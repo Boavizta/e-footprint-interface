@@ -3,7 +3,7 @@ import os
 
 from efootprint import __version__ as efootprint_version
 
-from model_builder.views import model_builder_main
+from model_builder.views import model_builder_main, result_chart
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
@@ -22,3 +22,15 @@ class TestViews(TestModelingBase):
 
         self.assertEqual(model_builder_main_request.session["system_data"]["efootprint_version"], efootprint_version)
         self.assertTrue("Device" in model_builder_main_request.session["system_data"].keys())
+
+    def test_result_computations(self):
+        with open(os.path.join("tests", "model_builder", "special_error_system_data.json"), "r") as file:
+            system_data = json.load(file)
+
+        result_request = self.factory.post('/result-chart/')
+        self._add_session_to_request(result_request, system_data)  # Attach a valid session
+
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        response = result_chart(result_request)
+
+        self.assertEqual(response.status_code, 200)

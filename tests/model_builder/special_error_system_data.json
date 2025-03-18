@@ -1,0 +1,442 @@
+{
+    "efootprint_version": "10.0.2",
+    "System": {
+        "uuid-system-1": {
+            "name": "system 1",
+            "id": "uuid-system-1",
+            "usage_patterns": [
+                "id-e0001c-Usage-pattern-1"
+            ]
+        }
+    },
+    "Storage": {
+        "id-10fe13-server-1-default-ssd": {
+            "name": "server 1 default ssd",
+            "id": "id-10fe13-server-1-default-ssd",
+            "lifespan": {
+                "label": "Lifespan of server 1 default ssd from hypothesis",
+                "value": 6.0,
+                "unit": "year",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fraction_of_usage_time": {
+                "label": "server 1 default ssd fraction of usage time from hypothesis",
+                "value": 1.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "carbon_footprint_fabrication_per_storage_capacity": {
+                "label": "Fabrication carbon footprint of server 1 default ssd per storage capacity from Dirty secret of SSDs: embodied carbon",
+                "value": 160.0,
+                "unit": "kilogram / terabyte",
+                "source": {
+                    "name": "Dirty secret of SSDs: embodied carbon",
+                    "link": "https://arxiv.org/pdf/2207.10793.pdf"
+                }
+            },
+            "power_per_storage_capacity": {
+                "label": "Power of server 1 default ssd per storage capacity from Dirty secret of SSDs: embodied carbon",
+                "value": 1.3,
+                "unit": "watt / terabyte",
+                "source": {
+                    "name": "Dirty secret of SSDs: embodied carbon",
+                    "link": "https://arxiv.org/pdf/2207.10793.pdf"
+                }
+            },
+            "idle_power": {
+                "label": "Idle power of server 1 default ssd from hypothesis",
+                "value": 0.0,
+                "unit": "watt",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "storage_capacity": {
+                "label": "Storage capacity of server 1 default ssd from Dirty secret of SSDs: embodied carbon",
+                "value": 1.0,
+                "unit": "terabyte",
+                "source": {
+                    "name": "Dirty secret of SSDs: embodied carbon",
+                    "link": "https://arxiv.org/pdf/2207.10793.pdf"
+                }
+            },
+            "data_replication_factor": {
+                "label": "Data replication factor of server 1 default ssd from hypothesis",
+                "value": 3.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "data_storage_duration": {
+                "label": "Data storage duration of server 1 default ssd from hypothesis",
+                "value": 5.0,
+                "unit": "year",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "base_storage_need": {
+                "label": "server 1 default ssd initial storage need from hypothesis",
+                "value": 0.0,
+                "unit": "terabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fixed_nb_of_instances": {
+                "label": "User defined number of server 1 default ssd instances",
+                "value": null
+            }
+        }
+    },
+    "BoaviztaCloudServer": {
+        "id-66c9f7-server-1": {
+            "name": "server 1",
+            "id": "id-66c9f7-server-1",
+            "lifespan": {
+                "label": "Lifespan of server 1 from hypothesis",
+                "value": 6.0,
+                "unit": "year",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fraction_of_usage_time": {
+                "label": "server 1 fraction of usage time from hypothesis",
+                "value": 1.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "server_type": {
+                "label": "Server type of server 1 from user data",
+                "value": "autoscaling",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "idle_power": {
+                "label": "Idle power of server 1 from hypothesis",
+                "value": 0.0,
+                "unit": "watt",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "power_usage_effectiveness": {
+                "label": "PUE of server 1 from hypothesis",
+                "value": 1.2,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "average_carbon_intensity": {
+                "label": "unnamed source from hypothesis",
+                "value": 0.23,
+                "unit": "kilogram / kilowatt_hour",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "server_utilization_rate": {
+                "label": "server 1 utilization rate from hypothesis",
+                "value": 0.9,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "base_ram_consumption": {
+                "label": "Base RAM consumption of server 1 from hypothesis",
+                "value": 0.0,
+                "unit": "gigabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "base_compute_consumption": {
+                "label": "Base cpu core consumption of server 1 from hypothesis",
+                "value": 0.0,
+                "unit": "cpu_core",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fixed_nb_of_instances": {
+                "label": "User defined number of server 1 instances",
+                "value": null
+            },
+            "storage": "id-10fe13-server-1-default-ssd",
+            "provider": {
+                "label": "unnamed source from user data",
+                "value": "aws",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "instance_type": {
+                "label": "unnamed source from user data",
+                "value": "c4.4xlarge.elasticsearch",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "impact_url": "https://api.boavizta.org/v1/cloud/instance"
+        }
+    },
+    "UsageJourney": {
+        "id-031f3c-UsageJourney-1": {
+            "name": "UsageJourney 1",
+            "id": "id-031f3c-UsageJourney-1",
+            "uj_steps": [
+                "id-b029f7-UsageJourneyStep-1"
+            ]
+        }
+    },
+    "UsageJourneyStep": {
+        "id-b029f7-UsageJourneyStep-1": {
+            "name": "UsageJourneyStep 1",
+            "id": "id-b029f7-UsageJourneyStep-1",
+            "user_time_spent": {
+                "label": "Time spent on step UsageJourneyStep 1 from hypothesis",
+                "value": 0.0,
+                "unit": "minute",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "jobs": [
+                "id-ccd93d-job-1"
+            ]
+        }
+    },
+    "Job": {
+        "id-ccd93d-job-1": {
+            "name": "job 1",
+            "id": "id-ccd93d-job-1",
+            "data_transferred": {
+                "label": "Sum of all data uploads and downloads for request job 1 from hypothesis",
+                "value": 350000000.0,
+                "unit": "kilobyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "data_stored": {
+                "label": "Data stored by request job 1 from hypothesis",
+                "value": 350000000.0,
+                "unit": "kilobyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "request_duration": {
+                "label": "Request duration of job 1 from hypothesis",
+                "value": 3600.0,
+                "unit": "second",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "ram_needed": {
+                "label": "RAM needed on server server 1 to process job 1 from hypothesis",
+                "value": 1000000.0,
+                "unit": "megabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "compute_needed": {
+                "label": "CPU needed on server server 1 to process job 1 from hypothesis",
+                "value": 1.0,
+                "unit": "cpu_core",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "server": "id-66c9f7-server-1"
+        }
+    },
+    "Network": {
+        "id-7cc9e5-Default-wifi-network": {
+            "name": "Default wifi network",
+            "id": "id-7cc9e5-Default-wifi-network",
+            "bandwidth_energy_intensity": {
+                "label": "bandwith energy intensity of Default wifi network from Traficom study",
+                "value": 0.05,
+                "unit": "kilowatt_hour / gigabyte",
+                "source": {
+                    "name": "Traficom study",
+                    "link": "https://www.traficom.fi/en/news/first-study-energy-consumption-communications-networks"
+                }
+            }
+        }
+    },
+    "Country": {
+        "id-05c931-France": {
+            "name": "France",
+            "id": "id-05c931-France",
+            "short_name": "FRA",
+            "average_carbon_intensity": {
+                "label": "Average carbon intensity of France from Our world in data",
+                "value": 85.0,
+                "unit": "gram / kilowatt_hour",
+                "source": {
+                    "name": "Our world in data",
+                    "link": "https://ourworldindata.org/energy#country-profiles"
+                }
+            },
+            "timezone": {
+                "label": "France timezone from user data",
+                "zone": "Europe/Paris",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            }
+        }
+    },
+    "Device": {
+        "id-ddeadd-Default-laptop": {
+            "name": "Default laptop",
+            "id": "id-ddeadd-Default-laptop",
+            "carbon_footprint_fabrication": {
+                "label": "Carbon footprint fabrication of Default laptop from Base ADEME_V19",
+                "value": 156.0,
+                "unit": "kilogram",
+                "source": {
+                    "name": "Base ADEME_V19",
+                    "link": "https://data.ademe.fr/datasets/base-carbone(r)"
+                }
+            },
+            "power": {
+                "label": "Power of Default laptop from hypothesis",
+                "value": 50.0,
+                "unit": "watt",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "lifespan": {
+                "label": "Lifespan of Default laptop from hypothesis",
+                "value": 6.0,
+                "unit": "year",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fraction_of_usage_time": {
+                "label": "Default laptop fraction of usage time from DATA.AI - STATE OF MOBILE",
+                "value": 7.0,
+                "unit": "hour / day",
+                "source": {
+                    "name": "DATA.AI - STATE OF MOBILE",
+                    "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
+                }
+            }
+        }
+    },
+    "UsagePatternFromForm": {
+        "id-e0001c-Usage-pattern-1": {
+            "name": "Usage pattern 1",
+            "id": "id-e0001c-Usage-pattern-1",
+            "usage_journey": "id-031f3c-UsageJourney-1",
+            "devices": [
+                "id-ddeadd-Default-laptop"
+            ],
+            "network": "id-7cc9e5-Default-wifi-network",
+            "country": "id-05c931-France",
+            "start_date": {
+                "label": "Usage pattern 1 start date from user data",
+                "value": "2025-01-01",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "modeling_duration_value": {
+                "label": "Usage pattern 1 modeling duration value from hypothesis",
+                "value": 1.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "modeling_duration_unit": {
+                "label": "Usage pattern 1 modeling duration unit from user data",
+                "value": "year",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "initial_usage_journey_volume": {
+                "label": "Usage pattern 1 initial usage journey volume from hypothesis",
+                "value": 30.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "initial_usage_journey_volume_timespan": {
+                "label": "Usage pattern 1 initial usage journey volume timespan from user data",
+                "value": "month",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "net_growth_rate_in_percentage": {
+                "label": "Usage pattern 1 net growth rate in percentage from hypothesis",
+                "value": 10.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "net_growth_rate_timespan": {
+                "label": "Usage pattern 1 net growth rate timespan from user data",
+                "value": "year",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            }
+        }
+    }
+}
