@@ -192,9 +192,10 @@ class ModelingObjectWeb:
 
         return structure
 
-    def self_delete(self, request_session: SessionBase):
+    def self_delete(self):
         obj_type = self.class_as_simple_str
         object_id = self.efootprint_id
+        request_session = self.model_web.session
         objects_to_delete_afterwards = []
         for modeling_obj in self.mod_obj_attributes:
             if (not ((modeling_obj.class_as_simple_str in [service_class.__name__ for service_class in SERVICE_CLASSES])
@@ -210,7 +211,7 @@ class ModelingObjectWeb:
         self.model_web.response_objs[obj_type].pop(object_id, None)
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
         for mod_obj in objects_to_delete_afterwards:
-            mod_obj.self_delete(request_session)
+            mod_obj.self_delete()
 
 class ServerWeb(ModelingObjectWeb):
     @property

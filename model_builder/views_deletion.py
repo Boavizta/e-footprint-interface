@@ -97,7 +97,7 @@ def delete_object(request, object_id):
             request.POST = mutable_post
             (partial_response_html, partial_ids_of_web_elements_with_lines_to_remove,
              partial_data_attribute_updates, partial_top_parent_ids) = compute_edit_object_html_and_event_response(
-                request, parent.efootprint_id, model_web)
+                request.POST, parent.efootprint_id, model_web)
             response_html += partial_response_html
             ids_of_web_elements_with_lines_to_remove += partial_ids_of_web_elements_with_lines_to_remove
             data_attribute_updates += partial_data_attribute_updates
@@ -106,7 +106,7 @@ def delete_object(request, object_id):
             http_response = generate_http_response_from_edit_html_and_events(
                 response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids)
     else:
-        web_obj.self_delete(request.session)
+        web_obj.self_delete()
         elements_with_lines_to_remove.append(object_id)
 
     if elements_with_lines_to_remove:

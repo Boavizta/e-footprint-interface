@@ -1,7 +1,7 @@
 import json
 from copy import copy
 
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from efootprint.builders.services.service_base_class import Service
@@ -46,8 +46,10 @@ def open_edit_object_panel(request, object_id):
 
 def edit_object(request, object_id, model_web=None):
     try:
+        if model_web is None:
+            model_web = ModelWeb(request.session)
         response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
-            compute_edit_object_html_and_event_response(request, object_id, model_web))
+            compute_edit_object_html_and_event_response(request.POST, object_id, model_web))
     except Exception as e:
         return render_exception_modal(request, e)
 
@@ -135,9 +137,7 @@ def generate_generic_edit_panel_http_response(
 
     return http_response
 
-def compute_edit_object_html_and_event_response(request, object_id, model_web=None):
-    if model_web is None:
-        model_web = ModelWeb(request.session)
+def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, object_id, model_web):
     data_attribute_updates = []
     ids_of_web_elements_with_lines_to_remove = []
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
@@ -145,7 +145,7 @@ def compute_edit_object_html_and_event_response(request, object_id, model_web=No
     for duplicated_card in obj_to_edit.duplicated_cards:
         accordion_children_before_edit[duplicated_card] = copy(duplicated_card.accordion_children)
 
-    edited_obj = edit_object_in_system(request.POST, obj_to_edit)
+    edited_obj = edit_object_in_system(edit_form_data, obj_to_edit)
     accordion_children_after_edit = {}
     for duplicated_card in edited_obj.duplicated_cards:
         accordion_children_after_edit[duplicated_card] = copy(duplicated_card.accordion_children)
@@ -171,7 +171,7 @@ def compute_edit_object_html_and_event_response(request, object_id, model_web=No
                 if previous_accordion not in removed_accordion_children:
                     data_attribute_updates += previous_accordion.data_attributes_as_list_of_dict
             if len(removed_accordion_child.modeling_obj_containers) == 0:
-                removed_accordion_child.self_delete(request.session)
+                removed_accordion_child.self_delete()
 
         unchanged_children = [acc_child for acc_child in accordion_children_after_edit[duplicated_card]
                               if acc_child not in added_accordion_children]
