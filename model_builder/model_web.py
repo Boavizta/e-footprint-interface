@@ -32,9 +32,10 @@ ATTRIBUTES_TO_SKIP_IN_FORMS = ["gpu_latency_alpha", "gpu_latency_beta", "fixed_n
 
 class ModelWeb:
     def __init__(
-        self, session_data: SessionBase, launch_system_computations=False, set_trigger_modeling_updates_to_false=True):
+        self, session: SessionBase, launch_system_computations=False, set_trigger_modeling_updates_to_false=True):
         start = time()
-        self.system_data = session_data["system_data"]
+        self.session = session
+        self.system_data = session["system_data"]
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
             self.system_data, launch_system_computations, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
@@ -73,12 +74,10 @@ class ModelWeb:
         efootprint_object = self.flat_efootprint_objs_dict[object_id]
         return wrap_efootprint_object(efootprint_object, self)
 
-    def get_efootprint_object_from_efootprint_id(
-        self, efootprint_id: str, object_type: str, request_session: SessionBase):
+    def get_efootprint_object_from_efootprint_id(self, efootprint_id: str, object_type: str):
         if efootprint_id in self.flat_efootprint_objs_dict.keys():
             efootprint_object = self.flat_efootprint_objs_dict[efootprint_id]
         else:
-            from model_builder.object_creation_and_edition_utils import add_new_efootprint_object_to_system
             web_object_json = DEFAULT_OBJECTS_CLASS_MAPPING[object_type]()[efootprint_id]
             efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
             efootprint_object = efootprint_class.__new__(efootprint_class)
@@ -90,10 +89,25 @@ class ModelWeb:
                 else:
                     efootprint_object.__dict__[attr_key] = attr_value
             efootprint_object.after_init()
-            web_object = add_new_efootprint_object_to_system(request_session, self, efootprint_object)
+            web_object = self.add_new_efootprint_object_to_system(efootprint_object)
             logger.info(f"Object {web_object.name} created from default object and added to system data.")
 
         return efootprint_object
+
+    def add_new_efootprint_object_to_system(self, efootprint_object):
+        object_type = efootprint_object.class_as_simple_str
+
+        if object_type not in self.session["system_data"]:
+            self.session["system_data"][object_type] = {}
+            self.response_objs[object_type] = {}
+        self.session["system_data"][object_type][efootprint_object.id] = efootprint_object.to_json()
+        # Here we updated a sub dict of request.session so we have to explicitly tell Django that it has been updated
+        self.session.modified = True
+
+        self.response_objs[object_type][efootprint_object.id] = efootprint_object
+        self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
+
+        return wrap_efootprint_object(efootprint_object, self)
 
     @property
     def storage(self):

@@ -58,7 +58,7 @@ def save_model_name(request):
     if request.method == "POST":
         model_web = ModelWeb(request.session)
         obj_to_edit = model_web.system
-        edited_obj = edit_object_in_system(request, obj_to_edit)
+        edited_obj = edit_object_in_system(dict(request.POST), obj_to_edit)
         return HttpResponse(status=204)
     else:
         return HttpResponse(status=400)
@@ -145,7 +145,7 @@ def compute_edit_object_html_and_event_response(request, object_id, model_web=No
     for duplicated_card in obj_to_edit.duplicated_cards:
         accordion_children_before_edit[duplicated_card] = copy(duplicated_card.accordion_children)
 
-    edited_obj = edit_object_in_system(request, obj_to_edit)
+    edited_obj = edit_object_in_system(dict(request.POST), obj_to_edit)
     accordion_children_after_edit = {}
     for duplicated_card in edited_obj.duplicated_cards:
         accordion_children_after_edit[duplicated_card] = copy(duplicated_card.accordion_children)
