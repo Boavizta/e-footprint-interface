@@ -188,7 +188,7 @@ def open_create_usage_pattern_panel(request):
 def add_new_usage_journey(request):
     model_web = ModelWeb(request.session)
 
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request, model_web, 'UsageJourney')
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsageJourney')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     response = render(
         request, "model_builder/object_cards/usage_journey_card.html", {"usage_journey": added_obj})
@@ -202,7 +202,7 @@ def add_new_usage_journey(request):
 
 def add_new_usage_journey_step(request, usage_journey_efootprint_id):
     model_web = ModelWeb(request.session)
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request, model_web, 'UsageJourneyStep')
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsageJourneyStep')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     usage_journey_to_edit = model_web.get_web_object_from_efootprint_id(usage_journey_efootprint_id)
     mutable_post = request.POST.copy()
@@ -225,7 +225,7 @@ def add_new_server(request):
     mutable_post['storage'] = default_ssd.id
     request.POST = mutable_post
 
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request, model_web, server_type)
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, server_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     response = render(
         request, "model_builder/object_cards/server_card.html", {"server": added_obj})
@@ -237,10 +237,9 @@ def add_new_service(request, server_efootprint_id):
     model_web = ModelWeb(request.session)
     mutable_post = request.POST.copy()
     mutable_post['server'] = server_efootprint_id
-    request.POST = mutable_post
     try:
         new_efootprint_obj = create_efootprint_obj_from_post_data(
-            request, model_web, request.POST.get('type_object_available'))
+            mutable_post, model_web, request.POST.get('type_object_available'))
 
         efootprint_server = model_web.get_web_object_from_efootprint_id(server_efootprint_id).modeling_obj
         efootprint_server.compute_calculated_attributes()
@@ -262,7 +261,7 @@ def add_new_job(request, usage_journey_step_efootprint_id):
 
     try:
         new_efootprint_obj = create_efootprint_obj_from_post_data(
-            request, model_web, request.POST.get('type_object_available'))
+            request.POST, model_web, request.POST.get('type_object_available'))
     except Exception as e:
         return render_exception_modal(request, e)
 
@@ -281,7 +280,7 @@ def add_new_job(request, usage_journey_step_efootprint_id):
 
 def add_new_usage_pattern(request):
     model_web = ModelWeb(request.session)
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request, model_web, 'UsagePatternFromForm')
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsagePatternFromForm')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     new_efootprint_obj.to_json()
     system_id = next(iter(request.session["system_data"]["System"].keys()))
