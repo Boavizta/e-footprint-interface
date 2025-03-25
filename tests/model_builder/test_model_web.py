@@ -1,3 +1,5 @@
+import os
+
 from django.http import QueryDict
 from efootprint.logger import logger
 
@@ -7,6 +9,10 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 
 
 class TestModelWeb(TestModelingBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+
     def test_get_efootprint_objects_from_efootprint_type(self):
         logger.info(f"Creating service")
         post_data = QueryDict(mutable=True)

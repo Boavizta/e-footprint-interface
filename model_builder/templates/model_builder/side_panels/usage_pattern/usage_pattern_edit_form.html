@@ -1,0 +1,9 @@
+{% extends "model_builder/side_panels/edit/edit_generic_form.html" %}
+
+{% block edit_form_content %}
+    <div class="accordion" id="accordionFormUsagePattern">
+        {% include "model_builder/side_panels/usage_pattern/links_to_other_objects_form.html" with usage_pattern_input_values=object_to_edit %}
+        {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" with usage_pattern_input_values=object_to_edit %}
+    </div>
+{% endblock %}
+

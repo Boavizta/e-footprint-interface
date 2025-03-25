@@ -1,3 +1,5 @@
+import os
+
 from efootprint.logger import logger
 from django.http import QueryDict
 
@@ -10,6 +12,10 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 
 
 class TestViewsAddition(TestModelingBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+
     def test_add_new_usage_pattern_from_form(self):
         post_data = QueryDict(mutable=True)
         post_data.update({

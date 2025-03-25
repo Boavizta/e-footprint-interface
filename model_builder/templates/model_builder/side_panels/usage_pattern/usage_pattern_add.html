@@ -1,7 +1,7 @@
 {% extends "model_builder/side_panels/components/side_panel_structure.html" %}
 
-{% block form_body %}
-    <form id="form-add-usage-pattern" class="my-3"
+{% block panel_body %}
+    <form id="sidePanelForm" class="my-3"
         hx-post="/model_builder/add-new-usage-pattern/"
         hx-target="#up-list"
         hx-swap="beforeend"
@@ -23,10 +23,12 @@
             {% include "model_builder/side_panels/usage_pattern/links_to_other_objects_form.html" %}
             {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" %}
         </div>
-        <div class="my-3">
-                <button type="submit"
-                    id="save_usage_pattern_btn"
-                    class="btn btn-primary rounded-pill w-100">
+
+        <div class="mb-3">
+            <button
+                    id="btn-submit-form"
+                    class="btn btn-primary rounded-pill w-100"
+                    type="submit">
                 Save
             </button>
         </div>

@@ -1,4 +1,5 @@
 from unittest.mock import patch
+import os
 
 from django.http import QueryDict
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
@@ -17,6 +18,10 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 
 
 class TestViewsEdition(TestModelingBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+
     def test_edition(self):
         logger.info(f"Creating service")
         post_data = QueryDict(mutable=True)
@@ -118,3 +123,29 @@ class TestViewsEdition(TestModelingBase):
 
         response = edit_object(edit_service_request, genai_service.id)
         mock_render_exception_modal.assert_not_called()
+
+    @patch("model_builder.views_edition.render_exception_modal")
+    def test_edit_server_and_storage(self, mock_render_exception_modal):
+        server_id = "uuid-Server-1"
+        storage_id = "uuid-Default-SSD-storage-1"
+
+        post_data = QueryDict(mutable=True)
+        post_data.update(
+            {'name': ['New server'], 'carbon_footprint_fabrication': ['60'], 'storage_form_data':
+                [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", "carbon_footprint_fabrication_per_storage_capacity":"160.0"}}']}
+        )
+
+        edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)
+        self._add_session_to_request(edit_server_request, self.system_data)
+        response = edit_object(edit_server_request, server_id)
+
+        mock_render_exception_modal.assert_not_called()
+        self.assertEqual(response.status_code, 200)
+
+        server = edit_server_request.session["system_data"]["Server"][server_id]
+        storage = edit_server_request.session["system_data"]["Storage"][storage_id]
+
+        self.assertEqual(server["name"], "New server")
+        self.assertEqual(server["carbon_footprint_fabrication"]["value"], 60.0)
+        self.assertEqual(storage["name"], "server 1 default ssd")
+        self.assertEqual(storage["carbon_footprint_fabrication_per_storage_capacity"]["value"], 160.0)

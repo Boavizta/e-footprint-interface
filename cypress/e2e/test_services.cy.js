@@ -17,24 +17,24 @@ describe('Test services', () => {
         cy.get('#type_object_available').select('GPUServer');
 
         // get ram_per_gpu and compute inside the #collapse_GPUServer
-        cy.get('#collapse_GPUServer').within(() => {
+        cy.get('#collapse_GPUServer_server').within(() => {
             cy.get('#ram_per_gpu').focus().type('{selectall}{backspace}512').blur();
             cy.get('#compute').focus().type('{selectall}{backspace}10').blur();
         });
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         cy.get('button[hx-get^="/model_builder/open-create-service-panel"][hx-get$="'+server.replaceAll(' ', '-')+'/"]').click();
         cy.get('#name').type(service);
         cy.get('#provider').select(providerName1);
         cy.get('#model_name').type(modelName1);
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         //edit du service
         cy.get('button').contains(service).click();
 
         cy.get('#provider').select(providerName2);
         cy.get('#model_name').clear().type(modelName2);
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         cy.get('#sidePanel').should('not.contain.html');
     });
@@ -51,7 +51,7 @@ describe('Test services', () => {
         cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
         cy.get('#name').type(server);
         cy.get('#type_object_available').select('GPUServer');
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         cy.get('button[data-bs-target^="#flush-"][data-bs-target$="'+server.replaceAll(' ', '-')+'"]').click();

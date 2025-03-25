@@ -130,8 +130,7 @@ class UsagePatternFromForm(UsagePattern):
         utc_start_date = datetime.strptime(self.start_date.value, "%Y-%m-%d")
 
         utc_tz = pytz.timezone('UTC')
-        current_time = datetime.now()
-        time_diff = self.country.timezone.value.utcoffset(current_time) - utc_tz.utcoffset(current_time)
+        time_diff = self.country.timezone.value.utcoffset(utc_start_date) - utc_tz.utcoffset(utc_start_date)
         time_diff_in_hours = int(time_diff.total_seconds() / 3600)
 
         local_start_date = utc_start_date + timedelta(hours=time_diff_in_hours)

@@ -1,7 +1,7 @@
 {% extends "model_builder/side_panels/components/side_panel_structure.html" %}
 
-{% block form_body %}
-    <form id="form-add-usage-journey-step" class="my-3"
+{% block panel_body %}
+    <form id="sidePanelForm" class="my-3"
             hx-post="/model_builder/add-new-usage-journey-step/{{ efootprint_id_of_parent_to_link_to }}/"
             hx-swap="none"
             hx-disabled-elt="button"
@@ -31,10 +31,12 @@
                 </div>
             </div>
         {% endfor %}
-        <div class="my-3">
-                <button type="submit"
-                    id="btn-submit-form-add-usage-journey-step"
-                    class="btn btn-primary rounded-pill w-100">
+
+        <div class="mb-3">
+            <button
+                    id="btn-submit-form"
+                    class="btn btn-primary rounded-pill w-100"
+                    type="submit">
                 Save
             </button>
         </div>

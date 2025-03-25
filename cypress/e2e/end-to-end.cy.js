@@ -29,17 +29,17 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#btn-add-usage-journey').should('be.visible');
         cy.get('#name').clear();
         cy.get('#name').type(ujNameOne);
-        cy.get('#btn-submit-form-add-usage-journey').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
 
         cy.get('#btn-add-usage-journey').click();
         cy.get('#name').clear();
-        cy.get('#btn-submit-form-add-usage-journey').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#name').then(($input) => {
             expect($input[0].validationMessage).to.not.be.empty;
         });
         cy.get('#name').type(ujNameTwo);
-        cy.get('#btn-submit-form-add-usage-journey').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
 
         // User journeys must be visible then add user journey steps to UJ 1
@@ -78,7 +78,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').type(server);
         cy.get('#type_object_available').select('BoaviztaCloudServer');
         cy.get('#instance_type').type('c4.8xlarge');
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         // get the button with attribute hx-get begin with '/model_builder/open-create-service-panel/' and ended with 'Test-E2E-Server'
@@ -120,7 +120,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
         cy.get('#net_growth_rate_timespan').select('year');
-        cy.get('#save_usage_pattern_btn').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
         cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible');
         cy.get('button[id^="button-id-"][id$="Test-E2E-UJ-2"]').click();

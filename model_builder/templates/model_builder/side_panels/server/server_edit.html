@@ -1,0 +1,10 @@
+{% extends "model_builder/side_panels/edit/edit_panel__generic.html" %}
+
+{% block edit_form %}
+    {% include "model_builder/side_panels/server/server_edit_form.html" %}
+    {% include "model_builder/side_panels/server/storage_edit_form.html" with object_to_edit=storage_to_edit structure_dict=storage_structure_dict dynamic_form_data=storage_dynamic_form_data %}
+{% endblock %}
+{% block calculated_attributes %}
+    {% include "model_builder/side_panels/edit/calculated_attributes.html" %}
+    {% include "model_builder/side_panels/edit/calculated_attributes.html" with object_to_edit=storage_to_edit %}
+{% endblock %}

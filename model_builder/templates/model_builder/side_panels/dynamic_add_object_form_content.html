@@ -11,11 +11,11 @@
         {%for item in structure_dict.items %}
         <div class="accordion-item {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" id="item-{{ item.category }}">
             <h2 class="accordion-header {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}">
-                <button class="accordion-button fz-1 {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ item.category }}" aria-expanded="true" aria-controls="collapse_{{ item.category }}">
+                <button class="accordion-button fz-1 {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ item.category }}_{{obj_type}}" aria-expanded="true" aria-controls="collapse_{{ item.category }}_{{obj_type}}">
                     {{ item.header }}
                 </button>
             </h2>
-            <div id="collapse_{{ item.category }}"
+            <div id="collapse_{{ item.category }}_{{obj_type}}"
                  class="accordion-collapse show" data-bs-parent="accordionFormAdd">
                 <div class="accordion-body">
                     {% for field in item.fields %}
@@ -26,18 +26,6 @@
         </div>
         {% endfor %}
     </div>
-</div>
-<div class="mn-3">
-    <p class="mt-4">
-        You will be able to edit all attributes about the {{ obj_type }} later in the dedicated panel.
-    </p>
-</div>
-
-<div class="my-3">
-    <button type="submit"
-            id="save_{{ obj_type }}_btn"
-            class="btn btn-primary rounded-pill w-100">Save
-    </button>
 </div>
 
 {{ dynamic_form_data|json_script:"dynamic-form-data" }}

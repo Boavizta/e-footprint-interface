@@ -17,12 +17,15 @@
             </div>
         </div>
     </div>
-    <div class="form-body" id="panel-body">
+    <div class="panel-body" id="panel-body">
         <div class="row text-start">
             <div class="col-12 mb-3">
-                {% block form_body %}
+                {% block panel_body %}
                 {% endblock %}
             </div>
         </div>
     </div>
 </div>
+
+{% block script_form %}
+{% endblock %}

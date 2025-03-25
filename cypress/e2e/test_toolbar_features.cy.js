@@ -86,7 +86,7 @@ describe("Test - Toolbars import/export/reboot", () => {
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
 
-        cy.wait(1000);
+        cy.wait(500);
 
         cy.get('a[id="btn-reboot-modeling"]').click();
 

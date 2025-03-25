@@ -13,7 +13,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#btn-add-usage-journey').click();
         cy.get('#btn-add-usage-journey').should('be.visible');
         cy.get('#name').type(ujName);
-        cy.get('#btn-submit-form-add-usage-journey').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
         cy.get('div[id$="'+ujName.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
 
@@ -34,7 +34,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
         cy.get('#net_growth_rate_timespan').select('year');
-        cy.get('#save_usage_pattern_btn').click();
+        cy.get('#btn-submit-form').click();
 
 
 
@@ -55,7 +55,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#net_growth_rate_in_percentage').invoke('val', '15').trigger('change');
         cy.get('#net_growth_rate_timespan').select('month');
 
-        cy.get('#save_usage_pattern_btn').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
         cy.wait(500)
         cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible').click();
@@ -80,7 +80,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#btn-add-usage-journey').click();
         cy.get('#btn-add-usage-journey').should('be.visible');
         cy.get('#name').type(ujName);
-        cy.get('#btn-submit-form-add-usage-journey').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
         cy.get('div[id$="'+ujName.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
 

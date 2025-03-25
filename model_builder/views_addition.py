@@ -1,5 +1,7 @@
 import json
+from urllib.parse import urlencode
 
+from django.http import QueryDict
 from efootprint.core.all_classes_in_order import SERVER_CLASSES, SERVICE_CLASSES, SERVER_BUILDER_CLASSES
 from efootprint.core.hardware.storage import Storage
 from django.shortcuts import render
@@ -7,7 +9,7 @@ from efootprint.core.usage.job import Job
 
 from model_builder.class_structure import generate_object_creation_structure, efootprint_class_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices
+from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices, model_web_root
 from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data, render_exception_modal
 from model_builder.views_edition import edit_object
 
@@ -38,14 +40,22 @@ def open_create_server_panel(request):
     structure_dict, dynamic_form_data = generate_object_creation_structure(
         SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type", ["fixed_nb_of_instances"])
 
-    http_response = render(request, f"model_builder/side_panels/server_add.html",
-                  context={
-                      'structure_dict': structure_dict,
-                      "dynamic_form_data": dynamic_form_data,
-                      "obj_type": "server",
-                      "header_name": "Add new server",
-                      "next_efootprint_object_rank": len(model_web.servers) + 1
-                  })
+    storage_structure_dict, storage_dynamic_form_data = generate_object_creation_structure(
+        [Storage], "Storage type", ["fixed_nb_of_instances"])
+
+
+    http_response = render(request, f"model_builder/side_panels/server/server_add.html",
+                context={
+                    'structure_dict': structure_dict,
+                    "dynamic_form_data": dynamic_form_data,
+                    "storage_structure_dict": storage_structure_dict,
+                    "storage_dynamic_form_data": storage_dynamic_form_data,
+                    "obj_type": "server",
+                    "storage_obj_type": "storage",
+                    "header_name": "Add new server",
+                    "next_efootprint_object_rank": len(model_web.servers) + 1,
+                    "storage_next_efootprint_object_rank": len(model_web.servers) + 1
+                })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
@@ -217,15 +227,17 @@ def add_new_usage_journey_step(request, usage_journey_efootprint_id):
 
 def add_new_server(request):
     model_web = ModelWeb(request.session)
-    server_type = request.POST.get('type_object_available')
+    storage_qd = QueryDict(urlencode(json.loads(request.POST.get('storage', '{}')), doseq=True))
 
-    default_ssd = Storage.ssd(f"{request.POST['name']} default ssd")
-    model_web.add_new_efootprint_object_to_system(default_ssd)
-    mutable_post = request.POST.copy()
-    mutable_post['storage'] = default_ssd.id
-    request.POST = mutable_post
+    storage = create_efootprint_obj_from_post_data(storage_qd, model_web, "Storage")
+    added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, server_type)
+    server_dict = json.loads(request.POST.get('server', '{}'))
+    server_dict['storage'] = added_storage.efootprint_id
+    server_qd = QueryDict(urlencode(server_dict, doseq=True))
+    server_type = server_qd.get('type_object_available')
+
+    new_efootprint_obj = create_efootprint_obj_from_post_data(server_qd, model_web, server_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     response = render(
         request, "model_builder/object_cards/server_card.html", {"server": added_obj})

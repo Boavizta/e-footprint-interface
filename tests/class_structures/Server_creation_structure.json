@@ -274,6 +274,10 @@
                         {
                             "label": "scaleway",
                             "value": "scaleway"
+                        },
+                        {
+                            "label": "gcp",
+                            "value": "gcp"
                         }
                     ]
                 },

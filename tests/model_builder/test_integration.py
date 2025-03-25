@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 
 from django.http import QueryDict
@@ -11,6 +12,10 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 
 
 class IntegrationTest(TestModelingBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+
     def test_partial_integration(self):
         logger.info(f"Creating usage pattern")
         post_data = QueryDict(mutable=True)

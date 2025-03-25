@@ -17,7 +17,7 @@ describe("Calculus graph", () => {
 
         cy.get("svg[id^='icon_accordion_id-'][id*='"+ujsOne.replaceAll(' ', '-')+"']").should('be.visible').click();
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist').click();
-        cy.get("button[data-bs-target='#collapseCalculatedAttributes']").should('exist').click();
+        cy.get("button[data-bs-target='#collapseCalculatedAttributesWebApplicationJob']").should('exist').click();
 
 
         cy.get("a[href^='/model_builder/display-calculus-graph/'][href$='ram_needed/']").then(($a) => {
@@ -53,7 +53,7 @@ describe("Calculus graph", () => {
 
         cy.get("svg[id^='icon_accordion_id-'][id*='"+ujsOne.replaceAll(' ', '-')+"']").should('be.visible').click();
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist').click();
-        cy.get("button[data-bs-target='#collapseCalculatedAttributes']").should('exist').click();
+        cy.get("button[data-bs-target='#collapseCalculatedAttributesWebApplicationJob']").should('exist').click();
 
         cy.get("a[href^='/model_builder/display-calculus-graph/'][href$='hourly_data_transferred_per_usage_pattern/']").then(($a) => {
             const url = $a.prop('href');

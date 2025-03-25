@@ -1,16 +1,22 @@
-import os
 import json
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import TestCase, RequestFactory
 
 class TestModelingBase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.system_data_path = None
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def setUp(self):
         self.factory = RequestFactory()
-        system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
 
         # Load system data
-        with open(system_data_path, "r") as f:
+        with open(self.system_data_path, "r") as f:
             self.system_data = json.load(f)
 
     @staticmethod

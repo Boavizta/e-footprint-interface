@@ -1,13 +1,31 @@
 {% extends "model_builder/side_panels/components/side_panel_structure.html" %}
 
-{% block form_body %}
+{% block panel_body %}
     <form hx-post="/model_builder/add-new-job/{{ efootprint_id_of_parent_to_link_to }}/"
             hx-swap="none"
             hx-disabled-elt="button"
             hx-on::after-request="closeAndEmptySidePanel()"
+          id="sidePanelForm"
     >
        {% with helper_message="To get support in defining your job, first create a server and add services to it." %}
             {% include "model_builder/side_panels/dynamic_add_object_form_content.html" %}
         {% endwith %}
+
+        <div class="mb-3">
+            <p class="mt-4">
+                You will be able to edit all attributes about the {{ obj_type }} later in the dedicated panel.
+            </p>
+        </div>
+        <div class="mb-3">
+            <button
+                    id="btn-submit-form"
+                    class="btn btn-primary rounded-pill w-100"
+                    type="submit">
+                Save
+            </button>
+        </div>
     </form>
+{% endblock %}
+
+{% block script_form %}
 {% endblock %}

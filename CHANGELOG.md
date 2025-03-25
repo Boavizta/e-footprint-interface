@@ -4,10 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.0] - 2025-03-31
+
+### Changed
+- In add end edit server panels, there is now a dedicated part of the form to define 
+  storage attributes.
+- In edit panel, storage calculated attributes are displayed when available.
+
 ## [0.6.8] 2025-03-27
 
 ### Fixed
-- Make sure all footprint values share same period index and compute daily aggregagtion server side instead of client side. This fixes results in case the model is made of usage patterns with disjoint time periods.
+- Make sure all footprint values share same period index and compute daily aggregation server side instead of client side. This fixes results in case the model is made of usage patterns with disjoint time periods.
 
 ## [0.6.7] 2025-03-25
 

@@ -114,7 +114,7 @@ class ModelWeb:
         return wrap_efootprint_object(efootprint_object, self)
 
     @property
-    def storage(self):
+    def storages(self):
         return self.get_web_objects_from_efootprint_type("Storage")
 
     @property

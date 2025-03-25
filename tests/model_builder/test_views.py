@@ -8,6 +8,10 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 
 
 class TestViews(TestModelingBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+
     def test_default_system_data_has_right_efootprint_version(self):
         with open(os.path.join("model_builder", "default_system_data.json"), "r") as file:
             system_data = json.load(file)
