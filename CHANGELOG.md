@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Exported JSON files now contain the mention 'UTC' in the filename.
 - Change error message before computation relative to missing step in a 
   UsageJourney.
-- Raise an error modal when the user tries to create a model with no servers.
+- Raise an error modal when the user tries to create a job with no servers.
 
 ### Fixed
-- fix CSS unalignment rules on timeseries part form in Usage pattern form.
+- Fix CSS unalignment rules on timeseries part form in Usage pattern form.
+- Fix max timeframe value when editing usage pattern time series with modeling duration initially setup in months. The max value for the timeframe field would keep being 10 instead of 120.
 
 ## [0.7.1] - 2025-04-02
 

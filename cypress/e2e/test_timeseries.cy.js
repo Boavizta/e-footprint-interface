@@ -153,4 +153,27 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#modeling_duration_value').invoke('val', '12').trigger('input');
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
     });
+
+    it('Test to edit a UP created with a timeframe in month to check if the max value is correctly ' +
+        'setup ', () => {
+
+        let ujName = "Test E2E UJ";
+        let upNameOne = "Test E2E Usage Pattern 1";
+        let intValue = null
+
+        cy.visit("/model_builder/");
+
+        cy.get('button').contains('Add usage pattern').click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#name').type(upNameOne);
+
+        cy.get('#modeling_duration_unit').select('month');
+        cy.get('#modeling_duration_value').invoke('val', '15').trigger('input');
+        cy.get('#modeling_duration_value_error_message').should('not.contain.html');
+        cy.get('#btn-submit-form').click();
+        cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible').click();
+        cy.get('#modeling_duration_value').invoke('val', '25').trigger('input');
+       cy.get('#modeling_duration_value_error_message').should('not.contain.text','Modeling duration value must be' +
+           ' less than or equal to 10');
+        });
 });

@@ -23,7 +23,8 @@
                            name="modeling_duration_value"
                            id="modeling_duration_value"
                            value="{{ usage_pattern_input_values.modeling_duration_value.magnitude|floatformat }}"
-                           max=10
+                           max=
+                               {% if usage_pattern_input_values.modeling_duration_unit.value == "year" %}10{% else %}120{% endif %}
                            _="on input applyMaxLimitOnModelingDurationValue()
                             then createOrUpdateTimeSeriesChart()
                             "
