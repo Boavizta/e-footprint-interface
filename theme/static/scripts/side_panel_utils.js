@@ -19,11 +19,3 @@ function closeAndEmptySidePanel() {
     closeTimeseriesChart();
     updateLines();
 }
-
-function initSidePanel() {
-    document.addEventListener('click', function(event) {
-        if(event.target.closest('[hx-target="#sidePanel"]')){
-            openSidePanel();
-        }
-    });
-}

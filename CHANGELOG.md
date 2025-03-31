@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Exported JSON files now contain the mention 'UTC' in the filename.
 - Change error message before computation relative to missing step in a 
   UsageJourney.
+- Raise an error modal when the user tries to create a model with no servers.
 
 ### Fixed
 - fix CSS unalignment rules on timeseries part form in Usage pattern form.

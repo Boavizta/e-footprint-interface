@@ -88,6 +88,10 @@ def open_create_job_panel(request):
     model_web = ModelWeb(request.session)
     servers = model_web.servers
 
+    if len(servers) == 0:
+        exception = ValueError("Please create a server before adding a job")
+        return render_exception_modal(request, exception)
+
     available_job_classes = {Job}
     for service in SERVICE_CLASSES:
         if service.__name__ in request.session["system_data"].keys():

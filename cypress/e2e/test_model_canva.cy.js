@@ -39,4 +39,12 @@ describe("Test - Model Canva div", () => {
 
 
     });
+
+    it("Try to create a new job without servers in your model", () => {
+        cy.visit("/model_builder/");
+        cy.get('button[hx-get^="/model_builder/open_create_job_panel/"]').click()
+        cy.get("#exception-msg").should("exist")
+            .should("include.text","Please create a server before adding a job")
+    });
+
 });
