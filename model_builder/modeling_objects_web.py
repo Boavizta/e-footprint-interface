@@ -1,6 +1,5 @@
 import re
 
-from django.contrib.sessions.backends.base import SessionBase
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject

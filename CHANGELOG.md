@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.1] - 2025-04-02
+
+### Changed
+- Updated to e-footprint 10.0.6 so Boaviztapi calls are now done through the python package and not through the API anymore.
+
+### Fixed
+- Updated to e-footprint 10.0.6 so BoaviztaCloudServer compute and ram values are fixed (they used to be vastly overestimated which resulted in underestimation of environmental impact).
+
 ## [0.7.0] - 2025-03-31
 
 ### Changed
