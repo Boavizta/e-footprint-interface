@@ -62,7 +62,7 @@ describe("Test - Result panel", () => {
         cy.get('#panel-result-btn').should('not.have.css', 'height', '93vh');
         cy.get('button').contains('Go back').should('be.exist');
         cy.get("#exception-msg").should("exist")
-            .should("include.text","The following usage journeys have a usage pattern but no usage journey step")
+            .should("include.text","The following usage journey(s) have no usage journey step")
             .should("include.text",ujNameTwo)
     });
 

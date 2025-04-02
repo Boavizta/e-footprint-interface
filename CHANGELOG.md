@@ -4,15 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.7.4] - 2025-04-02
+## [0.7.2] - 2025-04-03
 
 ### Changed
 - Exported JSON files now contain the mention 'UTC' in the filename.
-
-## [0.7.1] - 2025-04-02
+- Change error message before computation relative to missing step in a 
+  UsageJourney.
 
 ### Fixed
 - fix CSS unalignment rules on timeseries part form in Usage pattern form.
+
+## [0.7.1] - 2025-04-02
 
 ### Changed
 - Updated to e-footprint 10.0.6 so Boaviztapi calls are now done through the python package and not through the API anymore.

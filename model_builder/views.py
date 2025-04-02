@@ -118,9 +118,12 @@ def result_chart(request):
 
         if len(usage_journeys_linked_to_usage_pattern_and_without_uj_steps) > 0:
             exception = ValueError(
-                f"The following usage journeys have a usage pattern but no usage journey step: "
-                f"{[uj.name for uj in usage_journeys_linked_to_usage_pattern_and_without_uj_steps]}. "
-                f"Please link at least one usage journey step to each of them so that the model can be computed."
+                f"The following usage journey(s) have no usage journey step:  "
+                f"{[uj.name for uj in usage_journeys_linked_to_usage_pattern_and_without_uj_steps]}."
+                f" Please add at least one step in each of the above usage journey(s), so that the model can be "
+                f"computed.\n\n"
+                "(Alternatively, if they are work in progress, you can delete the usage patterns pointing to them: "
+                "in that way the usage journeys will be ignored in the computation.)"
             )
 
     if exception is not None:
