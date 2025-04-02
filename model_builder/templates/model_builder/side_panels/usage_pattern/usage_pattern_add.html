@@ -2,11 +2,11 @@
 
 {% block panel_body %}
     <form id="sidePanelForm" class="my-3"
-        hx-post="/model_builder/add-new-usage-pattern/"
-        hx-target="#up-list"
-        hx-swap="beforeend"
-        hx-disabled-elt="button"
-        hx-on::after-request="closeAndEmptySidePanel()"
+            hx-post="{% url 'add-new-object' 'UsagePattern' %}"
+            hx-target="#up-list"
+            hx-swap="beforeend"
+            hx-disabled-elt="button"
+            hx-on::after-request="closeAndEmptySidePanel()"
     >
         <div class="mb-3">
             <label for="name"class="form-label w-100 text-start">Name</label>

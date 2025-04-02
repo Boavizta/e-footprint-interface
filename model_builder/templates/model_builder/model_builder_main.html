@@ -12,12 +12,12 @@
                             </div>
                             <div class="col-12 mt-2 justify-content-start text-start">
                                 <button class="w-75 btn btn-white dotted-border text-start fz-0-9 rounded-2"
-                                id="add_usage_pattern"
-                                hx-get="/model_builder/open-create-usage-pattern-panel/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
+                                        id="add_usage_pattern"
+                                        hx-get="/model_builder/open-create-object-panel/UsagePattern/"
+                                        hx-target="#sidePanel"
+                                        hx-trigger="click"
+                                        hx-swap="innerHTML"
+                                        hx-disabled-elt="button"
                                 >
                                 <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-3"  width="14px" height="14px" alt="add icon" />
                                 Add usage pattern
@@ -71,12 +71,11 @@
                             <div class="col-12 mt-2 justify-content-start text-start" id="add_server">
                                 <button class="w-75 btn btn-white dotted-border text-start fz-0-9 rounded-2"
                                         id="btn-add-server"
-                                hx-get="/model_builder/open-create-server-panel/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-
+                                        hx-get="/model_builder/open-create-object-panel/Server/"
+                                        hx-target="#sidePanel"
+                                        hx-trigger="click"
+                                        hx-swap="innerHTML"
+                                        hx-disabled-elt="button"
                                 >
                                     <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-3"  width="14px" height="14px" alt="add icon" />
                                     Add server

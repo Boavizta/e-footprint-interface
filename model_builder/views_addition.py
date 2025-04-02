@@ -16,13 +16,49 @@ from model_builder.edition.views_edition import edit_object
 
 def open_create_object_panel(request, object_type):
     model_web = ModelWeb(request.session)
-    new_object_structure = efootprint_class_structure(object_type, ModelWeb(request.session))
+    if object_type == "Server":
+        http_response = generate_server_add_panel_http_response(request, model_web)
+    elif object_type == "Service":
+        http_response = generate_service_add_panel_http_response(request, model_web)
+    elif object_type == "Job":
+        http_response = generate_job_add_panel_http_response(request, model_web)
+    elif object_type == "UsagePattern":
+        http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
+    else:
+        http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
+
+    return http_response
+
+def add_object(request, object_type, model_web=None):
+    try:
+        if model_web is None:
+            model_web = ModelWeb(request.session)
+
+        if object_type == "UsageJourneyStep":
+            return add_new_usage_journey_step(request, model_web)
+        elif object_type == "UsageJourney":
+            return add_new_usage_journey(request, model_web)
+        elif object_type == "Server":
+            return add_new_server(request, model_web)
+        elif object_type == "Service":
+            return add_new_service(request, model_web)
+        elif object_type == "Job":
+            return add_new_job(request, model_web)
+        elif object_type == "UsagePattern":
+            return add_new_usage_pattern(request, model_web)
+        else:
+            return None
+    except Exception as e:
+        return render_exception_modal(request, e)
+
+def generate_generic_add_panel_http_response(request, object_type: str,  model_web: ModelWeb):
+    structure_dict = efootprint_class_structure(object_type, ModelWeb(request.session))
     assert object_type in ["UsageJourney", "UsageJourneyStep"]
     template_name_mapping = {
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
     template_name = template_name_mapping[object_type]
-    context_data = {"object_structure": new_object_structure,
-                    "header_name": "Add new " +  template_name.replace("_", " "),
+    context_data = {"object_structure": structure_dict,
+                    "header_name": "Add new " + template_name.replace("_", " "),
                     "new_object_name": "New " + template_name.replace("_", " ")}
     if request.GET.get('efootprint_id_of_parent_to_link_to'):
         context_data['efootprint_id_of_parent_to_link_to'] = request.GET['efootprint_id_of_parent_to_link_to']
@@ -35,35 +71,33 @@ def open_create_object_panel(request, object_type):
     return render(request, f"model_builder/side_panels/{template_name}_add.html", context=context_data)
 
 
-def open_create_server_panel(request):
-    model_web = ModelWeb(request.session)
+def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     structure_dict, dynamic_form_data = generate_object_creation_structure(
         SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type", ["fixed_nb_of_instances"])
 
     storage_structure_dict, storage_dynamic_form_data = generate_object_creation_structure(
         [Storage], "Storage type", ["fixed_nb_of_instances"])
 
-
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
-                context={
-                    'structure_dict': structure_dict,
-                    "dynamic_form_data": dynamic_form_data,
-                    "storage_structure_dict": storage_structure_dict,
-                    "storage_dynamic_form_data": storage_dynamic_form_data,
-                    "obj_type": "server",
-                    "storage_obj_type": "storage",
-                    "header_name": "Add new server",
-                    "next_efootprint_object_rank": len(model_web.servers) + 1,
-                    "storage_next_efootprint_object_rank": len(model_web.servers) + 1
-                })
+                           context={
+                               'structure_dict': structure_dict,
+                               "dynamic_form_data": dynamic_form_data,
+                               "storage_structure_dict": storage_structure_dict,
+                               "storage_dynamic_form_data": storage_dynamic_form_data,
+                               "obj_type": "server",
+                               "storage_obj_type": "storage",
+                               "header_name": "Add new server",
+                               "next_efootprint_object_rank": len(model_web.servers) + 1,
+                               "storage_next_efootprint_object_rank": len(model_web.servers) + 1
+                           })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
     return http_response
 
 
-def open_create_service_panel(request, server_efootprint_id):
-    model_web = ModelWeb(request.session)
+def generate_service_add_panel_http_response(request, model_web: ModelWeb):
+    server_efootprint_id = request.GET.get('efootprint_id_of_parent_to_link_to')
     server = model_web.get_web_object_from_efootprint_id(server_efootprint_id)
 
     installable_services = server.installable_services()
@@ -84,8 +118,8 @@ def open_create_service_panel(request, server_efootprint_id):
 
     return http_response
 
-def open_create_job_panel(request):
-    model_web = ModelWeb(request.session)
+
+def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     servers = model_web.servers
 
     if len(servers) == 0:
@@ -99,25 +133,25 @@ def open_create_job_panel(request):
 
     structure_dict, dynamic_form_data = generate_object_creation_structure(list(available_job_classes), "Job type")
     additional_item = {
-                "category": "job_creation_helper",
-                "header": "Job creation helper",
-                "class": "",
-                "fields": [
-                    {
-                        "input_type": "select",
-                        "id": "server",
-                        "name": "Server",
-                        "options": [
-                            {'label': server.name, 'value': server.efootprint_id} for server in servers]
-                    },
-                    {
-                        "input_type": "select",
-                        "id": "service",
-                        "name": "Service used",
-                        "options": None
-                    },
-                ]
-            }
+        "category": "job_creation_helper",
+        "header": "Job creation helper",
+        "class": "",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "server",
+                "name": "Server",
+                "options": [
+                    {'label': server.name, 'value': server.efootprint_id} for server in servers]
+            },
+            {
+                "input_type": "select",
+                "id": "service",
+                "name": "Service used",
+                "options": None
+            },
+        ]
+    }
     structure_dict["items"] = [additional_item] + structure_dict["items"]
 
     possible_job_types_per_service = {"direct_server_call": [{"label": "Manually defined job", "value": "Job"}]}
@@ -156,8 +190,8 @@ def open_create_job_panel(request):
 
     return http_response
 
-def open_create_usage_pattern_panel(request):
-    model_web = ModelWeb(request.session)
+
+def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb):
     usage_journeys = [{'efootprint_id': uj.efootprint_id, 'name': uj.name} for uj in model_web.usage_journeys]
     if len(usage_journeys) == 0:
         error = PermissionError("You need to have created at least one usage journey to create a usage pattern.")
@@ -199,9 +233,7 @@ def open_create_usage_pattern_panel(request):
     return http_response
 
 
-def add_new_usage_journey(request):
-    model_web = ModelWeb(request.session)
-
+def add_new_usage_journey(request, model_web: ModelWeb):
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsageJourney')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     response = render(
@@ -214,8 +246,8 @@ def add_new_usage_journey(request):
     return response
 
 
-def add_new_usage_journey_step(request, usage_journey_efootprint_id):
-    model_web = ModelWeb(request.session)
+def add_new_usage_journey_step(request, model_web: ModelWeb):
+    usage_journey_efootprint_id = request.POST.get('efootprint_id_of_parent_to_link_to')
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsageJourneyStep')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     usage_journey_to_edit = model_web.get_web_object_from_efootprint_id(usage_journey_efootprint_id)
@@ -229,8 +261,7 @@ def add_new_usage_journey_step(request, usage_journey_efootprint_id):
     return edit_object(request, usage_journey_efootprint_id, model_web)
 
 
-def add_new_server(request):
-    model_web = ModelWeb(request.session)
+def add_new_server(request, model_web: ModelWeb):
     storage_qd = QueryDict(urlencode(json.loads(request.POST.get('storage', '{}')), doseq=True))
 
     storage = create_efootprint_obj_from_post_data(storage_qd, model_web, "Storage")
@@ -249,8 +280,8 @@ def add_new_server(request):
     return response
 
 
-def add_new_service(request, server_efootprint_id):
-    model_web = ModelWeb(request.session)
+def add_new_service(request, model_web: ModelWeb):
+    server_efootprint_id = request.POST.get('efootprint_id_of_parent_to_link_to')
     mutable_post = request.POST.copy()
     mutable_post['server'] = server_efootprint_id
     try:
@@ -271,8 +302,8 @@ def add_new_service(request, server_efootprint_id):
         return render_exception_modal(request, e)
 
 
-def add_new_job(request, usage_journey_step_efootprint_id):
-    model_web = ModelWeb(request.session)
+def add_new_job(request, model_web: ModelWeb):
+    usage_journey_step_efootprint_id = request.POST.get('efootprint_id_of_parent_to_link_to')
     usage_journey_step_to_edit = model_web.get_web_object_from_efootprint_id(usage_journey_step_efootprint_id)
 
     try:
@@ -294,8 +325,7 @@ def add_new_job(request, usage_journey_step_efootprint_id):
     return edit_object(request, usage_journey_step_efootprint_id, model_web)
 
 
-def add_new_usage_pattern(request):
-    model_web = ModelWeb(request.session)
+def add_new_usage_pattern(request, model_web: ModelWeb):
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsagePatternFromForm')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     new_efootprint_obj.to_json()

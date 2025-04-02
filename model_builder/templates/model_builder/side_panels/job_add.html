@@ -1,11 +1,12 @@
 {% extends "model_builder/side_panels/components/side_panel_structure.html" %}
 
 {% block panel_body %}
-    <form hx-post="/model_builder/add-new-job/{{ efootprint_id_of_parent_to_link_to }}/"
-            hx-swap="none"
-            hx-disabled-elt="button"
-            hx-on::after-request="closeAndEmptySidePanel()"
-          id="sidePanelForm"
+    <form id="sidePanelForm"
+                hx-post="{% url 'add-new-object' 'Job' %}"
+                hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
+                hx-swap="none"
+                hx-disabled-elt="button"
+                hx-on::after-request="closeAndEmptySidePanel()"
     >
        {% with helper_message="To get support in defining your job, first create a server and add services to it." %}
             {% include "model_builder/side_panels/dynamic_add_object_form_content.html" %}

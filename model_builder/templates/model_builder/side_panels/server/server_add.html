@@ -21,7 +21,7 @@
         <button
                 id="btn-submit-form"
                 class="btn btn-primary rounded-pill w-100"
-                hx-post="/model_builder/add-new-server/"
+                hx-post="{% url 'add-new-object' 'Server' %}"
                 hx-target="#server-list"
                 hx-swap="beforeend"
                 hx-disabled-elt="button"

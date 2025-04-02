@@ -40,12 +40,12 @@
                         {% endfor %}
                     </div>
                     <button class="btn btn-white text-start p-0 fz-0-8 dotted-border h-100 w-100 rounded-2 p-2"
-                            hx-get="/model_builder/open-create-service-panel/{{ server.efootprint_id }}/"
+                            hx-get="/model_builder/open-create-object-panel/Service/"
                             hx-target="#sidePanel"
                             hx-trigger="click"
                             hx-swap="innerHTML"
                             hx-disabled-elt="button"
-
+                            hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ server.efootprint_id }}"}'
                     >
                         <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-2"  width="16px" height="16px" alt="add icon" />
                         Install service
