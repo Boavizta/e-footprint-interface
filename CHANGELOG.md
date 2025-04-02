@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.7.1] - 2025-04-02
 
+### Fixed
+- fix CSS unalignment rules on timeseries part form in Usage pattern form.
+
 ### Changed
 - Updated to e-footprint 10.0.6 so Boaviztapi calls are now done through the python package and not through the API anymore.
 

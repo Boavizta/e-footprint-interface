@@ -8,7 +8,7 @@
         <div class="accordion-body">
             <div class="mb-3 mx-2">
                 <label for="start_date" class="form-label w-100 text-start fz-0-8">Start date</label>
-                <input type="text" class="form-control"
+                <input type="text" class="form-control fz-0-8"
                        name="start_date"
                        id="start_date"
                        value="{{ usage_pattern_input_values.start_date.value }}"
@@ -17,9 +17,9 @@
                        >
             </div>
             <div class="mb-3 mx-2">
-                <label for="modeling_duration_value" class="form-label w-100 text-start">TimeFrame</label>
+                <label for="modeling_duration_value" class="form-label w-100 text-start fz-0-8">TimeFrame</label>
                 <div class="input-group">
-                    <input type="number" class="form-control"
+                    <input type="number" class="form-control fz-0-8"
                            name="modeling_duration_value"
                            id="modeling_duration_value"
                            value="{{ usage_pattern_input_values.modeling_duration_value.magnitude|floatformat }}"
@@ -28,7 +28,7 @@
                             then createOrUpdateTimeSeriesChart()
                             "
                            aria-describedby="basic-addon3 basic-addon4">
-                    <select class="input-group-text"
+                    <select class="input-group-text fz-0-8"
                             name="modeling_duration_unit"
                             id="modeling_duration_unit"
                             _="
@@ -47,47 +47,45 @@
                 </div>
                 <div class="hidden text-danger fz-0-8" id="modeling_duration_value_error_message"></div>
             </div>
-            <div class="row mb-3 align-items-end">
-                <div class="col-12 mb-3">
-                    <label for="initial_usage_journey_volume" class="form-label w-100 text-start fz-0-8">Initial number of usage journeys</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control fz-0-8"
-                               name="initial_usage_journey_volume"
-                               id="initial_usage_journey_volume"
-                               value="{{ usage_pattern_input_values.initial_usage_journey_volume.magnitude|floatformat }}"
-                               _="on input createOrUpdateTimeSeriesChart()"
-                               aria-describedby="basic-addon3 basic-addon4"
-                       >
-                        <select class="input-group-text fz-0-8"
-                                name="initial_usage_journey_volume_timespan"
-                                id="initial_usage_journey_volume_timespan"
-                                _="on change createOrUpdateTimeSeriesChart()"
-                        >
-                            <option value="month" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "month" %}selected{% endif %}>Monthly</option>
-                            <option value="year" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
-                        </select>
-                    </div>
+            <div class="mb-3 mx-2">
+                <label for="initial_usage_journey_volume" class="form-label w-100 text-start fz-0-8">Initial number of usage journeys</label>
+                <div class="input-group">
+                    <input type="number" class="form-control fz-0-8"
+                           name="initial_usage_journey_volume"
+                           id="initial_usage_journey_volume"
+                           value="{{ usage_pattern_input_values.initial_usage_journey_volume.magnitude|floatformat }}"
+                           _="on input createOrUpdateTimeSeriesChart()"
+                           aria-describedby="basic-addon3 basic-addon4"
+                   >
+                    <select class="input-group-text fz-0-8"
+                            name="initial_usage_journey_volume_timespan"
+                            id="initial_usage_journey_volume_timespan"
+                            _="on change createOrUpdateTimeSeriesChart()"
+                    >
+                        <option value="month" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "month" %}selected{% endif %}>Monthly</option>
+                        <option value="year" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
+                    </select>
                 </div>
-                <div class="col-12">
-                    <label for="net_growth_rate_in_percentage" class="form-label w-100 text-start fz-0-8">Net growth rate (%)</label>
-                    <div class="input-group">
-                        <input type="number"
-                               class="form-control fz-0-8"
-                               name="net_growth_rate_in_percentage"
-                               id="net_growth_rate_in_percentage"
-                               _="on input createOrUpdateTimeSeriesChart()"
-                               value="{{ usage_pattern_input_values.net_growth_rate_in_percentage.magnitude|floatformat }}"
-                               aria-describedby="basic-addon3 basic-addon4"
-                               >
-                        <select class="input-group-text fz-0-8"
-                                name="net_growth_rate_timespan"
-                                id="net_growth_rate_timespan"
-                                _="on change createOrUpdateTimeSeriesChart()"
-                        >
-                            <option value="month" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "month" %}selected{% endif %}>Monthly</option>
-                            <option value="year" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "year" %}selected{% endif %}>Yearly</option>
-                        </select>
-                    </div>
+            </div>
+            <div class="mb-3 mx-2">
+                <label for="net_growth_rate_in_percentage" class="form-label w-100 text-start fz-0-8">Net growth rate (%)</label>
+                <div class="input-group">
+                    <input type="number"
+                           class="form-control fz-0-8"
+                           name="net_growth_rate_in_percentage"
+                           id="net_growth_rate_in_percentage"
+                           _="on input createOrUpdateTimeSeriesChart()"
+                           value="{{ usage_pattern_input_values.net_growth_rate_in_percentage.magnitude|floatformat }}"
+                           aria-describedby="basic-addon3 basic-addon4"
+                           >
+                    <select class="input-group-text fz-0-8"
+                            name="net_growth_rate_timespan"
+                            id="net_growth_rate_timespan"
+                            _="on change createOrUpdateTimeSeriesChart()"
+                    >
+                        <option value="month" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "month" %}selected{% endif %}>Monthly</option>
+                        <option value="year" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "year" %}selected{% endif %}>Yearly</option>
+                    </select>
                 </div>
             </div>
         </div>
