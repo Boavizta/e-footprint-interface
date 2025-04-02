@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.4] - 2025-04-02
+
+### Changed
+- Exported JSON files now contain the mention 'UTC' in the filename.
+
 ## [0.7.1] - 2025-04-02
 
 ### Fixed

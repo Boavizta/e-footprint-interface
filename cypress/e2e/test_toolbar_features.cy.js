@@ -137,7 +137,7 @@ describe("Test - Toolbars import/export/reboot", () => {
         let year = nowUtc.getFullYear();
         let hours = String(nowUtc.getHours()).padStart(2, '0');
         let minutes = String(nowUtc.getMinutes()).padStart(2, '0');
-        let fileName = `${year}-${month}-${day} ${hours}:${minutes} system 1.e-f.json`;
+        let fileName = `${year}-${month}-${day} ${hours}:${minutes}_UTC system 1.e-f.json`;
 
         //to get the filedownload in cypress, we need to remove the target blank attribute
         cy.intercept('GET', '**/download-json/**').as('fileDownload');
