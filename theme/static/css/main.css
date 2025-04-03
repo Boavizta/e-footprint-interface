@@ -371,3 +371,7 @@ body{
 .panel-result-btn, #btn-open-panel-result {
     transition: transform 0.2s ease-in-out;
 }
+
+.sources-label{
+    color: #6B7280;
+}

@@ -43,35 +43,55 @@
                 "id": "Job_data_transferred",
                 "name": "data_transferred",
                 "unit": "kB",
-                "default": 150
+                "default": 150,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "Job_data_stored",
                 "name": "data_stored",
                 "unit": "kB",
-                "default": 100
+                "default": 100,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "Job_request_duration",
                 "name": "request_duration",
                 "unit": "s",
-                "default": 1
+                "default": 1,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "Job_compute_needed",
                 "name": "compute_needed",
                 "unit": "cpu_core",
-                "default": 0.1
+                "default": 0.1,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "Job_ram_needed",
                 "name": "ram_needed",
                 "unit": "MB",
-                "default": 50
+                "default": 50,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             }
         ]
     },
@@ -90,14 +110,22 @@
                 "id": "WebApplicationJob_data_transferred",
                 "name": "data_transferred",
                 "unit": "MB",
-                "default": 2.2
+                "default": 2.2,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "WebApplicationJob_data_stored",
                 "name": "data_stored",
                 "unit": "kB",
-                "default": 100
+                "default": 100,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "select",
@@ -184,21 +212,33 @@
                 "id": "VideoStreamingJob_video_duration",
                 "name": "video_duration",
                 "unit": "h",
-                "default": 1
+                "default": 1,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "VideoStreamingJob_refresh_rate",
                 "name": "refresh_rate",
                 "unit": "1/s",
-                "default": 30.0
+                "default": 30.0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "VideoStreamingJob_data_stored",
                 "name": "data_stored",
                 "unit": "MB",
-                "default": 0
+                "default": 0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             }
         ]
     },
@@ -217,7 +257,11 @@
                 "id": "GenAIJob_output_token_count",
                 "name": "output_token_count",
                 "unit": "",
-                "default": 1000
+                "default": 1000,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             }
         ]
     }

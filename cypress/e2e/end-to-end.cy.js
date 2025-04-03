@@ -1,3 +1,8 @@
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe('Test de la page d\'accueil', () => {
     it('Ouvre la page d\'accueil et interagit avec un bouton', () => {
 
@@ -135,7 +140,8 @@ describe('Test de la page d\'accueil', () => {
 
         cy.get('#btn-open-panel-result').click();
         cy.get('#lineChart').should('be.visible');
-        cy.get('#inner-panel-result').should('be.visible').find('div[onclick="hidePanelResult()"]').click();
+        cy.get('#graph-block').should('be.visible')
+        cy.get('#result-block').should('be.visible').find('div[onclick="hidePanelResult()"]').click();
         cy.get('#lineChart').should('not.exist');
     });
 });

@@ -68,12 +68,16 @@ class TestViewsEdition(TestModelingBase):
              'id': 'WebApplicationJob_data_transferred',
              'name': 'data_transferred',
              'unit': 'MB',
-             'default': 150.0},
+             'default': 150.0,
+             'source': {'name':'user data', 'link':None}
+             },
             {'input_type': 'input',
              'id': 'WebApplicationJob_data_stored',
              'name': 'data_stored',
              'unit': 'kB',
-             'default': 100.0},
+             'default': 100.0,
+             'source': {'name':'hypothesis', 'link':None}
+             },
             {'input_type': 'select',
              'id': 'WebApplicationJob_implementation_details',
              'name': 'implementation_details',
@@ -89,7 +93,6 @@ class TestViewsEdition(TestModelingBase):
             ]
 
         ref_dynamic_form_data = {'dynamic_lists': []}
-
         self.assertListEqual(job_edition_fields, ref_job_edition_fields)
         self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
 

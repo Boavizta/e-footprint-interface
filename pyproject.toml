@@ -5,7 +5,7 @@
 
 [tool.poetry]
 name = "efootprint-interface"
-version = "0.7.5"
+version = "0.7.6"
 description = "Digital service environmental footprint model interface"
 authors = ["Vincent Villet", "Clémence Knaébel", "Julien Houbart", "Jordane Frouin"]
 readme = "README.md"
@@ -49,6 +49,7 @@ google-api-python-client = "2.130"
 oauth2client = "^4.1"
 psycopg2-binary = "^2.9"
 django-bootstrap5 = "^24.3"
+openpyxl = "^3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"

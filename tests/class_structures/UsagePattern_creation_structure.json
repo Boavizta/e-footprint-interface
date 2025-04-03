@@ -101,7 +101,11 @@
                 "id": "UsagePatternFromForm_modeling_duration_value",
                 "name": "modeling_duration_value",
                 "unit": "",
-                "default": 3
+                "default": 3,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "select",
@@ -124,7 +128,11 @@
                 "id": "UsagePatternFromForm_initial_usage_journey_volume",
                 "name": "initial_usage_journey_volume",
                 "unit": "",
-                "default": 10000
+                "default": 10000,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "select",
@@ -151,7 +159,11 @@
                 "id": "UsagePatternFromForm_net_growth_rate_in_percentage",
                 "name": "net_growth_rate_in_percentage",
                 "unit": "",
-                "default": 10
+                "default": 10,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "datalist",

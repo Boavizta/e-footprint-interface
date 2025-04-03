@@ -1,0 +1,48 @@
+
+<div class="row">
+    <div class="col-auto my-3">
+        <a class="btn btn-white border border-dark rounded-2 fz-0-8"
+           id="download-sources"
+            target="_blank" href="{% url 'download-sources' %}">
+            Export to xslx
+        </a>
+    </div>
+    <div class="col-12">
+        <table class="table">
+            <thead class="text-start">
+                <tr>
+                    <th scope="col">Item name</th>
+                    <th scope="col">Attribute of</th>
+                    <th scope="col">Object Type</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Unit</th>
+                    <th scope="col">Source</th>
+                </tr>
+            </thead>
+            <tbody class="text-start">
+                {% for explainable_quantity in explainable_quantities %}
+                <tr>
+                    <th scope="row">{{ explainable_quantity.attr_name_in_mod_obj_container }}</th>
+                    <td>{{ explainable_quantity.modeling_obj_container.name }}</td>
+                    <td>{{ explainable_quantity.modeling_obj_container.class_as_simple_str }}</td>
+                    <td>{{ explainable_quantity.value.magnitude }}</td>
+                    <td>{{ explainable_quantity.value.units }}</td>
+                    <td>
+                        {% if explainable_quantity.attr_name_in_mod_obj_container in explainable_quantity.modeling_obj_container.calculated_attributes %}
+                            Computed <a href="{% url 'display-calculus-graph' explainable_quantity.modeling_obj_container.id explainable_quantity.attr_name_in_mod_obj_container %}" target="_blank">
+                            (see calculation graph)
+                            </a>
+                        {% elif explainable_quantity.source.link %}
+                            <a target="_blank" href="{{ explainable_quantity.source.link }}">{{ explainable_quantity.source.name }}</a>
+                        {% else %}
+                            {{ explainable_quantity.source.name }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

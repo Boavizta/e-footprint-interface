@@ -101,12 +101,12 @@
 >
     <div class="col-12" id="btn-open-panel-result"
          hx-get="/model_builder/result-chart/"
-        hx-target="#inner-panel-result"
+        hx-target="#result-block"
         hx-swap="innerHTML"
         hx-trigger="click"
         hx-disabled-elt="button"
     >
-        <div class="row align-items-center">
+        <div class="row align-items-center" id="result-panel-header">
             <div class="col-4 text-start px-4 py-0">
                 <p class="h5 m-0"><b>Results</b></p>
             </div>
@@ -117,7 +117,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 bg-white" id="inner-panel-result">
+    <div class="col-12 bg-white" id="result-block">
     </div>
 </div>
 

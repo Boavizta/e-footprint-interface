@@ -1,10 +1,15 @@
 import random
 import string
 from datetime import datetime
+from io import BytesIO
 
+import pandas as pd
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
+from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
@@ -20,7 +25,7 @@ import os
 from django.http import HttpResponse
 import matplotlib
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 DEFAULT_GRAPH_WIDTH = 700
 
 
@@ -56,24 +61,24 @@ def model_builder_main(request, reboot=False):
 
 def open_import_json_panel(request):
     return render(request, "model_builder/side_panels/import_model.html", context={
-              'header_name':'Import a model'})
+              "header_name":"Import a model"})
 
 def download_json(request):
-    data = request.session.get('system_data', {})
+    data = request.session.get("system_data", {})
     json_data = json.dumps(data, indent=4)
-    system_name = request.session["system_data"]['System'][
-        next(iter(request.session["system_data"]['System'].keys()), None)]['name']
+    system_name = request.session["system_data"]["System"][
+        next(iter(request.session["system_data"]["System"].keys()), None)]["name"]
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    response = HttpResponse(json_data, content_type='application/json')
-    response['Content-Disposition'] = f'attachment; filename="{current_date_time}_UTC {system_name}.e-f.json"'
+    response = HttpResponse(json_data, content_type="application/json")
+    response["Content-Disposition"] = f"attachment; filename='{current_date_time}_UTC {system_name}.e-f.json'"
     return response
 
 def upload_json(request):
     import_error_message = ""
     if "import-json-input" in request.FILES:
         try:
-            file = request.FILES['import-json-input']
-            if file and file.name.lower().endswith('.json'):
+            file = request.FILES["import-json-input"]
+            if file and file.name.lower().endswith(".json"):
                 data = json.load(file)
             else:
                 import_error_message = "Invalid file format ! Please use a JSON file"
@@ -130,11 +135,18 @@ def result_chart(request):
 
     try:
         model_web.system.after_init()
+        explainable_quantities = []
+        for efootprint_object in model_web.flat_efootprint_objs_dict.values():
+            explainable_quantities += list(get_instance_attributes(efootprint_object, ExplainableQuantity).values())
+
     except Exception as e:
         return render_exception_modal(request, e)
 
     http_response = htmx_render(
-        request, "model_builder/result_panel.html", context={'model_web': model_web})
+        request, "model_builder/result/result_panel.html", context={
+            "model_web": model_web,
+            "explainable_quantities": explainable_quantities
+        })
 
     return http_response
 
@@ -153,7 +165,7 @@ def display_calculus_graph(request, efootprint_id, attr_name):
     graphs = []
     graphs_html_contents = {}
     iframe_height = 95
-    cache_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    cache_key = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
 
     calculated_attribute_to_display = efootprint_object.__getattr__(attr_name)
 
@@ -177,7 +189,7 @@ def display_calculus_graph(request, efootprint_id, attr_name):
             "cache_key": cache_key,
             "efootprint_id": efootprint_id,
             "attr_name": attr_name,
-            "graph_key": 'none'
+            "graph_key": "none"
         })
         graphs.append({"url": url, "name": f"{attr_name}"})
         calculus_graph = build_calculus_graph(calculated_attribute_to_display)
@@ -188,7 +200,41 @@ def display_calculus_graph(request, efootprint_id, attr_name):
 
     return render(request, "model_builder/calculus_graphs.html", {
         "graphs": graphs,
-        'iframe_height': iframe_height,
+        "iframe_height": iframe_height,
     })
 
 
+def download_sources(request):
+    model_web = ModelWeb(request.session)
+    sources = []
+
+    for efootprint_object in model_web.flat_efootprint_objs_dict.values():
+        for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
+            source = attr_value.source
+            if attr_name in efootprint_object.calculated_attributes:
+                source = Source("Computed", "")
+
+            sources.append({
+                "name": attr_name,
+                "link_to": efootprint_object.name,
+                "objectType": efootprint_object.class_as_simple_str,
+                "value": attr_value.value.magnitude,
+                "unit": str(attr_value.value.units),
+                "source_name": source.name if source else "",
+                "source_link": source.link if source else "",
+            })
+
+    df = pd.DataFrame(sources)
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Sources")
+    output.seek(0)
+
+    system_name = next(iter(request.session["system_data"]["System"].values()))["name"]
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+    response = HttpResponse(output.read(),
+                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system_name}_sources.xlsx"
+
+    return response
