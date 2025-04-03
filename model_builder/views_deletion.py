@@ -8,7 +8,7 @@ from efootprint.logger import logger
 from model_builder.class_structure import efootprint_class_structure
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import JobWeb, UsageJourneyStepWeb, UsagePatternWeb, UsageJourneyWeb, ServerWeb
-from model_builder.views_edition import compute_edit_object_html_and_event_response, \
+from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 
 

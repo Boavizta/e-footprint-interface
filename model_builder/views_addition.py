@@ -9,9 +9,9 @@ from efootprint.core.usage.job import Job
 
 from model_builder.class_structure import generate_object_creation_structure, efootprint_class_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices, model_web_root
+from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices
 from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data, render_exception_modal
-from model_builder.views_edition import edit_object
+from model_builder.edition.views_edition import edit_object
 
 
 def open_create_object_panel(request, object_type):

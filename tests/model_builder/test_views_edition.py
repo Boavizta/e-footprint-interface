@@ -13,7 +13,7 @@ from efootprint.constants.units import u
 from model_builder.class_structure import generate_object_edition_structure
 from model_builder.views_addition import add_new_service, add_new_job
 from model_builder.model_web import ModelWeb
-from model_builder.views_edition import edit_object
+from model_builder.edition.views_edition import edit_object
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
@@ -93,7 +93,7 @@ class TestViewsEdition(TestModelingBase):
         self.assertDictEqual(job_edition_structure, ref_job_edition_structure)
         self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
 
-    @patch("model_builder.views_edition.render_exception_modal")
+    @patch("model_builder.edition.views_edition.render_exception_modal")
     def test_edit_genai_model(self, mock_render_exception_modal):
         gpu_server = GPUServer.from_defaults("GPU server", compute=SourceValue(16 * u.gpu), storage=Storage.ssd())
         first_provider = GenAIModel.list_values()["provider"][0]
@@ -124,7 +124,7 @@ class TestViewsEdition(TestModelingBase):
         response = edit_object(edit_service_request, genai_service.id)
         mock_render_exception_modal.assert_not_called()
 
-    @patch("model_builder.views_edition.render_exception_modal")
+    @patch("model_builder.edition.views_edition.render_exception_modal")
     def test_edit_server_and_storage(self, mock_render_exception_modal):
         server_id = "uuid-Server-1"
         storage_id = "uuid-Default-SSD-storage-1"

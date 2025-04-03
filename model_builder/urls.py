@@ -2,7 +2,7 @@ from django.urls import path
 
 import model_builder.views_addition
 import model_builder.views_deletion
-import model_builder.views_edition
+import model_builder.edition.views_edition
 from . import views
 
 urlpatterns = [
@@ -26,9 +26,9 @@ urlpatterns = [
     path('add-new-service/<server_efootprint_id>', model_builder.views_addition.add_new_service,
          name='add-add_new_service'),
     path("add-new-job/<usage_journey_step_efootprint_id>/",model_builder.views_addition.add_new_job, name="add-new-job"),
-    path("open-edit-object-panel/<object_id>/", model_builder.views_edition.open_edit_object_panel,
+    path("open-edit-object-panel/<object_id>/", model_builder.edition.views_edition.open_edit_object_panel,
          name="open-edit-object-panel"),
-    path("edit-object/<object_id>/", model_builder.views_edition.edit_object, name="edit-object"),
+    path("edit-object/<object_id>/", model_builder.edition.views_edition.edit_object, name="edit-object"),
     path("delete-object/<object_id>/", model_builder.views_deletion.delete_object, name="delete-object"),
     path("ask-delete-object/<object_id>/", model_builder.views_deletion.ask_delete_object, name="ask-delete-object"),
     path("download-json/", views.download_json, name="download-json"),
@@ -39,5 +39,5 @@ urlpatterns = [
          name='display-calculus-graph'),
     path('graph/<cache_key>/<efootprint_id>/<attr_name>/<graph_key>', model_builder.views.get_calculus_graph,
          name='get-graph'),
-    path('save-model-name/', model_builder.views_edition.save_model_name, name='save-model-name'),
+    path('save-model-name/', model_builder.edition.views_edition.save_model_name, name='save-model-name'),
 ]

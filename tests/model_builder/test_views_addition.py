@@ -7,7 +7,7 @@ from model_builder.views import model_builder_main
 from model_builder.views_addition import add_new_usage_pattern, add_new_service, add_new_job
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
-from model_builder.views_edition import edit_object, open_edit_object_panel
+from model_builder.edition.views_edition import edit_object, open_edit_object_panel
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
