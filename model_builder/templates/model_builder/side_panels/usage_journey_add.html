@@ -17,16 +17,8 @@
                    required
                    value="{{ obj_type }} {{ next_efootprint_object_rank }}">
         </div>
-        {% for attr in object_structure.list_attributes %}
-            <div class="mb-3">
-                <label for="{{ attr.attr_name }}" class="form-label">{{ attr.attr_name }}</label>
-                <select class="form-control p-2" id="{{ attr.attr_name }}" name="{{ attr.attr_name }}" multiple>
-                    {% for obj in attr.existing_objects %}
-                         <option value="{{ obj.efootprint_id }}">{{ obj.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <hr>
+        {% for field in form_fields %}
+            {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
         {% endfor %}
 
         <div class="mb-3">

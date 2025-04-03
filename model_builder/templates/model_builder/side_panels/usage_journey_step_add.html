@@ -17,21 +17,8 @@
                     required
                     value="{{ obj_type }} {{ next_efootprint_object_rank }}">
         </div>
-        {% for attr in object_structure.numerical_attributes %}
-            <div class="mb-3">
-                <div class="input-group">
-                    <label for="{{ attr.attr_name }}" class="form-label w-100">{{ attr.attr_name }}</label>
-                    <input type="number"
-                           class="form-control input_with_add_on"
-                           id="{{ attr.attr_name }}"
-                           name="{{ attr.attr_name }}"
-                           placeholder="Enter value" required
-                            step="0.1">
-                    <span class="input-group-text" id="basic-addon2">
-                        {{ attr.unit }}
-                    </span>
-                </div>
-            </div>
+        {% for field in form_fields %}
+            {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
         {% endfor %}
     </form>
 {% endblock %}

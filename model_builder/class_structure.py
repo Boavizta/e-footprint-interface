@@ -75,7 +75,7 @@ def efootprint_class_structure(efootprint_class_str: str, model_web=None):
     return structure
 
 
-def generate_object_creation_structure(available_efootprint_classes: list, header: str, attributes_to_skip = None):
+def generate_object_creation_structure(available_efootprint_classes: list, header: str, attributes_to_skip = None, model_web=None):
     if attributes_to_skip is None:
         attributes_to_skip = []
 
@@ -101,7 +101,7 @@ def generate_object_creation_structure(available_efootprint_classes: list, heade
     form_sections = [type_efootprint_classes_available]
 
     for index, efootprint_class in enumerate(available_efootprint_classes):
-        class_structure = efootprint_class_structure(efootprint_class.__name__)
+        class_structure = efootprint_class_structure(efootprint_class.__name__, model_web)
         class_fields, dynamic_lists = format_structure_for_dynamic_form(class_structure, attributes_to_skip)
 
         if dynamic_lists:
@@ -189,6 +189,26 @@ def format_structure_for_dynamic_form(input_structure, attributes_to_skip):
             "name": numerical_attribute["attr_name"],
             "unit": numerical_attribute["unit"],
             "default": default_value
+        })
+
+    for modeling_obj_attribute in input_structure["modeling_obj_attributes"]:
+        if modeling_obj_attribute["attr_name"] in attributes_to_skip:
+            continue
+        structure_fields.append({
+            "input_type": "select",
+            "id": modeling_obj_attribute["attr_name"],
+            "name": modeling_obj_attribute["attr_name"],
+            "options": modeling_obj_attribute["existing_objects"]
+        })
+
+    for list_attribute in input_structure["list_attributes"]:
+        if list_attribute["attr_name"] in attributes_to_skip:
+            continue
+        structure_fields.append({
+            "input_type": "select-multiple",
+            "id": list_attribute["attr_name"],
+            "name": list_attribute["attr_name"],
+            "options": list_attribute["existing_objects"]
         })
 
     return structure_fields, dynamic_lists
