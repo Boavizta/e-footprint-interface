@@ -1,10 +1,14 @@
 import random
 import string
 from datetime import datetime
+from io import BytesIO
 
+import pandas as pd
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
+from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
@@ -130,11 +134,24 @@ def result_chart(request):
 
     try:
         model_web.system.after_init()
+        sources = []
+        for efootprint_object in model_web.flat_efootprint_objs_dict.values():
+            for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
+                sources.append({
+                    'objectParentName': efootprint_object.name,
+                    'objectType': efootprint_object.class_as_simple_str,
+                    'attr_name': attr_name,
+                    'attr': attr_value
+                })
+
     except Exception as e:
         return render_exception_modal(request, e)
 
     http_response = htmx_render(
-        request, "model_builder/result_panel.html", context={'model_web': model_web})
+        request, "model_builder/result/result_panel.html", context={
+            'model_web': model_web,
+            'sources': sources
+        })
 
     return http_response
 
@@ -192,3 +209,35 @@ def display_calculus_graph(request, efootprint_id, attr_name):
     })
 
 
+def download_sources(request):
+    model_web = ModelWeb(request.session)
+    sources = []
+
+    for efootprint_object in model_web.flat_efootprint_objs_dict.values():
+        for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
+            source = attr_value.source
+
+            sources.append({
+                'name': attr_name,
+                'link_to': efootprint_object.name,
+                'objectType': efootprint_object.class_as_simple_str,
+                'value': attr_value.value.magnitude,
+                'unit': str(attr_value.value.units),
+                'source_name': source.name if source else '',
+                'source_link': source.link if source else '',
+            })
+
+    df = pd.DataFrame(sources)
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Sources")
+    output.seek(0)
+
+    system_name = next(iter(request.session["system_data"]['System'].values()))['name']
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+    response = HttpResponse(output.read(),
+                            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={current_date_time}_UTC {system_name}_sources.xlsx'
+
+    return response

@@ -31,7 +31,11 @@
                 "id": "UsageJourneyStep_user_time_spent",
                 "name": "user_time_spent",
                 "unit": "min",
-                "default": 1
+                "default": 1,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "select-multiple",

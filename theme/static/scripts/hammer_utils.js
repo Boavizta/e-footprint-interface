@@ -9,7 +9,7 @@ function displayPanelResult(){
 function hidePanelResult(){
     let panel = document.getElementById("panel-result-btn");
     let btn = document.getElementById("btn-open-panel-result");
-    let resultDiv = document.getElementById("inner-panel-result");
+    let resultDiv = document.getElementById("result-block");
     panel.style.transition = "height 0.2s ease-in-out";
     panel.style.height = "5vh";
     btn.style.transition = "height 0.2s ease-in-out";

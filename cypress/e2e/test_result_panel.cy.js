@@ -1,4 +1,5 @@
 import "cypress-real-events";
+
 describe("Test - Result panel", () => {
     let ujNameTwo = "Test E2E UJ 2";
 
@@ -40,7 +41,7 @@ describe("Test - Result panel", () => {
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
         cy.wait(500);
-        cy.get('#inner-panel-result').should('be.visible').find('div[onclick="hidePanelResult()"]')
+        cy.get('#result-block').should('be.visible').find('div[onclick="hidePanelResult()"]')
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
         .realTouch('end', { x: 100, y: 400 });
@@ -96,6 +97,47 @@ describe("Test - Result panel", () => {
                 expect(label.length).to.equal(4);
             });
         });
+    });
+
+    it("Check that sources are displayed and can be downloaded", () => {
+        let upName = "Test E2E Usage Pattern";
+        cy.visit("/model_builder/");
+        cy.get('#model-canva').should('be.visible');
+        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
+        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
+        cy.get('input[type="file"]').selectFile(fileTest);
+        cy.get('button[type="submit"]').click();
+        cy.wait(500);
+        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
+
+        cy.get('#btn-open-panel-result').click()
+
+        //get button with text Sources
+        cy.get('#header-btn-result-sources').should('be.visible').click();
+        cy.get('#source-block').should('have.class', 'd-block');
+        cy.get('#graph-block').should('have.class', 'd-none');
+
+        let now = new Date();
+        let nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+        let day = String(nowUtc.getDate()).padStart(2, '0');
+        let month = String(nowUtc.getMonth() + 1).padStart(2, '0');
+        let year = nowUtc.getFullYear();
+        let hours = String(nowUtc.getHours()).padStart(2, '0');
+        let minutes = String(nowUtc.getMinutes()).padStart(2, '0');
+        let fileName = `${year}-${month}-${day} ${hours}:${minutes}_UTC system 1_sources.xlsx`;
+
+        //to get the filedownload in cypress, we need to remove the target blank attribute
+        cy.intercept('GET', '**/download-sources/**').as('fileDownload');
+        cy.get('#download-sources').click()
+          .invoke('removeAttr', 'target')
+          .click();
+
+        cy.wait('@fileDownload').then((interception) => {
+            const contentDisposition = interception.response.headers['content-disposition'];
+            expect(contentDisposition).to.include('attachment');
+            expect(contentDisposition).to.include(fileName);
+        });
+
     });
 
 });

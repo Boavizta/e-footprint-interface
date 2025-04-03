@@ -85,5 +85,6 @@ class TestsClassStructure(TestCase):
             remove_ids_from_str(json.dumps(network_archetypes)), remove_ids_from_str(json.dumps(default_networks)))
         self.assertEqual(
             remove_ids_from_str(json.dumps(hardware_archetypes)), remove_ids_from_str(json.dumps(default_devices)))
+        self.maxDiff = None
         self.assertEqual(
             remove_ids_from_str(json.dumps(countries)), remove_ids_from_str(json.dumps(default_countries)))

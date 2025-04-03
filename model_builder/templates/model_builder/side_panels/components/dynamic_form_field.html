@@ -39,12 +39,6 @@
         <datalist id="datalist_{{ field.id }}">
             <option selected value="select a provider">
         </datalist>
-    {% elif field.input_type == 'list' %}
-        <ul class="list-group">
-            {% for option in field.options %}
-                <li class="list-group-item">{{ option }}</li>
-            {% endfor %}
-        </ul>
     {% elif field.input_type == 'str' %}
         <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
@@ -52,13 +46,19 @@
         <div class="input-group">
             <label for="{{ field.id }}" class="form-label w-100">{{ field.name }}</label>
             <input type="number"
-                class="form-control input_with_add_on"
-                id="{{ field.id }}"
-                name="{{ field.id }}"
-                value="{{ field.default }}"
-                   step="0.1"
-                   placeholder="Enter value"
-                   required
+                    class="form-control input_with_add_on"
+                    id="{{ field.id }}"
+                    name="{{ field.id }}"
+                    value="{{ field.default }}"
+                    step="0.1"
+                    placeholder="Enter value"
+                    required
+                    {% if field.source %}
+                        data-defaultValue="{{ field.default }}"
+                        data-sourceName="{{ field.source.name }}"
+                        data-sourceLink="{{ field.source.link }}"
+                        oninput="updateSource(this)"
+                    {% endif %}
             >
             <span class="input-group-text">
                 {{ field.unit }}
@@ -66,5 +66,15 @@
         </div>
     {% else %}
         <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>
+    {% endif %}
+    {% if field.source %}
+        <div class="form-text fz-0-8" id="source-{{ field.id }}">
+            {% if field.source.link %}
+                source : <a target="_blank" class="sources-label" href="{{ field.source.link }}">{{ field.source.name }}
+            </a>
+            {% else %}
+                source : {{ field.source.name }}
+            {% endif %}
+        </div>
     {% endif %}
 </div>

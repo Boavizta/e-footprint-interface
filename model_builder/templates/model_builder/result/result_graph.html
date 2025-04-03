@@ -1,0 +1,26 @@
+<div class="col-12 shadow rounded-2 p-4 mt-3 ">
+    <p class="h5">
+        Total CO2 emissions over time
+    </p>
+    <canvas id="lineChart" style="max-height: 600px;"></canvas>
+</div>
+<div class="col-12 my-3 shadow rounded-2 p-4">
+    <p class="h5" id="barChartTitle">
+        Yearly CO2 emissions
+    </p>
+    <div class="row align-items-center mb-2" id="form-result-panel">
+        <div class="col-auto">
+            <label for="results_temporal_granularity" class="form-label w-100 text-start fz-0-8">Time granularity</label>
+            <select class="form-select light-select fz-0-8 h-30"
+                    id="results_temporal_granularity"
+                    name="results_temporal_granularity"
+                    onchange="drawBarResultChart()"
+                    _="on change set #barChartTitle.innerText to my.value.charAt(0).toUpperCase() + my.value.slice(1) + 'ly CO2 emissions'"
+            >
+                <option value="month">Month</option>
+                <option value="year" selected>Year</option>
+            </select>
+        </div>
+    </div>
+    <canvas id="barChart" style="max-height: 600px;"></canvas>
+</div>
