@@ -8,17 +8,17 @@
 </div>
 <div class="mb-3">
     <div class="accordion accordion-panel" id="accordionFormAdd">
-        {%for item in structure_dict.items %}
-        <div class="accordion-item {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" id="item-{{ item.category }}">
+        {%for form_section in form_sections %}
+        <div class="accordion-item {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" id="item-{{ form_section.category }}">
             <h2 class="accordion-header {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}">
-                <button class="accordion-button fz-1 {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ item.category }}_{{obj_type}}" aria-expanded="true" aria-controls="collapse_{{ item.category }}_{{obj_type}}">
-                    {{ item.header }}
+                <button class="accordion-button fz-1 {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ form_section.category }}_{{obj_type}}" aria-expanded="true" aria-controls="collapse_{{ form_section.category }}_{{obj_type}}">
+                    {{ form_section.header }}
                 </button>
             </h2>
-            <div id="collapse_{{ item.category }}_{{obj_type}}"
+            <div id="collapse_{{ form_section.category }}_{{obj_type}}"
                  class="accordion-collapse show" data-bs-parent="accordionFormAdd">
                 <div class="accordion-body">
-                    {% for field in item.fields %}
+                    {% for field in form_section.fields %}
                         {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
                     {% endfor %}
                 </div>
