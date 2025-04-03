@@ -40,7 +40,7 @@ describe("Test - Result panel", () => {
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
         cy.wait(500);
-        cy.get('#inner-panel-result').should('be.visible').find('div[onclick="hidePanelResult()"]')
+        cy.get('#result-panel-header').should('be.visible').find('div[onclick="hidePanelResult()"]')
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
         .realTouch('end', { x: 100, y: 400 });

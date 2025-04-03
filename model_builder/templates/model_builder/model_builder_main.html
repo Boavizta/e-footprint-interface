@@ -71,12 +71,11 @@
                             <div class="col-12 mt-2 justify-content-start text-start" id="add_server">
                                 <button class="w-75 btn btn-white dotted-border text-start fz-0-9 rounded-2"
                                         id="btn-add-server"
-                                hx-get="/model_builder/open-create-server-panel/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-
+                                        hx-get="/model_builder/open-create-server-panel/"
+                                        hx-target="#sidePanel"
+                                        hx-trigger="click"
+                                        hx-swap="innerHTML"
+                                        hx-disabled-elt="button"
                                 >
                                     <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-3"  width="14px" height="14px" alt="add icon" />
                                     Add server
@@ -102,12 +101,12 @@
 >
     <div class="col-12" id="btn-open-panel-result"
          hx-get="/model_builder/result-chart/"
-        hx-target="#inner-panel-result"
+        hx-target="#result-block"
         hx-swap="innerHTML"
         hx-trigger="click"
         hx-disabled-elt="button"
     >
-        <div class="row align-items-center">
+        <div class="row align-items-center" id="result-panel-header">
             <div class="col-4 text-start px-4 py-0">
                 <p class="h5 m-0"><b>Results</b></p>
             </div>
@@ -118,7 +117,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 bg-white" id="inner-panel-result">
+    <div class="col-12 bg-white" id="result-block">
     </div>
 </div>
 

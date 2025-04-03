@@ -14,6 +14,7 @@ from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 
+from model_builder.class_structure import efootprint_class_structure
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 from utils import htmx_render
@@ -136,7 +137,7 @@ def result_chart(request):
         return render_exception_modal(request, e)
 
     http_response = htmx_render(
-        request, "model_builder/result_panel.html", context={'model_web': model_web})
+        request, "model_builder/result/result_graph.html", context={'model_web': model_web})
 
     return http_response
 
@@ -194,3 +195,20 @@ def display_calculus_graph(request, efootprint_id, attr_name):
     })
 
 
+def sources(request):
+    model_web = ModelWeb(request.session)
+    flat_dict = model_web.flat_efootprint_objs_dict
+    flat_dict_object_filtered = []
+    for key_object_in_flat_dict in flat_dict.keys():
+        obj_structure = efootprint_class_structure(flat_dict[key_object_in_flat_dict].class_as_simple_str)
+        for attr_dict in obj_structure["numerical_attributes"]:
+            flat_dict_object_filtered.append({
+                'objectParentName':flat_dict[key_object_in_flat_dict].name,
+                'objectType':flat_dict[key_object_in_flat_dict].class_as_simple_str,
+                'attr_name': attr_dict.get('attr_name'),
+                'attr' : getattr(flat_dict[key_object_in_flat_dict], attr_dict.get('attr_name'))
+            })
+
+    return render(request, 'model_builder/result/source_table.html', {
+        'flat_dict_object_filtered': flat_dict_object_filtered
+    })

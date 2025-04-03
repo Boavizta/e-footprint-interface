@@ -1,0 +1,53 @@
+{% extends 'model_builder/result/result_panel.html' %}
+
+{% block menu_result_panel %}
+<div class="col-auto">
+    <button class="bg-transparent bg-transparent header-btn-result p-2 fz-1 me-2"
+                hx-post="{% url 'result-chart' %}"
+                hx-trigger="click"
+                hx-target="#result-block"
+                hx-swap="innerHTML"
+                hx-disabled-elt="button"
+    >
+        <b>Results</b>
+    </button>
+</div>
+<div class="col-auto">
+    <button class="bg-transparent bg-transparent result-active p-2 fz-1 me-2"
+                hx-post="{% url 'sources' %}"
+                hx-trigger="click"
+                hx-target="#result-block"
+                hx-swap="innerHTML"
+                hx-disabled-elt="button"
+    >
+        <b>Sources</b>
+    </button>
+</div>
+{% endblock %}
+
+{% block content_result %}
+<table class="table">
+<thead class="text-start">
+    <tr>
+        <th scope="col">Item name</th>
+        <th scope="col">Attribute of</th>
+        <th scope="col">Object Type</th>
+        <th scope="col">Value</th>
+        <th scope="col">Unit</th>
+        <th scope="col">Source</th>
+    </tr>
+</thead>
+<tbody class="text-start">
+    {% for item in flat_dict_object_filtered %}
+    <tr>
+        <th scope="row">{{ item.attr_name }}</th>
+        <td>{{ item.objectParentName }}</td>
+        <td>{{ item.objectType }}</td>
+        <td>{{ item.attr.value.magnitude }}</td>
+        <td>{{ item.attr.value.units }}</td>
+        <td>{{ item.attr.source.name }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{% endblock %}
