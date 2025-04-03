@@ -1,98 +1,96 @@
-{
-    "items": [
-        {
-            "category": "efootprint_classes_available",
-            "header": "UsagePattern",
-            "class": "",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "type_object_available",
-                    "name": "type_object_available",
-                    "options": [
-                        {
-                            "label": "UsagePatternFromForm",
-                            "value": "UsagePatternFromForm"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "category": "UsagePatternFromForm",
-            "header": "UsagePatternFromForm creation",
-            "fields": [
-                {
-                    "input_type": "str",
-                    "id": "start_date",
-                    "name": "start_date",
-                    "default": "2025-01-01"
-                },
-                {
-                    "input_type": "select",
-                    "id": "modeling_duration_unit",
-                    "name": "modeling_duration_unit",
-                    "selected": null,
-                    "options": [
-                        {
-                            "label": "month",
-                            "value": "month"
-                        },
-                        {
-                            "label": "year",
-                            "value": "year"
-                        }
-                    ]
-                },
-                {
-                    "input_type": "select",
-                    "id": "initial_usage_journey_volume_timespan",
-                    "name": "initial_usage_journey_volume_timespan",
-                    "selected": null,
-                    "options": [
-                        {
-                            "label": "day",
-                            "value": "day"
-                        },
-                        {
-                            "label": "month",
-                            "value": "month"
-                        },
-                        {
-                            "label": "year",
-                            "value": "year"
-                        }
-                    ]
-                },
-                {
-                    "input_type": "datalist",
-                    "id": "net_growth_rate_timespan",
-                    "name": "net_growth_rate_timespan",
-                    "selected": null,
-                    "options": null
-                },
-                {
-                    "input_type": "input",
-                    "id": "modeling_duration_value",
-                    "name": "modeling_duration_value",
-                    "unit": "",
-                    "default": 3
-                },
-                {
-                    "input_type": "input",
-                    "id": "initial_usage_journey_volume",
-                    "name": "initial_usage_journey_volume",
-                    "unit": "",
-                    "default": 10000
-                },
-                {
-                    "input_type": "input",
-                    "id": "net_growth_rate_in_percentage",
-                    "name": "net_growth_rate_in_percentage",
-                    "unit": "",
-                    "default": 10
-                }
-            ]
-        }
-    ]
-}
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "UsagePattern",
+        "class": "",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "type_object_available",
+                "name": "type_object_available",
+                "options": [
+                    {
+                        "label": "UsagePatternFromForm",
+                        "value": "UsagePatternFromForm"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "UsagePatternFromForm",
+        "header": "UsagePatternFromForm creation",
+        "fields": [
+            {
+                "input_type": "str",
+                "id": "start_date",
+                "name": "start_date",
+                "default": "2025-01-01"
+            },
+            {
+                "input_type": "select",
+                "id": "modeling_duration_unit",
+                "name": "modeling_duration_unit",
+                "selected": null,
+                "options": [
+                    {
+                        "label": "month",
+                        "value": "month"
+                    },
+                    {
+                        "label": "year",
+                        "value": "year"
+                    }
+                ]
+            },
+            {
+                "input_type": "select",
+                "id": "initial_usage_journey_volume_timespan",
+                "name": "initial_usage_journey_volume_timespan",
+                "selected": null,
+                "options": [
+                    {
+                        "label": "day",
+                        "value": "day"
+                    },
+                    {
+                        "label": "month",
+                        "value": "month"
+                    },
+                    {
+                        "label": "year",
+                        "value": "year"
+                    }
+                ]
+            },
+            {
+                "input_type": "datalist",
+                "id": "net_growth_rate_timespan",
+                "name": "net_growth_rate_timespan",
+                "selected": null,
+                "options": null
+            },
+            {
+                "input_type": "input",
+                "id": "modeling_duration_value",
+                "name": "modeling_duration_value",
+                "unit": "",
+                "default": 3
+            },
+            {
+                "input_type": "input",
+                "id": "initial_usage_journey_volume",
+                "name": "initial_usage_journey_volume",
+                "unit": "",
+                "default": 10000
+            },
+            {
+                "input_type": "input",
+                "id": "net_growth_rate_in_percentage",
+                "name": "net_growth_rate_in_percentage",
+                "unit": "",
+                "default": 10
+            }
+        ]
+    }
+]

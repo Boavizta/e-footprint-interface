@@ -30,17 +30,17 @@ def generate_generic_add_panel_http_response(request, object_type: str,  model_w
 
 
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
-    structure_dict, dynamic_form_data = generate_object_creation_structure(
+    form_sections, dynamic_form_data = generate_object_creation_structure(
         SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type", ["fixed_nb_of_instances"])
 
-    storage_structure_dict, storage_dynamic_form_data = generate_object_creation_structure(
+    storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
         [Storage], "Storage type", ["fixed_nb_of_instances"])
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
-                               'structure_dict': structure_dict,
+                               'form_sections': form_sections,
                                "dynamic_form_data": dynamic_form_data,
-                               "storage_structure_dict": storage_structure_dict,
+                               "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
                                "obj_type": "server",
                                "storage_obj_type": "storage",
@@ -65,7 +65,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
     http_response = render(
         request, "model_builder/side_panels/service_add.html", {
             "server_id": server_efootprint_id,
-            "structure_dict": services_dict,
+            "form_sections": services_dict,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "service",
             "header_name": "Add new service",
@@ -89,7 +89,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         if service.__name__ in request.session["system_data"].keys():
             available_job_classes.update(service.compatible_jobs())
 
-    structure_dict, dynamic_form_data = generate_object_creation_structure(list(available_job_classes), "Job type")
+    form_sections, dynamic_form_data = generate_object_creation_structure(list(available_job_classes), "Job type")
     additional_item = {
         "category": "job_creation_helper",
         "header": "Job creation helper",
@@ -110,7 +110,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             },
         ]
     }
-    structure_dict["items"] = [additional_item] + structure_dict["items"]
+    form_sections = [additional_item] + form_sections
 
     possible_job_types_per_service = {"direct_server_call": [{"label": "Manually defined job", "value": "Job"}]}
     possible_job_types_per_service.update({
@@ -137,7 +137,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
 
     http_response = render(
         request, "model_builder/side_panels/job_add.html", {
-            "structure_dict": structure_dict,
+            "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "job",
             "efootprint_id_of_parent_to_link_to": request.GET.get('efootprint_id_of_parent_to_link_to'),
@@ -168,7 +168,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
          "selected_efootprint_id": usage_journeys[0]["efootprint_id"]},
     ]
 
-    structure_dict, dynamic_form_data = generate_object_creation_structure([UsagePatternFromForm], "Usage pattern")
+    form_sections, dynamic_form_data = generate_object_creation_structure([UsagePatternFromForm], "Usage pattern")
 
     dynamic_lists = dynamic_form_data["dynamic_lists"]
     dynamic_lists[0]["list_value"] = {

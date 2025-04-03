@@ -1,203 +1,201 @@
-{
-    "items": [
-        {
-            "category": "efootprint_classes_available",
-            "header": "Job",
-            "class": "",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "type_object_available",
-                    "name": "type_object_available",
-                    "options": [
-                        {
-                            "label": "Job",
-                            "value": "Job"
-                        },
-                        {
-                            "label": "WebApplicationJob",
-                            "value": "WebApplicationJob"
-                        },
-                        {
-                            "label": "VideoStreamingJob",
-                            "value": "VideoStreamingJob"
-                        },
-                        {
-                            "label": "GenAIJob",
-                            "value": "GenAIJob"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "category": "Job",
-            "header": "Job creation",
-            "fields": [
-                {
-                    "input_type": "input",
-                    "id": "data_transferred",
-                    "name": "data_transferred",
-                    "unit": "kB",
-                    "default": 150
-                },
-                {
-                    "input_type": "input",
-                    "id": "data_stored",
-                    "name": "data_stored",
-                    "unit": "kB",
-                    "default": 100
-                },
-                {
-                    "input_type": "input",
-                    "id": "request_duration",
-                    "name": "request_duration",
-                    "unit": "s",
-                    "default": 1
-                },
-                {
-                    "input_type": "input",
-                    "id": "compute_needed",
-                    "name": "compute_needed",
-                    "unit": "cpu_core",
-                    "default": 0.1
-                },
-                {
-                    "input_type": "input",
-                    "id": "ram_needed",
-                    "name": "ram_needed",
-                    "unit": "MB",
-                    "default": 50
-                }
-            ]
-        },
-        {
-            "category": "WebApplicationJob",
-            "header": "WebApplicationJob creation",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "implementation_details",
-                    "name": "implementation_details",
-                    "selected": null,
-                    "options": [
-                        {
-                            "label": "aggregation-code-side",
-                            "value": "aggregation-code-side"
-                        },
-                        {
-                            "label": "default",
-                            "value": "default"
-                        },
-                        {
-                            "label": "mysql",
-                            "value": "mysql"
-                        },
-                        {
-                            "label": "no-index",
-                            "value": "no-index"
-                        },
-                        {
-                            "label": "no-pagination",
-                            "value": "no-pagination"
-                        },
-                        {
-                            "label": "orm-loop",
-                            "value": "orm-loop"
-                        }
-                    ]
-                },
-                {
-                    "input_type": "input",
-                    "id": "data_transferred",
-                    "name": "data_transferred",
-                    "unit": "MB",
-                    "default": 2.2
-                },
-                {
-                    "input_type": "input",
-                    "id": "data_stored",
-                    "name": "data_stored",
-                    "unit": "kB",
-                    "default": 100
-                }
-            ]
-        },
-        {
-            "category": "VideoStreamingJob",
-            "header": "VideoStreamingJob creation",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "resolution",
-                    "name": "resolution",
-                    "selected": null,
-                    "options": [
-                        {
-                            "label": "480p (640 x 480)",
-                            "value": "480p (640 x 480)"
-                        },
-                        {
-                            "label": "720p (1280 x 720)",
-                            "value": "720p (1280 x 720)"
-                        },
-                        {
-                            "label": "1080p (1920 x 1080)",
-                            "value": "1080p (1920 x 1080)"
-                        },
-                        {
-                            "label": "1440p (2560 x 1440)",
-                            "value": "1440p (2560 x 1440)"
-                        },
-                        {
-                            "label": "2K (2048 x 1080)",
-                            "value": "2K (2048 x 1080)"
-                        },
-                        {
-                            "label": "4K (3840 x 2160)",
-                            "value": "4K (3840 x 2160)"
-                        },
-                        {
-                            "label": "8K (7680 x 4320)",
-                            "value": "8K (7680 x 4320)"
-                        }
-                    ]
-                },
-                {
-                    "input_type": "input",
-                    "id": "video_duration",
-                    "name": "video_duration",
-                    "unit": "h",
-                    "default": 1
-                },
-                {
-                    "input_type": "input",
-                    "id": "refresh_rate",
-                    "name": "refresh_rate",
-                    "unit": "1/s",
-                    "default": 30.0
-                },
-                {
-                    "input_type": "input",
-                    "id": "data_stored",
-                    "name": "data_stored",
-                    "unit": "MB",
-                    "default": 0
-                }
-            ]
-        },
-        {
-            "category": "GenAIJob",
-            "header": "GenAIJob creation",
-            "fields": [
-                {
-                    "input_type": "input",
-                    "id": "output_token_count",
-                    "name": "output_token_count",
-                    "unit": "",
-                    "default": 1000
-                }
-            ]
-        }
-    ]
-}
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Job",
+        "class": "",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "type_object_available",
+                "name": "type_object_available",
+                "options": [
+                    {
+                        "label": "Job",
+                        "value": "Job"
+                    },
+                    {
+                        "label": "WebApplicationJob",
+                        "value": "WebApplicationJob"
+                    },
+                    {
+                        "label": "VideoStreamingJob",
+                        "value": "VideoStreamingJob"
+                    },
+                    {
+                        "label": "GenAIJob",
+                        "value": "GenAIJob"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Job",
+        "header": "Job creation",
+        "fields": [
+            {
+                "input_type": "input",
+                "id": "data_transferred",
+                "name": "data_transferred",
+                "unit": "kB",
+                "default": 150
+            },
+            {
+                "input_type": "input",
+                "id": "data_stored",
+                "name": "data_stored",
+                "unit": "kB",
+                "default": 100
+            },
+            {
+                "input_type": "input",
+                "id": "request_duration",
+                "name": "request_duration",
+                "unit": "s",
+                "default": 1
+            },
+            {
+                "input_type": "input",
+                "id": "compute_needed",
+                "name": "compute_needed",
+                "unit": "cpu_core",
+                "default": 0.1
+            },
+            {
+                "input_type": "input",
+                "id": "ram_needed",
+                "name": "ram_needed",
+                "unit": "MB",
+                "default": 50
+            }
+        ]
+    },
+    {
+        "category": "WebApplicationJob",
+        "header": "WebApplicationJob creation",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "implementation_details",
+                "name": "implementation_details",
+                "selected": null,
+                "options": [
+                    {
+                        "label": "aggregation-code-side",
+                        "value": "aggregation-code-side"
+                    },
+                    {
+                        "label": "default",
+                        "value": "default"
+                    },
+                    {
+                        "label": "mysql",
+                        "value": "mysql"
+                    },
+                    {
+                        "label": "no-index",
+                        "value": "no-index"
+                    },
+                    {
+                        "label": "no-pagination",
+                        "value": "no-pagination"
+                    },
+                    {
+                        "label": "orm-loop",
+                        "value": "orm-loop"
+                    }
+                ]
+            },
+            {
+                "input_type": "input",
+                "id": "data_transferred",
+                "name": "data_transferred",
+                "unit": "MB",
+                "default": 2.2
+            },
+            {
+                "input_type": "input",
+                "id": "data_stored",
+                "name": "data_stored",
+                "unit": "kB",
+                "default": 100
+            }
+        ]
+    },
+    {
+        "category": "VideoStreamingJob",
+        "header": "VideoStreamingJob creation",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "resolution",
+                "name": "resolution",
+                "selected": null,
+                "options": [
+                    {
+                        "label": "480p (640 x 480)",
+                        "value": "480p (640 x 480)"
+                    },
+                    {
+                        "label": "720p (1280 x 720)",
+                        "value": "720p (1280 x 720)"
+                    },
+                    {
+                        "label": "1080p (1920 x 1080)",
+                        "value": "1080p (1920 x 1080)"
+                    },
+                    {
+                        "label": "1440p (2560 x 1440)",
+                        "value": "1440p (2560 x 1440)"
+                    },
+                    {
+                        "label": "2K (2048 x 1080)",
+                        "value": "2K (2048 x 1080)"
+                    },
+                    {
+                        "label": "4K (3840 x 2160)",
+                        "value": "4K (3840 x 2160)"
+                    },
+                    {
+                        "label": "8K (7680 x 4320)",
+                        "value": "8K (7680 x 4320)"
+                    }
+                ]
+            },
+            {
+                "input_type": "input",
+                "id": "video_duration",
+                "name": "video_duration",
+                "unit": "h",
+                "default": 1
+            },
+            {
+                "input_type": "input",
+                "id": "refresh_rate",
+                "name": "refresh_rate",
+                "unit": "1/s",
+                "default": 30.0
+            },
+            {
+                "input_type": "input",
+                "id": "data_stored",
+                "name": "data_stored",
+                "unit": "MB",
+                "default": 0
+            }
+        ]
+    },
+    {
+        "category": "GenAIJob",
+        "header": "GenAIJob creation",
+        "fields": [
+            {
+                "input_type": "input",
+                "id": "output_token_count",
+                "name": "output_token_count",
+                "unit": "",
+                "default": 1000
+            }
+        ]
+    }
+]

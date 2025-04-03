@@ -98,7 +98,7 @@ def generate_object_creation_structure(available_efootprint_classes: list, heade
         ]
     }
 
-    structure_dict = {"items": [type_efootprint_classes_available]}
+    form_sections = [type_efootprint_classes_available]
 
     for index, efootprint_class in enumerate(available_efootprint_classes):
         class_structure = efootprint_class_structure(efootprint_class.__name__)
@@ -110,12 +110,12 @@ def generate_object_creation_structure(available_efootprint_classes: list, heade
                  if elt["input"] not in [elt["input"] for elt in dynamic_form_dict["dynamic_lists"]]])
 
 
-        structure_dict["items"].append({
+        form_sections.append({
             "category": efootprint_class.__name__,
             "header": f"{efootprint_class.__name__} creation",
             "fields": class_fields})
 
-    return structure_dict, dynamic_form_dict
+    return form_sections, dynamic_form_dict
 
 
 def generate_object_edition_structure(web_object, attributes_to_skip=None):

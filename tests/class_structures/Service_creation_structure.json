@@ -1,178 +1,176 @@
-{
-    "items": [
-        {
-            "category": "efootprint_classes_available",
-            "header": "Service",
-            "class": "",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "type_object_available",
-                    "name": "type_object_available",
-                    "options": [
-                        {
-                            "label": "WebApplication",
-                            "value": "WebApplication"
-                        },
-                        {
-                            "label": "VideoStreaming",
-                            "value": "VideoStreaming"
-                        },
-                        {
-                            "label": "GenAIModel",
-                            "value": "GenAIModel"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "category": "WebApplication",
-            "header": "WebApplication creation",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "technology",
-                    "name": "technology",
-                    "selected": null,
-                    "options": [
-                        {
-                            "label": "go-pgx",
-                            "value": "go-pgx"
-                        },
-                        {
-                            "label": "jvm-kotlin-spring",
-                            "value": "jvm-kotlin-spring"
-                        },
-                        {
-                            "label": "node-express-sequelize",
-                            "value": "node-express-sequelize"
-                        },
-                        {
-                            "label": "php-symfony",
-                            "value": "php-symfony"
-                        },
-                        {
-                            "label": "rust-actix-sqlx",
-                            "value": "rust-actix-sqlx"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "category": "VideoStreaming",
-            "header": "VideoStreaming creation",
-            "fields": [
-                {
-                    "input_type": "input",
-                    "id": "base_ram_consumption",
-                    "name": "base_ram_consumption",
-                    "unit": "GB",
-                    "default": 2
-                },
-                {
-                    "input_type": "input",
-                    "id": "bits_per_pixel",
-                    "name": "bits_per_pixel",
-                    "unit": "",
-                    "default": 0.1
-                },
-                {
-                    "input_type": "input",
-                    "id": "static_delivery_cpu_cost",
-                    "name": "static_delivery_cpu_cost",
-                    "unit": "cpu_core\u00b7s/GB",
-                    "default": 4.0
-                },
-                {
-                    "input_type": "input",
-                    "id": "ram_buffer_per_user",
-                    "name": "ram_buffer_per_user",
-                    "unit": "MB",
-                    "default": 50
-                }
-            ]
-        },
-        {
-            "category": "GenAIModel",
-            "header": "GenAIModel creation",
-            "fields": [
-                {
-                    "input_type": "select",
-                    "id": "provider",
-                    "name": "provider",
-                    "selected": null,
-                    "options": [
-                        {
-                            "label": "anthropic",
-                            "value": "anthropic"
-                        },
-                        {
-                            "label": "cohere",
-                            "value": "cohere"
-                        },
-                        {
-                            "label": "google",
-                            "value": "google"
-                        },
-                        {
-                            "label": "huggingface_hub",
-                            "value": "huggingface_hub"
-                        },
-                        {
-                            "label": "mistralai",
-                            "value": "mistralai"
-                        },
-                        {
-                            "label": "openai",
-                            "value": "openai"
-                        }
-                    ]
-                },
-                {
-                    "input_type": "datalist",
-                    "id": "model_name",
-                    "name": "model_name",
-                    "selected": null,
-                    "options": null
-                },
-                {
-                    "input_type": "input",
-                    "id": "nb_of_bits_per_parameter",
-                    "name": "nb_of_bits_per_parameter",
-                    "unit": "",
-                    "default": 16
-                },
-                {
-                    "input_type": "input",
-                    "id": "llm_memory_factor",
-                    "name": "llm_memory_factor",
-                    "unit": "",
-                    "default": 1.2
-                },
-                {
-                    "input_type": "input",
-                    "id": "gpu_latency_alpha",
-                    "name": "gpu_latency_alpha",
-                    "unit": "s",
-                    "default": 0.0
-                },
-                {
-                    "input_type": "input",
-                    "id": "gpu_latency_beta",
-                    "name": "gpu_latency_beta",
-                    "unit": "s",
-                    "default": 0.02
-                },
-                {
-                    "input_type": "input",
-                    "id": "bits_per_token",
-                    "name": "bits_per_token",
-                    "unit": "",
-                    "default": 24
-                }
-            ]
-        }
-    ]
-}
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Service",
+        "class": "",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "type_object_available",
+                "name": "type_object_available",
+                "options": [
+                    {
+                        "label": "WebApplication",
+                        "value": "WebApplication"
+                    },
+                    {
+                        "label": "VideoStreaming",
+                        "value": "VideoStreaming"
+                    },
+                    {
+                        "label": "GenAIModel",
+                        "value": "GenAIModel"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "WebApplication",
+        "header": "WebApplication creation",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "technology",
+                "name": "technology",
+                "selected": null,
+                "options": [
+                    {
+                        "label": "go-pgx",
+                        "value": "go-pgx"
+                    },
+                    {
+                        "label": "jvm-kotlin-spring",
+                        "value": "jvm-kotlin-spring"
+                    },
+                    {
+                        "label": "node-express-sequelize",
+                        "value": "node-express-sequelize"
+                    },
+                    {
+                        "label": "php-symfony",
+                        "value": "php-symfony"
+                    },
+                    {
+                        "label": "rust-actix-sqlx",
+                        "value": "rust-actix-sqlx"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "VideoStreaming",
+        "header": "VideoStreaming creation",
+        "fields": [
+            {
+                "input_type": "input",
+                "id": "base_ram_consumption",
+                "name": "base_ram_consumption",
+                "unit": "GB",
+                "default": 2
+            },
+            {
+                "input_type": "input",
+                "id": "bits_per_pixel",
+                "name": "bits_per_pixel",
+                "unit": "",
+                "default": 0.1
+            },
+            {
+                "input_type": "input",
+                "id": "static_delivery_cpu_cost",
+                "name": "static_delivery_cpu_cost",
+                "unit": "cpu_core\u00b7s/GB",
+                "default": 4.0
+            },
+            {
+                "input_type": "input",
+                "id": "ram_buffer_per_user",
+                "name": "ram_buffer_per_user",
+                "unit": "MB",
+                "default": 50
+            }
+        ]
+    },
+    {
+        "category": "GenAIModel",
+        "header": "GenAIModel creation",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "provider",
+                "name": "provider",
+                "selected": null,
+                "options": [
+                    {
+                        "label": "anthropic",
+                        "value": "anthropic"
+                    },
+                    {
+                        "label": "cohere",
+                        "value": "cohere"
+                    },
+                    {
+                        "label": "google",
+                        "value": "google"
+                    },
+                    {
+                        "label": "huggingface_hub",
+                        "value": "huggingface_hub"
+                    },
+                    {
+                        "label": "mistralai",
+                        "value": "mistralai"
+                    },
+                    {
+                        "label": "openai",
+                        "value": "openai"
+                    }
+                ]
+            },
+            {
+                "input_type": "datalist",
+                "id": "model_name",
+                "name": "model_name",
+                "selected": null,
+                "options": null
+            },
+            {
+                "input_type": "input",
+                "id": "nb_of_bits_per_parameter",
+                "name": "nb_of_bits_per_parameter",
+                "unit": "",
+                "default": 16
+            },
+            {
+                "input_type": "input",
+                "id": "llm_memory_factor",
+                "name": "llm_memory_factor",
+                "unit": "",
+                "default": 1.2
+            },
+            {
+                "input_type": "input",
+                "id": "gpu_latency_alpha",
+                "name": "gpu_latency_alpha",
+                "unit": "s",
+                "default": 0.0
+            },
+            {
+                "input_type": "input",
+                "id": "gpu_latency_beta",
+                "name": "gpu_latency_beta",
+                "unit": "s",
+                "default": 0.02
+            },
+            {
+                "input_type": "input",
+                "id": "bits_per_token",
+                "name": "bits_per_token",
+                "unit": "",
+                "default": 24
+            }
+        ]
+    }
+]
