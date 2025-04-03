@@ -1,0 +1,23 @@
+{% extends "model_builder/side_panels/components/side_panel_structure.html" %}
+
+{% block panel_body %}
+    {% block add_form %}
+        {% include "model_builder/side_panels/edit/edit_generic_form.html" %}
+    {% endblock %}
+
+    <div class="mb-3">
+            <p class="mt-4">
+                You will be able to edit all attributes of the created {{ obj_type }} later by clicking on the object card.
+            </p>
+        </div>
+
+    <div class="mb-3">
+        <button
+                id="btn-submit-form"
+                class="btn btn-primary rounded-pill w-100"
+                onclick="document.getElementById('sidePanelForm').requestSubmit()"
+        >
+            Save
+        </button>
+    </div>
+{% endblock %}

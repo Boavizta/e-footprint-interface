@@ -53,7 +53,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').clear();
         cy.get('#name').type(ujsOne);
         cy.get('#user_time_spent').type('10.1');
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('exist').find('div').should('not.exist');
         // @ts-ignore
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
@@ -64,7 +64,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').clear();
         cy.get('#name').type(ujsTwo);
         cy.get('#user_time_spent').type('20,2');
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('exist').find('form').should('not.exist');
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
         //on vérifie que les deux ujs ont bien été ajoutés
@@ -86,7 +86,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').clear();
         cy.get('#name').type(service);
         cy.get('#technology').select('php-symfony');
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+service.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         // Add jobs
@@ -94,7 +94,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').clear();
         cy.get('#name').type(jobOne);
         cy.get('#service').select(service);
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobOne.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
@@ -102,7 +102,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').clear();
         cy.get('#name').type(jobTwo);
         cy.get('#service').select(service);
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobTwo.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         // Add usagePattern

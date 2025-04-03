@@ -1,6 +1,6 @@
-{% extends "model_builder/side_panels/components/side_panel_structure.html" %}
+{% extends "model_builder/side_panels/add/add_panel__generic.html" %}
 
-{% block panel_body %}
+{% block add_form %}
     <form id="sidePanelForm" class="my-3"
             hx-post="{% url 'add-new-object' 'UsageJourney' %}"
             hx-target="#uj-list"
@@ -33,15 +33,6 @@
             <p>
                If you want to reuse steps that already exist in other usage journeys, select them in uj_steps.
             </p>
-        </div>
-
-        <div class="mb-3">
-            <button
-                    id="btn-submit-form"
-                    class="btn btn-primary rounded-pill w-100"
-                    type="submit">
-                Save
-            </button>
         </div>
     </form>
 {% endblock %}

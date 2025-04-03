@@ -1,6 +1,6 @@
 {% block edit_form_content %}
     {% for field in structure_dict.fields %}
-        {% include "model_builder/side_panels/dynamic_form_field.html" %}
+        {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
     {% endfor %}
 
     {% for attr in structure_dict.modeling_obj_attributes %}
