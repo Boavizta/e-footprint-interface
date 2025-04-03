@@ -4,8 +4,8 @@ from unittest.mock import patch
 from django.http import QueryDict
 from efootprint.logger import logger
 
+from model_builder.addition.views_addition import add_object
 from model_builder.views import result_chart
-from model_builder.views_addition import add_new_usage_pattern, add_new_service, add_new_job
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
@@ -35,12 +35,12 @@ class IntegrationTest(TestModelingBase):
             'name': ['2New usage pattern'],
         })
 
-        up_request = self.factory.post('/add_new_usage_pattern/', data=post_data)
+        up_request = self.factory.post('/add-object/UsagePattern', data=post_data)
         self._add_session_to_request(up_request, self.system_data)  # Attach a valid session
         len_system_up = len(up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"])
         new_up_id = up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"][-1]
 
-        response = add_new_usage_pattern(up_request)
+        response = add_object(up_request, "UsagePattern")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 1)
@@ -48,15 +48,16 @@ class IntegrationTest(TestModelingBase):
         logger.info(f"Creating service")
         post_data = QueryDict(mutable=True)
         post_data.update({'name': ['New service'],
+                          'efootprint_id_of_parent_to_link_to': ['uuid-Server-1'],
                           'type_object_available': ['WebApplication'],
                           'technology': ['php-symfony'], 'base_ram_consumption': ['2'],
                           'bits_per_pixel': ['0.1'], 'static_delivery_cpu_cost': ['4.0'],
                           'ram_buffer_per_user': ['50']}
         )
 
-        service_request = self.factory.post('/add_new_service/uuid-Server-1', data=post_data)
+        service_request = self.factory.post('/add-object/Service', data=post_data)
         self._add_session_to_request(service_request, up_request.session["system_data"])
-        response = add_new_service(service_request, 'uuid-Server-1')
+        response = add_object(service_request, "Service")
         service_id = next(iter(service_request.session["system_data"]["WebApplication"].keys()))
         self.assertEqual(response.status_code, 200)
 
@@ -64,15 +65,16 @@ class IntegrationTest(TestModelingBase):
         post_data = QueryDict(mutable=True)
         post_data.update(
         {'name': ['New job'], 'server': ['uuid-Server-1'],
+         'efootprint_id_of_parent_to_link_to': ['uuid-20-min-streaming-on-Youtube'],
          'service': [service_id],
          'type_object_available': ['WebApplicationJob'],
          'implementation_details': ['aggregation-code-side'],
          'data_transferred': ['150'], 'data_stored': ['100']}
         )
 
-        job_request = self.factory.post('/model_builder/add-new-job/uuid-20-min-streaming-on-Youtube/', data=post_data)
+        job_request = self.factory.post('/model_builder/Job/', data=post_data)
         self._add_session_to_request(job_request, service_request.session["system_data"])
-        response = add_new_job(job_request, "uuid-20-min-streaming-on-Youtube")
+        response = add_object(job_request, "Job")
         self.assertEqual(response.status_code, 200)
         new_job_id = next(iter(job_request.session["system_data"]["WebApplicationJob"].keys()))
 

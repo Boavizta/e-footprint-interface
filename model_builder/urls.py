@@ -1,6 +1,6 @@
 from django.urls import path
 
-import model_builder.views_addition
+import model_builder.addition.views_addition
 import model_builder.views_deletion
 import model_builder.edition.views_edition
 from . import views
@@ -9,9 +9,9 @@ urlpatterns = [
     path("", views.model_builder_main, name="model-builder"),
     path("<reboot>", views.model_builder_main, name="model-builder"),
     path("open-create-object-panel/<object_type>/",
-         model_builder.views_addition.open_create_object_panel, name="open-add-new-object-panel"),
+         model_builder.addition.views_addition.open_create_object_panel, name="open-add-new-object-panel"),
     path("add-object/<object_type>/",
-         model_builder.views_addition.add_object, name="add-new-object"),
+         model_builder.addition.views_addition.add_object, name="add-new-object"),
     path("open-edit-object-panel/<object_id>/", model_builder.edition.views_edition.open_edit_object_panel,
          name="open-edit-object-panel"),
     path("edit-object/<object_id>/", model_builder.edition.views_edition.edit_object, name="edit-object"),
