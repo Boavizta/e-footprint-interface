@@ -1,29 +1,34 @@
-{% block edit_form_content %}
-    {% for field in structure_dict.fields %}
-        {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
-    {% endfor %}
+<div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input type="text"
+           class="form-control p-2"
+           id="name" name="name"
+           value="{{ object_to_edit.name }}">
+</div>
+{% for field in structure_dict.fields %}
+    {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
+{% endfor %}
 
-    {% for attr in structure_dict.modeling_obj_attributes %}
-        <div class="col-12 mb-3">
-            <label for="{{ attr.attr_name }}" class="form-label">{{ attr.attr_name }}</label>
-            <select class="form-control p-2" id="{{ attr.attr_name }}" name="{{ attr.attr_name }}">
-                {% for obj in attr.existing_objects %}
-                     <option value="{{ obj.efootprint_id }}" {% if attr.attr_value.efootprint_id == obj.efootprint_id %}selected{% endif %}>{{ obj.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    {% endfor %}
+{% for attr in structure_dict.modeling_obj_attributes %}
+    <div class="col-12 mb-3">
+        <label for="{{ attr.attr_name }}" class="form-label">{{ attr.attr_name }}</label>
+        <select class="form-control p-2" id="{{ attr.attr_name }}" name="{{ attr.attr_name }}">
+            {% for obj in attr.existing_objects %}
+                 <option value="{{ obj.efootprint_id }}" {% if attr.attr_value.efootprint_id == obj.efootprint_id %}selected{% endif %}>{{ obj.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endfor %}
 
-    {% for attr in structure_dict.list_attributes %}
-        <div class="col-12 mb-3">
-            <label for="{{ attr.attr_name }}" class="form-label">{{ attr.attr_name }}</label>
-            <select class="form-control p-2" id="{{ attr.attr_name }}" name="{{ attr.attr_name }}" multiple>
-                {% for obj in attr.existing_objects %}
-                     <option value="{{ obj.efootprint_id }}" {% for obj_selected in attr.attr_value %}{% if obj_selected.efootprint_id == obj.efootprint_id %}selected{% endif %}{% endfor %} >{{ obj.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <hr>
-    {% endfor %}
-    {{ dynamic_form_data|json_script:"dynamic-form-data" }}
-{% endblock %}
+{% for attr in structure_dict.list_attributes %}
+    <div class="col-12 mb-3">
+        <label for="{{ attr.attr_name }}" class="form-label">{{ attr.attr_name }}</label>
+        <select class="form-control p-2" id="{{ attr.attr_name }}" name="{{ attr.attr_name }}" multiple>
+            {% for obj in attr.existing_objects %}
+                 <option value="{{ obj.efootprint_id }}" {% for obj_selected in attr.attr_value %}{% if obj_selected.efootprint_id == obj.efootprint_id %}selected{% endif %}{% endfor %} >{{ obj.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <hr>
+{% endfor %}
+{{ dynamic_form_data|json_script:"dynamic-form-data" }}
