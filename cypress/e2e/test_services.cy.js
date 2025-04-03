@@ -59,7 +59,7 @@ describe('Test services', () => {
         cy.get('#name').type(service);
         cy.get('#provider').select('openai');
         cy.get('#model_name').type('gpt-4');
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         cy.get('#model-builder-modal').should('be.visible');
         cy.get('#model-builder-modal').contains('but is asked');

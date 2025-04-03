@@ -1,6 +1,6 @@
-{% extends "model_builder/side_panels/components/side_panel_structure.html" %}
+{% extends "model_builder/side_panels/add/add_panel__generic.html" %}
 
-{% block panel_body %}
+{% block add_form %}
     <form id="sidePanelForm" class="my-3"
             hx-post="{% url 'add-new-object' 'UsagePattern' %}"
             hx-target="#up-list"
@@ -22,15 +22,6 @@
         <div class="accordion" id="accordionFormUsagePattern">
             {% include "model_builder/side_panels/usage_pattern/links_to_other_objects_form.html" %}
             {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" %}
-        </div>
-
-        <div class="mb-3">
-            <button
-                    id="btn-submit-form"
-                    class="btn btn-primary rounded-pill w-100"
-                    type="submit">
-                Save
-            </button>
         </div>
     </form>
 {% endblock %}

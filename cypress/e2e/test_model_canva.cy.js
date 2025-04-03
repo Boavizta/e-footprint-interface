@@ -16,13 +16,13 @@ describe("Test - Model Canva div", () => {
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').click();
         cy.get('#name').type(jobOne);
         cy.get('#service').select(service);
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#name').type(jobTwo);
         cy.get('#service').select(service);
-        cy.get('#sidePanel form').find('button[type="submit"]').click();
+        cy.get('#btn-submit-form').click();
 
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist');
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist');
