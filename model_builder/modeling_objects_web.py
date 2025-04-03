@@ -36,8 +36,8 @@ class EmptyExplainableObjectWeb:
 
 
 class ExplainableObjectWeb:
-    def __init__(self, explainable_quantity: ExplainableObject):
-        self.explainable_object = explainable_quantity
+    def __init__(self, explainable_object: ExplainableObject):
+        self.explainable_object = explainable_object
 
     def __getattr__(self, name):
         attr = getattr(self.explainable_object, name)
@@ -124,6 +124,14 @@ class ModelingObjectWeb:
     @property
     def efootprint_id(self):
         return self._modeling_obj.id
+
+    @property
+    def value(self):
+        return self.efootprint_id
+
+    @property
+    def label(self):
+        return self.name
 
     @property
     def web_id(self):

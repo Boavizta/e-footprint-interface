@@ -12,6 +12,13 @@
                     {{ option.label }}</option>
             {% endfor %}
         </select>
+    {% elif field.input_type == 'select-multiple' %}
+        <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
+        <select class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" multiple>
+            {% for option in field.options %}
+                 <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
     {% elif field.input_type == 'datalist' %}
         <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
         <input

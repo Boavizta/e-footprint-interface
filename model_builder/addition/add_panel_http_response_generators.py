@@ -3,19 +3,21 @@ from efootprint.core.hardware.storage import Storage
 from django.shortcuts import render
 from efootprint.core.usage.job import Job
 
-from model_builder.class_structure import generate_object_creation_structure, efootprint_class_structure
+from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices
+from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices, \
+    ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 
 
 def generate_generic_add_panel_http_response(request, object_type: str,  model_web: ModelWeb):
-    structure_dict = efootprint_class_structure(object_type, ModelWeb(request.session))
-    assert object_type in ["UsageJourney", "UsageJourneyStep"]
+    efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+        [efootprint_class], "", ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
     template_name_mapping = {
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
     template_name = template_name_mapping[object_type]
-    context_data = {"object_structure": structure_dict,
+    context_data = {"form_fields": form_sections[1]["fields"],
                     "header_name": "Add new " + template_name.replace("_", " "),
                     "new_object_name": "New " + template_name.replace("_", " ")}
     if request.GET.get('efootprint_id_of_parent_to_link_to'):
@@ -31,10 +33,10 @@ def generate_generic_add_panel_http_response(request, object_type: str,  model_w
 
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type", ["fixed_nb_of_instances"])
+        SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type", attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"])
 
     storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
-        [Storage], "Storage type", ["fixed_nb_of_instances"])
+        [Storage], "Storage type", ATTRIBUTES_TO_SKIP_IN_FORMS)
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
@@ -60,7 +62,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
 
     installable_services = server.installable_services()
     services_dict, dynamic_form_data = generate_object_creation_structure(
-        installable_services, "Services available for this server", ["gpu_latency_alpha", "gpu_latency_beta"])
+        installable_services, "Services available for this server", ["gpu_latency_alpha", "gpu_latency_beta", "server"])
 
     http_response = render(
         request, "model_builder/side_panels/service_add.html", {
@@ -89,7 +91,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         if service.__name__ in request.session["system_data"].keys():
             available_job_classes.update(service.compatible_jobs())
 
-    form_sections, dynamic_form_data = generate_object_creation_structure(list(available_job_classes), "Job type")
+    form_sections, dynamic_form_data = generate_object_creation_structure(list(available_job_classes), "Job type", attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["server", "service"])
     additional_item = {
         "category": "job_creation_helper",
         "header": "Job creation helper",
@@ -168,7 +170,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
          "selected_efootprint_id": usage_journeys[0]["efootprint_id"]},
     ]
 
-    form_sections, dynamic_form_data = generate_object_creation_structure([UsagePatternFromForm], "Usage pattern")
+    form_sections, dynamic_form_data = generate_object_creation_structure([UsagePatternFromForm], "Usage pattern", attributes_to_skip=["network", "country", "devices", "usage_journey"])
 
     dynamic_lists = dynamic_form_data["dynamic_lists"]
     dynamic_lists[0]["list_value"] = {
