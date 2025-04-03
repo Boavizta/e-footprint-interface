@@ -3,8 +3,8 @@ import os
 from efootprint.logger import logger
 from django.http import QueryDict
 
+from model_builder.addition.views_addition import add_object
 from model_builder.views import model_builder_main
-from model_builder.views_addition import add_new_usage_pattern, add_new_service, add_new_job
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
 from model_builder.edition.views_edition import edit_object, open_edit_object_panel
@@ -33,11 +33,11 @@ class TestViewsAddition(TestModelingBase):
             "initial_usage_journey_volume_timespan": ["year"],
             'name': ['2New usage pattern'],
         })
-        add_request = self.factory.post('/add_new_usage_pattern/', data=post_data)
+        add_request = self.factory.post('/add-object/UsagePattern', data=post_data)
         self._add_session_to_request(add_request, self.system_data)  # Attach a valid session
         len_system_up = len(add_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"])
 
-        response = add_new_usage_pattern(add_request)
+        response = add_object(add_request, "UsagePattern")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(add_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]),
@@ -87,22 +87,24 @@ class TestViewsAddition(TestModelingBase):
     def test_add_web_service_then_web_job(self):
         post_data = QueryDict(mutable=True)
         post_data.update({'name': ['New service'],
+                            'efootprint_id_of_parent_to_link_to': ['uuid-Server-1'],
                           'type_object_available': ['WebApplication'],
                           'technology': ['php-symfony'], 'base_ram_consumption': ['2'],
                           'bits_per_pixel': ['0.1'], 'static_delivery_cpu_cost': ['4.0'],
                           'ram_buffer_per_user': ['50']}
         )
 
-        request = self.factory.post('/add_new_service/uuid-Server-1', data=post_data)
+        request = self.factory.post('/add-object/Service', data=post_data)
         self._add_session_to_request(request, self.system_data)
 
-        response = add_new_service(request, 'uuid-Server-1')
+        response = add_object(request, 'Service')
         service_id = next(iter(request.session["system_data"]["WebApplication"].keys()))
         self.assertEqual(response.status_code, 200)
 
         post_data = QueryDict(mutable=True)
         post_data.update(
         {'name': ['New job'], 'server': ['uuid-Server-1'],
+         'efootprint_id_of_parent_to_link_to': ['uuid-20-min-streaming-on-Youtube'],
          'service': [service_id],
          'type_object_available': ['WebApplicationJob'],
          'implementation_details': ['aggregation-code-side'],
@@ -111,8 +113,8 @@ class TestViewsAddition(TestModelingBase):
          'ram_needed': ['50']}
         )
 
-        request = self.factory.post('/model_builder/add-new-job/uuid-20-min-streaming-on-Youtube/', data=post_data)
+        request = self.factory.post('/model_builder/add-object/Job', data=post_data)
         self._add_session_to_request(request, self.system_data)
 
-        response = add_new_job(request, "uuid-20-min-streaming-on-Youtube")
+        response = add_object(request, "Job")
         self.assertEqual(response.status_code, 200)
