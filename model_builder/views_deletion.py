@@ -5,7 +5,6 @@ from django.shortcuts import render
 from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger
 
-from model_builder.class_structure import efootprint_class_structure
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import JobWeb, UsageJourneyStepWeb, UsagePatternWeb, UsageJourneyWeb, ServerWeb
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
@@ -91,8 +90,7 @@ def delete_object(request, object_id):
             mutable_post['name'] = parent.name
             new_list_attribute_ids = [list_attribute.efootprint_id for list_attribute in parent.accordion_children
                                       if list_attribute.efootprint_id != duplicated_card.efootprint_id]
-            list_attribute_name = efootprint_class_structure(
-                parent.class_as_simple_str)["list_attributes"][0]["attr_name"]
+            list_attribute_name = duplicated_card.modeling_obj.contextual_modeling_obj_containers[0].attr_name_in_mod_obj_container
             mutable_post.setlist(f'{list_attribute_name}', new_list_attribute_ids)
             request.POST = mutable_post
             (partial_response_html, partial_ids_of_web_elements_with_lines_to_remove,
