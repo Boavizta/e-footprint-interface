@@ -2,7 +2,15 @@
 {% load static %}
 
 {% block panel_body %}
-    <form id="formServer">
+    <form id="sidePanelForm"
+        hx-post="{% url 'add-new-object' 'Server' %}"
+        hx-target="#server-list"
+        hx-swap="beforeend"
+        hx-disabled-elt="button"
+        hx-on::after-request="closeAndEmptySidePanel()"
+        hx-vals="js:{
+            storage_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
+        }">
         {% with helper_message="How to choose the server type?<br><br>“GPUserver” to get help on configuring servers for AI use.<br><br>“BoaviztaCloudServer” to get help on configuring servers for all other kinds of use.<br><br>“Server” to fully customize your server." %}
             {% include "model_builder/side_panels/add/dynamic_add_object_form_content.html" %}
         {% endwith %}
@@ -19,19 +27,11 @@
 
     <div class="mb-3">
         <button
-                id="btn-submit-form"
-                class="btn btn-primary rounded-pill w-100"
-                hx-post="{% url 'add-new-object' 'Server' %}"
-                hx-target="#server-list"
-                hx-swap="beforeend"
-                hx-disabled-elt="button"
-                hx-on::after-request="closeAndEmptySidePanel()"
-                hx-vals="js:{
-                    server: Object.fromEntries(new FormData(document.getElementById('formServer'))),
-                    storage: Object.fromEntries(new FormData(document.getElementById('formStorage')))
-                }"
-        >
-            Save
+                    id="btn-submit-form"
+                    class="btn btn-primary rounded-pill w-100"
+                    onclick="document.getElementById('sidePanelForm').requestSubmit()"
+            >
+                Save
         </button>
     </div>
 {% endblock %}

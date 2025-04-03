@@ -74,8 +74,10 @@ describe('Test de la page d\'accueil', () => {
         // Add server
         cy.get('#btn-add-server').click();
         cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
-        cy.get('#name').clear();
-        cy.get('#name').type(server);
+        cy.get('#sidePanelForm').within(() => {
+            cy.get('#name').clear();
+            cy.get('#name').type(server);
+        });
         cy.get('#type_object_available').select('BoaviztaCloudServer');
         cy.get('#instance_type').type('c4.8xlarge');
         cy.get('#btn-submit-form').click();

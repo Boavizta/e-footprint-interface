@@ -1,8 +1,13 @@
 import os
 from datetime import datetime
+from inspect import signature
+from typing import List, get_origin
 
 from django.http import QueryDict
 from django.shortcuts import render
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity, ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.builders.time_builders import create_hourly_usage_df_from_list
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceHourlyValues, SourceObject
 from efootprint.constants.units import u
@@ -10,56 +15,49 @@ from efootprint.logger import logger
 
 from model_builder.modeling_objects_web import ModelingObjectWeb
 from model_builder.model_web import ModelWeb
-from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT, efootprint_class_structure
+from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 
 
 def create_efootprint_obj_from_post_data(create_form_data: QueryDict, model_web: ModelWeb, object_type: str):
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
+    init_sig_params = signature(new_efootprint_obj_class.__init__).parameters
+    default_values = new_efootprint_obj_class.default_values()
 
     obj_creation_kwargs = {}
-    obj_structure = efootprint_class_structure(object_type)
-    obj_creation_kwargs["name"] = create_form_data["name"]
+    for attr_name in create_form_data.keys():
+        if attr_name not in init_sig_params:
+            continue
 
-    for attr_dict in obj_structure["numerical_attributes"]:
-        attr_value_in_list = create_form_data.getlist(f'{attr_dict["attr_name"]}')
-        if not attr_value_in_list:
-            logger.info(f"No value for {attr_dict['attr_name']} in {object_type} form. "
-                        f"Default value {new_efootprint_obj_class.default_values()[attr_dict['attr_name']]} "
-                        f"will be used.")
-        else:
-            obj_creation_kwargs[attr_dict["attr_name"]] = SourceValue(
-                float(attr_value_in_list[0]) * u(attr_dict["unit"]))
-
-    for attr_dict in obj_structure["hourly_quantities_attributes"]:
-        obj_creation_kwargs[attr_dict["attr_name"]] = SourceHourlyValues(
-            # Create hourly_usage_journey_starts from request_post_data with the startDate and values
-            create_hourly_usage_df_from_list(
-                [float(value) for value
-                 in create_form_data.getlist(f'list_{attr_dict["attr_name"]}')[0].split(",")],
-                start_date=datetime.strptime(
-                    create_form_data[f'date_{attr_dict["attr_name"]}'], "%Y-%m-%d"),
-                pint_unit=u.dimensionless
+        annotation = init_sig_params[attr_name].annotation
+        if get_origin(annotation) and get_origin(annotation) in (list, List):
+            # Exclude the empty initial value that is only here to make sure that the list is not empty and thus submitted
+            selected_values = [value for value in create_form_data.getlist(attr_name) if len(value) > 0]
+            obj_creation_kwargs[attr_name] = [
+                model_web.get_efootprint_object_from_efootprint_id(obj_id, object_type)
+                for obj_id in selected_values]
+        elif issubclass(annotation, str):
+            obj_creation_kwargs[attr_name] = create_form_data[attr_name]
+        elif issubclass(annotation, ExplainableQuantity):
+            obj_creation_kwargs[attr_name] = SourceValue(
+                float(create_form_data[attr_name]) * default_values[attr_name].value.units)
+        elif issubclass(annotation, ExplainableHourlyQuantities):
+            obj_creation_kwargs[attr_name] = SourceHourlyValues(
+                # Create hourly_usage_journey_starts from request_post_data with the startDate and values
+                create_hourly_usage_df_from_list(
+                    [float(value) for value
+                     in create_form_data.getlist(f'list_{attr_name}')[0].split(",")],
+                    start_date=datetime.strptime(
+                        create_form_data[f'date_{attr_name}'], "%Y-%m-%d"),
+                    pint_unit=u.dimensionless
+                )
             )
-        )
-
-    for str_attr in obj_structure["str_attributes"] + obj_structure["conditional_str_attributes"]:
-        str_attr_name = str_attr["attr_name"]
-        if f'{str_attr_name}' not in create_form_data.keys():
-            logger.info(f"No value for {str_attr_name} in {object_type} form. "
-                        f"Default value {new_efootprint_obj_class.default_values()[str_attr_name]} will be used.")
-        else:
-            obj_creation_kwargs[str_attr_name] = SourceObject(
-                create_form_data[f'{str_attr_name}'], source=Sources.USER_DATA)
-
-    for mod_obj in obj_structure["modeling_obj_attributes"]:
-        new_mod_obj_id = create_form_data[f'{mod_obj["attr_name"]}']
-        obj_to_add = model_web.get_efootprint_object_from_efootprint_id(new_mod_obj_id, mod_obj["object_type"])
-        obj_creation_kwargs[mod_obj["attr_name"]] = obj_to_add
-
-    for mod_obj in obj_structure["list_attributes"]:
-        obj_creation_kwargs[mod_obj["attr_name"]] = [
-            model_web.get_efootprint_object_from_efootprint_id(obj_id, mod_obj["object_type"])
-            for obj_id in create_form_data.getlist(f'{mod_obj["attr_name"]}')]
+        elif issubclass(annotation, ExplainableObject):
+            obj_creation_kwargs[attr_name] = SourceObject(
+                create_form_data[attr_name], source=Sources.USER_DATA)
+        elif issubclass(annotation, ModelingObject):
+            new_mod_obj_id = create_form_data[attr_name]
+            obj_to_add = model_web.get_efootprint_object_from_efootprint_id(new_mod_obj_id, object_type)
+            obj_creation_kwargs[attr_name] = obj_to_add
 
     new_efootprint_obj = new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
 

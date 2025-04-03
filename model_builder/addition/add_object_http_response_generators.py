@@ -38,17 +38,17 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
 
 
 def add_new_server(request, model_web: ModelWeb):
-    storage_qd = QueryDict(urlencode(json.loads(request.POST.get('storage', '{}')), doseq=True))
+    storage_data = json.loads(request.POST.get('storage_form_data'))
 
-    storage = create_efootprint_obj_from_post_data(storage_qd, model_web, "Storage")
+    storage = create_efootprint_obj_from_post_data(storage_data, model_web, "Storage")
     added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
-    server_dict = json.loads(request.POST.get('server', '{}'))
-    server_dict['storage'] = added_storage.efootprint_id
-    server_qd = QueryDict(urlencode(server_dict, doseq=True))
-    server_type = server_qd.get('type_object_available')
+    mutable_post = request.POST.copy()
+    mutable_post['storage'] = added_storage.efootprint_id
+    request.POST = mutable_post
+    server_type = request.POST.get('type_object_available')
 
-    new_efootprint_obj = create_efootprint_obj_from_post_data(server_qd, model_web, server_type)
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, server_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
     response = render(
         request, "model_builder/object_cards/server_card.html", {"server": added_obj})
