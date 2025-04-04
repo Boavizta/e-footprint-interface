@@ -7,8 +7,8 @@
     ],
     "dynamic_lists": [
         {
-            "input": "fixed_nb_of_instances",
-            "filter_by": "server_type",
+            "input_id": "Server_fixed_nb_of_instances",
+            "filter_by": "Server_server_type",
             "list_value": {
                 "autoscaling": [
                     "no value"
@@ -19,8 +19,32 @@
             }
         },
         {
-            "input": "instance_type",
-            "filter_by": "provider",
+            "input_id": "GPUServer_fixed_nb_of_instances",
+            "filter_by": "GPUServer_server_type",
+            "list_value": {
+                "autoscaling": [
+                    "no value"
+                ],
+                "serverless": [
+                    "no value"
+                ]
+            }
+        },
+        {
+            "input_id": "BoaviztaCloudServer_fixed_nb_of_instances",
+            "filter_by": "BoaviztaCloudServer_server_type",
+            "list_value": {
+                "autoscaling": [
+                    "no value"
+                ],
+                "serverless": [
+                    "no value"
+                ]
+            }
+        },
+        {
+            "input_id": "BoaviztaCloudServer_instance_type",
+            "filter_by": "BoaviztaCloudServer_provider",
             "list_value": {
                 "aws": [
                     "a1.medium",

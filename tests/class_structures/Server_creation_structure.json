@@ -31,7 +31,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "server_type",
+                "id": "Server_server_type",
                 "name": "server_type",
                 "selected": null,
                 "options": [
@@ -51,87 +51,93 @@
             },
             {
                 "input_type": "datalist",
-                "id": "fixed_nb_of_instances",
+                "id": "Server_fixed_nb_of_instances",
                 "name": "fixed_nb_of_instances",
                 "selected": null,
                 "options": null
             },
             {
                 "input_type": "input",
-                "id": "carbon_footprint_fabrication",
+                "id": "Server_carbon_footprint_fabrication",
                 "name": "carbon_footprint_fabrication",
                 "unit": "kg",
                 "default": 600
             },
             {
                 "input_type": "input",
-                "id": "power",
+                "id": "Server_power",
                 "name": "power",
                 "unit": "W",
                 "default": 300
             },
             {
                 "input_type": "input",
-                "id": "lifespan",
+                "id": "Server_lifespan",
                 "name": "lifespan",
                 "unit": "yr",
                 "default": 6
             },
             {
                 "input_type": "input",
-                "id": "idle_power",
+                "id": "Server_idle_power",
                 "name": "idle_power",
                 "unit": "W",
                 "default": 50
             },
             {
                 "input_type": "input",
-                "id": "ram",
+                "id": "Server_ram",
                 "name": "ram",
                 "unit": "GB",
                 "default": 128
             },
             {
                 "input_type": "input",
-                "id": "compute",
+                "id": "Server_compute",
                 "name": "compute",
                 "unit": "cpu_core",
                 "default": 24
             },
             {
                 "input_type": "input",
-                "id": "power_usage_effectiveness",
+                "id": "Server_power_usage_effectiveness",
                 "name": "power_usage_effectiveness",
                 "unit": "",
                 "default": 1.2
             },
             {
                 "input_type": "input",
-                "id": "average_carbon_intensity",
+                "id": "Server_average_carbon_intensity",
                 "name": "average_carbon_intensity",
                 "unit": "g/kWh",
                 "default": 100.0
             },
             {
                 "input_type": "input",
-                "id": "server_utilization_rate",
+                "id": "Server_server_utilization_rate",
                 "name": "server_utilization_rate",
                 "unit": "",
                 "default": 0.9
             },
             {
                 "input_type": "input",
-                "id": "base_ram_consumption",
+                "id": "Server_base_ram_consumption",
                 "name": "base_ram_consumption",
                 "unit": "GB",
                 "default": 0
             },
             {
                 "input_type": "input",
-                "id": "base_compute_consumption",
+                "id": "Server_base_compute_consumption",
                 "name": "base_compute_consumption",
                 "unit": "cpu_core",
                 "default": 0
+            },
+            {
+                "input_type": "select",
+                "id": "Server_storage",
+                "name": "storage",
+                "options": []
             }
         ]
     },
@@ -141,7 +147,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "server_type",
+                "id": "GPUServer_server_type",
                 "name": "server_type",
                 "selected": null,
                 "options": [
@@ -161,94 +167,100 @@
             },
             {
                 "input_type": "datalist",
-                "id": "fixed_nb_of_instances",
+                "id": "GPUServer_fixed_nb_of_instances",
                 "name": "fixed_nb_of_instances",
                 "selected": null,
                 "options": null
             },
             {
                 "input_type": "input",
-                "id": "gpu_power",
+                "id": "GPUServer_gpu_power",
                 "name": "gpu_power",
                 "unit": "W/gpu",
                 "default": 400.0
             },
             {
                 "input_type": "input",
-                "id": "gpu_idle_power",
+                "id": "GPUServer_gpu_idle_power",
                 "name": "gpu_idle_power",
                 "unit": "W/gpu",
                 "default": 50.0
             },
             {
                 "input_type": "input",
-                "id": "ram_per_gpu",
+                "id": "GPUServer_ram_per_gpu",
                 "name": "ram_per_gpu",
                 "unit": "GB/gpu",
                 "default": 80.0
             },
             {
                 "input_type": "input",
-                "id": "carbon_footprint_fabrication_per_gpu",
+                "id": "GPUServer_carbon_footprint_fabrication_per_gpu",
                 "name": "carbon_footprint_fabrication_per_gpu",
                 "unit": "kg/gpu",
                 "default": 150.0
             },
             {
                 "input_type": "input",
-                "id": "average_carbon_intensity",
+                "id": "GPUServer_average_carbon_intensity",
                 "name": "average_carbon_intensity",
                 "unit": "g/kWh",
                 "default": 100.0
             },
             {
                 "input_type": "input",
-                "id": "compute",
+                "id": "GPUServer_compute",
                 "name": "compute",
                 "unit": "gpu",
                 "default": 4
             },
             {
                 "input_type": "input",
-                "id": "carbon_footprint_fabrication_without_gpu",
+                "id": "GPUServer_carbon_footprint_fabrication_without_gpu",
                 "name": "carbon_footprint_fabrication_without_gpu",
                 "unit": "kg",
                 "default": 2500
             },
             {
                 "input_type": "input",
-                "id": "lifespan",
+                "id": "GPUServer_lifespan",
                 "name": "lifespan",
                 "unit": "yr",
                 "default": 6
             },
             {
                 "input_type": "input",
-                "id": "power_usage_effectiveness",
+                "id": "GPUServer_power_usage_effectiveness",
                 "name": "power_usage_effectiveness",
                 "unit": "",
                 "default": 1.2
             },
             {
                 "input_type": "input",
-                "id": "server_utilization_rate",
+                "id": "GPUServer_server_utilization_rate",
                 "name": "server_utilization_rate",
                 "unit": "",
                 "default": 1
             },
             {
                 "input_type": "input",
-                "id": "base_compute_consumption",
+                "id": "GPUServer_base_compute_consumption",
                 "name": "base_compute_consumption",
                 "unit": "gpu",
                 "default": 0
             },
             {
                 "input_type": "input",
-                "id": "base_ram_consumption",
+                "id": "GPUServer_base_ram_consumption",
                 "name": "base_ram_consumption",
                 "unit": "GB",
                 "default": 0
+            },
+            {
+                "input_type": "select",
+                "id": "GPUServer_storage",
+                "name": "storage",
+                "options": []
             }
         ]
     },
@@ -258,7 +270,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "provider",
+                "id": "BoaviztaCloudServer_provider",
                 "name": "provider",
                 "selected": null,
                 "options": [
@@ -282,7 +294,7 @@
             },
             {
                 "input_type": "select",
-                "id": "server_type",
+                "id": "BoaviztaCloudServer_server_type",
                 "name": "server_type",
                 "selected": null,
                 "options": [
@@ -302,66 +314,72 @@
             },
             {
                 "input_type": "datalist",
-                "id": "fixed_nb_of_instances",
+                "id": "BoaviztaCloudServer_fixed_nb_of_instances",
                 "name": "fixed_nb_of_instances",
                 "selected": null,
                 "options": null
             },
             {
                 "input_type": "datalist",
-                "id": "instance_type",
+                "id": "BoaviztaCloudServer_instance_type",
                 "name": "instance_type",
                 "selected": null,
                 "options": null
             },
             {
                 "input_type": "input",
-                "id": "lifespan",
+                "id": "BoaviztaCloudServer_lifespan",
                 "name": "lifespan",
                 "unit": "yr",
                 "default": 6
             },
             {
                 "input_type": "input",
-                "id": "idle_power",
+                "id": "BoaviztaCloudServer_idle_power",
                 "name": "idle_power",
                 "unit": "W",
                 "default": 0
             },
             {
                 "input_type": "input",
-                "id": "power_usage_effectiveness",
+                "id": "BoaviztaCloudServer_power_usage_effectiveness",
                 "name": "power_usage_effectiveness",
                 "unit": "",
                 "default": 1.2
             },
             {
                 "input_type": "input",
-                "id": "average_carbon_intensity",
+                "id": "BoaviztaCloudServer_average_carbon_intensity",
                 "name": "average_carbon_intensity",
                 "unit": "kg/kWh",
                 "default": 0.23
             },
             {
                 "input_type": "input",
-                "id": "server_utilization_rate",
+                "id": "BoaviztaCloudServer_server_utilization_rate",
                 "name": "server_utilization_rate",
                 "unit": "",
                 "default": 0.9
             },
             {
                 "input_type": "input",
-                "id": "base_ram_consumption",
+                "id": "BoaviztaCloudServer_base_ram_consumption",
                 "name": "base_ram_consumption",
                 "unit": "GB",
                 "default": 0
             },
             {
                 "input_type": "input",
-                "id": "base_compute_consumption",
+                "id": "BoaviztaCloudServer_base_compute_consumption",
                 "name": "base_compute_consumption",
                 "unit": "cpu_core",
                 "default": 0
+            },
+            {
+                "input_type": "select",
+                "id": "BoaviztaCloudServer_storage",
+                "name": "storage",
+                "options": []
             }
         ]
     }

@@ -59,9 +59,10 @@ class TestViewsEdition(TestModelingBase):
         model_web = ModelWeb(job_request.session)
         job = model_web.get_web_object_from_efootprint_id(new_job_id)
 
-        job_edition_structure, dynamic_form_data = generate_object_edition_structure(job)
+        job_edition_structure, dynamic_form_data = generate_object_edition_structure(
+            job, attributes_to_skip=["service"])
 
-        ref_job_edition_structure = {'fields': [{'id': 'implementation_details',
+        ref_job_edition_structure = {'fields': [{'id': 'WebApplicationJob_implementation_details',
              'input_type': 'select',
              'name': 'implementation_details',
              'options': [{'label': 'aggregation-code-side',
@@ -73,12 +74,12 @@ class TestViewsEdition(TestModelingBase):
                          {'label': 'orm-loop', 'value': 'orm-loop'}],
              'selected': "aggregation-code-side"},
             {'default': 150.0,
-             'id': 'data_transferred',
+             'id': 'WebApplicationJob_data_transferred',
              'input_type': 'input',
              'name': 'data_transferred',
              'unit': 'MB'},
             {'default': 100.0,
-             'id': 'data_stored',
+             'id': 'WebApplicationJob_data_stored',
              'input_type': 'input',
              'name': 'data_stored',
              'unit': 'kB'}],
