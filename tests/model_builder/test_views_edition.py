@@ -62,7 +62,9 @@ class TestViewsEdition(TestModelingBase):
         job_edition_structure, dynamic_form_data = generate_object_edition_structure(
             job, attributes_to_skip=["service"])
 
-        ref_job_edition_structure = {'fields': [{'id': 'WebApplicationJob_implementation_details',
+        ref_job_edition_structure = {'fields': [
+            {'name': 'name', 'input_type': 'str', 'id': 'WebApplicationJob_name'},
+            {'id': 'WebApplicationJob_implementation_details',
              'input_type': 'select',
              'name': 'implementation_details',
              'options': [{'label': 'aggregation-code-side',
@@ -82,13 +84,7 @@ class TestViewsEdition(TestModelingBase):
              'id': 'WebApplicationJob_data_stored',
              'input_type': 'input',
              'name': 'data_stored',
-             'unit': 'kB'}],
-             'list_attributes': [],
-             'modeling_obj_attributes': [
-                 {'attr_name': 'service',
-                  'attr_value': model_web.get_web_object_from_efootprint_id(service_id),
-                  'existing_objects': [model_web.get_web_object_from_efootprint_id(service_id)],
-        'object_type': 'WebApplication'}]
+             'unit': 'kB'}]
         }
 
         ref_dynamic_form_data = {'dynamic_lists': []}

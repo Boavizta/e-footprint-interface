@@ -30,10 +30,16 @@
         "header": "Server creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "Server_name",
+                "name": "name",
+                "default": "Server"
+            },
+            {
                 "input_type": "select",
                 "id": "Server_server_type",
                 "name": "server_type",
-                "selected": null,
+                "selected": "autoscaling",
                 "options": [
                     {
                         "label": "autoscaling",
@@ -48,13 +54,6 @@
                         "value": "serverless"
                     }
                 ]
-            },
-            {
-                "input_type": "datalist",
-                "id": "Server_fixed_nb_of_instances",
-                "name": "fixed_nb_of_instances",
-                "selected": null,
-                "options": null
             },
             {
                 "input_type": "input",
@@ -132,12 +131,6 @@
                 "name": "base_compute_consumption",
                 "unit": "cpu_core",
                 "default": 0
-            },
-            {
-                "input_type": "select",
-                "id": "Server_storage",
-                "name": "storage",
-                "options": []
             }
         ]
     },
@@ -146,10 +139,16 @@
         "header": "GPUServer creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "GPUServer_name",
+                "name": "name",
+                "default": "GPUServer"
+            },
+            {
                 "input_type": "select",
                 "id": "GPUServer_server_type",
                 "name": "server_type",
-                "selected": null,
+                "selected": "serverless",
                 "options": [
                     {
                         "label": "autoscaling",
@@ -164,13 +163,6 @@
                         "value": "serverless"
                     }
                 ]
-            },
-            {
-                "input_type": "datalist",
-                "id": "GPUServer_fixed_nb_of_instances",
-                "name": "fixed_nb_of_instances",
-                "selected": null,
-                "options": null
             },
             {
                 "input_type": "input",
@@ -255,12 +247,6 @@
                 "name": "base_ram_consumption",
                 "unit": "GB",
                 "default": 0
-            },
-            {
-                "input_type": "select",
-                "id": "GPUServer_storage",
-                "name": "storage",
-                "options": []
             }
         ]
     },
@@ -269,10 +255,16 @@
         "header": "BoaviztaCloudServer creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "BoaviztaCloudServer_name",
+                "name": "name",
+                "default": "BoaviztaCloudServer"
+            },
+            {
                 "input_type": "select",
                 "id": "BoaviztaCloudServer_provider",
                 "name": "provider",
-                "selected": null,
+                "selected": "scaleway",
                 "options": [
                     {
                         "label": "aws",
@@ -293,10 +285,17 @@
                 ]
             },
             {
+                "input_type": "datalist",
+                "id": "BoaviztaCloudServer_instance_type",
+                "name": "instance_type",
+                "selected": "ent1-s",
+                "options": null
+            },
+            {
                 "input_type": "select",
                 "id": "BoaviztaCloudServer_server_type",
                 "name": "server_type",
-                "selected": null,
+                "selected": "autoscaling",
                 "options": [
                     {
                         "label": "autoscaling",
@@ -311,20 +310,6 @@
                         "value": "serverless"
                     }
                 ]
-            },
-            {
-                "input_type": "datalist",
-                "id": "BoaviztaCloudServer_fixed_nb_of_instances",
-                "name": "fixed_nb_of_instances",
-                "selected": null,
-                "options": null
-            },
-            {
-                "input_type": "datalist",
-                "id": "BoaviztaCloudServer_instance_type",
-                "name": "instance_type",
-                "selected": null,
-                "options": null
             },
             {
                 "input_type": "input",
@@ -374,12 +359,6 @@
                 "name": "base_compute_consumption",
                 "unit": "cpu_core",
                 "default": 0
-            },
-            {
-                "input_type": "select",
-                "id": "BoaviztaCloudServer_storage",
-                "name": "storage",
-                "options": []
             }
         ]
     }

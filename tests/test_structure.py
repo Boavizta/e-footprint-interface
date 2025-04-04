@@ -27,8 +27,8 @@ from utils import EFOOTPRINT_COUNTRIES
 
 obj_creation_structure_dict = {
         "Service": SERVICE_CLASSES, "Server": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
-        "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": UsageJourney,
-        "UsageJourneyStep": UsageJourneyStep}
+        "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
+        "UsageJourneyStep": [UsageJourneyStep]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -50,12 +50,12 @@ class TestsClassStructure(TestCase):
             model_web = MagicMock()
             @dataclass
             class MockModelingObjectWeb:
-                efootprint_id: str
+                id: str
                 name: str
 
-            option1 = MockModelingObjectWeb(efootprint_id="efootprint_id1", name="option1")
-            option2 = MockModelingObjectWeb(efootprint_id="efootprint_id2", name="option2")
-            model_web.get_web_objects_from_efootprint_type.side_effect = lambda x: [option1, option2]
+            option1 = MockModelingObjectWeb(id="efootprint_id1", name="option1")
+            option2 = MockModelingObjectWeb(id="efootprint_id2", name="option2")
+            model_web.get_efootprint_objects_from_efootprint_type.side_effect = lambda x: [option1, option2]
             structure, dynamic_data = generate_object_creation_structure(
                 class_list, class_category_name, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS, model_web=model_web)
             self._test_dict_equal_to_ref(structure, tmp_structure_filepath)

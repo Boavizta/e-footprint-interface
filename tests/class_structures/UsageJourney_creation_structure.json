@@ -1,0 +1,48 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "UsageJourney",
+        "class": "",
+        "fields": [
+            {
+                "input_type": "select",
+                "id": "type_object_available",
+                "name": "type_object_available",
+                "options": [
+                    {
+                        "label": "UsageJourney",
+                        "value": "UsageJourney"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "UsageJourney",
+        "header": "UsageJourney creation",
+        "fields": [
+            {
+                "input_type": "str",
+                "id": "UsageJourney_name",
+                "name": "name",
+                "default": "UsageJourney"
+            },
+            {
+                "input_type": "select-multiple",
+                "id": "UsageJourney_uj_steps",
+                "name": "uj_steps",
+                "selected": [],
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -34,6 +34,12 @@
         "header": "Job creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "Job_name",
+                "name": "name",
+                "default": "Job"
+            },
+            {
                 "input_type": "input",
                 "id": "Job_data_transferred",
                 "name": "data_transferred",
@@ -67,12 +73,6 @@
                 "name": "ram_needed",
                 "unit": "MB",
                 "default": 50
-            },
-            {
-                "input_type": "select",
-                "id": "Job_server",
-                "name": "server",
-                "options": []
             }
         ]
     },
@@ -81,10 +81,30 @@
         "header": "WebApplicationJob creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "WebApplicationJob_name",
+                "name": "name",
+                "default": "WebApplicationJob"
+            },
+            {
+                "input_type": "input",
+                "id": "WebApplicationJob_data_transferred",
+                "name": "data_transferred",
+                "unit": "MB",
+                "default": 2.2
+            },
+            {
+                "input_type": "input",
+                "id": "WebApplicationJob_data_stored",
+                "name": "data_stored",
+                "unit": "kB",
+                "default": 100
+            },
+            {
                 "input_type": "select",
                 "id": "WebApplicationJob_implementation_details",
                 "name": "implementation_details",
-                "selected": null,
+                "selected": "default",
                 "options": [
                     {
                         "label": "aggregation-code-side",
@@ -111,26 +131,6 @@
                         "value": "orm-loop"
                     }
                 ]
-            },
-            {
-                "input_type": "input",
-                "id": "WebApplicationJob_data_transferred",
-                "name": "data_transferred",
-                "unit": "MB",
-                "default": 2.2
-            },
-            {
-                "input_type": "input",
-                "id": "WebApplicationJob_data_stored",
-                "name": "data_stored",
-                "unit": "kB",
-                "default": 100
-            },
-            {
-                "input_type": "select",
-                "id": "WebApplicationJob_service",
-                "name": "service",
-                "options": []
             }
         ]
     },
@@ -139,10 +139,16 @@
         "header": "VideoStreamingJob creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "VideoStreamingJob_name",
+                "name": "name",
+                "default": "VideoStreamingJob"
+            },
+            {
                 "input_type": "select",
                 "id": "VideoStreamingJob_resolution",
                 "name": "resolution",
-                "selected": null,
+                "selected": "1080p (1920 x 1080)",
                 "options": [
                     {
                         "label": "480p (640 x 480)",
@@ -194,12 +200,6 @@
                 "name": "data_stored",
                 "unit": "MB",
                 "default": 0
-            },
-            {
-                "input_type": "select",
-                "id": "VideoStreamingJob_service",
-                "name": "service",
-                "options": []
             }
         ]
     },
@@ -208,17 +208,17 @@
         "header": "GenAIJob creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "GenAIJob_name",
+                "name": "name",
+                "default": "GenAIJob"
+            },
+            {
                 "input_type": "input",
                 "id": "GenAIJob_output_token_count",
                 "name": "output_token_count",
                 "unit": "",
                 "default": 1000
-            },
-            {
-                "input_type": "select",
-                "id": "GenAIJob_service",
-                "name": "service",
-                "options": []
             }
         ]
     }

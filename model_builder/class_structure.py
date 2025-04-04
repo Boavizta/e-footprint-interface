@@ -65,7 +65,7 @@ def generate_object_edition_structure(web_object, attributes_to_skip=None):
         attributes_to_skip = []
 
     object_fields, dynamic_lists = generate_dynamic_form(
-        web_object.efootprint_class_str, web_object.__dict__, attributes_to_skip, web_object.model_web)
+        web_object.class_as_simple_str, web_object.modeling_obj.__dict__, attributes_to_skip, web_object.model_web)
 
     return {"fields": object_fields}, {"dynamic_lists": dynamic_lists}
 
@@ -101,8 +101,9 @@ def generate_dynamic_form(
                 "name": attr_name,
                 "selected": selected,
                 "options": [
-                    {"label": attr_value.name, "value": attr_value.efootprint_id}
-                    for attr_value in model_web.get_web_objects_from_efootprint_type(list_attribute_object_type_str)]
+                    {"label": attr_value.name, "value": attr_value.id}
+                    for attr_value in model_web.get_efootprint_objects_from_efootprint_type(
+                        list_attribute_object_type_str)]
             })
         elif issubclass(annotation, str):
             structure_fields.append({
@@ -159,7 +160,7 @@ def generate_dynamic_form(
                 )
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
-            selection_options = model_web.get_web_objects_from_efootprint_type(mod_obj_attribute_object_type_str)
+            selection_options = model_web.get_efootprint_objects_from_efootprint_type(mod_obj_attribute_object_type_str)
             if attr_name in default_values.keys():
                 selected = default_values[attr_name]
             else:
@@ -168,9 +169,9 @@ def generate_dynamic_form(
                 "input_type": "select",
                 "id": id_prefix + "_" + attr_name,
                 "name": attr_name,
-                "selected": selected.efootprint_id,
+                "selected": selected.id,
                 "options": [
-                    {"label": attr_value.name, "value": attr_value.efootprint_id} for attr_value in selection_options]
+                    {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
             })
 
     return structure_fields, dynamic_lists
