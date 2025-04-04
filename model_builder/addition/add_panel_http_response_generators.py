@@ -122,7 +122,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     )
     dynamic_form_data["dynamic_selects"] = [
         {
-            "input": "service",
+            "input_id": "service",
             "filter_by": "server",
             "list_value": {
                 server.efootprint_id:
@@ -132,7 +132,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             }
         },
         {
-            "input": "type_object_available",
+            "input_id": "type_object_available",
             "filter_by": "service",
             "list_value": possible_job_types_per_service
         }]
