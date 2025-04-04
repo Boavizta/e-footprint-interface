@@ -18,22 +18,22 @@ describe('Test services', () => {
 
         // get ram_per_gpu and compute inside the #collapse_GPUServer
         cy.get('#collapse_GPUServer_server').within(() => {
-            cy.get('#ram_per_gpu').focus().type('{selectall}{backspace}512').blur();
-            cy.get('#compute').focus().type('{selectall}{backspace}10').blur();
+            cy.get('#GPUServer_ram_per_gpu').focus().type('{selectall}{backspace}512').blur();
+            cy.get('#GPUServer_compute').focus().type('{selectall}{backspace}10').blur();
         });
         cy.get('#btn-submit-form').click();
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
         cy.get('#name').type(service);
-        cy.get('#provider').select(providerName1);
-        cy.get('#model_name').type(modelName1);
+        cy.get('#GenAIModel_provider').select(providerName1);
+        cy.get('#GenAIModel_model_name').type(modelName1);
         cy.get('#btn-submit-form').click();
 
         //edit du service
         cy.get('button').contains(service).click();
 
-        cy.get('#provider').select(providerName2);
-        cy.get('#model_name').clear().type(modelName2);
+        cy.get('#GenAIModel_provider').select(providerName2);
+        cy.get('#GenAIModel_model_name').clear().type(modelName2);
         cy.get('#btn-submit-form').click();
 
         cy.get('#sidePanel').should('not.contain.html');
@@ -57,8 +57,8 @@ describe('Test services', () => {
         cy.get('button[data-bs-target^="#flush-"][data-bs-target$="'+server.replaceAll(' ', '-')+'"]').click();
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
         cy.get('#name').type(service);
-        cy.get('#provider').select('openai');
-        cy.get('#model_name').type('gpt-4');
+        cy.get('#GenAIModel_provider').select('openai');
+        cy.get('#GenAIModel_model_name').type('gpt-4');
         cy.get('#btn-submit-form').click();
 
         cy.get('#model-builder-modal').should('be.visible');

@@ -3,6 +3,8 @@ import re
 import json
 from unittest import TestCase
 import sys
+from unittest.mock import MagicMock
+
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -40,7 +42,10 @@ class TestsClassStructure(TestCase):
             print(class_category_name)
             tmp_structure_filepath = os.path.join(
                 root_dir, "class_structures", f"{class_category_name}_creation_structure_tmp.json")
-            structure, dynamic_data = generate_object_creation_structure(class_list, header=class_category_name)
+            model_web = MagicMock()
+            model_web.get_web_objects_from_efootprint_type.side_effect = lambda x: []
+            structure, dynamic_data = generate_object_creation_structure(
+                class_list, class_category_name, model_web=model_web)
             self._test_dict_equal_to_ref(structure, tmp_structure_filepath)
             tmp_dynamic_data_filepath = os.path.join(
                 root_dir, "class_structures", f"{class_category_name}_creation_dynamic_data_tmp.json")

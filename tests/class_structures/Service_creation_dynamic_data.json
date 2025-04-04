@@ -7,8 +7,8 @@
     ],
     "dynamic_lists": [
         {
-            "input": "model_name",
-            "filter_by": "provider",
+            "input_id": "GenAIModel_model_name",
+            "filter_by": "GenAIModel_provider",
             "list_value": {
                 "anthropic": [
                     "claude-2.0",

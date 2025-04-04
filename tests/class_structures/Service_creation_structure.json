@@ -31,7 +31,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "technology",
+                "id": "WebApplication_technology",
                 "name": "technology",
                 "selected": null,
                 "options": [
@@ -56,6 +56,12 @@
                         "value": "rust-actix-sqlx"
                     }
                 ]
+            },
+            {
+                "input_type": "select",
+                "id": "WebApplication_server",
+                "name": "server",
+                "options": []
             }
         ]
     },
@@ -65,31 +71,37 @@
         "fields": [
             {
                 "input_type": "input",
-                "id": "base_ram_consumption",
+                "id": "VideoStreaming_base_ram_consumption",
                 "name": "base_ram_consumption",
                 "unit": "GB",
                 "default": 2
             },
             {
                 "input_type": "input",
-                "id": "bits_per_pixel",
+                "id": "VideoStreaming_bits_per_pixel",
                 "name": "bits_per_pixel",
                 "unit": "",
                 "default": 0.1
             },
             {
                 "input_type": "input",
-                "id": "static_delivery_cpu_cost",
+                "id": "VideoStreaming_static_delivery_cpu_cost",
                 "name": "static_delivery_cpu_cost",
                 "unit": "cpu_core\u00b7s/GB",
                 "default": 4.0
             },
             {
                 "input_type": "input",
-                "id": "ram_buffer_per_user",
+                "id": "VideoStreaming_ram_buffer_per_user",
                 "name": "ram_buffer_per_user",
                 "unit": "MB",
                 "default": 50
+            },
+            {
+                "input_type": "select",
+                "id": "VideoStreaming_server",
+                "name": "server",
+                "options": []
             }
         ]
     },
@@ -99,7 +111,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "provider",
+                "id": "GenAIModel_provider",
                 "name": "provider",
                 "selected": null,
                 "options": [
@@ -131,45 +143,51 @@
             },
             {
                 "input_type": "datalist",
-                "id": "model_name",
+                "id": "GenAIModel_model_name",
                 "name": "model_name",
                 "selected": null,
                 "options": null
             },
             {
                 "input_type": "input",
-                "id": "nb_of_bits_per_parameter",
+                "id": "GenAIModel_nb_of_bits_per_parameter",
                 "name": "nb_of_bits_per_parameter",
                 "unit": "",
                 "default": 16
             },
             {
                 "input_type": "input",
-                "id": "llm_memory_factor",
+                "id": "GenAIModel_llm_memory_factor",
                 "name": "llm_memory_factor",
                 "unit": "",
                 "default": 1.2
             },
             {
                 "input_type": "input",
-                "id": "gpu_latency_alpha",
+                "id": "GenAIModel_gpu_latency_alpha",
                 "name": "gpu_latency_alpha",
                 "unit": "s",
                 "default": 0.0
             },
             {
                 "input_type": "input",
-                "id": "gpu_latency_beta",
+                "id": "GenAIModel_gpu_latency_beta",
                 "name": "gpu_latency_beta",
                 "unit": "s",
                 "default": 0.02
             },
             {
                 "input_type": "input",
-                "id": "bits_per_token",
+                "id": "GenAIModel_bits_per_token",
                 "name": "bits_per_token",
                 "unit": "",
                 "default": 24
+            },
+            {
+                "input_type": "select",
+                "id": "GenAIModel_server",
+                "name": "server",
+                "options": []
             }
         ]
     }

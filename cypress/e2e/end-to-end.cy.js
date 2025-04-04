@@ -52,7 +52,7 @@ describe('Test de la page d\'accueil', () => {
         //erase all the text in the input with id name
         cy.get('#name').clear();
         cy.get('#name').type(ujsOne);
-        cy.get('#user_time_spent').type('10.1');
+        cy.get('#UsageJourneyStep_user_time_spent').type('10.1');
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('exist').find('div').should('not.exist');
         // @ts-ignore
@@ -63,7 +63,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
         cy.get('#name').clear();
         cy.get('#name').type(ujsTwo);
-        cy.get('#user_time_spent').type('20,2');
+        cy.get('#UsageJourneyStep_user_time_spent').type('20,2');
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('exist').find('form').should('not.exist');
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
@@ -74,20 +74,18 @@ describe('Test de la page d\'accueil', () => {
         // Add server
         cy.get('#btn-add-server').click();
         cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
-        cy.get('#sidePanelForm').within(() => {
-            cy.get('#name').clear();
-            cy.get('#name').type(server);
-        });
+        cy.get('#name').clear();
+        cy.get('#name').type(server);
         cy.get('#type_object_available').select('BoaviztaCloudServer');
-        cy.get('#instance_type').type('c4.8xlarge');
+        cy.get('#BoaviztaCloudServer_instance_type').type('c4.8xlarge');
         cy.get('#btn-submit-form').click();
 
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         // get the button with attribute hx-get begin with '/model_builder/open-create-service-panel/' and ended with 'Test-E2E-Server'
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
-        cy.get('#sidePanelForm #name').clear();
-        cy.get('#sidePanelForm #name').type(service);
-        cy.get('#technology').select('php-symfony');
+        cy.get('#name').clear();
+        cy.get('#name').type(service);
+        cy.get('#WebApplication_technology').select('php-symfony');
         cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+service.replaceAll(' ', '-')+'/"]').should('be.visible');
 

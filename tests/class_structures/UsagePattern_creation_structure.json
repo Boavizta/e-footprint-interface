@@ -23,13 +23,13 @@
         "fields": [
             {
                 "input_type": "str",
-                "id": "start_date",
+                "id": "UsagePatternFromForm_start_date",
                 "name": "start_date",
                 "default": "2025-01-01"
             },
             {
                 "input_type": "select",
-                "id": "modeling_duration_unit",
+                "id": "UsagePatternFromForm_modeling_duration_unit",
                 "name": "modeling_duration_unit",
                 "selected": null,
                 "options": [
@@ -45,7 +45,7 @@
             },
             {
                 "input_type": "select",
-                "id": "initial_usage_journey_volume_timespan",
+                "id": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
                 "name": "initial_usage_journey_volume_timespan",
                 "selected": null,
                 "options": [
@@ -65,31 +65,55 @@
             },
             {
                 "input_type": "datalist",
-                "id": "net_growth_rate_timespan",
+                "id": "UsagePatternFromForm_net_growth_rate_timespan",
                 "name": "net_growth_rate_timespan",
                 "selected": null,
                 "options": null
             },
             {
                 "input_type": "input",
-                "id": "modeling_duration_value",
+                "id": "UsagePatternFromForm_modeling_duration_value",
                 "name": "modeling_duration_value",
                 "unit": "",
                 "default": 3
             },
             {
                 "input_type": "input",
-                "id": "initial_usage_journey_volume",
+                "id": "UsagePatternFromForm_initial_usage_journey_volume",
                 "name": "initial_usage_journey_volume",
                 "unit": "",
                 "default": 10000
             },
             {
                 "input_type": "input",
-                "id": "net_growth_rate_in_percentage",
+                "id": "UsagePatternFromForm_net_growth_rate_in_percentage",
                 "name": "net_growth_rate_in_percentage",
                 "unit": "",
                 "default": 10
+            },
+            {
+                "input_type": "select",
+                "id": "UsagePatternFromForm_usage_journey",
+                "name": "usage_journey",
+                "options": []
+            },
+            {
+                "input_type": "select",
+                "id": "UsagePatternFromForm_network",
+                "name": "network",
+                "options": []
+            },
+            {
+                "input_type": "select",
+                "id": "UsagePatternFromForm_country",
+                "name": "country",
+                "options": []
+            },
+            {
+                "input_type": "select-multiple",
+                "id": "UsagePatternFromForm_devices",
+                "name": "devices",
+                "options": []
             }
         ]
     }

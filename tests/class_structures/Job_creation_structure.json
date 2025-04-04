@@ -35,38 +35,44 @@
         "fields": [
             {
                 "input_type": "input",
-                "id": "data_transferred",
+                "id": "Job_data_transferred",
                 "name": "data_transferred",
                 "unit": "kB",
                 "default": 150
             },
             {
                 "input_type": "input",
-                "id": "data_stored",
+                "id": "Job_data_stored",
                 "name": "data_stored",
                 "unit": "kB",
                 "default": 100
             },
             {
                 "input_type": "input",
-                "id": "request_duration",
+                "id": "Job_request_duration",
                 "name": "request_duration",
                 "unit": "s",
                 "default": 1
             },
             {
                 "input_type": "input",
-                "id": "compute_needed",
+                "id": "Job_compute_needed",
                 "name": "compute_needed",
                 "unit": "cpu_core",
                 "default": 0.1
             },
             {
                 "input_type": "input",
-                "id": "ram_needed",
+                "id": "Job_ram_needed",
                 "name": "ram_needed",
                 "unit": "MB",
                 "default": 50
+            },
+            {
+                "input_type": "select",
+                "id": "Job_server",
+                "name": "server",
+                "options": []
             }
         ]
     },
@@ -76,7 +82,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "implementation_details",
+                "id": "WebApplicationJob_implementation_details",
                 "name": "implementation_details",
                 "selected": null,
                 "options": [
@@ -108,17 +114,23 @@
             },
             {
                 "input_type": "input",
-                "id": "data_transferred",
+                "id": "WebApplicationJob_data_transferred",
                 "name": "data_transferred",
                 "unit": "MB",
                 "default": 2.2
             },
             {
                 "input_type": "input",
-                "id": "data_stored",
+                "id": "WebApplicationJob_data_stored",
                 "name": "data_stored",
                 "unit": "kB",
                 "default": 100
+            },
+            {
+                "input_type": "select",
+                "id": "WebApplicationJob_service",
+                "name": "service",
+                "options": []
             }
         ]
     },
@@ -128,7 +140,7 @@
         "fields": [
             {
                 "input_type": "select",
-                "id": "resolution",
+                "id": "VideoStreamingJob_resolution",
                 "name": "resolution",
                 "selected": null,
                 "options": [
@@ -164,24 +176,30 @@
             },
             {
                 "input_type": "input",
-                "id": "video_duration",
+                "id": "VideoStreamingJob_video_duration",
                 "name": "video_duration",
                 "unit": "h",
                 "default": 1
             },
             {
                 "input_type": "input",
-                "id": "refresh_rate",
+                "id": "VideoStreamingJob_refresh_rate",
                 "name": "refresh_rate",
                 "unit": "1/s",
                 "default": 30.0
             },
             {
                 "input_type": "input",
-                "id": "data_stored",
+                "id": "VideoStreamingJob_data_stored",
                 "name": "data_stored",
                 "unit": "MB",
                 "default": 0
+            },
+            {
+                "input_type": "select",
+                "id": "VideoStreamingJob_service",
+                "name": "service",
+                "options": []
             }
         ]
     },
@@ -191,10 +209,16 @@
         "fields": [
             {
                 "input_type": "input",
-                "id": "output_token_count",
+                "id": "GenAIJob_output_token_count",
                 "name": "output_token_count",
                 "unit": "",
                 "default": 1000
+            },
+            {
+                "input_type": "select",
+                "id": "GenAIJob_service",
+                "name": "service",
+                "options": []
             }
         ]
     }

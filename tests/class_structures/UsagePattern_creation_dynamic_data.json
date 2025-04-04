@@ -5,8 +5,8 @@
     ],
     "dynamic_lists": [
         {
-            "input": "net_growth_rate_timespan",
-            "filter_by": "initial_usage_journey_volume_timespan",
+            "input_id": "UsagePatternFromForm_net_growth_rate_timespan",
+            "filter_by": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
             "list_value": {
                 "day": [
                     "month",

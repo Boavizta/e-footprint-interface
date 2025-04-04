@@ -1,6 +1,6 @@
 import os
-from inspect import signature
-from typing import List, get_origin
+from inspect import signature, _empty as empty_annotation
+from typing import List, get_origin, get_args
 
 from django.http import QueryDict
 from django.shortcuts import render
@@ -27,11 +27,16 @@ def create_efootprint_obj_from_post_data(create_form_data: QueryDict, model_web:
             continue
 
         annotation = init_sig_params[attr_name].annotation
+        if annotation is empty_annotation:
+            logger.warning(
+                f"Attribute {attr_name} in {object_type} has no annotation so it has been set up to str by default.")
+            annotation = str
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             # Exclude the empty initial value that is only here to make sure that the list is not empty and thus submitted
             selected_values = [value for value in create_form_data.getlist(attr_name_with_prefix) if len(value) > 0]
+            list_attribute_object_type_str = get_args(annotation)[0].__name__
             obj_creation_kwargs[attr_name] = [
-                model_web.get_efootprint_object_from_efootprint_id(obj_id, object_type)
+                model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
                 for obj_id in selected_values]
         elif issubclass(annotation, str):
             obj_creation_kwargs[attr_name] = create_form_data[attr_name_with_prefix]
@@ -43,7 +48,9 @@ def create_efootprint_obj_from_post_data(create_form_data: QueryDict, model_web:
                 create_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
         elif issubclass(annotation, ModelingObject):
             new_mod_obj_id = create_form_data[attr_name_with_prefix]
-            obj_to_add = model_web.get_efootprint_object_from_efootprint_id(new_mod_obj_id, object_type)
+            mod_obj_attribute_object_type_str = annotation.__name__
+            obj_to_add = model_web.get_efootprint_object_from_efootprint_id(
+                new_mod_obj_id, mod_obj_attribute_object_type_str)
             obj_creation_kwargs[attr_name] = obj_to_add
 
     new_efootprint_obj = new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
@@ -56,7 +63,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
     object_type = obj_to_edit.class_as_simple_str
     default_values = obj_to_edit.default_values()
 
-    init_sig_params = signature(obj_to_edit.__init__).parameters
+    init_sig_params = signature(obj_to_edit.modeling_obj.__init__).parameters
 
     for attr_name_with_prefix in edit_form_data.keys():
         attr_name = attr_name_with_prefix.replace(object_type + "_", "")
@@ -64,6 +71,10 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
             continue
 
         annotation = init_sig_params[attr_name].annotation
+        if annotation is empty_annotation:
+            logger.warning(
+                f"Attribute {attr_name} in {object_type} has no annotation so it has been set up to str by default.")
+            annotation = str
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             # Exclude the empty initial value that is only here to make sure that the list is not empty and thus submitted
             new_mod_obj_ids = [value for value in edit_form_data.getlist(attr_name_with_prefix) if len(value) > 0]
@@ -73,9 +84,10 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
             logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
             unchanged_mod_obj_ids = [obj_id for obj_id in current_mod_obj_ids if obj_id not in removed_mod_obj_ids]
             if new_mod_obj_ids != current_mod_obj_ids:
+                list_attribute_object_type_str = get_args(annotation)[0].__name__
                 obj_to_edit.set_efootprint_value(
                     attr_name,
-                    [model_web.get_efootprint_object_from_efootprint_id(obj_id, object_type)
+                    [model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
                      for obj_id in unchanged_mod_obj_ids + added_mod_obj_ids])
         elif issubclass(annotation, str):
             obj_to_edit.set_efootprint_value(attr_name, edit_form_data[attr_name_with_prefix])
@@ -102,7 +114,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                                     f"{obj_to_edit.attributes_with_depending_values()[attr_name]}")
                         check_input_validity = False
                     obj_to_edit.set_efootprint_value(attr_name, new_value, check_input_validity)
-            if attr_name in obj_to_edit.conditional_list_values().keys():
+            else:
                 new_value = SourceObject(edit_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
                 current_value = getattr(obj_to_edit, attr_name)
                 if new_value.value != current_value.value:
@@ -110,13 +122,15 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                 # Always update value for conditional str attribute to make sure that they belong to authorized values
                 new_value.set_label(current_value.label)
                 obj_to_edit.set_efootprint_value(attr_name, new_value)
+
         elif issubclass(annotation, ModelingObject):
             new_mod_obj_id = edit_form_data[attr_name_with_prefix]
             current_mod_obj_id = getattr(obj_to_edit, attr_name).efootprint_id
             if new_mod_obj_id != current_mod_obj_id:
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
+                mod_obj_attribute_object_type_str = annotation.__name__
                 obj_to_add = model_web.get_efootprint_object_from_efootprint_id(
-                    new_mod_obj_id, object_type)
+                    new_mod_obj_id, mod_obj_attribute_object_type_str)
                 obj_to_edit.set_efootprint_value(attr_name, obj_to_add)
 
     # Update session data
