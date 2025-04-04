@@ -30,10 +30,16 @@
         "header": "WebApplication creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "WebApplication_name",
+                "name": "name",
+                "default": "WebApplication"
+            },
+            {
                 "input_type": "select",
                 "id": "WebApplication_technology",
                 "name": "technology",
-                "selected": null,
+                "selected": "php-symfony",
                 "options": [
                     {
                         "label": "go-pgx",
@@ -56,12 +62,6 @@
                         "value": "rust-actix-sqlx"
                     }
                 ]
-            },
-            {
-                "input_type": "select",
-                "id": "WebApplication_server",
-                "name": "server",
-                "options": []
             }
         ]
     },
@@ -69,6 +69,12 @@
         "category": "VideoStreaming",
         "header": "VideoStreaming creation",
         "fields": [
+            {
+                "input_type": "str",
+                "id": "VideoStreaming_name",
+                "name": "name",
+                "default": "VideoStreaming"
+            },
             {
                 "input_type": "input",
                 "id": "VideoStreaming_base_ram_consumption",
@@ -96,12 +102,6 @@
                 "name": "ram_buffer_per_user",
                 "unit": "MB",
                 "default": 50
-            },
-            {
-                "input_type": "select",
-                "id": "VideoStreaming_server",
-                "name": "server",
-                "options": []
             }
         ]
     },
@@ -110,10 +110,16 @@
         "header": "GenAIModel creation",
         "fields": [
             {
+                "input_type": "str",
+                "id": "GenAIModel_name",
+                "name": "name",
+                "default": "GenAIModel"
+            },
+            {
                 "input_type": "select",
                 "id": "GenAIModel_provider",
                 "name": "provider",
-                "selected": null,
+                "selected": "mistralai",
                 "options": [
                     {
                         "label": "anthropic",
@@ -145,7 +151,7 @@
                 "input_type": "datalist",
                 "id": "GenAIModel_model_name",
                 "name": "model_name",
-                "selected": null,
+                "selected": "open-mistral-7b",
                 "options": null
             },
             {
@@ -164,30 +170,10 @@
             },
             {
                 "input_type": "input",
-                "id": "GenAIModel_gpu_latency_alpha",
-                "name": "gpu_latency_alpha",
-                "unit": "s",
-                "default": 0.0
-            },
-            {
-                "input_type": "input",
-                "id": "GenAIModel_gpu_latency_beta",
-                "name": "gpu_latency_beta",
-                "unit": "s",
-                "default": 0.02
-            },
-            {
-                "input_type": "input",
                 "id": "GenAIModel_bits_per_token",
                 "name": "bits_per_token",
                 "unit": "",
                 "default": 24
-            },
-            {
-                "input_type": "select",
-                "id": "GenAIModel_server",
-                "name": "server",
-                "options": []
             }
         ]
     }

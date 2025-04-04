@@ -106,6 +106,7 @@ document.addEventListener("initDynamicForm", function () {
 
       document.getElementById(filterId)?.addEventListener("change", function () {
         fillData("datalist", dynamicList.list_value, filterId, listId);
+        document.getElementById(dynamicList.input_id).value = "";
       });
     });
   }

@@ -1,4 +1,4 @@
-from inspect import signature
+from inspect import signature, _empty as empty_annotation
 from typing import get_origin, List, get_args
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
@@ -7,6 +7,7 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.usage.job import JobBase
+from efootprint.logger import logger
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 
@@ -16,66 +17,8 @@ MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_
 ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
 
 
-def efootprint_class_structure(efootprint_class_str: str, model_web=None):
-    efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
-    conditional_list_values = efootprint_class.conditional_list_values()
-    structure = {
-        "numerical_attributes": [],
-        "hourly_quantities_attributes": [],
-        "modeling_obj_attributes": [],
-        "list_attributes": [],
-        "str_attributes": [],
-        "conditional_str_attributes": [
-            {
-                "attr_name": key,
-                "depends_on": value["depends_on"],
-                "conditional_list_values": {
-                    str(conditional_value): [str(possible_value) for possible_value in possible_values]
-                    for conditional_value, possible_values in value["conditional_list_values"].items()
-                }
-            }
-            for key, value in conditional_list_values.items()]
-    }
-    efootprint_class_default_values = efootprint_class.default_values()
-    efootprint_class_list_values = efootprint_class.list_values()
-    init_sig_params = signature(efootprint_class.__init__).parameters
-    for attr_name in init_sig_params.keys():
-        annotation = init_sig_params[attr_name].annotation
-        if get_origin(annotation):
-            if get_origin(annotation) in (list, List):
-                object_type = get_args(annotation)[0]
-                structure["list_attributes"].append({"attr_name": attr_name, "object_type": object_type.__name__})
-        elif issubclass(annotation, ExplainableQuantity):
-            default_value = efootprint_class_default_values[attr_name].value
-            structure["numerical_attributes"].append(
-                {"attr_name": attr_name, "unit": f"{default_value.units:~P}",
-                 "long_unit": str(default_value.units),
-                 "default_value": round(default_value.magnitude, 2)})
-        elif issubclass(annotation, ExplainableHourlyQuantities):
-            structure["hourly_quantities_attributes"].append({"attr_name": attr_name})
-        elif issubclass(annotation, ExplainableObject):
-            if attr_name in efootprint_class_list_values.keys():
-                structure["str_attributes"].append(
-                    {"attr_name": attr_name,
-                     "list_values": [str(value) for value in efootprint_class.list_values()[attr_name]]}
-                    )
-            elif attr_name not in conditional_list_values.keys():
-                structure["str_attributes"].append(
-                    {"attr_name": attr_name, "default_value": str(efootprint_class_default_values[attr_name].value)})
-        elif issubclass(annotation, ModelingObject):
-            structure["modeling_obj_attributes"].append({"attr_name": attr_name, "object_type": annotation.__name__})
-
-        if model_web is not None:
-            for attribute_type in structure.keys():
-                for attribute in structure[attribute_type]:
-                    if "object_type" in attribute.keys():
-                        attribute["existing_objects"] = model_web.get_web_objects_from_efootprint_type(
-                            attribute["object_type"])
-
-    return structure
-
-
-def generate_object_creation_structure(available_efootprint_classes: list, header: str, attributes_to_skip = None, model_web=None):
+def generate_object_creation_structure(
+    available_efootprint_classes: list, header: str, attributes_to_skip = None, model_web=None):
     if attributes_to_skip is None:
         attributes_to_skip = []
 
@@ -101,19 +44,17 @@ def generate_object_creation_structure(available_efootprint_classes: list, heade
     form_sections = [type_efootprint_classes_available]
 
     for index, efootprint_class in enumerate(available_efootprint_classes):
-        class_structure = efootprint_class_structure(efootprint_class.__name__, model_web)
-        class_fields, dynamic_lists = format_structure_for_dynamic_form(
-            class_structure, attributes_to_skip, efootprint_class.__name__)
+        default_values = efootprint_class.default_values()
+        efootprint_class_str = efootprint_class.__name__
+        default_values["name"] = efootprint_class_str
+        class_fields, dynamic_lists = generate_dynamic_form(
+            efootprint_class_str, default_values, attributes_to_skip, model_web)
 
-        if dynamic_lists:
-            dynamic_form_dict["dynamic_lists"].extend(
-                [elt for elt in dynamic_lists
-                 if elt["input_id"] not in [elt["input_id"] for elt in dynamic_form_dict["dynamic_lists"]]])
-
+        dynamic_form_dict["dynamic_lists"] += dynamic_lists
 
         form_sections.append({
-            "category": efootprint_class.__name__,
-            "header": f"{efootprint_class.__name__} creation",
+            "category": efootprint_class_str,
+            "header": f"{efootprint_class_str} creation",
             "fields": class_fields})
 
     return form_sections, dynamic_form_dict
@@ -123,93 +64,114 @@ def generate_object_edition_structure(web_object, attributes_to_skip=None):
     if attributes_to_skip is None:
         attributes_to_skip = []
 
-    web_object_structure = web_object.generate_structure()
-    object_fields, dynamic_lists = format_structure_for_dynamic_form(
-        web_object_structure, attributes_to_skip, web_object.class_as_simple_str)
+    object_fields, dynamic_lists = generate_dynamic_form(
+        web_object.class_as_simple_str, web_object.modeling_obj.__dict__, attributes_to_skip, web_object.model_web)
 
-    return {"fields": object_fields, "modeling_obj_attributes": web_object_structure["modeling_obj_attributes"],
-            "list_attributes": web_object_structure["list_attributes"]}, {"dynamic_lists": dynamic_lists}
+    return {"fields": object_fields}, {"dynamic_lists": dynamic_lists}
 
 
-def format_structure_for_dynamic_form(input_structure: dict, attributes_to_skip: list, id_prefix: str):
+def generate_dynamic_form(
+    efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web):
     structure_fields = []
     dynamic_lists = []
 
-    for str_attribute_dict in input_structure["str_attributes"]:
-        if str_attribute_dict["attr_name"] in attributes_to_skip:
+    efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
+    list_values = efootprint_obj_class.list_values()
+    conditional_list_values = efootprint_obj_class.conditional_list_values()
+    id_prefix = efootprint_class_str
+    init_sig_params = signature(efootprint_obj_class.__init__).parameters
+
+    for attr_name in init_sig_params.keys():
+        if attr_name in attributes_to_skip + ["self", "name"]:
             continue
-        if "list_values" in str_attribute_dict.keys():
-            selected = None
-            if "attr_value" in str_attribute_dict.keys():
-                selected = str_attribute_dict["attr_value"].value
+        annotation = init_sig_params[attr_name].annotation
+        if annotation is empty_annotation:
+            logger.warning(
+                f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
+            annotation = str
+        if get_origin(annotation) and get_origin(annotation) in (list, List):
+            list_attribute_object_type_str = get_args(annotation)[0].__name__
+            if attr_name in default_values.keys():
+                selected = [elt.id for elt in default_values[attr_name]]
+            else:
+                selected = []
             structure_fields.append({
-                "input_type": "select",
-                "id": id_prefix + "_" + str_attribute_dict["attr_name"],
-                "name": str_attribute_dict["attr_name"],
+                "input_type": "select-multiple",
+                "id": id_prefix + "_" + attr_name,
+                "name": attr_name,
                 "selected": selected,
                 "options": [
-                    {"label": attr_value, "value": attr_value} for attr_value in str_attribute_dict["list_values"]]
+                    {"label": attr_value.name, "value": attr_value.id}
+                    for attr_value in model_web.get_efootprint_objects_from_efootprint_type(
+                        list_attribute_object_type_str)]
             })
-        else:
-            structure_fields.append(
-                {
-                    "input_type": "str",
-                    "id": id_prefix + "_" + str_attribute_dict["attr_name"],
-                    "name": str_attribute_dict["attr_name"],
-                    "default": str_attribute_dict["default_value"]
-                }
-            )
-    for conditional_str_attribute_dict in input_structure["conditional_str_attributes"]:
-        if conditional_str_attribute_dict["attr_name"] in attributes_to_skip:
-            continue
-        selected = None
-        if "attr_value" in conditional_str_attribute_dict.keys():
-            selected = conditional_str_attribute_dict["attr_value"].value
-        structure_fields.append({
-            "input_type": "datalist",
-            "id": id_prefix + "_" + conditional_str_attribute_dict["attr_name"],
-            "name": conditional_str_attribute_dict["attr_name"],
-            "selected": selected,
-            "options": None
-        })
-        dynamic_lists.append(
-                {
-                    "input_id": id_prefix + "_" + conditional_str_attribute_dict["attr_name"],
-                    "filter_by": id_prefix + "_" + conditional_str_attribute_dict["depends_on"],
-                    "list_value": conditional_str_attribute_dict["conditional_list_values"]
+        elif issubclass(annotation, str):
+            structure_fields.append({
+                "input_type": "str",
+                "id": id_prefix + "_" + attr_name,
+                "name": attr_name,
+                "default": default_values[attr_name]
+            })
+        elif issubclass(annotation, ExplainableQuantity):
+            default = default_values[attr_name]
+            structure_fields.append({
+                "input_type": "input",
+                "id": id_prefix + "_" + attr_name,
+                "name": attr_name,
+                "unit": f"{default.value.units:~P}",
+                "default": round(default.magnitude, 2)
+            })
+        elif issubclass(annotation, ExplainableObject):
+            if attr_name in list_values.keys():
+                structure_fields.append({
+                    "input_type": "select",
+                    "id": id_prefix + "_" + attr_name,
+                    "name": attr_name,
+                    "selected": default_values[attr_name].value,
+                    "options": [
+                        {"label": str(attr_value), "value": str(attr_value)} for attr_value in list_values[attr_name]]
                 })
-    for numerical_attribute in input_structure["numerical_attributes"]:
-        if numerical_attribute["attr_name"] in attributes_to_skip:
-            continue
-        default_value = numerical_attribute["default_value"]
-        if "attr_value" in numerical_attribute.keys():
-            default_value = numerical_attribute["attr_value"].rounded_magnitude
-        structure_fields.append({
-            "input_type": "input",
-            "id": id_prefix + "_" + numerical_attribute["attr_name"],
-            "name": numerical_attribute["attr_name"],
-            "unit": numerical_attribute["unit"],
-            "default": default_value
-        })
-
-    for modeling_obj_attribute in input_structure["modeling_obj_attributes"]:
-        if modeling_obj_attribute["attr_name"] in attributes_to_skip:
-            continue
-        structure_fields.append({
-            "input_type": "select",
-            "id": id_prefix + "_" + modeling_obj_attribute["attr_name"],
-            "name": modeling_obj_attribute["attr_name"],
-            "options": modeling_obj_attribute["existing_objects"]
-        })
-
-    for list_attribute in input_structure["list_attributes"]:
-        if list_attribute["attr_name"] in attributes_to_skip:
-            continue
-        structure_fields.append({
-            "input_type": "select-multiple",
-            "id": id_prefix + "_" + list_attribute["attr_name"],
-            "name": list_attribute["attr_name"],
-            "options": list_attribute["existing_objects"]
-        })
+            elif attr_name in conditional_list_values.keys():
+                structure_fields.append({
+                    "input_type": "datalist",
+                    "id": id_prefix + "_" + attr_name,
+                    "name": attr_name,
+                    "selected": default_values[attr_name].value,
+                    "options": None
+                })
+                dynamic_lists.append(
+                    {
+                        "input_id": id_prefix + "_" + attr_name,
+                        "filter_by": id_prefix + "_" + conditional_list_values[attr_name]["depends_on"],
+                        "list_value": {
+                            str(conditional_value): [str(possible_value) for possible_value in possible_values]
+                            for conditional_value, possible_values in
+                            conditional_list_values[attr_name]["conditional_list_values"].items()
+                        }
+                    })
+            else:
+                structure_fields.append(
+                    {
+                        "input_type": "str",
+                        "id": id_prefix + "_" + attr_name,
+                        "name": attr_name,
+                        "default": default_values[attr_name].value
+                    }
+                )
+        elif issubclass(annotation, ModelingObject):
+            mod_obj_attribute_object_type_str = annotation.__name__
+            selection_options = model_web.get_efootprint_objects_from_efootprint_type(mod_obj_attribute_object_type_str)
+            if attr_name in default_values.keys():
+                selected = default_values[attr_name]
+            else:
+                selected = selection_options[0]
+            structure_fields.append({
+                "input_type": "select",
+                "id": id_prefix + "_" + attr_name,
+                "name": attr_name,
+                "selected": selected.id,
+                "options": [
+                    {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
+            })
 
     return structure_fields, dynamic_lists

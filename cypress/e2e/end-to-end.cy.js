@@ -77,7 +77,8 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#name').clear();
         cy.get('#name').type(server);
         cy.get('#type_object_available').select('BoaviztaCloudServer');
-        cy.get('#BoaviztaCloudServer_instance_type').type('c4.8xlarge');
+        cy.get('#BoaviztaCloudServer_instance_type').clear();
+        cy.get('#BoaviztaCloudServer_instance_type').type("ent1-l");
         cy.get('#btn-submit-form').click();
 
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
