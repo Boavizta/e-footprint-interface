@@ -31,7 +31,8 @@ def default_countries():
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {
     "Network": default_networks, "Device": default_devices, "Country": default_countries}
-ATTRIBUTES_TO_SKIP_IN_FORMS = ["gpu_latency_alpha", "gpu_latency_beta", "fixed_nb_of_instances"]
+ATTRIBUTES_TO_SKIP_IN_FORMS = [
+    "gpu_latency_alpha", "gpu_latency_beta", "fixed_nb_of_instances", "storage", "service", "server"]
 
 
 class ModelWeb:

@@ -6,8 +6,6 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
-from model_builder.class_structure import efootprint_class_structure
-
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
     output_list = []
@@ -182,22 +180,6 @@ class ModelingObjectWeb:
             return self
         else:
             return self.all_accordion_parents[-1]
-
-    def generate_structure(self):
-        structure = efootprint_class_structure(self.class_as_simple_str, self.model_web)
-
-        for attribute_type in structure.keys():
-            for attribute in structure[attribute_type]:
-                attribute["attr_value"] = getattr(self, attribute["attr_name"])
-
-        all_attribute_names = []
-        for attribute_type in structure.keys():
-            for attribute in structure[attribute_type]:
-                all_attribute_names.append(attribute["attr_name"])
-
-        structure["all_attribute_names"] = all_attribute_names
-
-        return structure
 
     def self_delete(self):
         obj_type = self.class_as_simple_str
