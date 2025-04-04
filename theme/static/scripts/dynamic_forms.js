@@ -99,7 +99,7 @@ document.addEventListener("initDynamicForm", function () {
   if (dynamicFormData.dynamic_lists) {
     dynamicFormData.dynamic_lists.forEach((dynamicList) => {
       const filterId = dynamicList.filter_by;
-      const listId = "list_" + dynamicList.input;
+      const listId = "datalist_" + dynamicList.input_id;
 
       // Fill once initially
       fillData("datalist", dynamicList.list_value, filterId, listId);
@@ -116,7 +116,7 @@ document.addEventListener("initDynamicForm", function () {
   if (dynamicFormData.dynamic_selects) {
     dynamicFormData.dynamic_selects.forEach((dynamicSelect) => {
       const filterId = dynamicSelect.filter_by;
-      const selectId = dynamicSelect.input;
+      const selectId = dynamicSelect.input_id;
 
       // Fill once initially
       fillData("select", dynamicSelect.list_value, filterId, selectId);

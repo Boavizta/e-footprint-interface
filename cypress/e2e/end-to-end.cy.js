@@ -85,8 +85,8 @@ describe('Test de la page d\'accueil', () => {
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         // get the button with attribute hx-get begin with '/model_builder/open-create-service-panel/' and ended with 'Test-E2E-Server'
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
-        cy.get('#name').clear();
-        cy.get('#name').type(service);
+        cy.get('#sidePanelForm #name').clear();
+        cy.get('#sidePanelForm #name').type(service);
         cy.get('#technology').select('php-symfony');
         cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+service.replaceAll(' ', '-')+'/"]').should('be.visible');
