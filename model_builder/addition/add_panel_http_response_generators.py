@@ -19,24 +19,20 @@ def generate_generic_add_panel_http_response(request, object_type: str,  model_w
     template_name = template_name_mapping[object_type]
     context_data = {"form_fields": form_sections[1]["fields"],
                     "header_name": "Add new " + template_name.replace("_", " "),
-                    "new_object_name": "New " + template_name.replace("_", " ")}
+                    "obj_type": object_type}
     if request.GET.get('efootprint_id_of_parent_to_link_to'):
         context_data['efootprint_id_of_parent_to_link_to'] = request.GET['efootprint_id_of_parent_to_link_to']
-    if request.GET.get("name"):
-        context_data["new_object_name"] = request.GET["name"]
-
-    context_data["obj_type"] = object_type
-    context_data["next_efootprint_object_rank"] = len(model_web.__getattribute__(f"{template_name}s")) + 1
 
     return render(request, f"model_builder/side_panels/{template_name}_add.html", context=context_data)
 
 
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type", attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"])
+        SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type",
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"], model_web=model_web)
 
     storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
-        [Storage], "Storage type", ATTRIBUTES_TO_SKIP_IN_FORMS)
+        [Storage], "Storage type", ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
@@ -47,8 +43,6 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
                                "obj_type": "server",
                                "storage_obj_type": "storage",
                                "header_name": "Add new server",
-                               "next_efootprint_object_rank": len(model_web.servers) + 1,
-                               "storage_next_efootprint_object_rank": len(model_web.servers) + 1
                            })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
@@ -62,7 +56,8 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
 
     installable_services = server.installable_services()
     services_dict, dynamic_form_data = generate_object_creation_structure(
-        installable_services, "Services available for this server", ["gpu_latency_alpha", "gpu_latency_beta", "server"])
+        installable_services, "Services available for this server", ["gpu_latency_alpha", "gpu_latency_beta", "server"],
+        model_web)
 
     http_response = render(
         request, "model_builder/side_panels/service_add.html", {
@@ -71,7 +66,6 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "service",
             "header_name": "Add new service",
-            "next_efootprint_object_rank": len(model_web.services) + 1
         })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
@@ -91,7 +85,9 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         if service.__name__ in request.session["system_data"].keys():
             available_job_classes.update(service.compatible_jobs())
 
-    form_sections, dynamic_form_data = generate_object_creation_structure(list(available_job_classes), "Job type", attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["server", "service"])
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+        list(available_job_classes), "Job type",
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["server", "service"], model_web=model_web)
     additional_item = {
         "category": "job_creation_helper",
         "header": "Job creation helper",
@@ -126,9 +122,10 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             "filter_by": "server",
             "list_value": {
                 server.efootprint_id:
-                    [{"label": "direct call to server", "value": "direct_server_call"}]
-                    + [{"label": service.name, "value": service.efootprint_id}
-                       for service in server.installed_services] for server in servers
+                    [{"label": service.name, "value": service.efootprint_id}
+                       for service in server.installed_services]
+                + [{"label": "direct call to server", "value": "direct_server_call"}]
+                for server in servers
             }
         },
         {
@@ -144,7 +141,6 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             "obj_type": "job",
             "efootprint_id_of_parent_to_link_to": request.GET.get('efootprint_id_of_parent_to_link_to'),
             "header_name": "Add new job",
-            "next_efootprint_object_rank": len(model_web.jobs) + 1
         })
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
@@ -170,7 +166,9 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
          "selected_efootprint_id": usage_journeys[0]["efootprint_id"]},
     ]
 
-    form_sections, dynamic_form_data = generate_object_creation_structure([UsagePatternFromForm], "Usage pattern", attributes_to_skip=["network", "country", "devices", "usage_journey"])
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+    [UsagePatternFromForm], "Usage pattern", attributes_to_skip=["network", "country", "devices", "usage_journey"],
+    model_web=model_web)
 
     dynamic_lists = dynamic_form_data["dynamic_lists"]
     dynamic_lists[0]["list_value"] = {
@@ -185,7 +183,6 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             "dynamic_form_data": {"dynamic_selects": dynamic_lists},
             'header_name': "Add new usage pattern",
             'obj_type': "Usage pattern",
-            "next_efootprint_object_rank": len(model_web.usage_patterns) + 1
         })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"

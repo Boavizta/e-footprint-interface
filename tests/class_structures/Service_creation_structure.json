@@ -33,7 +33,7 @@
                 "input_type": "str",
                 "id": "WebApplication_name",
                 "name": "name",
-                "default": "WebApplication"
+                "default": "WebApplication 1"
             },
             {
                 "input_type": "select",
@@ -73,7 +73,7 @@
                 "input_type": "str",
                 "id": "VideoStreaming_name",
                 "name": "name",
-                "default": "VideoStreaming"
+                "default": "VideoStreaming 1"
             },
             {
                 "input_type": "input",
@@ -113,7 +113,7 @@
                 "input_type": "str",
                 "id": "GenAIModel_name",
                 "name": "name",
-                "default": "GenAIModel"
+                "default": "GenAIModel 1"
             },
             {
                 "input_type": "select",

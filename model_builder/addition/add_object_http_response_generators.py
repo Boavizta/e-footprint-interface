@@ -1,7 +1,5 @@
 import json
-from urllib.parse import urlencode
 
-from django.http import QueryDict
 from django.shortcuts import render
 
 from model_builder.model_web import ModelWeb

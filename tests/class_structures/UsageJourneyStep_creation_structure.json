@@ -25,7 +25,7 @@
                 "input_type": "str",
                 "id": "UsageJourneyStep_name",
                 "name": "name",
-                "default": "UsageJourneyStep"
+                "default": "UsageJourneyStep 1"
             },
             {
                 "input_type": "input",

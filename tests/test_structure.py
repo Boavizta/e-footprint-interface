@@ -87,21 +87,3 @@ class TestsClassStructure(TestCase):
             remove_ids_from_str(json.dumps(hardware_archetypes)), remove_ids_from_str(json.dumps(default_devices)))
         self.assertEqual(
             remove_ids_from_str(json.dumps(countries)), remove_ids_from_str(json.dumps(default_countries)))
-
-
-if __name__ == "__main__":
-    for class_category_name, class_list in obj_creation_structure_dict.items():
-        print(class_category_name)
-        structure, dynamic_data = generate_object_creation_structure(class_list, header=class_category_name)
-        with open(
-            os.path.join(root_dir, "class_structures", f"{class_category_name}_creation_structure.json"), "w") as f:
-            json.dump(structure, f, indent=4)
-        with open(
-            os.path.join(root_dir, "class_structures", f"{class_category_name}_creation_dynamic_data.json"),
-            "w") as f:
-            json.dump(dynamic_data, f, indent=4)
-
-    for class_name in MODELING_OBJECT_CLASSES_DICT.keys():
-        print(class_name)
-        with open(os.path.join(root_dir, "class_structures", f"{class_name}.json"), "w") as f:
-            json.dump(efootprint_class_structure(class_name), f, indent=4)

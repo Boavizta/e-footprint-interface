@@ -8,15 +8,6 @@
                 hx-on::after-request="closeAndEmptySidePanel()"
                 hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
     >
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text"
-                    class="form-control p-2"
-                    id="name"
-                    name="name"
-                    required
-                    value="{{ obj_type }} {{ next_efootprint_object_rank }}">
-        </div>
         {% for field in form_fields %}
             {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
         {% endfor %}

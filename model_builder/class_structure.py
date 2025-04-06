@@ -2,7 +2,7 @@ from inspect import signature, _empty as empty_annotation
 from typing import get_origin, List, get_args
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
-from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity, ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
@@ -18,9 +18,7 @@ ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": Server
 
 
 def generate_object_creation_structure(
-    available_efootprint_classes: list, header: str, attributes_to_skip = None, model_web=None):
-    if attributes_to_skip is None:
-        attributes_to_skip = []
+    available_efootprint_classes: list, header: str, attributes_to_skip, model_web):
 
     dynamic_form_dict = {
         "switch_item": "type_object_available",
@@ -46,7 +44,8 @@ def generate_object_creation_structure(
     for index, efootprint_class in enumerate(available_efootprint_classes):
         default_values = efootprint_class.default_values()
         efootprint_class_str = efootprint_class.__name__
-        default_values["name"] = efootprint_class_str
+        default_values["name"] = (f"{efootprint_class_str} "
+                                  f"{len(model_web.get_web_objects_from_efootprint_type(efootprint_class_str)) + 1}")
         class_fields, dynamic_lists = generate_dynamic_form(
             efootprint_class_str, default_values, attributes_to_skip, model_web)
 
@@ -82,7 +81,7 @@ def generate_dynamic_form(
     init_sig_params = signature(efootprint_obj_class.__init__).parameters
 
     for attr_name in init_sig_params.keys():
-        if attr_name in attributes_to_skip + ["self", "name"]:
+        if attr_name in attributes_to_skip + ["self"]:
             continue
         annotation = init_sig_params[attr_name].annotation
         if annotation is empty_annotation:

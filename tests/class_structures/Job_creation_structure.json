@@ -37,7 +37,7 @@
                 "input_type": "str",
                 "id": "Job_name",
                 "name": "name",
-                "default": "Job"
+                "default": "Job 1"
             },
             {
                 "input_type": "input",
@@ -84,7 +84,7 @@
                 "input_type": "str",
                 "id": "WebApplicationJob_name",
                 "name": "name",
-                "default": "WebApplicationJob"
+                "default": "WebApplicationJob 1"
             },
             {
                 "input_type": "input",
@@ -142,7 +142,7 @@
                 "input_type": "str",
                 "id": "VideoStreamingJob_name",
                 "name": "name",
-                "default": "VideoStreamingJob"
+                "default": "VideoStreamingJob 1"
             },
             {
                 "input_type": "select",
@@ -211,7 +211,7 @@
                 "input_type": "str",
                 "id": "GenAIJob_name",
                 "name": "name",
-                "default": "GenAIJob"
+                "default": "GenAIJob 1"
             },
             {
                 "input_type": "input",

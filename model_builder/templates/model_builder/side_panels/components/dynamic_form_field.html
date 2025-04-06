@@ -40,7 +40,10 @@
                 <li class="list-group-item">{{ option }}</li>
             {% endfor %}
         </ul>
-    {% else %}
+    {% elif field.input_type == 'str' %}
+        <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
+        <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
+    {% elif field.input_type == "input" %}
         <div class="input-group">
             <label for="{{ field.id }}" class="form-label w-100">{{ field.name }}</label>
             <input type="number"
@@ -56,5 +59,7 @@
                 {{ field.unit }}
             </span>
         </div>
+    {% else %}
+        <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>
     {% endif %}
 </div>

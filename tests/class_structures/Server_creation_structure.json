@@ -33,7 +33,7 @@
                 "input_type": "str",
                 "id": "Server_name",
                 "name": "name",
-                "default": "Server"
+                "default": "Server 1"
             },
             {
                 "input_type": "select",
@@ -142,7 +142,7 @@
                 "input_type": "str",
                 "id": "GPUServer_name",
                 "name": "name",
-                "default": "GPUServer"
+                "default": "GPUServer 1"
             },
             {
                 "input_type": "select",
@@ -258,7 +258,7 @@
                 "input_type": "str",
                 "id": "BoaviztaCloudServer_name",
                 "name": "name",
-                "default": "BoaviztaCloudServer"
+                "default": "BoaviztaCloudServer 1"
             },
             {
                 "input_type": "select",
