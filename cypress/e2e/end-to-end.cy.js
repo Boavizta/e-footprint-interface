@@ -27,18 +27,18 @@ describe('Test de la page d\'accueil', () => {
         // Create UJ one and two
         cy.get('#btn-add-usage-journey').click();
         cy.get('#btn-add-usage-journey').should('be.visible');
-        cy.get('#name').clear();
-        cy.get('#name').type(ujNameOne);
+        cy.get('#UsageJourney_name').clear();
+        cy.get('#UsageJourney_name').type(ujNameOne);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
 
         cy.get('#btn-add-usage-journey').click();
-        cy.get('#name').clear();
+        cy.get('#UsageJourney_name').clear();
         cy.get('#btn-submit-form').click();
-        cy.get('#name').then(($input) => {
+        cy.get('#UsageJourney_name').then(($input) => {
             expect($input[0].validationMessage).to.not.be.empty;
         });
-        cy.get('#name').type(ujNameTwo);
+        cy.get('#UsageJourney_name').type(ujNameTwo);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
 
@@ -50,8 +50,8 @@ describe('Test de la page d\'accueil', () => {
           .click();
         cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
         //erase all the text in the input with id name
-        cy.get('#name').clear();
-        cy.get('#name').type(ujsOne);
+        cy.get('#UsageJourneyStep_name').clear();
+        cy.get('#UsageJourneyStep_name').type(ujsOne);
         cy.get('#UsageJourneyStep_user_time_spent').type('10.1');
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('exist').find('div').should('not.exist');
@@ -61,8 +61,8 @@ describe('Test de la page d\'accueil', () => {
           .contains('button', 'Add usage journey step')
           .click();
         cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
-        cy.get('#name').clear();
-        cy.get('#name').type(ujsTwo);
+        cy.get('#UsageJourneyStep_name').clear();
+        cy.get('#UsageJourneyStep_name').type(ujsTwo);
         cy.get('#UsageJourneyStep_user_time_spent').type('20,2');
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('exist').find('form').should('not.exist');
@@ -74,9 +74,9 @@ describe('Test de la page d\'accueil', () => {
         // Add server
         cy.get('#btn-add-server').click();
         cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
-        cy.get('#name').clear();
-        cy.get('#name').type(server);
         cy.get('#type_object_available').select('BoaviztaCloudServer');
+        cy.get('#BoaviztaCloudServer_name').clear();
+        cy.get('#BoaviztaCloudServer_name').type(server);
         cy.get('#BoaviztaCloudServer_instance_type').clear();
         cy.get('#BoaviztaCloudServer_instance_type').type("ent1-l");
         cy.get('#btn-submit-form').click();
@@ -84,33 +84,33 @@ describe('Test de la page d\'accueil', () => {
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         // get the button with attribute hx-get begin with '/model_builder/open-create-service-panel/' and ended with 'Test-E2E-Server'
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
-        cy.get('#name').clear();
-        cy.get('#name').type(service);
+        cy.get('#WebApplication_name').clear();
+        cy.get('#WebApplication_name').type(service);
         cy.get('#WebApplication_technology').select('php-symfony');
         cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+service.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         // Add jobs
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').click();
-        cy.get('#name').clear();
-        cy.get('#name').type(jobOne);
         cy.get('#service').select(service);
+        cy.get('#WebApplicationJob_name').clear();
+        cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobOne.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#name').clear();
-        cy.get('#name').type(jobTwo);
         cy.get('#service').select(service);
+        cy.get('#WebApplicationJob_name').clear();
+        cy.get('#WebApplicationJob_name').type(jobTwo);
         cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobTwo.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         // Add usagePattern
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#name').clear();
-        cy.get('#name').type(upNameOne);
+        cy.get('#UsagePatternFromForm_name').clear();
+        cy.get('#UsagePatternFromForm_name').type(upNameOne);
 
         //get input  with name start_date in #modal-timeseries-chart
         cy.get('#start_date').click();

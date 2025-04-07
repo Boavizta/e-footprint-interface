@@ -8,7 +8,7 @@
             required
         >
             {% for option in field.options %}
-                <option value="{{ option.value }}" {% if option.label == field.selected %}selected{% endif %}>
+                <option value="{{ option.value }}" {% if option.value == field.selected %}selected{% endif %}>
                     {{ option.label }}</option>
             {% endfor %}
         </select>

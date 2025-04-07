@@ -8,16 +8,8 @@
             hx-disabled-elt="button"
             hx-on::after-request="closeAndEmptySidePanel()"
     >
-        <div class="mb-3">
-            <label for="name"class="form-label w-100 text-start">Name</label>
-            <input type="text"
-                   class="form-control p-2"
-                   id="name" name="name"
-                   required
-                   value="{{ obj_type }} {{ next_efootprint_object_rank }}">
-        </div>
         <p class="my-2">
-            Create a new usage pattern by defining its device mix, network mix, country mix, usage over time, and linking it to a usage journey.
+            Create a new usage pattern by linking it to a usage journey and defining the device the usage journey runs on, the network, the country, and the usage volume over time.
         </p>
         <div class="accordion" id="accordionFormUsagePattern">
             {% include "model_builder/side_panels/usage_pattern/links_to_other_objects_form.html" %}

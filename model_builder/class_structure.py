@@ -28,7 +28,6 @@ def generate_object_creation_structure(
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
         "header": header,
-        "class": "",
         "fields": [{
             "input_type": "select",
             "id": "type_object_available",

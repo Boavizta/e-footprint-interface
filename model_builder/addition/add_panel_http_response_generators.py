@@ -91,7 +91,6 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     additional_item = {
         "category": "job_creation_helper",
         "header": "Job creation helper",
-        "class": "",
         "fields": [
             {
                 "input_type": "select",
@@ -148,39 +147,39 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
 
 
 def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb):
-    usage_journeys = [{'efootprint_id': uj.efootprint_id, 'name': uj.name} for uj in model_web.usage_journeys]
-    if len(usage_journeys) == 0:
+    if len(model_web.usage_journeys) == 0:
         error = PermissionError("You need to have created at least one usage journey to create a usage pattern.")
         return render_exception_modal(request, error)
 
-    networks = [{"efootprint_id": network["id"], "name": network["name"]} for network in default_networks().values()]
-    countries = [{"efootprint_id": country["id"], "name": country["name"]} for country in default_countries().values()]
-    devices = [{"efootprint_id": device["id"], "name": device["name"]} for device in default_devices().values()]
-
-    modeling_obj_attributes = [
-        {"attr_name": "devices", "existing_objects": devices, "selected_efootprint_id": devices[0]["efootprint_id"]},
-        {"attr_name": "network", "existing_objects": networks, "selected_efootprint_id": networks[0]["efootprint_id"]},
-        {"attr_name": "country", "existing_objects": countries,
-         "selected_efootprint_id": countries[0]["efootprint_id"]},
-        {"attr_name": "usage_journey", "existing_objects": usage_journeys,
-         "selected_efootprint_id": usage_journeys[0]["efootprint_id"]},
-    ]
-
     form_sections, dynamic_form_data = generate_object_creation_structure(
-    [UsagePatternFromForm], "Usage pattern", attributes_to_skip=["network", "country", "devices", "usage_journey"],
-    model_web=model_web)
+    [UsagePatternFromForm], "Usage pattern",
+        attributes_to_skip=["start_date", "modeling_duration_value", "modeling_duration_unit",
+                            "initial_usage_journey_volume", "initial_usage_journey_volume_timespan",
+                            "net_growth_rate_in_percentage", "net_growth_rate_timespan"], model_web=model_web)
 
-    dynamic_lists = dynamic_form_data["dynamic_lists"]
-    dynamic_lists[0]["list_value"] = {
-        key: [{"label": {"day": "Daily", "month": "Monthly", "year": "Yearly"}[elt], "value": elt} for elt in value]
-        for key, value in dynamic_lists[0]["list_value"].items()
+    dynamic_select_options = {
+        str(conditional_value): [str(possible_value) for possible_value in possible_values]
+        for conditional_value, possible_values in
+        UsagePatternFromForm.conditional_list_values()["net_growth_rate_timespan"]["conditional_list_values"].items()
     }
+    dynamic_select = {
+        "input_id": "net_growth_rate_timespan",
+        "filter_by": "initial_usage_journey_volume_timespan",
+        "list_value": {
+            key: [{"label": {"day": "Daily", "month": "Monthly", "year": "Yearly"}[elt], "value": elt} for elt in value]
+            for key, value in dynamic_select_options.items()
+        }
+    }
+
+    for field in form_sections[1]["fields"]:
+        if field["name"] == "devices":
+            field["input_type"] = "select"
 
     http_response = render(
         request, "model_builder/side_panels/usage_pattern/usage_pattern_add.html", {
-            "modeling_obj_attributes": modeling_obj_attributes,
+            "form_fields": form_sections[1]["fields"],
             "usage_pattern_input_values": UsagePatternFromForm.default_values(),
-            "dynamic_form_data": {"dynamic_selects": dynamic_lists},
+            "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
             'header_name': "Add new usage pattern",
             'obj_type': "Usage pattern",
         })

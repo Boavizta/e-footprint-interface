@@ -1,15 +1,8 @@
 {% extends "model_builder/side_panels/edit/edit_generic_form.html" %}
 
 {% block edit_form_content %}
-    <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input type="text"
-               class="form-control p-2"
-               id="name" name="name"
-               value="{{ object_to_edit.name }}">
-    </div>
     <div class="accordion" id="accordionFormUsagePattern">
-        {% include "model_builder/side_panels/usage_pattern/links_to_other_objects_form.html" with usage_pattern_input_values=object_to_edit %}
+        {% include "model_builder/side_panels/usage_pattern/links_to_other_objects_form.html" %}
         {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" with usage_pattern_input_values=object_to_edit %}
     </div>
 {% endblock %}

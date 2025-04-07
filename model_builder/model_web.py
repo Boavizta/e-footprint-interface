@@ -52,8 +52,29 @@ class ModelWeb:
         for efootprint_obj in self.flat_efootprint_objs_dict.values():
             efootprint_obj.trigger_modeling_updates = False
 
+    @staticmethod
+    def _efootprint_object_from_json(json_input: dict, object_type: str):
+        efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
+        efootprint_object = efootprint_class.__new__(efootprint_class)
+        efootprint_object.__dict__["contextual_modeling_obj_containers"] = []
+        efootprint_object.trigger_modeling_updates = False
+        for attr_key, attr_value in json_input.items():
+            if type(attr_value) == dict:
+                efootprint_object.__setattr__(attr_key, json_to_explainable_object(attr_value))
+            else:
+                efootprint_object.__dict__[attr_key] = attr_value
+        efootprint_object.after_init()
+
+        return efootprint_object
+
     def get_efootprint_objects_from_efootprint_type(self, obj_type):
         output_list = []
+        if obj_type in DEFAULT_OBJECTS_CLASS_MAPPING.keys():
+            for json_input in DEFAULT_OBJECTS_CLASS_MAPPING[obj_type]().values():
+                output_list.append(self._efootprint_object_from_json(json_input, obj_type))
+
+            return output_list
+
         obj_type_class = MODELING_OBJECT_CLASSES_DICT.get(obj_type, None)
         if obj_type_class is None:
             obj_type_class = ABSTRACT_EFOOTPRINT_MODELING_CLASSES.get(obj_type, None)
@@ -65,15 +86,6 @@ class ModelWeb:
         return output_list
 
     def get_web_objects_from_efootprint_type(self, obj_type):
-        if obj_type in DEFAULT_OBJECTS_CLASS_MAPPING.keys():
-            default_objects_dicts = list(DEFAULT_OBJECTS_CLASS_MAPPING[obj_type]().values())
-
-            for default_dict in default_objects_dicts:
-                default_dict["value"] = default_dict["id"]
-                default_dict["label"] = default_dict["name"]
-
-            return default_objects_dicts
-
         return [wrap_efootprint_object(obj, self) for obj in self.get_efootprint_objects_from_efootprint_type(obj_type)]
 
     def get_web_object_from_efootprint_id(self, object_id):
@@ -85,16 +97,7 @@ class ModelWeb:
             efootprint_object = self.flat_efootprint_objs_dict[efootprint_id]
         else:
             web_object_json = DEFAULT_OBJECTS_CLASS_MAPPING[object_type]()[efootprint_id]
-            efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
-            efootprint_object = efootprint_class.__new__(efootprint_class)
-            efootprint_object.__dict__["contextual_modeling_obj_containers"] = []
-            efootprint_object.trigger_modeling_updates = False
-            for attr_key, attr_value in web_object_json.items():
-                if type(attr_value) == dict:
-                    efootprint_object.__setattr__(attr_key, json_to_explainable_object(attr_value))
-                else:
-                    efootprint_object.__dict__[attr_key] = attr_value
-            efootprint_object.after_init()
+            efootprint_object = self._efootprint_object_from_json(web_object_json, object_type)
             web_object = self.add_new_efootprint_object_to_system(efootprint_object)
             logger.info(f"Object {web_object.name} created from default object and added to system data.")
 

@@ -2,7 +2,6 @@
     {
         "category": "efootprint_classes_available",
         "header": "UsageJourneyStep",
-        "class": "",
         "fields": [
             {
                 "input_type": "select",

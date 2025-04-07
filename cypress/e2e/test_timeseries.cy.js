@@ -12,7 +12,7 @@ describe('Tests dedicated to the timeseries generation', () => {
 
         cy.get('#btn-add-usage-journey').click();
         cy.get('#btn-add-usage-journey').should('be.visible');
-        cy.get('#name').type(ujName);
+        cy.get('#UsageJourney_name').type(ujName);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
         cy.get('div[id$="'+ujName.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
@@ -24,7 +24,7 @@ describe('Tests dedicated to the timeseries generation', () => {
             let ctx = canvas.getContext('2d');
             expect(ctx).not.to.be.null;
         });
-        cy.get('#name').type(upNameOne);
+        cy.get('#UsagePatternFromForm_name').type(upNameOne);
 
         cy.get('#start_date').click();
         cy.get('input[class="numInput cur-year"]').type('2026');
@@ -45,7 +45,7 @@ describe('Tests dedicated to the timeseries generation', () => {
             let ctx = canvas.getContext('2d');
             expect(ctx).not.to.be.null;
         });
-        cy.get('#name').type(upNameTwo);
+        cy.get('#UsagePatternFromForm_name').type(upNameTwo);
         cy.get('#start_date').click();
         cy.get('input[class="numInput cur-year"]').type('2027');
         cy.get('span[aria-label="January 1, 2027"]').click()
@@ -79,14 +79,14 @@ describe('Tests dedicated to the timeseries generation', () => {
 
         cy.get('#btn-add-usage-journey').click();
         cy.get('#btn-add-usage-journey').should('be.visible');
-        cy.get('#name').type(ujName);
+        cy.get('#UsageJourney_name').type(ujName);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
         cy.get('div[id$="'+ujName.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
 
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#name').type(upNameOne);
+        cy.get('#UsagePatternFromForm_name').type(upNameOne);
 
         cy.get('#start_date').click();
         cy.get('span[aria-label="January 1, 2025"]').click();
@@ -165,7 +165,7 @@ describe('Tests dedicated to the timeseries generation', () => {
 
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#name').type(upNameOne);
+        cy.get('#UsagePatternFromForm_name').type(upNameOne);
 
         cy.get('#modeling_duration_unit').select('month');
         cy.get('#modeling_duration_value').invoke('val', '15').trigger('input');

@@ -8,17 +8,9 @@
     </h2>
     <div id="collapse-attribute-link-to-other-objet" class="accordion-collapse collapse show">
         <div class="accordion-body row">
-            {% for attr in modeling_obj_attributes %}
-            <div class="col-12 mb-3">
-                <label for="{{ attr.attr_name }}" class="form-label w-100 text-start fz-0-8">Select a {{ attr.attr_name }}:</label>
-                <select class="form-select light-select fz-0-8 h-30" id="{{ attr.attr_name }}" name="{{ attr.attr_name }}">
-                    {% for obj in attr.existing_objects %}
-                         <option value="{{ obj.efootprint_id }}" {% if obj.efootprint_id == attr.selected_efootprint_id %}selected{% endif %}>{{ obj.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            {% for field in form_fields %}
+                {%  include "model_builder/side_panels/components/dynamic_form_field.html" %}
             {% endfor %}
         </div>
     </div>
 </div>
-
