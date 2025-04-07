@@ -1,15 +1,13 @@
 import json
 
 from django.http import HttpResponse
-from efootprint.builders.services.service_base_class import Service
 from efootprint.core.hardware.server_base import ServerBase
 
 from model_builder.class_structure import generate_object_edition_structure
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 from model_builder.edition.edit_panel_http_response_generators import generate_usage_pattern_edit_panel_http_response, \
-    generate_server_edit_panel_http_response, generate_service_edit_panel_http_response, \
-    generate_generic_edit_panel_http_response
+    generate_server_edit_panel_http_response, generate_generic_edit_panel_http_response
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal
@@ -31,9 +29,6 @@ def open_edit_object_panel(request, object_id):
             request, obj_to_edit, form_fields, object_belongs_to_computable_system)
     elif issubclass(obj_to_edit.efootprint_class, ServerBase):
         http_response = generate_server_edit_panel_http_response(
-            request, form_fields, obj_to_edit, object_belongs_to_computable_system, dynamic_form_data)
-    elif issubclass(obj_to_edit.efootprint_class, Service):
-        http_response = generate_service_edit_panel_http_response(
             request, form_fields, obj_to_edit, object_belongs_to_computable_system, dynamic_form_data)
     else:
         http_response = generate_generic_edit_panel_http_response(

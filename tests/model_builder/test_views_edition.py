@@ -59,10 +59,10 @@ class TestViewsEdition(TestModelingBase):
         model_web = ModelWeb(job_request.session)
         job = model_web.get_web_object_from_efootprint_id(new_job_id)
 
-        job_edition_structure, dynamic_form_data = generate_object_edition_structure(
+        job_edition_fields, dynamic_form_data = generate_object_edition_structure(
             job, attributes_to_skip=["service"])
 
-        ref_job_edition_structure = {'fields': [
+        ref_job_edition_fields = [
             {'input_type': 'str', 'id': 'WebApplicationJob_name', 'name': 'name', "default": "New job"},
             {'input_type': 'input',
              'id': 'WebApplicationJob_data_transferred',
@@ -87,11 +87,10 @@ class TestViewsEdition(TestModelingBase):
                          {'label': 'orm-loop', 'value': 'orm-loop'}],
              },
             ]
-        }
 
         ref_dynamic_form_data = {'dynamic_lists': []}
 
-        self.assertDictEqual(job_edition_structure, ref_job_edition_structure)
+        self.assertListEqual(job_edition_fields, ref_job_edition_fields)
         self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
 
     @patch("model_builder.edition.views_edition.render_exception_modal")

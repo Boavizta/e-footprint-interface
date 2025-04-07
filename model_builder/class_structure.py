@@ -62,10 +62,10 @@ def generate_object_edition_structure(web_object, attributes_to_skip=None):
     if attributes_to_skip is None:
         attributes_to_skip = []
 
-    object_fields, dynamic_lists = generate_dynamic_form(
+    form_fields, dynamic_lists = generate_dynamic_form(
         web_object.class_as_simple_str, web_object.modeling_obj.__dict__, attributes_to_skip, web_object.model_web)
 
-    return {"fields": object_fields}, {"dynamic_lists": dynamic_lists}
+    return form_fields, {"dynamic_lists": dynamic_lists}
 
 
 def generate_dynamic_form(
