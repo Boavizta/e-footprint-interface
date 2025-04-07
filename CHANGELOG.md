@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.3] - 2025-04-07
+
+### Changed
+- UsagePatternFromForm form fields now have same formatting as other object fields.
+- Name field is now included in object form section
+- When changing value of filtering dynamic list, corresponding datalist value is erased.
+
 ## [0.7.2] - 2025-04-03
 
 ### Changed
