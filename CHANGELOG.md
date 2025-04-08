@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.5] - 2025-04-11
+
+### Fixed
+
+- Fix issue linked to click on the browser back button (loading bar not 
+  stopping and all buttons not working anymore).
+- Result footprints unit conversion (kgs were displayed as tonnes).
+
 ## [0.7.4] - 2025-04-10
 
 ### Fixed

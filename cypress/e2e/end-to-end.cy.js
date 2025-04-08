@@ -15,6 +15,7 @@ describe('Test de la page d\'accueil', () => {
         cy.visit("/");
         cy.get('#btn-start-modeling-my-service').click();
         cy.get('#model-canva').should('be.visible');
+        cy.wait(500);
         cy.window().its('LeaderLine')
 
         //delete default card

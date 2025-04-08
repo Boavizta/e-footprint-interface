@@ -22,7 +22,6 @@
                                 hx-push-url="{% url 'understand' %}"
                                 hx-target="#main-content-block"
                                 hx-swap="innerHTML"
-                                hx-disabled-elt="button"
                                 class="nav-link d-flex flex-row gap-2 mx-2"
                                 hx-on:htmx:before-request="removeAllLines()">
                             <span>Understand</span>
@@ -33,7 +32,6 @@
                                 hx-push-url="{% url 'model-builder' %}"
                                 hx-target="#main-content-block"
                                 hx-swap="innerHTML"
-                                hx-disabled-elt="button"
                                 class="nav-link d-flex flex-row gap-2 mx-2"
                                 hx-on:htmx:before-request="removeAllLines()"
                         >

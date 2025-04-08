@@ -39,29 +39,31 @@
             {% elif modelBuilderMain %}
             {% include "model_builder/model_builder_main.html" %}
             {% endif %}
-        </div>
+        </main>
     </div>
-        <script src="{% static 'scripts/leaderline_utils.js' %}"></script>
-        <script src="{% static 'scripts/hammer_utils.js' %}"></script>
-        <script src="{% static 'scripts/dynamic_forms.js' %}"></script>
-        <script src="{% static 'scripts/loading_bar.js' %}"></script>
-        <script src="{% static 'scripts/modal_utils.js' %}"></script>
-        <script src="{% static 'scripts/side_panel_utils.js' %}"></script>
-        <script src="{% static 'scripts/result_charts.js' %}"></script>
-        <script src="{% static 'scripts/model_builder_main.js' %}"></script>
-        <script src="{% static 'scripts/timeseries_utils.js' %}"></script>
-        <script>
-            window.initModelBuilderMain = initModelBuilderMain;
+    <script src="{% static 'scripts/leaderline_utils.js' %}"></script>
+    <script src="{% static 'scripts/hammer_utils.js' %}"></script>
+    <script src="{% static 'scripts/dynamic_forms.js' %}"></script>
+    <script src="{% static 'scripts/loading_bar.js' %}"></script>
+    <script src="{% static 'scripts/modal_utils.js' %}"></script>
+    <script src="{% static 'scripts/side_panel_utils.js' %}"></script>
+    <script src="{% static 'scripts/result_charts.js' %}"></script>
+    <script src="{% static 'scripts/model_builder_main.js' %}"></script>
+    <script src="{% static 'scripts/timeseries_utils.js' %}"></script>
+    <script>
+        window.initModelBuilderMain = initModelBuilderMain;
 
-            document.body.addEventListener('initModelBuilderMain', function (event) {
-               window.initModelBuilderMain();
-            });
+        document.body.addEventListener('initModelBuilderMain', function (event) {
+           window.initModelBuilderMain();
+        });
 
-            window.addEventListener("load", function () {
-                if (window.location.pathname === "/model_builder/") {
-                    window.initModelBuilderMain();
-                }
-            });
-        </script>
+        window.addEventListener("load", function () {
+            if (window.location.pathname === "/model_builder/") {
+                window.initModelBuilderMain();
+            }
+        });
+
+        hideLoadingBar();
+    </script>
     </body>
 </html>
