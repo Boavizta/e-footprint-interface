@@ -2,12 +2,15 @@ import os
 import re
 import json
 from dataclasses import dataclass
+from inspect import signature
 from unittest import TestCase
 import sys
 from unittest.mock import MagicMock
 
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+
+from model_builder.modeling_objects_web import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -87,3 +90,14 @@ class TestsClassStructure(TestCase):
             remove_ids_from_str(json.dumps(hardware_archetypes)), remove_ids_from_str(json.dumps(default_devices)))
         self.assertEqual(
             remove_ids_from_str(json.dumps(countries)), remove_ids_from_str(json.dumps(default_countries)))
+
+    def test_field_correspondences_have_right_attribute_names(self):
+        for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
+            efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
+            list_values = efootprint_obj_class.list_values()
+            conditional_list_values = efootprint_obj_class.conditional_list_values()
+            id_prefix = efootprint_class_str
+            init_sig_params = signature(efootprint_obj_class.__init__).parameters
+
+            for attr_name in init_sig_params.keys():
+                pass
