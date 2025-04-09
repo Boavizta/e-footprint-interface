@@ -3,23 +3,27 @@ from efootprint.core.hardware.storage import Storage
 from django.shortcuts import render
 from efootprint.core.usage.job import Job
 
-from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT
+from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
+    FORM_TYPE_OBJECT
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_web import ModelWeb, default_networks, default_countries, default_devices, \
-    ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 
 
-def generate_generic_add_panel_http_response(request, object_type: str,  model_web: ModelWeb):
-    efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
+def generate_generic_add_panel_http_response(request, efootprint_class_str: str,  model_web: ModelWeb):
+    efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        [efootprint_class], "", ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
+        efootprint_class_str,
+        available_efootprint_classes=[efootprint_class],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=model_web
+    )
     template_name_mapping = {
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
-    template_name = template_name_mapping[object_type]
+    template_name = template_name_mapping[efootprint_class_str]
     context_data = {"form_fields": form_sections[1]["fields"],
                     "header_name": "Add new " + template_name.replace("_", " "),
-                    "obj_type": object_type}
+                    "obj_type": efootprint_class_str}
     if request.GET.get('efootprint_id_of_parent_to_link_to'):
         context_data['efootprint_id_of_parent_to_link_to'] = request.GET['efootprint_id_of_parent_to_link_to']
 
@@ -28,11 +32,18 @@ def generate_generic_add_panel_http_response(request, object_type: str,  model_w
 
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        SERVER_CLASSES + SERVER_BUILDER_CLASSES, "Server type",
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"], model_web=model_web)
+        "Server",
+        available_efootprint_classes = SERVER_CLASSES + SERVER_BUILDER_CLASSES,
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"],
+        model_web=model_web,
+    )
 
     storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
-        [Storage], "Storage type", ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
+        "Storage",
+        available_efootprint_classes=[Storage],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=model_web,
+    )
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
@@ -43,6 +54,9 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
                                "obj_type": "server",
                                "storage_obj_type": "storage",
                                "header_name": "Add new server",
+                               "gpu_server_label": FORM_TYPE_OBJECT["GPUServer"]["label"],
+                               "server_label": FORM_TYPE_OBJECT["Server"]["label"],
+                               "boavizta_cloud_server_label": FORM_TYPE_OBJECT["BoaviztaCloudServer"]["label"],
                            })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
@@ -56,8 +70,11 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
 
     installable_services = server.installable_services()
     services_dict, dynamic_form_data = generate_object_creation_structure(
-        installable_services, "Services available for this server", ["gpu_latency_alpha", "gpu_latency_beta", "server"],
-        model_web)
+        "Service",
+        available_efootprint_classes=installable_services,
+        attributes_to_skip=["gpu_latency_alpha", "gpu_latency_beta", "server"],
+        model_web=model_web,
+    )
 
     http_response = render(
         request, "model_builder/side_panels/service_add.html", {
@@ -86,8 +103,11 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             available_job_classes.update(service.compatible_jobs())
 
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        list(available_job_classes), "Job type",
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["server", "service"], model_web=model_web)
+        "Job",
+        available_efootprint_classes=list(available_job_classes),
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["server", "service"],
+        model_web=model_web,
+    )
     additional_item = {
         "category": "job_creation_helper",
         "header": "Job creation helper",
@@ -97,13 +117,15 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
                 "id": "server",
                 "name": "Server",
                 "options": [
-                    {'label': server.name, 'value': server.efootprint_id} for server in servers]
+                    {'label': server.name, 'value': server.efootprint_id} for server in servers],
+                'label': "Choose a server"
             },
             {
                 "input_type": "select",
                 "id": "service",
                 "name": "Service used",
-                "options": None
+                "options": None,
+                'label': "Service used"
             },
         ]
     }
@@ -152,10 +174,13 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
         return render_exception_modal(request, error)
 
     form_sections, dynamic_form_data = generate_object_creation_structure(
-    [UsagePatternFromForm], "Usage pattern",
+        "UsagePatternFromForm",
+        available_efootprint_classes=[UsagePatternFromForm],
         attributes_to_skip=["start_date", "modeling_duration_value", "modeling_duration_unit",
                             "initial_usage_journey_volume", "initial_usage_journey_volume_timespan",
-                            "net_growth_rate_in_percentage", "net_growth_rate_timespan"], model_web=model_web)
+                            "net_growth_rate_in_percentage", "net_growth_rate_timespan"],
+        model_web=model_web
+    )
 
     dynamic_select_options = {
         str(conditional_value): [str(possible_value) for possible_value in possible_values]
@@ -172,7 +197,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
     }
 
     for field in form_sections[1]["fields"]:
-        if field["name"] == "devices":
+        if field["attr_name"] == "devices":
             field["input_type"] = "select"
 
     http_response = render(

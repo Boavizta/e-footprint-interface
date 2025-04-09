@@ -1,15 +1,15 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "UsageJourneyStep",
+        "header": "Usage journey step selection",
         "fields": [
             {
                 "input_type": "select",
                 "id": "type_object_available",
-                "name": "type_object_available",
+                "label": "Available usage journey steps",
                 "options": [
                     {
-                        "label": "UsageJourneyStep",
+                        "label": "Usage journey step",
                         "value": "UsageJourneyStep"
                     }
                 ]
@@ -18,18 +18,20 @@
     },
     {
         "category": "UsageJourneyStep",
-        "header": "UsageJourneyStep creation",
+        "header": "Usage journey step creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "UsageJourneyStep_name",
-                "name": "name",
-                "default": "UsageJourneyStep 1"
+                "attr_name": "name",
+                "label": "Name",
+                "input_type": "str",
+                "default": "Usage journey step 1"
             },
             {
-                "input_type": "input",
                 "id": "UsageJourneyStep_user_time_spent",
-                "name": "user_time_spent",
+                "attr_name": "user_time_spent",
+                "label": "User time spent",
+                "input_type": "input",
                 "unit": "min",
                 "default": 1,
                 "source": {
@@ -38,9 +40,10 @@
                 }
             },
             {
-                "input_type": "select-multiple",
                 "id": "UsageJourneyStep_jobs",
-                "name": "jobs",
+                "attr_name": "jobs",
+                "label": "Jobs",
+                "input_type": "select-multiple",
                 "selected": [],
                 "options": [
                     {

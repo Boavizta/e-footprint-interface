@@ -11,7 +11,7 @@ def generate_usage_pattern_edit_panel_http_response(
     attributes_to_skip = [
             "start_date", "modeling_duration_value", "modeling_duration_unit", "initial_usage_journey_volume",
             "initial_usage_journey_volume_timespan", "net_growth_rate_in_percentage", "net_growth_rate_timespan"]
-    filtered_form_fields = [field for field in form_fields if field["name"] not in attributes_to_skip]
+    filtered_form_fields = [field for field in form_fields if field["attr_name"] not in attributes_to_skip]
 
     dynamic_select_options = {
         str(conditional_value): [str(possible_value) for possible_value in possible_values]
@@ -28,7 +28,7 @@ def generate_usage_pattern_edit_panel_http_response(
     }
 
     for field in filtered_form_fields:
-        if field["name"] == "devices":
+        if field["attr_name"] == "devices":
             field["input_type"] = "select"
 
     http_response = render(

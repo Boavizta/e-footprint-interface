@@ -1,15 +1,15 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "UsageJourney",
+        "header": "Usage journey selection",
         "fields": [
             {
                 "input_type": "select",
                 "id": "type_object_available",
-                "name": "type_object_available",
+                "label": "Available usage journeys",
                 "options": [
                     {
-                        "label": "UsageJourney",
+                        "label": "Usage journey",
                         "value": "UsageJourney"
                     }
                 ]
@@ -18,18 +18,20 @@
     },
     {
         "category": "UsageJourney",
-        "header": "UsageJourney creation",
+        "header": "Usage journey creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "UsageJourney_name",
-                "name": "name",
-                "default": "UsageJourney 1"
+                "attr_name": "name",
+                "label": "Name",
+                "input_type": "str",
+                "default": "Usage journey 1"
             },
             {
-                "input_type": "select-multiple",
                 "id": "UsageJourney_uj_steps",
-                "name": "uj_steps",
+                "attr_name": "uj_steps",
+                "label": "Uj steps",
+                "input_type": "select-multiple",
                 "selected": [],
                 "options": [
                     {

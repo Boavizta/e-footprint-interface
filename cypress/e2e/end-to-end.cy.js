@@ -38,6 +38,8 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
 
+        cy.wait(500);
+
         cy.get('#btn-add-usage-journey').click();
         cy.get('#UsageJourney_name').clear();
         cy.get('#btn-submit-form').click();
@@ -114,6 +116,7 @@ describe('Test de la page d\'accueil', () => {
 
         // Add usagePattern
         cy.get('button').contains('Add usage pattern').click();
+        cy.wait(500);
         cy.get('#sidePanel').should('be.visible');
         cy.get('#UsagePatternFromForm_name').clear();
         cy.get('#UsagePatternFromForm_name').type(upNameOne);

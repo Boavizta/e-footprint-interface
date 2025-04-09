@@ -15,6 +15,10 @@ def camelcase_html_filename_from_path(html_file_path: str):
 
     return html_filename
 
+def format_snakecase_string(string: str) -> str:
+    format_str = str.replace(string, "_", " ")
+    return format_str.capitalize()
+
 
 def htmx_render(request, html_file_path: str, context=None):
     if context is None:

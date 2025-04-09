@@ -2,28 +2,29 @@ import os
 import re
 import json
 from dataclasses import dataclass
+from inspect import signature
 from unittest import TestCase
 import sys
 from unittest.mock import MagicMock
 
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
-
-# Add project root to sys.path manually
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, SERVER_CLASSES, SERVICE_JOB_CLASSES, \
     SERVER_BUILDER_CLASSES
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
 from efootprint.core.usage.job import Job
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from efootprint.logger import logger
+
+# Add project root to sys.path manually
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT
 from model_builder.model_web import model_web_root, ATTRIBUTES_TO_SKIP_IN_FORMS
-from utils import EFOOTPRINT_COUNTRIES
+from model_builder.modeling_objects_web import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 
+from utils import EFOOTPRINT_COUNTRIES, format_snakecase_string
 
 obj_creation_structure_dict = {
         "Service": SERVICE_CLASSES, "Server": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
@@ -57,7 +58,7 @@ class TestsClassStructure(TestCase):
             option2 = MockModelingObjectWeb(id="efootprint_id2", name="option2")
             model_web.get_efootprint_objects_from_efootprint_type.side_effect = lambda x: [option1, option2]
             structure, dynamic_data = generate_object_creation_structure(
-                class_list, class_category_name, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS, model_web=model_web)
+                class_category_name, class_list, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS, model_web=model_web)
             self._test_dict_equal_to_ref(structure, tmp_structure_filepath)
             tmp_dynamic_data_filepath = os.path.join(
                 root_dir, "class_structures", f"{class_category_name}_creation_dynamic_data_tmp.json")
@@ -87,3 +88,22 @@ class TestsClassStructure(TestCase):
             remove_ids_from_str(json.dumps(hardware_archetypes)), remove_ids_from_str(json.dumps(default_devices)))
         self.assertEqual(
             remove_ids_from_str(json.dumps(countries)), remove_ids_from_str(json.dumps(default_countries)))
+
+    def test_objects_attributes_have_correspondences(self):
+        with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
+            form_field_references = json.load(f)
+        with open(os.path.join(model_web_root, "form_type_object.json"), "r") as f:
+            form_type_objet = json.load(f)
+
+        objects_extra_fields_to_check = ['Server','Service']
+
+        for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
+            efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
+            init_sig_params = signature(efootprint_obj_class.__init__).parameters
+            for attr_name in init_sig_params.keys():
+                if attr_name == 'self':
+                    continue
+                assert form_field_references[efootprint_class_str][attr_name]["label"] is not None
+
+        for object_extra_fields_to_check in objects_extra_fields_to_check:
+                assert form_type_objet[object_extra_fields_to_check]["label"] is not None

@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Harmonize usage pattern time series css with other object forms.
 
 ### Changed
-- On result panel, the number of decimal digits is now set to 2 for tooltips 
-  in charts.
+- On result panel, the number of decimal digits is now set to 2 for tooltips in charts.
 - for all charts, the month format is now always in english (Jan. Feb, Mar...)
+- Add two reference files to overwrite fields label in forms additions and editions and give to users a better understanding of the fields.
 
 ## [0.7.6] - 2025-04-11
 
@@ -25,8 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fix issue linked to click on the browser back button (loading bar not 
-  stopping and all buttons not working anymore).
+- Fix issue linked to click on the browser back button (loading bar not stopping and all buttons not working anymore).
 - Result footprints unit conversion (kgs were displayed as tonnes).
 
 ## [0.7.4] - 2025-04-10

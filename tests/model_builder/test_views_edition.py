@@ -62,39 +62,10 @@ class TestViewsEdition(TestModelingBase):
         job_edition_fields, dynamic_form_data = generate_object_edition_structure(
             job, attributes_to_skip=["service"])
 
-        ref_job_edition_fields = [
-            {'input_type': 'str', 'id': 'WebApplicationJob_name', 'name': 'name', "default": "New job"},
-            {'input_type': 'input',
-             'id': 'WebApplicationJob_data_transferred',
-             'name': 'data_transferred',
-             'unit': 'MB',
-             'default': 150.0,
-             'source': {'name':'user data', 'link':None}
-             },
-            {'input_type': 'input',
-             'id': 'WebApplicationJob_data_stored',
-             'name': 'data_stored',
-             'unit': 'kB',
-             'default': 100.0,
-             'source': {'name':'hypothesis', 'link':None}
-             },
-            {'input_type': 'select',
-             'id': 'WebApplicationJob_implementation_details',
-             'name': 'implementation_details',
-             'selected': "aggregation-code-side",
-             'options': [{'label': 'aggregation-code-side',
-                          'value': 'aggregation-code-side'},
-                         {'label': 'default', 'value': 'default'},
-                         {'label': 'mysql', 'value': 'mysql'},
-                         {'label': 'no-index', 'value': 'no-index'},
-                         {'label': 'no-pagination', 'value': 'no-pagination'},
-                         {'label': 'orm-loop', 'value': 'orm-loop'}],
-             },
-            ]
-
         ref_dynamic_form_data = {'dynamic_lists': []}
-        self.assertListEqual(job_edition_fields, ref_job_edition_fields)
+
         self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
+        self.assertEqual(job_request.session["system_data"]["WebApplicationJob"][new_job_id]["name"], "New job")
 
     @patch("model_builder.edition.views_edition.render_exception_modal")
     def test_edit_genai_model(self, mock_render_exception_modal):

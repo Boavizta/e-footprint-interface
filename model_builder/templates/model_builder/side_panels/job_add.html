@@ -8,8 +8,9 @@
                 hx-disabled-elt="button"
                 hx-on::after-request="closeAndEmptySidePanel()"
     >
-       {% with helper_message="To get support in defining your job, first create a server and add services to it." %}
-            {% include "model_builder/side_panels/add/add_form_content.html" %}
-        {% endwith %}
+        <p>
+            To get support in defining your job, first create a server and add services to it.
+        </p>
+        {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>
 {% endblock %}

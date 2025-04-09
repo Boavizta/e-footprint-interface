@@ -1,0 +1,380 @@
+{
+    "Server": {
+        "name": {
+            "label": "Name"
+        },
+        "server_type": {
+            "label": "Infrastructure type available"
+        },
+        "carbon_footprint_fabrication": {
+            "label": "Carbon footprint fabrication"
+        },
+        "power": {
+            "label": "Power"
+        },
+        "lifespan": {
+            "label": "Lifespan"
+        },
+        "idle_power": {
+            "label": "Idle power"
+        },
+        "ram": {
+            "label": "Ram"
+        },
+        "compute": {
+            "label": "Compute"
+        },
+        "power_usage_effectiveness": {
+            "label": "Power usage effectiveness"
+        },
+        "average_carbon_intensity": {
+            "label": "Average carbon intensity"
+        },
+        "server_utilization_rate": {
+            "label": "Server utilization rate"
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption"
+        },
+        "base_compute_consumption": {
+            "label": "Base compute consumption"
+        },
+        "storage": {
+            "label": "Storage"
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances"
+        }
+    },
+    "GPUServer": {
+        "name": {
+            "label": "Name"
+        },
+        "server_type": {
+            "label": "Server type"
+        },
+        "gpu_power": {
+            "label": "Gpu power"
+        },
+        "gpu_idle_power": {
+            "label": "Gpu idle power"
+        },
+        "ram_per_gpu": {
+            "label": "Ram per gpu"
+        },
+        "carbon_footprint_fabrication_per_gpu": {
+            "label": "Carbon footprint fabrication per gpu"
+        },
+        "average_carbon_intensity": {
+            "label": "Average carbon intensity"
+        },
+        "compute": {
+            "label": "Compute"
+        },
+        "carbon_footprint_fabrication_without_gpu": {
+            "label": "Carbon footprint fabrication without gpu"
+        },
+        "lifespan": {
+            "label": "Lifespan"
+        },
+        "power_usage_effectiveness": {
+            "label": "Power usage effectiveness"
+        },
+        "server_utilization_rate": {
+            "label": "Server utilization rate"
+        },
+        "base_compute_consumption": {
+            "label": "Base compute consumption"
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption"
+        },
+        "storage": {
+            "label": "Storage"
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances"
+        }
+    },
+    "BoaviztaCloudServer": {
+        "name": {
+            "label": "Name"
+        },
+        "provider": {
+            "label": "Provider"
+        },
+        "instance_type": {
+            "label": "Instance type"
+        },
+        "server_type": {
+            "label": "Server type"
+        },
+        "lifespan": {
+            "label": "Lifespan"
+        },
+        "idle_power": {
+            "label": "Idle power"
+        },
+        "power_usage_effectiveness": {
+            "label": "Power usage effectiveness"
+        },
+        "average_carbon_intensity": {
+            "label": "Average carbon intensity"
+        },
+        "server_utilization_rate": {
+            "label": "Server utilization rate"
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption"
+        },
+        "base_compute_consumption": {
+            "label": "Base compute consumption"
+        },
+        "storage": {
+            "label": "Storage"
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances"
+        }
+    },
+    "UsageJourneyStep": {
+        "name": {
+            "label": "Name"
+        },
+        "user_time_spent": {
+            "label": "User time spent"
+        },
+        "jobs": {
+            "label": "Jobs"
+        }
+    },
+    "UsageJourney": {
+        "name": {
+            "label": "Name"
+        },
+        "uj_steps": {
+            "label": "Uj steps"
+        }
+    },
+    "UsagePattern": {
+        "name": {
+            "label": "Name"
+        },
+        "usage_journey": {
+            "label": "Usage journey"
+        },
+        "devices": {
+            "label": "Devices"
+        },
+        "network": {
+            "label": "Network"
+        },
+        "country": {
+            "label": "Country"
+        },
+        "hourly_usage_journey_starts": {
+            "label": "Hourly usage journey starts"
+        }
+    },
+    "UsagePatternFromForm": {
+        "name": {
+            "label": "Name"
+        },
+        "usage_journey": {
+            "label": "Usage journey"
+        },
+        "devices": {
+            "label": "Devices"
+        },
+        "network": {
+            "label": "Network"
+        },
+        "country": {
+            "label": "Country"
+        },
+        "start_date": {
+            "label": "Start date"
+        },
+        "modeling_duration_value": {
+            "label": "Modeling duration value"
+        },
+        "modeling_duration_unit": {
+            "label": "Modeling duration unit"
+        },
+        "initial_usage_journey_volume": {
+            "label": "Initial usage journey volume"
+        },
+        "initial_usage_journey_volume_timespan": {
+            "label": "Initial usage journey volume timespan"
+        },
+        "net_growth_rate_in_percentage": {
+            "label": "Net growth rate in percentage"
+        },
+        "net_growth_rate_timespan": {
+            "label": "Net growth rate timespan"
+        }
+    },
+    "Job": {
+        "name": {
+            "label": "Name"
+        },
+        "server": {
+            "label": "Server"
+        },
+        "data_transferred": {
+            "label": "Data transferred"
+        },
+        "data_stored": {
+            "label": "Data stored"
+        },
+        "request_duration": {
+            "label": "Request duration"
+        },
+        "compute_needed": {
+            "label": "Compute needed"
+        },
+        "ram_needed": {
+            "label": "Ram needed"
+        }
+    },
+    "GenAIJob": {
+        "name": {
+            "label": "Name"
+        },
+        "service": {
+            "label": "Service"
+        },
+        "output_token_count": {
+            "label": "Output token count"
+        }
+    },
+    "VideoStreamingJob": {
+        "name": {
+            "label": "Name"
+        },
+        "service": {
+            "label": "Service"
+        },
+        "resolution": {
+            "label": "Resolution"
+        },
+        "video_duration": {
+            "label": "Video duration"
+        },
+        "refresh_rate": {
+            "label": "Refresh rate"
+        },
+        "data_stored": {
+            "label": "Data stored"
+        }
+    },
+    "WebApplicationJob": {
+        "name": {
+            "label": "Name"
+        },
+        "service": {
+            "label": "Service"
+        },
+        "data_transferred": {
+            "label": "Data transferred"
+        },
+        "data_stored": {
+            "label": "Data stored"
+        },
+        "implementation_details": {
+            "label": "Implementation details"
+        }
+    },
+    "GenAIModel": {
+        "name": {
+            "label": "Name"
+        },
+        "provider": {
+            "label": "Provider"
+        },
+        "model_name": {
+            "label": "Model name"
+        },
+        "server": {
+            "label": "Server"
+        },
+        "nb_of_bits_per_parameter": {
+            "label": "Nb of bits per parameter"
+        },
+        "llm_memory_factor": {
+            "label": "Llm memory factor"
+        },
+        "gpu_latency_alpha": {
+            "label": "Gpu latency alpha"
+        },
+        "gpu_latency_beta": {
+            "label": "Gpu latency beta"
+        },
+        "bits_per_token": {
+            "label": "Bits per token"
+        }
+    },
+    "VideoStreaming": {
+        "name": {
+            "label": "Name"
+        },
+        "server": {
+            "label": "Server"
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption"
+        },
+        "bits_per_pixel": {
+            "label": "Bits per pixel"
+        },
+        "static_delivery_cpu_cost": {
+            "label": "Static delivery cpu cost"
+        },
+        "ram_buffer_per_user": {
+            "label": "Ram buffer per user"
+        }
+    },
+    "WebApplication": {
+        "name": {
+            "label": "Name"
+        },
+        "server": {
+            "label": "Server"
+        },
+        "technology": {
+            "label": "Technology"
+        }
+    },
+    "Storage": {
+        "name": {
+            "label": "Name"
+        },
+        "carbon_footprint_fabrication_per_storage_capacity": {
+            "label": "Carbon footprint fabrication per storage capacity"
+        },
+        "power_per_storage_capacity": {
+            "label": "Power per storage capacity"
+        },
+        "lifespan": {
+            "label": "Lifespan"
+        },
+        "idle_power": {
+            "label": "Idle power"
+        },
+        "storage_capacity": {
+            "label": "Storage capacity"
+        },
+        "data_replication_factor": {
+            "label": "Data replication factor"
+        },
+        "data_storage_duration": {
+            "label": "Data storage duration"
+        },
+        "base_storage_need": {
+            "label": "Base storage need"
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances"
+        }
+    }
+}

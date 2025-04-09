@@ -1,6 +1,6 @@
 <div class="mb-3">
     {% if field.input_type == 'select' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
         <select
             class="form-control p-2"
             id="{{ field.id }}"
@@ -13,7 +13,7 @@
             {% endfor %}
         </select>
     {% elif field.input_type == 'select-multiple' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
         <select class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" multiple>
             <!-- This is a workaround to make sure that the form is submitted even if no option is selected -->
             <option value="" hidden selected></option>
@@ -27,7 +27,7 @@
             {% endfor %}
         </select>
     {% elif field.input_type == 'datalist' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
         <input
                 class="form-control p-2"
                 list="datalist_{{ field.id }}"
@@ -40,11 +40,11 @@
             <option selected value="select a provider">
         </datalist>
     {% elif field.input_type == 'str' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.name }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
     {% elif field.input_type == "input" %}
         <div class="input-group">
-            <label for="{{ field.id }}" class="form-label w-100">{{ field.name }}</label>
+            <label for="{{ field.id }}" class="form-label w-100">{{ field.label }}</label>
             <input type="number"
                     class="form-control input_with_add_on"
                     id="{{ field.id }}"

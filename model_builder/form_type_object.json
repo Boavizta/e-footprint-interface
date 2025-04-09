@@ -1,0 +1,58 @@
+{
+    "Server": {
+        "label": "Server",
+        "type_object_available": "Available server types"
+    },
+    "Job": {
+        "label": "Job",
+        "type_object_available": "Available job types"
+    },
+    "Service": {
+        "label": "Service",
+        "type_object_available": "Available services for this server"
+    },
+    "Storage": {
+        "label": "Storage",
+        "type_object_available": "Available storage types"
+    },
+    "UsagePatternFromForm": {
+        "label": "Usage pattern",
+        "type_object_available": "Available usage patterns"
+    },
+    "UsagePattern": {
+        "label": "Usage pattern",
+        "type_object_available": "Available usage patterns"
+    },
+    "UsageJourneyStep": {
+        "label": "Usage journey step",
+        "type_object_available": "Available usage journey steps"
+    },
+    "UsageJourney": {
+        "label": "Usage journey",
+        "type_object_available": "Available usage journeys"
+    },
+    "BoaviztaCloudServer": {
+        "label": "Cloud server from Boavizta API"
+    },
+    "GPUServer": {
+        "label": "GPU server"
+    },
+    "WebApplication": {
+        "label": "Web application"
+    },
+    "VideoStreaming": {
+        "label": "Video streaming application"
+    },
+    "GenAIModel": {
+        "label": "Generative AI model"
+    },
+    "WebApplicationJob": {
+        "label": "Web application job"
+    },
+    "VideoStreamingJob": {
+        "label": "Video streaming job"
+    },
+    "GenAIJob": {
+        "label": "Generative AI job"
+    }
+}

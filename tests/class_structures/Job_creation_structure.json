@@ -1,27 +1,27 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Job",
+        "header": "Job selection",
         "fields": [
             {
                 "input_type": "select",
                 "id": "type_object_available",
-                "name": "type_object_available",
+                "label": "Available job types",
                 "options": [
                     {
                         "label": "Job",
                         "value": "Job"
                     },
                     {
-                        "label": "WebApplicationJob",
+                        "label": "Web application job",
                         "value": "WebApplicationJob"
                     },
                     {
-                        "label": "VideoStreamingJob",
+                        "label": "Video streaming job",
                         "value": "VideoStreamingJob"
                     },
                     {
-                        "label": "GenAIJob",
+                        "label": "Generative AI job",
                         "value": "GenAIJob"
                     }
                 ]
@@ -33,15 +33,17 @@
         "header": "Job creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "Job_name",
-                "name": "name",
+                "attr_name": "name",
+                "label": "Name",
+                "input_type": "str",
                 "default": "Job 1"
             },
             {
-                "input_type": "input",
                 "id": "Job_data_transferred",
-                "name": "data_transferred",
+                "attr_name": "data_transferred",
+                "label": "Data transferred",
+                "input_type": "input",
                 "unit": "kB",
                 "default": 150,
                 "source": {
@@ -50,9 +52,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "Job_data_stored",
-                "name": "data_stored",
+                "attr_name": "data_stored",
+                "label": "Data stored",
+                "input_type": "input",
                 "unit": "kB",
                 "default": 100,
                 "source": {
@@ -61,9 +64,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "Job_request_duration",
-                "name": "request_duration",
+                "attr_name": "request_duration",
+                "label": "Request duration",
+                "input_type": "input",
                 "unit": "s",
                 "default": 1,
                 "source": {
@@ -72,9 +76,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "Job_compute_needed",
-                "name": "compute_needed",
+                "attr_name": "compute_needed",
+                "label": "Compute needed",
+                "input_type": "input",
                 "unit": "cpu_core",
                 "default": 0.1,
                 "source": {
@@ -83,9 +88,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "Job_ram_needed",
-                "name": "ram_needed",
+                "attr_name": "ram_needed",
+                "label": "Ram needed",
+                "input_type": "input",
                 "unit": "MB",
                 "default": 50,
                 "source": {
@@ -97,18 +103,20 @@
     },
     {
         "category": "WebApplicationJob",
-        "header": "WebApplicationJob creation",
+        "header": "Web application job creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "WebApplicationJob_name",
-                "name": "name",
-                "default": "WebApplicationJob 1"
+                "attr_name": "name",
+                "label": "Name",
+                "input_type": "str",
+                "default": "Web application job 1"
             },
             {
-                "input_type": "input",
                 "id": "WebApplicationJob_data_transferred",
-                "name": "data_transferred",
+                "attr_name": "data_transferred",
+                "label": "Data transferred",
+                "input_type": "input",
                 "unit": "MB",
                 "default": 2.2,
                 "source": {
@@ -117,9 +125,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "WebApplicationJob_data_stored",
-                "name": "data_stored",
+                "attr_name": "data_stored",
+                "label": "Data stored",
+                "input_type": "input",
                 "unit": "kB",
                 "default": 100,
                 "source": {
@@ -128,9 +137,10 @@
                 }
             },
             {
-                "input_type": "select",
                 "id": "WebApplicationJob_implementation_details",
-                "name": "implementation_details",
+                "attr_name": "implementation_details",
+                "label": "Implementation details",
+                "input_type": "select",
                 "selected": "default",
                 "options": [
                     {
@@ -163,18 +173,20 @@
     },
     {
         "category": "VideoStreamingJob",
-        "header": "VideoStreamingJob creation",
+        "header": "Video streaming job creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "VideoStreamingJob_name",
-                "name": "name",
-                "default": "VideoStreamingJob 1"
+                "attr_name": "name",
+                "label": "Name",
+                "input_type": "str",
+                "default": "Video streaming job 1"
             },
             {
-                "input_type": "select",
                 "id": "VideoStreamingJob_resolution",
-                "name": "resolution",
+                "attr_name": "resolution",
+                "label": "Resolution",
+                "input_type": "select",
                 "selected": "1080p (1920 x 1080)",
                 "options": [
                     {
@@ -208,9 +220,10 @@
                 ]
             },
             {
-                "input_type": "input",
                 "id": "VideoStreamingJob_video_duration",
-                "name": "video_duration",
+                "attr_name": "video_duration",
+                "label": "Video duration",
+                "input_type": "input",
                 "unit": "h",
                 "default": 1,
                 "source": {
@@ -219,9 +232,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "VideoStreamingJob_refresh_rate",
-                "name": "refresh_rate",
+                "attr_name": "refresh_rate",
+                "label": "Refresh rate",
+                "input_type": "input",
                 "unit": "1/s",
                 "default": 30.0,
                 "source": {
@@ -230,9 +244,10 @@
                 }
             },
             {
-                "input_type": "input",
                 "id": "VideoStreamingJob_data_stored",
-                "name": "data_stored",
+                "attr_name": "data_stored",
+                "label": "Data stored",
+                "input_type": "input",
                 "unit": "MB",
                 "default": 0,
                 "source": {
@@ -244,18 +259,20 @@
     },
     {
         "category": "GenAIJob",
-        "header": "GenAIJob creation",
+        "header": "Generative AI job creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "GenAIJob_name",
-                "name": "name",
-                "default": "GenAIJob 1"
+                "attr_name": "name",
+                "label": "Name",
+                "input_type": "str",
+                "default": "Generative AI job 1"
             },
             {
-                "input_type": "input",
                 "id": "GenAIJob_output_token_count",
-                "name": "output_token_count",
+                "attr_name": "output_token_count",
+                "label": "Output token count",
+                "input_type": "input",
                 "unit": "",
                 "default": 1000,
                 "source": {
