@@ -1,4 +1,4 @@
-window.chartJSOptions = {
+let resultChartJSOptions = {
     responsive: true,
     scales: {
         x: {
@@ -80,8 +80,8 @@ function drawResultChart(chartType, resultsTemporalGranularity){
     chartData.labels = generateTimeIndexLabels(
         window.emissions["dates"][0], resultsTemporalGranularity, chartData["datasets"][0]["data"].length);
 
-    window.chartJSOptions.scales.x.time.unit = resultsTemporalGranularity === "month" ? "month" : "year";
-    window.chartJSOptions.scales.x.time.tooltipFormat = resultsTemporalGranularity === "month" ? "MMM yyyy" : "yyyy";
+    resultChartJSOptions.scales.x.time.unit = resultsTemporalGranularity === "month" ? "month" : "year";
+    resultChartJSOptions.scales.x.time.tooltipFormat = resultsTemporalGranularity === "month" ? "MMM yyyy" : "yyyy";
 
     if (window.charts[chartType+'Chart']) {
         window.charts[chartType+'Chart'].destroy();
@@ -94,7 +94,7 @@ function drawResultChart(chartType, resultsTemporalGranularity){
         chart:{height: '400px'},
         type: chartType,
         data: chartData,
-        options: window.chartJSOptions
+        options: resultChartJSOptions
     });
 }
 

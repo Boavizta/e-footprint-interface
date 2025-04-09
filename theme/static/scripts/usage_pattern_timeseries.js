@@ -1,4 +1,4 @@
-window.chartJSOptions = {
+let timeSeriesChartJSOptions = {
     scales: {
         x: {
             type: 'time',
@@ -91,8 +91,8 @@ function createOrUpdateTimeSeriesChart(){
         window.chart = null;
     }
 
-    window.chartJSOptions.scales.x.time.unit = displayGranularity === "month" ? "month" : "year";
-    window.chartJSOptions.scales.x.time.tooltipFormat = displayGranularity === "month" ? "MMM yyyy" : "yyyy";
+    timeSeriesChartJSOptions.scales.x.time.unit = displayGranularity === "month" ? "month" : "year";
+    timeSeriesChartJSOptions.scales.x.time.tooltipFormat = displayGranularity === "month" ? "MMM yyyy" : "yyyy";
 
     const ctx = document.getElementById("timeSeriesChart").getContext('2d');
     window.chart = new Chart(ctx, {
@@ -108,7 +108,7 @@ function createOrUpdateTimeSeriesChart(){
                 tension: 0.5
             }]
         },
-        options: window.chartJSOptions
+        options: timeSeriesChartJSOptions
     });
 }
 
