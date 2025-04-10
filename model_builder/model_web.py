@@ -179,7 +179,7 @@ class ModelWeb:
             elt for elt in list(energy_footprints.values()) + list(fabrication_footprints.values())
             if isinstance(elt, ExplainableHourlyQuantities)]
 
-        combined_index = pd.period_range(
+        combined_index = pd.date_range(
             start=min(
                 explainable_hourly_quantities.value.index.min() for explainable_hourly_quantities in
                 all_explainable_hourly_quantities_values),
@@ -203,14 +203,12 @@ class ModelWeb:
         energy_footprints, fabrication_footprints, combined_index = (
             self.get_reindexed_system_energy_and_fabrication_footprint_as_df_dict())
 
-        # Resample all dataframes to daily frequency
-        hours = combined_index.view('int64')
-        days_since_epoch = hours // 24
-        unique_days, unique_days_indices = np.unique(days_since_epoch, return_inverse=True)
-
+        day_indexes_from_unix_epoch = (combined_index.view("int64") // (24 * 3600 * 1e9)).astype(int)
+        day_indexes_from_df_start = day_indexes_from_unix_epoch - day_indexes_from_unix_epoch.min()
         def to_rounded_daily_values_list(df, rounding_depth=5):
-            daily_sums = np.bincount(unique_days_indices, weights=df["value"].pint.to(u.kg).values)
+            daily_sums = np.bincount(day_indexes_from_df_start, weights=df["value"].pint.to(u.kg).values._data)
 
+            # Round the results and return as a list
             return np.round(daily_sums, rounding_depth).tolist()
 
         values = {
@@ -223,7 +221,8 @@ class ModelWeb:
             "Devices_fabrication": to_rounded_daily_values_list(fabrication_footprints["Devices"])
         }
 
-        date_index = pd.to_datetime(unique_days, unit='D', origin="1970-01-01")
+        # normalize converts all datetime indexes to midnight time
+        date_index = combined_index.normalize().drop_duplicates()
         emissions = {
             "dates": date_index.strftime("%Y-%m-%d").tolist(),
             "values": values

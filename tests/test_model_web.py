@@ -15,21 +15,21 @@ class TestModelWeb(unittest.TestCase):
         self.model_web.system = MagicMock()
         self.model_web.system.total_energy_footprints = {
             "Servers": pd.DataFrame(
-                {"value": [1, 2]}, index=pd.period_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [1, 2]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Storage": pd.DataFrame(
-                {"value": [3, 4]}, index=pd.period_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [3, 4]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Devices": pd.DataFrame(
-                {"value": [5, 6]}, index=pd.period_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [5, 6]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Network": pd.DataFrame(
-                {"value": [7, 8]}, index=pd.period_range("2023-01-01 03:00", periods=2, freq='h'), dtype="pint[kg]")
+                {"value": [7, 8]}, index=pd.date_range("2023-01-01 03:00", periods=2, freq='h'), dtype="pint[kg]")
         }
         self.model_web.system.total_fabrication_footprints = {
             "Servers": pd.DataFrame(
-                {"value": [9, 10]}, index=pd.period_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [9, 10]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Storage": pd.DataFrame(
-                {"value": [11, 12]}, index=pd.period_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [11, 12]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Devices": pd.DataFrame(
-                {"value": [13, 14]}, index=pd.period_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [13, 14]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Network": EmptyExplainableObject()
         }
 
@@ -44,7 +44,7 @@ class TestModelWeb(unittest.TestCase):
             self.model_web.get_reindexed_system_energy_and_fabrication_footprint_as_df_dict())
 
         # Check if the indices are correctly reindexed
-        ref_combined_index = pd.period_range("2023-01-01 00:00", periods=28, freq='h')
+        ref_combined_index = pd.date_range("2023-01-01 00:00", periods=28, freq='h')
         for df in energy_footprints.values():
             self.assertTrue(df.index.equals(ref_combined_index))
         for df in fabrication_footprints.values():
@@ -52,9 +52,9 @@ class TestModelWeb(unittest.TestCase):
 
         # Check if the values are correctly filled with 0
         for df in energy_footprints.values():
-            self.assertTrue((df.loc[pd.Period("2023-01-01 13:00", freq="h")]["value"] == 0 * u.kg))
+            self.assertTrue((df.loc[pd.Timestamp("2023-01-01 13:00")]["value"] == 0 * u.kg))
         for df in fabrication_footprints.values():
-            self.assertTrue((df.loc[pd.Period("2023-01-01 13:00", freq="h")]["value"] == 0 * u.kg))
+            self.assertTrue((df.loc[pd.Timestamp("2023-01-01 13:00")]["value"] == 0 * u.kg))
 
     def test_system_emissions(self):
         emissions = self.model_web.system_emissions

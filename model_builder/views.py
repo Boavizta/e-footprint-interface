@@ -1,18 +1,15 @@
 import random
 import string
 from datetime import datetime
-from operator import index
 
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.core.cache import cache
-from efootprint.abstract_modeling_classes.explainable_object_base_class import \
-    retrieve_update_function_from_mod_obj_and_attr_name
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
+from efootprint.utils.tools import time_it
 
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal
@@ -102,6 +99,7 @@ def upload_json(request):
 
     return http_response
 
+@time_it
 def result_chart(request):
     model_web = ModelWeb(request.session)
     exception = None

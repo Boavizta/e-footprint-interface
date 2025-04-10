@@ -58,7 +58,7 @@ class UsagePatternFromForm(UsagePattern):
             name, usage_journey, devices, network, country,
             SourceHourlyValues(pd.DataFrame(
                 {"value": [0]}, dtype=f"pint[]",
-                index=pd.period_range(start=datetime.strptime(start_date.value, "%Y-%m-%d"), periods=1, freq='h'))))
+                index=pd.date_range(start=datetime.strptime(start_date.value, "%Y-%m-%d"), periods=1, freq='h'))))
 
         self.start_date = start_date.set_label(f"{self.name} start date")
         self.modeling_duration_value = modeling_duration_value.set_label(f"{self.name} modeling duration value")
@@ -153,7 +153,7 @@ class UsagePatternFromForm(UsagePattern):
         # each day’s hourly value remains constant (daily value divided equally among 24 hours).
         hourly_values = np.repeat(daily_values / 24, 24)
 
-        hourly_index = pd.period_range(start=self.local_timezone_start_date.value, periods=len(hourly_values), freq='h')
+        hourly_index = pd.date_range(start=self.local_timezone_start_date.value, periods=len(hourly_values), freq='h')
         values_df = pd.DataFrame({"value": hourly_values}, index=hourly_index, dtype=f"pint[]")
 
         self.hourly_usage_journey_starts = ExplainableHourlyQuantities(

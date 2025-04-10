@@ -172,8 +172,8 @@ class TestUsagePatternFromForm(unittest.TestCase):
         # Check the index starts at the specified start_date and spans 48 hours
         expected_start = pd.to_datetime(self.start_date_val.value)
         expected_end = expected_start + pd.Timedelta(hours=47)
-        self.assertEqual(hourly_df.index[0].to_timestamp(), expected_start)
-        self.assertEqual(hourly_df.index[-1].to_timestamp(), expected_end)
+        self.assertEqual(hourly_df.index[0], expected_start)
+        self.assertEqual(hourly_df.index[-1], expected_end)
 
     def test_update_hourly_usage_journey_starts_growth_scenario(self):
         """
