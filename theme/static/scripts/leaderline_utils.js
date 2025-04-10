@@ -1,4 +1,4 @@
-window.dictLeaderLineOption = {
+let dictLeaderLineOption = {
     'object-to-object': {
         color: "#9CA3AF",
         size: 1,
@@ -35,8 +35,10 @@ window.dictLeaderLineOption = {
     }
 };
 
+let allLines = new Map();
+
 function updateLines() {
-    Object.values(window.allLines).forEach(lineArray => {
+    Object.values(allLines).forEach(lineArray => {
         lineArray.forEach(line => {
             line.position();
         });
@@ -44,15 +46,15 @@ function updateLines() {
 }
 
 function removeAllLinesDepartingFromElement(elementId) {
-    if (window.allLines[elementId]) {
-        window.allLines[elementId].forEach( line => line.remove());
-        delete window.allLines[elementId];
+    if (allLines[elementId]) {
+        allLines[elementId].forEach( line => line.remove());
+        delete allLines[elementId];
     }
 }
 
 function removeAllLinesArrivingAtElement(elementId) {
-    Object.keys(window.allLines).forEach(key => {
-        window.allLines[key] = window.allLines[key].filter(line => {
+    Object.keys(allLines).forEach(key => {
+        allLines[key] = allLines[key].filter(line => {
             if (line.end.id === elementId) {
                 line.remove();
                 return false; // Remove this line from the array
@@ -63,10 +65,10 @@ function removeAllLinesArrivingAtElement(elementId) {
 }
 
 function removeAllLines() {
-    Object.values(window.allLines).forEach(lineArray => {
+    Object.values(allLines).forEach(lineArray => {
         lineArray.forEach(line => line.remove());
     });
-    window.allLines = [];
+    allLines = [];
 }
 
 function updateOrCreateLines(element) {
@@ -74,16 +76,16 @@ function updateOrCreateLines(element) {
     function drawLines(fromElement) {
         const linkedIds = fromElement.dataset.linkTo?.split('|') || [];
         linkedIds.forEach(toElementId => {
-            if (!window.allLines[fromElement.id]) {
-                window.allLines[fromElement.id] = [];
+            if (!allLines[fromElement.id]) {
+                allLines[fromElement.id] = [];
             }
-            const existingLine = window.allLines[fromElement.id].find(line => line.end.id === toElementId);
+            const existingLine = allLines[fromElement.id].find(line => line.end.id === toElementId);
             if (!existingLine) {
                 const toElement = document.getElementById(toElementId);
                 if (toElement) {
                     let optLine = fromElement.getAttribute('data-line-opt');
-                    let line = new LeaderLine(fromElement, toElement, window.dictLeaderLineOption[optLine]);
-                    window.allLines[fromElement.id].push(line);
+                    let line = new LeaderLine(fromElement, toElement, dictLeaderLineOption[optLine]);
+                    allLines[fromElement.id].push(line);
                 }
             }
         });
@@ -197,11 +199,11 @@ function setLeaderLineListeners() {
         });
     });
 
-    window.resizeTimeout = null;
+    let resizeTimeout = null;
 
     window.addEventListener('resize', () => {
-        clearTimeout(window.resizeTimeout);
-        window.resizeTimeout = setTimeout(() => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
             updateLines();
         }, 100);
     });
