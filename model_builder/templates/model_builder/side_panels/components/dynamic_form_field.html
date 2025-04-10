@@ -18,7 +18,12 @@
             <!-- This is a workaround to make sure that the form is submitted even if no option is selected -->
             <option value="" hidden selected></option>
             {% for option in field.options %}
-                 <option value="{{ option.value }}">{{ option.label }}</option>
+                 <option value="{{ option.value }}"
+                 {% for selected_obj_id in field.selected %}
+                     {% if selected_obj_id == option.value %}
+                         selected
+                     {% endif %}
+                 {% endfor %} >{{ option.label }}</option>
             {% endfor %}
         </select>
     {% elif field.input_type == 'datalist' %}

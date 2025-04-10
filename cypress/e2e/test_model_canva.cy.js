@@ -47,4 +47,12 @@ describe("Test - Model Canva div", () => {
             .should("include.text","Please create a server before adding a job")
     });
 
+    it("Edit UsageJourney name and make sure its UsageJourneyStep is still there", () => {
+        cy.visit("/model_builder/");
+        cy.get("#button-uid-my-first-usage-journey-1").click();
+        cy.get('#btn-submit-form').click();
+        cy.wait(500);
+        cy.get("#button-uid-my-first-usage-journey-1_uid-my-first-usage-journey-step-1").should("exist");
+    });
+
 });
