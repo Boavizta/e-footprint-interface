@@ -7,6 +7,7 @@ from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
 
+
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
     output_list = []
     for attr_name, attr_value in vars(modeling_obj).items():
@@ -202,6 +203,7 @@ class ModelingObjectWeb:
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
 
+
 class ServerWeb(ModelingObjectWeb):
     @property
     def template_name(self):
@@ -395,9 +397,10 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
     "WebApplicationJob": JobWeb,
-    "GenAI": ModelingObjectWeb,
+    "GenAIModel": ModelingObjectWeb,
     "VideoStreaming": ModelingObjectWeb,
     "WebApplication": ModelingObjectWeb,
+    "Storage": ModelingObjectWeb
 }
 
 def wrap_efootprint_object(modeling_obj, model_web):

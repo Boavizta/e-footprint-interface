@@ -1,3 +1,5 @@
+import json
+import os
 from inspect import signature, _empty as empty_annotation
 from typing import get_origin, List, get_args
 
@@ -16,9 +18,12 @@ MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_
                                 for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
 ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
 
+with open(os.path.join("model_builder", "form_fields_reference.json"), "r") as f:
+    FORM_FIELD_REFERENCES = json.load(f)
 
 def generate_object_creation_structure(
-    available_efootprint_classes: list, header: str, attributes_to_skip, model_web):
+    available_efootprint_classes: list, header: str, attributes_to_skip, model_web,
+    label_type_object_availaible=None):
 
     dynamic_form_dict = {
         "switch_item": "type_object_available",
@@ -37,6 +42,9 @@ def generate_object_creation_structure(
         }
         ]
     }
+
+    if label_type_object_availaible:
+        type_efootprint_classes_available['fields'][0].update({"label": label_type_object_availaible})
 
     form_sections = [type_efootprint_classes_available]
 
@@ -90,6 +98,8 @@ def generate_dynamic_form(
         structure_field = {
             "id": id_prefix + "_" + attr_name,
             "name": attr_name,
+            "label": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["label"],
+            "tooltip": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["tooltip"]
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__

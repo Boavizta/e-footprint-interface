@@ -1,0 +1,34 @@
+{
+    "Server": {
+        "type_object_available" : {
+            "label": "Type of servers available",
+            "tooltip": ""
+        }
+    },
+    "Job": {
+        "type_object_available" : {
+            "label": "Type of jobs available",
+            "tooltip": ""
+        },
+        "servers_available" : {
+            "label": "Choose a server",
+            "tooltip": ""
+        },
+        "services_available" : {
+            "label": "Service used",
+            "tooltip": ""
+        }
+    },
+    "Service": {
+        "type_object_available" : {
+            "label": "Type of services available",
+            "tooltip": ""
+        }
+    },
+    "Storage": {
+        "type_object_available" : {
+            "label": "Type of storages available",
+            "tooltip": ""
+        }
+    }
+}

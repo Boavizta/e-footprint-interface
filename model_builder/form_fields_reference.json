@@ -1,0 +1,500 @@
+{
+    "Server": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "server_type": {
+            "label": "Infrastructure type available",
+            "tooltip": ""
+        },
+        "carbon_footprint_fabrication": {
+            "label": "Carbon footprint fabrication",
+            "tooltip": ""
+        },
+        "power": {
+            "label": "Power",
+            "tooltip": ""
+        },
+        "lifespan": {
+            "label": "Lifespan",
+            "tooltip": ""
+        },
+        "idle_power": {
+            "label": "Idle power",
+            "tooltip": ""
+        },
+        "ram": {
+            "label": "Ram",
+            "tooltip": ""
+        },
+        "compute": {
+            "label": "Compute",
+            "tooltip": ""
+        },
+        "power_usage_effectiveness": {
+            "label": "Power usage effectiveness",
+            "tooltip": ""
+        },
+        "average_carbon_intensity": {
+            "label": "Average carbon intensity",
+            "tooltip": ""
+        },
+        "server_utilization_rate": {
+            "label": "Server utilization rate",
+            "tooltip": ""
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption",
+            "tooltip": ""
+        },
+        "base_compute_consumption": {
+            "label": "Base compute consumption",
+            "tooltip": ""
+        },
+        "storage": {
+            "label": "Storage",
+            "tooltip": ""
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances",
+            "tooltip": ""
+        },
+        "type_object_available": {
+            "label": "Type of server available",
+            "tooltip": ""
+        }
+    },
+    "GPUServer": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "server_type": {
+            "label": "Server type",
+            "tooltip": ""
+        },
+        "gpu_power": {
+            "label": "Gpu power",
+            "tooltip": ""
+        },
+        "gpu_idle_power": {
+            "label": "Gpu idle power",
+            "tooltip": ""
+        },
+        "ram_per_gpu": {
+            "label": "Ram per gpu",
+            "tooltip": ""
+        },
+        "carbon_footprint_fabrication_per_gpu": {
+            "label": "Carbon footprint fabrication per gpu",
+            "tooltip": ""
+        },
+        "average_carbon_intensity": {
+            "label": "Average carbon intensity",
+            "tooltip": ""
+        },
+        "compute": {
+            "label": "Compute",
+            "tooltip": ""
+        },
+        "carbon_footprint_fabrication_without_gpu": {
+            "label": "Carbon footprint fabrication without gpu",
+            "tooltip": ""
+        },
+        "lifespan": {
+            "label": "Lifespan",
+            "tooltip": ""
+        },
+        "power_usage_effectiveness": {
+            "label": "Power usage effectiveness",
+            "tooltip": ""
+        },
+        "server_utilization_rate": {
+            "label": "Server utilization rate",
+            "tooltip": ""
+        },
+        "base_compute_consumption": {
+            "label": "Base compute consumption",
+            "tooltip": ""
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption",
+            "tooltip": ""
+        },
+        "storage": {
+            "label": "Storage",
+            "tooltip": ""
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances",
+            "tooltip": ""
+        }
+    },
+    "BoaviztaCloudServer": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "provider": {
+            "label": "Provider",
+            "tooltip": ""
+        },
+        "instance_type": {
+            "label": "Instance type",
+            "tooltip": ""
+        },
+        "server_type": {
+            "label": "Server type",
+            "tooltip": ""
+        },
+        "lifespan": {
+            "label": "Lifespan",
+            "tooltip": ""
+        },
+        "idle_power": {
+            "label": "Idle power",
+            "tooltip": ""
+        },
+        "power_usage_effectiveness": {
+            "label": "Power usage effectiveness",
+            "tooltip": ""
+        },
+        "average_carbon_intensity": {
+            "label": "Average carbon intensity",
+            "tooltip": ""
+        },
+        "server_utilization_rate": {
+            "label": "Server utilization rate",
+            "tooltip": ""
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption",
+            "tooltip": ""
+        },
+        "base_compute_consumption": {
+            "label": "Base compute consumption",
+            "tooltip": ""
+        },
+        "storage": {
+            "label": "Storage",
+            "tooltip": ""
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances",
+            "tooltip": ""
+        }
+    },
+    "UsageJourneyStep": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "user_time_spent": {
+            "label": "User time spent",
+            "tooltip": ""
+        },
+        "jobs": {
+            "label": "Jobs",
+            "tooltip": ""
+        }
+    },
+    "UsageJourney": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "uj_steps": {
+            "label": "Uj steps",
+            "tooltip": ""
+        }
+    },
+    "UsagePattern": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "usage_journey": {
+            "label": "Usage journey",
+            "tooltip": ""
+        },
+        "devices": {
+            "label": "Devices",
+            "tooltip": ""
+        },
+        "network": {
+            "label": "Network",
+            "tooltip": ""
+        },
+        "country": {
+            "label": "Country",
+            "tooltip": ""
+        },
+        "hourly_usage_journey_starts": {
+            "label": "Hourly usage journey starts",
+            "tooltip": ""
+        }
+    },
+    "UsagePatternFromForm": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "usage_journey": {
+            "label": "Usage journey",
+            "tooltip": ""
+        },
+        "devices": {
+            "label": "Devices",
+            "tooltip": ""
+        },
+        "network": {
+            "label": "Network",
+            "tooltip": ""
+        },
+        "country": {
+            "label": "Country",
+            "tooltip": ""
+        },
+        "start_date": {
+            "label": "Start date",
+            "tooltip": ""
+        },
+        "modeling_duration_value": {
+            "label": "Modeling duration value",
+            "tooltip": ""
+        },
+        "modeling_duration_unit": {
+            "label": "Modeling duration unit",
+            "tooltip": ""
+        },
+        "initial_usage_journey_volume": {
+            "label": "Initial usage journey volume",
+            "tooltip": ""
+        },
+        "initial_usage_journey_volume_timespan": {
+            "label": "Initial usage journey volume timespan",
+            "tooltip": ""
+        },
+        "net_growth_rate_in_percentage": {
+            "label": "Net growth rate in percentage",
+            "tooltip": ""
+        },
+        "net_growth_rate_timespan": {
+            "label": "Net growth rate timespan",
+            "tooltip": ""
+        }
+    },
+    "Job": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "server": {
+            "label": "Server",
+            "tooltip": ""
+        },
+        "data_transferred": {
+            "label": "Data transferred",
+            "tooltip": ""
+        },
+        "data_stored": {
+            "label": "Data stored",
+            "tooltip": ""
+        },
+        "request_duration": {
+            "label": "Request duration",
+            "tooltip": ""
+        },
+        "compute_needed": {
+            "label": "Compute needed",
+            "tooltip": ""
+        },
+        "ram_needed": {
+            "label": "Ram needed",
+            "tooltip": ""
+        }
+    },
+    "GenAIJob": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "service": {
+            "label": "Service",
+            "tooltip": ""
+        },
+        "output_token_count": {
+            "label": "Output token count",
+            "tooltip": ""
+        }
+    },
+    "VideoStreamingJob": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "service": {
+            "label": "Service",
+            "tooltip": ""
+        },
+        "resolution": {
+            "label": "Resolution",
+            "tooltip": ""
+        },
+        "video_duration": {
+            "label": "Video duration",
+            "tooltip": ""
+        },
+        "refresh_rate": {
+            "label": "Refresh rate",
+            "tooltip": ""
+        },
+        "data_stored": {
+            "label": "Data stored",
+            "tooltip": ""
+        }
+    },
+    "WebApplicationJob": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "service": {
+            "label": "Service",
+            "tooltip": ""
+        },
+        "data_transferred": {
+            "label": "Data transferred",
+            "tooltip": ""
+        },
+        "data_stored": {
+            "label": "Data stored",
+            "tooltip": ""
+        },
+        "implementation_details": {
+            "label": "Implementation details",
+            "tooltip": ""
+        }
+    },
+    "GenAIModel": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "provider": {
+            "label": "Provider",
+            "tooltip": ""
+        },
+        "model_name": {
+            "label": "Model name",
+            "tooltip": ""
+        },
+        "server": {
+            "label": "Server",
+            "tooltip": ""
+        },
+        "nb_of_bits_per_parameter": {
+            "label": "Nb of bits per parameter",
+            "tooltip": ""
+        },
+        "llm_memory_factor": {
+            "label": "Llm memory factor",
+            "tooltip": ""
+        },
+        "gpu_latency_alpha": {
+            "label": "Gpu latency alpha",
+            "tooltip": ""
+        },
+        "gpu_latency_beta": {
+            "label": "Gpu latency beta",
+            "tooltip": ""
+        },
+        "bits_per_token": {
+            "label": "Bits per token",
+            "tooltip": ""
+        }
+    },
+    "VideoStreaming": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "server": {
+            "label": "Server",
+            "tooltip": ""
+        },
+        "base_ram_consumption": {
+            "label": "Base ram consumption",
+            "tooltip": ""
+        },
+        "bits_per_pixel": {
+            "label": "Bits per pixel",
+            "tooltip": ""
+        },
+        "static_delivery_cpu_cost": {
+            "label": "Static delivery cpu cost",
+            "tooltip": ""
+        },
+        "ram_buffer_per_user": {
+            "label": "Ram buffer per user",
+            "tooltip": ""
+        }
+    },
+    "WebApplication": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "server": {
+            "label": "Server",
+            "tooltip": ""
+        },
+        "technology": {
+            "label": "Technology",
+            "tooltip": ""
+        }
+    },
+    "Storage": {
+        "name": {
+            "label": "Name",
+            "tooltip": ""
+        },
+        "carbon_footprint_fabrication_per_storage_capacity": {
+            "label": "Carbon footprint fabrication per storage capacity",
+            "tooltip": ""
+        },
+        "power_per_storage_capacity": {
+            "label": "Power per storage capacity",
+            "tooltip": ""
+        },
+        "lifespan": {
+            "label": "Lifespan",
+            "tooltip": ""
+        },
+        "idle_power": {
+            "label": "Idle power",
+            "tooltip": ""
+        },
+        "storage_capacity": {
+            "label": "Storage capacity",
+            "tooltip": ""
+        },
+        "data_replication_factor": {
+            "label": "Data replication factor",
+            "tooltip": ""
+        },
+        "data_storage_duration": {
+            "label": "Data storage duration",
+            "tooltip": ""
+        },
+        "base_storage_need": {
+            "label": "Base storage need",
+            "tooltip": ""
+        },
+        "fixed_nb_of_instances": {
+            "label": "Fixed nb of instances",
+            "tooltip": ""
+        }
+    }
+}
