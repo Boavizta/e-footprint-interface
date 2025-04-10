@@ -20,7 +20,7 @@ django-browser-reload==1.18.0 ; python_version >= "3.12" and python_version < "4
 django-environ==0.12.0 ; python_version >= "3.12" and python_version < "4"
 django==5.2 ; python_version >= "3.12" and python_version < "4.0"
 ecologits==0.6.3 ; python_version >= "3.12" and python_version < "4"
-efootprint==10.0.8 ; python_version >= "3.12" and python_version < "4.0"
+efootprint==10.0.9 ; python_version >= "3.12" and python_version < "4.0"
 executing==2.2.0 ; python_version >= "3.12" and python_version < "4.0"
 fastapi==0.115.12 ; python_version >= "3.12" and python_version < "4.0"
 flexcache==0.3 ; python_version >= "3.12" and python_version < "4.0"

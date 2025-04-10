@@ -141,7 +141,7 @@ class UsagePatternFromForm(UsagePattern):
             label=f"{self.name} local timezone {self.country.timezone} start date")
 
     def update_hourly_usage_journey_starts(self):
-        num_days = self.modeling_duration.to(u.day).magnitude
+        num_days = int(self.modeling_duration.to(u.day).magnitude)
         days = np.arange(num_days)
 
         # Compute the daily usage journeys (daily constant value) with exponential growth.

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.4] - 2025-04-10
+
+### Fixed
+- Usage pattern time series chart JS options were those of result panel, now they are back to the 
+  original ones. Fixes https://github.com/Boavizta/e-footprint-interface/issues/14
+- When deleting modeling duration in usage pattern form, the time series chart is not updated so the field can be empty. It is still required for form submission though. Fixes https://github.com/Boavizta/e-footprint-interface/issues/16
+- Update to efootprint 10.0.9 to fix date errors due to DST conversions.
+- Round UsagePatternFromForm number of days to previous int to avoid having an extra day in next modeling year because pint year duration is 365.25 days.
+- Select existing list attributes when updating parent object. For example, when editing a UsageJourney the UsageJourneyStep list had no object selected. Now the right objects are selected.
+
 ## [0.7.3] - 2025-04-07
 
 ### Changed
