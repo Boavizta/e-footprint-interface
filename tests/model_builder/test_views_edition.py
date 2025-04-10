@@ -63,22 +63,40 @@ class TestViewsEdition(TestModelingBase):
             job, attributes_to_skip=["service"])
 
         ref_job_edition_fields = [
-            {'input_type': 'str', 'id': 'WebApplicationJob_name', 'name': 'name', "default": "New job"},
-            {'input_type': 'input',
-             'id': 'WebApplicationJob_data_transferred',
-             'name': 'data_transferred',
-             'unit': 'MB',
-             'default': 150.0},
-            {'input_type': 'input',
-             'id': 'WebApplicationJob_data_stored',
-             'name': 'data_stored',
-             'unit': 'kB',
-             'default': 100.0},
-            {'input_type': 'select',
-             'id': 'WebApplicationJob_implementation_details',
-             'name': 'implementation_details',
-             'selected': "aggregation-code-side",
-             'options': [{'label': 'aggregation-code-side',
+            {
+                'id': 'WebApplicationJob_name',
+                'name': 'name',
+                "label": "Name",
+                'input_type': 'str',
+                "tooltip": "",
+                "default": "New job"
+            },
+            {
+                'id': 'WebApplicationJob_data_transferred',
+                'name': 'data_transferred',
+                "label": "Data transferred",
+                "tooltip": "",
+                'input_type': 'input',
+                'unit': 'MB',
+                'default': 150.0
+            },
+            {
+                'id': 'WebApplicationJob_data_stored',
+                'name': 'data_stored',
+                "label": "Data stored",
+                "tooltip": "",
+                'input_type': 'input',
+                'unit': 'kB',
+                'default': 100.0
+            },
+            {
+                'id': 'WebApplicationJob_implementation_details',
+                'name': 'implementation_details',
+                "label": "Implementation details",
+                "tooltip": "",
+                'input_type': 'select',
+                'selected': "aggregation-code-side",
+                'options': [{'label': 'aggregation-code-side',
                           'value': 'aggregation-code-side'},
                          {'label': 'default', 'value': 'default'},
                          {'label': 'mysql', 'value': 'mysql'},

@@ -18,7 +18,9 @@ MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_
                                 for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
 ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
 
-with open(os.path.join("model_builder", "form_fields_reference.json"), "r") as f:
+model_web_root = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
     FORM_FIELD_REFERENCES = json.load(f)
 
 def generate_object_creation_structure(

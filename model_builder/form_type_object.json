@@ -10,11 +10,11 @@
             "label": "Type of jobs available",
             "tooltip": ""
         },
-        "servers_available" : {
+        "server" : {
             "label": "Choose a server",
             "tooltip": ""
         },
-        "services_available" : {
+        "service" : {
             "label": "Service used",
             "tooltip": ""
         }

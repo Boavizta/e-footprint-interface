@@ -33,43 +33,55 @@
         "header": "Job creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "Job_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "Job 1"
             },
             {
-                "input_type": "input",
                 "id": "Job_data_transferred",
                 "name": "data_transferred",
+                "label": "Data transferred",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "kB",
                 "default": 150
             },
             {
-                "input_type": "input",
                 "id": "Job_data_stored",
                 "name": "data_stored",
+                "label": "Data stored",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "kB",
                 "default": 100
             },
             {
-                "input_type": "input",
                 "id": "Job_request_duration",
                 "name": "request_duration",
+                "label": "Request duration",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "s",
                 "default": 1
             },
             {
-                "input_type": "input",
                 "id": "Job_compute_needed",
                 "name": "compute_needed",
+                "label": "Compute needed",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "cpu_core",
                 "default": 0.1
             },
             {
-                "input_type": "input",
                 "id": "Job_ram_needed",
                 "name": "ram_needed",
+                "label": "Ram needed",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "MB",
                 "default": 50
             }
@@ -80,29 +92,37 @@
         "header": "WebApplicationJob creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "WebApplicationJob_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "WebApplicationJob 1"
             },
             {
-                "input_type": "input",
                 "id": "WebApplicationJob_data_transferred",
                 "name": "data_transferred",
+                "label": "Data transferred",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "MB",
                 "default": 2.2
             },
             {
-                "input_type": "input",
                 "id": "WebApplicationJob_data_stored",
                 "name": "data_stored",
+                "label": "Data stored",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "kB",
                 "default": 100
             },
             {
-                "input_type": "select",
                 "id": "WebApplicationJob_implementation_details",
                 "name": "implementation_details",
+                "label": "Implementation details",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "default",
                 "options": [
                     {
@@ -138,15 +158,19 @@
         "header": "VideoStreamingJob creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "VideoStreamingJob_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "VideoStreamingJob 1"
             },
             {
-                "input_type": "select",
                 "id": "VideoStreamingJob_resolution",
                 "name": "resolution",
+                "label": "Resolution",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "1080p (1920 x 1080)",
                 "options": [
                     {
@@ -180,23 +204,29 @@
                 ]
             },
             {
-                "input_type": "input",
                 "id": "VideoStreamingJob_video_duration",
                 "name": "video_duration",
+                "label": "Video duration",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "h",
                 "default": 1
             },
             {
-                "input_type": "input",
                 "id": "VideoStreamingJob_refresh_rate",
                 "name": "refresh_rate",
+                "label": "Refresh rate",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "1/s",
                 "default": 30.0
             },
             {
-                "input_type": "input",
                 "id": "VideoStreamingJob_data_stored",
                 "name": "data_stored",
+                "label": "Data stored",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "MB",
                 "default": 0
             }
@@ -207,15 +237,19 @@
         "header": "GenAIJob creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "GenAIJob_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "GenAIJob 1"
             },
             {
-                "input_type": "input",
                 "id": "GenAIJob_output_token_count",
                 "name": "output_token_count",
+                "label": "Output token count",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "",
                 "default": 1000
             }

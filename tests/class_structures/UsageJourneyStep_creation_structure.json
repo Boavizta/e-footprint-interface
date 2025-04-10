@@ -21,22 +21,28 @@
         "header": "UsageJourneyStep creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "UsageJourneyStep_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "UsageJourneyStep 1"
             },
             {
-                "input_type": "input",
                 "id": "UsageJourneyStep_user_time_spent",
                 "name": "user_time_spent",
+                "label": "User time spent",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "min",
                 "default": 1
             },
             {
-                "input_type": "select-multiple",
                 "id": "UsageJourneyStep_jobs",
                 "name": "jobs",
+                "label": "Jobs",
+                "tooltip": "",
+                "input_type": "select-multiple",
                 "selected": [],
                 "options": [
                     {

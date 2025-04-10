@@ -21,15 +21,19 @@
         "header": "UsageJourney creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "UsageJourney_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "UsageJourney 1"
             },
             {
-                "input_type": "select-multiple",
                 "id": "UsageJourney_uj_steps",
                 "name": "uj_steps",
+                "label": "Uj steps",
+                "tooltip": "",
+                "input_type": "select-multiple",
                 "selected": [],
                 "options": [
                     {

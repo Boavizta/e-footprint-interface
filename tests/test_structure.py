@@ -89,28 +89,29 @@ class TestsClassStructure(TestCase):
         self.assertEqual(
             remove_ids_from_str(json.dumps(countries)), remove_ids_from_str(json.dumps(default_countries)))
 
-    def test_field_correspondences_have_right_attribute_names(self):
-        exported_fields = {}
+    def test_objects_attributes_have_correspondences(self):
+        with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
+            form_field_references = json.load(f)
+        with open(os.path.join(model_web_root, "form_type_object.json"), "r") as f:
+            form_type_objet = json.load(f)
+
+        objects_with_field_type_object_available = ["Server", "Service", "Job", "Storage"]
+
+        objects_extra_fields_to_check = {
+            "Job": ['server','service']
+        }
+
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
             init_sig_params = signature(efootprint_obj_class.__init__).parameters
-            conditional_list_values = efootprint_obj_class.conditional_list_values()
-            fields_efootprint_class = {}
             for attr_name in init_sig_params.keys():
                 if attr_name == 'self':
                     continue
-                fields_efootprint_class.update({
-                    f'{attr_name}':{
-                        "label": format_snakecase_string(attr_name),
-                        "tooltip": ""
-                    }
-                })
+                assert form_field_references[efootprint_class_str][attr_name]["label"] is not None
 
+        for object_with_field_type_object_available in objects_with_field_type_object_available:
+            assert form_type_objet[object_with_field_type_object_available]["type_object_available"] is not None
 
-            exported_fields.update({
-                efootprint_class_str: fields_efootprint_class
-            })
-
-        #export the exported fields to a json file
-        with open(os.path.join(model_web_root, "form_fields_reference.json"), "w") as f:
-            json.dump(exported_fields, f, indent=4)
+        for object_extra_fields_to_check in objects_extra_fields_to_check:
+            for extra_field in objects_extra_fields_to_check[object_extra_fields_to_check]:
+                assert form_type_objet[object_extra_fields_to_check][extra_field]["label"] is not None

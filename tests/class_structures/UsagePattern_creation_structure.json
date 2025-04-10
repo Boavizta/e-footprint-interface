@@ -21,15 +21,19 @@
         "header": "UsagePatternFromForm creation",
         "fields": [
             {
-                "input_type": "str",
                 "id": "UsagePatternFromForm_name",
                 "name": "name",
+                "label": "Name",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "UsagePatternFromForm 1"
             },
             {
-                "input_type": "select",
                 "id": "UsagePatternFromForm_usage_journey",
                 "name": "usage_journey",
+                "label": "Usage journey",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -43,9 +47,11 @@
                 ]
             },
             {
-                "input_type": "select-multiple",
                 "id": "UsagePatternFromForm_devices",
                 "name": "devices",
+                "label": "Devices",
+                "tooltip": "",
+                "input_type": "select-multiple",
                 "selected": [],
                 "options": [
                     {
@@ -59,9 +65,11 @@
                 ]
             },
             {
-                "input_type": "select",
                 "id": "UsagePatternFromForm_network",
                 "name": "network",
+                "label": "Network",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -75,9 +83,11 @@
                 ]
             },
             {
-                "input_type": "select",
                 "id": "UsagePatternFromForm_country",
                 "name": "country",
+                "label": "Country",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -91,22 +101,28 @@
                 ]
             },
             {
-                "input_type": "str",
                 "id": "UsagePatternFromForm_start_date",
                 "name": "start_date",
+                "label": "Start date",
+                "tooltip": "",
+                "input_type": "str",
                 "default": "2025-01-01"
             },
             {
-                "input_type": "input",
                 "id": "UsagePatternFromForm_modeling_duration_value",
                 "name": "modeling_duration_value",
+                "label": "Modeling duration value",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "",
                 "default": 3
             },
             {
-                "input_type": "select",
                 "id": "UsagePatternFromForm_modeling_duration_unit",
                 "name": "modeling_duration_unit",
+                "label": "Modeling duration unit",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "year",
                 "options": [
                     {
@@ -120,16 +136,20 @@
                 ]
             },
             {
-                "input_type": "input",
                 "id": "UsagePatternFromForm_initial_usage_journey_volume",
                 "name": "initial_usage_journey_volume",
+                "label": "Initial usage journey volume",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "",
                 "default": 10000
             },
             {
-                "input_type": "select",
                 "id": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
                 "name": "initial_usage_journey_volume_timespan",
+                "label": "Initial usage journey volume timespan",
+                "tooltip": "",
+                "input_type": "select",
                 "selected": "month",
                 "options": [
                     {
@@ -147,16 +167,20 @@
                 ]
             },
             {
-                "input_type": "input",
                 "id": "UsagePatternFromForm_net_growth_rate_in_percentage",
                 "name": "net_growth_rate_in_percentage",
+                "label": "Net growth rate in percentage",
+                "tooltip": "",
+                "input_type": "input",
                 "unit": "",
                 "default": 10
             },
             {
-                "input_type": "datalist",
                 "id": "UsagePatternFromForm_net_growth_rate_timespan",
                 "name": "net_growth_rate_timespan",
+                "label": "Net growth rate timespan",
+                "tooltip": "",
+                "input_type": "datalist",
                 "selected": "year",
                 "options": null
             }

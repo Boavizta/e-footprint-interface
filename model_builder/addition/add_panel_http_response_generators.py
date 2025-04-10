@@ -12,7 +12,7 @@ from model_builder.model_web import ModelWeb, default_networks, default_countrie
     ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 
-with open(os.path.join("model_builder", "form_type_object.json"), "r") as f:
+with open(os.path.join('model_builder', "form_type_object.json"), "r") as f:
     FORM_TYPE_OBJECT = json.load(f)
 
 def generate_generic_add_panel_http_response(request, efootprint_class_str: str,  model_web: ModelWeb):
@@ -124,14 +124,14 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
                 "name": "Server",
                 "options": [
                     {'label': server.name, 'value': server.efootprint_id} for server in servers],
-                'label': FORM_TYPE_OBJECT['Job']['servers_available']['label']
+                'label': FORM_TYPE_OBJECT['Job']['server']['label']
             },
             {
                 "input_type": "select",
                 "id": "service",
                 "name": "Service used",
                 "options": None,
-                'label': FORM_TYPE_OBJECT['Job']['services_available']['label']
+                'label': FORM_TYPE_OBJECT['Job']['service']['label']
             },
         ]
     }
