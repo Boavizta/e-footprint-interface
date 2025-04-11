@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Harmonize usage pattern time series css with other object forms.
 
+### Changed
+- On result panel, the number of decimal digits is now set to 2 for tooltips 
+  in charts.
+- for all charts, the month format is now always in english (Jan. Feb, Mar...)
+
 ## [0.7.6] - 2025-04-11
 
 ### Changed
