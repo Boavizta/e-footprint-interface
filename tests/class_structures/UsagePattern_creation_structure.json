@@ -112,7 +112,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "UsagePatternFromForm_modeling_duration_unit",
@@ -141,7 +143,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
@@ -174,7 +178,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "UsagePatternFromForm_net_growth_rate_timespan",

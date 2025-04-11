@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.8] - 2025-04-15
+
+### Fixed
+- Use correct labels for objects in forms and sources.
+
+### Changed
+
+- Minimum set to 0 except for inputs that can be negative (job data stored attribute for example).
+- Possibility to define custom numerical input step for each attribute (for example, the compute step is 1 in server form and the average carbon intensity step is 0.01, default is 0.1).
+
 ## [0.7.7] - 2025-04-14
 
 ### Fixed

@@ -4,7 +4,7 @@
             "label": "Name"
         },
         "server_type": {
-            "label": "Infrastructure type available"
+            "label": "Infrastructure type"
         },
         "carbon_footprint_fabrication": {
             "label": "Carbon footprint fabrication"
@@ -22,13 +22,15 @@
             "label": "Ram"
         },
         "compute": {
-            "label": "Compute"
+            "label": "Compute",
+            "step": 1
         },
         "power_usage_effectiveness": {
             "label": "Power usage effectiveness"
         },
         "average_carbon_intensity": {
-            "label": "Average carbon intensity"
+            "label": "Average carbon intensity",
+            "step": 0.01
         },
         "server_utilization_rate": {
             "label": "Server utilization rate"
@@ -54,7 +56,7 @@
             "label": "Name"
         },
         "server_type": {
-            "label": "Server type"
+            "label": "Infrastructure type"
         },
         "gpu_power": {
             "label": "Gpu power"
@@ -69,10 +71,12 @@
             "label": "Carbon footprint fabrication per gpu"
         },
         "average_carbon_intensity": {
-            "label": "Average carbon intensity"
+            "label": "Average carbon intensity",
+            "step": 0.01
         },
         "compute": {
-            "label": "Compute"
+            "label": "Compute",
+            "step": 1
         },
         "carbon_footprint_fabrication_without_gpu": {
             "label": "Carbon footprint fabrication without gpu"
@@ -113,7 +117,7 @@
             "label": "Instance type"
         },
         "server_type": {
-            "label": "Server type"
+            "label": "Infrastructure type"
         },
         "lifespan": {
             "label": "Lifespan"
@@ -125,7 +129,8 @@
             "label": "Power usage effectiveness"
         },
         "average_carbon_intensity": {
-            "label": "Average carbon intensity"
+            "label": "Average carbon intensity",
+            "step": 0.01
         },
         "server_utilization_rate": {
             "label": "Server utilization rate"

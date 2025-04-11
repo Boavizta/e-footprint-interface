@@ -92,6 +92,8 @@ def generate_dynamic_form(
     id_prefix = efootprint_class_str
     init_sig_params = signature(efootprint_obj_class.__init__).parameters
 
+    attributes_that_can_have_negative_values = efootprint_obj_class.attributes_that_can_have_negative_values()
+
     for attr_name in init_sig_params.keys():
         if attr_name in attributes_to_skip + ["self"]:
             continue
@@ -130,7 +132,9 @@ def generate_dynamic_form(
                 "input_type": "input",
                 "unit": f"{default.value.units:~P}",
                 "default": round(default.magnitude, 2),
-                "source": {"name":default.source.name, "link":default.source.link}
+                "source": {"name":default.source.name, "link":default.source.link},
+                "can_be_negative": attr_name in attributes_that_can_have_negative_values,
+                "step": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name].get("step", 0.1)
             })
         elif issubclass(annotation, ExplainableObject):
             if attr_name in list_values.keys():

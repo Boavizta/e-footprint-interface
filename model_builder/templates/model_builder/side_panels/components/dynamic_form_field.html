@@ -50,7 +50,7 @@
                     id="{{ field.id }}"
                     name="{{ field.id }}"
                     value="{{ field.default }}"
-                    step="0.1"
+                    step="{{ field.step }}"
                     placeholder="Enter value"
                     required
                     {% if field.source %}
@@ -59,6 +59,9 @@
                         data-sourceLink="{{ field.source.link }}"
                         oninput="updateSource(this)"
                     {% endif %}
+                    {% if not field.can_be_negative %}
+                        min="0"
+                   {% endif %}
             >
             <span class="input-group-text">
                 {{ field.unit }}

@@ -38,7 +38,7 @@
             {
                 "id": "Server_server_type",
                 "attr_name": "server_type",
-                "label": "Infrastructure type available",
+                "label": "Infrastructure type",
                 "input_type": "select",
                 "selected": "autoscaling",
                 "options": [
@@ -66,7 +66,9 @@
                 "source": {
                     "name": "Base ADEME_V19",
                     "link": "https://data.ademe.fr/datasets/base-carbone(r)"
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_power",
@@ -78,7 +80,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_lifespan",
@@ -90,7 +94,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_idle_power",
@@ -102,7 +108,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_ram",
@@ -114,7 +122,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_compute",
@@ -126,7 +136,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 1
             },
             {
                 "id": "Server_power_usage_effectiveness",
@@ -138,7 +150,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_average_carbon_intensity",
@@ -150,7 +164,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.01
             },
             {
                 "id": "Server_server_utilization_rate",
@@ -162,7 +178,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_base_ram_consumption",
@@ -174,7 +192,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "Server_base_compute_consumption",
@@ -186,7 +206,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             }
         ]
     },
@@ -204,7 +226,7 @@
             {
                 "id": "GPUServer_server_type",
                 "attr_name": "server_type",
-                "label": "Server type",
+                "label": "Infrastructure type",
                 "input_type": "select",
                 "selected": "serverless",
                 "options": [
@@ -232,7 +254,9 @@
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_gpu_idle_power",
@@ -244,7 +268,9 @@
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_ram_per_gpu",
@@ -256,7 +282,9 @@
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_carbon_footprint_fabrication_per_gpu",
@@ -268,7 +296,9 @@
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_average_carbon_intensity",
@@ -280,7 +310,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.01
             },
             {
                 "id": "GPUServer_compute",
@@ -292,7 +324,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 1
             },
             {
                 "id": "GPUServer_carbon_footprint_fabrication_without_gpu",
@@ -304,7 +338,9 @@
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_lifespan",
@@ -316,7 +352,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_power_usage_effectiveness",
@@ -328,7 +366,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_server_utilization_rate",
@@ -340,7 +380,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_base_compute_consumption",
@@ -352,7 +394,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "GPUServer_base_ram_consumption",
@@ -364,7 +408,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             }
         ]
     },
@@ -415,7 +461,7 @@
             {
                 "id": "BoaviztaCloudServer_server_type",
                 "attr_name": "server_type",
-                "label": "Server type",
+                "label": "Infrastructure type",
                 "input_type": "select",
                 "selected": "autoscaling",
                 "options": [
@@ -443,7 +489,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "BoaviztaCloudServer_idle_power",
@@ -455,7 +503,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "BoaviztaCloudServer_power_usage_effectiveness",
@@ -467,7 +517,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "BoaviztaCloudServer_average_carbon_intensity",
@@ -479,7 +531,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.01
             },
             {
                 "id": "BoaviztaCloudServer_server_utilization_rate",
@@ -491,7 +545,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "BoaviztaCloudServer_base_ram_consumption",
@@ -503,7 +559,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             },
             {
                 "id": "BoaviztaCloudServer_base_compute_consumption",
@@ -515,7 +573,9 @@
                 "source": {
                     "name": "hypothesis",
                     "link": null
-                }
+                },
+                "can_be_negative": false,
+                "step": 0.1
             }
         ]
     }

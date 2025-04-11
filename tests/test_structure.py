@@ -19,7 +19,8 @@ from efootprint.logger import logger
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT
+from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
+    FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
 from model_builder.model_web import model_web_root, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.modeling_objects_web import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
@@ -90,11 +91,6 @@ class TestsClassStructure(TestCase):
             remove_ids_from_str(json.dumps(countries)), remove_ids_from_str(json.dumps(default_countries)))
 
     def test_objects_attributes_have_correspondences(self):
-        with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
-            form_field_references = json.load(f)
-        with open(os.path.join(model_web_root, "form_type_object.json"), "r") as f:
-            form_type_objet = json.load(f)
-
         objects_extra_fields_to_check = ['Server','Service']
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
@@ -103,7 +99,28 @@ class TestsClassStructure(TestCase):
             for attr_name in init_sig_params.keys():
                 if attr_name == 'self':
                     continue
-                assert form_field_references[efootprint_class_str][attr_name]["label"] is not None
+                assert FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["label"] is not None
 
         for object_extra_fields_to_check in objects_extra_fields_to_check:
-                assert form_type_objet[object_extra_fields_to_check]["label"] is not None
+                assert FORM_TYPE_OBJECT[object_extra_fields_to_check]["label"] is not None
+
+    def test_that_form_fields_present_in_different_objects_have_same_field_reference(self):
+        all_form_fields = []
+        for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
+            all_form_fields.extend(FORM_FIELD_REFERENCES[efootprint_class_str].items())
+
+        treated_form_field_names = []
+
+        for form_field_name, form_field in all_form_fields:
+            if form_field_name in treated_form_field_names:
+                continue
+
+            form_field_duplicates = [
+                form_field[1] for form_field in all_form_fields if form_field[0] == form_field_name]
+            if len(form_field_duplicates) > 1:
+                logger.info(f"Form field {form_field_name} is duplicated {len(form_field_duplicates)} times")
+                for form_field_duplicate in form_field_duplicates:
+                    self.assertDictEqual(form_field_duplicate, form_field_duplicates[0],
+                                         f"Form field {form_field_name} is not the same in all objects")
+
+            treated_form_field_names.append(form_field_name)
