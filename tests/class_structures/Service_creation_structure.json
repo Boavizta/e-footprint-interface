@@ -79,28 +79,44 @@
                 "id": "VideoStreaming_base_ram_consumption",
                 "name": "base_ram_consumption",
                 "unit": "GB",
-                "default": 2
+                "default": 2,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "VideoStreaming_bits_per_pixel",
                 "name": "bits_per_pixel",
                 "unit": "",
-                "default": 0.1
+                "default": 0.1,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "VideoStreaming_static_delivery_cpu_cost",
                 "name": "static_delivery_cpu_cost",
                 "unit": "cpu_core\u00b7s/GB",
-                "default": 4.0
+                "default": 4.0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "VideoStreaming_ram_buffer_per_user",
                 "name": "ram_buffer_per_user",
                 "unit": "MB",
-                "default": 50
+                "default": 50,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             }
         ]
     },
@@ -158,21 +174,33 @@
                 "id": "GenAIModel_nb_of_bits_per_parameter",
                 "name": "nb_of_bits_per_parameter",
                 "unit": "",
-                "default": 16
+                "default": 16,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             },
             {
                 "input_type": "input",
                 "id": "GenAIModel_llm_memory_factor",
                 "name": "llm_memory_factor",
                 "unit": "",
-                "default": 1.2
+                "default": 1.2,
+                "source": {
+                    "name": "Ecologits",
+                    "link": "https://github.com/genai-impact/ecologits"
+                }
             },
             {
                 "input_type": "input",
                 "id": "GenAIModel_bits_per_token",
                 "name": "bits_per_token",
                 "unit": "",
-                "default": 24
+                "default": 24,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
             }
         ]
     }

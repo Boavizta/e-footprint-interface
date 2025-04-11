@@ -129,3 +129,18 @@ document.addEventListener("initDynamicForm", function () {
     });
   }
 });
+
+function updateSource(input){
+    let divSource = document.getElementById("source-"+input.id);
+    if(input.value && parseFloat(input.value.length) > 0){
+        if(parseFloat(input.value) !== parseFloat(input.dataset.defaultvalue)){
+            divSource.innerHTML = `source : user data`;
+        }else{
+            if(input.dataset.sourcelink && input.dataset.sourcelink !== '' && input.dataset.sourcelink !== 'None'){
+                divSource.innerHTML = `source : <a target="_blank" class="sources-label" href="${input.dataset.sourcelink}">${input.dataset.sourcename}</a>`
+            }else{
+                divSource.innerHTML = `source : ${input.dataset.sourcename}`
+            }
+        }
+    }
+}

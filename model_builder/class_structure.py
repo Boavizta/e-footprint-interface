@@ -117,7 +117,8 @@ def generate_dynamic_form(
                 "id": id_prefix + "_" + attr_name,
                 "name": attr_name,
                 "unit": f"{default.value.units:~P}",
-                "default": round(default.magnitude, 2)
+                "default": round(default.magnitude, 2),
+                "source": {"name":default.source.name, "link":default.source.link}
             })
         elif issubclass(annotation, ExplainableObject):
             if attr_name in list_values.keys():

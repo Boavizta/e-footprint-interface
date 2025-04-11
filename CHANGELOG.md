@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.6] - 2025-04-11
+
+### Changed
+
+- A source array is available in the results panel for all numerical inputs with the possibility to download it.
+- In side panels, for each field, if a source is available, it is displayed bellow the field.
+
 ## [0.7.5] - 2025-04-11
 
 ### Fixed
