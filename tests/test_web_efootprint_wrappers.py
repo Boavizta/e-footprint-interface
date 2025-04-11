@@ -5,7 +5,6 @@ from efootprint.core.hardware.storage import Storage
 
 from model_builder.modeling_objects_web import ModelingObjectWeb
 
-
 class StorageWeb(ModelingObjectWeb):
     @property
     def id(self):

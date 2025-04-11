@@ -29,6 +29,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Name field is now included in object form section
 - When changing value of filtering dynamic list, corresponding datalist value is erased.
 
+## [0.7.5] - 2025-04-11
+
+### Changed
+
+- Add two reference files to overwrite fields label in forms additions and 
+  editions and give to users a better understanding of the fields.
+
 ## [0.7.2] - 2025-04-03
 
 ### Changed

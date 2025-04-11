@@ -7,6 +7,7 @@ from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
 
+
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
     output_list = []
     for attr_name, attr_value in vars(modeling_obj).items():
@@ -202,6 +203,7 @@ class ModelingObjectWeb:
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
 
+
 class ServerWeb(ModelingObjectWeb):
     @property
     def template_name(self):
@@ -382,8 +384,8 @@ class UsagePatternWeb(ModelingObjectWeb):
         # TODO: Add Device mix Network mix and Country mix
         return []
 
-wrapper_mapping = {
-    # TODO: create a mapping for all classes
+
+EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Server": ServerWeb,
     "GPUServer": ServerWeb,
     "BoaviztaCloudServer": ServerWeb,
@@ -395,10 +397,14 @@ wrapper_mapping = {
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
     "WebApplicationJob": JobWeb,
+    "GenAIModel": ModelingObjectWeb,
+    "VideoStreaming": ModelingObjectWeb,
+    "WebApplication": ModelingObjectWeb,
+    "Storage": ModelingObjectWeb
 }
 
 def wrap_efootprint_object(modeling_obj, model_web):
-    if modeling_obj.class_as_simple_str in wrapper_mapping.keys():
-        return wrapper_mapping[modeling_obj.class_as_simple_str](modeling_obj, model_web)
+    if modeling_obj.class_as_simple_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
+        return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[modeling_obj.class_as_simple_str](modeling_obj, model_web)
 
     return ModelingObjectWeb(modeling_obj, model_web)

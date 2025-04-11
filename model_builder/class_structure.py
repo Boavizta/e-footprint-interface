@@ -1,3 +1,5 @@
+import json
+import os
 from inspect import signature, _empty as empty_annotation
 from typing import get_origin, List, get_args
 
@@ -16,9 +18,14 @@ MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_
                                 for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
 ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
 
+model_web_root = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
+    FORM_FIELD_REFERENCES = json.load(f)
 
 def generate_object_creation_structure(
-    available_efootprint_classes: list, header: str, attributes_to_skip, model_web):
+    available_efootprint_classes: list, header: str, attributes_to_skip, model_web,
+    label_type_object_availaible=None):
 
     dynamic_form_dict = {
         "switch_item": "type_object_available",
@@ -37,6 +44,9 @@ def generate_object_creation_structure(
         }
         ]
     }
+
+    if label_type_object_availaible:
+        type_efootprint_classes_available['fields'][0].update({"label": label_type_object_availaible})
 
     form_sections = [type_efootprint_classes_available]
 
@@ -87,16 +97,20 @@ def generate_dynamic_form(
             logger.warning(
                 f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
             annotation = str
+        structure_field = {
+            "id": id_prefix + "_" + attr_name,
+            "name": attr_name,
+            "label": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["label"],
+            "tooltip": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["tooltip"]
+        }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             if attr_name in default_values.keys():
                 selected = [elt.id for elt in default_values[attr_name]]
             else:
                 selected = []
-            structure_fields.append({
+            structure_field.update({
                 "input_type": "select-multiple",
-                "id": id_prefix + "_" + attr_name,
-                "name": attr_name,
                 "selected": selected,
                 "options": [
                     {"label": attr_value.name, "value": attr_value.id}
@@ -104,36 +118,28 @@ def generate_dynamic_form(
                         list_attribute_object_type_str)]
             })
         elif issubclass(annotation, str):
-            structure_fields.append({
+            structure_field.update({
                 "input_type": "str",
-                "id": id_prefix + "_" + attr_name,
-                "name": attr_name,
                 "default": default_values[attr_name]
             })
         elif issubclass(annotation, ExplainableQuantity):
             default = default_values[attr_name]
-            structure_fields.append({
+            structure_field.update({
                 "input_type": "input",
-                "id": id_prefix + "_" + attr_name,
-                "name": attr_name,
                 "unit": f"{default.value.units:~P}",
                 "default": round(default.magnitude, 2)
             })
         elif issubclass(annotation, ExplainableObject):
             if attr_name in list_values.keys():
-                structure_fields.append({
+                structure_field.update({
                     "input_type": "select",
-                    "id": id_prefix + "_" + attr_name,
-                    "name": attr_name,
                     "selected": default_values[attr_name].value,
                     "options": [
                         {"label": str(attr_value), "value": str(attr_value)} for attr_value in list_values[attr_name]]
                 })
             elif attr_name in conditional_list_values.keys():
-                structure_fields.append({
+                structure_field.update({
                     "input_type": "datalist",
-                    "id": id_prefix + "_" + attr_name,
-                    "name": attr_name,
                     "selected": default_values[attr_name].value,
                     "options": None
                 })
@@ -148,11 +154,9 @@ def generate_dynamic_form(
                         }
                     })
             else:
-                structure_fields.append(
+                structure_field.update(
                     {
                         "input_type": "str",
-                        "id": id_prefix + "_" + attr_name,
-                        "name": attr_name,
                         "default": default_values[attr_name].value
                     }
                 )
@@ -163,13 +167,13 @@ def generate_dynamic_form(
                 selected = default_values[attr_name]
             else:
                 selected = selection_options[0]
-            structure_fields.append({
+            structure_field.update({
                 "input_type": "select",
-                "id": id_prefix + "_" + attr_name,
-                "name": attr_name,
                 "selected": selected.id,
                 "options": [
                     {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
             })
+
+        structure_fields.append(structure_field)
 
     return structure_fields, dynamic_lists

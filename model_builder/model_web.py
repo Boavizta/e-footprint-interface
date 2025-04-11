@@ -18,7 +18,7 @@ from utils import EFOOTPRINT_COUNTRIES
 model_web_root = os.path.dirname(os.path.abspath(__file__))
 
 def default_networks():
-    with open(os.path.join(model_web_root, "default_networks.json"), "r") as f:
+     with open(os.path.join(model_web_root, "default_networks.json"), "r") as f:
         return json.load(f)
 
 def default_devices():
