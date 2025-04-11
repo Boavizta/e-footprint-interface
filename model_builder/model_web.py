@@ -206,7 +206,7 @@ class ModelWeb:
         day_indexes_from_unix_epoch = (combined_index.view("int64") // (24 * 3600 * 1e9)).astype(int)
         day_indexes_from_df_start = day_indexes_from_unix_epoch - day_indexes_from_unix_epoch.min()
         def to_rounded_daily_values_list(df, rounding_depth=5):
-            daily_sums = np.bincount(day_indexes_from_df_start, weights=df["value"].pint.to(u.kg).values._data)
+            daily_sums = np.bincount(day_indexes_from_df_start, weights=df["value"].pint.to(u.tonne).values._data)
 
             # Round the results and return as a list
             return np.round(daily_sums, rounding_depth).tolist()

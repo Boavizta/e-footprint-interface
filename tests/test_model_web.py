@@ -15,21 +15,21 @@ class TestModelWeb(unittest.TestCase):
         self.model_web.system = MagicMock()
         self.model_web.system.total_energy_footprints = {
             "Servers": pd.DataFrame(
-                {"value": [1, 2]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [100, 200]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Storage": pd.DataFrame(
-                {"value": [3, 4]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [300, 400]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Devices": pd.DataFrame(
-                {"value": [5, 6]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [500, 600]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Network": pd.DataFrame(
-                {"value": [7, 8]}, index=pd.date_range("2023-01-01 03:00", periods=2, freq='h'), dtype="pint[kg]")
+                {"value": [700, 800]}, index=pd.date_range("2023-01-01 03:00", periods=2, freq='h'), dtype="pint[kg]")
         }
         self.model_web.system.total_fabrication_footprints = {
             "Servers": pd.DataFrame(
-                {"value": [9, 10]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [900, 1000]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Storage": pd.DataFrame(
-                {"value": [11, 12]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [1100, 1200]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Devices": pd.DataFrame(
-                {"value": [13, 14]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
+                {"value": [1300, 1400]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
             "Network": EmptyExplainableObject()
         }
 
@@ -60,11 +60,11 @@ class TestModelWeb(unittest.TestCase):
         emissions = self.model_web.system_emissions
 
         self.assertListEqual(emissions["dates"], ["2023-01-01", "2023-01-02"])
-        self.assertListEqual(emissions["values"]["Servers_and_storage_energy"], [10, 0])
-        self.assertListEqual(emissions["values"]["Devices_energy"], [0, 11])
-        self.assertListEqual(emissions["values"]["Network_energy"], [15, 0])
-        self.assertListEqual(emissions["values"]["Servers_and_storage_fabrication"], [42, 0])
-        self.assertListEqual(emissions["values"]["Devices_fabrication"], [0, 27])
+        self.assertListEqual(emissions["values"]["Servers_and_storage_energy"], [1, 0])
+        self.assertListEqual(emissions["values"]["Devices_energy"], [0, 1.1])
+        self.assertListEqual(emissions["values"]["Network_energy"], [1.5, 0])
+        self.assertListEqual(emissions["values"]["Servers_and_storage_fabrication"], [4.2, 0])
+        self.assertListEqual(emissions["values"]["Devices_fabrication"], [0, 2.7])
 
 if __name__ == '__main__':
     unittest.main()
