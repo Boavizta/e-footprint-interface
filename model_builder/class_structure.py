@@ -79,6 +79,8 @@ def generate_dynamic_form(
     id_prefix = efootprint_class_str
     init_sig_params = signature(efootprint_obj_class.__init__).parameters
 
+    attributes_that_can_have_negative_values = efootprint_obj_class.attributes_that_can_have_negative_values()
+
     for attr_name in init_sig_params.keys():
         if attr_name in attributes_to_skip + ["self"]:
             continue
@@ -112,13 +114,18 @@ def generate_dynamic_form(
             })
         elif issubclass(annotation, ExplainableQuantity):
             default = default_values[attr_name]
-            structure_fields.append({
+            field_to_append = {
                 "input_type": "input",
                 "id": id_prefix + "_" + attr_name,
                 "name": attr_name,
                 "unit": f"{default.value.units:~P}",
                 "default": round(default.magnitude, 2)
-            })
+            }
+            if attr_name not in attributes_that_can_have_negative_values:
+                field_to_append.update({
+                    "min_value": 0
+                })
+            structure_fields.append(field_to_append)
         elif issubclass(annotation, ExplainableObject):
             if attr_name in list_values.keys():
                 structure_fields.append({

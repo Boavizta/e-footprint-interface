@@ -58,6 +58,9 @@
                 value="{{ field.default }}"
                    step="0.1"
                    placeholder="Enter value"
+                   {% if field.min_value != '' %}
+                        min="{{ field.min_value }}"
+                   {% endif %}
                    required
             >
             <span class="input-group-text">
