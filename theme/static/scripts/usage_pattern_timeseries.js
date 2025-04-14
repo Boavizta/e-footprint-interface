@@ -1,6 +1,5 @@
-const EN_MONTHS_TIMESERIES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 let timeSeriesChartJSOptions = {
+    locale: "en-IN",
     scales: {
         x: {
             type: 'time',
@@ -20,14 +19,6 @@ let timeSeriesChartJSOptions = {
         tooltip: {
             mode: 'index',
             intersect: false,
-            callbacks: {
-                title: function(context) {
-                    const date = new Date(context[0].label);
-                    const month = date.getMonth();
-                    const year = date.getFullYear();
-                    return `${EN_MONTHS_TIMESERIES[month]} ${year}`;
-                }
-            }
         },
         legend: { display: false },
         responsive: true,
@@ -103,15 +94,6 @@ function createOrUpdateTimeSeriesChart(){
 
     timeSeriesChartJSOptions.scales.x.time.unit = displayGranularity === "month" ? "month" : "year";
     timeSeriesChartJSOptions.scales.x.time.tooltipFormat = displayGranularity === "month" ? "MMM yyyy" : "yyyy";
-    timeSeriesChartJSOptions.scales.x.ticks = {
-        callback: function(value, index, ticks) {
-            let label = this.getLabelForValue(value);
-            let date = new Date(label);
-            let year = date.getFullYear();
-            let month = date.getMonth();
-            return `${EN_MONTHS_TIMESERIES[month]} ${year}`;
-        }
-    };
 
     const ctx = document.getElementById("timeSeriesChart").getContext('2d');
     window.chart = new Chart(ctx, {

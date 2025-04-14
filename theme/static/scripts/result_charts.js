@@ -1,6 +1,5 @@
-const EN_MONTHS_RESULT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 let resultChartJSOptions = {
+    locale: "en-IN",
     responsive: true,
     scales: {
         x: {
@@ -36,12 +35,6 @@ let resultChartJSOptions = {
             mode: "index",
             intersect: false,
             callbacks: {
-                title: function(context) {
-                    const date = new Date(context[0].label);
-                    const month = date.getMonth();
-                    const year = date.getFullYear();
-                    return `${EN_MONTHS_RESULT[month]} ${year}`;
-                },
                 label: function(context) {
                     let label = context.dataset.label || '';
                     let value = context.parsed.y;
@@ -100,15 +93,6 @@ function drawResultChart(chartType, resultsTemporalGranularity){
 
     resultChartJSOptions.scales.x.time.unit = resultsTemporalGranularity === "month" ? "month" : "year";
     resultChartJSOptions.scales.x.time.tooltipFormat = resultsTemporalGranularity === "month" ? "MMM yyyy" : "yyyy";
-    resultChartJSOptions.scales.x.ticks = {
-        callback: function(value, index, ticks) {
-            let label = this.getLabelForValue(value);
-            let date = new Date(label);
-            let year = date.getFullYear();
-            let month = date.getMonth();
-            return `${EN_MONTHS_RESULT[month]} ${year}`;
-        }
-    };
 
     if (window.charts[chartType+'Chart']) {
         window.charts[chartType+'Chart'].destroy();
