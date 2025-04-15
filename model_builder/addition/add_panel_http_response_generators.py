@@ -22,10 +22,11 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
     template_name = template_name_mapping[efootprint_class_str]
     context_data = {"form_fields": form_sections[1]["fields"],
-                    "header_name": "Add new " + template_name.replace("_", " "),
-                    "obj_type": efootprint_class_str}
-    if request.GET.get('efootprint_id_of_parent_to_link_to'):
-        context_data['efootprint_id_of_parent_to_link_to'] = request.GET['efootprint_id_of_parent_to_link_to']
+                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"],
+                    "obj_type": efootprint_class_str,
+                    "obj_label": FORM_TYPE_OBJECT[efootprint_class_str]["label"]}
+    if request.GET.get("efootprint_id_of_parent_to_link_to"):
+        context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 
     return render(request, f"model_builder/side_panels/{template_name}_add.html", context=context_data)
 
@@ -47,11 +48,12 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
-                               'form_sections': form_sections,
+                               "form_sections": form_sections,
                                "dynamic_form_data": dynamic_form_data,
                                "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
                                "obj_type": "server",
+                               "obj_label": FORM_TYPE_OBJECT["Server"]["label"],
                                "storage_obj_type": "storage",
                                "header_name": "Add new server",
                                "gpu_server_label": FORM_TYPE_OBJECT["GPUServer"]["label"],
@@ -65,7 +67,7 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
 
 
 def generate_service_add_panel_http_response(request, model_web: ModelWeb):
-    server_efootprint_id = request.GET.get('efootprint_id_of_parent_to_link_to')
+    server_efootprint_id = request.GET.get("efootprint_id_of_parent_to_link_to")
     server = model_web.get_web_object_from_efootprint_id(server_efootprint_id)
 
     installable_services = server.installable_services()
@@ -82,6 +84,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
             "form_sections": services_dict,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "service",
+            "obj_label": FORM_TYPE_OBJECT["Service"]["label"],
             "header_name": "Add new service",
         })
 
@@ -117,15 +120,15 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
                 "id": "server",
                 "name": "Server",
                 "options": [
-                    {'label': server.name, 'value': server.efootprint_id} for server in servers],
-                'label': "Choose a server"
+                    {"label": server.name, "value": server.efootprint_id} for server in servers],
+                "label": "Choose a server"
             },
             {
                 "input_type": "select",
                 "id": "service",
                 "name": "Service used",
                 "options": None,
-                'label': "Service used"
+                "label": "Service used"
             },
         ]
     }
@@ -160,7 +163,8 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "job",
-            "efootprint_id_of_parent_to_link_to": request.GET.get('efootprint_id_of_parent_to_link_to'),
+            "obj_label": FORM_TYPE_OBJECT["Job"]["label"],
+            "efootprint_id_of_parent_to_link_to": request.GET.get("efootprint_id_of_parent_to_link_to"),
             "header_name": "Add new job",
         })
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
@@ -205,8 +209,9 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             "form_fields": form_sections[1]["fields"],
             "usage_pattern_input_values": UsagePatternFromForm.default_values(),
             "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
-            'header_name': "Add new usage pattern",
-            'obj_type': "Usage pattern",
+            "header_name": "Add new usage pattern",
+            "obj_type": "Usage pattern",
+            "obj_label": FORM_TYPE_OBJECT["UsagePatternFromForm"]["label"],
         })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"

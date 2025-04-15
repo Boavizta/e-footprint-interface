@@ -2,12 +2,11 @@
 
 {% block panel_body %}
     {% block add_form %}
-        {% include "model_builder/side_panels/edit/edit_generic_form.html" %}
     {% endblock %}
 
     <div class="mb-3">
             <p class="mt-4">
-                You will be able to edit all attributes of the created {{ obj_type }} later by clicking on the object card.
+                You will be able to edit all attributes of the created {{ obj_label|lower }} later by clicking on the object card.
             </p>
         </div>
 

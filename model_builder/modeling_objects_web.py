@@ -6,6 +6,8 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
+from model_builder.class_structure import FORM_TYPE_OBJECT
+
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
     output_list = []
@@ -130,6 +132,10 @@ class ModelingObjectWeb:
     @property
     def label(self):
         return self.name
+
+    @property
+    def class_label(self):
+        return FORM_TYPE_OBJECT[self.class_as_simple_str]["label"]
 
     @property
     def web_id(self):
