@@ -90,7 +90,7 @@ def add_new_job(request, model_web: ModelWeb):
 
     mutable_post = request.POST.copy()
     mutable_post['name'] = usage_journey_step_to_edit.name
-    mutable_post['user_time_spent'] = usage_journey_step_to_edit.user_time_spent.rounded_magnitude
+    mutable_post['user_time_spent'] = usage_journey_step_to_edit.user_time_spent.magnitude
     job_ids = [job.efootprint_id for job in usage_journey_step_to_edit.jobs]
     job_ids.append(added_obj.efootprint_id)
     mutable_post.setlist('jobs', job_ids)

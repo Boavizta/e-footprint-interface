@@ -13,23 +13,23 @@
                 <tr>
                     <th scope="col">Item name</th>
                     <th scope="col">Attribute of</th>
-                    <th scope="col">Object Type</th>
+                    <th scope="col">Object type</th>
                     <th scope="col">Value</th>
                     <th scope="col">Unit</th>
                     <th scope="col">Source</th>
                 </tr>
             </thead>
             <tbody class="text-start">
-                {% for explainable_quantity in explainable_quantities %}
+                {% for explainable_quantity in web_explainable_quantities %}
                 <tr>
-                    <th scope="row">{{ explainable_quantity.attr_name_in_mod_obj_container }}</th>
+                    <th scope="row">{{ explainable_quantity.label|capfirst }}</th>
                     <td>{{ explainable_quantity.modeling_obj_container.name }}</td>
-                    <td>{{ explainable_quantity.modeling_obj_container.class_as_simple_str }}</td>
+                    <td>{{ explainable_quantity.modeling_obj_container.class_label }}</td>
                     <td>{{ explainable_quantity.value.magnitude }}</td>
                     <td>{{ explainable_quantity.value.units }}</td>
                     <td>
                         {% if explainable_quantity.attr_name_in_mod_obj_container in explainable_quantity.modeling_obj_container.calculated_attributes %}
-                            Computed <a href="{% url 'display-calculus-graph' explainable_quantity.modeling_obj_container.id explainable_quantity.attr_name_in_mod_obj_container %}" target="_blank">
+                            Computed <a href="{% url 'display-calculus-graph' explainable_quantity.modeling_obj_container.efootprint_id explainable_quantity.attr_name_in_mod_obj_container %}" target="_blank">
                             (see calculation graph)
                             </a>
                         {% elif explainable_quantity.source.link %}

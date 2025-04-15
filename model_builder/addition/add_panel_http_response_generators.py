@@ -22,7 +22,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
     template_name = template_name_mapping[efootprint_class_str]
     context_data = {"form_fields": form_sections[1]["fields"],
-                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"],
+                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
                     "obj_type": efootprint_class_str,
                     "obj_label": FORM_TYPE_OBJECT[efootprint_class_str]["label"]}
     if request.GET.get("efootprint_id_of_parent_to_link_to"):

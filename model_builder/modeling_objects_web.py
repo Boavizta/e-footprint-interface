@@ -1,12 +1,11 @@
 import re
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
-from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
-from model_builder.class_structure import FORM_TYPE_OBJECT
+from model_builder.class_structure import FORM_TYPE_OBJECT, FORM_FIELD_REFERENCES
 
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
@@ -18,26 +17,11 @@ def retrieve_attributes_by_type(modeling_obj, attribute_type):
 
     return output_list
 
-class EmptyExplainableObjectWeb:
-    def __init__(self, attr_name):
-        self.attr_name_in_mod_obj_container = attr_name
-
-    @property
-    def rounded_magnitude(self):
-        return 0
-
-    @property
-    def short_unit(self):
-        return ""
-
-    @property
-    def readable_attr_name(self):
-        return self.attr_name_in_mod_obj_container.replace("_", " ")
-
 
 class ExplainableObjectWeb:
-    def __init__(self, explainable_object: ExplainableObject):
+    def __init__(self, explainable_object: ExplainableObject, modeling_obj_container):
         self.explainable_object = explainable_object
+        self.modeling_obj_container = modeling_obj_container
 
     def __getattr__(self, name):
         attr = getattr(self.explainable_object, name)
@@ -45,16 +29,13 @@ class ExplainableObjectWeb:
         return attr
 
     @property
-    def rounded_magnitude(self):
-        return round(self.magnitude, 2)
-
-    @property
-    def short_unit(self):
-        return f"{self.value.units:~P}"
-
-    @property
-    def readable_attr_name(self):
-        return self.attr_name_in_mod_obj_container.replace("_", " ")
+    def label(self):
+        if (self.modeling_obj_container.class_as_simple_str in FORM_FIELD_REFERENCES.keys()
+            and self.attr_name_in_mod_obj_container not in self.modeling_obj_container.calculated_attributes):
+            return FORM_FIELD_REFERENCES[self.modeling_obj_container.class_as_simple_str][
+                self.attr_name_in_mod_obj_container]["label"]
+        else:
+            return self.attr_name_in_mod_obj_container.replace("_", " ")
 
 
 class ModelingObjectWeb:
@@ -73,9 +54,6 @@ class ModelingObjectWeb:
             raise ValueError("The id attribute shouldn’t be retrieved by ModelingObjectWrapper objects. "
                              "Use efootprint_id and web_id for clear disambiguation.")
 
-        if isinstance(attr, EmptyExplainableObject):
-            return EmptyExplainableObjectWeb(attr)
-
         if isinstance(attr, list) and len(attr) > 0 and isinstance(attr[0], ModelingObject):
             return [wrap_efootprint_object(item, self.model_web) for item in attr]
 
@@ -83,7 +61,7 @@ class ModelingObjectWeb:
             return wrap_efootprint_object(attr, self.model_web)
 
         if isinstance(attr, ExplainableObject):
-            return ExplainableObjectWeb(attr)
+            return ExplainableObjectWeb(attr, self)
 
         return attr
 

@@ -17,6 +17,7 @@ from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
 from model_builder.model_web import ModelWeb
+from model_builder.modeling_objects_web import ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 from utils import htmx_render
 
@@ -135,9 +136,12 @@ def result_chart(request):
 
     try:
         model_web.system.after_init()
-        explainable_quantities = []
+        web_explainable_quantities = []
         for efootprint_object in model_web.flat_efootprint_objs_dict.values():
-            explainable_quantities += list(get_instance_attributes(efootprint_object, ExplainableQuantity).values())
+            web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
+            web_explainable_quantities += [
+                ExplainableObjectWeb(explainable_object, web_efootprint_object)
+                for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
 
     except Exception as e:
         return render_exception_modal(request, e)
@@ -145,7 +149,7 @@ def result_chart(request):
     http_response = htmx_render(
         request, "model_builder/result/result_panel.html", context={
             "model_web": model_web,
-            "explainable_quantities": explainable_quantities
+            "web_explainable_quantities": web_explainable_quantities
         })
 
     return http_response
@@ -211,24 +215,31 @@ def download_sources(request):
     for efootprint_object in model_web.flat_efootprint_objs_dict.values():
         for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
             source = attr_value.source
+            web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
+            web_attr_value = ExplainableObjectWeb(attr_value, web_efootprint_object)
             if attr_name in efootprint_object.calculated_attributes:
                 source = Source("Computed", "")
 
             sources.append({
-                "name": attr_name,
-                "link_to": efootprint_object.name,
-                "objectType": efootprint_object.class_as_simple_str,
-                "value": attr_value.value.magnitude,
-                "unit": str(attr_value.value.units),
-                "source_name": source.name if source else "",
-                "source_link": source.link if source else "",
+                "Item name": web_attr_value.label,
+                "Attribute of": web_efootprint_object.name,
+                "Object type": web_efootprint_object.class_label,
+                "Value": attr_value.value.magnitude,
+                "Unit": str(attr_value.value.units),
+                "Source name": source.name if source else "",
+                "Source link": source.link if source else "",
             })
 
     df = pd.DataFrame(sources)
 
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Sources")
+        sheet_name = "Sources"
+        df.to_excel(writer, index=False, sheet_name=sheet_name)
+        worksheet = writer.sheets[sheet_name]
+        for col in worksheet.columns:
+            worksheet.column_dimensions[col[0].column_letter].width = 30
+
     output.seek(0)
 
     system_name = next(iter(request.session["system_data"]["System"].values()))["name"]

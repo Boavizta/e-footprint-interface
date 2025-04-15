@@ -44,6 +44,9 @@
         },
         "fixed_nb_of_instances": {
             "label": "Fixed nb of instances"
+        },
+        "fraction_of_usage_time": {
+            "label": "Fraction of usage time"
         }
     },
     "GPUServer": {
@@ -94,6 +97,9 @@
         },
         "fixed_nb_of_instances": {
             "label": "Fixed nb of instances"
+        },
+        "fraction_of_usage_time": {
+            "label": "Fraction of usage time"
         }
     },
     "BoaviztaCloudServer": {
@@ -135,6 +141,9 @@
         },
         "fixed_nb_of_instances": {
             "label": "Fixed nb of instances"
+        },
+        "fraction_of_usage_time": {
+            "label": "Fraction of usage time"
         }
     },
     "UsageJourneyStep": {
@@ -375,6 +384,9 @@
         },
         "fixed_nb_of_instances": {
             "label": "Fixed nb of instances"
+        },
+        "fraction_of_usage_time": {
+            "label": "Fraction of usage time"
         }
     }
 }

@@ -54,5 +54,14 @@
     },
     "GenAIJob": {
         "label": "Generative AI job"
+    },
+    "Network": {
+        "label": "Network"
+    },
+    "Device": {
+        "label": "Device"
+    },
+    "Country": {
+        "label": "Country"
     }
 }
