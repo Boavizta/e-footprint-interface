@@ -1,6 +1,6 @@
 {
     "Server": {
-        "label": "Server",
+        "label": "Custom server (CPUs)",
         "type_object_available": "Available server types"
     },
     "Job": {
@@ -32,10 +32,10 @@
         "type_object_available": "Available usage journeys"
     },
     "BoaviztaCloudServer": {
-        "label": "Cloud server from Boavizta API"
+        "label": "Cloud server (CPUs, for webapps, streaming, etc.)"
     },
     "GPUServer": {
-        "label": "GPU server"
+        "label": "Server for AI & GenAI services (GPUs)"
     },
     "WebApplication": {
         "label": "Web application"

@@ -25,7 +25,7 @@ class UsagePatternFromForm(UsagePattern):
             "modeling_duration_unit": SourceObject("year"),
             "initial_usage_journey_volume": SourceValue(10000 * u.dimensionless),
             "initial_usage_journey_volume_timespan": SourceObject("month"),
-            "net_growth_rate_in_percentage": SourceValue(10 * u.dimensionless),
+            "net_growth_rate_in_percentage": SourceValue(0 * u.dimensionless),
             "net_growth_rate_timespan": SourceObject("year")
         }
     @classmethod

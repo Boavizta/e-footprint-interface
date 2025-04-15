@@ -19,7 +19,7 @@
             "label": "Idle power"
         },
         "ram": {
-            "label": "Ram"
+            "label": "RAM"
         },
         "compute": {
             "label": "Compute",
@@ -29,14 +29,14 @@
             "label": "Power usage effectiveness"
         },
         "average_carbon_intensity": {
-            "label": "Average carbon intensity",
+            "label": "Average carbon intensity of electricity",
             "step": 0.01
         },
         "server_utilization_rate": {
             "label": "Server utilization rate"
         },
         "base_ram_consumption": {
-            "label": "Base ram consumption"
+            "label": "Base RAM consumption"
         },
         "base_compute_consumption": {
             "label": "Base compute consumption"
@@ -59,19 +59,19 @@
             "label": "Infrastructure type"
         },
         "gpu_power": {
-            "label": "Gpu power"
+            "label": "GPU power"
         },
         "gpu_idle_power": {
-            "label": "Gpu idle power"
+            "label": "GPU idle power"
         },
         "ram_per_gpu": {
-            "label": "Ram per gpu"
+            "label": "RAM per GPU"
         },
         "carbon_footprint_fabrication_per_gpu": {
-            "label": "Carbon footprint fabrication per gpu"
+            "label": "Carbon footprint fabrication per GPU"
         },
         "average_carbon_intensity": {
-            "label": "Average carbon intensity",
+            "label": "Average carbon intensity of electricity",
             "step": 0.01
         },
         "compute": {
@@ -79,7 +79,7 @@
             "step": 1
         },
         "carbon_footprint_fabrication_without_gpu": {
-            "label": "Carbon footprint fabrication without gpu"
+            "label": "Carbon footprint fabrication without GPU"
         },
         "lifespan": {
             "label": "Lifespan"
@@ -94,7 +94,7 @@
             "label": "Base compute consumption"
         },
         "base_ram_consumption": {
-            "label": "Base ram consumption"
+            "label": "Base RAM consumption"
         },
         "storage": {
             "label": "Storage"
@@ -129,14 +129,14 @@
             "label": "Power usage effectiveness"
         },
         "average_carbon_intensity": {
-            "label": "Average carbon intensity",
+            "label": "Average carbon intensity of electricity",
             "step": 0.01
         },
         "server_utilization_rate": {
             "label": "Server utilization rate"
         },
         "base_ram_consumption": {
-            "label": "Base ram consumption"
+            "label": "Base RAM consumption"
         },
         "base_compute_consumption": {
             "label": "Base compute consumption"
@@ -167,7 +167,7 @@
             "label": "Name"
         },
         "uj_steps": {
-            "label": "Uj steps"
+            "label": "Usage journey steps"
         }
     },
     "UsagePattern": {
@@ -239,7 +239,8 @@
             "label": "Data transferred"
         },
         "data_stored": {
-            "label": "Data stored"
+            "label": "Data stored",
+            "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
         },
         "request_duration": {
             "label": "Request duration"
@@ -248,7 +249,7 @@
             "label": "Compute needed"
         },
         "ram_needed": {
-            "label": "Ram needed"
+            "label": "RAM needed"
         }
     },
     "GenAIJob": {
@@ -279,7 +280,8 @@
             "label": "Refresh rate"
         },
         "data_stored": {
-            "label": "Data stored"
+            "label": "Data stored",
+            "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
         }
     },
     "WebApplicationJob": {
@@ -293,7 +295,8 @@
             "label": "Data transferred"
         },
         "data_stored": {
-            "label": "Data stored"
+            "label": "Data stored",
+            "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
         },
         "implementation_details": {
             "label": "Implementation details"
@@ -319,10 +322,10 @@
             "label": "Llm memory factor"
         },
         "gpu_latency_alpha": {
-            "label": "Gpu latency alpha"
+            "label": "GPU latency alpha"
         },
         "gpu_latency_beta": {
-            "label": "Gpu latency beta"
+            "label": "GPU latency beta"
         },
         "bits_per_token": {
             "label": "Bits per token"
@@ -336,7 +339,7 @@
             "label": "Server"
         },
         "base_ram_consumption": {
-            "label": "Base ram consumption"
+            "label": "Base RAM consumption"
         },
         "bits_per_pixel": {
             "label": "Bits per pixel"
@@ -345,7 +348,7 @@
             "label": "Static delivery cpu cost"
         },
         "ram_buffer_per_user": {
-            "label": "Ram buffer per user"
+            "label": "RAM buffer per user"
         }
     },
     "WebApplication": {

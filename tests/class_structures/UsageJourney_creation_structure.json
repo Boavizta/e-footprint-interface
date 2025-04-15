@@ -30,7 +30,7 @@
             {
                 "id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
-                "label": "Uj steps",
+                "label": "Usage journey steps",
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [

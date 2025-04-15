@@ -98,7 +98,7 @@
             {
                 "id": "Job_ram_needed",
                 "attr_name": "ram_needed",
-                "label": "Ram needed",
+                "label": "RAM needed",
                 "input_type": "input",
                 "unit": "MB",
                 "default": 50,

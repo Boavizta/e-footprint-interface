@@ -1,4 +1,7 @@
-from efootprint.core.all_classes_in_order import SERVER_CLASSES, SERVICE_CLASSES, SERVER_BUILDER_CLASSES
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
+from efootprint.core.all_classes_in_order import SERVICE_CLASSES
+from efootprint.core.hardware.gpu_server import GPUServer
+from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
 from django.shortcuts import render
 from efootprint.core.usage.job import Job
@@ -34,7 +37,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
         "Server",
-        available_efootprint_classes = SERVER_CLASSES + SERVER_BUILDER_CLASSES,
+        available_efootprint_classes = [GPUServer, BoaviztaCloudServer, Server],
         attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"],
         model_web=model_web,
     )

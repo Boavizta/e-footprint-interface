@@ -1,7 +1,7 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Server selection",
+        "header": "Custom server (CPUs) selection",
         "fields": [
             {
                 "input_type": "select",
@@ -9,15 +9,15 @@
                 "label": "Available server types",
                 "options": [
                     {
-                        "label": "Server",
+                        "label": "Custom server (CPUs)",
                         "value": "Server"
                     },
                     {
-                        "label": "GPU server",
+                        "label": "Server for AI & GenAI services (GPUs)",
                         "value": "GPUServer"
                     },
                     {
-                        "label": "Cloud server from Boavizta API",
+                        "label": "Cloud server (CPUs, for webapps, streaming, etc.)",
                         "value": "BoaviztaCloudServer"
                     }
                 ]
@@ -26,14 +26,14 @@
     },
     {
         "category": "Server",
-        "header": "Server creation",
+        "header": "Custom server (CPUs) creation",
         "fields": [
             {
                 "id": "Server_name",
                 "attr_name": "name",
                 "label": "Name",
                 "input_type": "str",
-                "default": "Server 1"
+                "default": "Custom server (CPUs) 1"
             },
             {
                 "id": "Server_server_type",
@@ -115,7 +115,7 @@
             {
                 "id": "Server_ram",
                 "attr_name": "ram",
-                "label": "Ram",
+                "label": "RAM",
                 "input_type": "input",
                 "unit": "GB",
                 "default": 128,
@@ -157,7 +157,7 @@
             {
                 "id": "Server_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
-                "label": "Average carbon intensity",
+                "label": "Average carbon intensity of electricity",
                 "input_type": "input",
                 "unit": "g/kWh",
                 "default": 100.0,
@@ -185,7 +185,7 @@
             {
                 "id": "Server_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
-                "label": "Base ram consumption",
+                "label": "Base RAM consumption",
                 "input_type": "input",
                 "unit": "GB",
                 "default": 0,
@@ -214,14 +214,14 @@
     },
     {
         "category": "GPUServer",
-        "header": "GPU server creation",
+        "header": "Server for AI & GenAI services (GPUs) creation",
         "fields": [
             {
                 "id": "GPUServer_name",
                 "attr_name": "name",
                 "label": "Name",
                 "input_type": "str",
-                "default": "GPU server 1"
+                "default": "Server for AI & GenAI services (GPUs) 1"
             },
             {
                 "id": "GPUServer_server_type",
@@ -247,7 +247,7 @@
             {
                 "id": "GPUServer_gpu_power",
                 "attr_name": "gpu_power",
-                "label": "Gpu power",
+                "label": "GPU power",
                 "input_type": "input",
                 "unit": "W/gpu",
                 "default": 400.0,
@@ -261,7 +261,7 @@
             {
                 "id": "GPUServer_gpu_idle_power",
                 "attr_name": "gpu_idle_power",
-                "label": "Gpu idle power",
+                "label": "GPU idle power",
                 "input_type": "input",
                 "unit": "W/gpu",
                 "default": 50.0,
@@ -275,7 +275,7 @@
             {
                 "id": "GPUServer_ram_per_gpu",
                 "attr_name": "ram_per_gpu",
-                "label": "Ram per gpu",
+                "label": "RAM per GPU",
                 "input_type": "input",
                 "unit": "GB/gpu",
                 "default": 80.0,
@@ -289,7 +289,7 @@
             {
                 "id": "GPUServer_carbon_footprint_fabrication_per_gpu",
                 "attr_name": "carbon_footprint_fabrication_per_gpu",
-                "label": "Carbon footprint fabrication per gpu",
+                "label": "Carbon footprint fabrication per GPU",
                 "input_type": "input",
                 "unit": "kg/gpu",
                 "default": 150.0,
@@ -303,7 +303,7 @@
             {
                 "id": "GPUServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
-                "label": "Average carbon intensity",
+                "label": "Average carbon intensity of electricity",
                 "input_type": "input",
                 "unit": "g/kWh",
                 "default": 100.0,
@@ -331,7 +331,7 @@
             {
                 "id": "GPUServer_carbon_footprint_fabrication_without_gpu",
                 "attr_name": "carbon_footprint_fabrication_without_gpu",
-                "label": "Carbon footprint fabrication without gpu",
+                "label": "Carbon footprint fabrication without GPU",
                 "input_type": "input",
                 "unit": "kg",
                 "default": 2500,
@@ -401,7 +401,7 @@
             {
                 "id": "GPUServer_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
-                "label": "Base ram consumption",
+                "label": "Base RAM consumption",
                 "input_type": "input",
                 "unit": "GB",
                 "default": 0,
@@ -416,14 +416,14 @@
     },
     {
         "category": "BoaviztaCloudServer",
-        "header": "Cloud server from Boavizta API creation",
+        "header": "Cloud server (CPUs, for webapps, streaming, etc.) creation",
         "fields": [
             {
                 "id": "BoaviztaCloudServer_name",
                 "attr_name": "name",
                 "label": "Name",
                 "input_type": "str",
-                "default": "Cloud server from Boavizta API 1"
+                "default": "Cloud server (CPUs, for webapps, streaming, etc.) 1"
             },
             {
                 "id": "BoaviztaCloudServer_provider",
@@ -524,7 +524,7 @@
             {
                 "id": "BoaviztaCloudServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
-                "label": "Average carbon intensity",
+                "label": "Average carbon intensity of electricity",
                 "input_type": "input",
                 "unit": "kg/kWh",
                 "default": 0.23,
@@ -552,7 +552,7 @@
             {
                 "id": "BoaviztaCloudServer_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
-                "label": "Base ram consumption",
+                "label": "Base RAM consumption",
                 "input_type": "input",
                 "unit": "GB",
                 "default": 0,

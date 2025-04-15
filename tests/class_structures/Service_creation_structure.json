@@ -80,7 +80,7 @@
             {
                 "id": "VideoStreaming_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
-                "label": "Base ram consumption",
+                "label": "Base RAM consumption",
                 "input_type": "input",
                 "unit": "GB",
                 "default": 2,
@@ -122,7 +122,7 @@
             {
                 "id": "VideoStreaming_ram_buffer_per_user",
                 "attr_name": "ram_buffer_per_user",
-                "label": "Ram buffer per user",
+                "label": "RAM buffer per user",
                 "input_type": "input",
                 "unit": "MB",
                 "default": 50,

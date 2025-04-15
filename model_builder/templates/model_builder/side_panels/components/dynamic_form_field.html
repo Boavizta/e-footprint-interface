@@ -73,10 +73,10 @@
     {% if field.source %}
         <div class="form-text fz-0-8" id="source-{{ field.id }}">
             {% if field.source.link %}
-                source : <a target="_blank" class="sources-label" href="{{ field.source.link }}">{{ field.source.name }}
+                Source : <a target="_blank" class="sources-label" href="{{ field.source.link }}">{{ field.source.name }}
             </a>
             {% else %}
-                source : {{ field.source.name }}
+                Source : {{ field.source.name }}
             {% endif %}
         </div>
     {% endif %}
