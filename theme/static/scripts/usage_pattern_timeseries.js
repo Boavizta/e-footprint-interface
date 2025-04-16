@@ -12,7 +12,10 @@ let timeSeriesChartJSOptions = {
         },
         y: {
             display: true,
-            title: { display: false }
+            title: {
+                display: true,
+                text: 'Number of usage journeys',
+            }
         }
     },
     plugins: {
@@ -101,7 +104,7 @@ function createOrUpdateTimeSeriesChart(){
         data: {
             labels: Object.keys(usageJourneyVolume),
             datasets: [{
-                label: 'Usage journeys',
+                label: 'Nb of usage journeys',
                 borderColor: '#017E7E',
                 backgroundColor: '#017E7E',
                 data: Object.values(usageJourneyVolume),
