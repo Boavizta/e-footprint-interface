@@ -15,7 +15,7 @@ def open_create_object_panel(request, object_type):
         http_response = generate_service_add_panel_http_response(request, model_web)
     elif object_type == "Job":
         http_response = generate_job_add_panel_http_response(request, model_web)
-    elif object_type == "UsagePattern":
+    elif object_type == "UsagePatternFromForm":
         http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
     else:
         http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
@@ -37,7 +37,7 @@ def add_object(request, object_type):
             return add_new_service(request, model_web)
         elif object_type == "Job":
             return add_new_job(request, model_web)
-        elif object_type == "UsagePattern":
+        elif object_type == "UsagePatternFromForm":
             return add_new_usage_pattern(request, model_web)
         else:
             return None

@@ -13,19 +13,25 @@
             {% endfor %}
         </select>
     {% elif field.input_type == 'select-multiple' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
-        <select class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" multiple>
-            <!-- This is a workaround to make sure that the form is submitted even if no option is selected -->
-            <option value="" hidden selected></option>
-            {% for option in field.options %}
-                 <option value="{{ option.value }}"
-                 {% for selected_obj_id in field.selected %}
-                     {% if selected_obj_id == option.value %}
-                         selected
-                     {% endif %}
-                 {% endfor %} >{{ option.label }}</option>
-            {% endfor %}
-        </select>
+            <label for="{{ field.id }}"
+                   class="form-label {% if not field.options %} d-none {% endif %} ">
+                {{ field.label }}
+            </label>
+            <select
+                class="form-control p-2 {% if not field.options %} d-none {% endif %}"
+                id="{{ field.id }}" name="{{ field.id }}"
+                multiple>
+                <!-- This is a workaround to make sure that the form is submitted even if no option is selected -->
+                <option value="" hidden selected></option>
+                {% for option in field.options %}
+                     <option value="{{ option.value }}"
+                     {% for selected_obj_id in field.selected %}
+                         {% if selected_obj_id == option.value %}
+                             selected
+                         {% endif %}
+                     {% endfor %} >{{ option.label }}</option>
+                {% endfor %}
+            </select>
     {% elif field.input_type == 'datalist' %}
         <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
         <input
@@ -44,7 +50,7 @@
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
     {% elif field.input_type == "input" %}
         <div class="input-group">
-            <label for="{{ field.id }}" class="form-label w-100">{{ field.label }}</label>
+
             <input type="number"
                     class="form-control input_with_add_on"
                     id="{{ field.id }}"

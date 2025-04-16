@@ -25,12 +25,12 @@ class TestViewsEdition(TestModelingBase):
     def test_edition(self):
         logger.info(f"Creating service")
         post_data = QueryDict(mutable=True)
-        post_data.update({'name': ['New service'],
+        post_data.update({'WebApplication_name': ['New service'],
                             'efootprint_id_of_parent_to_link_to': ['uuid-Server-1'],
                           'type_object_available': ['WebApplication'],
-                          'technology': ['php-symfony'], 'base_ram_consumption': ['2'],
-                          'bits_per_pixel': ['0.1'], 'static_delivery_cpu_cost': ['4.0'],
-                          'ram_buffer_per_user': ['50']}
+                          'WebApplication_technology': ['php-symfony'], 'WebApplication_base_ram_consumption': ['2'],
+                          'WebApplication_bits_per_pixel': ['0.1'], 'WebApplication_static_delivery_cpu_cost': ['4.0'],
+                          'WebApplication_ram_buffer_per_user': ['50']}
         )
 
         service_request = self.factory.post('/add-object/Service', data=post_data)
@@ -42,12 +42,12 @@ class TestViewsEdition(TestModelingBase):
         logger.info(f"Creating job")
         post_data = QueryDict(mutable=True)
         post_data.update(
-        {'name': ['New job'], 'server': ['uuid-Server-1'],
+        {'WebApplicationJob_name': ['New job'], 'WebApplicationJob_server': ['uuid-Server-1'],
          'efootprint_id_of_parent_to_link_to': ['uuid-20-min-streaming-on-Youtube'],
-         'service': [service_id],
+         'WebApplicationJob_service': [service_id],
          'type_object_available': ['WebApplicationJob'],
-         'implementation_details': ['aggregation-code-side'],
-         'data_transferred': ['150'], 'data_stored': ['100']}
+         'WebApplicationJob_implementation_details': ['aggregation-code-side'],
+         'WebApplicationJob_data_transferred': ['150'], 'WebApplicationJob_data_stored': ['100']}
         )
 
         job_request = self.factory.post('/model_builder/add-object/Job/', data=post_data)
@@ -83,8 +83,8 @@ class TestViewsEdition(TestModelingBase):
         second_model_name = GenAIModel.conditional_list_values()[
             "model_name"]["conditional_list_values"][second_provider][0]
         post_data.update(
-            {'name': ['Gen AI service'], 'server': [gpu_server.id],
-             "provider": [second_provider], "model_name": [second_model_name]}
+            {'GenAIModel_name': ['Gen AI service'], 'GenAIModel_server': [gpu_server.id],
+             "GenAIModel_provider": [second_provider], "GenAIModel_model_name": [second_model_name]}
         )
 
         edit_service_request = self.factory.post(f'/edit-object/{genai_service.id}', data=post_data)

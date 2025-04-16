@@ -42,9 +42,9 @@ def add_new_server(request, model_web: ModelWeb):
     added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
     mutable_post = request.POST.copy()
-    mutable_post['storage'] = added_storage.efootprint_id
     request.POST = mutable_post
     server_type = request.POST.get('type_object_available')
+    mutable_post[server_type + "_" + 'storage'] = added_storage.efootprint_id
 
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, server_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
@@ -56,11 +56,11 @@ def add_new_server(request, model_web: ModelWeb):
 
 def add_new_service(request, model_web: ModelWeb):
     server_efootprint_id = request.POST.get('efootprint_id_of_parent_to_link_to')
+    service_type = request.POST.get('type_object_available')
     mutable_post = request.POST.copy()
-    mutable_post['server'] = server_efootprint_id
+    mutable_post[f"{service_type}_server"] = server_efootprint_id
     try:
-        new_efootprint_obj = create_efootprint_obj_from_post_data(
-            mutable_post, model_web, request.POST.get('type_object_available'))
+        new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
 
         efootprint_server = model_web.get_web_object_from_efootprint_id(server_efootprint_id).modeling_obj
         efootprint_server.compute_calculated_attributes()

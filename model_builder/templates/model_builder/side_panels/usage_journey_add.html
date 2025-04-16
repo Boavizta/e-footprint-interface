@@ -12,10 +12,12 @@
             {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
         {% endfor %}
 
-        <div class="mb-3">
-            <p>
-               If you want to reuse steps that already exist in other usage journeys, select them in the list above.
-            </p>
-        </div>
+        {% if display_uj_step_help %}
+            <div class="mb-3">
+                <p>
+                   If you want to reuse steps that already exist in other usage journeys, select them in the list above.
+                </p>
+            </div>
+        {% endif %}
     </form>
 {% endblock %}
