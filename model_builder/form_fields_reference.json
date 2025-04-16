@@ -459,7 +459,8 @@
         "modeling_obj_containers": [
             "Storage"
         ],
-        "label": "storage capacity"
+        "label": "storage capacity",
+        "is_advanced_parameter": true
     },
     "data_replication_factor": {
         "modeling_obj_containers": [

@@ -57,12 +57,8 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
                                "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
                                "obj_type": "server",
-                               "obj_label": FORM_TYPE_OBJECT["Server"]["label"],
                                "storage_obj_type": "storage",
                                "header_name": "Add new server",
-                               "gpu_server_label": FORM_TYPE_OBJECT["GPUServer"]["label"],
-                               "server_label": FORM_TYPE_OBJECT["Server"]["label"],
-                               "boavizta_cloud_server_label": FORM_TYPE_OBJECT["BoaviztaCloudServer"]["label"],
                            })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"

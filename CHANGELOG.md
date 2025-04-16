@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.11] - 2025-04-16
+
+### Changed
+- A section in forms "Advanced options" has been added to included fields 
+  which required some technicals knowledge. This section can be expand or 
+  hide and all fields in this section can be edited.
+
 ## [0.7.9] - 2025-04-16
 
 ### Changed

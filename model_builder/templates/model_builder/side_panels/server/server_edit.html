@@ -2,7 +2,7 @@
 
 {% block edit_form %}
     {% include "model_builder/side_panels/server/server_edit_form.html" %}
-    {% include "model_builder/side_panels/server/storage_edit_form.html" with object_to_edit=storage_to_edit form_fields=storage_form_fields dynamic_form_data=storage_dynamic_form_data %}
+    {% include "model_builder/side_panels/server/storage_edit_form.html" with object_to_edit=storage_to_edit form_fields=storage_form_fields form_fields_advanced=storage_form_fields_advanced dynamic_form_data=storage_dynamic_form_data %}
 {% endblock %}
 {% block calculated_attributes %}
     {% include "model_builder/side_panels/edit/calculated_attributes.html" %}
