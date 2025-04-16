@@ -1,7 +1,7 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Custom server (CPUs) selection",
+        "header": "Server selection",
         "fields": [
             {
                 "input_type": "select",

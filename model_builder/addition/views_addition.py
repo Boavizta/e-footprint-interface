@@ -9,7 +9,7 @@ from model_builder.object_creation_and_edition_utils import render_exception_mod
 
 def open_create_object_panel(request, object_type):
     model_web = ModelWeb(request.session)
-    if object_type == "Server":
+    if object_type == "ServerBase":
         http_response = generate_server_add_panel_http_response(request, model_web)
     elif object_type == "Service":
         http_response = generate_service_add_panel_http_response(request, model_web)
@@ -31,7 +31,7 @@ def add_object(request, object_type):
             return add_new_usage_journey_step(request, model_web)
         elif object_type == "UsageJourney":
             return add_new_usage_journey(request, model_web)
-        elif object_type == "Server":
+        elif object_type == "ServerBase":
             return add_new_server(request, model_web)
         elif object_type == "Service":
             return add_new_service(request, model_web)

@@ -1,6 +1,6 @@
 {
-    "Server": {
-        "label": "Custom server (CPUs)",
+    "ServerBase": {
+        "label": "Server",
         "type_object_available": "Available server types"
     },
     "Job": {
@@ -30,6 +30,9 @@
     "UsageJourney": {
         "label": "Usage journey",
         "type_object_available": "Available usage journeys"
+    },
+    "Server": {
+        "label": "Custom server (CPUs)"
     },
     "BoaviztaCloudServer": {
         "label": "Cloud server (CPUs, for webapps, streaming, etc.)"

@@ -37,7 +37,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
 
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        "Server",
+        "ServerBase",
         available_efootprint_classes = [GPUServer, BoaviztaCloudServer, Server],
         attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"],
         model_web=model_web,

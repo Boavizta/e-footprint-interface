@@ -3,7 +3,7 @@
 
 {% block panel_body %}
     <form id="sidePanelForm"
-        hx-post="{% url 'add-new-object' 'Server' %}"
+        hx-post="{% url 'add-new-object' 'ServerBase' %}"
         hx-target="#server-list"
         hx-swap="beforeend"
         hx-disabled-elt="button"
@@ -11,9 +11,6 @@
         hx-vals="js:{
             storage_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
         }">
-    <p>
-        How to choose the server type?<br><br>“{{ gpu_server_label }}” to get help on configuring servers for AI use.<br><br>“{{ boavizta_cloud_server_label }}” to get help on configuring cloud servers for all other kinds of use.<br><br>“{{ server_label }}” to fully customize your non-AI server.
-    </p>
     {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>
     <form id="formStorage">

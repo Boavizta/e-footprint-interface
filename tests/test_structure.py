@@ -25,10 +25,10 @@ from model_builder.model_web import model_web_root, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.modeling_objects_web import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 
-from utils import EFOOTPRINT_COUNTRIES, format_snakecase_string
+from utils import EFOOTPRINT_COUNTRIES
 
 obj_creation_structure_dict = {
-        "Service": SERVICE_CLASSES, "Server": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
+        "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
         "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
         "UsageJourneyStep": [UsageJourneyStep]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
