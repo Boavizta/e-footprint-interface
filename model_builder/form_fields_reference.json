@@ -31,7 +31,8 @@
         "modeling_obj_containers": [
             "Server"
         ],
-        "label": "carbon footprint fabrication"
+        "label": "carbon footprint fabrication",
+        "is_advanced_parameter": true
     },
     "power": {
         "modeling_obj_containers": [
@@ -47,7 +48,8 @@
             "BoaviztaCloudServer",
             "Storage"
         ],
-        "label": "lifespan"
+        "label": "lifespan",
+        "is_advanced_parameter": true
     },
     "idle_power": {
         "modeling_obj_containers": [
@@ -88,8 +90,7 @@
             "BoaviztaCloudServer"
         ],
         "label": "average carbon intensity of electricity",
-        "step": 0.01,
-        "is_advanced_parameter": true
+        "step": 0.01
     },
     "server_utilization_rate": {
         "modeling_obj_containers": [
@@ -107,7 +108,8 @@
             "BoaviztaCloudServer",
             "VideoStreaming"
         ],
-        "label": "base RAM consumption"
+        "label": "base RAM consumption",
+        "is_advanced_parameter": true
     },
     "base_compute_consumption": {
         "modeling_obj_containers": [
@@ -115,7 +117,8 @@
             "GPUServer",
             "BoaviztaCloudServer"
         ],
-        "label": "base compute consumption"
+        "label": "base compute consumption",
+        "is_advanced_parameter": true
     },
     "storage": {
         "modeling_obj_containers": [
@@ -141,13 +144,15 @@
             "BoaviztaCloudServer",
             "Storage"
         ],
-        "label": "fraction of usage time"
+        "label": "fraction of usage time",
+        "is_advanced_parameter": true
     },
     "gpu_power": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
-        "label": "GPU power"
+        "label": "GPU power",
+        "is_advanced_parameter": true
     },
     "gpu_idle_power": {
         "modeling_obj_containers": [
@@ -160,19 +165,22 @@
         "modeling_obj_containers": [
             "GPUServer"
         ],
-        "label": "RAM per GPU"
+        "label": "RAM per GPU",
+        "is_advanced_parameter": true
     },
     "carbon_footprint_fabrication_per_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
-        "label": "carbon footprint fabrication per GPU"
+        "label": "carbon footprint fabrication per GPU",
+        "is_advanced_parameter": true
     },
     "carbon_footprint_fabrication_without_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
-        "label": "carbon footprint fabrication without GPU"
+        "label": "carbon footprint fabrication without GPU",
+        "is_advanced_parameter": true
     },
     "provider": {
         "modeling_obj_containers": [
@@ -191,7 +199,7 @@
         "modeling_obj_containers": [
             "UsageJourneyStep"
         ],
-        "label": "user time spent"
+        "label": "time spent by user"
     },
     "jobs": {
         "modeling_obj_containers": [
@@ -316,13 +324,15 @@
         "modeling_obj_containers": [
             "Job"
         ],
-        "label": "compute needed"
+        "label": "compute needed",
+        "is_advanced_parameter": true
     },
     "ram_needed": {
         "modeling_obj_containers": [
             "Job"
         ],
-        "label": "RAM needed"
+        "label": "RAM needed",
+        "is_advanced_parameter": true
     },
     "service": {
         "modeling_obj_containers": [
@@ -354,7 +364,8 @@
         "modeling_obj_containers": [
             "VideoStreamingJob"
         ],
-        "label": "refresh rate"
+        "label": "refresh rate",
+        "is_advanced_parameter": true
     },
     "implementation_details": {
         "modeling_obj_containers": [
@@ -466,6 +477,7 @@
         "modeling_obj_containers": [
             "Storage"
         ],
-        "label": "base storage need"
+        "label": "base storage need",
+        "is_advanced_parameter": true
     }
 }

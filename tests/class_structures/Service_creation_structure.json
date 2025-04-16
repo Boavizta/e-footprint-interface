@@ -77,7 +77,9 @@
                 "label": "name",
                 "input_type": "str",
                 "default": "Video streaming application 1"
-            },
+            }
+        ],
+        "advanced_fields": [
             {
                 "id": "VideoStreaming_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
@@ -91,9 +93,7 @@
                 },
                 "can_be_negative": false,
                 "step": 0.1
-            }
-        ],
-        "advanced_fields": [
+            },
             {
                 "id": "VideoStreaming_bits_per_pixel",
                 "attr_name": "bits_per_pixel",

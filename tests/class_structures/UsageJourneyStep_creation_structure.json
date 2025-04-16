@@ -30,7 +30,7 @@
             {
                 "id": "UsageJourneyStep_user_time_spent",
                 "attr_name": "user_time_spent",
-                "label": "user time spent",
+                "label": "time spent by user",
                 "input_type": "input",
                 "unit": "min",
                 "default": 1,

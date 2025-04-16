@@ -15,12 +15,8 @@ describe('Test services', () => {
         cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
         cy.get('#type_object_available').select('GPUServer');
         cy.get('#GPUServer_name').type(server);
+        cy.get('#GPUServer_compute').type(16);
 
-        // get ram_per_gpu and compute inside the #collapse_GPUServer
-        cy.get('#collapse_GPUServer_server').within(() => {
-            cy.get('#GPUServer_ram_per_gpu').focus().type('{selectall}{backspace}512').blur();
-            cy.get('#GPUServer_compute').focus().type('{selectall}{backspace}10').blur();
-        });
         cy.get('#btn-submit-form').click();
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();

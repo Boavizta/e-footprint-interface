@@ -13,14 +13,14 @@
                 if #advanced-{{ object_to_edit.class_label|slugify }}.classList.contains('d-none')
                     remove .d-none from #advanced-{{ object_to_edit.class_label|slugify }}
                     add .d-block to #advanced-{{ object_to_edit.class_label|slugify }}
-                    put 'Hide advanced options' into me.innerText
+                    put 'Hide advanced parameters' into me.innerText
                 else
                     remove .d-block from #advanced-{{ object_to_edit.class_label|slugify }}
                     add .d-none to #advanced-{{ object_to_edit.class_label|slugify }}
-                    put 'Show advanced options' into me.innerText
+                    put 'Show advanced parameters' into me.innerText
             "
            >
-        Show advanced options
+        Show advanced parameters
     </button>
 {% endif %}
 

@@ -25,14 +25,14 @@
                                     if #advanced-{{ form_section.category }}.classList.contains('d-none')
                                         remove .d-none from #advanced-{{ form_section.category }}
                                         add .d-block to #advanced-{{ form_section.category }}
-                                        put 'Hide advanced options' into me.innerText
+                                        put 'Hide advanced parameters' into me.innerText
                                     else
                                         remove .d-block from #advanced-{{ form_section.category }}
                                         add .d-none to #advanced-{{ form_section.category }}
-                                        put 'Show advanced options' into me.innerText
+                                        put 'Show advanced parameters' into me.innerText
                                 "
                                >
-                            Show advanced options
+                            Show advanced parameters
                         </button>
                     {% endif %}
                 </div>

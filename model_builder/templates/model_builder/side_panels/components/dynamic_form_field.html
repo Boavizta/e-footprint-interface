@@ -50,7 +50,7 @@
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
     {% elif field.input_type == "input" %}
         <div class="input-group">
-
+            <label for="{{ field.id }}" class="form-label w-100">{{ field.label|capfirst }}</label>
             <input type="number"
                     class="form-control input_with_add_on"
                     id="{{ field.id }}"

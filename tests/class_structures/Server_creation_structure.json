@@ -57,34 +57,6 @@
                 ]
             },
             {
-                "id": "Server_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
-                "input_type": "input",
-                "unit": "kg",
-                "default": 600,
-                "source": {
-                    "name": "Base ADEME_V19",
-                    "link": "https://data.ademe.fr/datasets/base-carbone(r)"
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "id": "Server_lifespan",
-                "attr_name": "lifespan",
-                "label": "lifespan",
-                "input_type": "input",
-                "unit": "yr",
-                "default": 6,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
                 "id": "Server_ram",
                 "attr_name": "ram",
                 "label": "RAM",
@@ -113,12 +85,42 @@
                 "step": 1
             },
             {
-                "id": "Server_base_ram_consumption",
-                "attr_name": "base_ram_consumption",
-                "label": "base RAM consumption",
+                "id": "Server_average_carbon_intensity",
+                "attr_name": "average_carbon_intensity",
+                "label": "average carbon intensity of electricity",
                 "input_type": "input",
-                "unit": "GB",
-                "default": 0,
+                "unit": "g/kWh",
+                "default": 100.0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.01
+            }
+        ],
+        "advanced_fields": [
+            {
+                "id": "Server_carbon_footprint_fabrication",
+                "attr_name": "carbon_footprint_fabrication",
+                "label": "carbon footprint fabrication",
+                "input_type": "input",
+                "unit": "kg",
+                "default": 600,
+                "source": {
+                    "name": "Base ADEME_V19",
+                    "link": "https://data.ademe.fr/datasets/base-carbone(r)"
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "Server_power",
+                "attr_name": "power",
+                "label": "power",
+                "input_type": "input",
+                "unit": "W",
+                "default": 300,
                 "source": {
                     "name": "hypothesis",
                     "link": null
@@ -127,28 +129,12 @@
                 "step": 0.1
             },
             {
-                "id": "Server_base_compute_consumption",
-                "attr_name": "base_compute_consumption",
-                "label": "base compute consumption",
+                "id": "Server_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
                 "input_type": "input",
-                "unit": "cpu_core",
-                "default": 0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            }
-        ],
-        "advanced_fields": [
-            {
-                "id": "Server_power",
-                "attr_name": "power",
-                "label": "power",
-                "input_type": "input",
-                "unit": "W",
-                "default": 300,
+                "unit": "yr",
+                "default": 6,
                 "source": {
                     "name": "hypothesis",
                     "link": null
@@ -185,26 +171,40 @@
                 "step": 0.1
             },
             {
-                "id": "Server_average_carbon_intensity",
-                "attr_name": "average_carbon_intensity",
-                "label": "average carbon intensity of electricity",
-                "input_type": "input",
-                "unit": "g/kWh",
-                "default": 100.0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.01
-            },
-            {
                 "id": "Server_server_utilization_rate",
                 "attr_name": "server_utilization_rate",
                 "label": "server utilization rate",
                 "input_type": "input",
                 "unit": "",
                 "default": 0.9,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "Server_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "input_type": "input",
+                "unit": "GB",
+                "default": 0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "Server_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "input_type": "input",
+                "unit": "cpu_core",
+                "default": 0,
                 "source": {
                     "name": "hypothesis",
                     "link": null
@@ -247,12 +247,56 @@
                 ]
             },
             {
+                "id": "GPUServer_average_carbon_intensity",
+                "attr_name": "average_carbon_intensity",
+                "label": "average carbon intensity of electricity",
+                "input_type": "input",
+                "unit": "g/kWh",
+                "default": 100.0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.01
+            },
+            {
+                "id": "GPUServer_compute",
+                "attr_name": "compute",
+                "label": "compute",
+                "input_type": "input",
+                "unit": "gpu",
+                "default": 4,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": [
+            {
                 "id": "GPUServer_gpu_power",
                 "attr_name": "gpu_power",
                 "label": "GPU power",
                 "input_type": "input",
                 "unit": "W/gpu",
                 "default": 400.0,
+                "source": {
+                    "name": "Estimating the Carbon Footprint of BLOOM",
+                    "link": "https://arxiv.org/abs/2211.05100"
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "GPUServer_gpu_idle_power",
+                "attr_name": "gpu_idle_power",
+                "label": "GPU idle power",
+                "input_type": "input",
+                "unit": "W/gpu",
+                "default": 50.0,
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
@@ -289,20 +333,6 @@
                 "step": 0.1
             },
             {
-                "id": "GPUServer_compute",
-                "attr_name": "compute",
-                "label": "compute",
-                "input_type": "input",
-                "unit": "gpu",
-                "default": 4,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 1
-            },
-            {
                 "id": "GPUServer_carbon_footprint_fabrication_without_gpu",
                 "attr_name": "carbon_footprint_fabrication_without_gpu",
                 "label": "carbon footprint fabrication without GPU",
@@ -331,64 +361,6 @@
                 "step": 0.1
             },
             {
-                "id": "GPUServer_base_compute_consumption",
-                "attr_name": "base_compute_consumption",
-                "label": "base compute consumption",
-                "input_type": "input",
-                "unit": "gpu",
-                "default": 0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "id": "GPUServer_base_ram_consumption",
-                "attr_name": "base_ram_consumption",
-                "label": "base RAM consumption",
-                "input_type": "input",
-                "unit": "GB",
-                "default": 0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            }
-        ],
-        "advanced_fields": [
-            {
-                "id": "GPUServer_gpu_idle_power",
-                "attr_name": "gpu_idle_power",
-                "label": "GPU idle power",
-                "input_type": "input",
-                "unit": "W/gpu",
-                "default": 50.0,
-                "source": {
-                    "name": "Estimating the Carbon Footprint of BLOOM",
-                    "link": "https://arxiv.org/abs/2211.05100"
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "id": "GPUServer_average_carbon_intensity",
-                "attr_name": "average_carbon_intensity",
-                "label": "average carbon intensity of electricity",
-                "input_type": "input",
-                "unit": "g/kWh",
-                "default": 100.0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.01
-            },
-            {
                 "id": "GPUServer_power_usage_effectiveness",
                 "attr_name": "power_usage_effectiveness",
                 "label": "power usage effectiveness",
@@ -409,6 +381,34 @@
                 "input_type": "input",
                 "unit": "",
                 "default": 1,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "GPUServer_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "input_type": "input",
+                "unit": "gpu",
+                "default": 0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "GPUServer_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "input_type": "input",
+                "unit": "GB",
+                "default": 0,
                 "source": {
                     "name": "hypothesis",
                     "link": null
@@ -484,6 +484,22 @@
                 ]
             },
             {
+                "id": "BoaviztaCloudServer_average_carbon_intensity",
+                "attr_name": "average_carbon_intensity",
+                "label": "average carbon intensity of electricity",
+                "input_type": "input",
+                "unit": "kg/kWh",
+                "default": 0.23,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.01
+            }
+        ],
+        "advanced_fields": [
+            {
                 "id": "BoaviztaCloudServer_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
@@ -497,36 +513,6 @@
                 "can_be_negative": false,
                 "step": 0.1
             },
-            {
-                "id": "BoaviztaCloudServer_base_ram_consumption",
-                "attr_name": "base_ram_consumption",
-                "label": "base RAM consumption",
-                "input_type": "input",
-                "unit": "GB",
-                "default": 0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "id": "BoaviztaCloudServer_base_compute_consumption",
-                "attr_name": "base_compute_consumption",
-                "label": "base compute consumption",
-                "input_type": "input",
-                "unit": "cpu_core",
-                "default": 0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            }
-        ],
-        "advanced_fields": [
             {
                 "id": "BoaviztaCloudServer_idle_power",
                 "attr_name": "idle_power",
@@ -556,26 +542,40 @@
                 "step": 0.1
             },
             {
-                "id": "BoaviztaCloudServer_average_carbon_intensity",
-                "attr_name": "average_carbon_intensity",
-                "label": "average carbon intensity of electricity",
-                "input_type": "input",
-                "unit": "kg/kWh",
-                "default": 0.23,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.01
-            },
-            {
                 "id": "BoaviztaCloudServer_server_utilization_rate",
                 "attr_name": "server_utilization_rate",
                 "label": "server utilization rate",
                 "input_type": "input",
                 "unit": "",
                 "default": 0.9,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "BoaviztaCloudServer_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "input_type": "input",
+                "unit": "GB",
+                "default": 0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "id": "BoaviztaCloudServer_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "input_type": "input",
+                "unit": "cpu_core",
+                "default": 0,
                 "source": {
                     "name": "hypothesis",
                     "link": null

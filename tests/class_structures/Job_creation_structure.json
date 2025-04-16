@@ -80,7 +80,9 @@
                 },
                 "can_be_negative": false,
                 "step": 0.1
-            },
+            }
+        ],
+        "advanced_fields": [
             {
                 "id": "Job_compute_needed",
                 "attr_name": "compute_needed",
@@ -109,8 +111,7 @@
                 "can_be_negative": false,
                 "step": 0.1
             }
-        ],
-        "advanced_fields": []
+        ]
     },
     {
         "category": "WebApplicationJob",
@@ -250,20 +251,6 @@
                 "step": 0.1
             },
             {
-                "id": "VideoStreamingJob_refresh_rate",
-                "attr_name": "refresh_rate",
-                "label": "refresh rate",
-                "input_type": "input",
-                "unit": "1/s",
-                "default": 30.0,
-                "source": {
-                    "name": "hypothesis",
-                    "link": null
-                },
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
                 "id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
@@ -278,7 +265,22 @@
                 "step": 0.1
             }
         ],
-        "advanced_fields": []
+        "advanced_fields": [
+            {
+                "id": "VideoStreamingJob_refresh_rate",
+                "attr_name": "refresh_rate",
+                "label": "refresh rate",
+                "input_type": "input",
+                "unit": "1/s",
+                "default": 30.0,
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                },
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ]
     },
     {
         "category": "GenAIJob",
