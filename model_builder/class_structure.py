@@ -108,7 +108,7 @@ def generate_dynamic_form(
         structure_field = {
             "id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
-            "label": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["label"],
+            "label": FORM_FIELD_REFERENCES[attr_name]["label"],
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
@@ -137,7 +137,7 @@ def generate_dynamic_form(
                 "default": round(default.magnitude, 2),
                 "source": {"name":default.source.name, "link":default.source.link},
                 "can_be_negative": attr_name in attributes_that_can_have_negative_values,
-                "step": FORM_FIELD_REFERENCES[efootprint_class_str][attr_name].get("step", 0.1)
+                "step": FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
             })
         elif issubclass(annotation, ExplainableObject):
             if attr_name in list_values.keys():
@@ -184,7 +184,7 @@ def generate_dynamic_form(
                     {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
             })
 
-        if FORM_FIELD_REFERENCES[efootprint_class_str][attr_name].get("is_advanced_parameter", False):
+        if FORM_FIELD_REFERENCES[attr_name].get("is_advanced_parameter", False):
             structure_fields_advanced.append(structure_field)
         else:
             structure_fields.append(structure_field)

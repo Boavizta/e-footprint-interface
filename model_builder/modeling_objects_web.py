@@ -30,10 +30,8 @@ class ExplainableObjectWeb:
 
     @property
     def label(self):
-        if (self.modeling_obj_container.class_as_simple_str in FORM_FIELD_REFERENCES.keys()
-            and self.attr_name_in_mod_obj_container not in self.modeling_obj_container.calculated_attributes):
-            return FORM_FIELD_REFERENCES[self.modeling_obj_container.class_as_simple_str][
-                self.attr_name_in_mod_obj_container]["label"]
+        if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
+            return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
         else:
             return self.attr_name_in_mod_obj_container.replace("_", " ")
 

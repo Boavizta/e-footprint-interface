@@ -1,424 +1,471 @@
 {
-    "Server": {
-        "name": {
-            "label": "Name"
-        },
-        "server_type": {
-            "label": "Infrastructure type"
-        },
-        "carbon_footprint_fabrication": {
-            "label": "Carbon footprint fabrication"
-        },
-        "power": {
-            "label": "Power",
-            "is_advanced_parameter": true
-        },
-        "lifespan": {
-            "label": "Lifespan"
-        },
-        "idle_power": {
-            "label": "Idle power",
-            "is_advanced_parameter": true
-        },
-        "ram": {
-            "label": "RAM"
-        },
-        "compute": {
-            "label": "Compute",
-            "step": 1
-        },
-        "power_usage_effectiveness": {
-            "label": "Power usage effectiveness",
-            "is_advanced_parameter": true
-        },
-        "average_carbon_intensity": {
-            "label": "Average carbon intensity of electricity",
-            "step": 0.01,
-            "is_advanced_parameter": true
-        },
-        "server_utilization_rate": {
-            "label": "Server utilization rate",
-            "is_advanced_parameter": true
-        },
-        "base_ram_consumption": {
-            "label": "Base RAM consumption"
-        },
-        "base_compute_consumption": {
-            "label": "Base compute consumption"
-        },
-        "storage": {
-            "label": "Storage"
-        },
-        "fixed_nb_of_instances": {
-            "label": "Fixed nb of instances"
-        },
-        "fraction_of_usage_time": {
-            "label": "Fraction of usage time"
-        }
+    "name": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "UsageJourneyStep",
+            "UsageJourney",
+            "UsagePattern",
+            "UsagePatternFromForm",
+            "Job",
+            "GenAIJob",
+            "VideoStreamingJob",
+            "WebApplicationJob",
+            "GenAIModel",
+            "VideoStreaming",
+            "WebApplication",
+            "Storage"
+        ],
+        "label": "name"
     },
-    "GPUServer": {
-        "name": {
-            "label": "Name"
-        },
-        "server_type": {
-            "label": "Infrastructure type"
-        },
-        "gpu_power": {
-            "label": "GPU power"
-        },
-        "gpu_idle_power": {
-            "label": "GPU idle power",
-            "is_advanced_parameter": true
-        },
-        "ram_per_gpu": {
-            "label": "RAM per GPU"
-        },
-        "carbon_footprint_fabrication_per_gpu": {
-            "label": "Carbon footprint fabrication per GPU"
-        },
-        "average_carbon_intensity": {
-            "label": "Average carbon intensity of electricity",
-            "step": 0.01,
-            "is_advanced_parameter": true
-        },
-        "compute": {
-            "label": "Compute",
-            "step": 1
-        },
-        "carbon_footprint_fabrication_without_gpu": {
-            "label": "Carbon footprint fabrication without GPU"
-        },
-        "lifespan": {
-            "label": "Lifespan"
-        },
-        "power_usage_effectiveness": {
-            "label": "Power usage effectiveness",
-            "is_advanced_parameter": true
-        },
-        "server_utilization_rate": {
-            "label": "Server utilization rate",
-            "is_advanced_parameter": true
-        },
-        "base_compute_consumption": {
-            "label": "Base compute consumption"
-        },
-        "base_ram_consumption": {
-            "label": "Base RAM consumption"
-        },
-        "storage": {
-            "label": "Storage"
-        },
-        "fixed_nb_of_instances": {
-            "label": "Fixed nb of instances"
-        },
-        "fraction_of_usage_time": {
-            "label": "Fraction of usage time"
-        }
+    "server_type": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "infrastructure type"
     },
-    "BoaviztaCloudServer": {
-        "name": {
-            "label": "Name"
-        },
-        "provider": {
-            "label": "Provider"
-        },
-        "instance_type": {
-            "label": "Instance type"
-        },
-        "server_type": {
-            "label": "Infrastructure type"
-        },
-        "lifespan": {
-            "label": "Lifespan"
-        },
-        "idle_power": {
-            "label": "Idle power",
-            "is_advanced_parameter": true
-        },
-        "power_usage_effectiveness": {
-            "label": "Power usage effectiveness",
-            "is_advanced_parameter": true
-        },
-        "average_carbon_intensity": {
-            "label": "Average carbon intensity of electricity",
-            "step": 0.01,
-            "is_advanced_parameter": true
-        },
-        "server_utilization_rate": {
-            "label": "Server utilization rate",
-            "is_advanced_parameter": true
-        },
-        "base_ram_consumption": {
-            "label": "Base RAM consumption"
-        },
-        "base_compute_consumption": {
-            "label": "Base compute consumption"
-        },
-        "storage": {
-            "label": "Storage"
-        },
-        "fixed_nb_of_instances": {
-            "label": "Fixed nb of instances"
-        },
-        "fraction_of_usage_time": {
-            "label": "Fraction of usage time"
-        }
+    "carbon_footprint_fabrication": {
+        "modeling_obj_containers": [
+            "Server"
+        ],
+        "label": "carbon footprint fabrication"
     },
-    "UsageJourneyStep": {
-        "name": {
-            "label": "Name"
-        },
-        "user_time_spent": {
-            "label": "User time spent"
-        },
-        "jobs": {
-            "label": "Jobs"
-        }
+    "power": {
+        "modeling_obj_containers": [
+            "Server"
+        ],
+        "label": "power",
+        "is_advanced_parameter": true
     },
-    "UsageJourney": {
-        "name": {
-            "label": "Name"
-        },
-        "uj_steps": {
-            "label": "Usage journey steps"
-        }
+    "lifespan": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "Storage"
+        ],
+        "label": "lifespan"
     },
-    "UsagePattern": {
-        "name": {
-            "label": "Name"
-        },
-        "usage_journey": {
-            "label": "Usage journey"
-        },
-        "devices": {
-            "label": "Devices"
-        },
-        "network": {
-            "label": "Network"
-        },
-        "country": {
-            "label": "Country"
-        },
-        "hourly_usage_journey_starts": {
-            "label": "Hourly usage journey starts"
-        }
+    "idle_power": {
+        "modeling_obj_containers": [
+            "Server",
+            "BoaviztaCloudServer",
+            "Storage"
+        ],
+        "label": "idle power",
+        "is_advanced_parameter": true
     },
-    "UsagePatternFromForm": {
-        "name": {
-            "label": "Name"
-        },
-        "usage_journey": {
-            "label": "Usage journey"
-        },
-        "devices": {
-            "label": "Devices"
-        },
-        "network": {
-            "label": "Network"
-        },
-        "country": {
-            "label": "Country"
-        },
-        "start_date": {
-            "label": "Start date"
-        },
-        "modeling_duration_value": {
-            "label": "Modeling duration value"
-        },
-        "modeling_duration_unit": {
-            "label": "Modeling duration unit"
-        },
-        "initial_usage_journey_volume": {
-            "label": "Initial usage journey volume"
-        },
-        "initial_usage_journey_volume_timespan": {
-            "label": "Initial usage journey volume timespan"
-        },
-        "net_growth_rate_in_percentage": {
-            "label": "Net growth rate in percentage"
-        },
-        "net_growth_rate_timespan": {
-            "label": "Net growth rate timespan"
-        }
+    "ram": {
+        "modeling_obj_containers": [
+            "Server"
+        ],
+        "label": "RAM"
     },
-    "Job": {
-        "name": {
-            "label": "Name"
-        },
-        "server": {
-            "label": "Server"
-        },
-        "data_transferred": {
-            "label": "Data transferred"
-        },
-        "data_stored": {
-            "label": "Data stored",
-            "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
-        },
-        "request_duration": {
-            "label": "Request duration"
-        },
-        "compute_needed": {
-            "label": "Compute needed"
-        },
-        "ram_needed": {
-            "label": "RAM needed"
-        }
+    "compute": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer"
+        ],
+        "label": "compute",
+        "step": 1
     },
-    "GenAIJob": {
-        "name": {
-            "label": "Name"
-        },
-        "service": {
-            "label": "Service"
-        },
-        "output_token_count": {
-            "label": "Output token count"
-        }
+    "power_usage_effectiveness": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "power usage effectiveness",
+        "is_advanced_parameter": true
     },
-    "VideoStreamingJob": {
-        "name": {
-            "label": "Name"
-        },
-        "service": {
-            "label": "Service"
-        },
-        "resolution": {
-            "label": "Resolution"
-        },
-        "video_duration": {
-            "label": "Video duration"
-        },
-        "refresh_rate": {
-            "label": "Refresh rate"
-        },
-        "data_stored": {
-            "label": "Data stored",
-            "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
-        }
+    "average_carbon_intensity": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "average carbon intensity of electricity",
+        "step": 0.01,
+        "is_advanced_parameter": true
     },
-    "WebApplicationJob": {
-        "name": {
-            "label": "Name"
-        },
-        "service": {
-            "label": "Service"
-        },
-        "data_transferred": {
-            "label": "Data transferred"
-        },
-        "data_stored": {
-            "label": "Data stored",
-            "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
-        },
-        "implementation_details": {
-            "label": "Implementation details"
-        }
+    "server_utilization_rate": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "server utilization rate",
+        "is_advanced_parameter": true
     },
-    "GenAIModel": {
-        "name": {
-            "label": "Name"
-        },
-        "provider": {
-            "label": "Provider"
-        },
-        "model_name": {
-            "label": "Model name"
-        },
-        "server": {
-            "label": "Server"
-        },
-        "nb_of_bits_per_parameter": {
-            "label": "Nb of bits per parameter",
-            "is_advanced_parameter": true
-        },
-        "llm_memory_factor": {
-            "label": "Llm memory factor",
-            "is_advanced_parameter": true
-        },
-        "gpu_latency_alpha": {
-            "label": "GPU latency alpha",
-            "is_advanced_parameter": true
-        },
-        "gpu_latency_beta": {
-            "label": "GPU latency beta",
-            "is_advanced_parameter": true
-        },
-        "bits_per_token": {
-            "label": "Bits per token",
-            "is_advanced_parameter": true
-        }
+    "base_ram_consumption": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "VideoStreaming"
+        ],
+        "label": "base RAM consumption"
     },
-    "VideoStreaming": {
-        "name": {
-            "label": "Name"
-        },
-        "server": {
-            "label": "Server"
-        },
-        "base_ram_consumption": {
-            "label": "Base RAM consumption"
-        },
-        "bits_per_pixel": {
-            "label": "Bits per pixel",
-            "is_advanced_parameter": true
-        },
-        "static_delivery_cpu_cost": {
-            "label": "Static delivery cpu cost",
-            "is_advanced_parameter": true
-        },
-        "ram_buffer_per_user": {
-            "label": "RAM buffer per user",
-            "is_advanced_parameter": true
-        }
+    "base_compute_consumption": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "base compute consumption"
     },
-    "WebApplication": {
-        "name": {
-            "label": "Name"
-        },
-        "server": {
-            "label": "Server"
-        },
-        "technology": {
-            "label": "Technology"
-        }
+    "storage": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "storage"
     },
-    "Storage": {
-        "name": {
-            "label": "Name"
-        },
-        "carbon_footprint_fabrication_per_storage_capacity": {
-            "label": "Carbon footprint fabrication per storage capacity",
-            "is_advanced_parameter": true
-        },
-        "power_per_storage_capacity": {
-            "label": "Power per storage capacity",
-            "is_advanced_parameter": true
-        },
-        "lifespan": {
-            "label": "Lifespan"
-        },
-        "idle_power": {
-            "label": "Idle power",
-            "is_advanced_parameter": true
-        },
-        "storage_capacity": {
-            "label": "Storage capacity"
-        },
-        "data_replication_factor": {
-            "label": "Data replication factor"
-        },
-        "data_storage_duration": {
-            "label": "Data storage duration"
-        },
-        "base_storage_need": {
-            "label": "Base storage need"
-        },
-        "fixed_nb_of_instances": {
-            "label": "Fixed nb of instances"
-        },
-        "fraction_of_usage_time": {
-            "label": "Fraction of usage time"
-        }
+    "fixed_nb_of_instances": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "Storage"
+        ],
+        "label": "fixed nb of instances"
+    },
+    "fraction_of_usage_time": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "Storage"
+        ],
+        "label": "fraction of usage time"
+    },
+    "gpu_power": {
+        "modeling_obj_containers": [
+            "GPUServer"
+        ],
+        "label": "GPU power"
+    },
+    "gpu_idle_power": {
+        "modeling_obj_containers": [
+            "GPUServer"
+        ],
+        "label": "GPU idle power",
+        "is_advanced_parameter": true
+    },
+    "ram_per_gpu": {
+        "modeling_obj_containers": [
+            "GPUServer"
+        ],
+        "label": "RAM per GPU"
+    },
+    "carbon_footprint_fabrication_per_gpu": {
+        "modeling_obj_containers": [
+            "GPUServer"
+        ],
+        "label": "carbon footprint fabrication per GPU"
+    },
+    "carbon_footprint_fabrication_without_gpu": {
+        "modeling_obj_containers": [
+            "GPUServer"
+        ],
+        "label": "carbon footprint fabrication without GPU"
+    },
+    "provider": {
+        "modeling_obj_containers": [
+            "BoaviztaCloudServer",
+            "GenAIModel"
+        ],
+        "label": "provider"
+    },
+    "instance_type": {
+        "modeling_obj_containers": [
+            "BoaviztaCloudServer"
+        ],
+        "label": "instance type"
+    },
+    "user_time_spent": {
+        "modeling_obj_containers": [
+            "UsageJourneyStep"
+        ],
+        "label": "user time spent"
+    },
+    "jobs": {
+        "modeling_obj_containers": [
+            "UsageJourneyStep"
+        ],
+        "label": "jobs"
+    },
+    "uj_steps": {
+        "modeling_obj_containers": [
+            "UsageJourney"
+        ],
+        "label": "usage journey steps"
+    },
+    "usage_journey": {
+        "modeling_obj_containers": [
+            "UsagePattern",
+            "UsagePatternFromForm"
+        ],
+        "label": "usage journey"
+    },
+    "devices": {
+        "modeling_obj_containers": [
+            "UsagePattern",
+            "UsagePatternFromForm"
+        ],
+        "label": "devices"
+    },
+    "network": {
+        "modeling_obj_containers": [
+            "UsagePattern",
+            "UsagePatternFromForm"
+        ],
+        "label": "network"
+    },
+    "country": {
+        "modeling_obj_containers": [
+            "UsagePattern",
+            "UsagePatternFromForm"
+        ],
+        "label": "country"
+    },
+    "hourly_usage_journey_starts": {
+        "modeling_obj_containers": [
+            "UsagePattern"
+        ],
+        "label": "hourly usage journey starts"
+    },
+    "start_date": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "start date"
+    },
+    "modeling_duration_value": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "modeling duration value"
+    },
+    "modeling_duration_unit": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "modeling duration unit"
+    },
+    "initial_usage_journey_volume": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "initial usage journey volume"
+    },
+    "initial_usage_journey_volume_timespan": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "initial usage journey volume timespan"
+    },
+    "net_growth_rate_in_percentage": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "net growth rate in percentage"
+    },
+    "net_growth_rate_timespan": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "net growth rate timespan"
+    },
+    "server": {
+        "modeling_obj_containers": [
+            "Job",
+            "GenAIModel",
+            "VideoStreaming",
+            "WebApplication"
+        ],
+        "label": "server"
+    },
+    "data_transferred": {
+        "modeling_obj_containers": [
+            "Job",
+            "WebApplicationJob"
+        ],
+        "label": "data transferred"
+    },
+    "data_stored": {
+        "modeling_obj_containers": [
+            "Job",
+            "VideoStreamingJob",
+            "WebApplicationJob"
+        ],
+        "label": "data stored",
+        "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
+    },
+    "request_duration": {
+        "modeling_obj_containers": [
+            "Job"
+        ],
+        "label": "request duration"
+    },
+    "compute_needed": {
+        "modeling_obj_containers": [
+            "Job"
+        ],
+        "label": "compute needed"
+    },
+    "ram_needed": {
+        "modeling_obj_containers": [
+            "Job"
+        ],
+        "label": "RAM needed"
+    },
+    "service": {
+        "modeling_obj_containers": [
+            "GenAIJob",
+            "VideoStreamingJob",
+            "WebApplicationJob"
+        ],
+        "label": "service"
+    },
+    "output_token_count": {
+        "modeling_obj_containers": [
+            "GenAIJob"
+        ],
+        "label": "output token count"
+    },
+    "resolution": {
+        "modeling_obj_containers": [
+            "VideoStreamingJob"
+        ],
+        "label": "resolution"
+    },
+    "video_duration": {
+        "modeling_obj_containers": [
+            "VideoStreamingJob"
+        ],
+        "label": "video duration"
+    },
+    "refresh_rate": {
+        "modeling_obj_containers": [
+            "VideoStreamingJob"
+        ],
+        "label": "refresh rate"
+    },
+    "implementation_details": {
+        "modeling_obj_containers": [
+            "WebApplicationJob"
+        ],
+        "label": "implementation details"
+    },
+    "model_name": {
+        "modeling_obj_containers": [
+            "GenAIModel"
+        ],
+        "label": "model name"
+    },
+    "nb_of_bits_per_parameter": {
+        "modeling_obj_containers": [
+            "GenAIModel"
+        ],
+        "label": "nb of bits per parameter",
+        "is_advanced_parameter": true
+    },
+    "llm_memory_factor": {
+        "modeling_obj_containers": [
+            "GenAIModel"
+        ],
+        "label": "llm memory factor",
+        "is_advanced_parameter": true
+    },
+    "gpu_latency_alpha": {
+        "modeling_obj_containers": [
+            "GenAIModel"
+        ],
+        "label": "GPU latency alpha",
+        "is_advanced_parameter": true
+    },
+    "gpu_latency_beta": {
+        "modeling_obj_containers": [
+            "GenAIModel"
+        ],
+        "label": "GPU latency beta",
+        "is_advanced_parameter": true
+    },
+    "bits_per_token": {
+        "modeling_obj_containers": [
+            "GenAIModel"
+        ],
+        "label": "bits per token",
+        "is_advanced_parameter": true
+    },
+    "bits_per_pixel": {
+        "modeling_obj_containers": [
+            "VideoStreaming"
+        ],
+        "label": "bits per pixel",
+        "is_advanced_parameter": true
+    },
+    "static_delivery_cpu_cost": {
+        "modeling_obj_containers": [
+            "VideoStreaming"
+        ],
+        "label": "static delivery cpu cost",
+        "is_advanced_parameter": true
+    },
+    "ram_buffer_per_user": {
+        "modeling_obj_containers": [
+            "VideoStreaming"
+        ],
+        "label": "RAM buffer per user",
+        "is_advanced_parameter": true
+    },
+    "technology": {
+        "modeling_obj_containers": [
+            "WebApplication"
+        ],
+        "label": "technology"
+    },
+    "carbon_footprint_fabrication_per_storage_capacity": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "carbon footprint fabrication per storage capacity",
+        "is_advanced_parameter": true
+    },
+    "power_per_storage_capacity": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "power per storage capacity",
+        "is_advanced_parameter": true
+    },
+    "storage_capacity": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "storage capacity"
+    },
+    "data_replication_factor": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "data replication factor"
+    },
+    "data_storage_duration": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "data storage duration"
+    },
+    "base_storage_need": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "base storage need"
     }
 }

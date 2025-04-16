@@ -23,14 +23,14 @@
             {
                 "id": "UsageJourney_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Usage journey 1"
             },
             {
                 "id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
-                "label": "Usage journey steps",
+                "label": "usage journey steps",
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [

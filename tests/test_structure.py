@@ -99,28 +99,23 @@ class TestsClassStructure(TestCase):
             for attr_name in init_sig_params.keys():
                 if attr_name == 'self':
                     continue
-                assert FORM_FIELD_REFERENCES[efootprint_class_str][attr_name]["label"] is not None
+                assert FORM_FIELD_REFERENCES[attr_name]["label"] is not None
 
         for object_extra_fields_to_check in objects_extra_fields_to_check:
                 assert FORM_TYPE_OBJECT[object_extra_fields_to_check]["label"] is not None
 
-    def test_that_form_fields_present_in_different_objects_have_same_field_reference(self):
-        all_form_fields = []
-        for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
-            all_form_fields.extend(FORM_FIELD_REFERENCES[efootprint_class_str].items())
 
-        treated_form_field_names = []
+if __name__ == "__main__":
+    reformatted_form_fields = {}
+    for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
+        for form_field_name, form_field in FORM_FIELD_REFERENCES[efootprint_class_str].items():
+            if form_field_name not in reformatted_form_fields:
+                reformatted_form_fields[form_field_name] = {"modeling_obj_containers": [], **form_field}
+            reformatted_form_fields[form_field_name]["modeling_obj_containers"].append(efootprint_class_str)
+            current_label = reformatted_form_fields[form_field_name]["label"]
+            # test if second caracter is capitalized
+            if not current_label[1].isupper():
+                reformatted_form_fields[form_field_name]["label"] = current_label[0].lower() + current_label[1:]
 
-        for form_field_name, form_field in all_form_fields:
-            if form_field_name in treated_form_field_names:
-                continue
-
-            form_field_duplicates = [
-                form_field[1] for form_field in all_form_fields if form_field[0] == form_field_name]
-            if len(form_field_duplicates) > 1:
-                logger.info(f"Form field {form_field_name} is duplicated {len(form_field_duplicates)} times")
-                for form_field_duplicate in form_field_duplicates:
-                    self.assertDictEqual(form_field_duplicate, form_field_duplicates[0],
-                                         f"Form field {form_field_name} is not the same in all objects")
-
-            treated_form_field_names.append(form_field_name)
+    with open(os.path.join(model_web_root, "form_fields_reference.json"), "w") as f:
+        json.dump(reformatted_form_fields, f, indent=4)

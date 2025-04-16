@@ -1,6 +1,6 @@
 <div class="mb-3">
     {% if field.input_type == 'select' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
         <select
             class="form-control p-2"
             id="{{ field.id }}"
@@ -15,7 +15,7 @@
     {% elif field.input_type == 'select-multiple' %}
             <label for="{{ field.id }}"
                    class="form-label {% if not field.options %} d-none {% endif %} ">
-                {{ field.label }}
+                {{ field.label|capfirst }}
             </label>
             <select
                 class="form-control p-2 {% if not field.options %} d-none {% endif %}"
@@ -33,7 +33,7 @@
                 {% endfor %}
             </select>
     {% elif field.input_type == 'datalist' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
         <input
                 class="form-control p-2"
                 list="datalist_{{ field.id }}"
@@ -46,7 +46,7 @@
             <option selected value="select a provider">
         </datalist>
     {% elif field.input_type == 'str' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
+        <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
     {% elif field.input_type == "input" %}
         <div class="input-group">

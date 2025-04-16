@@ -31,14 +31,14 @@
             {
                 "id": "WebApplication_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Web application 1"
             },
             {
                 "id": "WebApplication_technology",
                 "attr_name": "technology",
-                "label": "Technology",
+                "label": "technology",
                 "input_type": "select",
                 "selected": "php-symfony",
                 "options": [
@@ -74,14 +74,14 @@
             {
                 "id": "VideoStreaming_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Video streaming application 1"
             },
             {
                 "id": "VideoStreaming_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
-                "label": "Base RAM consumption",
+                "label": "base RAM consumption",
                 "input_type": "input",
                 "unit": "GB",
                 "default": 2,
@@ -97,7 +97,7 @@
             {
                 "id": "VideoStreaming_bits_per_pixel",
                 "attr_name": "bits_per_pixel",
-                "label": "Bits per pixel",
+                "label": "bits per pixel",
                 "input_type": "input",
                 "unit": "",
                 "default": 0.1,
@@ -111,7 +111,7 @@
             {
                 "id": "VideoStreaming_static_delivery_cpu_cost",
                 "attr_name": "static_delivery_cpu_cost",
-                "label": "Static delivery cpu cost",
+                "label": "static delivery cpu cost",
                 "input_type": "input",
                 "unit": "cpu_core\u00b7s/GB",
                 "default": 4.0,
@@ -145,14 +145,14 @@
             {
                 "id": "GenAIModel_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Generative AI model 1"
             },
             {
                 "id": "GenAIModel_provider",
                 "attr_name": "provider",
-                "label": "Provider",
+                "label": "provider",
                 "input_type": "select",
                 "selected": "mistralai",
                 "options": [
@@ -185,7 +185,7 @@
             {
                 "id": "GenAIModel_model_name",
                 "attr_name": "model_name",
-                "label": "Model name",
+                "label": "model name",
                 "input_type": "datalist",
                 "selected": "open-mistral-7b",
                 "options": null
@@ -195,7 +195,7 @@
             {
                 "id": "GenAIModel_nb_of_bits_per_parameter",
                 "attr_name": "nb_of_bits_per_parameter",
-                "label": "Nb of bits per parameter",
+                "label": "nb of bits per parameter",
                 "input_type": "input",
                 "unit": "",
                 "default": 16,
@@ -209,7 +209,7 @@
             {
                 "id": "GenAIModel_llm_memory_factor",
                 "attr_name": "llm_memory_factor",
-                "label": "Llm memory factor",
+                "label": "llm memory factor",
                 "input_type": "input",
                 "unit": "",
                 "default": 1.2,
@@ -223,7 +223,7 @@
             {
                 "id": "GenAIModel_bits_per_token",
                 "attr_name": "bits_per_token",
-                "label": "Bits per token",
+                "label": "bits per token",
                 "input_type": "input",
                 "unit": "",
                 "default": 24,

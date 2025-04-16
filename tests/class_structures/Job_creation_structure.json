@@ -35,14 +35,14 @@
             {
                 "id": "Job_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Job 1"
             },
             {
                 "id": "Job_data_transferred",
                 "attr_name": "data_transferred",
-                "label": "Data transferred",
+                "label": "data transferred",
                 "input_type": "input",
                 "unit": "kB",
                 "default": 150,
@@ -56,7 +56,7 @@
             {
                 "id": "Job_data_stored",
                 "attr_name": "data_stored",
-                "label": "Data stored",
+                "label": "data stored",
                 "input_type": "input",
                 "unit": "kB",
                 "default": 100,
@@ -70,7 +70,7 @@
             {
                 "id": "Job_request_duration",
                 "attr_name": "request_duration",
-                "label": "Request duration",
+                "label": "request duration",
                 "input_type": "input",
                 "unit": "s",
                 "default": 1,
@@ -84,7 +84,7 @@
             {
                 "id": "Job_compute_needed",
                 "attr_name": "compute_needed",
-                "label": "Compute needed",
+                "label": "compute needed",
                 "input_type": "input",
                 "unit": "cpu_core",
                 "default": 0.1,
@@ -119,14 +119,14 @@
             {
                 "id": "WebApplicationJob_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Web application job 1"
             },
             {
                 "id": "WebApplicationJob_data_transferred",
                 "attr_name": "data_transferred",
-                "label": "Data transferred",
+                "label": "data transferred",
                 "input_type": "input",
                 "unit": "MB",
                 "default": 2.2,
@@ -140,7 +140,7 @@
             {
                 "id": "WebApplicationJob_data_stored",
                 "attr_name": "data_stored",
-                "label": "Data stored",
+                "label": "data stored",
                 "input_type": "input",
                 "unit": "kB",
                 "default": 100,
@@ -154,7 +154,7 @@
             {
                 "id": "WebApplicationJob_implementation_details",
                 "attr_name": "implementation_details",
-                "label": "Implementation details",
+                "label": "implementation details",
                 "input_type": "select",
                 "selected": "default",
                 "options": [
@@ -194,14 +194,14 @@
             {
                 "id": "VideoStreamingJob_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Video streaming job 1"
             },
             {
                 "id": "VideoStreamingJob_resolution",
                 "attr_name": "resolution",
-                "label": "Resolution",
+                "label": "resolution",
                 "input_type": "select",
                 "selected": "1080p (1920 x 1080)",
                 "options": [
@@ -238,7 +238,7 @@
             {
                 "id": "VideoStreamingJob_video_duration",
                 "attr_name": "video_duration",
-                "label": "Video duration",
+                "label": "video duration",
                 "input_type": "input",
                 "unit": "h",
                 "default": 1,
@@ -252,7 +252,7 @@
             {
                 "id": "VideoStreamingJob_refresh_rate",
                 "attr_name": "refresh_rate",
-                "label": "Refresh rate",
+                "label": "refresh rate",
                 "input_type": "input",
                 "unit": "1/s",
                 "default": 30.0,
@@ -266,7 +266,7 @@
             {
                 "id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
-                "label": "Data stored",
+                "label": "data stored",
                 "input_type": "input",
                 "unit": "MB",
                 "default": 0,
@@ -287,14 +287,14 @@
             {
                 "id": "GenAIJob_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Generative AI job 1"
             },
             {
                 "id": "GenAIJob_output_token_count",
                 "attr_name": "output_token_count",
-                "label": "Output token count",
+                "label": "output token count",
                 "input_type": "input",
                 "unit": "",
                 "default": 1000,

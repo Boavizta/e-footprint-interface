@@ -23,14 +23,14 @@
             {
                 "id": "UsageJourneyStep_name",
                 "attr_name": "name",
-                "label": "Name",
+                "label": "name",
                 "input_type": "str",
                 "default": "Usage journey step 1"
             },
             {
                 "id": "UsageJourneyStep_user_time_spent",
                 "attr_name": "user_time_spent",
-                "label": "User time spent",
+                "label": "user time spent",
                 "input_type": "input",
                 "unit": "min",
                 "default": 1,
@@ -44,7 +44,7 @@
             {
                 "id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
-                "label": "Jobs",
+                "label": "jobs",
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [
