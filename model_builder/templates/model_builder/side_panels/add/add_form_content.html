@@ -10,31 +10,7 @@
             <div id="collapse_{{ form_section.category }}_{{obj_type}}"
                  class="accordion-collapse show" data-bs-parent="accordionFormAdd">
                 <div class="accordion-body">
-                    {% for field in form_section.fields %}
-                        {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
-                    {% endfor %}
-                    {% if form_section.advanced_fields|length > 0 %}
-                        <div id="advanced-{{ form_section.category }}" class="d-none mb-3">
-                            {% for field in form_section.advanced_fields %}
-                                {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
-                            {% endfor %}
-                        </div>
-                        <button type="button" class="btn btn-white border border-dark rounded-2 fz-0-8 mb-3"
-                                id="display-advanced-{{ form_section.category }}"
-                                _="on click
-                                    if #advanced-{{ form_section.category }}.classList.contains('d-none')
-                                        remove .d-none from #advanced-{{ form_section.category }}
-                                        add .d-block to #advanced-{{ form_section.category }}
-                                        put 'Hide advanced parameters' into me.innerText
-                                    else
-                                        remove .d-block from #advanced-{{ form_section.category }}
-                                        add .d-none to #advanced-{{ form_section.category }}
-                                        put 'Show advanced parameters' into me.innerText
-                                "
-                               >
-                            Show advanced parameters
-                        </button>
-                    {% endif %}
+                    {% include "model_builder/side_panels/components/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
                 </div>
             </div>
         </div>
