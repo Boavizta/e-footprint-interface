@@ -18,10 +18,6 @@ function dropModal(id){
     }
 }
 
-function dropModalUnderstand(){
-    document.getElementById("open-understand-modal").focus();
-}
-
 document.addEventListener('show.bs.modal', function(event) {
     document.querySelectorAll('.modal-backdrop').forEach(function(el) {
         el.remove();

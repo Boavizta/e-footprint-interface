@@ -5,7 +5,7 @@
 
 [tool.poetry]
 name = "efootprint-interface"
-version = "0.7.8"
+version = "0.7.9"
 description = "Digital service environmental footprint model interface"
 authors = ["Vincent Villet", "Clémence Knaébel", "Julien Houbart", "Jordane Frouin"]
 readme = "README.md"

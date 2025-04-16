@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.9] - 2025-04-16
+
+### Changed
+- The page "Understand" has been removed due to outdated contents in this 
+  section. fore more details about e-footprint, please refer to the documentation
+- Object and field wordings have been updated.
+- Empty multiple select lists are not displayed anymore (for example, when creating a new usage journey but there are no usage journey steps in the system, or when creating a new usage journey step but there are no jobs in the system).
+
+### Fixed
+- Result modal now always close side panels.
+
 ## [0.7.8] - 2025-04-15
 
 ### Fixed
