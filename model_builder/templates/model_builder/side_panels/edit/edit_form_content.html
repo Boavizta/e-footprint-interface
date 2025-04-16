@@ -1,5 +1,27 @@
 {% for field in form_fields %}
     {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
 {% endfor %}
+{% if form_fields_advanced|length > 0 %}
+    <div id="advanced-{{ object_to_edit.class_label|slugify }}" class="d-none mb-3">
+        {% for field in form_fields_advanced %}
+            {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
+        {% endfor %}
+    </div>
+    <button type="button" class="btn btn-white border border-dark rounded-2 fz-0-8 mb-3"
+            id="display-advanced-{{ object_to_edit.class_label|slugify }}"
+            _="on click
+                if #advanced-{{ object_to_edit.class_label|slugify }}.classList.contains('d-none')
+                    remove .d-none from #advanced-{{ object_to_edit.class_label|slugify }}
+                    add .d-block to #advanced-{{ object_to_edit.class_label|slugify }}
+                    put 'Hide advanced options' into me.innerText
+                else
+                    remove .d-block from #advanced-{{ object_to_edit.class_label|slugify }}
+                    add .d-none to #advanced-{{ object_to_edit.class_label|slugify }}
+                    put 'Show advanced options' into me.innerText
+            "
+           >
+        Show advanced options
+    </button>
+{% endif %}
 
 {{ dynamic_form_data|json_script:"dynamic-form-data" }}

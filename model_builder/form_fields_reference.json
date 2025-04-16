@@ -10,13 +10,15 @@
             "label": "Carbon footprint fabrication"
         },
         "power": {
-            "label": "Power"
+            "label": "Power",
+            "is_advanced_parameter": true
         },
         "lifespan": {
             "label": "Lifespan"
         },
         "idle_power": {
-            "label": "Idle power"
+            "label": "Idle power",
+            "is_advanced_parameter": true
         },
         "ram": {
             "label": "RAM"
@@ -26,14 +28,17 @@
             "step": 1
         },
         "power_usage_effectiveness": {
-            "label": "Power usage effectiveness"
+            "label": "Power usage effectiveness",
+            "is_advanced_parameter": true
         },
         "average_carbon_intensity": {
             "label": "Average carbon intensity of electricity",
-            "step": 0.01
+            "step": 0.01,
+            "is_advanced_parameter": true
         },
         "server_utilization_rate": {
-            "label": "Server utilization rate"
+            "label": "Server utilization rate",
+            "is_advanced_parameter": true
         },
         "base_ram_consumption": {
             "label": "Base RAM consumption"
@@ -62,7 +67,8 @@
             "label": "GPU power"
         },
         "gpu_idle_power": {
-            "label": "GPU idle power"
+            "label": "GPU idle power",
+            "is_advanced_parameter": true
         },
         "ram_per_gpu": {
             "label": "RAM per GPU"
@@ -72,7 +78,8 @@
         },
         "average_carbon_intensity": {
             "label": "Average carbon intensity of electricity",
-            "step": 0.01
+            "step": 0.01,
+            "is_advanced_parameter": true
         },
         "compute": {
             "label": "Compute",
@@ -85,10 +92,12 @@
             "label": "Lifespan"
         },
         "power_usage_effectiveness": {
-            "label": "Power usage effectiveness"
+            "label": "Power usage effectiveness",
+            "is_advanced_parameter": true
         },
         "server_utilization_rate": {
-            "label": "Server utilization rate"
+            "label": "Server utilization rate",
+            "is_advanced_parameter": true
         },
         "base_compute_consumption": {
             "label": "Base compute consumption"
@@ -123,17 +132,21 @@
             "label": "Lifespan"
         },
         "idle_power": {
-            "label": "Idle power"
+            "label": "Idle power",
+            "is_advanced_parameter": true
         },
         "power_usage_effectiveness": {
-            "label": "Power usage effectiveness"
+            "label": "Power usage effectiveness",
+            "is_advanced_parameter": true
         },
         "average_carbon_intensity": {
             "label": "Average carbon intensity of electricity",
-            "step": 0.01
+            "step": 0.01,
+            "is_advanced_parameter": true
         },
         "server_utilization_rate": {
-            "label": "Server utilization rate"
+            "label": "Server utilization rate",
+            "is_advanced_parameter": true
         },
         "base_ram_consumption": {
             "label": "Base RAM consumption"
@@ -316,19 +329,24 @@
             "label": "Server"
         },
         "nb_of_bits_per_parameter": {
-            "label": "Nb of bits per parameter"
+            "label": "Nb of bits per parameter",
+            "is_advanced_parameter": true
         },
         "llm_memory_factor": {
-            "label": "Llm memory factor"
+            "label": "Llm memory factor",
+            "is_advanced_parameter": true
         },
         "gpu_latency_alpha": {
-            "label": "GPU latency alpha"
+            "label": "GPU latency alpha",
+            "is_advanced_parameter": true
         },
         "gpu_latency_beta": {
-            "label": "GPU latency beta"
+            "label": "GPU latency beta",
+            "is_advanced_parameter": true
         },
         "bits_per_token": {
-            "label": "Bits per token"
+            "label": "Bits per token",
+            "is_advanced_parameter": true
         }
     },
     "VideoStreaming": {
@@ -342,13 +360,16 @@
             "label": "Base RAM consumption"
         },
         "bits_per_pixel": {
-            "label": "Bits per pixel"
+            "label": "Bits per pixel",
+            "is_advanced_parameter": true
         },
         "static_delivery_cpu_cost": {
-            "label": "Static delivery cpu cost"
+            "label": "Static delivery cpu cost",
+            "is_advanced_parameter": true
         },
         "ram_buffer_per_user": {
-            "label": "RAM buffer per user"
+            "label": "RAM buffer per user",
+            "is_advanced_parameter": true
         }
     },
     "WebApplication": {
@@ -367,16 +388,19 @@
             "label": "Name"
         },
         "carbon_footprint_fabrication_per_storage_capacity": {
-            "label": "Carbon footprint fabrication per storage capacity"
+            "label": "Carbon footprint fabrication per storage capacity",
+            "is_advanced_parameter": true
         },
         "power_per_storage_capacity": {
-            "label": "Power per storage capacity"
+            "label": "Power per storage capacity",
+            "is_advanced_parameter": true
         },
         "lifespan": {
             "label": "Lifespan"
         },
         "idle_power": {
-            "label": "Idle power"
+            "label": "Idle power",
+            "is_advanced_parameter": true
         },
         "storage_capacity": {
             "label": "Storage capacity"

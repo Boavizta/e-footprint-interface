@@ -17,7 +17,7 @@ def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
-    form_fields, dynamic_form_data = generate_object_edition_structure(
+    form_fields, form_fields_advanced, dynamic_form_data = generate_object_edition_structure(
         obj_to_edit, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS)
 
     object_belongs_to_computable_system = False
@@ -26,13 +26,14 @@ def open_edit_object_panel(request, object_id):
 
     if issubclass(obj_to_edit.efootprint_class, UsagePatternFromForm):
         http_response = generate_usage_pattern_edit_panel_http_response(
-            request, obj_to_edit, form_fields, object_belongs_to_computable_system)
+            request, obj_to_edit, form_fields, form_fields_advanced, object_belongs_to_computable_system)
     elif issubclass(obj_to_edit.efootprint_class, ServerBase):
         http_response = generate_server_edit_panel_http_response(
-            request, form_fields, obj_to_edit, object_belongs_to_computable_system, dynamic_form_data)
+            request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system, dynamic_form_data)
     else:
         http_response = generate_generic_edit_panel_http_response(
-            request, form_fields, obj_to_edit, object_belongs_to_computable_system, dynamic_form_data)
+            request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
+            dynamic_form_data)
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 

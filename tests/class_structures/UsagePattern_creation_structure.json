@@ -190,6 +190,7 @@
                 "selected": "year",
                 "options": null
             }
-        ]
+        ],
+        "advanced_fields": []
     }
 ]

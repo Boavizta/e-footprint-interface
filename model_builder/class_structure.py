@@ -58,7 +58,7 @@ def generate_object_creation_structure(
         default_values["name"] = (
             f"{available_efootprint_class_label} "
             f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
-        class_fields, dynamic_lists = generate_dynamic_form(
+        class_fields, class_fields_advanced, dynamic_lists = generate_dynamic_form(
             available_efootprint_class_str, default_values, attributes_to_skip, model_web)
 
         dynamic_form_dict["dynamic_lists"] += dynamic_lists
@@ -66,7 +66,9 @@ def generate_object_creation_structure(
         form_sections.append({
             "category": available_efootprint_class_str,
             "header": f"{available_efootprint_class_label} creation",
-            "fields": class_fields})
+            "fields": class_fields,
+            "advanced_fields": class_fields_advanced,
+        })
 
     return form_sections, dynamic_form_dict
 
@@ -75,15 +77,16 @@ def generate_object_edition_structure(web_object, attributes_to_skip=None):
     if attributes_to_skip is None:
         attributes_to_skip = []
 
-    form_fields, dynamic_lists = generate_dynamic_form(
+    form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
         web_object.class_as_simple_str, web_object.modeling_obj.__dict__, attributes_to_skip, web_object.model_web)
 
-    return form_fields, {"dynamic_lists": dynamic_lists}
+    return form_fields, form_fields_advanced, {"dynamic_lists": dynamic_lists}
 
 
 def generate_dynamic_form(
     efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web):
     structure_fields = []
+    structure_fields_advanced = []
     dynamic_lists = []
 
     efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
@@ -181,6 +184,9 @@ def generate_dynamic_form(
                     {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
             })
 
-        structure_fields.append(structure_field)
+        if FORM_FIELD_REFERENCES[efootprint_class_str][attr_name].get("is_advanced_parameter", False):
+            structure_fields_advanced.append(structure_field)
+        else:
+            structure_fields.append(structure_field)
 
-    return structure_fields, dynamic_lists
+    return structure_fields, structure_fields_advanced, dynamic_lists

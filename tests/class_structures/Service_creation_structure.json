@@ -64,7 +64,8 @@
                     }
                 ]
             }
-        ]
+        ],
+        "advanced_fields": []
     },
     {
         "category": "VideoStreaming",
@@ -90,7 +91,9 @@
                 },
                 "can_be_negative": false,
                 "step": 0.1
-            },
+            }
+        ],
+        "advanced_fields": [
             {
                 "id": "VideoStreaming_bits_per_pixel",
                 "attr_name": "bits_per_pixel",
@@ -186,7 +189,9 @@
                 "input_type": "datalist",
                 "selected": "open-mistral-7b",
                 "options": null
-            },
+            }
+        ],
+        "advanced_fields": [
             {
                 "id": "GenAIModel_nb_of_bits_per_parameter",
                 "attr_name": "nb_of_bits_per_parameter",

@@ -59,7 +59,7 @@ class TestViewsEdition(TestModelingBase):
         model_web = ModelWeb(job_request.session)
         job = model_web.get_web_object_from_efootprint_id(new_job_id)
 
-        job_edition_fields, dynamic_form_data = generate_object_edition_structure(
+        job_edition_fields, job_edition_fields_advanced, dynamic_form_data = generate_object_edition_structure(
             job, attributes_to_skip=["service"])
 
         ref_dynamic_form_data = {'dynamic_lists': []}

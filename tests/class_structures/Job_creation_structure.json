@@ -109,7 +109,8 @@
                 "can_be_negative": false,
                 "step": 0.1
             }
-        ]
+        ],
+        "advanced_fields": []
     },
     {
         "category": "WebApplicationJob",
@@ -183,7 +184,8 @@
                     }
                 ]
             }
-        ]
+        ],
+        "advanced_fields": []
     },
     {
         "category": "VideoStreamingJob",
@@ -275,7 +277,8 @@
                 "can_be_negative": true,
                 "step": 0.1
             }
-        ]
+        ],
+        "advanced_fields": []
     },
     {
         "category": "GenAIJob",
@@ -302,6 +305,7 @@
                 "can_be_negative": false,
                 "step": 0.1
             }
-        ]
+        ],
+        "advanced_fields": []
     }
 ]
