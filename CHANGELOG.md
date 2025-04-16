@@ -6,10 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.7.11] - 2025-04- 17
 
-### Changed
+### Added
 
 - Add Y-axis title "Number of usage journeys" and change label displayed in 
   the tooltip.
+- Add a tooltip component for each field in the forms to give more details 
+  when a tooltip key for this field is defined in the reference file.
+
+### Changed
+- Name field automatically empties when clicking but resets back to default when empty and unfocus.
+- Usage pattern form fields order.
 
 ## [0.7.10] - 2025-04-17
 

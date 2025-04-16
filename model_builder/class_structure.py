@@ -109,6 +109,7 @@ def generate_dynamic_form(
             "id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
             "label": FORM_FIELD_REFERENCES[attr_name]["label"],
+            "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False),
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__

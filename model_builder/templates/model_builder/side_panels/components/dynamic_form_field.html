@@ -1,6 +1,16 @@
 <div class="mb-3">
-    {% if field.input_type == 'select' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
+    <div class="row gy-0 p-0 m-0 w-100
+            {% if field.input_type == "select-multiple" and not field.options %} d-none {% endif %}">
+        <div class="col-auto">
+            <label for="{{ field.id }}" class="form-label">
+                {{ field.label|capfirst }}
+            </label>
+        </div>
+        {% if field.tooltip %}
+            {% include "model_builder/side_panels/components/tooltip.html" %}
+        {% endif %}
+    </div>
+    {% if field.input_type == "select" %}
         <select
             class="form-control p-2"
             id="{{ field.id }}"
@@ -12,11 +22,7 @@
                     {{ option.label }}</option>
             {% endfor %}
         </select>
-    {% elif field.input_type == 'select-multiple' %}
-            <label for="{{ field.id }}"
-                   class="form-label {% if not field.options %} d-none {% endif %} ">
-                {{ field.label|capfirst }}
-            </label>
+    {% elif field.input_type == "select-multiple" %}
             <select
                 class="form-control p-2 {% if not field.options %} d-none {% endif %}"
                 id="{{ field.id }}" name="{{ field.id }}"
@@ -32,8 +38,7 @@
                      {% endfor %} >{{ option.label }}</option>
                 {% endfor %}
             </select>
-    {% elif field.input_type == 'datalist' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
+    {% elif field.input_type == "datalist" %}
         <input
                 class="form-control p-2"
                 list="datalist_{{ field.id }}"
@@ -45,15 +50,13 @@
         <datalist id="datalist_{{ field.id }}">
             <option selected value="select a provider">
         </datalist>
-    {% elif field.input_type == 'str' %}
-        <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
+    {% elif field.input_type == "str" %}
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}"
                _="on click set my value to ''
                   on focusout if my value is empty set my value to '{{ field.default }}'"
                required>
     {% elif field.input_type == "input" %}
         <div class="input-group">
-            <label for="{{ field.id }}" class="form-label w-100">{{ field.label|capfirst }}</label>
             <input type="number"
                     class="form-control input_with_add_on"
                     id="{{ field.id }}"

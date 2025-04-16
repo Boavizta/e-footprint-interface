@@ -384,14 +384,16 @@
             "GenAIModel"
         ],
         "label": "nb of bits per parameter",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "tooltip": "Reduce this number if quantization techniques have been used."
     },
     "llm_memory_factor": {
         "modeling_obj_containers": [
             "GenAIModel"
         ],
-        "label": "llm memory factor",
-        "is_advanced_parameter": true
+        "label": "LLM memory factor",
+        "is_advanced_parameter": true,
+        "tooltip": "Ratio between the GPU RAM needed and the model size."
     },
     "gpu_latency_alpha": {
         "modeling_obj_containers": [

@@ -32,6 +32,7 @@
                 "id": "WebApplication_name",
                 "attr_name": "name",
                 "label": "name",
+                "tooltip": false,
                 "input_type": "str",
                 "default": "Web application 1"
             },
@@ -39,6 +40,7 @@
                 "id": "WebApplication_technology",
                 "attr_name": "technology",
                 "label": "technology",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "php-symfony",
                 "options": [
@@ -75,6 +77,7 @@
                 "id": "VideoStreaming_name",
                 "attr_name": "name",
                 "label": "name",
+                "tooltip": false,
                 "input_type": "str",
                 "default": "Video streaming application 1"
             }
@@ -84,6 +87,7 @@
                 "id": "VideoStreaming_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "GB",
                 "default": 2,
@@ -98,6 +102,7 @@
                 "id": "VideoStreaming_bits_per_pixel",
                 "attr_name": "bits_per_pixel",
                 "label": "bits per pixel",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "",
                 "default": 0.1,
@@ -112,6 +117,7 @@
                 "id": "VideoStreaming_static_delivery_cpu_cost",
                 "attr_name": "static_delivery_cpu_cost",
                 "label": "static delivery cpu cost",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "cpu_core\u00b7s/GB",
                 "default": 4.0,
@@ -126,6 +132,7 @@
                 "id": "VideoStreaming_ram_buffer_per_user",
                 "attr_name": "ram_buffer_per_user",
                 "label": "RAM buffer per user",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "MB",
                 "default": 50,
@@ -146,6 +153,7 @@
                 "id": "GenAIModel_name",
                 "attr_name": "name",
                 "label": "name",
+                "tooltip": false,
                 "input_type": "str",
                 "default": "Generative AI model 1"
             },
@@ -153,6 +161,7 @@
                 "id": "GenAIModel_provider",
                 "attr_name": "provider",
                 "label": "provider",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "mistralai",
                 "options": [
@@ -186,6 +195,7 @@
                 "id": "GenAIModel_model_name",
                 "attr_name": "model_name",
                 "label": "model name",
+                "tooltip": false,
                 "input_type": "datalist",
                 "selected": "open-mistral-7b",
                 "options": null
@@ -196,6 +206,7 @@
                 "id": "GenAIModel_nb_of_bits_per_parameter",
                 "attr_name": "nb_of_bits_per_parameter",
                 "label": "nb of bits per parameter",
+                "tooltip": "Reduce this number if quantization techniques have been used.",
                 "input_type": "input",
                 "unit": "",
                 "default": 16,
@@ -209,7 +220,8 @@
             {
                 "id": "GenAIModel_llm_memory_factor",
                 "attr_name": "llm_memory_factor",
-                "label": "llm memory factor",
+                "label": "LLM memory factor",
+                "tooltip": "Ratio between the GPU RAM needed and the model size.",
                 "input_type": "input",
                 "unit": "",
                 "default": 1.2,
@@ -224,6 +236,7 @@
                 "id": "GenAIModel_bits_per_token",
                 "attr_name": "bits_per_token",
                 "label": "bits per token",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "",
                 "default": 24,

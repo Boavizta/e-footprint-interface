@@ -27,8 +27,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
     context_data = {"form_fields": form_sections[1]["fields"],
                     "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
                     "obj_type": efootprint_class_str,
-                    "obj_label": FORM_TYPE_OBJECT[efootprint_class_str]["label"],
-                    "display_uj_step_help": len(model_web.usage_journey_steps) > 0,}
+                    "obj_label": FORM_TYPE_OBJECT[efootprint_class_str]["label"],}
     if request.GET.get("efootprint_id_of_parent_to_link_to"):
         context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 

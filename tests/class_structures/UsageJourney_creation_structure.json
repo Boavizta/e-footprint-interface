@@ -24,6 +24,7 @@
                 "id": "UsageJourney_name",
                 "attr_name": "name",
                 "label": "name",
+                "tooltip": false,
                 "input_type": "str",
                 "default": "Usage journey 1"
             },
@@ -31,6 +32,7 @@
                 "id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
                 "label": "existing usage journey steps you can pick",
+                "tooltip": false,
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [

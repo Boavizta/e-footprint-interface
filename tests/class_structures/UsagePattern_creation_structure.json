@@ -24,6 +24,7 @@
                 "id": "UsagePatternFromForm_name",
                 "attr_name": "name",
                 "label": "name",
+                "tooltip": false,
                 "input_type": "str",
                 "default": "Usage pattern 1"
             },
@@ -31,6 +32,7 @@
                 "id": "UsagePatternFromForm_usage_journey",
                 "attr_name": "usage_journey",
                 "label": "usage journey",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "efootprint_id1",
                 "options": [
@@ -48,6 +50,7 @@
                 "id": "UsagePatternFromForm_devices",
                 "attr_name": "devices",
                 "label": "devices",
+                "tooltip": false,
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [
@@ -65,6 +68,7 @@
                 "id": "UsagePatternFromForm_network",
                 "attr_name": "network",
                 "label": "network",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "efootprint_id1",
                 "options": [
@@ -82,6 +86,7 @@
                 "id": "UsagePatternFromForm_country",
                 "attr_name": "country",
                 "label": "country",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "efootprint_id1",
                 "options": [
@@ -99,6 +104,7 @@
                 "id": "UsagePatternFromForm_start_date",
                 "attr_name": "start_date",
                 "label": "start date",
+                "tooltip": false,
                 "input_type": "str",
                 "default": "2025-01-01"
             },
@@ -106,6 +112,7 @@
                 "id": "UsagePatternFromForm_modeling_duration_value",
                 "attr_name": "modeling_duration_value",
                 "label": "modeling duration value",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "",
                 "default": 3,
@@ -120,6 +127,7 @@
                 "id": "UsagePatternFromForm_modeling_duration_unit",
                 "attr_name": "modeling_duration_unit",
                 "label": "modeling duration unit",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "year",
                 "options": [
@@ -137,6 +145,7 @@
                 "id": "UsagePatternFromForm_initial_usage_journey_volume",
                 "attr_name": "initial_usage_journey_volume",
                 "label": "initial usage journey volume",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "",
                 "default": 10000,
@@ -151,6 +160,7 @@
                 "id": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
                 "attr_name": "initial_usage_journey_volume_timespan",
                 "label": "initial usage journey volume timespan",
+                "tooltip": false,
                 "input_type": "select",
                 "selected": "month",
                 "options": [
@@ -172,6 +182,7 @@
                 "id": "UsagePatternFromForm_net_growth_rate_in_percentage",
                 "attr_name": "net_growth_rate_in_percentage",
                 "label": "net growth rate in percentage",
+                "tooltip": false,
                 "input_type": "input",
                 "unit": "",
                 "default": 0,
@@ -186,6 +197,7 @@
                 "id": "UsagePatternFromForm_net_growth_rate_timespan",
                 "attr_name": "net_growth_rate_timespan",
                 "label": "net growth rate timespan",
+                "tooltip": false,
                 "input_type": "datalist",
                 "selected": "year",
                 "options": null
