@@ -11,7 +11,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ usage_journey.web_id }}"
-                        class="btn btn-white ms-1 fz-1"
+                        class="btn btn-white ms-1 fz-1 button-card"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ usage_journey.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -36,7 +36,7 @@
                             <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white"  width="16px" height="16px" alt="add icon" />
                         </div>
                         <div class="col-10 p-0 text-start">
-                            <button class="btn btn-white text-start p-0 fz-0-9"
+                            <button class="btn btn-white text-start p-0 fz-0-9 button-card"
                                     hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"

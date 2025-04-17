@@ -28,7 +28,7 @@
                         </svg>
                     </button>
                     <button id="button-{{ usage_journey_step.web_id }}"
-                            class="btn btn-white p-0 text-start fz-1"
+                            class="btn btn-white p-0 text-start fz-1 button-card"
                             type="button"
                             hx-get="/model_builder/open-edit-object-panel/{{ usage_journey_step.efootprint_id }}"
                             hx-target="#sidePanel"
@@ -46,7 +46,7 @@
                             {% include 'model_builder/object_cards/job_card.html' with job=job %}
                         {% endfor %}
                         <div class="col-12 p-2">
-                            <button class="btn btn-white dotted-border text-start p-2 fz-0-8"
+                            <button class="btn btn-white dotted-border text-start p-2 fz-0-8 button-card"
                                     hx-get="/model_builder/open-create-object-panel/Job/"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"

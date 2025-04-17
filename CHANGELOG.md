@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.13] - 2025-04- 23
+
+### Changed
+- Update the behaviour of the sidePanelOpen and sidePanelClose functions to 
+  implement some differences regarding the size of the browser window. These 
+  differences help to improve the user experience on small screens.
+
 ## [0.7.12] - 2025-04-23
 
 ### Fixed

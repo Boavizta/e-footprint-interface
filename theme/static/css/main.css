@@ -138,7 +138,6 @@ body{
     background: #FFFFFF;
     height: calc(100vh - 50px);
     position: fixed;
-    width: 25%;
     right: 0;
     top: 52px;
     overflow-y: auto;
@@ -209,6 +208,10 @@ body{
 
 .fz-0-5{
     font-size: 0.5em;
+}
+
+.fz-0-6{
+    font-size: 0.6em;
 }
 
 .fz-0-7{
@@ -340,12 +343,17 @@ body{
     width: 50vw !important;
     z-index: 2000 !important;
     top: 15vh !important;
-    left: 24vw !important;
     border-radius: 15px;
     background-color: #FFFFFF;
     padding: 2rem;
 }
 
+.left-small {
+    left: 17vw !important;
+}
+.left-large {
+    left: 24vw !important;
+}
 
 .accordion-header-panel,
 .accordion-header-panel .show,

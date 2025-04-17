@@ -18,7 +18,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ server.web_id }}"
-                        class="btn btn-white ms-1 text-start fz-1"
+                        class="btn btn-white ms-1 text-start fz-1 button-card"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ server.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -39,7 +39,7 @@
                             {%  include 'model_builder/object_cards/service_card.html' with service=service %}
                         {% endfor %}
                     </div>
-                    <button class="btn btn-white text-start p-0 fz-0-8 dotted-border h-100 w-100 rounded-2 p-2"
+                    <button class="btn btn-white text-start p-0 fz-0-8 dotted-border h-100 w-100 rounded-2 p-2 button-card"
                             hx-get="/model_builder/open-create-object-panel/Service/"
                             hx-target="#sidePanel"
                             hx-trigger="click"
