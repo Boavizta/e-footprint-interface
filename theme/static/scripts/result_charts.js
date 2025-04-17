@@ -20,6 +20,7 @@ let resultChartJSOptions = {
                 text: "Total CO2 emissions in metric tons",
                 color: "rgb(107,114,128)"
             },
+            beginAtZero: true
         },
     },
     plugins: {
