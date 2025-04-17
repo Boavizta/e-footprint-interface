@@ -3,7 +3,7 @@
      data-link-to="{{ usage_journey.links_to }}" data-line-opt="{{ usage_journey.data_line_opt }}">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
-            <h6 class="accordion-header px-3 d-flex align-items-center">
+            <div class="accordion-header px-3 d-flex align-items-center">
                 <button type="button" class="chevron-btn btn btn-link p-0 me-2 text-black"
                         data-bs-toggle="collapse" data-bs-target="#flush-{{ usage_journey.web_id }}" onclick="reverseIconAccordion('{{ usage_journey.web_id }}')" aria-expanded="true" aria-controls="collapseOne">
                         <svg id="icon_accordion_{{ usage_journey.web_id }}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="bi bi-chevron-right chevron-rotate" viewBox="0 0 16 16">
@@ -11,7 +11,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ usage_journey.web_id }}"
-                        class="btn btn-white ms-1 fz-0-8"
+                        class="btn btn-white ms-1 fz-1"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ usage_journey.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -21,7 +21,7 @@
                 >
                     {{ usage_journey.name }}
                 </button>
-            </h6>
+            </div>
             <div id="flush-{{ usage_journey.web_id }}" class="accordion-collapse show accordion-all" data-bs-parent="#{{ usage_journey.web_id }}">
                 <div class="accordion-body py-0 ps-3 pe-0">
                     {% for usage_journey_step in usage_journey.uj_steps %}
@@ -36,7 +36,7 @@
                             <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white"  width="16px" height="16px" alt="add icon" />
                         </div>
                         <div class="col-10 p-0 text-start">
-                            <button class="btn btn-white text-start p-0 fz-0-8"
+                            <button class="btn btn-white text-start p-0 fz-0-9"
                                     hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"

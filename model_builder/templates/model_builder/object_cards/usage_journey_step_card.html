@@ -12,7 +12,7 @@
     <div class="col-10 p-0">
         <div class="accordion accordion-flush">
             <div class="accordion-item">
-                <h6 class="accordion-header p-0 d-flex align-items-center text-start">
+                <div class="accordion-header p-0 d-flex align-items-center text-start pe-1">
                     <button type="button" class="chevron-btn btn btn-link p-0 me-1 text-black"
                             data-bs-toggle="collapse"
                             data-bs-target="#flush-{{ usage_journey_step.web_id }}"
@@ -28,7 +28,7 @@
                         </svg>
                     </button>
                     <button id="button-{{ usage_journey_step.web_id }}"
-                            class="btn btn-white p-0 text-start fz-0-8"
+                            class="btn btn-white p-0 text-start fz-1"
                             type="button"
                             hx-get="/model_builder/open-edit-object-panel/{{ usage_journey_step.efootprint_id }}"
                             hx-target="#sidePanel"
@@ -37,7 +37,7 @@
                             hx-disabled-elt="button">
                         {{ usage_journey_step.name }}
                     </button>
-                </h6>
+                </div>
                 <div id="flush-{{ usage_journey_step.web_id }}"
                      class="accordion-collapse collapse {% if usage_journey_step.jobs|length == 0 %}show{% endif %}"
                      data-bs-parent="#{{ usage_journey_step.web_id }}">
