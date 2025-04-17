@@ -2,7 +2,7 @@
     data-link-to="{{ job.links_to }}" data-line-opt="{{ job.data_line_opt }}">
     <button
             id="button-{{ job.web_id }}"
-            class="btn btn-white text-start fz-0-8"
+            class="btn btn-white text-start fz-0-8 button-card"
             hx-get="/model_builder/open-edit-object-panel/{{ job.efootprint_id }}/"
             hx-target="#sidePanel"
             hx-trigger="click"
