@@ -3,7 +3,7 @@
      style="cursor: move;">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
-            <h6 class="accordion-header d-flex align-items-center">
+            <div class="accordion-header d-flex align-items-center pe-1">
                 <button type="button" class="chevron-btn btn btn-link p-0 me-2 text-black"
                         data-bs-toggle="collapse"
                         data-bs-target="#flush-{{ server.web_id }}"
@@ -18,7 +18,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ server.web_id }}"
-                        class="btn btn-white ms-1 text-start fz-0-8"
+                        class="btn btn-white ms-1 text-start fz-1"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ server.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -28,12 +28,12 @@
                 >
                     {{ server.name}}
                 </button>
-            </h6>
+            </div>
             <div id="flush-{{ server.web_id }}"
                  class="accordion-collapse collapse accordion-all  {% if server.installed_services|length == 0 %}show{% endif %}"
                  data-bs-parent="#{{ server.web_id }}">
                 <div class="accordion-body text-start">
-                    <p>Services</p>
+                    <p class="fz-0-9">Services</p>
                     <div class="row mx-0 my-0 align-items-center rounded-2" id="{{ server.web_id }}-services" style="z-index: 1000 !important; background-color: #ffffff !important;">
                         {% for service in server.installed_services %}
                             {%  include 'model_builder/object_cards/service_card.html' with service=service %}

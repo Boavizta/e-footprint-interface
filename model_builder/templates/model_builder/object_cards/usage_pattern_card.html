@@ -1,31 +1,14 @@
 <div id="{{ usage_pattern.web_id }}" class="leader-line-object list-group-item my-3 mb-1 rounded-3 border border-body-tertiary p-2 up-list-item card-hover"
      data-link-to="{{ usage_pattern.links_to }}" data-line-opt="{{ usage_pattern.data_line_opt }}" style="cursor: move;">
-    <div class="accordion accordion-flush">
-        <div class="accordion-item">
-            <h6 class="accordion-header d-flex align-items-center">
-                <button type="button" class="chevron-btn btn btn-link p-0 me-2 text-black"
-                        data-bs-toggle="collapse" data-bs-target="#flush-{{ usage_pattern.web_id }}" onclick="reverseIconAccordion('{{ usage_pattern.web_id }}')" aria-expanded="true" aria-controls="collapseOne">
-                        <svg id="icon_accordion_{{ usage_pattern.web_id }}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="bi bi-chevron-right" viewBox="0 0 16 16">
-                            <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
-                        </svg>
-                </button>
-                <button id="button-{{ usage_pattern.web_id }}"
-                        class="btn btn-white ms-1 text-start fz-0-8"
-                        type="button"
-                        hx-get="/model_builder/open-edit-object-panel/{{ usage_pattern.efootprint_id }}"
-                        hx-target="#sidePanel"
-                        hx-trigger="click"
-                        hx-swap="innerHTML"
-                        hx-disabled-elt="button"
-                >
-                    {{ usage_pattern.name}}
-            </button>
-            </h6>
-            <div id="flush-{{ usage_pattern.web_id }}" class="accordion-collapse collapse accordion-all" data-bs-parent="#{{ usage_pattern.web_id }}">
-                <div class="accordion-body">
-                    <p class="fz-0-8">{{ usage_pattern.name }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <button id="button-{{ usage_pattern.web_id }}"
+            class="btn btn-white text-start w-100 fz-1"
+            type="button"
+            hx-get="/model_builder/open-edit-object-panel/{{ usage_pattern.efootprint_id }}"
+            hx-target="#sidePanel"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+            hx-disabled-elt="button"
+    >
+            {{ usage_pattern.name}}
+    </button>
 </div>
