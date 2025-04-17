@@ -30,7 +30,7 @@
             {
                 "id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
-                "label": "usage journey steps",
+                "label": "existing usage journey steps you can pick",
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [

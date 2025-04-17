@@ -22,7 +22,7 @@
                 id="{{ field.id }}" name="{{ field.id }}"
                 multiple>
                 <!-- This is a workaround to make sure that the form is submitted even if no option is selected -->
-                <option value="" hidden selected></option>
+                <option class="d-none" value="" hidden selected></option>
                 {% for option in field.options %}
                      <option value="{{ option.value }}"
                      {% for selected_obj_id in field.selected %}
@@ -47,7 +47,10 @@
         </datalist>
     {% elif field.input_type == 'str' %}
         <label for="{{ field.id }}" class="form-label">{{ field.label|capfirst }}</label>
-        <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}" required>
+        <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}"
+               _="on click set my value to ''
+                  on focusout if my value is empty set my value to '{{ field.default }}'"
+               required>
     {% elif field.input_type == "input" %}
         <div class="input-group">
             <label for="{{ field.id }}" class="form-label w-100">{{ field.label|capfirst }}</label>

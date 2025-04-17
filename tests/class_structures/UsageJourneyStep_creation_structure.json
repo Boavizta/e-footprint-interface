@@ -44,7 +44,7 @@
             {
                 "id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
-                "label": "jobs",
+                "label": "existing jobs you can pick",
                 "input_type": "select-multiple",
                 "selected": [],
                 "options": [

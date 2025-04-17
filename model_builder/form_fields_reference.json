@@ -205,13 +205,13 @@
         "modeling_obj_containers": [
             "UsageJourneyStep"
         ],
-        "label": "jobs"
+        "label": "existing jobs you can pick"
     },
     "uj_steps": {
         "modeling_obj_containers": [
             "UsageJourney"
         ],
-        "label": "usage journey steps"
+        "label": "existing usage journey steps you can pick"
     },
     "usage_journey": {
         "modeling_obj_containers": [

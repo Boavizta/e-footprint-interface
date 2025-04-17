@@ -97,7 +97,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     servers = model_web.servers
 
     if len(servers) == 0:
-        exception = ValueError("Please create a server before adding a job")
+        exception = ValueError("Please go to the infrastructure section and create a server before adding a job")
         return render_exception_modal(request, exception)
 
     available_job_classes = {Job}

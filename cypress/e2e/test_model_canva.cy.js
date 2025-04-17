@@ -9,7 +9,7 @@ describe("Test - Model Canva div", () => {
         cy.visit("/model_builder/");
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="uid-my-first-usage-journey-step-1"]').click();
         cy.get("#exception-msg").should("exist")
-            .should("include.text","Please create a server before adding a job")
+            .should("include.text","Please go to the infrastructure section and create a server before adding a job")
     });
 
     it("Edit UsageJourney name and make sure its UsageJourneyStep is still there", () => {

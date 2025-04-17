@@ -42,10 +42,6 @@ describe('Test de la page d\'accueil', () => {
 
         cy.get('#btn-add-usage-journey').click();
         cy.get('#UsageJourney_name').clear();
-        cy.get('#btn-submit-form').click();
-        cy.get('#UsageJourney_name').then(($input) => {
-            expect($input[0].validationMessage).to.not.be.empty;
-        });
         cy.get('#UsageJourney_name').type(ujNameTwo);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
