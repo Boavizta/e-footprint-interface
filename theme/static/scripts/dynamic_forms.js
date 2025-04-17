@@ -144,3 +144,20 @@ function updateSource(input){
         }
     }
 }
+
+function addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption(){
+    const allMultipleSelects = document.querySelectorAll('select[multiple]');
+    allMultipleSelects.forEach(multipleSelect => {
+        if (multipleSelect && ![...multipleSelect.options].some(opt => opt.selected)) {
+            let idMultipleSelect = multipleSelect.id;
+            multipleSelect.remove();
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = idMultipleSelect;
+            hiddenInput.id = idMultipleSelect;
+            hiddenInput.value = '';
+            const labelGroup = document.getElementById("field-group-"+idMultipleSelect);
+            labelGroup.appendChild(hiddenInput);
+        }
+    })
+}

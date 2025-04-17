@@ -1,4 +1,4 @@
-<div class="mb-3">
+<div id="field-group-{{ field.id }}" class="mb-3">
     <div class="row gy-0 p-0 m-0 w-100
             {% if field.input_type == "select-multiple" and not field.options %} d-none {% endif %}">
         <div class="col-auto">
@@ -27,8 +27,6 @@
                 class="form-control p-2 {% if not field.options %} d-none {% endif %}"
                 id="{{ field.id }}" name="{{ field.id }}"
                 multiple>
-                <!-- This is a workaround to make sure that the form is submitted even if no option is selected -->
-                <option class="d-none" value="" hidden selected></option>
                 {% for option in field.options %}
                      <option value="{{ option.value }}"
                      {% for selected_obj_id in field.selected %}
