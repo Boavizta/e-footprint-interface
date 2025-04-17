@@ -15,7 +15,8 @@ let timeSeriesChartJSOptions = {
             title: {
                 display: true,
                 text: 'Number of usage journeys',
-            }
+            },
+            beginAtZero: true
         }
     },
     plugins: {
