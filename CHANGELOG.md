@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.13] - 2025-04- 17
+
+### Fixed
+
+- Fix charts in result panel and usage pattern time series form to always 
+  start Y-axis at 0.
+
 ## [0.7.11] - 2025-04- 17
 
 ### Added
