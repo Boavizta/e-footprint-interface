@@ -30,6 +30,7 @@
 <script>
     openSidePanel();
 
-    window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="side_panel"]')
     window.popoverList = [...window.popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+
 </script>

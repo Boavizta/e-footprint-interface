@@ -18,10 +18,11 @@
         <div class="row text-end me-4">
             <div class="col-auto">
                 <span class="d-inline-block" tabindex="0"
-                      data-bs-toggle="popover"
-                      data-bs-trigger="hover focus"
-                      data-bs-content="Import a model"
-                      data-bs-placement="bottom">
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover"
+                        data-bs-content="Import a model"
+                        data-bs-placement="bottom"
+                        data-location="upload_download_reboot_model_tooltips">
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"
                             hx-swap="innerHTML"
@@ -33,10 +34,11 @@
             </div>
             <div class="col-auto">
                 <span class="d-inline-block" tabindex="0"
-                      data-bs-toggle="popover"
-                      data-bs-trigger="hover focus"
-                      data-bs-content="Export your model"
-                      data-bs-placement="bottom">
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover"
+                        data-bs-content="Export your model"
+                        data-bs-placement="bottom"
+                        data-location="upload_download_reboot_model_tooltips">
                     <a href="download-json/" target="_blank" class="nav-link d-flex flex-row gap-2  mx-2">
                         <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
                     </a>
@@ -45,9 +47,10 @@
             <div class="col-auto">
                 <span class="d-inline-block" tabindex="0"
                       data-bs-toggle="popover"
-                      data-bs-trigger="hover focus"
+                      data-bs-trigger="hover"
                       data-bs-content="Reset to default model"
-                      data-bs-placement="bottom">
+                      data-bs-placement="bottom"
+                        data-location="upload_download_reboot_model_tooltips">
                     <a href="reboot" class="nav-link d-flex flex-row gap-2 mx-2" id="btn-reboot-modeling">
                         <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
                     </a>
@@ -58,7 +61,7 @@
 </div>
 
 <script>
-    window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="upload_download_reboot_model_tooltips"]');
     window.popoverList = [...window.popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 
     document.addEventListener("DOMContentLoaded", () => {
