@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   start Y-axis at 0.
 - Fix issue with tooltips on upload_and_download template. The tooltip now 
   is not persistent after the click and disappears.
+- Remove accordion behavior from usage pattern card.
 
 ## [0.7.11] - 2025-04- 17
 

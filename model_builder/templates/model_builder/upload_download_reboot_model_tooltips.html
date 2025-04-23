@@ -63,8 +63,4 @@
 <script>
     window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="upload_download_reboot_model_tooltips"]');
     window.popoverList = [...window.popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
-
-    document.addEventListener("DOMContentLoaded", () => {
-        resizeSystemNameHeader();
-    });
 </script>
