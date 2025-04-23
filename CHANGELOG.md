@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.7.15] - 2025-04- 23
+
+### Changed
+- Add Calculated attributes in reference files to overwrite fields label in 
+  edit panel when calculated attributes additions are available to give to 
+  users a better understanding of the fields.
+
+### Fixed
+- Fix format number in chart JS (from Indian-EN to English).
+
 ## [0.7.12] - 2025-04-23
 
 ### Fixed

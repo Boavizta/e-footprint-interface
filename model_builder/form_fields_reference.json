@@ -482,5 +482,28 @@
         ],
         "label": "base storage need",
         "is_advanced_parameter": true
+    },
+    "nb_of_instances": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer"
+        ],
+        "label": "number of instances"
+    },
+    "hourly_avg_occurrences_per_usage_pattern": {
+        "modeling_obj_containers": [
+            "Job",
+            "GenAIJob",
+            "VideoStreamingJob",
+            "WebApplicationJob"
+        ],
+        "label": "hourly average occurrences per usage pattern"
+    },
+    "nb_usage_journeys_in_parallel": {
+        "modeling_obj_containers": [
+            "UsagePattern"
+        ],
+        "label": "number of usage journeys in parallel"
     }
 }

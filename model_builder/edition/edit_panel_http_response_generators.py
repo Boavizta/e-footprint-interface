@@ -34,6 +34,8 @@ def generate_usage_pattern_edit_panel_http_response(
         if field["attr_name"] == "devices":
             field["input_type"] = "select"
 
+    calculated_attributes = get_calculated_attributes_with_label(object_belongs_to_computable_system, obj_to_edit)
+
     http_response = render(
         request, "model_builder/side_panels/usage_pattern/usage_pattern_edit.html",
         {
@@ -43,7 +45,8 @@ def generate_usage_pattern_edit_panel_http_response(
             "object_to_edit_type": 'UsagePattern',
             "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
             "object_belongs_to_computable_system": object_belongs_to_computable_system,
-            "header_name": f"Edit {obj_to_edit.name}"
+            "header_name": f"Edit {obj_to_edit.name}",
+            "calculated_attributes": calculated_attributes,
         }
     )
 
@@ -57,6 +60,10 @@ def generate_server_edit_panel_http_response(
     storage_to_edit = obj_to_edit.storage
     storage_form_fields, storage_form_fields_advanced, storage_dynamic_form_data = generate_object_edition_structure(
         storage_to_edit, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS)
+
+    storage_calculated_attributes = get_calculated_attributes_with_label(
+        object_belongs_to_computable_system, storage_to_edit)
+    calculated_attributes = get_calculated_attributes_with_label(object_belongs_to_computable_system, obj_to_edit)
 
     http_response = render(
         request,
@@ -72,15 +79,19 @@ def generate_server_edit_panel_http_response(
             "storage_dynamic_form_data": storage_dynamic_form_data,
             "object_to_edit_type": 'Server',
             "object_belongs_to_computable_system": object_belongs_to_computable_system,
-            "header_name": f"Edit {obj_to_edit.name}"
+            "header_name": f"Edit {obj_to_edit.name}",
+            "calculated_attributes": calculated_attributes,
+            "storage_calculated_attributes": storage_calculated_attributes
         })
 
     return http_response
 
 
 def generate_generic_edit_panel_http_response(
-    request, form_fields: dict, form_fields_advanced: dict, obj_to_edit: ModelingObjectWeb, object_belongs_to_computable_system: bool,
-    dynamic_form_data: dict):
+    request, form_fields: dict, form_fields_advanced: dict, obj_to_edit: ModelingObjectWeb,
+    object_belongs_to_computable_system: bool, dynamic_form_data: dict):
+    calculated_attributes = get_calculated_attributes_with_label(object_belongs_to_computable_system, obj_to_edit)
+
     http_response = render(
         request,
         "model_builder/side_panels/edit/edit_panel__generic.html",
@@ -90,7 +101,19 @@ def generate_generic_edit_panel_http_response(
             "form_fields_advanced": form_fields_advanced,
             "dynamic_form_data": dynamic_form_data,
             "object_belongs_to_computable_system": object_belongs_to_computable_system,
-            "header_name": f"Edit {obj_to_edit.name}"
+            "header_name": f"Edit {obj_to_edit.name}",
+             "calculated_attributes": calculated_attributes
         })
 
     return http_response
+
+
+def get_calculated_attributes_with_label(
+    object_belongs_to_computable_system: bool, modeling_object_web: ModelingObjectWeb):
+    calculated_attributes = []
+    if object_belongs_to_computable_system and len(modeling_object_web.calculated_attributes) > 0:
+        calculated_attributes = [
+            {"id": field, "label": getattr(modeling_object_web, field).label}
+            for field in modeling_object_web.calculated_attributes
+        ]
+    return calculated_attributes

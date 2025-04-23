@@ -1,5 +1,5 @@
 let timeSeriesChartJSOptions = {
-    locale: "en-IN",
+    locale: "en-EN",
     scales: {
         x: {
             type: 'time',
