@@ -31,7 +31,7 @@ let dictLeaderLineOption = {
         startSocket: "bottom",
         endSocket: "top",
         showEffectName: 'fade',
-        dash: true
+        dash: { animation: false, len: 3, gap: 3 }
     }
 };
 
@@ -109,8 +109,8 @@ function updateOrCreateLines(element) {
                 drawLines(element);
             }
             // Handle usage journey step circles
-            const imgLeaderLineChildren = element.querySelectorAll('img.leader-line-object');
-            imgLeaderLineChildren.forEach(child => drawLines(child));
+            const svgLeaderLineChildren = element.querySelectorAll('svg.leader-line-object');
+            svgLeaderLineChildren.forEach(child => drawLines(child));
         }
         else {
             drawLines(element);

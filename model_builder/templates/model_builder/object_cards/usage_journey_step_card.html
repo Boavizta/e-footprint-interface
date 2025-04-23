@@ -3,11 +3,19 @@
      data-link-to="{{ usage_journey_step.links_to }}"
      data-line-opt="{{ usage_journey_step.data_line_opt }}">
     <div class="col-2 p-0 justify-content-center">
-        <img src="{% static 'icons/circle_uj_step.svg' %}" id="icon-{{ usage_journey_step.web_id }}"
-             class="leader-line-object border border-2 border-white bg-white rounded-circle"
-             data-link-to="{{ usage_journey_step.icon_links_to }}"
-             data-line-opt="{{ usage_journey_step.icon_leaderline_style }}"
-             width="18px" height="18px;" alt="circle_step">
+        <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-circle leader-line-object"
+                width="20" height="20"
+                fill="none"
+                data-link-to="{{ usage_journey_step.icon_links_to }}"
+                data-line-opt="{{ usage_journey_step.icon_leaderline_style }}"
+                id="icon-{{ usage_journey_step.web_id }}"
+                stroke-width="1.5"
+                stroke="#000000"
+             viewBox="-2 -2 22 22"
+        >
+
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+        </svg>
     </div>
     <div class="col-10 p-0">
         <div class="accordion accordion-flush">
@@ -20,7 +28,7 @@
                             aria-expanded="{% if usage_journey_step.jobs|length == 0 %}true{% else %}false{% endif %}"
                             aria-controls="flush-{{ usage_journey_step.web_id }}">
                         <svg id="icon_accordion_{{ usage_journey_step.web_id }}" xmlns="http://www.w3.org/2000/svg"
-                             width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                             width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
                              class="bi bi-chevron-right {% if usage_journey_step.jobs|length == 0 %}chevron-rotate{% endif %}"
                              viewBox="0 0 16 16">
                             <path fill="none" stroke-linecap="round" stroke-linejoin="round"
@@ -28,25 +36,27 @@
                         </svg>
                     </button>
                     <button id="button-{{ usage_journey_step.web_id }}"
-                            class="btn btn-white p-0 text-start fz-1 button-card"
+                            class="btn btn-white p-0 text-start"
                             type="button"
                             hx-get="/model_builder/open-edit-object-panel/{{ usage_journey_step.efootprint_id }}"
                             hx-target="#sidePanel"
                             hx-trigger="click"
                             hx-swap="innerHTML"
                             hx-disabled-elt="button">
-                        {{ usage_journey_step.name }}
+                        <p class="h7 mb-0">
+                            {{ usage_journey_step.name }}
+                        </p>
                     </button>
                 </div>
                 <div id="flush-{{ usage_journey_step.web_id }}"
                      class="accordion-collapse collapse {% if usage_journey_step.jobs|length == 0 %}show{% endif %}"
                      data-bs-parent="#{{ usage_journey_step.web_id }}">
-                    <div class="accordion-body p-0 row m-0 text-start">
+                    <div class="accordion-body p-0 row m-0 text-end">
                         {% for job in usage_journey_step.jobs %}
                             {% include 'model_builder/object_cards/job_card.html' with job=job %}
                         {% endfor %}
                         <div class="col-12 p-2">
-                            <button class="btn btn-white dotted-border text-start p-2 fz-0-8 button-card"
+                            <button class="btn btn-white dotted-border text-center p-2 me-2 h8 button-card w-50"
                                     hx-get="/model_builder/open-create-object-panel/Job/"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"

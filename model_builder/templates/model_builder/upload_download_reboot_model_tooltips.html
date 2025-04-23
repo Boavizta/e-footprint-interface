@@ -20,15 +20,18 @@
                 <span class="d-inline-block" tabindex="0"
                         data-bs-toggle="popover"
                         data-bs-trigger="hover"
-                        data-bs-content="Import a model"
+                        data-bs-content="Import a model from a JSON file"
                         data-bs-placement="bottom"
                         data-location="upload_download_reboot_model_tooltips">
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"
                             hx-swap="innerHTML"
                             hx-disabled-elt="button"
-                            class="nav-link d-flex flex-row gap-2  mx-2 move-panel-open">
-                        <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
+                            class="nav-link m-1 move-panel-open">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-earmark-plus" viewBox="0 0 16 16">
+                          <path d="M8 6.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 .5-.5"/>
+                          <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"/>
+                        </svg>
                     </button>
                 </span>
             </div>
@@ -36,11 +39,14 @@
                 <span class="d-inline-block" tabindex="0"
                         data-bs-toggle="popover"
                         data-bs-trigger="hover"
-                        data-bs-content="Export your model"
+                        data-bs-content="Save and export your model"
                         data-bs-placement="bottom"
                         data-location="upload_download_reboot_model_tooltips">
-                    <a href="download-json/" target="_blank" class="nav-link d-flex flex-row gap-2  mx-2">
-                        <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
+                    <a href="download-json/" target="_blank" class="nav-link m-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16">
+                          <path d="M11 2H9v3h2z"/>
+                          <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
+                        </svg>
                     </a>
                 </span>
             </div>
@@ -51,8 +57,11 @@
                       data-bs-content="Reset to default model"
                       data-bs-placement="bottom"
                         data-location="upload_download_reboot_model_tooltips">
-                    <a href="reboot" class="nav-link d-flex flex-row gap-2 mx-2" id="btn-reboot-modeling">
-                        <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
+                    <a href="reboot" class="nav-link m-1" id="btn-reboot-modeling">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
+                          <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
+                        </svg>
                     </a>
                 </span>
             </div>

@@ -4,8 +4,8 @@ let sidePanelWidthLarge = 'col-3';
 let modelCanvaWidthSmall = 'col-8';
 let modelCanvaWidthLarge = 'col-9';
 
-let fontSizeSmall = 'fz-0-6';
-let fontSizeSLarge = 'fz-0-7';
+let fontSizeSmall = 'fs-md';
+let fontSizeSLarge = 'fs-lg';
 
 let widthLimit = 1200;
 
@@ -18,7 +18,7 @@ function openSidePanel() {
         window.innerWidth <= widthLimit ? sidePanelWidthSmall : sidePanelWidthLarge);
     let elementsToReduce = document.querySelectorAll(".button-card");
     elementsToReduce.forEach((element) => {
-        element.classList.remove("fz-0-8");
+        element.classList.remove("fs-xl");
         element.classList.add(window.innerWidth <= widthLimit ? fontSizeSmall : fontSizeSLarge);
     });
     let chartTimeseriesDiv = document.getElementById("chartTimeseries");
@@ -43,7 +43,7 @@ function closeAndEmptySidePanel() {
     let elementsToReduce = document.querySelectorAll(".button-card");
     elementsToReduce.forEach((element) => {
         element.classList.remove(window.innerWidth <= widthLimit ? fontSizeSmall : fontSizeSLarge);
-        element.classList.add("fz-0-8");
+        element.classList.add("fs-xl");
     });
     closeTimeseriesChart();
     updateLines();

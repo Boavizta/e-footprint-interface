@@ -206,30 +206,6 @@ body{
     background-color: rgba(241, 247, 253, 0.5);
 }
 
-.fz-0-5{
-    font-size: 0.5em;
-}
-
-.fz-0-6{
-    font-size: 0.6em;
-}
-
-.fz-0-7{
-    font-size: 0.7em;
-}
-
-.fz-0-8{
-    font-size: 0.8em;
-}
-
-.fz-0-9{
-    font-size: 0.9em;
-}
-
-.fz-1{
-    font-size: 1em;
-}
-
 .h-38{
     height: 38px;
 }
@@ -382,4 +358,86 @@ body{
 
 .sources-label{
     color: #6B7280;
+}
+
+
+.model-builder-card{
+    border: 2px solid #E5E7EB !important;
+    border-radius: 15px !important;
+}
+
+/* Modal body */
+
+
+.h5{font-weight: 700;}
+.h6{font-weight: 600;}
+.h7{font-weight: 450;}
+.h8{}
+
+@media (max-width: 1200px) {
+    .h7 {
+      font-size: 0.8rem;
+    }
+
+    .fs-sm{
+        font-size: 0.4em;
+    }
+
+    .fs-md{
+        font-size: 0.5em;
+    }
+
+    .fs-lg{
+        font-size: 0.6em;
+    }
+
+    .fs-xl{
+        font-size: 0.7em;
+    }
+
+    .fs-2xl{
+        font-size: 0.8em;
+    }
+
+    .fs-3xl{
+        font-size: 0.9em;
+    }
+}
+
+@media (min-width: 1201px) {
+    .fs-sm{
+        font-size: 0.5em;
+    }
+
+    .fs-md{
+        font-size: 0.6em;
+    }
+
+    .fs-lg{
+        font-size: 0.7em;
+    }
+
+    .fs-xl{
+        font-size: 0.8em;
+    }
+
+    .fs-2xl{
+        font-size: 0.9em;
+    }
+
+    .fs-3xl{
+        font-size: 1em;
+    }
+
+    .h6{
+        font-size: 1rem;
+    }
+
+    .h7{
+        font-size: 0.9rem
+    }
+
+    .h8{
+        font-size: 0.8rem
+    }
 }

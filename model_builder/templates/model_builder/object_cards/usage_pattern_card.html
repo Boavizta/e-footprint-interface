@@ -1,7 +1,8 @@
-<div id="{{ usage_pattern.web_id }}" class="leader-line-object list-group-item my-3 mb-1 rounded-3 border border-body-tertiary p-2 up-list-item card-hover"
+<div id="{{ usage_pattern.web_id }}"
+     class="leader-line-object list-group-item my-3 mb-1 p-2 card-hover model-builder-card"
      data-link-to="{{ usage_pattern.links_to }}" data-line-opt="{{ usage_pattern.data_line_opt }}" style="cursor: move;">
     <button id="button-{{ usage_pattern.web_id }}"
-            class="btn btn-white text-start w-100 fz-1 button-card"
+            class="btn btn-white text-start w-100"
             type="button"
             hx-get="/model_builder/open-edit-object-panel/{{ usage_pattern.efootprint_id }}"
             hx-target="#sidePanel"
@@ -9,6 +10,6 @@
             hx-swap="innerHTML"
             hx-disabled-elt="button"
     >
-            {{ usage_pattern.name}}
+        <p class="h6 mb-0">{{ usage_pattern.name}}</p>
     </button>
 </div>

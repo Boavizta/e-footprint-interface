@@ -1,5 +1,7 @@
 {% load static %}
-<div id="{{ usage_journey.web_id }}" class="leader-line-object card list-group-item my-3 mb-1 rounded-3 border border-body-tertiary py-2 px-0 up-list-item card-hover" style="cursor: move;"
+<div id="{{ usage_journey.web_id }}"
+     class="leader-line-object card list-group-item my-3 mb-1 py-2 px-0 model-builder-card card-hover"
+     style="cursor: move;"
      data-link-to="{{ usage_journey.links_to }}" data-line-opt="{{ usage_journey.data_line_opt }}">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
@@ -11,7 +13,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ usage_journey.web_id }}"
-                        class="btn btn-white ms-1 fz-1 button-card"
+                        class="btn btn-white ms-1"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ usage_journey.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -19,7 +21,8 @@
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
                 >
-                    {{ usage_journey.name }}
+                    <p class="h6 mb-0">{{ usage_journey.name }}</p>
+
                 </button>
             </div>
             <div id="flush-{{ usage_journey.web_id }}" class="accordion-collapse show accordion-all" data-bs-parent="#{{ usage_journey.web_id }}">
@@ -31,12 +34,12 @@
                         <div class="col-2 p-0 justify-content-center leader-line-object" height="1px;" id="add-usage-pattern-{{ usage_journey.web_id }}">
                         </div>
                     </div>
-                    <div class="row mx-0 my-0 dotted-border align-items-center rounded-2" style="z-index: 1000 !important; background-color: #ffffff !important;">
+                    <div class="row mx-0 my-0 me-3 mb-2 dotted-border align-items-center rounded-2" style="z-index: 1000 !important; background-color: #ffffff !important;">
                         <div class="col-2 p-0 justify-content-center bg-white my-2" >
                             <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white"  width="16px" height="16px" alt="add icon" />
                         </div>
                         <div class="col-10 p-0 text-start">
-                            <button class="btn btn-white text-start p-0 fz-0-9 button-card"
+                            <button class="btn btn-white text-start p-0 h8 button-card"
                                     hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"

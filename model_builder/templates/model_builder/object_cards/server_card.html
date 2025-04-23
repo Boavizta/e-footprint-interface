@@ -1,5 +1,5 @@
 {% load static %}
-<div id="{{ server.web_id }}" class="list-group-item my-3 mb-1 rounded-3  border border-body-tertiary  up-list-item card-hover"
+<div id="{{ server.web_id }}" class="list-group-item my-3 mb-1 rounded-3  border border-body-tertiary model-builder-card card-hover"
      style="cursor: move;">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
@@ -11,14 +11,14 @@
                         aria-expanded="{% if server.installed_services|length == 0 %}true{% else %}false{% endif %}"
                         aria-controls="flush-{{ server.web_id }}">
                         <svg id="icon_accordion_{{ server.web_id }}" xmlns="http://www.w3.org/2000/svg"
-                             width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                             width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
                              class="bi bi-chevron-right {% if server.installed_services|length == 0 %}chevron-rotate{% endif %}"
                              viewBox="0 0 16 16">
                             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
                         </svg>
                 </button>
                 <button id="button-{{ server.web_id }}"
-                        class="btn btn-white ms-1 text-start fz-1 button-card"
+                        class="btn btn-white ms-1 text-start"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ server.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -26,20 +26,20 @@
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
                 >
-                    {{ server.name}}
+                    <p class="h6 mb-0">{{ server.name}}</p>
                 </button>
             </div>
             <div id="flush-{{ server.web_id }}"
                  class="accordion-collapse collapse accordion-all  {% if server.installed_services|length == 0 %}show{% endif %}"
                  data-bs-parent="#{{ server.web_id }}">
                 <div class="accordion-body text-start">
-                    <p class="fz-0-9">Services</p>
+                    <p class="h7 my-2">Services</p>
                     <div class="row mx-0 my-0 align-items-center rounded-2" id="{{ server.web_id }}-services" style="z-index: 1000 !important; background-color: #ffffff !important;">
                         {% for service in server.installed_services %}
                             {%  include 'model_builder/object_cards/service_card.html' with service=service %}
                         {% endfor %}
                     </div>
-                    <button class="btn btn-white text-start p-0 fz-0-8 dotted-border h-100 w-100 rounded-2 p-2 button-card"
+                    <button class="btn btn-white text-start p-0 h8 dotted-border h-100 w-100 rounded-2 p-2 button-card"
                             hx-get="/model_builder/open-create-object-panel/Service/"
                             hx-target="#sidePanel"
                             hx-trigger="click"
