@@ -4,8 +4,27 @@ let sidePanelWidthLarge = 'col-3';
 let modelCanvaWidthSmall = 'col-8';
 let modelCanvaWidthLarge = 'col-9';
 
-let fontSizeSmall = 'fs-md';
-let fontSizeSLarge = 'fs-lg';
+let root = document.documentElement;
+
+let elementName = ['h6', 'h7', 'h8'];
+let elementSize = [
+    {"name": "min", "unit": "rem"},
+    {"name": "max", "unit": "rem"},
+    {"name": "ideal", "unit": "vw"}
+];
+let elementSizeValue = [];
+
+elementName.forEach((el) => {
+    elementSize.forEach((els) => {
+        elementSizeValue.push({
+            "id": `--${el}-${els.name}`,
+            "value": parseFloat(getComputedStyle(root).getPropertyValue(`--${el}-${els.name}`)),
+            "unit": els.unit
+        })
+    });
+})
+
+let factorToApplyOnFontSize = 0.2
 
 let widthLimit = 1200;
 
@@ -16,15 +35,13 @@ function openSidePanel() {
          window.innerWidth <= widthLimit ? modelCanvaWidthSmall : modelCanvaWidthLarge);
     sidePanel.classList.replace("d-none",
         window.innerWidth <= widthLimit ? sidePanelWidthSmall : sidePanelWidthLarge);
-    let elementsToReduce = document.querySelectorAll(".button-card");
-    elementsToReduce.forEach((element) => {
-        element.classList.remove("fs-xl");
-        element.classList.add(window.innerWidth <= widthLimit ? fontSizeSmall : fontSizeSLarge);
-    });
     let chartTimeseriesDiv = document.getElementById("chartTimeseries");
     if (chartTimeseriesDiv) {
         chartTimeseriesDiv.classList.add(window.innerWidth <= widthLimit ? "left-small" : "left-large");
     }
+    elementSizeValue.forEach((el) => {
+        root.style.setProperty(el.id, `${el.value - factorToApplyOnFontSize}${el.unit}`);
+    })
     updateLines();
 }
 
@@ -40,11 +57,9 @@ function closeAndEmptySidePanel() {
     sidePanel.classList.replace(window.innerWidth <= widthLimit ? sidePanelWidthSmall : sidePanelWidthLarge,
         "d-none");
     sidePanel.innerHTML = "";
-    let elementsToReduce = document.querySelectorAll(".button-card");
-    elementsToReduce.forEach((element) => {
-        element.classList.remove(window.innerWidth <= widthLimit ? fontSizeSmall : fontSizeSLarge);
-        element.classList.add("fs-xl");
-    });
     closeTimeseriesChart();
+    elementSizeValue.forEach((el) => {
+        root.style.setProperty(el.id, `${el.value}${el.unit}`);
+    })
     updateLines();
 }

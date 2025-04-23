@@ -117,7 +117,6 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#UsagePatternFromForm_name').clear();
         cy.get('#UsagePatternFromForm_name').type(upNameOne);
 
-        //get input  with name start_date in #modal-timeseries-chart
         cy.get('#start_date').click();
         cy.get('input[class="numInput cur-year"]').type('2026');
         cy.get('span[aria-label="January 1, 2026"]').click()
