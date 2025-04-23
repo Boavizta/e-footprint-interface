@@ -78,3 +78,14 @@ input:disabled{
 .btn-white:hover, .chevron-btn:hover{
     background-color: #F3F4F6;
 }
+
+.blue-popover{
+    --bs-popover-border-color: #2D4675;
+    --bs-popover-header-bg: #2D4675;
+    --bs-popover-body-bg: #2D4675 !important;
+    --bs-popover-header-color: var(--bs-white);
+    --bs-popover-body-color: var(--bs-white);
+    --bs-popover-body-padding-x: 1rem;
+    --bs-popover-body-padding-y: .5rem;
+    --bs-popover-bg: #2D4675;
+}

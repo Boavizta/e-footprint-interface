@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   is not persistent after the click and disappears.
 - Remove accordion behavior from usage pattern card.
 
+## [0.7.16] - 2025-04- 23
+
+### Changed
+
+- Update SCSS rules about popover to render tooltips more readable.
+
 ## [0.7.11] - 2025-04- 17
 
 ### Added
