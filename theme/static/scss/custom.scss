@@ -504,3 +504,14 @@ input:disabled{
 .transition-width {
     transition: width 0.5s ease-in-out;
 }
+
+.blue-popover{
+    --bs-popover-border-color: #2D4675;
+    --bs-popover-header-bg: #2D4675;
+    --bs-popover-body-bg: #2D4675 !important;
+    --bs-popover-header-color: var(--bs-white);
+    --bs-popover-body-color: var(--bs-white);
+    --bs-popover-body-padding-x: 1rem;
+    --bs-popover-body-padding-y: .5rem;
+    --bs-popover-bg: #2D4675;
+}

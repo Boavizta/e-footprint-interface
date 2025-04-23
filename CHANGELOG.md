@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   components and improve readability.
 - Refactor CSS part to improve sizing(specifically for components height) 
   system.
+- Update SCSS rules about popover to render tooltips more readable.
 
 ## [0.7.13] - 2025-04-28
 
