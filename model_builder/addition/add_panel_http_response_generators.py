@@ -136,7 +136,8 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     possible_job_types_per_service = {"direct_server_call": [{"label": "Manually defined job", "value": "Job"}]}
     possible_job_types_per_service.update({
         service.efootprint_id: [
-            {"label": job.__name__, "value": job.__name__} for job in service.compatible_jobs()]
+            {"label": FORM_TYPE_OBJECT[job.__name__]['label'], "value": job.__name__} for job in
+            service.compatible_jobs()]
         for service in model_web.services}
     )
     dynamic_form_data["dynamic_selects"] = [
