@@ -95,6 +95,8 @@
     </div>
 </div>
 
+{% include 'model_builder/side_panels/usage_pattern/timeseries_chart.html' %}
+
 <div id="panel-result-btn"
      class="panel-result-btn position-fixed bottom-0 p-0 bg-white rounded-top-2 reverse-shadow border border-0 p-0 row align-items-center"
      style="z-index: 1000;height: 5vh; cursor: pointer;"
@@ -121,27 +123,11 @@
     </div>
 </div>
 
-{% include 'model_builder/side_panels/usage_pattern/timeseries_chart.html' %}
-
 <div id="modal-container">
 </div>
 
 <div id="loader-container">
 </div>
-
-<div class="modal fade" id="loader-modal" tabindex="-1" aria-labelledby="loader-modal-Label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <div class="spinner-border mt-3" role="status" style="width: 100px; height: 100px;">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p><strong role="status">Loading...</strong></p>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 <div class="modal fade" id="error-import-modal" tabindex="-1" aria-labelledby="error-import-modal-Label" aria-hidden="true"  data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">

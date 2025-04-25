@@ -352,7 +352,6 @@ input:disabled{
 .chartTimeseries{
     position: fixed;
     height: 70vh !important;
-    width: 50vw !important;
     z-index: 2000 !important;
     top: 15vh !important;
     border-radius: 15px;
@@ -414,9 +413,19 @@ input:disabled{
     .flex-width{
         width: 100%;
     }
+
+    #chartTimeseries{
+        width: 50%;
+        left: 17%;
+    }
 }
 
 @media (min-width: 1201px) {
+    #chartTimeseries{
+        width: 50%;
+        left: 25%;
+    }
+
     .fs-sm{
         font-size: 0.5em;
     }
@@ -474,11 +483,4 @@ input:disabled{
 
 .transition-width {
     transition: width 0.5s ease-in-out;
-}
-
-.left-small {
-    left: 17vw !important;
-}
-.left-large {
-    left: 24vw !important;
 }
