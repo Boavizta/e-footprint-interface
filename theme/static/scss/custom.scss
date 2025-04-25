@@ -256,14 +256,8 @@ input:disabled{
 }
 
 #sidePanel {
-    border-radius: 0;
     border: none;
-    background: #FFFFFF;
     height: calc(100vh - 50px);
-    position: fixed;
-    right: 0;
-    top: 52px;
-    overflow-y: auto;
     border-left: 2px solid var(--gray-200);
 }
 

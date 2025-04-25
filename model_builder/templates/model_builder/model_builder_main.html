@@ -1,7 +1,7 @@
 {% load static %}
 <div class="container-fluid px-0 mx-0 w-100" id="model-builder-page">
     <div class="row g-0 px-0 mx-0">
-        <div class="col-12 px-0 mx-0" id="model-canva">
+        <div class="col px-0 mx-0" id="model-canva">
             {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
             <div class="row my-3 mx-0 px-0 gx-3">
                 <div class="col-4">
@@ -91,7 +91,7 @@
                 </div>
             </div>
         </div>
-        <div class="d-none transition-width" id="sidePanel"></div>
+        <div class="col-4 col-xl-3 d-none transition-width overflow-y-auto" id="sidePanel"></div>
     </div>
 </div>
 
