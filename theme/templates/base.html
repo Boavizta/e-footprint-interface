@@ -24,20 +24,18 @@
 </head>
 
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    <div class="container-fluid p-0">
-        <!-- Main Content -->
-        {% include 'navbar.html' %}
-        <div id="loading-bar" class="bg-body-tertiary">
-            <div class="progress-bar"></div>
-        </div>
-        <main id="main-content-block" class="text-center w-100">
-            {% if home %}
-            {% include "home.html" %}
-            {% elif modelBuilderMain %}
-            {% include "model_builder/model_builder_main.html" %}
-            {% endif %}
-        </main>
+    <!-- Main Content -->
+    {% include 'navbar.html' %}
+    <div id="loading-bar" class="bg-body-tertiary">
+        <div class="progress-bar"></div>
     </div>
+    <main id="main-content-block" class="text-center w-100">
+        {% if home %}
+        {% include "home.html" %}
+        {% elif modelBuilderMain %}
+        {% include "model_builder/model_builder_main.html" %}
+        {% endif %}
+    </main>
     <script src="{% static 'scripts/leaderline_utils.js' %}"></script>
     <script src="{% static 'scripts/hammer_utils.js' %}"></script>
     <script src="{% static 'scripts/dynamic_forms.js' %}"></script>

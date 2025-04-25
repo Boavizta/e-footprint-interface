@@ -1,19 +1,17 @@
-<div class="row px-5" style="height:80vh; overflow-y: auto">
-    <div class="col-12">
-        <div class="row align-items-center">
-            <div class="col-4 text-start px-4 py-0">
-                <p class="h5 m-0"><b>Results</b></p>
-            </div>
-            <div class="col-4 text-center text-secondary"
-                onclick="hidePanelResult()"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="40" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
-                  <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
-                </svg>
-            </div>
+<div class="w-100 rounded-top-5 reverse-shadow h-100 bg-light p-4">
+    <div class="row align-items-center">
+        <div class="col-4 text-start px-4 py-0">
+            <p class="h5 m-0"><b>Results</b></p>
+        </div>
+        <div class="col-4 text-center text-secondary"
+            onclick="hidePanelResult()"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="40" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
+              <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+            </svg>
         </div>
     </div>
-    <div class="col-auto">
+    <div class="d-flex flex-row mb-3" >
         <button id="header-btn-result-chart" class="bg-transparent bg-transparent header-btn-result result-active p-2 fs-3xl me-2"
                     _="on click
                         repeat for button in .result-active
@@ -27,8 +25,6 @@
             >
             <b>Results</b>
         </button>
-    </div>
-    <div class="col-auto">
         <button id="header-btn-result-sources" class="bg-transparent bg-transparent header-btn-result p-2 fs-3xl me-2"
                     _="on click
                         repeat for button in .result-active
@@ -43,13 +39,11 @@
             <b>Sources</b>
         </button>
     </div>
-    <div id="result-block" class="py-3">
-        <div id="graph-block" class="d-block">
-            {% include 'model_builder/result/result_graph.html' %}
-        </div>
-        <div id="source-block" class="d-none">
-            {% include 'model_builder/result/source_table.html' %}
-        </div>
+    <div id="graph-block" class="col d-block">
+        {% include 'model_builder/result/result_graph.html' %}
+    </div>
+    <div id="source-block" class="col d-none">
+        {% include 'model_builder/result/source_table.html' %}
     </div>
 </div>
 

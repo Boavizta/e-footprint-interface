@@ -31,14 +31,31 @@
     --loading-bar-bg : #e0e0e0;
     --gadrient-color-2 : #017E7E;
     --gadrient-color-3 : #1B9891;
+
+    --navbar-height : 50px;
+    --toolbar-height : 48px;
+    --open-result-btn : 50px;
+    --loading-bar-height : 2px;
+    --margin-padding-model : 30px;
+
+    --model-height : calc(100vh - var(--navbar-height) - var(--loading-bar-height) );
+    --model-canva-calculated-height : calc(
+        100vh - var(--navbar-height)
+        - var(--toolbar-height)
+        - var(--open-result-btn)
+        - var(--loading-bar-height)
+        - var(--margin-padding-model)
+    );
+    --list-object-calculated-height : calc(
+        var(--model-canva-calculated-height)- var(--open-result-btn)
+    );
+    --result-panel-opened : calc(100vh - var(--navbar-height) - var(--toolbar-height));
 }
 
 /* CSS class utilities*/
 /*----------------------------------*/
 
 html{
-    margin: 0;
-    padding: 0;
     overflow: hidden;
 }
 
@@ -48,9 +65,17 @@ body{
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
     color: var(--dark-blue);
     font-size: 0.8em;
-    padding: 50px 0 0 0;
     margin: 0;
     overflow: hidden;
+    height: 100vh;
+}
+
+#main-content-block{
+    height: var(--model-height);
+}
+
+.home-page{
+    height: var(--model-height);
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, .h7, .h8{
@@ -168,7 +193,7 @@ input:disabled{
 /*Bootstrap overwrite*/
 .navbar{
     z-index: 101 !important;
-    height: 50px!important;
+    height: var(--navbar-height);
 }
 
 .dotted-border {
@@ -225,7 +250,7 @@ input:disabled{
 #loading-bar {
     position: relative;
     width: 100%;
-    height: 2px;
+    height: var(--loading-bar-height);
     background-color: var(--loading-bar-bg);
     overflow: hidden;
 }
@@ -245,46 +270,35 @@ input:disabled{
 }
 
 #model-builder-page{
-    height: calc(100vh - 100px);
+    height: var(--model-height);
     overflow: hidden;
 }
 
 #model-canva{
     background-color: white;
     overflow-y: auto;
-    height: calc(100vh - 100px);
-    padding-bottom: 75px;
+    height: var(--model-canva-calculated-height);
 }
 
 .list-object-efootprint{
-    min-height: calc(100vh - 100px);
+    min-height: var(--list-object-calculated-height);
 }
 
 #sidePanel {
     border: none;
-    height: calc(100vh - 100px);
+    height: var(--result-panel-opened);
     border-left: 2px solid var(--gray-200);
     overflow-y: auto;
 }
 
-.panel-result-btn{
-    position: absolute;
-    bottom: 0 !important;
-    width: 100vw;
-    height: 5vh;
-    cursor: pointer;
+#panel-result-btn{
+    height: var(--open-result-btn);
     z-index: 3000 !important;
-    padding: 0;
 }
 
-.btn-open-panel-result{
-    height: 5vh;
+#btn-open-panel-result{
+    cursor: pointer;
 }
-
-.panel-body{
-    padding: 2em;
-}
-
 
 #sidePanel .accordion-panel .accordion-button{
     background-color: var(--gray-100);

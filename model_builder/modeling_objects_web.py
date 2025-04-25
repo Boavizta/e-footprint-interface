@@ -195,7 +195,7 @@ class ModelingObjectWeb:
 class ServiceWeb(ModelingObjectWeb):
     @property
     def class_title_style(self):
-        return "h7"
+        return "h8"
 
 class ServerWeb(ModelingObjectWeb):
     @property

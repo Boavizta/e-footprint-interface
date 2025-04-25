@@ -1,26 +1,48 @@
-<div class="col-12 shadow rounded-2 p-4 mt-3 ">
-    <p class="h5">
-        Total CO2 emissions over time
-    </p>
-    <canvas id="lineChart" style="max-height: 600px;"></canvas>
-</div>
-<div class="col-12 my-3 shadow rounded-2 p-4">
-    <p class="h5" id="barChartTitle">
-        Yearly CO2 emissions
-    </p>
-    <div class="row align-items-center mb-2" id="form-result-panel">
-        <div class="col-auto">
-            <label for="results_temporal_granularity" class="form-label w-100 text-start fs-xl">Time granularity</label>
-            <select class="form-select light-select fs-xl height-30"
-                    id="results_temporal_granularity"
-                    name="results_temporal_granularity"
-                    onchange="drawBarResultChart()"
-                    _="on change set #barChartTitle.innerText to my.value.charAt(0).toUpperCase() + my.value.slice(1) + 'ly CO2 emissions'"
-            >
-                <option value="month">Month</option>
-                <option value="year" selected>Year</option>
-            </select>
+<div class="row">
+    <div class="col-12 col-xl-6">
+        <div class="row bg-white border border-light rounded-4 m-1 g-4 align-items-center">
+            <div class="col-6">
+                <p class="h5" id="barChartTitle">
+                    Monthly CO2 emissions
+                </p>
+            </div>
+            <div class="col-6 align-items-center" id="form-result-panel">
+                <div class="row justify-content-end">
+                    <label for="results_temporal_granularity" class="col-auto col-form-label text-start fz-0-8">Time granularity</label>
+                    <div class="col col-md-4">
+                        <select class="form-select light-select fz-0-8 h-30"
+                            id="results_temporal_granularity"
+                            name="results_temporal_granularity"
+                            onchange="drawBarResultChart()"
+                            _="on change set #barChartTitle.innerText to my.value.charAt(0).toUpperCase() + my.value.slice(1) + 'ly CO2 emissions'"
+                        >
+                            <option value="month" selected>Month</option>
+                            <option value="year">Year</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-0">
+                <p class="h8">t CO<sub>2</sub>e</p>
+            </div>
+            <div class="col-12 mt-0">
+                <canvas id="barChart" style="max-height: 600px;"></canvas>
+            </div>
         </div>
     </div>
-    <canvas id="barChart" style="max-height: 600px;"></canvas>
+    <div class="col-12 col-xl-6">
+        <div class="row g-4 bg-white border border-light rounded-4 m-1 align-items-center">
+            <div class="col-12">
+                <p class="h5">
+                    Total CO2 emissions over time
+                </p>
+            </div>
+            <div class="col-12 mb-0">
+                <p class="h8">t CO<sub>2</sub>e</p>
+            </div>
+            <div class="col-12 mt-0">
+                <canvas id="lineChart" style="max-height: 600px;"></canvas>
+            </div>
+        </div>
+    </div>
 </div>

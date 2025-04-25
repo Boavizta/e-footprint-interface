@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.14] - 2025-05-05
+
+### Changed
+- Result panel has been updated to have both dashboards on large screens and a single dashboard by row on small screens.
+- Refactor HTML part in base/home/moder_builder/result to reduce useless 
+  components and improve readability.
+- Refactor CSS part to improve sizing(specifically for components height) 
+  system.
+
 ## [0.7.13] - 2025-04-28
 
 ### Changed

@@ -15,7 +15,6 @@ describe("Test - Result panel", () => {
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
 
-        cy.get('#panel-result-btn').should('not.have.css', 'height', '93vh');
         cy.get('button').contains('Go back').should('be.exist');
     });
 
@@ -60,7 +59,6 @@ describe("Test - Result panel", () => {
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
 
-        cy.get('#panel-result-btn').should('not.have.css', 'height', '93vh');
         cy.get('button').contains('Go back').should('be.exist');
         cy.get("#exception-msg").should("exist")
             .should("include.text","The following usage journey(s) have no usage journey step")

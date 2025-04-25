@@ -16,9 +16,7 @@ let resultChartJSOptions = {
         y: {
             stacked: true,
             title: {
-                display: true,
-                text: "Total CO2 emissions in metric tons",
-                color: "rgb(107,114,128)"
+                display: false,
             },
             beginAtZero: true
         },
@@ -28,9 +26,7 @@ let resultChartJSOptions = {
             position: "bottom",
         },
         title: {
-            display: true,
-            text: 'Total CO2 emissions in metric tons',
-            color: "rgb(107,114,128)"
+            display: false,
         },
         tooltip: {
             mode: "index",

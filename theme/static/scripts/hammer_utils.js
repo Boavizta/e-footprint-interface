@@ -1,8 +1,10 @@
 function displayPanelResult(){
     let panel = document.getElementById("panel-result-btn");
     let btn = document.getElementById("btn-open-panel-result");
+    let resultDiv = document.getElementById("result-block");
     panel.style.transition = "height 0.2s ease-in-out";
-    panel.style.height = "93vh";
+    panel.style.height = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
+    resultDiv.style.height = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
     btn.style.display = "none";
 }
 
@@ -11,11 +13,10 @@ function hidePanelResult(){
     let btn = document.getElementById("btn-open-panel-result");
     let resultDiv = document.getElementById("result-block");
     panel.style.transition = "height 0.2s ease-in-out";
-    panel.style.height = "5vh";
-    btn.style.transition = "height 0.2s ease-in-out";
-    btn.style.height = "5vh";
+    panel.style.height = getComputedStyle(document.documentElement).getPropertyValue("--open-result-btn");
     btn.style.display = "block";
     resultDiv.innerHTML = "";
+    resultDiv.style.height = "0px";
 }
 
 function initHammer() {
