@@ -10,7 +10,7 @@ from model_builder.edition.edit_panel_http_response_generators import generate_u
     generate_server_edit_panel_http_response, generate_generic_edit_panel_http_response
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
-from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal
+from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
 
 
 def open_edit_object_panel(request, object_id):
@@ -40,19 +40,17 @@ def open_edit_object_panel(request, object_id):
     return http_response
 
 
+@render_exception_modal_if_error
 def edit_object(request, object_id, model_web=None):
-    try:
-        if model_web is None:
-            model_web = ModelWeb(request.session)
-        obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
-        if issubclass(obj_to_edit.efootprint_class, ServerBase):
-            storage_data = json.loads(request.POST.get('storage_form_data'))
-            storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
-            edit_object_in_system(storage_data, storage)
-        response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
-            compute_edit_object_html_and_event_response(request.POST, obj_to_edit))
-    except Exception as e:
-        return render_exception_modal(request, e)
+    if model_web is None:
+        model_web = ModelWeb(request.session)
+    obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
+    if issubclass(obj_to_edit.efootprint_class, ServerBase):
+        storage_data = json.loads(request.POST.get('storage_form_data'))
+        storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
+        edit_object_in_system(storage_data, storage)
+    response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
+        compute_edit_object_html_and_event_response(request.POST, obj_to_edit))
 
     return generate_http_response_from_edit_html_and_events(
         response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids)

@@ -67,7 +67,7 @@ class TestViewsEdition(TestModelingBase):
         self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
         self.assertEqual(job_request.session["system_data"]["WebApplicationJob"][new_job_id]["name"], "New job")
 
-    @patch("model_builder.edition.views_edition.render_exception_modal")
+    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_edit_genai_model(self, mock_render_exception_modal):
         gpu_server = GPUServer.from_defaults("GPU server", compute=SourceValue(16 * u.gpu), storage=Storage.ssd())
         first_provider = GenAIModel.list_values()["provider"][0]
@@ -98,7 +98,7 @@ class TestViewsEdition(TestModelingBase):
         response = edit_object(edit_service_request, genai_service.id)
         mock_render_exception_modal.assert_not_called()
 
-    @patch("model_builder.edition.views_edition.render_exception_modal")
+    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_edit_server_and_storage(self, mock_render_exception_modal):
         server_id = "uuid-Server-1"
         storage_id = "uuid-Default-SSD-storage-1"

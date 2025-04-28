@@ -18,7 +18,7 @@ from efootprint.utils.tools import time_it
 
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import ExplainableObjectWeb
-from model_builder.object_creation_and_edition_utils import render_exception_modal
+from model_builder.object_creation_and_edition_utils import render_exception_modal, render_exception_modal_if_error
 from utils import htmx_render
 
 import json
@@ -106,6 +106,7 @@ def upload_json(request):
     return http_response
 
 @time_it
+@render_exception_modal_if_error
 def result_chart(request):
     model_web = ModelWeb(request.session)
     exception = None
@@ -134,17 +135,13 @@ def result_chart(request):
         http_response = render_exception_modal(request, exception)
         return http_response
 
-    try:
-        model_web.system.after_init()
-        web_explainable_quantities = []
-        for efootprint_object in model_web.flat_efootprint_objs_dict.values():
-            web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
-            web_explainable_quantities += [
-                ExplainableObjectWeb(explainable_object, web_efootprint_object)
-                for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
-
-    except Exception as e:
-        return render_exception_modal(request, e)
+    model_web.system.after_init()
+    web_explainable_quantities = []
+    for efootprint_object in model_web.flat_efootprint_objs_dict.values():
+        web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
+        web_explainable_quantities += [
+            ExplainableObjectWeb(explainable_object, web_efootprint_object)
+            for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
 
     http_response = htmx_render(
         request, "model_builder/result/result_panel.html", context={

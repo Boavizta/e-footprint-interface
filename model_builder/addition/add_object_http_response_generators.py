@@ -3,7 +3,8 @@ import json
 from django.shortcuts import render
 
 from model_builder.model_web import ModelWeb
-from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data, render_exception_modal
+from model_builder.object_creation_and_edition_utils import (create_efootprint_obj_from_post_data,
+                                                             render_exception_modal_if_error)
 from model_builder.edition.views_edition import edit_object
 
 
@@ -54,37 +55,32 @@ def add_new_server(request, model_web: ModelWeb):
     return response
 
 
+@render_exception_modal_if_error
 def add_new_service(request, model_web: ModelWeb):
     server_efootprint_id = request.POST.get('efootprint_id_of_parent_to_link_to')
     service_type = request.POST.get('type_object_available')
     mutable_post = request.POST.copy()
     mutable_post[f"{service_type}_server"] = server_efootprint_id
-    try:
-        new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+    new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
 
-        efootprint_server = model_web.get_web_object_from_efootprint_id(server_efootprint_id).modeling_obj
-        efootprint_server.compute_calculated_attributes()
+    efootprint_server = model_web.get_web_object_from_efootprint_id(server_efootprint_id).modeling_obj
+    efootprint_server.compute_calculated_attributes()
 
-        added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+    added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
-        response = render(request, "model_builder/object_cards/service_card.html",
-                          context={"service": added_obj})
+    response = render(request, "model_builder/object_cards/service_card.html",
+                      context={"service": added_obj})
 
-        return response
-
-    except Exception as e:
-        return render_exception_modal(request, e)
+    return response
 
 
+@render_exception_modal_if_error
 def add_new_job(request, model_web: ModelWeb):
     usage_journey_step_efootprint_id = request.POST.get('efootprint_id_of_parent_to_link_to')
     usage_journey_step_to_edit = model_web.get_web_object_from_efootprint_id(usage_journey_step_efootprint_id)
 
-    try:
-        new_efootprint_obj = create_efootprint_obj_from_post_data(
-            request.POST, model_web, request.POST.get('type_object_available'))
-    except Exception as e:
-        return render_exception_modal(request, e)
+    new_efootprint_obj = create_efootprint_obj_from_post_data(
+        request.POST, model_web, request.POST.get('type_object_available'))
 
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 

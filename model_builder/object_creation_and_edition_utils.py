@@ -157,3 +157,12 @@ def render_exception_modal(request, exception):
     http_response["HX-Trigger-After-Swap"] = "openModalDialog"
 
     return http_response
+
+
+def render_exception_modal_if_error(func):
+    def wrapper(request, *args, **kwargs):
+        try:
+            return func(request, *args, **kwargs)
+        except Exception as e:
+            return render_exception_modal(request, e)
+    return wrapper
