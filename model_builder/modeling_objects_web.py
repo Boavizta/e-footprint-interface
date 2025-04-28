@@ -94,6 +94,10 @@ class ModelingObjectWeb:
         return getattr(self._modeling_obj, key, None)
 
     @property
+    def calculated_attributes_values(self):
+        return [getattr(self, attr_name) for attr_name in self.calculated_attributes]
+
+    @property
     def modeling_obj(self):
         return self._modeling_obj
 

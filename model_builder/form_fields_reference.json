@@ -147,6 +147,24 @@
         "label": "fraction of usage time",
         "is_advanced_parameter": true
     },
+    "nb_of_instances": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "Storage"
+        ],
+        "label": "number of instances"
+    },
+    "raw_nb_of_instances": {
+        "modeling_obj_containers": [
+            "Server",
+            "GPUServer",
+            "BoaviztaCloudServer",
+            "Storage"
+        ],
+        "label": "raw number of instances"
+    },
     "gpu_power": {
         "modeling_obj_containers": [
             "GPUServer"
@@ -243,9 +261,10 @@
     },
     "hourly_usage_journey_starts": {
         "modeling_obj_containers": [
-            "UsagePattern"
+            "UsagePattern",
+            "UsagePatternFromForm"
         ],
-        "label": "hourly usage journey starts"
+        "label": "hourly number of usage journey starts local time"
     },
     "start_date": {
         "modeling_obj_containers": [
@@ -288,6 +307,26 @@
             "UsagePatternFromForm"
         ],
         "label": "net growth rate timespan"
+    },
+    "first_daily_usage_journey_volume": {
+        "modeling_obj_containers": [
+            "UsagePatternFromForm"
+        ],
+        "label": "initial daily usage journey volume"
+    },
+    "utc_hourly_usage_journey_starts": {
+        "modeling_obj_containers": [
+            "UsagePattern",
+            "UsagePatternFromForm"
+        ],
+        "label": "hourly number of usage journey starts UTC"
+    },
+    "nb_usage_journeys_in_parallel": {
+        "modeling_obj_containers": [
+            "UsagePattern",
+            "UsagePatternFromForm"
+        ],
+        "label": "number of usage journeys in parallel"
     },
     "server": {
         "modeling_obj_containers": [
@@ -372,6 +411,24 @@
             "WebApplicationJob"
         ],
         "label": "implementation details"
+    },
+    "hourly_avg_occurrences_per_usage_pattern": {
+        "modeling_obj_containers": [
+            "Job",
+            "GenAIJob",
+            "VideoStreamingJob",
+            "WebApplicationJob"
+        ],
+        "label": "hourly average occurrences per usage pattern"
+    },
+    "hourly_avg_occurrences_across_usage_patterns": {
+        "modeling_obj_containers": [
+            "Job",
+            "GenAIJob",
+            "VideoStreamingJob",
+            "WebApplicationJob"
+        ],
+        "label": "hourly average occurrences across usage patterns"
     },
     "model_name": {
         "modeling_obj_containers": [
@@ -482,5 +539,11 @@
         ],
         "label": "base storage need",
         "is_advanced_parameter": true
+    },
+    "nb_of_active_instances": {
+        "modeling_obj_containers": [
+            "Storage"
+        ],
+        "label": "number of active instances"
     }
 }

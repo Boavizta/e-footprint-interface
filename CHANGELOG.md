@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Change CSS rules to improve the overall display
 - Refactor the CSS part to be fully managed into SCSS files and re-organize 
   the custom SCSS file.
+- Add custom labels for calculated attributes.
 
 ### Fixed
 
