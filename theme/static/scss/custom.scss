@@ -56,11 +56,11 @@ body{
 }
 
 .h6{
-    font-weight: 600;
+    font-weight: 450;
     font-size: clamp(var(--h6-min), var(--h6-ideal), var(--h6-max));
 }
 .h7{
-    font-weight: 450;
+    font-weight: 300;
     font-size: clamp(var(--h7-min), var(--h7-ideal), var(--h7-max));
 }
 .h8{
@@ -249,6 +249,7 @@ input:disabled{
 #model-canva{
     background-color: white;
     overflow-y: auto;
+    padding-bottom: 50px;
 }
 
 .list-object-efootprint{
@@ -257,7 +258,6 @@ input:disabled{
 
 #sidePanel {
     border: none;
-    height: calc(100vh - 50px);
     border-left: 2px solid var(--gray-200);
 }
 
