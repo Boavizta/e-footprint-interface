@@ -1,5 +1,5 @@
 let resultChartJSOptions = {
-    locale: "en-IN",
+    locale: "en-EN",
     responsive: true,
     scales: {
         x: {
