@@ -39,6 +39,7 @@
 html{
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 body{
@@ -49,6 +50,7 @@ body{
     font-size: 0.8em;
     padding: 50px 0 0 0;
     margin: 0;
+    overflow: hidden;
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, .h7, .h8{
@@ -243,22 +245,26 @@ input:disabled{
 }
 
 #model-builder-page{
+    height: calc(100vh - 100px);
     overflow: hidden;
 }
 
 #model-canva{
     background-color: white;
     overflow-y: auto;
-    padding-bottom: 50px;
+    height: calc(100vh - 100px);
+    padding-bottom: 75px;
 }
 
 .list-object-efootprint{
-    min-height: 80vh !important;
+    min-height: calc(100vh - 100px);
 }
 
 #sidePanel {
     border: none;
+    height: calc(100vh - 100px);
     border-left: 2px solid var(--gray-200);
+    overflow-y: auto;
 }
 
 .panel-result-btn{

@@ -24,7 +24,9 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
 
     response_html = ""
     for duplicated_card in accordion_children_before_edit.keys():
-        response_html += f"<p hx-swap-oob='innerHTML:#button-{duplicated_card.web_id}'>{duplicated_card.name}</p>"
+        response_html += (f"<div hx-swap-oob='innerHTML:#button-{duplicated_card.web_id}'>"
+                          f"<p class='{duplicated_card.class_title_style} mb-0'>{duplicated_card.name}</p>"
+                          f"</div>")
         added_accordion_children = [acc_child for acc_child in accordion_children_after_edit[duplicated_card]
                                     if acc_child not in accordion_children_before_edit[duplicated_card]]
 

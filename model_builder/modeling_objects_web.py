@@ -143,6 +143,10 @@ class ModelingObjectWeb:
         return None
 
     @property
+    def class_title_style(self):
+        return None
+
+    @property
     def accordion_children(self):
         return []
 
@@ -184,6 +188,10 @@ class ModelingObjectWeb:
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
 
+class ServiceWeb(ModelingObjectWeb):
+    @property
+    def class_title_style(self):
+        return "h7"
 
 class ServerWeb(ModelingObjectWeb):
     @property
@@ -197,6 +205,10 @@ class ServerWeb(ModelingObjectWeb):
     @property
     def accordion_children(self):
         return [self.storage]
+
+    @property
+    def class_title_style(self):
+        return "h6"
 
 
 class JobWeb(ModelingObjectWeb):
@@ -243,6 +255,10 @@ class DuplicatedJobWeb(ModelingObjectWeb):
     @property
     def accordion_children(self):
         return []
+
+    @property
+    def class_title_style(self):
+        return "h8"
 
 
 class UsageJourneyStepWeb(ModelingObjectWeb):
@@ -316,6 +332,10 @@ class DuplicatedUsageJourneyStepWeb(UsageJourneyStepWeb):
         return class_name
 
     @property
+    def class_title_style(self):
+        return "h7"
+
+    @property
     def data_attributes_as_list_of_dict(self):
         data_attribute_updates = super().data_attributes_as_list_of_dict
         data_attribute_updates.append(
@@ -350,6 +370,10 @@ class UsageJourneyWeb(ModelingObjectWeb):
 
         return web_uj_steps
 
+    @property
+    def class_title_style(self):
+        return "h6"
+
 
 class UsagePatternWeb(ModelingObjectWeb):
     @property
@@ -365,6 +389,9 @@ class UsagePatternWeb(ModelingObjectWeb):
         # TODO: Add Device mix Network mix and Country mix
         return []
 
+    @property
+    def class_title_style(self):
+        return "h6"
 
 EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Server": ServerWeb,
@@ -378,9 +405,9 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
     "WebApplicationJob": JobWeb,
-    "GenAIModel": ModelingObjectWeb,
-    "VideoStreaming": ModelingObjectWeb,
-    "WebApplication": ModelingObjectWeb,
+    "GenAIModel": ServiceWeb,
+    "VideoStreaming": ServiceWeb,
+    "WebApplication": ServiceWeb,
     "Storage": ModelingObjectWeb
 }
 
