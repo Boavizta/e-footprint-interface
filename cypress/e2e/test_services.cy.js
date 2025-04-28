@@ -50,7 +50,6 @@ describe('Test services', () => {
         cy.get('#btn-submit-form').click();
 
         cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
-        cy.get('button[data-bs-target^="#flush-"][data-bs-target$="'+server.replaceAll(' ', '-')+'"]').click();
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
         cy.get('#GenAIModel_name').type(service);
         cy.get('#GenAIModel_provider').select('openai');

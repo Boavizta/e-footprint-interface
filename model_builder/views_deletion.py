@@ -9,6 +9,7 @@ from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import JobWeb, UsageJourneyStepWeb, UsagePatternWeb, UsageJourneyWeb, ServerWeb
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
+from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
 
 def ask_delete_object(request, object_id):
@@ -58,6 +59,7 @@ def ask_delete_object(request, object_id):
     return http_response
 
 
+@render_exception_modal_if_error
 def delete_object(request, object_id):
     model_web = ModelWeb(request.session)
 

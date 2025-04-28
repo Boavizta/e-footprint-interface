@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   select field
 - In Safari select multiple fields don’t have a visible hidden value anymore, while retaining the fact that the forms will always send a value for select multiple fields, even if no value has been selected.
 - Number format in charts y axis (from indian to english format)
+- Deletion logic for duplicated cards (for example, trying to delete a job that belongs to a duplicated user journey step would raise an error).
 
 ## [0.7.12] - 2025-04-23
 

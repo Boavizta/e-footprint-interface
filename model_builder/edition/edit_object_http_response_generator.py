@@ -42,8 +42,6 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
                 previous_accordion = accordion_children_before_edit[duplicated_card][index_removed_accordion_child-1]
                 if previous_accordion not in removed_accordion_children:
                     data_attribute_updates += previous_accordion.data_attributes_as_list_of_dict
-            if len(removed_accordion_child.modeling_obj_containers) == 0:
-                removed_accordion_child.self_delete()
 
         unchanged_children = [acc_child for acc_child in accordion_children_after_edit[duplicated_card]
                               if acc_child not in added_accordion_children]
@@ -63,6 +61,15 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
         elif added_accordion_children and not unchanged_children:
             response_html += (f"<div hx-swap-oob='afterbegin:#flush-{duplicated_card.web_id} "
                               f".accordion-body'>{added_children_html}</div>")
+
+    # Delete children that don’t have any accordion parent anymore
+    # It is only necessary to iterate over the children of the first duplicated card
+    first_duplicated_card = list(accordion_children_after_edit.keys())[0]
+    removed_accordion_children = [acc_child for acc_child in accordion_children_before_edit[first_duplicated_card]
+                                  if acc_child not in accordion_children_after_edit[first_duplicated_card]]
+    for removed_accordion_child in removed_accordion_children:
+        if len(removed_accordion_child.modeling_obj_containers) == 0:
+            removed_accordion_child.self_delete()
 
     for duplicated_card in edited_obj.duplicated_cards:
         data_attribute_updates += duplicated_card.data_attributes_as_list_of_dict
