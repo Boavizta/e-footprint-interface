@@ -105,8 +105,8 @@ def upload_json(request):
 
     return http_response
 
-@time_it
 @render_exception_modal_if_error
+@time_it
 def result_chart(request):
     model_web = ModelWeb(request.session)
     exception = None

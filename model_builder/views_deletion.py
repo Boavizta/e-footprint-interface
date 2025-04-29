@@ -44,8 +44,8 @@ def ask_delete_object(request, object_id):
         remove_card_with_hyperscript = True
         if isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
             remove_card_with_hyperscript = False
-            if len(web_obj.duplicated_cards) > 1:
-                message = (f"This {web_obj.class_as_simple_str} is mirrored {len(web_obj.duplicated_cards)} times, "
+            if len(web_obj.mirrored_cards) > 1:
+                message = (f"This {web_obj.class_as_simple_str} is mirrored {len(web_obj.mirrored_cards)} times, "
                            f"this action will delete all mirrored {web_obj.class_as_simple_str}s.")
                 sub_message = f"To delete only one {web_obj.class_as_simple_str}, break the mirroring link first."
 
@@ -85,14 +85,14 @@ def delete_object(request, object_id):
     elif isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
         response_html = ""
         ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = [], [], []
-        for duplicated_card in web_obj.duplicated_cards:
+        for mirrored_card in web_obj.mirrored_cards:
             mutable_post = request.POST.copy()
-            parent = duplicated_card.accordion_parent
-            logger.info(f"Removing {duplicated_card.name} from {parent.name}")
+            parent = mirrored_card.accordion_parent
+            logger.info(f"Removing {mirrored_card.name} from {parent.name}")
             mutable_post['name'] = parent.name
             new_list_attribute_ids = [list_attribute.efootprint_id for list_attribute in parent.accordion_children
-                                      if list_attribute.efootprint_id != duplicated_card.efootprint_id]
-            list_attribute_name = duplicated_card.modeling_obj.contextual_modeling_obj_containers[0].attr_name_in_mod_obj_container
+                                      if list_attribute.efootprint_id != mirrored_card.efootprint_id]
+            list_attribute_name = mirrored_card.modeling_obj.contextual_modeling_obj_containers[0].attr_name_in_mod_obj_container
             mutable_post.setlist(f'{list_attribute_name}', new_list_attribute_ids)
             request.POST = mutable_post
             (partial_response_html, partial_ids_of_web_elements_with_lines_to_remove,

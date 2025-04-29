@@ -122,7 +122,7 @@ class ModelingObjectWeb:
         return self._modeling_obj.id
 
     @property
-    def duplicated_cards(self):
+    def mirrored_cards(self):
         return [self]
 
     @property
@@ -219,19 +219,19 @@ class JobWeb(ModelingObjectWeb):
     @property
     def web_id(self):
         raise PermissionError(f"JobWeb objects don’t have a web_id attribute because their html "
-                             f"representation should be managed by the DuplicatedJobWeb object")
+                             f"representation should be managed by the MirroredJobWeb object")
 
     @property
-    def duplicated_cards(self):
-        duplicated_cards = []
+    def mirrored_cards(self):
+        mirrored_cards = []
         for usage_journey_step in self.usage_journey_steps:
-            for duplicated_usage_journey_card in usage_journey_step.duplicated_cards:
-                duplicated_cards.append(DuplicatedJobWeb(self._modeling_obj, duplicated_usage_journey_card))
+            for mirrored_usage_journey_card in usage_journey_step.mirrored_cards:
+                mirrored_cards.append(MirroredJobWeb(self._modeling_obj, mirrored_usage_journey_card))
 
-        return duplicated_cards
+        return mirrored_cards
 
 
-class DuplicatedJobWeb(ModelingObjectWeb):
+class MirroredJobWeb(ModelingObjectWeb):
     def __init__(self, modeling_obj: ModelingObject, uj_step):
         super().__init__(modeling_obj, uj_step.model_web)
         self.usage_journey_step = uj_step
@@ -269,17 +269,17 @@ class UsageJourneyStepWeb(ModelingObjectWeb):
     @property
     def web_id(self):
         raise PermissionError(f"UsageJourneyStepWeb objects don’t have a web_id attribute because their html "
-                             f"representation should be managed by the DuplicatedUsageJourneyStepWeb object")
+                             f"representation should be managed by the MirroredUsageJourneyStepWeb object")
 
     @property
-    def duplicated_cards(self):
-        duplicated_cards = []
+    def mirrored_cards(self):
+        mirrored_cards = []
         for usage_journey in self.usage_journeys:
-            duplicated_cards.append(DuplicatedUsageJourneyStepWeb(self._modeling_obj, usage_journey))
+            mirrored_cards.append(MirroredUsageJourneyStepWeb(self._modeling_obj, usage_journey))
 
-        return duplicated_cards
+        return mirrored_cards
 
-class DuplicatedUsageJourneyStepWeb(UsageJourneyStepWeb):
+class MirroredUsageJourneyStepWeb(UsageJourneyStepWeb):
     def __init__(self, modeling_obj: ModelingObject, usage_journey):
         super().__init__(modeling_obj, usage_journey.model_web)
         self.usage_journey = usage_journey
@@ -309,7 +309,7 @@ class DuplicatedUsageJourneyStepWeb(UsageJourneyStepWeb):
     def jobs(self):
         web_jobs = []
         for job in self._modeling_obj.jobs:
-            web_jobs.append(DuplicatedJobWeb(job, self))
+            web_jobs.append(MirroredJobWeb(job, self))
 
         return web_jobs
 
@@ -370,7 +370,7 @@ class UsageJourneyWeb(ModelingObjectWeb):
     def uj_steps(self):
         web_uj_steps = []
         for uj_step in self._modeling_obj.uj_steps:
-            web_uj_steps.append(DuplicatedUsageJourneyStepWeb(uj_step, self))
+            web_uj_steps.append(MirroredUsageJourneyStepWeb(uj_step, self))
 
         return web_uj_steps
 
