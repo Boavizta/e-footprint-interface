@@ -105,8 +105,11 @@ class TestViewsEdition(TestModelingBase):
 
         post_data = QueryDict(mutable=True)
         post_data.update(
-            {'name': ['New server'], 'carbon_footprint_fabrication': ['60'], 'storage_form_data':
-                [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", "carbon_footprint_fabrication_per_storage_capacity":"160.0"}}']}
+            {'name': ['New server'], 'carbon_footprint_fabrication': ['60'], 'carbon_footprint_fabrication_unit': 'kg',
+                'storage_form_data':
+                [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", '
+                 f'"carbon_footprint_fabrication_per_storage_capacity":"160.0",'
+                 f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}']}
         )
 
         edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)

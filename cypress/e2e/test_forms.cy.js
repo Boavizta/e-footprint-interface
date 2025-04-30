@@ -116,4 +116,24 @@ describe("Test - Forms panel", () => {
         cy.get("#Server_power").should('have.value', '888.0');
     });
 
+    it("Check that object keep unit define in model", () => {
+        let serverName = 'cloud server test'
+        cy.visit("/model_builder/");
+        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
+        let fileTest = 'cypress/fixtures/test-unit-edit.json'
+        cy.get('input[type="file"]').selectFile(fileTest);
+        cy.wait(500);
+        cy.get("#btn-submit-form").click();
+        cy.wait(500);
+
+        cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
+        cy.get('#Storage_data_storage_duration').clear().type('3');
+        cy.get('#btn-submit-form').click();
+
+        cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
+        cy.get('#Storage_data_storage_duration').should('have.value', '3.0');
+    });
+
 });

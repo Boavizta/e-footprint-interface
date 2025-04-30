@@ -95,8 +95,9 @@ describe('Test de la page d\'accueil', () => {
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+service.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         // Add jobs
-        cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').click();
-        cy.get('#service').select(service);
+        cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').click({force: true});
+        cy.wait(500);
+        cy.get('#service').should('exist').select(service);
         cy.get('#WebApplicationJob_name').clear();
         cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();

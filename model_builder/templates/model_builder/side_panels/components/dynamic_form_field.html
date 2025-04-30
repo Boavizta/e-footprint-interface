@@ -56,7 +56,7 @@
     {% elif field.input_type == "input" %}
         <div class="input-group">
             <input type="number"
-                    class="form-control input_with_add_on"
+                    class="form-control input_with_add_on {% if field.unit != "" %} rounded-start-2 w-75{% else %} rounded-2 w-100 {% endif %} }"
                     id="{{ field.id }}"
                     name="{{ field.id }}"
                     value="{{ field.default }}"
@@ -73,9 +73,15 @@
                         min="0"
                    {% endif %}
             >
-            <span class="input-group-text">
-                {{ field.unit }}
-            </span>
+             {% if field.unit != "" %}
+                <input
+                       class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
+                       name="{{ field.id }}_unit"
+                       id="{{ field.id }}_unit"
+                       value="{{ field.unit }}"
+                       readonly
+                >
+             {% endif %}
         </div>
     {% else %}
         <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>

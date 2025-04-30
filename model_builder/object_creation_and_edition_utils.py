@@ -10,6 +10,7 @@ from efootprint.abstract_modeling_classes.explainable_objects import Explainable
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
 from efootprint.logger import logger
+from efootprint.constants.units import u
 
 from model_builder.modeling_objects_web import ModelingObjectWeb
 from model_builder.model_web import ModelWeb
@@ -46,8 +47,9 @@ def create_efootprint_obj_from_post_data(create_form_data: QueryDict, model_web:
                 source = Sources.USER_DATA
             else:
                 source = default_values.get(attr_name).source
+            unit = create_form_data.get(f"{attr_name_with_prefix}_unit", "dimensionless")
             obj_creation_kwargs[attr_name] = SourceValue(
-                float(create_form_data[attr_name_with_prefix]) * default_values[attr_name].value.units, source)
+                float(create_form_data[attr_name_with_prefix]) * u(unit), source)
         elif issubclass(annotation, ExplainableObject):
             obj_creation_kwargs[attr_name] = SourceObject(
                 create_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
@@ -97,9 +99,9 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
         elif issubclass(annotation, str):
             obj_to_edit.set_efootprint_value(attr_name, edit_form_data[attr_name_with_prefix])
         elif issubclass(annotation, ExplainableQuantity):
-            request_unit = default_values[attr_name].value.units
             request_value = edit_form_data[attr_name_with_prefix]
-            new_value = SourceValue(float(request_value) * request_unit, Sources.USER_DATA)
+            request_unit = edit_form_data.get(f"{attr_name_with_prefix}_unit", "dimensionless")
+            new_value = SourceValue(float(request_value) * u(request_unit), Sources.USER_DATA)
             current_value = getattr(obj_to_edit, attr_name)
             if new_value.value != current_value.value:
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")

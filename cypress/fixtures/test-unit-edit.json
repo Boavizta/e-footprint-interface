@@ -1,0 +1,209 @@
+{
+    "efootprint_version": "10.0.9",
+    "System": {
+        "uuid-system-1": {
+            "name": "My system",
+            "id": "uuid-system-1",
+            "usage_patterns": []
+        }
+    },
+    "Storage": {
+        "id-f7da85-Storage-1": {
+            "name": "Storage 1",
+            "id": "id-f7da85-Storage-1",
+            "lifespan": {
+                "label": "Lifespan of Storage 1 from hypothesis",
+                "value": 6.0,
+                "unit": "year",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fraction_of_usage_time": {
+                "label": "Storage 1 fraction of usage time from hypothesis",
+                "value": 1.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "carbon_footprint_fabrication_per_storage_capacity": {
+                "label": "Fabrication carbon footprint of Storage 1 per storage capacity from hypothesis",
+                "value": 160.0,
+                "unit": "kilogram / terabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "power_per_storage_capacity": {
+                "label": "Power of Storage 1 per storage capacity from hypothesis",
+                "value": 1.3,
+                "unit": "watt / terabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "idle_power": {
+                "label": "Idle power of Storage 1 from hypothesis",
+                "value": 0.0,
+                "unit": "watt",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "storage_capacity": {
+                "label": "Storage capacity of Storage 1 from hypothesis",
+                "value": 1.0,
+                "unit": "terabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "data_replication_factor": {
+                "label": "Data replication factor of Storage 1 from hypothesis",
+                "value": 3.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "data_storage_duration": {
+                "label": "Data storage duration of Storage 1 from hypothesis",
+                "value": 5.0,
+                "unit": "month",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "base_storage_need": {
+                "label": "Storage 1 initial storage need from hypothesis",
+                "value": 0.0,
+                "unit": "terabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fixed_nb_of_instances": {
+                "label": "User defined number of Storage 1 instances",
+                "value": null
+            }
+        }
+    },
+    "BoaviztaCloudServer": {
+        "id-e19a3b-cloud-server-test": {
+            "name": "cloud server test",
+            "id": "id-e19a3b-cloud-server-test",
+            "lifespan": {
+                "label": "Lifespan of cloud server test from hypothesis",
+                "value": 6.0,
+                "unit": "year",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fraction_of_usage_time": {
+                "label": "cloud server test fraction of usage time from hypothesis",
+                "value": 1.0,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "server_type": {
+                "label": "Server type of cloud server test from user data",
+                "value": "autoscaling",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "idle_power": {
+                "label": "Idle power of cloud server test from hypothesis",
+                "value": 0.0,
+                "unit": "watt",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "power_usage_effectiveness": {
+                "label": "PUE of cloud server test from hypothesis",
+                "value": 1.2,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "average_carbon_intensity": {
+                "label": "unnamed source from user data",
+                "value": 0.23,
+                "unit": "kilogram / kilowatt_hour",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "server_utilization_rate": {
+                "label": "cloud server test utilization rate from hypothesis",
+                "value": 0.9,
+                "unit": "dimensionless",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "base_ram_consumption": {
+                "label": "Base RAM consumption of cloud server test from hypothesis",
+                "value": 0.0,
+                "unit": "gigabyte",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "base_compute_consumption": {
+                "label": "Base cpu core consumption of cloud server test from hypothesis",
+                "value": 0.0,
+                "unit": "cpu_core",
+                "source": {
+                    "name": "hypothesis",
+                    "link": null
+                }
+            },
+            "fixed_nb_of_instances": {
+                "label": "User defined number of cloud server test instances",
+                "value": null
+            },
+            "storage": "id-f7da85-Storage-1",
+            "provider": {
+                "label": "unnamed source from user data",
+                "value": "scaleway",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "instance_type": {
+                "label": "unnamed source from user data",
+                "value": "ent1-s",
+                "source": {
+                    "name": "user data",
+                    "link": null
+                }
+            },
+            "impact_url": "https://api.boavizta.org/v1/cloud/instance"
+        }
+    }
+}

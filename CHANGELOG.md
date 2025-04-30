@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.16] - 2025-05-06
+
+### Fixed
+- Backend and frontend updates to use form units in the edit/add views. This allows for uploading models with units different from default units and keep unit consistency.
+
 ## [0.7.15] - 2025-05-05
 
 ### Changed
