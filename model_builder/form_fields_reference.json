@@ -32,14 +32,16 @@
             "Server"
         ],
         "label": "carbon footprint fabrication",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "power": {
         "modeling_obj_containers": [
             "Server"
         ],
         "label": "power",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "lifespan": {
         "modeling_obj_containers": [
@@ -49,7 +51,8 @@
             "Storage"
         ],
         "label": "lifespan",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "idle_power": {
         "modeling_obj_containers": [
@@ -58,13 +61,15 @@
             "Storage"
         ],
         "label": "idle power",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "ram": {
         "modeling_obj_containers": [
             "Server"
         ],
-        "label": "RAM"
+        "label": "RAM",
+        "step": 1
     },
     "compute": {
         "modeling_obj_containers": [
@@ -90,7 +95,7 @@
             "BoaviztaCloudServer"
         ],
         "label": "average carbon intensity of electricity",
-        "step": 0.01
+        "step": 1
     },
     "server_utilization_rate": {
         "modeling_obj_containers": [
@@ -109,7 +114,8 @@
             "VideoStreaming"
         ],
         "label": "base RAM consumption",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "base_compute_consumption": {
         "modeling_obj_containers": [
@@ -135,7 +141,8 @@
             "BoaviztaCloudServer",
             "Storage"
         ],
-        "label": "fixed nb of instances"
+        "label": "fixed nb of instances",
+        "step": 1
     },
     "fraction_of_usage_time": {
         "modeling_obj_containers": [
@@ -170,35 +177,40 @@
             "GPUServer"
         ],
         "label": "GPU power",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "gpu_idle_power": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
         "label": "GPU idle power",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "ram_per_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
         "label": "RAM per GPU",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "carbon_footprint_fabrication_per_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
         "label": "carbon footprint fabrication per GPU",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "carbon_footprint_fabrication_without_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
         "label": "carbon footprint fabrication without GPU",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "provider": {
         "modeling_obj_containers": [
@@ -342,7 +354,8 @@
             "Job",
             "WebApplicationJob"
         ],
-        "label": "data transferred"
+        "label": "data transferred",
+        "step": 1
     },
     "data_stored": {
         "modeling_obj_containers": [
@@ -351,7 +364,8 @@
             "WebApplicationJob"
         ],
         "label": "data stored",
-        "tooltip": "Data stored in the server. Can be negative if the job is deleting data."
+        "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+        "step": 1
     },
     "request_duration": {
         "modeling_obj_containers": [
@@ -371,7 +385,8 @@
             "Job"
         ],
         "label": "RAM needed",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "service": {
         "modeling_obj_containers": [
@@ -385,7 +400,8 @@
         "modeling_obj_containers": [
             "GenAIJob"
         ],
-        "label": "output token count"
+        "label": "output token count",
+        "step": 1
     },
     "resolution": {
         "modeling_obj_containers": [
@@ -442,7 +458,8 @@
         ],
         "label": "nb of bits per parameter",
         "is_advanced_parameter": true,
-        "tooltip": "Reduce this number if quantization techniques have been used."
+        "tooltip": "Reduce this number if quantization techniques have been used.",
+        "step": 1
     },
     "llm_memory_factor": {
         "modeling_obj_containers": [
@@ -471,14 +488,16 @@
             "GenAIModel"
         ],
         "label": "bits per token",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "bits_per_pixel": {
         "modeling_obj_containers": [
             "VideoStreaming"
         ],
         "label": "bits per pixel",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "static_delivery_cpu_cost": {
         "modeling_obj_containers": [
@@ -505,21 +524,24 @@
             "Storage"
         ],
         "label": "carbon footprint fabrication per storage capacity",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "power_per_storage_capacity": {
         "modeling_obj_containers": [
             "Storage"
         ],
         "label": "power per storage capacity",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "storage_capacity": {
         "modeling_obj_containers": [
             "Storage"
         ],
         "label": "storage capacity",
-        "is_advanced_parameter": true
+        "is_advanced_parameter": true,
+        "step": 1
     },
     "data_replication_factor": {
         "modeling_obj_containers": [

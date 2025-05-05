@@ -71,7 +71,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "Server_compute",
@@ -101,7 +101,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.01
+                "step": 1
             }
         ],
         "advanced_fields": [
@@ -118,7 +118,7 @@
                     "link": "https://data.ademe.fr/datasets/base-carbone(r)"
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "Server_power",
@@ -133,7 +133,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "Server_lifespan",
@@ -148,7 +148,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "Server_idle_power",
@@ -163,7 +163,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "Server_power_usage_effectiveness",
@@ -208,7 +208,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "Server_base_compute_consumption",
@@ -274,7 +274,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.01
+                "step": 1
             },
             {
                 "id": "GPUServer_compute",
@@ -306,7 +306,7 @@
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GPUServer_gpu_idle_power",
@@ -321,7 +321,7 @@
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GPUServer_ram_per_gpu",
@@ -336,7 +336,7 @@
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GPUServer_carbon_footprint_fabrication_per_gpu",
@@ -351,7 +351,7 @@
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GPUServer_carbon_footprint_fabrication_without_gpu",
@@ -366,7 +366,7 @@
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GPUServer_lifespan",
@@ -381,7 +381,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GPUServer_power_usage_effectiveness",
@@ -441,7 +441,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             }
         ]
     },
@@ -527,7 +527,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.01
+                "step": 1
             }
         ],
         "advanced_fields": [
@@ -544,7 +544,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "BoaviztaCloudServer_idle_power",
@@ -559,7 +559,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "BoaviztaCloudServer_power_usage_effectiveness",
@@ -604,7 +604,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "BoaviztaCloudServer_base_compute_consumption",

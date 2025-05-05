@@ -96,7 +96,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "VideoStreaming_bits_per_pixel",
@@ -111,7 +111,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "VideoStreaming_static_delivery_cpu_cost",
@@ -215,7 +215,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             },
             {
                 "id": "GenAIModel_llm_memory_factor",
@@ -245,7 +245,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 0.1
+                "step": 1
             }
         ]
     }
