@@ -7,6 +7,10 @@
         "label": "Job",
         "type_object_available": "Available job types"
     },
+    "GPUJob": {
+        "label": "GPU job",
+        "type_object_available": "Available job types"
+    },
     "Service": {
         "label": "Service",
         "type_object_available": "Available services for this server"

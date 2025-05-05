@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.15] - 2025-05-05
+
+### Changed
+- Re-put yearly emission breakdown as default + use CO2-eq as emission unit
+- Update to e-footprint 10.0.11 gives better default units especially for carbon intensity of electricity (gCO2-eq/kWh and not kgCO2-eq/kWh)
+
+### Fixed
+- Result charts labels (sometimes cumulative emissions line chart had yearly labels when it should always be monthly).
+- Use GPUJob instead of Job when making a request to a GPU server, to use the right compute unit.
+
 ## [0.7.14] - 2025-05-05
 
 ### Changed

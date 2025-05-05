@@ -37,7 +37,7 @@
                 "unit": "min",
                 "default": 1,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,

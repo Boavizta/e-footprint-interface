@@ -117,7 +117,7 @@
                 "unit": "",
                 "default": 3,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -150,7 +150,7 @@
                 "unit": "",
                 "default": 10000,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -187,7 +187,7 @@
                 "unit": "",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,

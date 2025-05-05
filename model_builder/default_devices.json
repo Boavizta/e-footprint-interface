@@ -12,20 +12,20 @@
             }
         },
         "power": {
-            "label": "Power of Default laptop from hypothesis",
+            "label": "Power of Default laptop from e-footprint hypothesis",
             "value": 50.0,
             "unit": "watt",
             "source": {
-                "name": "hypothesis",
+                "name": "e-footprint hypothesis",
                 "link": null
             }
         },
         "lifespan": {
-            "label": "Lifespan of Default laptop from hypothesis",
+            "label": "Lifespan of Default laptop from e-footprint hypothesis",
             "value": 6.0,
             "unit": "year",
             "source": {
-                "name": "hypothesis",
+                "name": "e-footprint hypothesis",
                 "link": null
             }
         },
@@ -52,20 +52,20 @@
             }
         },
         "power": {
-            "label": "Power of Default smartphone from hypothesis",
+            "label": "Power of Default smartphone from e-footprint hypothesis",
             "value": 1.0,
             "unit": "watt",
             "source": {
-                "name": "hypothesis",
+                "name": "e-footprint hypothesis",
                 "link": null
             }
         },
         "lifespan": {
-            "label": "Lifespan of Default smartphone from hypothesis",
+            "label": "Lifespan of Default smartphone from e-footprint hypothesis",
             "value": 3.0,
             "unit": "year",
             "source": {
-                "name": "hypothesis",
+                "name": "e-footprint hypothesis",
                 "link": null
             }
         },

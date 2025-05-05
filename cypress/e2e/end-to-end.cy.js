@@ -53,7 +53,7 @@ describe('Test de la page d\'accueil', () => {
           .contains('button', 'Add usage journey step')
           .click();
         cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
-        //erase all the text in the input with id name
+        // Erase all the text in the input with id name
         cy.get('#UsageJourneyStep_name').clear();
         cy.get('#UsageJourneyStep_name').type(ujsOne);
         cy.get('#UsageJourneyStep_user_time_spent').type('10.1');
@@ -104,9 +104,9 @@ describe('Test de la page d\'accueil', () => {
 
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#service').select(service);
-        cy.get('#WebApplicationJob_name').clear();
-        cy.get('#WebApplicationJob_name').type(jobTwo);
+        cy.get('#service').select("direct_server_call");
+        cy.get('#Job_name').clear();
+        cy.get('#Job_name').type(jobTwo);
         cy.get('#btn-submit-form').click();
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobTwo.replaceAll(' ', '-')+'/"]').should('be.visible');
 

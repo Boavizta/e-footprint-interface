@@ -242,39 +242,39 @@ class TestUsagePatternFromForm(unittest.TestCase):
             'country': 'FR-id',
             'devices': ['device-id', 'device-id2'],
             'modeling_duration_value': {
-                'label': 'test_usage_pattern_from_form modeling duration value from hypothesis',
-                'source': {'link': None, 'name': 'hypothesis'},
+                'label': 'test_usage_pattern_from_form modeling duration value from e-footprint hypothesis',
+                'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'unit': 'dimensionless',
                 'value': 2.0},
             "modeling_duration_unit": {
-                "label": "test_usage_pattern_from_form modeling duration unit from hypothesis",
-                "source": {"link": None, "name": "hypothesis"},
+                "label": "test_usage_pattern_from_form modeling duration unit from e-footprint hypothesis",
+                "source": {"link": None, "name": "e-footprint hypothesis"},
                 "value": "month"
             },
             'net_growth_rate_in_percentage': {
-                'label': 'test_usage_pattern_from_form net growth rate in percentage from hypothesis',
-                'source': {'link': None, 'name': 'hypothesis'},
+                'label': 'test_usage_pattern_from_form net growth rate in percentage from e-footprint hypothesis',
+                'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'unit': 'dimensionless',
                 'value': 20},
             'net_growth_rate_timespan': {
-                'label': 'test_usage_pattern_from_form net growth rate timespan from hypothesis',
-                'source': {'link': None, 'name': 'hypothesis'},
+                'label': 'test_usage_pattern_from_form net growth rate timespan from e-footprint hypothesis',
+                'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'value': 'year'},
             "initial_usage_journey_volume": {
-                "label": "test_usage_pattern_from_form initial usage journey volume from hypothesis",
-                "source": {"link": None, "name": "hypothesis"},
+                "label": "test_usage_pattern_from_form initial usage journey volume from e-footprint hypothesis",
+                "source": {"link": None, "name": "e-footprint hypothesis"},
                 "unit": "dimensionless",
                 "value": 1000.0
             },
             "initial_usage_journey_volume_timespan": {
-                "label": "test_usage_pattern_from_form initial usage journey volume timespan from hypothesis",
-                "source": {"link": None, "name": "hypothesis"},
+                "label": "test_usage_pattern_from_form initial usage journey volume timespan from e-footprint hypothesis",
+                "source": {"link": None, "name": "e-footprint hypothesis"},
                 "value": "month"
             },
             'network': 'network-id',
             'start_date': {
-                'label': 'test_usage_pattern_from_form start date from hypothesis',
-                'source': {'link': None, 'name': 'hypothesis'},
+                'label': 'test_usage_pattern_from_form start date from e-footprint hypothesis',
+                'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'value': '2025-01-01'},
             'usage_journey': 'usage-journey-id'}
         result_json = self.usage_pattern.to_json()

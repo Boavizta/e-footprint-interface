@@ -4,7 +4,7 @@ from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
 from django.shortcuts import render
-from efootprint.core.usage.job import Job
+from efootprint.core.usage.job import Job, GPUJob
 
 from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
     FORM_TYPE_OBJECT
@@ -99,7 +99,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         exception = ValueError("Please go to the infrastructure section and create a server before adding a job")
         return render_exception_modal(request, exception)
 
-    available_job_classes = {Job}
+    available_job_classes = {Job, GPUJob}
     for service in SERVICE_CLASSES:
         if service.__name__ in request.session["system_data"].keys():
             available_job_classes.update(service.compatible_jobs())
@@ -133,7 +133,10 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     }
     form_sections = [additional_item] + form_sections
 
-    possible_job_types_per_service = {"direct_server_call": [{"label": "Manually defined job", "value": "Job"}]}
+    possible_job_types_per_service = {
+        "direct_server_call": [{"label": "Manually defined job", "value": "Job"}],
+        "direct_server_call_gpu": [{"label": "Manually defined GPU job", "value": "GPUJob"}]
+    }
     possible_job_types_per_service.update({
         service.efootprint_id: [
             {"label": FORM_TYPE_OBJECT[job.__name__]['label'], "value": job.__name__} for job in
@@ -148,7 +151,8 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
                 server.efootprint_id:
                     [{"label": service.name, "value": service.efootprint_id}
                        for service in server.installed_services]
-                + [{"label": "direct call to server", "value": "direct_server_call"}]
+                + [{"label": f"direct call to{' GPU' if isinstance(server.modeling_obj, GPUServer) else ''} server",
+                    "value": f"direct_server_call{'_gpu' if isinstance(server.modeling_obj, GPUServer) else ''}"}]
                 for server in servers
             }
         },

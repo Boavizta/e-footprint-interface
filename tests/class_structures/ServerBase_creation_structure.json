@@ -67,7 +67,7 @@
                 "unit": "GB",
                 "default": 128,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -82,7 +82,7 @@
                 "unit": "cpu_core",
                 "default": 24,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -97,7 +97,7 @@
                 "unit": "g/kWh",
                 "default": 100.0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -129,7 +129,7 @@
                 "unit": "W",
                 "default": 300,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -144,7 +144,7 @@
                 "unit": "yr",
                 "default": 6,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -159,7 +159,7 @@
                 "unit": "W",
                 "default": 50,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -174,7 +174,7 @@
                 "unit": "",
                 "default": 1.2,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -189,7 +189,7 @@
                 "unit": "",
                 "default": 0.9,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -204,7 +204,7 @@
                 "unit": "GB",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -219,7 +219,7 @@
                 "unit": "cpu_core",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -270,7 +270,7 @@
                 "unit": "g/kWh",
                 "default": 100.0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -285,7 +285,7 @@
                 "unit": "gpu",
                 "default": 4,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -377,7 +377,7 @@
                 "unit": "yr",
                 "default": 6,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -392,7 +392,7 @@
                 "unit": "",
                 "default": 1.2,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -407,7 +407,7 @@
                 "unit": "",
                 "default": 1,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -422,7 +422,7 @@
                 "unit": "gpu",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -437,7 +437,7 @@
                 "unit": "GB",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -520,10 +520,10 @@
                 "label": "average carbon intensity of electricity",
                 "tooltip": false,
                 "input_type": "input",
-                "unit": "kg/kWh",
-                "default": 0.23,
+                "unit": "g/kWh",
+                "default": 233.0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -540,7 +540,7 @@
                 "unit": "yr",
                 "default": 6,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -555,7 +555,7 @@
                 "unit": "W",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -570,7 +570,7 @@
                 "unit": "",
                 "default": 1.2,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -585,7 +585,7 @@
                 "unit": "",
                 "default": 0.9,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -600,7 +600,7 @@
                 "unit": "GB",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -615,7 +615,7 @@
                 "unit": "cpu_core",
                 "default": 0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,

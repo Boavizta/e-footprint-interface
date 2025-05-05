@@ -92,7 +92,7 @@
                 "unit": "GB",
                 "default": 2,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -107,7 +107,7 @@
                 "unit": "",
                 "default": 0.1,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -122,7 +122,7 @@
                 "unit": "cpu_core\u00b7s/GB",
                 "default": 4.0,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -137,7 +137,7 @@
                 "unit": "MB",
                 "default": 50,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -211,7 +211,7 @@
                 "unit": "",
                 "default": 16,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
@@ -241,7 +241,7 @@
                 "unit": "",
                 "default": 24,
                 "source": {
-                    "name": "hypothesis",
+                    "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "can_be_negative": false,
