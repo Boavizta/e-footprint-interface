@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - In code, rename duplicated cards to mirrored cards.
 - Round usage projection figures to 1.
 - Form fields steps (for example, step is now 1 for electricity carbon intensity, instead of 0.1).
+- Automatically round integer default values (to display 100.0 as 100 for example)
 
 ## [0.7.15] - 2025-05-05
 

@@ -132,10 +132,13 @@ def generate_dynamic_form(
             })
         elif issubclass(annotation, ExplainableQuantity):
             default = default_values[attr_name]
+            default_value = round(default.magnitude, 2)
+            if default_value == int(default_value):
+                default_value = int(default_value)
             structure_field.update({
                 "input_type": "input",
                 "unit": f"{default.value.units:~P}",
-                "default": round(default.magnitude, 2),
+                "default": default_value,
                 "source": {"name":default.source.name, "link":default.source.link},
                 "can_be_negative": attr_name in attributes_that_can_have_negative_values,
                 "step": FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
