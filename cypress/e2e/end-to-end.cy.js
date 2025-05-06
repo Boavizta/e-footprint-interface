@@ -123,6 +123,10 @@ describe('Test de la page d\'accueil', () => {
         cy.get('span[aria-label="January 1, 2026"]').click()
         cy.get('#modeling_duration_value').click();
         cy.get('#modeling_duration_value').invoke('val', '2').trigger('change');
+        cy.get("#chartTimeseries").should('have.class', 'd-none');
+        cy.get('#initial_usage_journey_volume').click();
+        cy.get('#initial_usage_journey_volume').type('1000');
+        cy.get("#chartTimeseries").should('not.have.class', 'd-none');
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
         cy.get('#net_growth_rate_timespan').select('year');

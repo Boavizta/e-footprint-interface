@@ -47,11 +47,33 @@ let timeSeriesChartJSOptions = {
     }
 };
 
-function openTimeseriesChart() {
+function openOrCloseTimeseriesChartAndTriggerUpdate() {
     let element = document.getElementById("chartTimeseries");
-    element.classList.remove("d-none");
-    element.classList.add("d-block");
-    createOrUpdateTimeSeriesChart();
+    let startDate = document.getElementById("start_date").value;
+    let modelingDurationValue = document.getElementById("modeling_duration_value").value;
+    let initialUsageJourneyVolume = document.getElementById("initial_usage_journey_volume").value;
+    let netGrowthRateInPercentage = document.getElementById("net_growth_rate_in_percentage").value;
+    if(
+        startDate !==""
+        && (modelingDurationValue !== "" && modelingDurationValue > 0)
+        && (initialUsageJourneyVolume !== "" && initialUsageJourneyVolume > 0)
+        && (netGrowthRateInPercentage !== "")
+    ){
+        if(element.classList.contains("d-none")){
+            element.classList.remove("d-none");
+            element.classList.add("d-block");
+        }
+        createOrUpdateTimeSeriesChart();
+    }else{
+        if(element.classList.contains("d-block")) {
+            element.classList.remove("d-block");
+            element.classList.add("d-none");
+            if (window.chart) {
+                window.chart.destroy();
+                window.chart = null;
+            }
+        }
+    }
 }
 
 function closeTimeseriesChart() {

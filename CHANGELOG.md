@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Simplify server labels but keep more descriptive labels for server type selection.
+- In usage pattern form, for new usage patterns, the field initial_usage_journey_volume isn't set to a default value, the timeseries chart isn't diplayed and submit button is disabled. 
+  Once all informations are filled, the chart is displayed and button enabled.
 
 ## [0.7.16] - 2025-05-06
 

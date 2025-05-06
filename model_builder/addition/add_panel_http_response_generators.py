@@ -208,10 +208,12 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
         if field["attr_name"] == "devices":
             field["input_type"] = "select"
 
+    usage_pattern_input_values = UsagePatternFromForm.default_values()
+    usage_pattern_input_values["initial_usage_journey_volume"] = None
     http_response = render(
         request, "model_builder/side_panels/usage_pattern/usage_pattern_add.html", {
             "form_fields": form_sections[1]["fields"],
-            "usage_pattern_input_values": UsagePatternFromForm.default_values(),
+            "usage_pattern_input_values": usage_pattern_input_values,
             "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
             "header_name": "Add new usage pattern",
             "obj_type": "Usage pattern",
