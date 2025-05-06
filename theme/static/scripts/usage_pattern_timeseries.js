@@ -23,6 +23,16 @@ let timeSeriesChartJSOptions = {
         tooltip: {
             mode: 'index',
             intersect: false,
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    let value = context.parsed.y;
+                    if (value !== null && value !== undefined) {
+                        value = value.toFixed(1);
+                    }
+                    return `${label}: ${value}`;
+                }
+            }
         },
         legend: { display: false },
         responsive: true,
