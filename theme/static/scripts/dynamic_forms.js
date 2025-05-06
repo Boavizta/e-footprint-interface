@@ -88,6 +88,14 @@ document.addEventListener("initDynamicForm", function () {
             targetElem.value = selectedValue;
         }
 
+        if (items.length === 1 && targetElem.closest('#item-efootprint_classes_available')) {
+            targetElem.closest('#item-efootprint_classes_available').classList.add('d-none');
+        }
+        else {
+            if (targetElem.closest('#item-efootprint_classes_available')) {
+                targetElem.closest('#item-efootprint_classes_available').classList.remove('d-none');
+            }
+        }
         targetElem.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }

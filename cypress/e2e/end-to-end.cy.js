@@ -4,7 +4,7 @@ beforeEach(() => {
 });
 
 describe('Test de la page d\'accueil', () => {
-    it('Ouvre la page d\'accueil et interagit avec un bouton', () => {
+    it('End to end user journey', () => {
 
         let ujNameOne = "Test E2E UJ 1";
         let ujNameTwo = "Test E2E UJ 2";

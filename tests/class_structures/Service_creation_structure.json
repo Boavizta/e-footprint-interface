@@ -111,7 +111,7 @@
                     "link": null
                 },
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             },
             {
                 "id": "VideoStreaming_static_delivery_cpu_cost",
@@ -120,7 +120,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "cpu_core\u00b7s/GB",
-                "default": 4.0,
+                "default": 4,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null

@@ -101,22 +101,22 @@ describe("Test - Forms panel", () => {
 
         cy.get('button[id^="button-id-"][id$="'+serverOne.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.wait(500);
-        cy.get("#Server_average_carbon_intensity").should('have.value', '700.0');
+        cy.get("#Server_average_carbon_intensity").should('have.value', '700');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
-        cy.get("#Server_power").should('have.value', '300.0');
+        cy.get("#Server_power").should('have.value', '300');
 
         cy.get('button[id^="button-id-"][id$="'+serverTwo.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.wait(500);
-        cy.get("#Server_average_carbon_intensity").should('have.value', '800.0');
+        cy.get("#Server_average_carbon_intensity").should('have.value', '800');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
-        cy.get("#Server_power").should('have.value', '888.0');
+        cy.get("#Server_power").should('have.value', '888');
     });
 
-    it("Check that object keep unit define in model", () => {
+    it("Check that object keep units defined in model", () => {
         let serverName = 'cloud server test'
         cy.visit("/model_builder/");
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
@@ -133,7 +133,7 @@ describe("Test - Forms panel", () => {
 
         cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
-        cy.get('#Storage_data_storage_duration').should('have.value', '3.0');
+        cy.get('#Storage_data_storage_duration').should('have.value', '3');
     });
 
 });

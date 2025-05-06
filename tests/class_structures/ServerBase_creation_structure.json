@@ -95,7 +95,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "g/kWh",
-                "default": 100.0,
+                "default": 100,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
@@ -268,7 +268,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "g/kWh",
-                "default": 100.0,
+                "default": 100,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
@@ -300,7 +300,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "W/gpu",
-                "default": 400.0,
+                "default": 400,
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
@@ -315,7 +315,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "W/gpu",
-                "default": 50.0,
+                "default": 50,
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
@@ -330,7 +330,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "GB/gpu",
-                "default": 80.0,
+                "default": 80,
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
@@ -345,7 +345,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "kg/gpu",
-                "default": 150.0,
+                "default": 150,
                 "source": {
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
@@ -521,7 +521,7 @@
                 "tooltip": false,
                 "input_type": "input",
                 "unit": "g/kWh",
-                "default": 233.0,
+                "default": 233,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null

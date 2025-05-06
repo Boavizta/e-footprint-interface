@@ -1,21 +1,20 @@
-<div class="mb-3">
-    <div class="accordion accordion-panel" id="accordionFormAdd">
+    <div class="mb-3 accordion accordion-panel" id="accordionFormAdd">
         {%for form_section in form_sections %}
-        <div class="accordion-item {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" id="item-{{ form_section.category }}">
-            <h2 class="accordion-header {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}">
-                <button class="accordion-button fs-3xl {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ form_section.category }}_{{obj_type}}" aria-expanded="true" aria-controls="collapse_{{ form_section.category }}_{{obj_type}}">
-                    {{ form_section.header }}
-                </button>
-            </h2>
-            <div id="collapse_{{ form_section.category }}_{{obj_type}}"
-                 class="accordion-collapse show" data-bs-parent="accordionFormAdd">
-                <div class="accordion-body">
-                    {% include "model_builder/side_panels/components/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
+            <div class="accordion-item
+                {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}
+{% if form_section.category == "efootprint_classes_available" and form_section.fields|length == 1 and form_section.fields.0.input_type == "select" and form_section.fields.0.options|length == 1 %}d-none{% endif %}"
+                 id="item-{{ form_section.category }}">
+                <h2 class="accordion-header {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}">
+                    <button class="accordion-button fs-3xl {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ form_section.category }}" aria-expanded="true" aria-controls="collapse_{{ form_section.category }}">
+                        {{ form_section.header }}
+                    </button>
+                </h2>
+                <div id="collapse_{{ form_section.category }}"
+                     class="accordion-collapse show" data-bs-parent="accordionFormAdd">
+                    <div class="accordion-body">
+                        {% include "model_builder/side_panels/components/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
+                    </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
     </div>
-</div>
-
-{{ dynamic_form_data|json_script:"dynamic-form-data" }}
