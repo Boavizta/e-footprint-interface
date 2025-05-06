@@ -13,7 +13,7 @@
             <div class="accordion-body row gy-2">
                 {% for item in object_to_edit.calculated_attributes_values %}
                     <div class="col-10">
-                        <input disabled name="calculated_attributes{{ item.attr_name_in_mod_obj_container }}" value="{{ item.label }}" class="form-control">
+                        <input disabled name="calculated_attributes{{ item.attr_name_in_mod_obj_container }}" value="{{ item.label|capfirst }}" class="form-control">
                     </div>
                     <div class="col-2">
                         <a href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}" target="_blank">
