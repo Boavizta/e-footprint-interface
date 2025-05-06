@@ -1,74 +1,77 @@
 {
     "ServerBase": {
-        "label": "Server",
+        "explicit_label": "Server",
         "type_object_available": "Available server types"
     },
     "Job": {
-        "label": "Job",
+        "explicit_label": "Job",
         "type_object_available": "Available job types"
     },
     "GPUJob": {
-        "label": "GPU job",
+        "explicit_label": "GPU job",
         "type_object_available": "Available job types"
     },
     "Service": {
-        "label": "Service",
+        "explicit_label": "Service",
         "type_object_available": "Available services for this server"
     },
     "Storage": {
-        "label": "Storage",
+        "explicit_label": "Storage",
         "type_object_available": "Available storage types"
     },
     "UsagePatternFromForm": {
-        "label": "Usage pattern",
+        "explicit_label": "Usage pattern",
         "type_object_available": "Available usage patterns"
     },
     "UsagePattern": {
-        "label": "Usage pattern",
+        "explicit_label": "Usage pattern",
         "type_object_available": "Available usage patterns"
     },
     "UsageJourneyStep": {
-        "label": "Usage journey step",
+        "explicit_label": "Usage journey step",
         "type_object_available": "Available usage journey steps"
     },
     "UsageJourney": {
-        "label": "Usage journey",
+        "explicit_label": "Usage journey",
         "type_object_available": "Available usage journeys"
     },
     "Server": {
-        "label": "Custom server (CPUs)"
+        "explicit_label": "Custom server (CPUs)",
+        "name": "Custom server"
     },
     "BoaviztaCloudServer": {
-        "label": "Cloud server (CPUs, for webapps, streaming, etc.)"
+        "explicit_label": "Cloud server (CPUs, for webapps, streaming, etc.)",
+        "name": "Cloud server"
     },
     "GPUServer": {
-        "label": "Server for AI & GenAI services (GPUs)"
+        "explicit_label": "Server for AI & GenAI services (GPUs)",
+        "name": "AI server"
     },
     "WebApplication": {
-        "label": "Web application"
+        "explicit_label": "Web application"
     },
     "VideoStreaming": {
-        "label": "Video streaming application"
+        "explicit_label": "Video streaming application"
     },
     "GenAIModel": {
-        "label": "Generative AI model"
+        "explicit_label": "Generative AI model"
     },
     "WebApplicationJob": {
-        "label": "Web application job"
+        "explicit_label": "Web application job"
     },
     "VideoStreamingJob": {
-        "label": "Video streaming job"
+        "explicit_label": "Video streaming job"
     },
     "GenAIJob": {
-        "label": "Generative AI job"
+        "explicit_label": "Generative AI job"
     },
     "Network": {
-        "label": "Network"
+        "explicit_label": "Network"
     },
     "Device": {
-        "label": "Device"
+        "explicit_label": "Device"
     },
     "Country": {
-        "label": "Country"
+        "explicit_label": "Country"
     }
 }

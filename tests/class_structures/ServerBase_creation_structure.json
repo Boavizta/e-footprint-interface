@@ -1,7 +1,7 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Server selection",
+        "name": "Server selection",
         "fields": [
             {
                 "input_type": "select",
@@ -26,7 +26,7 @@
     },
     {
         "category": "Server",
-        "header": "Custom server (CPUs) creation",
+        "name": "Custom server creation",
         "fields": [
             {
                 "id": "Server_name",
@@ -34,7 +34,7 @@
                 "label": "name",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "Custom server (CPUs) 1"
+                "default": "Custom server 1"
             },
             {
                 "id": "Server_server_type",
@@ -229,7 +229,7 @@
     },
     {
         "category": "GPUServer",
-        "header": "Server for AI & GenAI services (GPUs) creation",
+        "name": "AI server creation",
         "fields": [
             {
                 "id": "GPUServer_name",
@@ -237,7 +237,7 @@
                 "label": "name",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "Server for AI & GenAI services (GPUs) 1"
+                "default": "AI server 1"
             },
             {
                 "id": "GPUServer_server_type",
@@ -447,7 +447,7 @@
     },
     {
         "category": "BoaviztaCloudServer",
-        "header": "Cloud server (CPUs, for webapps, streaming, etc.) creation",
+        "name": "Cloud server creation",
         "fields": [
             {
                 "id": "BoaviztaCloudServer_name",
@@ -455,7 +455,7 @@
                 "label": "name",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "Cloud server (CPUs, for webapps, streaming, etc.) 1"
+                "default": "Cloud server 1"
             },
             {
                 "id": "BoaviztaCloudServer_provider",

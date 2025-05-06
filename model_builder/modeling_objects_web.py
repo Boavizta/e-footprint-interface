@@ -114,8 +114,12 @@ class ModelingObjectWeb:
         return self.name
 
     @property
+    def class_name(self):
+        return FORM_TYPE_OBJECT[self.class_as_simple_str].get("name", self.class_as_simple_str)
+
+    @property
     def class_label(self):
-        return FORM_TYPE_OBJECT[self.class_as_simple_str]["label"]
+        return FORM_TYPE_OBJECT[self.class_as_simple_str]["explicit_label"]
 
     @property
     def web_id(self):

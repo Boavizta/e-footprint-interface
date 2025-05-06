@@ -37,13 +37,13 @@ def generate_object_creation_structure(
 
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
-        "header": f"{FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]} selection",
+        "name": f"{FORM_TYPE_OBJECT[available_efootprint_class_str]["explicit_label"]} selection",
         "fields": [{
             "input_type": "select",
             "id": "type_object_available",
             "label": FORM_TYPE_OBJECT[available_efootprint_class_str]["type_object_available"],
             "options": [
-                {"label": FORM_TYPE_OBJECT[available_class.__name__]["label"],  "value": available_class.__name__}
+                {"label": FORM_TYPE_OBJECT[available_class.__name__]["explicit_label"],  "value": available_class.__name__}
                 for available_class in available_efootprint_classes]
         }
         ]
@@ -54,9 +54,11 @@ def generate_object_creation_structure(
     for index, efootprint_class in enumerate(available_efootprint_classes):
         default_values = efootprint_class.default_values()
         available_efootprint_class_str = efootprint_class.__name__
-        available_efootprint_class_label = FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]
+        available_efootprint_class_label = FORM_TYPE_OBJECT[available_efootprint_class_str]["explicit_label"]
+        available_efootprint_class_header = FORM_TYPE_OBJECT[available_efootprint_class_str].get(
+            "name", available_efootprint_class_label)
         default_values["name"] = (
-            f"{available_efootprint_class_label} "
+            f"{available_efootprint_class_header} "
             f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
         class_fields, class_fields_advanced, dynamic_lists = generate_dynamic_form(
             available_efootprint_class_str, default_values, attributes_to_skip, model_web)
@@ -65,7 +67,7 @@ def generate_object_creation_structure(
 
         form_sections.append({
             "category": available_efootprint_class_str,
-            "header": f"{available_efootprint_class_label} creation",
+            "name": f"{available_efootprint_class_header} creation",
             "fields": class_fields,
             "advanced_fields": class_fields_advanced,
         })

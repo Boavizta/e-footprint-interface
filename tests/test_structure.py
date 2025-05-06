@@ -102,7 +102,7 @@ class TestsClassStructure(TestCase):
                 assert FORM_FIELD_REFERENCES[attr_name]["label"] is not None
 
         for object_extra_fields_to_check in objects_extra_fields_to_check:
-                assert FORM_TYPE_OBJECT[object_extra_fields_to_check]["label"] is not None
+                assert FORM_TYPE_OBJECT[object_extra_fields_to_check]["explicit_label"] is not None
 
 
 if __name__ == "__main__":

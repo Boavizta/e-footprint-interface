@@ -1,7 +1,7 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Service selection",
+        "name": "Service selection",
         "fields": [
             {
                 "input_type": "select",
@@ -26,7 +26,7 @@
     },
     {
         "category": "WebApplication",
-        "header": "Web application creation",
+        "name": "Web application creation",
         "fields": [
             {
                 "id": "WebApplication_name",
@@ -71,7 +71,7 @@
     },
     {
         "category": "VideoStreaming",
-        "header": "Video streaming application creation",
+        "name": "Video streaming application creation",
         "fields": [
             {
                 "id": "VideoStreaming_name",
@@ -147,7 +147,7 @@
     },
     {
         "category": "GenAIModel",
-        "header": "Generative AI model creation",
+        "name": "Generative AI model creation",
         "fields": [
             {
                 "id": "GenAIModel_name",

@@ -1,7 +1,7 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Usage journey selection",
+        "name": "Usage journey selection",
         "fields": [
             {
                 "input_type": "select",
@@ -18,7 +18,7 @@
     },
     {
         "category": "UsageJourney",
-        "header": "Usage journey creation",
+        "name": "Usage journey creation",
         "fields": [
             {
                 "id": "UsageJourney_name",

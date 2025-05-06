@@ -25,9 +25,9 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
     template_name = template_name_mapping[efootprint_class_str]
     context_data = {"form_fields": form_sections[1]["fields"],
-                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
+                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["explicit_label"].lower(),
                     "obj_type": efootprint_class_str,
-                    "obj_label": FORM_TYPE_OBJECT[efootprint_class_str]["label"],}
+                    "obj_label": FORM_TYPE_OBJECT[efootprint_class_str]["explicit_label"],}
     if request.GET.get("efootprint_id_of_parent_to_link_to"):
         context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 
@@ -83,7 +83,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
             "form_sections": services_dict,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "service",
-            "obj_label": FORM_TYPE_OBJECT["Service"]["label"],
+            "obj_label": FORM_TYPE_OBJECT["Service"]["explicit_label"],
             "header_name": "Add new service",
         })
 
@@ -112,7 +112,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     )
     additional_item = {
         "category": "job_creation_helper",
-        "header": "Job creation helper",
+        "name": "Job creation helper",
         "fields": [
             {
                 "input_type": "select",
@@ -139,7 +139,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     }
     possible_job_types_per_service.update({
         service.efootprint_id: [
-            {"label": FORM_TYPE_OBJECT[job.__name__]['label'], "value": job.__name__} for job in
+            {"label": FORM_TYPE_OBJECT[job.__name__]['explicit_label'], "value": job.__name__} for job in
             service.compatible_jobs()]
         for service in model_web.services}
     )
@@ -167,7 +167,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "job",
-            "obj_label": FORM_TYPE_OBJECT["Job"]["label"],
+            "obj_label": FORM_TYPE_OBJECT["Job"]["explicit_label"],
             "efootprint_id_of_parent_to_link_to": request.GET.get("efootprint_id_of_parent_to_link_to"),
             "header_name": "Add new job",
         })
@@ -215,7 +215,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
             "header_name": "Add new usage pattern",
             "obj_type": "Usage pattern",
-            "obj_label": FORM_TYPE_OBJECT["UsagePatternFromForm"]["label"],
+            "obj_label": FORM_TYPE_OBJECT["UsagePatternFromForm"]["explicit_label"],
         })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"

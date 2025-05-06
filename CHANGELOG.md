@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.7.16] - 2025-05-06
 
+### Changed
+- Add in form_type_object file a key to display a shorter name relative to 
+  the object type and use it in the default name value and section header.
+
+## [0.7.16] - 2025-05-06
+
 ### Fixed
 - Backend and frontend updates to use form units in the edit/add views. This allows for uploading models with units different from default units and keep unit consistency.
 

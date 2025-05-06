@@ -1,7 +1,7 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Job selection",
+        "name": "Job selection",
         "fields": [
             {
                 "input_type": "select",
@@ -30,7 +30,7 @@
     },
     {
         "category": "Job",
-        "header": "Job creation",
+        "name": "Job creation",
         "fields": [
             {
                 "id": "Job_name",
@@ -121,7 +121,7 @@
     },
     {
         "category": "WebApplicationJob",
-        "header": "Web application job creation",
+        "name": "Web application job creation",
         "fields": [
             {
                 "id": "WebApplicationJob_name",
@@ -200,7 +200,7 @@
     },
     {
         "category": "VideoStreamingJob",
-        "header": "Video streaming job creation",
+        "name": "Video streaming job creation",
         "fields": [
             {
                 "id": "VideoStreamingJob_name",
@@ -299,7 +299,7 @@
     },
     {
         "category": "GenAIJob",
-        "header": "Generative AI job creation",
+        "name": "Generative AI job creation",
         "fields": [
             {
                 "id": "GenAIJob_name",

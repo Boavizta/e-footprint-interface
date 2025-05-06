@@ -6,7 +6,7 @@
                  id="item-{{ form_section.category }}">
                 <h2 class="accordion-header {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}">
                     <button class="accordion-button fs-3xl {% if forloop.counter > 1 %}rounded-bottom-2{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ form_section.category }}" aria-expanded="true" aria-controls="collapse_{{ form_section.category }}">
-                        {{ form_section.header }}
+                        {{ form_section.name }}
                     </button>
                 </h2>
                 <div id="collapse_{{ form_section.category }}"
