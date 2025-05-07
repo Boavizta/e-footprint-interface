@@ -408,6 +408,26 @@ input:disabled{
 
 .h5{font-weight: 700;}
 
+
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgb(56, 120, 69);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 102, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 102, 0, 0);
+    }
+}
+
+.highlight-border {
+    border: 3px solid #428e51;
+    border-radius: 5px;
+    transition: border 0.3s ease;
+    animation: pulse-border 0.5s ease-out infinite;
+}
+
 /* CSS class use for Responsive or small screen */
 /*----------------------------------*/
 

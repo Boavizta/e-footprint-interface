@@ -4,11 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.18] - 2025-05-13
+
+### Added
+- On add/edit/delete object, a toast is displayed to inform the user that 
+  the action has been successfully completed. For Add and Edit, related 
+  objects are highlighted in the model canvas.
+
+### Fixed
+- Object name in edit panel remains after clicking on the name field.
+
 ## [0.7.17] - 2025-05-07
 
 ### Changed
 - Simplify server labels but keep more descriptive labels for server type selection.
-- In usage pattern form, for new usage patterns, the field initial_usage_journey_volume isn't set to a default value, the timeseries chart isn't diplayed and submit button is disabled. Once all informations are filled, the chart is displayed and button enabled.
+- In usage pattern form, for new usage patterns, the field initial_usage_journey_volume isn't set to a default value and the timeseries chart isn't diplayed. Once all informations are filled, the chart is displayed.
 - Refactoring: In SCSS file, remove all references to property z-index and use bootstrap class instead. For leaderline, use z-index defined in bootstrap variables.
 
 ### Fixed

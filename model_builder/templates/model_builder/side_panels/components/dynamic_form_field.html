@@ -50,8 +50,12 @@
         </datalist>
     {% elif field.input_type == "str" %}
         <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}"
-               _="on click set my value to ''
+               {% if object_to_edit %}
+                     _="on focusout if my value is empty set my value to '{{ field.default }}'"
+               {% else %}
+                    _="on click set my value to ''
                   on focusout if my value is empty set my value to '{{ field.default }}'"
+               {% endif %}
                required>
     {% elif field.input_type == "input" %}
         <div class="input-group">

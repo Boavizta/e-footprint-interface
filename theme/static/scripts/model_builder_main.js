@@ -23,19 +23,19 @@ function initModelBuilderMain() {
 }
 
 function reverseIconAccordion(objectId){
-    let icon = document.getElementById('icon_accordion_'+objectId);
-    if (icon.classList.contains('chevron-rotate')) {
-        icon.classList.remove('chevron-rotate');
+    let icon = document.getElementById("icon_accordion_"+objectId);
+    if (icon.classList.contains("chevron-rotate")) {
+        icon.classList.remove("chevron-rotate");
     }
     else {
-        icon.classList.add('chevron-rotate');
+        icon.classList.add("chevron-rotate");
     }
     updateLines();
 }
 
 
 function resizeSystemNameHeader() {
-    let systemNameHeader = document.getElementById('SystemNameHeader');
+    let systemNameHeader = document.getElementById("SystemNameHeader");
 
     let span = document.createElement("span");
     span.style.visibility = "hidden";
@@ -47,3 +47,40 @@ function resizeSystemNameHeader() {
     systemNameHeader.style.width = `${span.offsetWidth + 5}px`;
     document.body.removeChild(span);
 }
+
+function highlightObject(modelObjectId){
+    let element = document.getElementById(modelObjectId);
+    if (element) {
+        element.classList.add("highlight-border");
+        setTimeout(() => {
+            element.classList.remove("highlight-border");
+        }, 2000);
+    }
+}
+
+document.body.addEventListener("displayToastAndHighlightObjects", function (event) {
+    let toastElement = document.getElementById("toast-push-notification");
+    let toastBody = document.getElementById("toast-content");
+    let toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastElement);
+
+    let action_type = event.detail["action_type"];
+    let modelObjectName = event.detail["name"];
+    if (action_type === "delete_object"){
+        toastBody.innerHTML = `${modelObjectName} has been deleted!`;
+    }else if( action_type === "edit_object") {
+        toastBody.innerHTML = `${modelObjectName} has been updated!`;
+    }else if( action_type === "add_new_object"){
+        toastBody.innerHTML = `${modelObjectName} has been saved!`;
+    }
+
+    event.detail["ids"].forEach((mirrorObjetWebId, index) => {
+        if(index === 0){
+            document.getElementById(`button-${mirrorObjetWebId}`).scrollIntoView(
+                { behavior: "smooth", block: "center" });
+        }
+        highlightObject(`button-${mirrorObjetWebId}`);
+    })
+
+    toastBootstrap.show();
+});
+
