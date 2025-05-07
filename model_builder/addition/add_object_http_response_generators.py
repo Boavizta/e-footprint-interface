@@ -11,11 +11,19 @@ from model_builder.edition.views_edition import edit_object
 def add_new_usage_journey(request, model_web: ModelWeb):
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, 'UsageJourney')
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+
+    toast_content = {
+        'id': added_obj.web_id,
+        "name": added_obj.name,
+        "actionOnModel": "add_new_object"
+    }
+
     response = render(
         request, "model_builder/object_cards/usage_journey_card.html", {"usage_journey": added_obj})
     response["HX-Trigger-After-Swap"] = json.dumps({
         "updateTopParentLines": {"topParentIds": [added_obj.web_id]},
         "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
+        "highlightObject": toast_content,
     })
 
     return response
@@ -33,7 +41,13 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
     mutable_post.setlist('uj_steps', usage_journey_step_ids)
     request.POST = mutable_post
 
-    return edit_object(request, usage_journey_efootprint_id, model_web)
+    toast_content = {
+        'id': f"{usage_journey_efootprint_id}_{added_obj.efootprint_id}",
+        "name": added_obj.name,
+        "actionOnModel": "add_new_object"
+    }
+
+    return edit_object(request, usage_journey_efootprint_id, model_web, toast_content)
 
 
 def add_new_server(request, model_web: ModelWeb):
@@ -49,8 +63,18 @@ def add_new_server(request, model_web: ModelWeb):
 
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, server_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+
+    toast_content = {
+        'id': added_obj.web_id,
+        "name": added_obj.name,
+        "actionOnModel": "add_new_object"
+    }
+
     response = render(
         request, "model_builder/object_cards/server_card.html", {"server": added_obj})
+    response["HX-Trigger-After-Swap"] = json.dumps({
+        "highlightObject": toast_content
+    })
 
     return response
 
@@ -68,9 +92,17 @@ def add_new_service(request, model_web: ModelWeb):
 
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
+    toast_content = {
+        'id': added_obj.web_id,
+        "name": added_obj.name,
+        "actionOnModel": "add_new_object"
+    }
+
     response = render(request, "model_builder/object_cards/service_card.html",
                       context={"service": added_obj})
-
+    response["HX-Trigger-After-Swap"] = json.dumps({
+        "highlightObject": toast_content
+    })
     return response
 
 
@@ -93,7 +125,16 @@ def add_new_job(request, model_web: ModelWeb):
     mutable_post.setlist('jobs', job_ids)
     request.POST = mutable_post
 
-    return edit_object(request, usage_journey_step_efootprint_id, model_web)
+    toast_content = {
+        "name": added_obj.name,
+        "mirroredCardIds": [
+            f"{mirroredUsageJourneyStep.web_id}_{added_obj.efootprint_id}" for mirroredUsageJourneyStep in
+            usage_journey_step_to_edit.mirrored_cards
+        ],
+        "actionOnModel": "add_new_object"
+    }
+
+    return edit_object(request, usage_journey_step_efootprint_id, model_web, toast_content)
 
 
 def add_new_usage_pattern(request, model_web: ModelWeb):
@@ -107,9 +148,16 @@ def add_new_usage_pattern(request, model_web: ModelWeb):
     response = render(
         request, "model_builder/object_cards/usage_pattern_card.html", {"usage_pattern": added_obj})
 
+    toast_content = {
+        'id': added_obj.web_id,
+        "name": added_obj.name,
+        "actionOnModel": "add_new_object"
+    }
+
     response["HX-Trigger-After-Swap"] = json.dumps({
         "updateTopParentLines": {"topParentIds": [added_obj.web_id]},
         "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
+        "highlightObject": toast_content
     })
 
     return response

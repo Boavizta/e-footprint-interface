@@ -69,6 +69,11 @@ def delete_object(request, object_id):
 
     elements_with_lines_to_remove = []
 
+    toast_content = {
+        "name": web_obj.name,
+        "actionOnModel": "delete_object"
+    }
+
     http_response = HttpResponse(status=204)
 
     if issubclass(obj_type, UsagePattern):
@@ -104,7 +109,8 @@ def delete_object(request, object_id):
             top_parent_ids += partial_top_parent_ids
 
             http_response = generate_http_response_from_edit_html_and_events(
-                response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids)
+                response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
+                toast_content)
     else:
         web_obj.self_delete()
         elements_with_lines_to_remove.append(object_id)
@@ -114,7 +120,8 @@ def delete_object(request, object_id):
             "removeLinesAndUpdateDataAttributes": {
                 "elementIdsOfLinesToRemove": elements_with_lines_to_remove,
                 "dataAttributeUpdates": []
-            }
+            },
+            "highlightObject": toast_content
         })
 
     return http_response

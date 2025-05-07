@@ -83,7 +83,7 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
 
 
 def generate_http_response_from_edit_html_and_events(
-    response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids):
+    response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids, toast_content):
     http_response = HttpResponse(response_html)
 
     http_response["HX-Trigger"] = json.dumps({
@@ -96,7 +96,8 @@ def generate_http_response_from_edit_html_and_events(
     http_response["HX-Trigger-After-Swap"] = json.dumps({
         "updateTopParentLines": {
             "topParentIds": top_parent_ids
-        }
+        },
+        "highlightObject": toast_content
     })
 
     return http_response

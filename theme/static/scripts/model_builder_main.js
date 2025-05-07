@@ -47,3 +47,50 @@ function resizeSystemNameHeader() {
     systemNameHeader.style.width = `${span.offsetWidth + 5}px`;
     document.body.removeChild(span);
 }
+
+function highlightObject(modelObjectId){
+    let element = document.getElementById(modelObjectId);
+    if (element) {
+        element.classList.add('highlight-border');
+        setTimeout(() => {
+            element.classList.remove('highlight-border');
+        }, 2000);
+    }
+}
+
+document.body.addEventListener('highlightObject', function (event) {
+    let toastElement = document.getElementById('toast-push-notification');
+    let toastBody = document.getElementById('toast-content');
+    let toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastElement);
+    let toastMessage;
+    let actionOnModel = event.detail['actionOnModel'];
+
+    let modelObjectName = event.detail['name'];
+
+    if (actionOnModel === 'delete_object'){
+        toastMessage = `${modelObjectName} has been deleted!`;
+    }else{
+         if( actionOnModel === 'edit_object') {
+             toastMessage = `${modelObjectName} has been updated!`;
+         }else if( actionOnModel === 'add_new_object'){
+            toastMessage = `${modelObjectName} has been saved!`;
+        }
+         if(event.detail['mirroredCardIds']){
+            let mirrorObjetWebIds = event.detail['mirroredCardIds'];
+            mirrorObjetWebIds.forEach((mirrorObjetWebId, index) => {
+                if(index === 0){
+                    document.getElementById(`button-${mirrorObjetWebId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                highlightObject(`button-${mirrorObjetWebId}`);
+            })
+        }else{
+            let mirrorObjetsId = event.detail['id'];
+            document.getElementById(mirrorObjetsId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+            highlightObject(mirrorObjetsId);
+        }
+    }
+
+    toastBody.innerHTML = toastMessage;
+    toastBootstrap.show();
+});
+
