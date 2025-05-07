@@ -36,13 +36,16 @@
         "type_object_available": "Available usage journeys"
     },
     "Server": {
-        "label": "Custom server (CPUs)"
+        "label": "Custom server",
+        "more_descriptive_label_for_select_inputs": "Custom server (CPUs)"
     },
     "BoaviztaCloudServer": {
-        "label": "Cloud server (CPUs, for webapps, streaming, etc.)"
+        "label": "Cloud server",
+        "more_descriptive_label_for_select_inputs": "Cloud server (CPUs, for webapps, streaming, etc.)"
     },
     "GPUServer": {
-        "label": "Server for AI & GenAI services (GPUs)"
+        "label": "AI server",
+        "more_descriptive_label_for_select_inputs": "Server for AI & GenAI services (GPUs)"
     },
     "WebApplication": {
         "label": "Web application"

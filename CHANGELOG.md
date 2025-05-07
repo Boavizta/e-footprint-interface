@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.17] - 2025-05-07
+
+### Changed
+- Simplify server labels but keep more descriptive labels for server type selection.
+
 ## [0.7.16] - 2025-05-06
 
 ### Fixed

@@ -43,7 +43,9 @@ def generate_object_creation_structure(
             "id": "type_object_available",
             "label": FORM_TYPE_OBJECT[available_efootprint_class_str]["type_object_available"],
             "options": [
-                {"label": FORM_TYPE_OBJECT[available_class.__name__]["label"],  "value": available_class.__name__}
+                {"label": FORM_TYPE_OBJECT[available_class.__name__].get(
+                    "more_descriptive_label_for_select_inputs", FORM_TYPE_OBJECT[available_class.__name__]["label"]),
+                    "value": available_class.__name__}
                 for available_class in available_efootprint_classes]
         }
         ]
