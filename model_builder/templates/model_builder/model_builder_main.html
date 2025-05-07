@@ -81,7 +81,7 @@
                             </button>
                         </div>
                     </div>
-                    <div id="server-list" class="list-group w-75" style="margin-left:25%;">
+                    <div id="server-list" class="list-group row">
                         {% for server in model_web.servers %}
                         {% include 'model_builder/object_cards/server_card.html' %}
                         {% endfor %}
@@ -91,7 +91,7 @@
         </div>
     </div>
     <div class="col-4 col-xl-3 d-none transition-width pb-3 overflow-y-auto" id="sidePanel"></div>
-    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0" id="panel-result-btn">
+    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3" id="panel-result-btn">
         <div class="w-100 text-center h6 bg-white text-start bg-white rounded-2 reverse-shadow h-100" id="btn-open-panel-result"
             hx-get="/model_builder/result-chart/"
             hx-target="#result-block"
@@ -134,7 +134,7 @@
                 <p><strong role="status">Import errror</strong></p>
                 <p>{{ import_error_message }}</p>
                 <div class="progress mt-3">
-                    <div id="progressBar" class="progress-bar bg-primary" style="width: 100%;"></div>
+                    <div id="progressBar" class="progress-bar bg-primary w-100" style="width: 100%;"></div>
                 </div>
                 <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
             </div>

@@ -1,6 +1,5 @@
 {% load static %}
-<div id="{{ server.web_id }}" class="list-group-item my-3 mb-1 py-2 px-0 model-builder-card"
-     style="cursor: move;">
+<div id="{{ server.web_id }}" class="col-9 offset-3 list-group-item my-3 mb-1 py-2 px-0 model-builder-card cursor">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <div class="accordion-header d-flex align-items-center px-3">
@@ -34,7 +33,7 @@
                  data-bs-parent="#{{ server.web_id }}">
                 <div class="accordion-body text-start">
                     <p class="h7 my-2">Services</p>
-                    <div class="row mx-0 my-0 align-items-center rounded-2" id="{{ server.web_id }}-services" style="z-index: 1000 !important; background-color: #ffffff !important;">
+                    <div class="row mx-0 my-0 align-items-center rounded-2 bg-white" id="{{ server.web_id }}-services">
                         {% for service in server.installed_services %}
                             {%  include 'model_builder/object_cards/service_card.html' with service=service %}
                         {% endfor %}

@@ -1,15 +1,23 @@
 /* CSS Variables*/
 /*----------------------------------*/
 
+$zindex-levels: (
+    n1: -1,
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5
+) !default;
+
 :root {
     --h6-min: 0.8rem;
     --h6-ideal: 1vw;
     --h6-max: 1.5rem;
-
     --h7-min: 0.7rem;
     --h7-ideal: 0.9vw;
     --h7-max: 1.4rem;
-
     --h8-min: 0.6rem;
     --h8-ideal: 0.8vw;
     --h8-max: 1.3rem;
@@ -21,12 +29,9 @@
     --gray-350: #9CA3AF;
     --gray-400 : #6B7280;
     --gray-500 : #4B5563;
-
-
     --dark-blue : #111928;
     --new-primary : #2D4675;
     --new-light : #F4FAFB;
-
     --loading-bar-color : #0d6efd;
     --loading-bar-bg : #e0e0e0;
     --gadrient-color-2 : #017E7E;
@@ -192,7 +197,6 @@ input:disabled{
 
 /*Bootstrap overwrite*/
 .navbar{
-    z-index: 101 !important;
     height: var(--navbar-height);
 }
 
@@ -235,6 +239,10 @@ input:disabled{
     -moz-box-shadow: -5px 0 8px 4px rgba(138,138,138,0.24);
 }
 
+.cursor {
+    cursor: pointer;
+}
+
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
 
@@ -265,8 +273,8 @@ input:disabled{
     animation: none;
 }
 
-.leader-line {
-  z-index: 100;
+.leader-line{
+  z-index: map-get($zindex-levels, 1);
 }
 
 #model-builder-page{
@@ -293,7 +301,6 @@ input:disabled{
 
 #panel-result-btn{
     height: var(--open-result-btn);
-    z-index: 3000 !important;
 }
 
 #btn-open-panel-result{
@@ -372,7 +379,6 @@ input:disabled{
 .chartTimeseries{
     position: fixed;
     height: 70vh !important;
-    z-index: 2000 !important;
     top: 15vh !important;
     border-radius: 15px;
     background-color: #FFFFFF;

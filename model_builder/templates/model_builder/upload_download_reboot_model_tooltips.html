@@ -1,6 +1,6 @@
 {% load static %}
-<div class="row bg-white border border-top-2 border-light justify-content-between px-0 mx-0">
-    <div class="col-auto p-2">
+<div class="d-flex bg-white border border-top-2 border-light justify-content-between px-0 mx-0 z-2">
+    <div class="p-2 flex-grow-1 bg-white text-start z-2">
         <input
             name="name"
             id="SystemNameHeader"
@@ -14,14 +14,14 @@
             hx-swap="none"
         >
     </div>
-    <div class="col-auto p-2">
+    <div class="p-2">
         <div class="row text-end me-4">
             <div class="col-auto">
                 <button hx-get="{% url 'open-import-json-panel' %}"
                         hx-target="#sidePanel"
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
-                        class="nav-link d-flex flex-row gap-2  mx-2 move-panel-open"
+                        class="nav-link d-flex flex-row gap-2 mx-2 move-panel-open"
                         data-bs-toggle="popover"
                         data-bs-trigger="hover focus"
                         data-bs-content="Import a model"
@@ -35,7 +35,7 @@
             <div class="col-auto">
                 <a href="download-json/"
                     target="_blank"
-                    class="nav-link d-flex flex-row gap-2  mx-2"
+                    class="nav-link d-flex flex-row gap-2 mx-2"
                     data-bs-toggle="popover"
                     data-bs-trigger="hover focus"
                     data-bs-content="Export your model"
