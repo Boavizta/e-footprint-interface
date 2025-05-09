@@ -5,6 +5,7 @@ from io import BytesIO
 
 import pandas as pd
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -108,46 +109,10 @@ def upload_json(request):
 @render_exception_modal_if_error
 @time_it
 def result_chart(request):
-    model_web = ModelWeb(request.session)
-    exception = None
-
-    if len(model_web.system.servers) == 0:
-        exception = ValueError(
-            "No impact could be computed because the modeling is incomplete. Please make sure you have at least "
-            "one usage pattern linked to a usage journey with at least one step making a request to a server.")
-    else:
-        usage_journeys_linked_to_usage_pattern_and_without_uj_steps = []
-        for usage_journey in model_web.usage_journeys:
-            if len(usage_journey.usage_patterns) > 0 and len(usage_journey.uj_steps) == 0:
-                usage_journeys_linked_to_usage_pattern_and_without_uj_steps.append(usage_journey)
-
-        if len(usage_journeys_linked_to_usage_pattern_and_without_uj_steps) > 0:
-            exception = ValueError(
-                f"The following usage journey(s) have no usage journey step:  "
-                f"{[uj.name for uj in usage_journeys_linked_to_usage_pattern_and_without_uj_steps]}."
-                f" Please add at least one step in each of the above usage journey(s), so that the model can be "
-                f"computed.\n\n"
-                "(Alternatively, if they are work in progress, you can delete the usage patterns pointing to them: "
-                "in that way the usage journeys will be ignored in the computation.)"
-            )
-
-    if exception is not None:
-        http_response = render_exception_modal(request, exception)
-        return http_response
-
-    model_web.system.after_init()
-    web_explainable_quantities = []
-    for efootprint_object in model_web.flat_efootprint_objs_dict.values():
-        web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
-        web_explainable_quantities += [
-            ExplainableObjectWeb(explainable_object, web_efootprint_object)
-            for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
+    model_web = ModelWeb(request.session, launch_system_computations=True)
 
     http_response = htmx_render(
-        request, "model_builder/result/result_panel.html", context={
-            "model_web": model_web,
-            "web_explainable_quantities": web_explainable_quantities
-        })
+        request, "model_builder/result/result_panel.html", context={"model_web": model_web})
 
     return http_response
 

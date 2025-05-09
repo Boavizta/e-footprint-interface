@@ -68,6 +68,17 @@ window.baseChartConfigByHardwareType = {
     }
 }
 
+function displayLoaderResult() {
+    let loaders = document.querySelectorAll(".spinner-result-chart");
+    let chartElements = document.querySelectorAll(".content-result-chart")
+    chartElements.forEach(chartElement => {
+        chartElement.classList.add("d-none");
+    })
+    loaders.forEach(loader => {
+       loader.classList.remove("d-none");
+    });
+}
+
 function drawResultChart(chartType, resultsTemporalGranularity){
     let chartData = {labels: [], datasets: []}
 

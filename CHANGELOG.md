@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.19] - 2025-05-12
+
+### Changed
+- Change behavior of the result panel to allow its display when side panel 
+  is open. A side panel form submit if the result panel is open now triggers 
+  a recomputation of the model.
+
 ## [0.7.18] - 2025-05-13
 
 ### Added

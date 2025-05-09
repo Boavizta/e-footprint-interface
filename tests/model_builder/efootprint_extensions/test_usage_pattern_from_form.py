@@ -49,7 +49,7 @@ class TestUsagePatternFromForm(unittest.TestCase):
             net_growth_rate_timespan=self.yearly_source
         )
 
-        # Prevent automatic recalculations
+        # Prevent automatic recomputations
         self.usage_pattern.trigger_modeling_updates = False
 
     def test_calculated_attributes(self):

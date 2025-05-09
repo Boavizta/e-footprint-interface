@@ -194,8 +194,8 @@
             },
             "average_carbon_intensity": {
                 "label": "unnamed source from hypothesis",
-                "value": 0.23,
-                "unit": "kilogram / kilowatt_hour",
+                "value": 230,
+                "unit": "gram / kilowatt_hour",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null

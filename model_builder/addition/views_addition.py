@@ -1,3 +1,5 @@
+from django.template.loader import render_to_string
+
 from model_builder.addition.add_object_http_response_generators import add_new_usage_journey, add_new_usage_journey_step, \
     add_new_server, add_new_service, add_new_job, add_new_usage_pattern
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
@@ -25,19 +27,29 @@ def open_create_object_panel(request, object_type):
 
 @render_exception_modal_if_error
 def add_object(request, object_type):
-    model_web = ModelWeb(request.session)
+    recompute_modeling = request.POST.get("recomputation", False)
+    model_web = ModelWeb(request.session, launch_system_computations=recompute_modeling,
+                         set_trigger_modeling_updates_to_false=not recompute_modeling)
+
+    http_response = None
 
     if object_type == "UsageJourneyStep":
-        return add_new_usage_journey_step(request, model_web)
+        http_response =  add_new_usage_journey_step(request, model_web)
     elif object_type == "UsageJourney":
-        return add_new_usage_journey(request, model_web)
+        http_response =  add_new_usage_journey(request, model_web)
     elif object_type == "ServerBase":
-        return add_new_server(request, model_web)
+        http_response =  add_new_server(request, model_web)
     elif object_type == "Service":
-        return add_new_service(request, model_web)
+        http_response =  add_new_service(request, model_web)
     elif object_type == "Job":
-        return add_new_job(request, model_web)
+        http_response =  add_new_job(request, model_web)
     elif object_type == "UsagePatternFromForm":
-        return add_new_usage_pattern(request, model_web)
-    else:
-        return None
+        http_response =  add_new_usage_pattern(request, model_web)
+
+    if recompute_modeling:
+        refresh_content_response = render_to_string(
+            "model_builder/result/result_panel.html", context={"model_web": model_web})
+        http_response.content += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
+                         f"{refresh_content_response}</div>").encode('utf-8')
+
+    return http_response

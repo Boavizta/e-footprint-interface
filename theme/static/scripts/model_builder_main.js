@@ -63,13 +63,13 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     let toastBody = document.getElementById("toast-content");
     let toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastElement);
 
-    let action_type = event.detail["action_type"];
+    let actionType = event.detail["action_type"];
     let modelObjectName = event.detail["name"];
-    if (action_type === "delete_object"){
+    if (actionType === "delete_object"){
         toastBody.innerHTML = `${modelObjectName} has been deleted!`;
-    }else if( action_type === "edit_object") {
+    }else if( actionType === "edit_object") {
         toastBody.innerHTML = `${modelObjectName} has been updated!`;
-    }else if( action_type === "add_new_object"){
+    }else if( actionType === "add_new_object"){
         toastBody.innerHTML = `${modelObjectName} has been saved!`;
     }
 

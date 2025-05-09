@@ -5,14 +5,16 @@ from time import time
 import numpy as np
 import pandas as pd
 from django.contrib.sessions.backends.base import SessionBase
-from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplainableObject, ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplainableObject, \
+    ExplainableHourlyQuantities, ExplainableQuantity
+from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system, json_to_explainable_object
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 from efootprint.constants.units import u
 
 from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
-from model_builder.modeling_objects_web import wrap_efootprint_object
+from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
 from utils import EFOOTPRINT_COUNTRIES
 
 model_web_root = os.path.dirname(os.path.abspath(__file__))
@@ -41,12 +43,37 @@ class ModelWeb:
         start = time()
         self.session = session
         self.system_data = session["system_data"]
+        self.launch_system_computations = launch_system_computations
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
             self.system_data, launch_system_computations, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
         if set_trigger_modeling_updates_to_false:
             self.set_all_trigger_modeling_updates_to_false()
         logger.info(f"ModelWeb object created in {time() - start:.3f} seconds.")
+
+        if launch_system_computations:
+            self.raise_incomplete_modeling_errors()
+
+    def raise_incomplete_modeling_errors(self):
+        if len(self.system.servers) == 0:
+            raise ValueError(
+                "No impact could be computed because the modeling is incomplete. Please make sure you have at least "
+                "one usage pattern linked to a usage journey with at least one step making a request to a server.")
+        else:
+            usage_journeys_linked_to_usage_pattern_and_without_uj_steps = []
+            for usage_journey in self.usage_journeys:
+                if len(usage_journey.usage_patterns) > 0 and len(usage_journey.uj_steps) == 0:
+                    usage_journeys_linked_to_usage_pattern_and_without_uj_steps.append(usage_journey)
+
+            if len(usage_journeys_linked_to_usage_pattern_and_without_uj_steps) > 0:
+                raise ValueError(
+                    f"The following usage journey(s) have no usage journey step:  "
+                    f"{[uj.name for uj in usage_journeys_linked_to_usage_pattern_and_without_uj_steps]}."
+                    f" Please add at least one step in each of the above usage journey(s), so that the model can be "
+                    f"computed.\n\n"
+                    "(Alternatively, if they are work in progress, you can delete the usage patterns pointing to them: "
+                    "in that way the usage journeys will be ignored in the computation.)"
+                )
 
     def set_all_trigger_modeling_updates_to_false(self):
         for efootprint_obj in self.flat_efootprint_objs_dict.values():
@@ -104,6 +131,8 @@ class ModelWeb:
         return efootprint_object
 
     def add_new_efootprint_object_to_system(self, efootprint_object):
+        if self.launch_system_computations:
+            self.raise_incomplete_modeling_errors()
         object_type = efootprint_object.class_as_simple_str
 
         if object_type not in self.session["system_data"]:
@@ -117,6 +146,17 @@ class ModelWeb:
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
 
         return wrap_efootprint_object(efootprint_object, self)
+
+    @property
+    def web_explainable_quantities(self):
+        web_explainable_quantities = []
+        for efootprint_object in self.flat_efootprint_objs_dict.values():
+            web_efootprint_object = self.get_web_object_from_efootprint_id(efootprint_object.id)
+            web_explainable_quantities += [
+                ExplainableObjectWeb(explainable_object, web_efootprint_object)
+                for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
+
+        return web_explainable_quantities
 
     @property
     def storages(self):

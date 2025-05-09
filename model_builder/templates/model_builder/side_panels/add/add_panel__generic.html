@@ -14,7 +14,10 @@
         <button
                 id="btn-submit-form"
                 class="btn btn-primary rounded-pill w-100"
-                onclick="addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption();document.getElementById('sidePanelForm').requestSubmit()"
+                onclick="
+                    addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption();
+                    setRecomputationToTrueIfResultPaneIsOpen();
+                    document.getElementById('sidePanelForm').requestSubmit()"
         >
             Save
         </button>

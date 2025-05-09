@@ -138,4 +138,28 @@ describe("Test - Result panel", () => {
 
     });
 
+    it("Check edition when the result panel is open and model recomputation", () => {
+        let serverTest = "Test-E2E-Server"
+        cy.visit("/model_builder/");
+        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
+        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
+        cy.get('input[type="file"]').selectFile(fileTest);
+        cy.get('button[type="submit"]').click();
+        cy.wait(500);
+        cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('exist').click()
+        cy.get('#btn-open-panel-result').click()
+        cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")
+        cy.get("#Storage_data_replication_factor").type("1000")
+        cy.get('#panel-result-btn').should('have.class', 'result-width')
+        cy.window().then((win) => {
+            cy.spy(win, 'displayLoaderResult').as('displayLoaderResult');
+        });
+        cy.window().then((win) => {
+            cy.spy(win, 'drawBarResultChart').as('drawBarResultChart');
+        });
+        cy.get('#btn-submit-form').click();
+        cy.get('@displayLoaderResult').should('have.been.called');
+        cy.get('@drawBarResultChart').should('have.been.called');
+        cy.get('#panel-result-btn').should('not.have.class', 'result-width')
+    });
 });

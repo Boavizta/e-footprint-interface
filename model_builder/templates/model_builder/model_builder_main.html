@@ -91,8 +91,8 @@
         </div>
     </div>
     <div class="col-4 col-xl-3 d-none transition-width pb-3 overflow-y-auto" id="sidePanel"></div>
-    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3" id="panel-result-btn">
-        <div class="w-100 text-center h6 bg-white text-start bg-white rounded-2 reverse-shadow h-100" id="btn-open-panel-result"
+    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
+        <div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
             hx-get="/model_builder/result-chart/"
             hx-target="#result-block"
             hx-swap="innerHTML"
@@ -110,7 +110,7 @@
                 </div>
             </div>
         </div>
-        <div id="result-block" class="bg-white overflow-y-auto"></div>
+        <div id="result-block" class="bg-transparent overflow-y-auto pt-1"></div>
     </div>
 </div>
 

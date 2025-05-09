@@ -57,6 +57,17 @@ $zindex-levels: (
     --result-panel-opened : calc(100vh - var(--navbar-height) - var(--toolbar-height));
 }
 
+@media (max-width: 1200px) {
+    :root {
+        --result-width: 66vw;
+    }
+}
+@media (min-width: 1201px) {
+    :root {
+        --result-width: 75vw;
+    }
+}
+
 /* CSS class utilities*/
 /*----------------------------------*/
 
@@ -243,6 +254,19 @@ input:disabled{
     cursor: pointer;
 }
 
+.shadow-sm-up {
+  box-shadow: 0 -0.125rem 0.25rem rgba(0, 0, 0, .075) !important;
+}
+
+.shadow-up {
+  box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+.shadow-lg-up {
+  box-shadow: 0 -1rem 3rem rgba(0, 0, 0, .175) !important;
+}
+
+
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
 
@@ -305,6 +329,10 @@ input:disabled{
 
 #btn-open-panel-result{
     cursor: pointer;
+}
+
+.result-width{
+    width: var(--result-width);
 }
 
 #sidePanel .accordion-panel .accordion-button{

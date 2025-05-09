@@ -1,12 +1,13 @@
 import json
 
+from django.http import QueryDict
 from django.shortcuts import render
 
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import (create_efootprint_obj_from_post_data,
-                                                             render_exception_modal_if_error)
+                                                             render_exception_modal_if_error, edit_object_in_system)
 
 
 def add_new_usage_journey(request, model_web: ModelWeb):
@@ -15,6 +16,7 @@ def add_new_usage_journey(request, model_web: ModelWeb):
 
     response = render(
         request, "model_builder/object_cards/usage_journey_card.html", {"usage_journey": added_obj})
+
     response["HX-Trigger-After-Swap"] = json.dumps({
         "updateTopParentLines": {"topParentIds": [added_obj.web_id]},
         "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
@@ -132,10 +134,14 @@ def add_new_job(request, model_web: ModelWeb):
 def add_new_usage_pattern(request, model_web: ModelWeb):
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, "UsagePatternFromForm")
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-    new_efootprint_obj.to_json()
-    system_id = next(iter(request.session["system_data"]["System"].keys()))
-    request.session["system_data"]["System"][system_id]["usage_patterns"].append(new_efootprint_obj.id)
-    request.session.modified = True
+
+    mutable_post = QueryDict(mutable=True)
+    mutable_post["name"] = model_web.system.name
+    usage_patterns_ids = [usage_pattern.efootprint_id for usage_pattern in model_web.system.usage_patterns]
+    usage_patterns_ids.append(added_obj.efootprint_id)
+    mutable_post.setlist("usage_patterns", usage_patterns_ids)
+    request.POST = mutable_post
+    edit_object_in_system(request.POST, model_web.system)
 
     response = render(
         request, "model_builder/object_cards/usage_pattern_card.html", {"usage_pattern": added_obj})

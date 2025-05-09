@@ -87,7 +87,7 @@ class IntegrationTest(TestModelingBase):
 
         self.assertEqual(job_request.session["system_data"], self.system_data)
 
-    @patch("model_builder.views.render_exception_modal")
+    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_raise_error_if_users_tries_to_see_results_with_incomplete_modeling(self, mock_exception_modal):
         logger.info("Creating user journey")
         post_data = QueryDict(mutable=True)

@@ -5,6 +5,13 @@ function displayPanelResult(){
     panel.style.transition = "height 0.2s ease-in-out";
     panel.style.height = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
     resultDiv.style.height = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
+
+    if(document.getElementById("sidePanel").classList.contains("d-none")){
+        panel.classList.add("w-100");
+    }else{
+        panel.classList.remove("w-100");
+        panel.classList.add("result-width");
+    }
     btn.style.display = "none";
 }
 
@@ -17,6 +24,11 @@ function hidePanelResult(){
     btn.style.display = "block";
     resultDiv.innerHTML = "";
     resultDiv.style.height = "0px";
+    if(document.getElementById("sidePanel").classList.contains("d-none")){
+        resultDiv.classList.remove("w-100");
+    }else{
+        resultDiv.classList.remove("result-width");
+    }
 }
 
 function initHammer() {
