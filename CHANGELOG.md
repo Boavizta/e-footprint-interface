@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.18] - 2025-05-09
+
+### Add
+- On add/edit/delete object, a toast is displayed to inform the user that 
+  the action has been successfully completed. For Add and Edit, related 
+  objects are highlighted in the model canvas.
+
+### Fixed
+- Object name in edit panel remains after clicking on the name field.
+
 ## [0.7.17] - 2025-05-07
 
 ### Changed
