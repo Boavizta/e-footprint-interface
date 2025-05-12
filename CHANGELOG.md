@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Simplify server labels but keep more descriptive labels for server type selection.
-- In usage pattern form, for new usage patterns, the field initial_usage_journey_volume isn't set to a default value, the timeseries chart isn't diplayed and submit button is disabled. Once all informations are filled, the chart is displayed and button enabled.
+- In usage pattern form, for new usage patterns, the field initial_usage_journey_volume isn't set to a default value and the timeseries chart isn't diplayed. Once all informations are filled, the chart is displayed.
 - Refactoring: In SCSS file, remove all references to property z-index and use bootstrap class instead. For leaderline, use z-index defined in bootstrap variables.
 
 ### Fixed
