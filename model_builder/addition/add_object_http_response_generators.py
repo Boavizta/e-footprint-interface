@@ -40,8 +40,9 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
     response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
         compute_edit_object_html_and_event_response(request.POST, usage_journey_to_edit))
 
+    # There will always be only one mirrored card for a newly created usage journey step
     toast_and_highlight_data = {
-        "ids": [mirrored_card.web_id for mirrored_card in added_obj.mirrored_cards], "name": added_obj.name,
+        "ids": [added_obj.mirrored_cards[0].web_id], "name": added_obj.name,
         "action_type": "add_new_object"
     }
 

@@ -406,6 +406,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "UsagePattern": UsagePatternWeb,
     "UsagePatternFromForm": UsagePatternWeb,
     "Job": JobWeb,
+    "GPUJob": JobWeb,
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
     "WebApplicationJob": JobWeb,
