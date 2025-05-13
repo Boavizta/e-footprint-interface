@@ -23,19 +23,19 @@ function initModelBuilderMain() {
 }
 
 function reverseIconAccordion(objectId){
-    let icon = document.getElementById('icon_accordion_'+objectId);
-    if (icon.classList.contains('chevron-rotate')) {
-        icon.classList.remove('chevron-rotate');
+    let icon = document.getElementById("icon_accordion_"+objectId);
+    if (icon.classList.contains("chevron-rotate")) {
+        icon.classList.remove("chevron-rotate");
     }
     else {
-        icon.classList.add('chevron-rotate');
+        icon.classList.add("chevron-rotate");
     }
     updateLines();
 }
 
 
 function resizeSystemNameHeader() {
-    let systemNameHeader = document.getElementById('SystemNameHeader');
+    let systemNameHeader = document.getElementById("SystemNameHeader");
 
     let span = document.createElement("span");
     span.style.visibility = "hidden";
@@ -51,42 +51,39 @@ function resizeSystemNameHeader() {
 function highlightObject(modelObjectId){
     let element = document.getElementById(modelObjectId);
     if (element) {
-        element.classList.add('highlight-border');
+        element.classList.add("highlight-border");
         setTimeout(() => {
-            element.classList.remove('highlight-border');
+            element.classList.remove("highlight-border");
         }, 2000);
     }
 }
 
-document.body.addEventListener('highlightObject', function (event) {
-    let toastElement = document.getElementById('toast-push-notification');
-    let toastBody = document.getElementById('toast-content');
+document.body.addEventListener("displayToastAndHighlightObjects", function (event) {
+    let toastElement = document.getElementById("toast-push-notification");
+    let toastBody = document.getElementById("toast-content");
     let toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastElement);
     let toastMessage;
-    let actionOnModel = event.detail['actionOnModel'];
+    let action_type = event.detail["action_type"];
 
-    let modelObjectName = event.detail['name'];
+    let modelObjectName = event.detail["name"];
 
-    if (actionOnModel === 'delete_object'){
+    if (action_type === "delete_object"){
         toastMessage = `${modelObjectName} has been deleted!`;
     }else{
-         if( actionOnModel === 'edit_object') {
+         if( action_type === "edit_object") {
              toastMessage = `${modelObjectName} has been updated!`;
-         }else if( actionOnModel === 'add_new_object'){
+         }else if( action_type === "add_new_object"){
             toastMessage = `${modelObjectName} has been saved!`;
         }
-         if(event.detail['mirroredCardIds']){
-            let mirrorObjetWebIds = event.detail['mirroredCardIds'];
-            mirrorObjetWebIds.forEach((mirrorObjetWebId, index) => {
+         if(event.detail["ids"]){
+            let webObjectIds = event.detail["ids"];
+            webObjectIds.forEach((mirrorObjetWebId, index) => {
                 if(index === 0){
-                    document.getElementById(`button-${mirrorObjetWebId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    document.getElementById(`button-${mirrorObjetWebId}`).scrollIntoView(
+                        { behavior: "smooth", block: "center" });
                 }
                 highlightObject(`button-${mirrorObjetWebId}`);
             })
-        }else{
-            let mirrorObjetsId = event.detail['id'];
-            document.getElementById(mirrorObjetsId).scrollIntoView({ behavior: 'smooth', block: 'center' });
-            highlightObject(mirrorObjetsId);
         }
     }
 

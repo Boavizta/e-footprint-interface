@@ -41,7 +41,7 @@ def open_edit_object_panel(request, object_id):
 
 
 @render_exception_modal_if_error
-def edit_object(request, object_id, model_web=None, toast_content=None):
+def edit_object(request, object_id, model_web=None):
     if model_web is None:
         model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
@@ -52,15 +52,15 @@ def edit_object(request, object_id, model_web=None, toast_content=None):
     response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
         compute_edit_object_html_and_event_response(request.POST, obj_to_edit))
 
-    if toast_content is None:
-        toast_content = {
-            "name": obj_to_edit.name,
-            "mirroredCardIds": [mirrored_card.web_id for mirrored_card in obj_to_edit.mirrored_cards],
-            "actionOnModel": "edit_object"
-        }
+    toast_and_highlight_data = {
+        "ids": [mirrored_card.web_id for mirrored_card in obj_to_edit.mirrored_cards],
+        "name": obj_to_edit.name,
+        "action_type": "edit_object"
+    }
 
     return generate_http_response_from_edit_html_and_events(
-        response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids, toast_content)
+        response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
+        toast_and_highlight_data)
 
 
 def save_model_name(request):
