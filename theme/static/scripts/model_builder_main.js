@@ -84,4 +84,3 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
 
     toastBootstrap.show();
 });
-

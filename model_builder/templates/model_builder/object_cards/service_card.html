@@ -1,13 +1,15 @@
 <div id="{{ service.web_id }}" class="my-2">
     <button
     id="button-{{ service.web_id }}"
-    class="btn btn-white text-start"
+    class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative"
     hx-get="/model_builder/open-edit-object-panel/{{ service.efootprint_id }}/"
     hx-target="#sidePanel"
     hx-trigger="click"
     hx-swap="innerHTML"
     hx-disabled-elt="button"
+    _="on mouseover remove .d-none from #edit-icon-{{ service.web_id }}
+    on mouseout add .d-none to #edit-icon-{{ service.web_id }}"
     >
-        <p class="{{ service.class_title_style }} mb-0">{{ service.name }}</p>
+        {% include 'model_builder/components/button_card_header.html' with object_card=service %}
     </button>
 </div>

@@ -12,15 +12,17 @@
                         </svg>
                 </button>
                 <button id="button-{{ usage_journey.web_id }}"
-                        class="btn btn-white ms-1 w-100 text-start"
+                        class="btn btn-white ms-1 w-100 text-start d-flex flex-row justify-content-between align-items-center text-break position-relative"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ usage_journey.efootprint_id }}/"
                         hx-target="#sidePanel"
                         hx-trigger="click"
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
+                        _="on mouseover remove .d-none from #edit-icon-{{ usage_journey.web_id }}
+                        on mouseout add .d-none to #edit-icon-{{ usage_journey.web_id }}"
                 >
-                    <p class="{{ usage_journey.class_title_style }} mb-0">{{ usage_journey.name }}</p>
+                    {% include 'model_builder/components/button_card_header.html' with object_card=usage_journey %}
                 </button>
             </div>
             <div id="flush-{{ usage_journey.web_id }}" class="accordion-collapse show accordion-all" data-bs-parent="#{{ usage_journey.web_id }}">

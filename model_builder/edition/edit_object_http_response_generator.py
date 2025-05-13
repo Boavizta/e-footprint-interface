@@ -24,9 +24,10 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
 
     response_html = ""
     for mirrored_card in accordion_children_before_edit.keys():
-        response_html += (f"<div hx-swap-oob='innerHTML:#button-{mirrored_card.web_id}'>"
-                          f"<p class='{mirrored_card.class_title_style} mb-0'>{mirrored_card.name}</p>"
-                          f"</div>")
+        response_html += (
+            f"<div hx-swap-oob='innerHTML:#button-{mirrored_card.web_id}'>"
+            f"  {render_to_string("model_builder/components/button_card_header.html",{'object_card':mirrored_card})}"
+            f"</div>")
         added_accordion_children = [acc_child for acc_child in accordion_children_after_edit[mirrored_card]
                                     if acc_child not in accordion_children_before_edit[mirrored_card]]
 
