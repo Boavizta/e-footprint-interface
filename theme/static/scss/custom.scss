@@ -267,13 +267,10 @@ input:disabled{
   box-shadow: 0 -1rem 3rem rgba(0, 0, 0, .175) !important;
 }
 
-.custom-ms-3 {
-    margin-left: calc(1rem + 16px);
+.start-95 {
+  left: 95% !important;
 }
 
-.custom-ms-4 {
-    margin-left: calc(1rem + 20px);
-}
 
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
@@ -523,6 +520,14 @@ input:disabled{
         width: 50%;
         left: 17%;
     }
+
+    .custom-ms-3 {
+        margin-left: 0;
+    }
+
+    .custom-ms-4 {
+        margin-left: 4px;
+    }
 }
 
 @media (min-width: 1201px) {
@@ -557,6 +562,14 @@ input:disabled{
 
     .flex-width{
         width: 50%;
+    }
+
+    .custom-ms-3 {
+        margin-left: calc(1rem + 16px);
+    }
+
+    .custom-ms-4 {
+        margin-left: calc(1rem + 20px);
     }
 }
 

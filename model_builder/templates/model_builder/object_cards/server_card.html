@@ -17,15 +17,17 @@
                         </svg>
                 </button>
                 <button id="button-{{ server.web_id }}"
-                        class="btn btn-white ms-1 w-100 text-start"
+                        class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between w-100 text-break position-relative"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ server.efootprint_id }}/"
                         hx-target="#sidePanel"
                         hx-trigger="click"
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
+                        _="on mouseover remove .d-none from #edit-icon-{{ server.web_id }}
+                        on mouseout add .d-none to #edit-icon-{{ server.web_id }}"
                 >
-                    <p class="{{ server.class_title_style }} mb-0">{{ server.name}}</p>
+                    {% include 'model_builder/components/button_card_header.html' with object_card=server %}
                 </button>
             </div>
             <div id="flush-{{ server.web_id }}"
@@ -38,7 +40,7 @@
                             {%  include 'model_builder/object_cards/service_card.html' with service=service %}
                         {% endfor %}
                     </div>
-                    <button class="btn btn-white text-start p-0 h8 dotted-border h-100 w-100 rounded-2 p-2"
+                    <button class="btn btn-white text-start p-0 h8 dotted-border h-100 w-100 rounded-2 p-2  d-flex flex-row align-items-center"
                             hx-get="/model_builder/open-create-object-panel/Service/"
                             hx-target="#sidePanel"
                             hx-trigger="click"
@@ -46,7 +48,7 @@
                             hx-disabled-elt="button"
                             hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ server.efootprint_id }}"}'
                     >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-2"  width="16px" height="16px" alt="add icon" />
+                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-2 d-none d-xl-flex"  width="16px" height="16px" alt="add icon" />
                         Install service
                     </button>
                 </div>
