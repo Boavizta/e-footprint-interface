@@ -84,3 +84,46 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     toastBootstrap.show();
 });
 
+function displayEditIcon(modelObjectId) {
+    let textElement = document.querySelector("#button-" + modelObjectId + " p");
+    let editIcon = document.querySelector("#button-" + modelObjectId + " svg");
+
+    if (!textElement) return;
+
+    let previousHeight = textElement.offsetHeight;
+
+    if (editIcon) {
+        editIcon.classList.remove("d-none");
+    }
+
+    shave(textElement, previousHeight)
+}
+
+function hideEditIcon(modelObjectId) {
+    let textElement = document.querySelector("#button-" + modelObjectId + " p");
+    let editIcon = document.querySelector("#button-" + modelObjectId + " svg");
+
+    if (editIcon) {
+        editIcon.classList.add("d-none");
+    }
+
+    //replace ... with the full text
+    //check if the textElement has a span with class js-shave
+    //if it does, replace the textElement with the full text
+
+    if (textElement) {
+        let textElement = document.querySelector("#button-" + modelObjectId + " p");
+        let shavedSpanChar = textElement.querySelector(".js-shave-char");
+        let shavedSpan = textElement.querySelector(".js-shave");
+
+        if (shavedSpan) {
+            let shavedSpanContent = shavedSpan.textContent;
+            shavedSpanChar.remove()
+            shavedSpan.remove()
+            textElement.innerHTML = textElement.textContent+" "+shavedSpanContent
+        }
+
+    }
+
+
+}
