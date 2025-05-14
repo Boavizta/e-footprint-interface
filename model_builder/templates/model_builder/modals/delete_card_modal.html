@@ -16,7 +16,7 @@
                         hx-get="/model_builder/delete-object/{{ obj.efootprint_id }}/"
                         script="on htmx:afterRequest
                                 {% if remove_card_with_hyperscript %}remove #{{ obj.efootprint_id }} then updateLines() then {% endif %}"
-                        hx-on::after-request="dropModal('model-builder-modal');"
+                        hx-on::after-request="dropModal('model-builder-modal');closeAndEmptySidePanel();"
                         hx-disabled-elt="button"
                 >Yes, delete</button>
                 <button type="button" class="btn btn-white border border-1 border-body-tertiary rounded-2 px-4 py-3 mb-3" data-bs-dismiss="modal" onclick="dropModal('model-builder-modal')">No, go back</button>
@@ -25,6 +25,5 @@
     </div>
 </div>
 <script>
-    closeAndEmptySidePanel();
     hidePanelResult();
 </script>
