@@ -490,6 +490,7 @@
                 "tooltip": false,
                 "input_type": "datalist",
                 "selected": "ent1-s",
+                "default": "ent1-s",
                 "options": null
             },
             {

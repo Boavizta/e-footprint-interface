@@ -200,6 +200,7 @@
                 "tooltip": false,
                 "input_type": "datalist",
                 "selected": "year",
+                "default": "year",
                 "options": null
             }
         ],

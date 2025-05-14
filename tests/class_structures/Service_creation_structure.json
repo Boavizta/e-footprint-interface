@@ -198,6 +198,7 @@
                 "tooltip": false,
                 "input_type": "datalist",
                 "selected": "open-mistral-7b",
+                "default": "open-mistral-7b",
                 "options": null
             }
         ],

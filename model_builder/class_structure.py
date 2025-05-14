@@ -160,6 +160,7 @@ def generate_dynamic_form(
                 structure_field.update({
                     "input_type": "datalist",
                     "selected": default_values[attr_name].value,
+                    "default": default_values[attr_name].value,
                     "options": None
                 })
                 dynamic_lists.append(

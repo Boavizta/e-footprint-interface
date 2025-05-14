@@ -43,6 +43,12 @@
                 id="{{ field.id }}"
                 name="{{ field.id }}"
                 {% if field.selected %}value="{{ field.selected }}"{% endif %}
+                {% if object_to_edit %}
+                     _="on focusout if my value is empty set my value to '{{ field.default }}'"
+               {% else %}
+                    _="on click set my value to ''
+                  on focusout if my value is empty set my value to '{{ field.default }}'"
+               {% endif %}
                 required
         >
         <datalist id="datalist_{{ field.id }}">
