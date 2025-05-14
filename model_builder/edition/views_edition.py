@@ -44,8 +44,7 @@ def open_edit_object_panel(request, object_id):
 @render_exception_modal_if_error
 def edit_object(request, object_id):
     recompute_modeling = request.POST.get("recomputation", False)
-    model_web = ModelWeb(request.session, launch_system_computations=recompute_modeling,
-                         set_trigger_modeling_updates_to_false=not recompute_modeling)
+    model_web = ModelWeb(request.session, launch_system_computations_and_make_modeling_dynamic=recompute_modeling)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
     if issubclass(obj_to_edit.efootprint_class, ServerBase):
         storage_data = json.loads(request.POST.get("storage_form_data"))

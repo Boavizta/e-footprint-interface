@@ -109,7 +109,7 @@ def upload_json(request):
 @render_exception_modal_if_error
 @time_it
 def result_chart(request):
-    model_web = ModelWeb(request.session, launch_system_computations=True)
+    model_web = ModelWeb(request.session, launch_system_computations_and_make_modeling_dynamic=True)
 
     http_response = htmx_render(
         request, "model_builder/result/result_panel.html", context={"model_web": model_web})

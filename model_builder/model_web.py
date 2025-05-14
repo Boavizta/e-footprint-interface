@@ -39,19 +39,20 @@ ATTRIBUTES_TO_SKIP_IN_FORMS = [
 
 class ModelWeb:
     def __init__(
-        self, session: SessionBase, launch_system_computations=False, set_trigger_modeling_updates_to_false=True):
+        self, session: SessionBase, launch_system_computations_and_make_modeling_dynamic=False):
         start = time()
         self.session = session
         self.system_data = session["system_data"]
-        self.launch_system_computations = launch_system_computations
+        self.launch_system_computations_and_make_modeling_dynamic = launch_system_computations_and_make_modeling_dynamic
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
-            self.system_data, launch_system_computations, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+            self.system_data, launch_system_computations_and_make_modeling_dynamic,
+            efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
-        if set_trigger_modeling_updates_to_false:
+        if not self.launch_system_computations_and_make_modeling_dynamic:
             self.set_all_trigger_modeling_updates_to_false()
         logger.info(f"ModelWeb object created in {time() - start:.3f} seconds.")
 
-        if launch_system_computations:
+        if launch_system_computations_and_make_modeling_dynamic:
             self.raise_incomplete_modeling_errors()
 
     def raise_incomplete_modeling_errors(self):
@@ -131,7 +132,7 @@ class ModelWeb:
         return efootprint_object
 
     def add_new_efootprint_object_to_system(self, efootprint_object):
-        if self.launch_system_computations:
+        if self.launch_system_computations_and_make_modeling_dynamic:
             self.raise_incomplete_modeling_errors()
         object_type = efootprint_object.class_as_simple_str
 

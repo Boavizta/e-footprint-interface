@@ -90,7 +90,7 @@ class ModelingObjectWeb:
 
         self._modeling_obj.__setattr__(key, value, check_input_validity)
 
-        if self.model_web.launch_system_computations:
+        if self.model_web.launch_system_computations_and_make_modeling_dynamic:
             self.model_web.raise_incomplete_modeling_errors()
 
     def get_efootprint_value(self, key):
