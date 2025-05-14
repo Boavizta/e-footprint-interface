@@ -1,8 +1,8 @@
-<div id="{{ job.web_id }}" class="col-12 p-2 leader-line-object"
+<div id="{{ job.web_id }}" class="w-85 ms-15 px-0 py-2 leader-line-object"
     data-link-to="{{ job.links_to }}" data-line-opt="{{ job.data_line_opt }}">
     <button
             id="button-{{ job.web_id }}"
-            class="btn btn-white text-end w-100"
+            class="btn btn-white text-end w-100 rounded-start-2 rounded-end-0 border-0"
             hx-get="/model_builder/open-edit-object-panel/{{ job.efootprint_id }}/"
             hx-target="#sidePanel"
             hx-trigger="click"

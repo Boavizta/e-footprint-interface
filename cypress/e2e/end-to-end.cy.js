@@ -49,8 +49,7 @@ describe('Test de la page d\'accueil', () => {
         // User journeys must be visible then add user journey steps to UJ 1
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
         cy.get('div[id$="'+ujNameTwo.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
-        cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]')
-          .contains('button', 'Add usage journey step')
+        cy.get('div[id^="add-step-to"][id$="'+ujNameOne.replaceAll(' ', '-')+'"]')
           .click();
         cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
         // Erase all the text in the input with id name
@@ -61,8 +60,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#sidePanel').should('exist').find('div').should('not.exist');
         // @ts-ignore
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
-        cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]')
-          .contains('button', 'Add usage journey step')
+        cy.get('div[id^="add-step-to"][id$="'+ujNameOne.replaceAll(' ', '-')+'"]')
           .click();
         cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
         cy.get('#UsageJourneyStep_name').clear();
@@ -112,7 +110,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobTwo.replaceAll(' ', '-')+'/"]').should('be.visible');
 
         // Add usagePattern
-        cy.get('button').contains('Add usage pattern').click();
+        cy.get('#add_usage_pattern').click();
         cy.wait(500);
         cy.get('#sidePanel').should('be.visible');
         cy.get('#UsagePatternFromForm_name').clear();

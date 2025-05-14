@@ -24,14 +24,14 @@ let dictLeaderLineOption = {
     },
     "step-dot-line": {
         path: 'straight',
-        color: "#003235",
-        size: 3,
+        color: "#9CA3AF",
+        size: 2,
         startPlug: 'behind',
         endPlug: 'behind',
         startSocket: "bottom",
         endSocket: "top",
         showEffectName: 'fade',
-        dash: { animation: false, len: 3, gap: 3 }
+        dash: { animation: false, len: 2, gap: 4 }
     }
 };
 
@@ -109,7 +109,7 @@ function updateOrCreateLines(element) {
                 drawLines(element);
             }
             // Handle usage journey step circles
-            const svgLeaderLineChildren = element.querySelectorAll('svg.leader-line-object');
+            const svgLeaderLineChildren = element.querySelectorAll('img.leader-line-object');
             svgLeaderLineChildren.forEach(child => drawLines(child));
         }
         else {

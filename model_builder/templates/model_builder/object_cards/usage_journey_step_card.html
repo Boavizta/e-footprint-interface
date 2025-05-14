@@ -1,27 +1,19 @@
 {% load static %}
-<div id="{{ usage_journey_step.web_id }}" class="leader-line-object row mx-0 my-3 border border-2 border-white"
+<div id="{{ usage_journey_step.web_id }}" class="leader-line-object d-flex my-3 custom-ms-3 border border-0 border-white align-items-start"
      data-link-to="{{ usage_journey_step.links_to }}"
      data-line-opt="{{ usage_journey_step.data_line_opt }}">
-    <div class="col-2 p-0 justify-content-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-circle leader-line-object"
-                width="20" height="20"
-                fill="none"
-                data-link-to="{{ usage_journey_step.icon_links_to }}"
-                data-line-opt="{{ usage_journey_step.icon_leaderline_style }}"
-                id="icon-{{ usage_journey_step.web_id }}"
-                stroke-width="1.5"
-                stroke="#000000"
-             viewBox="-2 -2 22 22"
-        >
-
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-        </svg>
-    </div>
-    <div class="col-10 p-0">
+    <div class="w-100 p-0">
         <div class="accordion accordion-flush">
             <div class="accordion-item">
-                <div class="accordion-header p-0 d-flex align-items-center text-start pe-1">
-                    <button type="button" class="chevron-btn btn btn-link p-0 p-2 m-2 text-black"
+                <div class="accordion-header p-0 d-flex align-self-start">
+                    <img src="{% static 'images/step-circle.svg' %}"
+                         data-link-to="{{ usage_journey_step.icon_links_to }}"
+                         data-line-opt="{{ usage_journey_step.icon_leaderline_style }}"
+                         id="icon-{{ usage_journey_step.web_id }}"
+                         width="16" height="16"
+                         class="align-self-center leader-line-object mx-1"
+                        alt="icon line step">
+                    <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0"
                             data-bs-toggle="collapse"
                             data-bs-target="#flush-{{ usage_journey_step.web_id }}"
                             onclick="reverseIconAccordion('{{ usage_journey_step.web_id }}')"
@@ -36,14 +28,14 @@
                         </svg>
                     </button>
                     <button id="button-{{ usage_journey_step.web_id }}"
-                            class="btn btn-white p-2 text-start w-100"
+                            class="btn btn-white text-start w-100"
                             type="button"
                             hx-get="/model_builder/open-edit-object-panel/{{ usage_journey_step.efootprint_id }}"
                             hx-target="#sidePanel"
                             hx-trigger="click"
                             hx-swap="innerHTML"
                             hx-disabled-elt="button">
-                        <p class="{{ usage_journey_step.class_title_style }} mb-0">
+                        <p class="{{ usage_journey_step.class_title_style }} p-0 mb-0">
                             {{ usage_journey_step.name }}
                         </p>
                     </button>
@@ -51,21 +43,21 @@
                 <div id="flush-{{ usage_journey_step.web_id }}"
                      class="accordion-collapse collapse {% if usage_journey_step.jobs|length == 0 %}show{% endif %}"
                      data-bs-parent="#{{ usage_journey_step.web_id }}">
-                    <div class="accordion-body p-0 row m-0 text-end">
+                    <div class="accordion-body w-100 pe-0 m-0 d-flex flex-column text-end">
                         {% for job in usage_journey_step.jobs %}
                             {% include 'model_builder/object_cards/job_card.html' with job=job %}
                         {% endfor %}
-                        <div class="col-12 p-2">
-                            <button class="btn btn-white dotted-border text-center p-2 me-2 h8 flex-width"
+                        <div class="ms-50 align-items-end p-2">
+                            <button class="btn btn-white dotted-border text-center p-2 me-2 h8 w-100 d-flex flew-row text-addition justify-content-center"
                                     hx-get="/model_builder/open-create-object-panel/Job/"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"
                                     hx-swap="innerHTML"
                                     hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ usage_journey_step.efootprint_id }}"}'
                                     hx-disabled-elt="button">
-                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-3"
+                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-3 my-auto"
                                      width="14px" height="14px" alt="add icon"/>
-                                Add new job
+                                <p class="mb-0">Add new job</p>
                             </button>
                         </div>
                     </div>

@@ -54,7 +54,8 @@ function highlightObject(modelObjectId){
         element.classList.add("highlight-border");
         setTimeout(() => {
             element.classList.remove("highlight-border");
-        }, 2000);
+            updateLines();
+        }, 1000);
     }
 }
 

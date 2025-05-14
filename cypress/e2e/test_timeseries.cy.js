@@ -15,12 +15,12 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#UsageJourney_name').type(ujName);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
-        cy.get('div[id$="'+ujName.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
+        cy.get('div[id$="' + ujName.replaceAll(' ', '-') + '"]').should('have.class', 'leader-line-object')
 
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get("#chartTimeseries").should('have.class', 'd-none');
-        cy.get('#timeSeriesChart').then(($canvas) =>{
+        cy.get('#timeSeriesChart').then(($canvas) => {
             let canvas = $canvas[0]
             let ctx = canvas.getContext('2d');
             expect(ctx).not.to.be.null;
@@ -38,16 +38,13 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#initial_usage_journey_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
 
+        cy.wait(500);
+
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#timeSeriesChart').then(($canvas) =>{
-            let canvas = $canvas[0]
-            let ctx = canvas.getContext('2d');
-            expect(ctx).not.to.be.null;
-        });
         cy.get('#UsagePatternFromForm_name').type(upNameTwo);
         cy.get('#start_date').click();
-        cy.get('input[class="numInput cur-year"]').type('2027');
+        cy.get('input[class="numInput cur-year"]').should('exist').type('2027');
         cy.get('span[aria-label="January 1, 2027"]').click()
         cy.get('#modeling_duration_value').click();
         cy.get('#modeling_duration_value').invoke('val', '5').trigger('change');
@@ -55,13 +52,17 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#net_growth_rate_in_percentage').invoke('val', '15').trigger('change');
         cy.get('#net_growth_rate_timespan').select('month');
         cy.get('#initial_usage_journey_volume').click().type('1000');
-
+        cy.get('#timeSeriesChart').then(($canvas) => {
+            let canvas = $canvas[0]
+            let ctx = canvas.getContext('2d');
+            expect(ctx).not.to.be.null;
+        });
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
         cy.wait(500)
-        cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible').click();
+        cy.get('button[id^="button-id-"][id$="' + upNameOne.replaceAll(' ', '-') + '"]').should('be.visible').click();
         cy.get("#chartTimeseries").should("have.class", "d-block")
-        cy.get('#timeSeriesChart').then(($canvas) =>{
+        cy.get('#timeSeriesChart').then(($canvas) => {
             let canvas = $canvas[0]
             let ctx = canvas.getContext('2d');
             expect(ctx).not.to.be.null;

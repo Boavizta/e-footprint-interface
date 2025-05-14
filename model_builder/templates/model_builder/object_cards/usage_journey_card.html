@@ -1,11 +1,11 @@
 {% load static %}
 <div id="{{ usage_journey.web_id }}"
-     class="leader-line-object card list-group-item my-3 mb-1 py-2 px-0 model-builder-card cursor"
+     class="leader-line-object card list-group-item mt-0 mb-3 py-2 px-0 model-builder-card cursor"
      data-link-to="{{ usage_journey.links_to }}" data-line-opt="{{ usage_journey.data_line_opt }}">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
-            <div class="accordion-header px-3 d-flex align-items-center">
-                <button type="button" class="chevron-btn btn btn-link p-2 me-2 text-black"
+            <div class="accordion-header p-0 d-flex align-items-center">
+                <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0"
                         data-bs-toggle="collapse" data-bs-target="#flush-{{ usage_journey.web_id }}" onclick="reverseIconAccordion('{{ usage_journey.web_id }}')" aria-expanded="true" aria-controls="collapseOne">
                         <svg id="icon_accordion_{{ usage_journey.web_id }}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3" class="bi bi-chevron-right chevron-rotate" viewBox="0 0 16 16">
                             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
@@ -21,7 +21,6 @@
                         hx-disabled-elt="button"
                 >
                     <p class="{{ usage_journey.class_title_style }} mb-0">{{ usage_journey.name }}</p>
-
                 </button>
             </div>
             <div id="flush-{{ usage_journey.web_id }}" class="accordion-collapse show accordion-all" data-bs-parent="#{{ usage_journey.web_id }}">
@@ -29,30 +28,20 @@
                     {% for usage_journey_step in usage_journey.uj_steps %}
                         {% include 'model_builder/object_cards/usage_journey_step_card.html' %}
                     {% endfor %}
-                    <div class="row g-0">
-                        <div class="col-2 p-0 justify-content-center leader-line-object"
-                             id="add-usage-pattern-{{ usage_journey.web_id }}"
-                             style="height:1px !important;margin-left: 2px;"
-                        ></div>
-                        <div class="col-10 p-0 justify-content-center" style="height:1px !important;"></div>
-                        <div class="col-12 mb-3 pe-3">
-                            <button class="btn bg-white dotted-border w-100 h8"
-                                    hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
-                                    hx-target="#sidePanel"
-                                    hx-trigger="click"
-                                    hx-swap="innerHTML"
-                                    hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ usage_journey.efootprint_id }}"}'
-                                    hx-disabled-elt="button"
-                            >
-                                <div class="row py-1">
-                                    <div class="col-2 justify-content-center">
-                                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white"  width="18px" height="18px" alt="add icon" style="padding-left: 2px;" />
-                                    </div>
-                                    <div class="col-10 text-start">
-                                        Add usage journey step
-                                    </div>
-                                </div>
-                            </button>
+                    <div id="add-step-to-{{ usage_journey.efootprint_id }}" class="d-flex custom-ms-4 mt-3 align-items-center cursor"
+                        hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
+                        hx-target="#sidePanel"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ usage_journey.efootprint_id }}"}'
+                        hx-disabled-elt="button"
+                    >
+                        <img src="{% static 'icons/circle_add_icon.svg' %}"  width="16" height="16" id="add-usage-pattern-{{ usage_journey.web_id }}">
+                        <div class="mb-0 ms-2 ps-1 d-flex align-items-center">
+                            <img src="{% static 'icons/add-gray-icon.svg' %}"  width="16" height="16">
+                            <div class="h8 mb-0 ms-2 ps-2 text-addition">
+                                Add usage journey step
+                            </div>
                         </div>
                     </div>
                 </div>

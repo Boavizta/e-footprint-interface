@@ -17,21 +17,19 @@ describe("Test - Forms panel", () => {
         cy.get("#btn-submit-form").click();
         cy.wait(500);
 
-        cy.get('button[id^="button-id-"][id$="'+uj.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
         cy.get('#UsageJourney_uj_steps').should('exist').should('not.be.visible');
 
         cy.get('#btn-add-usage-journey').click();
         cy.get('#UsageJourney_uj_steps').should('exist').should('not.be.visible');
 
-         cy.get('button[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
-         '-')+'"]').click();
-         cy.get("#btn-submit-form").click()
+        cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="' + uj.replaceAll(' ',
+        '-') + '"]').should('exist').click();
         cy.wait(500);
-
-        cy.get('button[id^="button-id-"][id$="'+uj.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.get("#btn-submit-form").should('exist').click();
+        cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
         cy.wait(500);
         cy.get('#UsageJourney_uj_steps').should('exist').should('be.visible');
-
         cy.get('#btn-add-usage-journey').click();
         cy.wait(500);
         cy.get('#UsageJourney_uj_steps').should('exist').should('be.visible');
@@ -49,7 +47,7 @@ describe("Test - Forms panel", () => {
         cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.wait(500);
         cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
-        cy.get('button[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
+        cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
          '-')+'"]').click();
         cy.wait(500);
         cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
@@ -61,7 +59,7 @@ describe("Test - Forms panel", () => {
         cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.wait(500);
         cy.get('#UsageJourneyStep_jobs').should('exist').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
+        cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
          '-')+'"]').click();
         cy.get('#UsageJourneyStep_jobs').should('exist').should('be.visible');
     });

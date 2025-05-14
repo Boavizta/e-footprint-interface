@@ -108,6 +108,7 @@ body{
 }
 .h8{
     font-size: clamp(var(--h8-min), var(--h8-ideal), var(--h8-max));
+    font-weight: 200;
 }
 
 .bg-radiant{
@@ -212,7 +213,7 @@ input:disabled{
 }
 
 .dotted-border {
-  border: 2px var(--gray-350) dotted;
+    border: 2px var(--gray-350) dotted;
 }
 
 .shadow-custom {
@@ -266,6 +267,13 @@ input:disabled{
   box-shadow: 0 -1rem 3rem rgba(0, 0, 0, .175) !important;
 }
 
+.custom-ms-3 {
+    margin-left: calc(1rem + 16px);
+}
+
+.custom-ms-4 {
+    margin-left: calc(1rem + 20px);
+}
 
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
@@ -421,6 +429,29 @@ input:disabled{
     color: var(--gray-400);
 }
 
+.text-addition{
+    color: #767676;
+}
+
+.bg-addition{
+    background-color: var(--gray-350);
+}
+
+.ms-15{
+    margin-left: 15%;
+}
+
+.ms-25{
+    margin-left: 25%;
+}
+
+.w-85{
+    width: 85%;
+}
+
+.ms-50{
+    margin-left: 50%;
+}
 
 /* CSS class use model canvas and objects */
 /*----------------------------------*/

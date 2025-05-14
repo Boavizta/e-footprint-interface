@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.21] - 2025-05-15
+
+### Changed
+
+- UI has been updated to use d-flex components instead of row/col for more 
+  flexibility.
+- Updates in CSS to unify rules about object addition.
+
 ## [0.7.20] - 2025-05-15
 
 ### Fixed
