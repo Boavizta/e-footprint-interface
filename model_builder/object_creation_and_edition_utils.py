@@ -1,13 +1,13 @@
 import os
 from inspect import signature, _empty as empty_annotation
-from types import UnionType
 from typing import List, get_origin, get_args
 
 from django.http import QueryDict
 from django.shortcuts import render
-from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
-from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity, EmptyExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
 from efootprint.logger import logger
 from efootprint.constants.units import u
@@ -72,6 +72,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
 
     init_sig_params = signature(obj_to_edit.modeling_obj.__init__).parameters
 
+    attr_name_new_value_check_input_validity_pairs = []
     for attr_name_with_prefix in edit_form_data.keys():
         attr_name = attr_name_with_prefix.replace(object_type + "_", "")
         if attr_name not in init_sig_params:
@@ -92,11 +93,14 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
             unchanged_mod_obj_ids = [obj_id for obj_id in current_mod_obj_ids if obj_id not in removed_mod_obj_ids]
             if new_mod_obj_ids != current_mod_obj_ids:
                 list_attribute_object_type_str = get_args(annotation)[0].__name__
-                obj_to_edit.set_efootprint_value(
-                    attr_name,
+                attr_name_new_value_check_input_validity_pairs.append(
+                    [attr_name,
                     [model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
-                     for obj_id in unchanged_mod_obj_ids + added_mod_obj_ids])
+                     for obj_id in unchanged_mod_obj_ids + added_mod_obj_ids],
+                     False])
         elif issubclass(annotation, str):
+            # It should only be the case for the name parameter.
+            # The ModelingUpdate object is not meant to handle name updates so this parameter is updated right away.
             obj_to_edit.set_efootprint_value(attr_name, edit_form_data[attr_name_with_prefix])
         elif issubclass(annotation, ExplainableQuantity):
             request_value = edit_form_data[attr_name_with_prefix]
@@ -108,7 +112,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                 new_value.set_label(current_value.label)
                 if default_values.get(attr_name).value.magnitude == new_value.value.magnitude:
                     new_value.source = default_values.get(attr_name).source
-                obj_to_edit.set_efootprint_value(attr_name, new_value)
+                attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
         elif issubclass(annotation, ExplainableObject):
             if attr_name in obj_to_edit.list_values().keys():
                 new_value = SourceObject(edit_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
@@ -122,7 +126,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                                     f"because it has depending values: "
                                     f"{obj_to_edit.attributes_with_depending_values()[attr_name]}")
                         check_input_validity = False
-                    obj_to_edit.set_efootprint_value(attr_name, new_value, check_input_validity)
+                    attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, check_input_validity])
             else:
                 new_value = SourceObject(edit_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
                 current_value = getattr(obj_to_edit, attr_name)
@@ -130,7 +134,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                     logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
                 # Always update value for conditional str attribute to make sure that they belong to authorized values
                 new_value.set_label(current_value.label)
-                obj_to_edit.set_efootprint_value(attr_name, new_value)
+                attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
 
         elif issubclass(annotation, ModelingObject):
             new_mod_obj_id = edit_form_data[attr_name_with_prefix]
@@ -140,7 +144,16 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                 mod_obj_attribute_object_type_str = annotation.__name__
                 obj_to_add = model_web.get_efootprint_object_from_efootprint_id(
                     new_mod_obj_id, mod_obj_attribute_object_type_str)
-                obj_to_edit.set_efootprint_value(attr_name, obj_to_add)
+                attr_name_new_value_check_input_validity_pairs.append([attr_name, obj_to_add, False])
+
+    if model_web.launch_system_computations_and_make_modeling_dynamic:
+        changes_list = [
+            [getattr(obj_to_edit.modeling_obj, attr_name), new_value]
+            for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs]
+        ModelingUpdate(changes_list)
+    else:
+        for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs:
+            obj_to_edit.set_efootprint_value(attr_name, new_value, check_input_validity)
 
     # Update session data
     model_web.session["system_data"][obj_to_edit.class_as_simple_str][obj_to_edit.efootprint_id] = obj_to_edit.to_json()

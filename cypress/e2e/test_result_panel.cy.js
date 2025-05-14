@@ -3,7 +3,7 @@ import "cypress-real-events";
 describe("Test - Result panel", () => {
     let ujNameTwo = "Test E2E UJ 2";
 
-    it("Check if the model cannot be calculated if the modal exception is displayed and the result panel not showed", () => {
+    it("Check if the model cannot be calculated then the modal exception is displayed and the result panel not showed", () => {
         cy.visit("/model_builder/");
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'

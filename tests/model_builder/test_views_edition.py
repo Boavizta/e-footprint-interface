@@ -3,15 +3,22 @@ import os
 
 from django.http import QueryDict
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
-from efootprint.builders.services.generative_ai_ecologits import GenAIModel
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.builders.services.generative_ai_ecologits import GenAIModel, GenAIJob
+from efootprint.constants.countries import Countries
 from efootprint.core.hardware.gpu_server import GPUServer
+from efootprint.core.hardware.network import Network
 from efootprint.core.hardware.storage import Storage
+from efootprint.core.hardware.device import Device
 from efootprint.core.system import System
+from efootprint.core.usage.usage_journey import UsageJourney
+from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.logger import logger
 from efootprint.constants.units import u
 
 from model_builder.addition.views_addition import add_object
 from model_builder.class_structure import generate_object_edition_structure
+from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
@@ -68,14 +75,21 @@ class TestViewsEdition(TestModelingBase):
         self.assertEqual(job_request.session["system_data"]["WebApplicationJob"][new_job_id]["name"], "New job")
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
-    def test_edit_genai_model(self, mock_render_exception_modal):
+    def test_edit_genai_model_provider_with_recompute_true(self, mock_render_exception_modal):
         gpu_server = GPUServer.from_defaults("GPU server", compute=SourceValue(16 * u.gpu), storage=Storage.ssd())
         first_provider = GenAIModel.list_values()["provider"][0]
         first_model_name = GenAIModel.conditional_list_values()[
             "model_name"]["conditional_list_values"][first_provider][0]
         genai_service = GenAIModel.from_defaults(
             "GenAI service", server=gpu_server, provider=first_provider, model_name=first_model_name)
-        system = System("Test system", usage_patterns=[])
+        genai_job = GenAIJob.from_defaults("genai job", service=genai_service)
+        usage_journey = UsageJourney(
+            "usage journey", uj_steps=[UsageJourneyStep("step", jobs=[genai_job],
+                                                        user_time_spent=SourceValue(1 * u.min))])
+        usage_pattern = UsagePatternFromForm.from_defaults(
+            "usage pattern", usage_journey=usage_journey, devices=[Device.laptop()], network=Network.wifi_network(),
+            country=Countries.FRANCE())
+        system = System("Test system", usage_patterns=[usage_pattern])
         logger.info(f"Created GenAI service with provider {first_provider} and model name {first_model_name}")
 
         post_data = QueryDict(mutable=True)
@@ -84,16 +98,13 @@ class TestViewsEdition(TestModelingBase):
             "model_name"]["conditional_list_values"][second_provider][0]
         post_data.update(
             {'GenAIModel_name': ['Gen AI service'], 'GenAIModel_server': [gpu_server.id],
-             "GenAIModel_provider": [second_provider], "GenAIModel_model_name": [second_model_name]}
+             "GenAIModel_provider": [second_provider], "GenAIModel_model_name": [second_model_name],
+             "recomputation": ["true"],}
         )
 
         edit_service_request = self.factory.post(f'/edit-object/{genai_service.id}', data=post_data)
         self._add_session_to_request(
-            edit_service_request,
-            {
-                "System": {system.id: system.to_json()},
-                "GenAIModel": {genai_service.id: genai_service.to_json()},
-                "GPUServer": {gpu_server.id: gpu_server.to_json()}})
+            edit_service_request, system_to_json(system, save_calculated_attributes=False))
 
         response = edit_object(edit_service_request, genai_service.id)
         mock_render_exception_modal.assert_not_called()
@@ -126,3 +137,25 @@ class TestViewsEdition(TestModelingBase):
         self.assertEqual(server["carbon_footprint_fabrication"]["value"], 60.0)
         self.assertEqual(storage["name"], "server 1 default ssd")
         self.assertEqual(storage["carbon_footprint_fabrication_per_storage_capacity"]["value"], 160.0)
+
+    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
+    def test_edition_with_recompute(self, mock_render_exception_modal):
+        server_id = "uuid-Server-1"
+        storage_id = "uuid-Default-SSD-storage-1"
+
+        post_data = QueryDict(mutable=True)
+        post_data.update(
+            {'name': ['New server'], 'carbon_footprint_fabrication': ['60'], 'carbon_footprint_fabrication_unit': 'kg',
+             'storage_form_data':
+                 [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", '
+                  f'"carbon_footprint_fabrication_per_storage_capacity":"170.0",'
+                  f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}'],
+             "recomputation": ["true"],}
+        )
+
+        edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)
+        self._add_session_to_request(edit_server_request, self.system_data)
+        response = edit_object(edit_server_request, server_id)
+
+        mock_render_exception_modal.assert_not_called()
+        self.assertEqual(response.status_code, 200)

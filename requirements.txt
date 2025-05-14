@@ -72,7 +72,7 @@ platformdirs==4.3.8 ; python_version >= "3.12" and python_version < "4.0"
 plotly==5.19.0 ; python_version >= "3.12" and python_version < "4.0"
 prompt-toolkit==3.0.51 ; python_version >= "3.12" and python_version < "4.0"
 proto-plus==1.26.1 ; python_version >= "3.12" and python_version < "4.0"
-protobuf==6.30.2 ; python_version >= "3.12" and python_version < "4.0"
+protobuf==6.31.0 ; python_version >= "3.12" and python_version < "4.0"
 psycopg2-binary==2.9.10 ; python_version >= "3.12" and python_version < "4.0"
 ptyprocess==0.7.0 ; python_version >= "3.12" and python_version < "4.0" and (sys_platform != "win32" and sys_platform != "emscripten")
 pure-eval==0.2.3 ; python_version >= "3.12" and python_version < "4.0"

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.20] - 2025-05-15
+
+### Fixed
+- Provider edit when result panel is open. Now ModelingUpdate is used to update both provider and model name so that e-footprint doesn’t raise an error when provider is updated.
+
+### Changed
+- Datalist values (for example gen AI model name) now have same logic as name field: in the add panel when clicking the value is deleted.
+- When opening the confirm delete modal, the side panel is not closed anymore so that clicking "go back" allows to go back to the side panel.
+
 ## [0.7.19] - 2025-05-12
 
 ### Changed
