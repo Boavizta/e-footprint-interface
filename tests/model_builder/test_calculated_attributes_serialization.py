@@ -1,9 +1,12 @@
-import gzip
 import os
+import gzip
+import base64
 import json
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
-from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
+from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity, ExplainableHourlyQuantities, \
+    EmptyExplainableObject
+from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.logger import logger
 from efootprint.utils.tools import time_it
@@ -12,22 +15,51 @@ from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 from tests.test_structure import root_dir
 
 
+def compress_value(value):
+    compressed = gzip.compress(json.dumps(value).encode("utf-8"), compresslevel=1)
+    return base64.b64encode(compressed).decode("utf-8")
+
+def decompress_value(value_str):
+    compressed = base64.b64decode(value_str.encode("utf-8"))
+    return json.loads(gzip.decompress(compressed).decode("utf-8"))
+
+
 def to_serializable_dict(explainable_object: ExplainableObject):
     explainable_object_dict = {
-        "value_type": type(explainable_object.value).__name__,
-        "label": explainable_object.label,
         "class_name": explainable_object.__class__.__name__
     }
 
-    # Handle different value types appropriately
-    if hasattr(explainable_object, "to_json"):
-        explainable_object_dict["value"] = explainable_object.to_json()
-    elif hasattr(explainable_object, "__dict__"):
-        raise NotImplementedError(f"Serialization for {explainable_object.value.__class__.__name__} is not implemented.")
-        # explainable_object_dict["value"] = explainable_object.value.__dict__
+    if isinstance(explainable_object, ExplainableQuantity):
+        explainable_object_dict.update(explainable_object.to_json())
+    elif isinstance(explainable_object, ExplainableHourlyQuantities):
+        explainable_object_dict.update(
+            {
+                "label": explainable_object.label,
+                "values": compress_value(explainable_object.value["value"].values._data.tolist()),
+                "unit": str(explainable_object.value.dtypes.iloc[0].units),
+                "start_date": explainable_object.value.index[0].strftime("%Y-%m-%d %H:%M:%S")
+            }
+        )
+    elif isinstance(explainable_object, EmptyExplainableObject):
+        explainable_object_dict.update(explainable_object.to_json())
+    elif isinstance(explainable_object, dict):
+        output_dict = {}
+
+        for key, value in explainable_object.items():
+            if isinstance(key, ModelingObject):
+                output_dict[key.id] = {
+                    "label": value.label,
+                    "values": compress_value(value.value["value"].values._data.tolist()),
+                    "unit": str(value.value.dtypes.iloc[0].units),
+                    "start_date": value.value.index[0].strftime("%Y-%m-%d %H:%M:%S")
+                }
+            else:
+                raise ValueError(f"Key {key} is not a ModelingObject")
+        explainable_object_dict.update(output_dict)
+    elif isinstance(explainable_object, ExplainableObject):
+        explainable_object_dict.update(explainable_object.to_json())
     else:
-        # Handle primitive types or convert to string if needed
-        explainable_object_dict["value"] = str(explainable_object.value)
+        raise ValueError(f"Unsupported type: {explainable_object.__class__.__name__}. object {explainable_object}.")
 
     # Include modeling object relationship
     if explainable_object.modeling_obj_container is not None:
