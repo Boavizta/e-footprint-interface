@@ -4,8 +4,10 @@ import json
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.logger import logger
 from efootprint.utils.tools import time_it
 
+from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 from tests.test_structure import root_dir
 
 
@@ -41,17 +43,7 @@ def to_serializable_dict(explainable_object: ExplainableObject):
     explainable_object_dict["direct_ancestors"] = [id(ancestor) for ancestor in explainable_object.direct_ancestors_with_id]
     explainable_object_dict["direct_children"] = [id(child) for child in explainable_object.direct_children_with_id]
 
-    output_dict = {id(explainable_object): explainable_object_dict}
-
-    # Recursively serialize parents that don’t belong to any modeling object
-    if explainable_object.left_parent is not None and \
-            explainable_object.left_parent.modeling_obj_container is None:
-        output_dict.update(to_serializable_dict(explainable_object.left_parent))
-    if explainable_object.right_parent is not None and \
-            explainable_object.right_parent.modeling_obj_container is None:
-        output_dict.update(to_serializable_dict(explainable_object.right_parent))
-
-    return output_dict
+    return explainable_object_dict
 
 
 @time_it
@@ -73,16 +65,24 @@ def serialize_efootprint_object_attributes(efootprint_object):
     return efootprint_obj_attributes_dict
 
 # Load the system data
-with open(os.path.join(root_dir, "model_builder", "default_system_data.json"), "r") as file:
+with open(os.path.join(root_dir, "model_builder", "system_with_multiple_servers_and_ups.json"), "r") as file:
     system_data = json.load(file)
 
-class_obj_dict, flat_obj_dict = json_to_system(system_data, launch_system_computations=True)
+class_obj_dict, flat_obj_dict = json_to_system(
+    system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
 
-calculated_attributes_dict = {}
+@time_it
+def serialize_system(input_flat_obj_dict):
+    calc_attr_dict = {}
 
-for efootprint_object in flat_obj_dict.values():
-    efootprint_object_attributes_dict = serialize_efootprint_object_attributes(efootprint_object)
-    calculated_attributes_dict.update(efootprint_object_attributes_dict)
+    for efootprint_object in input_flat_obj_dict.values():
+        efootprint_object_attributes_dict = serialize_efootprint_object_attributes(efootprint_object)
+        calc_attr_dict.update(efootprint_object_attributes_dict)
+
+    return calc_attr_dict
+
+# Serialize the system and get the calculated attributes dictionary
+calculated_attributes_dict = serialize_system(flat_obj_dict)
 
 # Save the calculated attributes dictionary to a JSON file
 with open(os.path.join(root_dir, "model_builder", "calculated_attributes_serialization.json"), "w") as f:
