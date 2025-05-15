@@ -2,11 +2,12 @@ import os
 import gzip
 import base64
 import json
+import zstandard as zstd
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity, ExplainableHourlyQuantities, \
     EmptyExplainableObject
-from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.logger import logger
 from efootprint.utils.tools import time_it
@@ -14,14 +15,16 @@ from efootprint.utils.tools import time_it
 from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 from tests.test_structure import root_dir
 
-
+@time_it
 def compress_value(value):
-    compressed = gzip.compress(json.dumps(value).encode("utf-8"), compresslevel=1)
+    cctx = zstd.ZstdCompressor(level=1)
+    compressed = cctx.compress(json.dumps(value).encode("utf-8"))
     return base64.b64encode(compressed).decode("utf-8")
 
 def decompress_value(value_str):
     compressed = base64.b64decode(value_str.encode("utf-8"))
-    return json.loads(gzip.decompress(compressed).decode("utf-8"))
+    dctx = zstd.ZstdDecompressor()
+    return json.loads(dctx.decompress(compressed).decode("utf-8"))
 
 
 def to_serializable_dict(explainable_object: ExplainableObject):
@@ -42,20 +45,11 @@ def to_serializable_dict(explainable_object: ExplainableObject):
         )
     elif isinstance(explainable_object, EmptyExplainableObject):
         explainable_object_dict.update(explainable_object.to_json())
-    elif isinstance(explainable_object, dict):
-        output_dict = {}
-
-        for key, value in explainable_object.items():
-            if isinstance(key, ModelingObject):
-                output_dict[key.id] = {
-                    "label": value.label,
-                    "values": compress_value(value.value["value"].values._data.tolist()),
-                    "unit": str(value.value.dtypes.iloc[0].units),
-                    "start_date": value.value.index[0].strftime("%Y-%m-%d %H:%M:%S")
-                }
-            else:
-                raise ValueError(f"Key {key} is not a ModelingObject")
-        explainable_object_dict.update(output_dict)
+    elif isinstance(explainable_object, ExplainableObjectDict):
+        output = {}
+        for value in explainable_object.values():
+            output.update(to_serializable_dict(value))
+        return output
     elif isinstance(explainable_object, ExplainableObject):
         explainable_object_dict.update(explainable_object.to_json())
     else:
@@ -66,10 +60,14 @@ def to_serializable_dict(explainable_object: ExplainableObject):
         explainable_object_dict["modeling_obj_container_id"] = explainable_object.modeling_obj_container.id
         explainable_object_dict["attr_name_in_mod_obj_container"] = explainable_object.attr_name_in_mod_obj_container
 
-    explainable_object_dict["direct_ancestors"] = [id(ancestor) for ancestor in explainable_object.direct_ancestors_with_id]
-    explainable_object_dict["direct_children"] = [id(child) for child in explainable_object.direct_children_with_id]
+    explainable_object_dict["direct_ancestors"] = [
+        str((ancestor.modeling_obj_container.id, ancestor.attr_name_in_mod_obj_container, ancestor.key_in_dict.id if ancestor.dict_container is not None else None))
+        for ancestor in explainable_object.direct_ancestors_with_id]
+    explainable_object_dict["direct_children"] = [
+        str((child.modeling_obj_container.id, child.attr_name_in_mod_obj_container, child.key_in_dict.id if child.dict_container is not None else None))
+        for child in explainable_object.direct_children_with_id]
 
-    return explainable_object_dict
+    return {str((explainable_object.modeling_obj_container.id, explainable_object.attr_name_in_mod_obj_container, explainable_object.key_in_dict.id if explainable_object.dict_container is not None else None)): explainable_object_dict}
 
 
 @time_it
@@ -79,14 +77,9 @@ def serialize_efootprint_object_attributes(efootprint_object):
     This function is used to create a JSON representation of the object's attributes.
     """
     efootprint_obj_attributes_dict = {}
-    for explainable_object in get_instance_attributes(efootprint_object, ExplainableObject).values():
-        if explainable_object.attr_name_in_mod_obj_container in efootprint_object.calculated_attributes:
-            efootprint_obj_attributes_dict[id(explainable_object)] = to_serializable_dict(explainable_object)
-        else:
-            efootprint_obj_attributes_dict[id(explainable_object)] = {
-                "modeling_obj_container_id": explainable_object.modeling_obj_container.id,
-                "attr_name_in_mod_obj_container": explainable_object.attr_name_in_mod_obj_container,
-            }
+    for calculated_attribute_name in efootprint_object.calculated_attributes:
+        explainable_object = getattr(efootprint_object, calculated_attribute_name)
+        efootprint_obj_attributes_dict.update(to_serializable_dict(explainable_object))
 
     return efootprint_obj_attributes_dict
 

@@ -51,6 +51,7 @@ psycopg2-binary = "^2.9"
 django-bootstrap5 = "^24.3"
 openpyxl = "^3"
 ecologits = "^0.6"
+zstandard = "^0.23"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
