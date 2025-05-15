@@ -15,16 +15,14 @@ from efootprint.utils.tools import time_it
 from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 from tests.test_structure import root_dir
 
+
+import array
 @time_it
 def compress_value(value):
+    arr = array.array("d", value)  # "d" is double-precision float
     cctx = zstd.ZstdCompressor(level=1)
-    compressed = cctx.compress(json.dumps(value).encode("utf-8"))
+    compressed = cctx.compress(arr.tobytes())
     return base64.b64encode(compressed).decode("utf-8")
-
-def decompress_value(value_str):
-    compressed = base64.b64decode(value_str.encode("utf-8"))
-    dctx = zstd.ZstdDecompressor()
-    return json.loads(dctx.decompress(compressed).decode("utf-8"))
 
 
 def to_serializable_dict(explainable_object: ExplainableObject):
