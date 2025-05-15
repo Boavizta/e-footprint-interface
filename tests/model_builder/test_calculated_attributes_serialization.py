@@ -1,3 +1,4 @@
+import gzip
 import os
 import json
 
@@ -33,13 +34,6 @@ def to_serializable_dict(explainable_object: ExplainableObject):
         explainable_object_dict["modeling_obj_container_id"] = explainable_object.modeling_obj_container.id
         explainable_object_dict["attr_name_in_mod_obj_container"] = explainable_object.attr_name_in_mod_obj_container
 
-    # Include relationship information
-    if explainable_object.left_parent is not None:
-        explainable_object_dict["left_parent_id"] = id(explainable_object.left_parent) \
-            if explainable_object.left_parent is not None else None
-    if explainable_object.right_parent is not None:
-        explainable_object_dict["right_parent_id"] = id(explainable_object.right_parent) \
-            if explainable_object.right_parent is not None else None
     explainable_object_dict["direct_ancestors"] = [id(ancestor) for ancestor in explainable_object.direct_ancestors_with_id]
     explainable_object_dict["direct_children"] = [id(child) for child in explainable_object.direct_children_with_id]
 
@@ -85,5 +79,34 @@ def serialize_system(input_flat_obj_dict):
 calculated_attributes_dict = serialize_system(flat_obj_dict)
 
 # Save the calculated attributes dictionary to a JSON file
-with open(os.path.join(root_dir, "model_builder", "calculated_attributes_serialization.json"), "w") as f:
+from time import time
+start = time()
+with gzip.open(
+    os.path.join(root_dir, "model_builder", "calculated_attributes_serialization.zip"), "wt", encoding="utf-8") as f:
+    json.dump(calculated_attributes_dict, f)
+end = time()
+logger.info(f"zip dumping took {end - start} seconds.")
+
+start = time()
+with open(
+    os.path.join(root_dir, "model_builder", "calculated_attributes_serialization.json"), "w") as f:
     json.dump(calculated_attributes_dict, f, indent=4)
+end = time()
+logger.info(f"json dumping took {end - start} seconds.")
+
+# test time it takes to load the json file
+start = time()
+with open(
+    os.path.join(root_dir, "model_builder", "calculated_attributes_serialization.json"), "r") as f:
+    loaded_dict = json.load(f)
+
+end = time()
+logger.info(f"json loading took {end - start} seconds.")
+
+# test time it takes to load the zip file
+start = time()
+with gzip.open(
+    os.path.join(root_dir, "model_builder", "calculated_attributes_serialization.zip"), "rt", encoding="utf-8") as f:
+    loaded_dict = json.load(f)
+end = time()
+logger.info(f"zip loading took {end - start} seconds.")
