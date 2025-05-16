@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.22] - 2025-05-15
+
+### Added
+
+- Add in external librairies shave JS to easily mange the crop of button's 
+  text when a user hover it if the button must be resize.
+
 ## [0.7.20] - 2025-05-15
 
 ### Fixed
