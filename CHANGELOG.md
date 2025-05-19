@@ -4,11 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.7.22] - 2025-05-21
+## [0.7.22] - 2025-05-22
 
 ### Added
 
 - Edit icon appears when hovering over an object name in object cards.
+
+### Fixed
+- Remove " ' " for exported json filename.
+
+### Changed
+- Minimum number of instances is set to 1 so that BoaviztaCloudServer doesn’t get reimported every time the first instance is created.
 
 ## [0.7.21] - 2025-05-15
 

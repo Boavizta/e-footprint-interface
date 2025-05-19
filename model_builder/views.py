@@ -72,7 +72,7 @@ def download_json(request):
         next(iter(request.session["system_data"]["System"].keys()), None)]["name"]
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
-    response["Content-Disposition"] = f"attachment; filename='{current_date_time}_UTC {system_name}.e-f.json'"
+    response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system_name}.e-f.json"
     return response
 
 def upload_json(request):
