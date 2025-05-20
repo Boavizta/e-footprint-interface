@@ -7,6 +7,7 @@ function openSidePanel() {
         btn.classList.remove("w-100");
         btn.classList.add("result-width");
     }
+    updateLines();
 }
 
 function closeAndEmptySidePanel() {
@@ -18,7 +19,6 @@ function closeAndEmptySidePanel() {
     sidePanel.classList.add("d-none");
     sidePanel.innerHTML = "";
     closeTimeseriesChart();
-    updateLines();
 
     let panel = document.getElementById("panel-result-btn");
     if (panel.classList.contains("result-width")) {
@@ -31,6 +31,8 @@ function closeAndEmptySidePanel() {
         btn.classList.remove("result-width");
         btn.classList.add("w-100");
     }
+    removeAllOpenedObjectsHighlights()
+    updateLines();
 }
 
 function setRecomputationToTrueIfResultPaneIsOpen(){

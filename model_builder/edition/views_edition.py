@@ -36,7 +36,11 @@ def open_edit_object_panel(request, object_id):
             request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
             dynamic_form_data)
 
-    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+    http_response["HX-Trigger-After-Swap"] = json.dumps({
+        "initDynamicForm" : "",
+        "highlightOpenedObjects": [f"button-{mirrored_card.web_id}" for mirrored_card in obj_to_edit.mirrored_cards]
+        if len(obj_to_edit.mirrored_cards) > 1 else [],
+    })
 
     return http_response
 

@@ -1,5 +1,5 @@
 <div id="{{ usage_pattern.web_id }}"
-     class="leader-line-object list-group-item my-3 mb-1 py-2 ps-2 pe-0 model-builder-card cursor"
+     class="leader-line-object list-group-item my-3 mb-1 py-2 ps-2 pe-0 model-builder-card move"
      data-link-to="{{ usage_pattern.links_to }}" data-line-opt="{{ usage_pattern.data_line_opt }}">
     <button id="button-{{ usage_pattern.web_id }}"
             class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center w-100"
@@ -9,8 +9,11 @@
             hx-trigger="click"
             hx-swap="innerHTML"
             hx-disabled-elt="button"
-            _="on mouseover remove .d-none from #edit-icon-{{ usage_pattern.web_id }}
-             on mouseout add .d-none to #edit-icon-{{ usage_pattern.web_id }}"
+            _="
+                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ usage_pattern.web_id }}
+                on mouseout add .d-none to #edit-icon-{{ usage_pattern.web_id }}
+                on mouseover remove .d-none from #edit-icon-{{ usage_pattern.web_id }}
+            "
     >
         {% include 'model_builder/components/button_card_header.html' with object_card=usage_pattern %}
     </button>

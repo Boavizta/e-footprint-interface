@@ -1,5 +1,5 @@
 {% load static %}
-<div id="{{ server.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card cursor">
+<div id="{{ server.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card move">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <div class="accordion-header p-0 d-flex align-items-center">
@@ -24,8 +24,11 @@
                         hx-trigger="click"
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
-                        _="on mouseover remove .d-none from #edit-icon-{{ server.web_id }}
-                        on mouseout add .d-none to #edit-icon-{{ server.web_id }}"
+                        _="
+                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ server.web_id }}
+                            on mouseover remove .d-none from #edit-icon-{{ server.web_id }}
+                            on mouseout add .d-none to #edit-icon-{{ server.web_id }}
+                        "
                 >
                     {% include 'model_builder/components/button_card_header.html' with object_card=server %}
                 </button>
@@ -47,6 +50,7 @@
                             hx-swap="innerHTML"
                             hx-disabled-elt="button"
                             hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ server.efootprint_id }}"}'
+                            _="on click removeAllOpenedObjectsHighlights()"
                     >
                         <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-2 d-none d-xl-flex"  width="16px" height="16px" alt="add icon" />
                         Install service

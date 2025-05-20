@@ -282,6 +282,7 @@ class UsageJourneyStepWeb(ModelingObjectWeb):
 
         return mirrored_cards
 
+
 class MirroredUsageJourneyStepWeb(UsageJourneyStepWeb):
     def __init__(self, modeling_obj: ModelingObject, usage_journey):
         super().__init__(modeling_obj, usage_journey.model_web)

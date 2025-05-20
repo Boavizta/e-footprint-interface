@@ -1,6 +1,6 @@
 {% load static %}
 <div id="{{ usage_journey.web_id }}"
-     class="leader-line-object card list-group-item mt-0 mb-3 py-2 px-0 model-builder-card cursor"
+     class="leader-line-object card list-group-item mt-0 mb-3 py-2 px-0 model-builder-card move"
      data-link-to="{{ usage_journey.links_to }}" data-line-opt="{{ usage_journey.data_line_opt }}">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
@@ -19,8 +19,11 @@
                         hx-trigger="click"
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
-                        _="on mouseover remove .d-none from #edit-icon-{{ usage_journey.web_id }}
-                        on mouseout add .d-none to #edit-icon-{{ usage_journey.web_id }}"
+                        _="
+                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ usage_journey.web_id }}
+                            on mouseover remove .d-none from #edit-icon-{{ usage_journey.web_id }}
+                            on mouseout add .d-none to #edit-icon-{{ usage_journey.web_id }}
+                        "
                 >
                     {% include 'model_builder/components/button_card_header.html' with object_card=usage_journey %}
                 </button>
@@ -30,13 +33,14 @@
                     {% for usage_journey_step in usage_journey.uj_steps %}
                         {% include 'model_builder/object_cards/usage_journey_step_card.html' %}
                     {% endfor %}
-                    <div id="add-step-to-{{ usage_journey.efootprint_id }}" class="d-flex custom-ms-4 mt-3 align-items-center cursor"
+                    <div id="add-step-to-{{ usage_journey.efootprint_id }}" class="d-flex custom-ms-4 mt-3 align-items-center move"
                         hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
                         hx-target="#sidePanel"
                         hx-trigger="click"
                         hx-swap="innerHTML"
                         hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ usage_journey.efootprint_id }}"}'
                         hx-disabled-elt="button"
+                         _="on click removeAllOpenedObjectsHighlights()"
                     >
                         <img src="{% static 'icons/circle_add_icon.svg' %}"  width="16" height="16" id="add-usage-pattern-{{ usage_journey.web_id }}">
                         <div class="mb-0 ms-2 ps-1 d-flex align-items-center">

@@ -48,16 +48,34 @@ function resizeSystemNameHeader() {
     document.body.removeChild(span);
 }
 
-function highlightObject(modelObjectId){
+
+function removeAllOpenedObjectsHighlights(){
+    let objectsActivated = document.querySelectorAll(".model-builder-card-opened");
+    objectsActivated.forEach(function (object) {
+        object.classList.remove("model-builder-card-opened");
+    });
+}
+
+
+function highlightObjectAfterAddOrEdit(modelObjectId){
     let element = document.getElementById(modelObjectId);
     if (element) {
-        element.classList.add("highlight-border");
+        element.classList.add("border-pulse-after-add-edit-object");
         setTimeout(() => {
-            element.classList.remove("highlight-border");
+            element.classList.remove("border-pulse-after-add-edit-object");
             updateLines();
         }, 1000);
     }
 }
+
+document.body.addEventListener("highlightOpenedObjects", function (event) {
+    let elements = event.detail.value;
+    elements.forEach(function (element) {
+        if (document.getElementById(element).classList.contains("model-builder-card-opened") === false) {
+            document.getElementById(element).classList.add("model-builder-card-opened");
+        }
+    })
+})
 
 document.body.addEventListener("displayToastAndHighlightObjects", function (event) {
     let toastElement = document.getElementById("toast-push-notification");
@@ -79,7 +97,7 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
             document.getElementById(`button-${mirrorObjetWebId}`).scrollIntoView(
                 { behavior: "smooth", block: "center" });
         }
-        highlightObject(`button-${mirrorObjetWebId}`);
+        highlightObjectAfterAddOrEdit(`button-${mirrorObjetWebId}`);
     })
 
     toastBootstrap.show();

@@ -2,14 +2,17 @@
     data-link-to="{{ job.links_to }}" data-line-opt="{{ job.data_line_opt }}">
     <button
             id="button-{{ job.web_id }}"
-            class="btn btn-white text-end w-100 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-0 position-relative"
+            class="btn btn-white text-end w-100 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
             hx-get="/model_builder/open-edit-object-panel/{{ job.efootprint_id }}/"
             hx-target="#sidePanel"
             hx-trigger="click"
             hx-swap="innerHTML"
             hx-disabled-elt="button"
-            _="on mouseover remove .d-none from #edit-icon-{{ job.web_id }}
-            on mouseout add .d-none to #edit-icon-{{ job.web_id }}"
+            _="
+                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened on me
+                on mouseover remove .d-none from #edit-icon-{{ job.web_id }}
+                on mouseout add .d-none to #edit-icon-{{ job.web_id }}
+            "
     >
         {% include 'model_builder/components/button_card_header.html' with object_card=job %}
     </button>
