@@ -1,93 +1,12 @@
 {% load static %}
+{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
 <div class="row position-relative mx-0" id="model-builder-page">
-    <div class="col p-0">
-        {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
-        <div class="row my-3 mx-0 px-0 gx-3" id="model-canva">
-            <div class="col-4">
-                <div class="rounded-4 p-4 list-object-efootprint" id="usage-pattern-container">
-                   <div class="d-flex flex-column mb-3">
-                        <div class="w-100 mb-2 text-start">
-                            <h5><b>Usage patterns</b></h5>
-                        </div>
-                        <button class="w-75 btn bg-white dotted-border text-start h8 rounded-2 d-flex flex-row px-0 py-2"
-                                id="add_usage_pattern"
-                                    hx-get="/model_builder/open-create-object-panel/UsagePatternFromForm/"
-                                    hx-target="#sidePanel"
-                                    hx-trigger="click"
-                                    hx-swap="innerHTML"
-                                    hx-disabled-elt="button"
-                        >
-                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                            <p class="mb-0 text-addition">Add usage pattern</p>
-                        </button>
-                        <div id="up-list" class="list-group w-75 ps-0">
-                            {% for usage_pattern in model_web.usage_patterns %}
-                            {% include 'model_builder/object_cards/usage_pattern_card.html' %}
-                            {% endfor %}
-                        </div>
-                   </div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="rounded-4 p-4 list-object-efootprint" id="usage-journey-container">
-                    <div class="d-flex flex-column mb-3 text-start align-items-center">
-                        <div class="w-100 mb-2">
-                            <h5><b>Usage journeys</b></h5>
-                        </div>
-                        <div class="w-100 d-flex flex-row align-items-center">
-                            <button class="w-100 btn bg-white dotted-border text-start h8 rounded-2 d-flex flex-row px-0 py-2"
-                                id="btn-add-usage-journey"
-                                    hx-get="/model_builder/open-create-object-panel/UsageJourney/"
-                                    hx-target="#sidePanel"
-                                    hx-trigger="click"
-                                    hx-swap="innerHTML"
-                                    hx-disabled-elt="button"
-                            >
-                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                                <p class="mb-0 text-addition">Add usage journey</p>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="uj-list" class="list-group w-100 ps-0">
-                        {% for usage_journey in model_web.usage_journeys %}
-                        {% include 'model_builder/object_cards/usage_journey_card.html' %}
-                        {% endfor %}
-                        {% for empty_usage_journey in model_web.empty_usage_journeys %}
-                        {% include 'model_builder/object_cards/usage_journey_empty.html' with usage_journey=empty_usage_journey %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="rounded-4 p-4 list-object-efootprint" id="server-container">
-                    <div class="d-flex flex-column mb-3 text-start align-items-center">
-                        <div class="w-100 mb-2">
-                            <h5><b>Infrastructure</b></h5>
-                        </div>
-                        <div class="w-100">
-                            <button class="w-75 btn bg-white dotted-border text-start h8 rounded-2 d-flex flex-row px-0 py-2"
-                                    id="btn-add-server"
-                                    hx-get="/model_builder/open-create-object-panel/ServerBase/"
-                                    hx-target="#sidePanel"
-                                    hx-trigger="click"
-                                    hx-swap="innerHTML"
-                                    hx-disabled-elt="button"
-                            >
-                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                                <p class="mb-0 text-addition">Add server</p>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">
-                        {% for server in model_web.servers %}
-                        {% include 'model_builder/object_cards/server_card.html' %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+    <div class="col p-0" id="model-canva-wrapper">
+        <div class="d-flex flex-row my-3 mx-0 px-0" id="model-canva">
+
         </div>
     </div>
-    <div class="col-4 col-xl-3 d-none transition-width pb-3 overflow-y-auto" id="sidePanel"></div>
+    <div class="col-12 col-md-6 col-xl-3 d-none transition-width pb-3 overflow-y-auto z-2 bg-white" id="sidePanel"></div>
     <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
         <div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
             hx-get="/model_builder/result-chart/"
@@ -111,6 +30,23 @@
     </div>
 </div>
 
+<button id="model-scroll-to-right"
+    class="d-block d-xl-none position-absolute top-50 end-0 top-0 border-0 rounded-start-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-2"
+        onclick="scrollToRight()"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+</svg>
+</button>
+
+<button id="model-scroll-to-left"
+    class="d-block d-xl-none position-absolute top-50 start-0 border-0 rounded-end-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-2"
+        onclick="scrollToLeft()"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+      <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+    </svg>
+</button>
 
 {% include 'model_builder/side_panels/usage_pattern/timeseries_chart.html' %}
 

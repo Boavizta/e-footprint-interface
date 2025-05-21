@@ -157,7 +157,9 @@ function initLeaderLines() {
         addAccordionListener(accordion);
     });
     const scrollContainer = document.querySelector('#model-canva');
+    const scrollContainerWrapper = document.querySelector('#model-canva-wrapper');
     scrollContainer.addEventListener('scroll', updateLines);
+    scrollContainerWrapper.addEventListener('scroll', updateLines);
     updateLines();
     setLeaderLineListeners();
 }

@@ -44,7 +44,7 @@ $zindex-levels: (
     --loading-bar-height : 2px;
     --margin-padding-model : 30px;
 
-    --model-height : calc(100vh - var(--navbar-height) - var(--loading-bar-height) );
+    --model-height : calc(100vh - var(--navbar-height) - var(--loading-bar-height) - var(--toolbar-height));
     --model-canva-calculated-height : calc(
         100vh - var(--navbar-height)
         - var(--toolbar-height)
@@ -56,21 +56,29 @@ $zindex-levels: (
         var(--model-canva-calculated-height)- var(--open-result-btn)
     );
     --result-panel-opened : calc(100vh - var(--navbar-height) - var(--toolbar-height));
-}
-
-@media (max-width: 1200px) {
-    :root {
-        --result-width: 66vw;
-    }
-}
-@media (min-width: 1201px) {
-    :root {
-        --result-width: 75vw;
-    }
+    --home-page-height : calc(100vh - var(--navbar-height))
 }
 
 /* CSS class utilities*/
 /*----------------------------------*/
+
+$percents: ();
+@for $i from 0 through 20 {
+  $percents: append($percents, $i * 5);
+}
+$percents: append($percents, 33);
+$percents: append($percents, 66);
+
+$breakpoints: (
+  null: null,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+@function pct($v) { @return if($v == 0, 0, $v * 1%); }
 
 html{
     overflow: hidden;
@@ -88,10 +96,6 @@ body{
 }
 
 #main-content-block{
-    height: var(--model-height);
-}
-
-.home-page{
     height: var(--model-height);
 }
 
@@ -252,8 +256,12 @@ input:disabled{
     -moz-box-shadow: -5px 0 8px 4px rgba(138,138,138,0.24);
 }
 
-.cursor {
-    cursor: pointer;
+.cursor {cursor: pointer;}
+.grab {cursor: -webkit-grab; cursor: grab;}
+.grabbing {cursor: -webkit-grabbing; cursor: grabbing;}
+.dragging {
+    cursor: -webkit-grabbing !important;
+    cursor: grabbing !important;
 }
 
 .shadow-sm-up {
@@ -272,6 +280,12 @@ input:disabled{
   left: 95% !important;
 }
 
+/* CSS Custom rules for home page*/
+/*----------------------------------*/
+#home-page-container{
+    height: var(--home-page-height);
+    overflow-y: auto;
+}
 
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
@@ -310,12 +324,6 @@ input:disabled{
 #model-builder-page{
     height: var(--model-height);
     overflow: hidden;
-}
-
-#model-canva{
-    background-color: white;
-    overflow-y: auto;
-    height: var(--model-canva-calculated-height);
 }
 
 .list-object-efootprint{
@@ -489,7 +497,33 @@ input:disabled{
 /* CSS class use for Responsive or small screen */
 /*----------------------------------*/
 
-@media (max-width: 1200px) {
+#model-canva-wrapper{
+    overflow-x: auto;
+}
+
+#model-canva{
+    background-color: white;
+    overflow-y: auto;
+    height: var(--model-canva-calculated-height);
+}
+
+/* Mobile */
+
+@media (max-width:575.98px){
+    #model-canva{
+        width:300vw;
+    }
+}
+
+/* tablette */
+@media (min-width:576px) and (max-width:1199.9px){
+    #model-canva{
+        width:150vw;
+    }
+}
+
+
+@media (max-width: 1199.9px) {
     .fs-sm{
         font-size: 0.4em;
     }
@@ -532,7 +566,16 @@ input:disabled{
     }
 }
 
-@media (min-width: 1200.1px) {
+@media (min-width: 1200px) {
+    .home-page{
+        height: var(--home-page-height);
+    }
+
+    #model-canva{
+        width:100%;
+        flex-wrap:wrap;
+    }
+
     #chartTimeseries{
         width: 50%;
         left: 25%;
@@ -573,6 +616,24 @@ input:disabled{
     .custom-ms-4 {
         margin-left: calc(1rem + 20px);
     }
+}
+
+@each $p in $percents {
+  .width-#{$p} { width: pct($p) !important; }
+  .ml-#{$p}   { margin-left: pct($p) !important; }
+  .mr-#{$p}   { margin-right: pct($p) !important; }
+}
+
+@each $bp, $size in $breakpoints {
+  @if $bp != null {
+    @media (min-width: $size) {
+      @each $p in $percents {
+        .width-#{$bp}-#{$p} { width: pct($p) !important; }
+        .ml-#{$bp}-#{$p}   { margin-left: pct($p) !important; }
+        .mr-#{$bp}-#{$p}   { margin-right: pct($p) !important; }
+      }
+    }
+  }
 }
 
 
