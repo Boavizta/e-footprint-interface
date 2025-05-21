@@ -47,12 +47,12 @@
                 <div id="flush-{{ usage_journey_step.web_id }}"
                      class="accordion-collapse collapse {% if usage_journey_step.jobs|length == 0 %}show{% endif %}"
                      data-bs-parent="#{{ usage_journey_step.web_id }}">
-                    <div class="accordion-body w-100 pe-0 m-0 d-flex flex-column text-end">
+                    <div class="accordion-body w-100 pe-0 m-0 d-flex flex-column">
                         {% for job in usage_journey_step.jobs %}
                             {% include 'model_builder/object_cards/job_card.html' with job=job %}
                         {% endfor %}
-                        <div class="ms-50 align-items-end p-2">
-                            <button class="btn btn-white dotted-border text-center p-2 me-2 h8 w-100 d-flex flew-row text-addition justify-content-center"
+                        <div class="width-100 ml-0 width-md-85 ml-md-15 width-lg-70 ml-lg-30 p-2 d-flex justify-content-end">
+                            <button class="d-flex h8 align-items-center justify-content-end p-2 btn bg-transparent"
                                     hx-get="/model_builder/open-create-object-panel/Job/"
                                     hx-target="#sidePanel"
                                     hx-trigger="click"
@@ -61,9 +61,12 @@
                                     hx-disabled-elt="button"
                                     _="on click removeAllOpenedObjectsHighlights()"
                             >
-                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-3 my-auto d-none d-xl-flex"
-                                     width="14px" height="14px" alt="add icon"/>
-                                <p class="mb-0">Add new job</p>
+                                <img src="{% static 'icons/circle_add_icon.svg' %}"  width="16" height="16">
+                                <div class="mb-0 ms-2 ps-1 d-flex align-items-center">
+                                    <div class="h8 mb-0 text-addition">
+                                        Add new job
+                                    </div>
+                                </div>
                             </button>
                         </div>
                     </div>

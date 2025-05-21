@@ -1,19 +1,53 @@
 function initSortableObjectCards() {
-    const upList = new Sortable(document.getElementById("up-list"), {
+    const options = {
         animation: 150,
-        onEnd: updateLines
-    });
+        onStart: () => {
+            document.querySelectorAll('.grabbing').forEach(el => {
+                el.classList.remove('grabbing');
+            });
+        },
+        onEnd: () =>{
+            document.querySelectorAll('.grabbing').forEach(el => {
+                el.classList.remove('grabbing');
+            });
+            updateLines();
+        }
+    };
 
-    const ujList = new Sortable(document.getElementById("uj-list"), {
-        animation: 150,
-        onEnd: updateLines
-    });
+    new Sortable(document.getElementById("up-list"), options);
+    new Sortable(document.getElementById("uj-list"), options);
+    new Sortable(document.getElementById("server-list"), options);
+}
 
-    const serverList = new Sortable(document.getElementById("server-list"), {
-        animation: 150,
-        onEnd: updateLines
+
+function addLongPressListener(selector, callback, delay = 300) {
+    let timer = null;
+
+    document.querySelectorAll(selector).forEach(element => {
+        element.addEventListener('mousedown', e => {
+            timer = setTimeout(() => {
+                callback(e, element);
+            }, delay);
+        });
+
+        ['mouseup', 'mouseleave'].forEach(event => {
+            element.addEventListener(event, () => {
+                clearTimeout(timer);
+                timer = null;
+            });
+        });
     });
 }
+
+addLongPressListener('.grab', (e, el) => {
+    el.classList.add('grabbing');
+});
+
+document.addEventListener('mouseup', () => {
+    document.querySelectorAll('.grabbing').forEach(el => {
+        el.classList.remove('grabbing');
+    });
+});
 
 function initModelBuilderMain() {
     initLeaderLines();
@@ -102,3 +136,66 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
 
     toastBootstrap.show();
 });
+
+function scrollToRight() {
+    const wrapper = document.getElementById("model-canva-wrapper");
+    if (!wrapper) return;
+
+    const scrollAmount = wrapper.clientWidth / 2;
+    wrapper.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+function scrollToLeft() {
+    const wrapper = document.getElementById("model-canva-wrapper");
+    if (!wrapper) return;
+
+    const scrollAmount = wrapper.clientWidth / 2;
+    wrapper.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const wrapper = document.getElementById("model-canva-wrapper");
+    const btnRight = document.getElementById("model-scroll-to-right");
+    const btnLeft = document.getElementById("model-scroll-to-left");
+
+    if (!wrapper) return;
+
+    const updateScrollButtons = () => {
+        const maxScrollLeft = wrapper.scrollWidth - wrapper.clientWidth;
+        const currentScroll = wrapper.scrollLeft;
+
+        if (btnRight) {
+            if (Math.ceil(currentScroll) >= maxScrollLeft) {
+                btnRight.classList.remove("d-block");
+                btnRight.classList.add("d-none");
+            } else {
+                btnRight.classList.remove("d-none");
+                btnRight.classList.add("d-block");
+            }
+        }
+
+        if (btnLeft) {
+            if (Math.floor(currentScroll) <= 0) {
+                btnLeft.classList.remove("d-block");
+                btnLeft.classList.add("d-none");
+            } else {
+                btnLeft.classList.remove("d-none");
+                btnLeft.classList.add("d-block");
+            }
+        }
+    };
+
+    wrapper.addEventListener("scroll", updateScrollButtons);
+
+    // Appelle une première fois au chargement
+    updateScrollButtons();
+});
+
+

@@ -1,68 +1,74 @@
 {% load static %}
-<div class="d-flex bg-white border border-top-2 border-light justify-content-between px-0 mx-0 z-2">
-    <div class="p-2 flex-grow-1 bg-white text-start z-2">
-        <input
-            name="name"
-            id="SystemNameHeader"
-            type="text"
-            class="lead m-0 ms-5 text-body-tertiary border-0"
-            value="{{ model_web.system.name}}"
-            _="on input resizeSystemNameHeader()"
-            hx-post="{% url 'save-model-name' %}"
-            hx-trigger="input delay:1s"
-            hx-include="this"
-            hx-swap="none"
-        >
-    </div>
-    <div class="p-2">
-        <div class="row text-end me-4">
-            <div class="col-auto">
-                <button hx-get="{% url 'open-import-json-panel' %}"
-                        hx-target="#sidePanel"
-                        hx-swap="innerHTML"
-                        hx-disabled-elt="button"
-                        class="nav-link d-flex flex-row gap-2 mx-2 move-panel-open"
-                        data-bs-toggle="popover"
-                        data-bs-trigger="hover focus"
-                        data-bs-content="Import a model"
-                        data-bs-placement="bottom"
-                        data-bs-custom-class="blue-popover"
-                        data-location="upload_download_reboot_model_tooltips"
-                >
-                    <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
-                </button>
-            </div>
-            <div class="col-auto">
-                <a href="download-json/"
-                    target="_blank"
-                    class="nav-link d-flex flex-row gap-2 mx-2"
-                    data-bs-toggle="popover"
-                    data-bs-trigger="hover focus"
-                    data-bs-content="Export your model"
-                    data-bs-placement="bottom"
-                    data-bs-custom-class="blue-popover"
-                    data-location="upload_download_reboot_model_tooltips"
-                >
-                    <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
-                </a>
-            </div>
-            <div class="col-auto">
-                <a href="reboot"
-                    id="btn-reboot-modeling"
-                    class="nav-link d-flex flex-row gap-2 mx-2"
-                    data-bs-toggle="popover"
-                    data-bs-trigger="hover focus"
-                    data-bs-content="Reset to default model"
-                    data-bs-placement="bottom"
-                    data-bs-custom-class="blue-popover"
-                    data-location="upload_download_reboot_model_tooltips"
-                >
-                    <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
-                </a>
-            </div>
+<nav class="navbar navbar-expand-lg bg-white z-3">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+
+        <div class="navbar-brand">
+            My mobil system
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3">
+                <li class="nav-item">
+                    <button hx-get="{% url 'open-import-json-panel' %}"
+                            hx-target="#sidePanel"
+                            hx-swap="innerHTML"
+                            hx-disabled-elt="button"
+                            class="nav-link d-flex flex-row gap-2 mx-2 move-panel-open"
+                            data-bs-toggle="popover"
+                            data-bs-trigger="hover focus"
+                            data-bs-content="Import a model"
+                            data-bs-placement="bottom"
+                            data-bs-custom-class="blue-popover"
+                            data-location="upload_download_reboot_model_tooltips"
+                    >
+                        <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
+                        <p class="d-block d-lg-none">
+                            Import your model
+                        </p>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a href="download-json/"
+                       target="_blank"
+                       class="nav-link d-flex flex-row gap-2 mx-2"
+                       data-bs-toggle="popover"
+                       data-bs-trigger="hover focus"
+                       data-bs-content="Export your model"
+                       data-bs-placement="bottom"
+                       data-bs-custom-class="blue-popover"
+                       data-location="upload_download_reboot_model_tooltips"
+                    >
+                        <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
+                        <p class="d-block d-lg-none">
+                            Export your model
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reboot"
+                       id="btn-reboot-modeling"
+                       class="nav-link d-flex flex-row gap-2 mx-2"
+                       data-bs-toggle="popover"
+                       data-bs-trigger="hover focus"
+                       data-bs-content="Reset to default model"
+                       data-bs-placement="bottom"
+                       data-bs-custom-class="blue-popover"
+                       data-location="upload_download_reboot_model_tooltips"
+                    >
+                        <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
+                        <p class="d-block d-lg-none">
+                            Reset to default model
+                        </p>
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
-</div>
+</nav>
 
 <script>
     window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="upload_download_reboot_model_tooltips"]');

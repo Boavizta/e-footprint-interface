@@ -1,5 +1,5 @@
 {% load static %}
-<div id="{{ server.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card move">
+<div id="{{ server.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <div class="accordion-header p-0 d-flex align-items-center">
@@ -43,7 +43,7 @@
                             {%  include 'model_builder/object_cards/service_card.html' with service=service %}
                         {% endfor %}
                     </div>
-                    <button class="btn btn-white text-start p-0 h8 dotted-border h-100 w-100 rounded-2 p-2  d-flex flex-row align-items-center"
+                    <button class="d-flex h8 align-items-center p-2 btn bg-transparent ms-2  d-flex flex-row align-items-center"
                             hx-get="/model_builder/open-create-object-panel/Service/"
                             hx-target="#sidePanel"
                             hx-trigger="click"
@@ -52,8 +52,12 @@
                             hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ server.efootprint_id }}"}'
                             _="on click removeAllOpenedObjectsHighlights()"
                     >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white me-2 d-none d-xl-flex"  width="16px" height="16px" alt="add icon" />
-                        Install service
+                        <img src="{% static 'icons/circle_add_icon.svg' %}"  width="16" height="16">
+                        <div class="mb-0 ms-2 ps-1 d-flex align-items-center">
+                            <div class="h8 mb-0 text-addition">
+                                Install service
+                            </div>
+                        </div>
                     </button>
                 </div>
             </div>
