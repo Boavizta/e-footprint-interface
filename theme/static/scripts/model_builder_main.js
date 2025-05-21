@@ -1,19 +1,53 @@
 function initSortableObjectCards() {
-    const upList = new Sortable(document.getElementById("up-list"), {
+    const options = {
         animation: 150,
-        onEnd: updateLines
-    });
+        onStart: () => {
+            document.querySelectorAll('.grabbing').forEach(el => {
+                el.classList.remove('grabbing');
+            });
+        },
+        onEnd: () =>{
+            document.querySelectorAll('.grabbing').forEach(el => {
+                el.classList.remove('grabbing');
+            });
+            updateLines();
+        }
+    };
 
-    const ujList = new Sortable(document.getElementById("uj-list"), {
-        animation: 150,
-        onEnd: updateLines
-    });
+    new Sortable(document.getElementById("up-list"), options);
+    new Sortable(document.getElementById("uj-list"), options);
+    new Sortable(document.getElementById("server-list"), options);
+}
 
-    const serverList = new Sortable(document.getElementById("server-list"), {
-        animation: 150,
-        onEnd: updateLines
+
+function addLongPressListener(selector, callback, delay = 300) {
+    let timer = null;
+
+    document.querySelectorAll(selector).forEach(element => {
+        element.addEventListener('mousedown', e => {
+            timer = setTimeout(() => {
+                callback(e, element);
+            }, delay);
+        });
+
+        ['mouseup', 'mouseleave'].forEach(event => {
+            element.addEventListener(event, () => {
+                clearTimeout(timer);
+                timer = null;
+            });
+        });
     });
 }
+
+addLongPressListener('.grab', (e, el) => {
+    el.classList.add('grabbing');
+});
+
+document.addEventListener('mouseup', () => {
+    document.querySelectorAll('.grabbing').forEach(el => {
+        el.classList.remove('grabbing');
+    });
+});
 
 function initModelBuilderMain() {
     initLeaderLines();
