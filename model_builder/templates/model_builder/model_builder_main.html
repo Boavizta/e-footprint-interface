@@ -1,7 +1,7 @@
 {% load static %}
+{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
 <div class="row position-relative mx-0" id="model-builder-page">
-    <div class="col p-0">
-        {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+    <div class="col p-0" id="model-canva-wrapper">
         <div class="row my-3 mx-0 px-0 gx-3" id="model-canva">
             <div class="col-4">
                 <div class="rounded-4 p-4 list-object-efootprint" id="usage-pattern-container">
@@ -87,7 +87,7 @@
             </div>
         </div>
     </div>
-    <div class="col-4 col-xl-3 d-none transition-width pb-3 overflow-y-auto" id="sidePanel"></div>
+    <div class="col-12 col-md-6 col-xl-3 d-none transition-width pb-3 overflow-y-auto z-2 bg-white" id="sidePanel"></div>
     <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
         <div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
             hx-get="/model_builder/result-chart/"
@@ -111,6 +111,23 @@
     </div>
 </div>
 
+<button id="model-scroll-to-right"
+    class="d-block d-lg-none position-absolute top-50 end-0 top-0 border-0 rounded-start-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-2"
+        onclick="scrollToRight()"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+</svg>
+</button>
+
+<button id="model-scroll-to-left"
+    class="d-block d-lg-none position-absolute top-50 start-0 border-0 rounded-end-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-2"
+        onclick="scrollToLeft()"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+      <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+    </svg>
+</button>
 
 {% include 'model_builder/side_panels/usage_pattern/timeseries_chart.html' %}
 

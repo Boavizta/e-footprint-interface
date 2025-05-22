@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta charset="UTF-8"/>
         <title>e-footprint</title>
         <link rel="stylesheet" href="{% static 'css/bs_main.css' %}"/>
@@ -29,7 +30,7 @@
     <div id="loading-bar" class="bg-body-tertiary z-2">
         <div class="progress-bar"></div>
     </div>
-    <main id="main-content-block" class="text-center w-100">
+    <main id="main-content-block" class="text-center w-100 position-relative">
         {% if home %}
         {% include "home.html" %}
         {% elif modelBuilderMain %}

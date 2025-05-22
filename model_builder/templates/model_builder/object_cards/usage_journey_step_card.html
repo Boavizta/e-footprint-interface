@@ -48,7 +48,7 @@
                         {% for job in usage_journey_step.jobs %}
                             {% include 'model_builder/object_cards/job_card.html' with job=job %}
                         {% endfor %}
-                        <div class="width-100 ml-0 width-md-85 ml-md-15 width-lg-70 ml-lg-30 width-xl-50 ml-xl-50 p-2 d-flex justify-content-end">
+                        <div class="width-100 ml-0 width-md-85 ml-md-15 width-lg-70 ml-lg-30 p-2 d-flex justify-content-end">
                             <button class="d-flex h8 align-items-center justify-content-end p-2 btn bg-transparent"
                                     hx-get="/model_builder/open-create-object-panel/Job/"
                                     hx-target="#sidePanel"

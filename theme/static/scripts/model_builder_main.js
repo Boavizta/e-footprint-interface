@@ -118,3 +118,66 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
 
     toastBootstrap.show();
 });
+
+function scrollToRight() {
+    const wrapper = document.getElementById("model-canva-wrapper");
+    if (!wrapper) return;
+
+    const scrollAmount = wrapper.clientWidth / 2;
+    wrapper.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+function scrollToLeft() {
+    const wrapper = document.getElementById("model-canva-wrapper");
+    if (!wrapper) return;
+
+    const scrollAmount = wrapper.clientWidth / 2;
+    wrapper.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const wrapper = document.getElementById("model-canva-wrapper");
+    const btnRight = document.getElementById("model-scroll-to-right");
+    const btnLeft = document.getElementById("model-scroll-to-left");
+
+    if (!wrapper) return;
+
+    const updateScrollButtons = () => {
+        const maxScrollLeft = wrapper.scrollWidth - wrapper.clientWidth;
+        const currentScroll = wrapper.scrollLeft;
+
+        if (btnRight) {
+            if (Math.ceil(currentScroll) >= maxScrollLeft) {
+                btnRight.classList.remove("d-block");
+                btnRight.classList.add("d-none");
+            } else {
+                btnRight.classList.remove("d-none");
+                btnRight.classList.add("d-block");
+            }
+        }
+
+        if (btnLeft) {
+            if (Math.floor(currentScroll) <= 0) {
+                btnLeft.classList.remove("d-block");
+                btnLeft.classList.add("d-none");
+            } else {
+                btnLeft.classList.remove("d-none");
+                btnLeft.classList.add("d-block");
+            }
+        }
+    };
+
+    wrapper.addEventListener("scroll", updateScrollButtons);
+
+    // Appelle une première fois au chargement
+    updateScrollButtons();
+});
+
+
