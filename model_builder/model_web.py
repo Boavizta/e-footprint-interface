@@ -9,15 +9,28 @@ from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplai
     ExplainableHourlyQuantities, ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system, json_to_explainable_object
-from efootprint.core.all_classes_in_order import SERVICE_CLASSES
+from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
+from efootprint.core.hardware.server_base import ServerBase
+from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
 from efootprint.constants.units import u
 
-from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
+from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
 from utils import EFOOTPRINT_COUNTRIES
 
 model_web_root = os.path.dirname(os.path.abspath(__file__))
+_extension_classes = [UsagePatternFromForm]
+MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
+                                for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
+ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
+
+with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
+    FORM_FIELD_REFERENCES = json.load(f)
+
+with open(os.path.join(model_web_root, "form_type_object.json"), "r") as f:
+    FORM_TYPE_OBJECT = json.load(f)
+
 
 def default_networks():
     with open(os.path.join(model_web_root, "default_networks.json"), "r") as f:

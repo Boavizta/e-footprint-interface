@@ -5,8 +5,6 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
-from model_builder.class_structure import FORM_TYPE_OBJECT, FORM_FIELD_REFERENCES
-
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
     output_list = []
@@ -30,6 +28,7 @@ class ExplainableObjectWeb:
 
     @property
     def label(self):
+        from model_builder.model_web import FORM_FIELD_REFERENCES
         if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
             return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
         else:
@@ -118,6 +117,7 @@ class ModelingObjectWeb:
 
     @property
     def class_label(self):
+        from model_builder.model_web import FORM_TYPE_OBJECT
         return FORM_TYPE_OBJECT[self.class_as_simple_str]["label"]
 
     @property
