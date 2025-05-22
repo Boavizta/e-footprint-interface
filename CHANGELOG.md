@@ -4,12 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.7.23] - 2025 - 05 - 22
+## [0.7.23] - 2025-05-26
 
 ### Added
 - Highlight the object in the model canvas when the user clicks on i. If it 
   is a mirrored object, the corresponding objects are also highlighted in the 
   model canvas.
+
+### Changed
+- Load e-footprint objects in settings.py so that they are already loaded even in the first user interaction.
 
 ## [0.7.22] - 2025-05-22
 

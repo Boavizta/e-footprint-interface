@@ -1,30 +1,12 @@
-import json
-import os
 from inspect import signature, _empty as empty_annotation
 from typing import get_origin, List, get_args
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.core.all_classes_in_order import ALL_EFOOTPRINT_CLASSES
-from efootprint.core.hardware.server_base import ServerBase
-from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
 
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-
-_extension_classes = [UsagePatternFromForm]
-MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
-                                for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
-ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
-
-model_web_root = os.path.dirname(os.path.abspath(__file__))
-
-with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
-    FORM_FIELD_REFERENCES = json.load(f)
-
-with open(os.path.join(model_web_root, "form_type_object.json"), "r") as f:
-    FORM_TYPE_OBJECT = json.load(f)
+from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT, FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
 
 
 def generate_object_creation_structure(
