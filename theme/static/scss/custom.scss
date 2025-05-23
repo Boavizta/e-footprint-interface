@@ -42,7 +42,7 @@ $zindex-levels: (
     --toolbar-height : 48px;
     --open-result-btn : 50px;
     --loading-bar-height : 2px;
-    --margin-padding-model : 30px;
+    --margin-padding-model : 6px;
 
     --model-height : calc(100vh - var(--navbar-height) - var(--loading-bar-height) - var(--toolbar-height));
     --model-canva-calculated-height : calc(
@@ -55,7 +55,7 @@ $zindex-levels: (
     --list-object-calculated-height : calc(
         var(--model-canva-calculated-height)- var(--open-result-btn)
     );
-    --result-panel-opened : calc(100vh - var(--navbar-height) - var(--toolbar-height));
+    --result-panel-opened : calc(100vh - var(--navbar-height) - var(--toolbar-height) );
     --home-page-height : calc(100vh - var(--navbar-height))
 }
 
@@ -80,8 +80,9 @@ $breakpoints: (
 
 @function pct($v) { @return if($v == 0, 0, $v * 1%); }
 
-html{
-    overflow: hidden;
+html, body {
+  overflow: hidden !important;
+  position: relative;
 }
 
 body{
@@ -91,7 +92,6 @@ body{
     color: var(--dark-blue);
     font-size: 0.8em;
     margin: 0;
-    overflow: hidden;
     height: 100vh;
 }
 
@@ -124,6 +124,16 @@ body{
                 var(--gadrient-color-2) 50.5%,
                 var(--gadrient-color-3) 100.53%)
     );
+}
+
+.scrollable-area {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    width: 100%;
+    height: var(--model-canva-calculated-height);
+    scroll-behavior: smooth;
 }
 
 /*Bootstrap overwrite*/
@@ -207,6 +217,10 @@ input:disabled{
   height: 80vh !important;
 }
 
+.vh-70 {
+  height: 70vh !important;
+}
+
 /*Bootstrap overwrite*/
 .btn-white:hover, .chevron-btn:hover{
     background-color: var(--gray-100);
@@ -280,11 +294,14 @@ input:disabled{
   left: 95% !important;
 }
 
+.equal-width {
+  flex: 1;
+}
+
 /* CSS Custom rules for home page*/
 /*----------------------------------*/
 #home-page-container{
     height: var(--home-page-height);
-    overflow-y: auto;
 }
 
 /* CSS Custom rules for model-builder page*/
@@ -304,7 +321,6 @@ input:disabled{
     width: 100%;
     height: var(--loading-bar-height);
     background-color: var(--loading-bar-bg);
-    overflow: hidden;
 }
 
 #loading-bar .progress-bar {
@@ -317,13 +333,22 @@ input:disabled{
     animation: none;
 }
 
+#leaderlines-layer {
+  pointer-events: none;
+  z-index: map-get($zindex-levels, 0) !important;
+  overflow: hidden;
+}
+
 .leader-line{
-  z-index: map-get($zindex-levels, 1);
+    z-index: map-get($zindex-levels, 0) !important;
+    pointer-events: none !important;
 }
 
 #model-builder-page{
     height: var(--model-height);
-    overflow: hidden;
+    width: 100vw !important;
+    overflow-x: hidden;
+    position: relative;
 }
 
 .list-object-efootprint{
@@ -332,9 +357,8 @@ input:disabled{
 
 #sidePanel {
     border: none;
-    height: var(--result-panel-opened);
+    height: var(--model-canva-calculated-height);
     border-left: 2px solid var(--gray-200);
-    overflow-y: auto;
 }
 
 #panel-result-btn{
@@ -497,28 +521,49 @@ input:disabled{
 /* CSS class use for Responsive or small screen */
 /*----------------------------------*/
 
-#model-canva-wrapper{
-    overflow-x: auto;
-}
-
 #model-canva{
+    min-width: max-content;
     background-color: white;
-    overflow-y: auto;
     height: var(--model-canva-calculated-height);
 }
 
 /* Mobile */
 
+
+
 @media (max-width:575.98px){
     #model-canva{
-        width:300vw;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        width:900px !important;
     }
+    .list-object-efootprint{
+        min-width: 300px;
+    }
+
+    #sidePanel {
+        width: 100vw;
+        max-width: 100vw;
+        left: 0;
+        right: 0;
+        position: fixed;
+    }
+
 }
 
 /* tablette */
 @media (min-width:576px) and (max-width:1199.9px){
     #model-canva{
-        width:150vw;
+        width:50%;
+    }
+
+
+    #sidePanel {
+        width: 50vw;
+        max-width: 50vw;
+        left: 50%;
+        right: 0;
+        position: fixed;
     }
 }
 
@@ -564,6 +609,19 @@ input:disabled{
     .custom-ms-4 {
         margin-left: 4px;
     }
+
+    #barChart{
+        min-height: 400px;
+    }
+
+    #lineChart{
+        min-height: 400px;
+    }
+
+    #panel-result-btn, #result-block {
+       max-height:  var(--result-panel-opened);
+    }
+
 }
 
 @media (min-width: 1200px) {
@@ -616,21 +674,29 @@ input:disabled{
     .custom-ms-4 {
         margin-left: calc(1rem + 20px);
     }
+
+    #sidePanel {
+        min-width: 25vw;
+    }
+
+    #barChart, #lineChart {
+       min-height: 500px;
+    }
 }
 
 @each $p in $percents {
-  .width-#{$p} { width: pct($p) !important; }
-  .ml-#{$p}   { margin-left: pct($p) !important; }
-  .mr-#{$p}   { margin-right: pct($p) !important; }
+  .width-#{$p} { width: pct($p); }
+  .ml-#{$p}   { margin-left: pct($p); }
+  .mr-#{$p}   { margin-right: pct($p); }
 }
 
 @each $bp, $size in $breakpoints {
   @if $bp != null {
     @media (min-width: $size) {
       @each $p in $percents {
-        .width-#{$bp}-#{$p} { width: pct($p) !important; }
-        .ml-#{$bp}-#{$p}   { margin-left: pct($p) !important; }
-        .mr-#{$bp}-#{$p}   { margin-right: pct($p) !important; }
+        .width-#{$bp}-#{$p} { width: pct($p); }
+        .ml-#{$bp}-#{$p}   { margin-left: pct($p); }
+        .mr-#{$bp}-#{$p}   { margin-right: pct($p); }
       }
     }
   }
@@ -675,4 +741,10 @@ input:disabled{
     --bs-popover-body-padding-x: 1rem;
     --bs-popover-body-padding-y: .5rem;
     --bs-popover-bg: #2D4675;
+}
+
+.custom-tooltip {
+  --bs-tooltip-bg: var(--new-primary);
+  --bs-tooltip-color: var(--bs-white);
+  --bs-tooltip-opacity: 1;
 }

@@ -84,7 +84,10 @@ function updateOrCreateLines(element) {
                 const toElement = document.getElementById(toElementId);
                 if (toElement) {
                     let optLine = fromElement.getAttribute('data-line-opt');
-                    let line = new LeaderLine(fromElement, toElement, dictLeaderLineOption[optLine]);
+                    let line = new LeaderLine(fromElement, toElement, {
+                      ...dictLeaderLineOption[optLine],
+                      parent: document.getElementById('leaderlines-layer')
+                    });
                     allLines[fromElement.id].push(line);
                 }
             }
@@ -156,10 +159,10 @@ function initLeaderLines() {
     document.querySelectorAll('.accordion').forEach(accordion => {
         addAccordionListener(accordion);
     });
+    const scrollContainerScrollableArea = document.querySelector('#model-canva-scrollable-area');
+    scrollContainerScrollableArea.addEventListener('scroll', updateLines);
     const scrollContainer = document.querySelector('#model-canva');
-    const scrollContainerWrapper = document.querySelector('#model-canva-wrapper');
     scrollContainer.addEventListener('scroll', updateLines);
-    scrollContainerWrapper.addEventListener('scroll', updateLines);
     updateLines();
     setLeaderLineListeners();
 }

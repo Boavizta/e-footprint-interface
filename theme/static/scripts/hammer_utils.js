@@ -3,8 +3,8 @@ function displayPanelResult(){
     let btn = document.getElementById("btn-open-panel-result");
     let resultDiv = document.getElementById("result-block");
     panel.style.transition = "height 0.2s ease-in-out";
-    panel.style.height = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
-    resultDiv.style.height = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
+    panel.style.minHeight = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
+    resultDiv.style.minHeight = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
 
     if(document.getElementById("sidePanel").classList.contains("d-none")){
         panel.classList.add("w-100");
@@ -20,7 +20,7 @@ function hidePanelResult(){
     let btn = document.getElementById("btn-open-panel-result");
     let resultDiv = document.getElementById("result-block");
     panel.style.transition = "height 0.2s ease-in-out";
-    panel.style.height = getComputedStyle(document.documentElement).getPropertyValue("--open-result-btn");
+    panel.style.minHeight = getComputedStyle(document.documentElement).getPropertyValue("--open-result-btn");
     btn.style.display = "block";
     resultDiv.innerHTML = "";
     resultDiv.style.height = "0px";
