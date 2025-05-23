@@ -53,7 +53,7 @@ function initModelBuilderMain() {
     initLeaderLines();
     initSortableObjectCards();
     initHammer();
-    resizeSystemNameHeader();
+    //resizeSystemNameHeader();
 }
 
 function reverseIconAccordion(objectId){
@@ -67,7 +67,7 @@ function reverseIconAccordion(objectId){
     updateLines();
 }
 
-
+/*
 function resizeSystemNameHeader() {
     let systemNameHeader = document.getElementById("SystemNameHeader");
 
@@ -81,6 +81,8 @@ function resizeSystemNameHeader() {
     systemNameHeader.style.width = `${span.offsetWidth + 5}px`;
     document.body.removeChild(span);
 }
+
+ */
 
 
 function removeAllOpenedObjectsHighlights(){
@@ -137,8 +139,9 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     toastBootstrap.show();
 });
 
+
 function scrollToRight() {
-    const wrapper = document.getElementById("model-canva-wrapper");
+    const wrapper = document.getElementById("model-canva-scrollable-area");
     if (!wrapper) return;
 
     const scrollAmount = wrapper.clientWidth / 2;
@@ -149,7 +152,7 @@ function scrollToRight() {
 }
 
 function scrollToLeft() {
-    const wrapper = document.getElementById("model-canva-wrapper");
+    const wrapper = document.getElementById("model-canva-scrollable-area");
     if (!wrapper) return;
 
     const scrollAmount = wrapper.clientWidth / 2;
@@ -159,9 +162,8 @@ function scrollToLeft() {
     });
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
-    const wrapper = document.getElementById("model-canva-wrapper");
+    const wrapper = document.getElementById("model-canva-scrollable-area");
     const btnRight = document.getElementById("model-scroll-to-right");
     const btnLeft = document.getElementById("model-scroll-to-left");
 
@@ -193,9 +195,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     wrapper.addEventListener("scroll", updateScrollButtons);
-
-    // Appelle une première fois au chargement
     updateScrollButtons();
 });
-
-
