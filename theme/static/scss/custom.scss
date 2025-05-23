@@ -505,20 +505,23 @@ input:disabled{
     height: var(--model-canva-calculated-height);
 }
 
+/* Mobile */
+
 @media (max-width:575.98px){
     #model-canva{
         width:300vw;
-        overflow-x: auto;
     }
 }
 
 /* tablette */
 @media (min-width:576px) and (max-width:1199.9px){
-    #model-canva{width:150vw;}
+    #model-canva{
+        width:150vw;
+    }
 }
 
 
-@media  (max-width: 1199.9px) {
+@media (max-width: 1199.9px) {
     .fs-sm{
         font-size: 0.4em;
     }
