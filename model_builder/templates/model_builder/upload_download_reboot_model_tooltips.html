@@ -1,7 +1,6 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg bg-white z-3">
     <div class="container-fluid d-flex align-items-center justify-content-between">
-
         <div class="navbar-brand">
             My mobil system
         </div>
@@ -10,20 +9,19 @@
                 aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse justify-content-end mt-1 m-lg-0" id="navbarSupportedContent">
             <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3">
                 <li class="nav-item">
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"
                             hx-swap="innerHTML"
                             hx-disabled-elt="button"
-                            class="nav-link d-flex flex-row gap-2 mx-2 move-panel-open"
-                            data-bs-toggle="popover"
-                            data-bs-trigger="hover focus"
-                            data-bs-content="Import a model"
-                            data-bs-placement="bottom"
-                            data-bs-custom-class="blue-popover"
+                            class="nav-link d-flex flex-row gap-2 mx-2"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Import a model"
+                            data-bs-custom-class="custom-tooltip"
                             data-location="upload_download_reboot_model_tooltips"
+                            _="on click call collapseNavbarIfShown()"
                     >
                         <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
                         <p class="d-block d-lg-none">
@@ -33,14 +31,13 @@
                 </li>
                 <li class="nav-item">
                     <a href="download-json/"
-                       target="_blank"
-                       class="nav-link d-flex flex-row gap-2 mx-2"
-                       data-bs-toggle="popover"
-                       data-bs-trigger="hover focus"
-                       data-bs-content="Export your model"
-                       data-bs-placement="bottom"
-                       data-bs-custom-class="blue-popover"
-                       data-location="upload_download_reboot_model_tooltips"
+                           target="_blank"
+                           class="nav-link d-flex flex-row gap-2 mx-2"
+                           data-bs-title="Export your model"
+                           data-bs-placement="bottom"
+                           data-bs-custom-class="custom-tooltip"
+                           data-location="upload_download_reboot_model_tooltips"
+                            _="on click call collapseNavbarIfShown()"
                     >
                         <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
                         <p class="d-block d-lg-none">
@@ -51,13 +48,12 @@
                 <li class="nav-item">
                     <a href="reboot"
                        id="btn-reboot-modeling"
-                       class="nav-link d-flex flex-row gap-2 mx-2"
-                       data-bs-toggle="popover"
-                       data-bs-trigger="hover focus"
-                       data-bs-content="Reset to default model"
-                       data-bs-placement="bottom"
-                       data-bs-custom-class="blue-popover"
-                       data-location="upload_download_reboot_model_tooltips"
+                           class="nav-link d-flex flex-row gap-2 mx-2"
+                           data-bs-title="Reset to default model"
+                           data-bs-placement="bottom"
+                           data-bs-custom-class="custom-tooltip"
+                           data-location="upload_download_reboot_model_tooltips"
+                            _="on click call collapseNavbarIfShown()"
                     >
                         <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
                         <p class="d-block d-lg-none">
@@ -71,6 +67,23 @@
 </nav>
 
 <script>
-    window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="upload_download_reboot_model_tooltips"]');
-    window.popoverList = [...window.popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+
+    window.tooltipTriggerList = document.querySelectorAll('[data-location="upload_download_reboot_model_tooltips"]')
+    window.tooltipTriggerList.forEach(el => {
+        if (window.innerWidth >= 992) {
+            new bootstrap.Tooltip(el)
+        } else {
+            el.removeAttribute('data-bs-toggle')
+        }
+    })
+
+    function collapseNavbarIfShown() {
+        const isExpanded = document.getElementById("navbarSupportedContent").classList.contains("show");
+        if (isExpanded) {
+            const collapse = new bootstrap.Collapse(document.getElementById("navbarSupportedContent"), {
+                toggle: false
+            });
+            collapse.hide();
+        }
+    }
 </script>
