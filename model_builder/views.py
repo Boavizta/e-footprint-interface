@@ -5,7 +5,6 @@ from io import BytesIO
 
 import pandas as pd
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -18,10 +17,9 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
-from e_footprint_interface.settings import MODELING_OBJECT_CLASSES_DICT
-from model_builder.model_web import ModelWeb
+from model_builder.model_web import ModelWeb, MODELING_OBJECT_CLASSES_DICT
 from model_builder.modeling_objects_web import ExplainableObjectWeb
-from model_builder.object_creation_and_edition_utils import render_exception_modal, render_exception_modal_if_error
+from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render
 
 import json
@@ -73,13 +71,14 @@ def open_import_json_panel(request):
               "header_name":"Import a model"})
 
 def download_json(request):
-    data = request.session.get("system_data", {})
-    json_data = json.dumps(data, indent=4)
-    system_name = request.session["system_data"]["System"][
-        next(iter(request.session["system_data"]["System"].keys()), None)]["name"]
+    model_web = ModelWeb(request.session)
+    system = model_web.system
+    system_data_without_calculated_attributes = system_to_json(
+        system, save_calculated_attributes=False, output_filepath=None)
+    json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
-    response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system_name}.e-f.json"
+    response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system.name}.e-f.json"
     return response
 
 def upload_json(request):
@@ -97,8 +96,12 @@ def upload_json(request):
             from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
             if "efootprint_version" not in data.keys():
                 data["efootprint_version"] = "9.1.4"
-            json_to_system(data, launch_system_computations=False, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
-            request.session["system_data"] = data
+            class_obj_dict, flat_obj_dict = json_to_system(
+                data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+            system = next(iter(class_obj_dict["System"].values()))
+            system_data_with_calculated_attributes = system_to_json(
+                system, save_calculated_attributes=True, output_filepath=None)
+            request.session["system_data"] = system_data_with_calculated_attributes
             return redirect("model-builder")
         except Exception as e:
             import_error_message += (
@@ -116,7 +119,7 @@ def upload_json(request):
 @render_exception_modal_if_error
 @time_it
 def result_chart(request):
-    model_web = ModelWeb(request.session, launch_system_computations_and_make_modeling_dynamic=True)
+    model_web = ModelWeb(request.session)
 
     http_response = htmx_render(
         request, "model_builder/result/result_panel.html", context={"model_web": model_web})
@@ -133,7 +136,6 @@ def get_calculus_graph(request, cache_key, efootprint_id, attr_name, graph_key):
 
 def display_calculus_graph(request, efootprint_id, attr_name):
     model_web = ModelWeb(request.session)
-    model_web.system.after_init()
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
     graphs = []
     graphs_html_contents = {}

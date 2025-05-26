@@ -9,6 +9,7 @@ from efootprint.abstract_modeling_classes.explainable_objects import Explainable
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
+from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.logger import logger
 from efootprint.constants.units import u
 
@@ -146,19 +147,14 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                     new_mod_obj_id, mod_obj_attribute_object_type_str)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, obj_to_add, False])
 
-    if model_web.launch_system_computations_and_make_modeling_dynamic:
-        changes_list = [
-            [getattr(obj_to_edit.modeling_obj, attr_name), new_value]
-            for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs]
-        ModelingUpdate(changes_list)
-    else:
-        for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs:
-            obj_to_edit.set_efootprint_value(attr_name, new_value, check_input_validity)
+    changes_list = [
+        [getattr(obj_to_edit.modeling_obj, attr_name), new_value]
+        for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs]
+    ModelingUpdate(changes_list)
 
     # Update session data
-    model_web.session["system_data"][obj_to_edit.class_as_simple_str][obj_to_edit.efootprint_id] = obj_to_edit.to_json()
-    # Here we updated a sub dict of request.session so we have to explicitly tell Django that it has been updated
-    model_web.session.modified = True
+    model_web.session["system_data"] = system_to_json(
+        obj_to_edit.systems[0].modeling_obj, save_calculated_attributes=True)
 
     return obj_to_edit
 

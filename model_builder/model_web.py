@@ -9,6 +9,7 @@ from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplai
     ExplainableHourlyQuantities, ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system, json_to_explainable_object
+from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.usage.job import JobBase
@@ -94,6 +95,8 @@ class ModelWeb:
                 efootprint_object.__setattr__(attr_key, json_to_explainable_object(attr_value))
             else:
                 efootprint_object.__dict__[attr_key] = attr_value
+        for calculated_attribute in efootprint_object.calculated_attributes:
+            efootprint_object.__setattr__(calculated_attribute, EmptyExplainableObject())
         efootprint_object.after_init()
 
         return efootprint_object
@@ -135,16 +138,18 @@ class ModelWeb:
         return efootprint_object
 
     def add_new_efootprint_object_to_system(self, efootprint_object):
-        if self.launch_system_computations_and_make_modeling_dynamic:
-            self.raise_incomplete_modeling_errors()
+        new_system_data = self.session["system_data"]
         object_type = efootprint_object.class_as_simple_str
-
-        if object_type not in self.session["system_data"]:
-            self.session["system_data"][object_type] = {}
-            self.response_objs[object_type] = {}
-        self.session["system_data"][object_type][efootprint_object.id] = efootprint_object.to_json()
-        # Here we updated a sub dict of request.session so we have to explicitly tell Django that it has been updated
-        self.session.modified = True
+        if len(efootprint_object.systems) == 0:
+            if object_type not in new_system_data:
+                new_system_data[object_type] = {}
+                self.response_objs[object_type] = {}
+                new_system_data[object_type][efootprint_object.id] = efootprint_object.to_json()
+        else:
+            serialized_system_data_with_calculated_attributes = system_to_json(
+                efootprint_object.systems[0].modeling_obj, save_calculated_attributes=True)
+            new_system_data.update(serialized_system_data_with_calculated_attributes)
+        self.session["system_data"] = new_system_data
 
         self.response_objs[object_type][efootprint_object.id] = efootprint_object
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
