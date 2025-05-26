@@ -4,18 +4,11 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from django.contrib import staticfiles
-from efootprint.core.all_classes_in_order import ALL_EFOOTPRINT_CLASSES
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
 import environ
 from google.cloud import secretmanager
-
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-
-_extension_classes = [UsagePatternFromForm]
-MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
-                                for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +21,6 @@ SECRET_KEY = "django-insecure--3#!ddceds#0n$a6(r$8=j*%-r05rm5x!en1wqhg@^2cjnvg4r
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = '/static/'

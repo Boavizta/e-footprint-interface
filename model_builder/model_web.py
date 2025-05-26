@@ -9,15 +9,20 @@ from efootprint.abstract_modeling_classes.explainable_objects import EmptyExplai
     ExplainableHourlyQuantities, ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system, json_to_explainable_object
-from efootprint.core.all_classes_in_order import SERVICE_CLASSES
+from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
 from efootprint.constants.units import u
 
-from e_footprint_interface.settings import MODELING_OBJECT_CLASSES_DICT
+from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
 from utils import EFOOTPRINT_COUNTRIES
+
+
+_extension_classes = [UsagePatternFromForm]
+MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
+                                for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
 
 model_web_root = os.path.dirname(os.path.abspath(__file__))
 ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
