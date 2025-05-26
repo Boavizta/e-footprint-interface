@@ -8,13 +8,14 @@ from model_builder.addition.views_addition import add_object
 from model_builder.views import result_chart
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
+from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class IntegrationTest(TestModelingBase):
     @classmethod
     def setUpClass(cls):
-        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+        cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_partial_integration(self):
         logger.info(f"Creating usage pattern")
@@ -38,9 +39,9 @@ class IntegrationTest(TestModelingBase):
         up_request = self.factory.post('/add-object/UsagePatternFromForm', data=post_data)
         self._add_session_to_request(up_request, self.system_data)  # Attach a valid session
         len_system_up = len(up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"])
-        new_up_id = up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"][-1]
 
         response = add_object(up_request, "UsagePatternFromForm")
+        new_up_id = up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"][-1]
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 1)
@@ -80,6 +81,7 @@ class IntegrationTest(TestModelingBase):
 
         logger.info(f"Manually deleting usage pattern")
         delete_object(job_request, new_up_id)
+        self.assertNotIn("UsagePatternFromForm", job_request.session["system_data"])
         logger.info(f"Manually deleting job")
         delete_object(job_request, new_job_id)
         logger.info(f"Manually deleting service")

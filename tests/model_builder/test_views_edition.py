@@ -21,13 +21,14 @@ from model_builder.class_structure import generate_object_edition_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
+from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class TestViewsEdition(TestModelingBase):
     @classmethod
     def setUpClass(cls):
-        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+        cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_edition(self):
         logger.info(f"Creating service")

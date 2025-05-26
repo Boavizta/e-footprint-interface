@@ -20,9 +20,7 @@
                     "link": null
                 }
             },
-            "jobs": [
-                "id-4f5352-Test-E2E-Job-1"
-            ]
+            "jobs": []
         },
         "id-781e99-Test-E2E-UJ-2": {
             "name": "Test E2E UJ 2",
@@ -36,9 +34,7 @@
                     "link": null
                 }
             },
-            "jobs": [
-                "id-5f350a-Test-E2E-Job-2"
-            ]
+            "jobs": []
         }
     },
     "UsageJourney": {

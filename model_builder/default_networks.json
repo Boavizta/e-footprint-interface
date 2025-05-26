@@ -1,24 +1,24 @@
 {
-    "id-7cc9e5-Default-wifi-network": {
+    "id-0ca432-Default-wifi-network": {
         "name": "Default wifi network",
-        "id": "id-7cc9e5-Default-wifi-network",
+        "id": "id-0ca432-Default-wifi-network",
         "bandwidth_energy_intensity": {
-            "label": "bandwith energy intensity of Default wifi network from Traficom study",
             "value": 0.05,
             "unit": "kilowatt_hour / gigabyte",
+            "label": "bandwith energy intensity of Default wifi network from Traficom study",
             "source": {
                 "name": "Traficom study",
                 "link": "https://www.traficom.fi/en/news/first-study-energy-consumption-communications-networks"
             }
         }
     },
-    "id-a68fd8-Default-mobile-network": {
+    "id-af8379-Default-mobile-network": {
         "name": "Default mobile network",
-        "id": "id-a68fd8-Default-mobile-network",
+        "id": "id-af8379-Default-mobile-network",
         "bandwidth_energy_intensity": {
-            "label": "bandwith energy intensity of Default mobile network from Traficom study",
             "value": 0.12,
             "unit": "kilowatt_hour / gigabyte",
+            "label": "bandwith energy intensity of Default mobile network from Traficom study",
             "source": {
                 "name": "Traficom study",
                 "link": "https://www.traficom.fi/en/news/first-study-energy-consumption-communications-networks"

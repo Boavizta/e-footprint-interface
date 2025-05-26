@@ -85,10 +85,10 @@ describe("Test - Toolbars import/export/reboot", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-
-        cy.wait(500);
+        cy.get('input[type="file"]').should("not.exist");
 
         cy.get('a[id="btn-reboot-modeling"]').click();
+        cy.wait(500);
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('not.exist');
         cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('not.exist');
@@ -112,8 +112,7 @@ describe("Test - Toolbars import/export/reboot", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-
-        cy.wait(500);
+        cy.get('input[type="file"]').should("not.exist");
 
         cy.get('#SystemNameHeader').clear().invoke('val', newSystemName).trigger('input').wait(1200);
         cy.visit("/model_builder/");
@@ -127,8 +126,7 @@ describe("Test - Toolbars import/export/reboot", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-
-        cy.wait(500);
+        cy.get('input[type="file"]').should("not.exist");
 
         let now = new Date();
         let nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);

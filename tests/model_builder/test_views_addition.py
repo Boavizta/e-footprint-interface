@@ -8,13 +8,14 @@ from model_builder.views import model_builder_main
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
 from model_builder.edition.views_edition import edit_object, open_edit_object_panel
+from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class TestViewsAddition(TestModelingBase):
     @classmethod
     def setUpClass(cls):
-        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+        cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_add_new_usage_pattern_from_form(self):
         post_data = QueryDict(mutable=True)
@@ -80,7 +81,7 @@ class TestViewsAddition(TestModelingBase):
         response = delete_object(delete_request, up_id)
 
         self.assertEqual(response.status_code, 204)
-        self.assertNotIn(up_id, add_request.session["system_data"]["UsagePatternFromForm"])
+        self.assertNotIn("UsagePatternFromForm", add_request.session["system_data"])
         self.assertEqual(
             len(delete_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]), len_system_up)
 
@@ -119,7 +120,6 @@ class TestViewsAddition(TestModelingBase):
         response = add_object(request, "Job")
         self.assertEqual(response.status_code, 200)
 
-
     def test_add_usage_journey_with_no_uj_step(self):
         post_data = QueryDict(mutable=True)
         post_data.update({
@@ -143,3 +143,23 @@ class TestViewsAddition(TestModelingBase):
         response = add_object(add_request, "UsageJourney")
 
         self.assertTrue("UsageJourney" in add_request.session["system_data"].keys())
+
+    def test_add_usage_journey_step(self):
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
+            "UsageJourneyStep_name": ["New usage journey step"],
+            "efootprint_id_of_parent_to_link_to": ["uuid-Daily-video-usage"],
+            "UsageJourneyStep_user_time_spent": ["1"],
+            "UsageJourneyStep_user_time_spent_unit": ["min"],
+            "UsageJourneyStep_jobs": [""],
+        })
+
+        add_request = self.factory.post("/add-object/UsageJourneyStep", data=post_data)
+        self._add_session_to_request(add_request, self.system_data)
+        nb_uj_steps_before = len(add_request.session["system_data"]["UsageJourneyStep"])
+        response = add_object(add_request, "UsageJourneyStep")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nb_uj_steps_before + 1, len(add_request.session["system_data"]["UsageJourneyStep"]))
+

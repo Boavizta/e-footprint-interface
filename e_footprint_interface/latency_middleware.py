@@ -6,7 +6,7 @@ class NetworkLatencyMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        time.sleep(0.1)
+        time.sleep(0)
 
         response = self.get_response(request)
         return response

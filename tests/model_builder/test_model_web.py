@@ -5,13 +5,14 @@ from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
 from model_builder.model_web import ModelWeb
+from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class TestModelWeb(TestModelingBase):
     @classmethod
     def setUpClass(cls):
-        cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+        cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_get_efootprint_objects_from_efootprint_type(self):
         logger.info(f"Creating service")

@@ -89,9 +89,6 @@ class ModelingObjectWeb:
 
         self._modeling_obj.__setattr__(key, value, check_input_validity)
 
-        if self.model_web.launch_system_computations_and_make_modeling_dynamic:
-            self.model_web.raise_incomplete_modeling_errors()
-
     def get_efootprint_value(self, key):
         return getattr(self._modeling_obj, key, None)
 
@@ -188,12 +185,12 @@ class ModelingObjectWeb:
         request_session["system_data"][obj_type].pop(object_id, None)
         if len(request_session["system_data"][obj_type]) == 0:
             del request_session["system_data"][obj_type]
-        request_session.modified = True
         self._modeling_obj.self_delete()
         self.model_web.response_objs[obj_type].pop(object_id, None)
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
+        self.model_web.update_system_data_with_up_to_date_calculated_attributes()
 
 class ServiceWeb(ModelingObjectWeb):
     @property

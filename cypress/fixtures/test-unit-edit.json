@@ -148,8 +148,8 @@
             },
             "average_carbon_intensity": {
                 "label": "unnamed source from user data",
-                "value": 0.23,
-                "unit": "kilogram / kilowatt_hour",
+                "value": 230,
+                "unit": "gram / kilowatt_hour",
                 "source": {
                     "name": "user data",
                     "link": null

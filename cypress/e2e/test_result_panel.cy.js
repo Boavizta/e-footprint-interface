@@ -9,6 +9,7 @@ describe("Test - Result panel", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
+        cy.get('input[type="file"]').should("not.exist");
 
         cy.get('#btn-open-panel-result')
         .realTouch('start', { x: 100, y: 300 })
@@ -32,7 +33,7 @@ describe("Test - Result panel", () => {
           expect($input[0].files[0].name).to.equal('efootprint-model-system-data.json');
         });
         cy.get('button[type="submit"]').click();
-        cy.wait(500);
+        cy.get('input[type="file"]').should("not.exist");
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
 
         cy.get('#btn-open-panel-result')
@@ -53,6 +54,7 @@ describe("Test - Result panel", () => {
         let fileTest = 'cypress/fixtures/model-test-uj-not-linked-to-uj-step.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
+        cy.get('input[type="file"]').should("not.exist");
 
         cy.get('#btn-open-panel-result')
         .realTouch('start', { x: 100, y: 300 })
