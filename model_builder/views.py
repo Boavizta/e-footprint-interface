@@ -13,10 +13,12 @@ from efootprint.abstract_modeling_classes.explainable_objects import Explainable
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint import __version__ as efootprint_version
+from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
+from e_footprint_interface.settings import MODELING_OBJECT_CLASSES_DICT
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal, render_exception_modal_if_error
@@ -37,7 +39,12 @@ def model_builder_main(request, reboot=False):
     if reboot == "reboot":
         with open(os.path.join("model_builder", "default_system_data.json"), "r") as file:
             system_data = json.load(file)
-            request.session["system_data"] = system_data
+        class_obj_dict, flat_obj_dict = json_to_system(
+            system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+        system = next(iter(class_obj_dict["System"].values()))
+        system_data_with_calculated_attributes = system_to_json(
+            system, save_calculated_attributes=True, output_filepath=None)
+        request.session["system_data"] = system_data_with_calculated_attributes
         return redirect("model-builder")
     if "system_data" not in request.session.keys():
         return redirect("model-builder", reboot="reboot")

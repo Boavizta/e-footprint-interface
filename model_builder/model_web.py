@@ -53,22 +53,14 @@ ATTRIBUTES_TO_SKIP_IN_FORMS = [
 
 
 class ModelWeb:
-    def __init__(
-        self, session: SessionBase, launch_system_computations_and_make_modeling_dynamic=False):
+    def __init__(self, session: SessionBase):
         start = time()
         self.session = session
         self.system_data = session["system_data"]
-        self.launch_system_computations_and_make_modeling_dynamic = launch_system_computations_and_make_modeling_dynamic
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
-            self.system_data, launch_system_computations_and_make_modeling_dynamic,
-            efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+            self.system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
-        if not self.launch_system_computations_and_make_modeling_dynamic:
-            self.set_all_trigger_modeling_updates_to_false()
         logger.info(f"ModelWeb object created in {time() - start:.3f} seconds.")
-
-        if launch_system_computations_and_make_modeling_dynamic:
-            self.raise_incomplete_modeling_errors()
 
     def raise_incomplete_modeling_errors(self):
         if len(self.system.servers) == 0:
@@ -90,10 +82,6 @@ class ModelWeb:
                     "(Alternatively, if they are work in progress, you can delete the usage patterns pointing to them: "
                     "in that way the usage journeys will be ignored in the computation.)"
                 )
-
-    def set_all_trigger_modeling_updates_to_false(self):
-        for efootprint_obj in self.flat_efootprint_objs_dict.values():
-            efootprint_obj.trigger_modeling_updates = False
 
     @staticmethod
     def _efootprint_object_from_json(json_input: dict, object_type: str):
