@@ -4,9 +4,9 @@ from typing import List
 import pandas as pd
 import numpy as np
 import pytz
-from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
-from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity, EmptyExplainableObject, \
-    ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, SourceObject, SourceHourlyValues
 from efootprint.core.country import Country
 from efootprint.core.usage.usage_journey import UsageJourney
@@ -14,6 +14,8 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
 from efootprint.constants.units import u
+
+from model_builder.efootprint_extensions.explainable_start_date import ExplainableStartDate
 
 
 class UsagePatternFromForm(UsagePattern):
@@ -135,7 +137,7 @@ class UsagePatternFromForm(UsagePattern):
 
         local_start_date = utc_start_date + timedelta(hours=time_diff_in_hours)
 
-        self.local_timezone_start_date = ExplainableObject(
+        self.local_timezone_start_date = ExplainableStartDate(
             local_start_date, left_parent=self.start_date, right_parent=self.country.timezone,
             operator="converted to local timezone",
             label=f"{self.name} local timezone {self.country.timezone} start date")

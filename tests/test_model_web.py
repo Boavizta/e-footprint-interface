@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 import pandas as pd
-from efootprint.abstract_modeling_classes.explainable_objects import ExplainableHourlyQuantities, EmptyExplainableObject
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 
 from model_builder.model_web import ModelWeb
 import pint_pandas

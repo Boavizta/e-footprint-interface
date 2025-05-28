@@ -18,7 +18,7 @@ class TestViewsDeletion(TestModelingBase):
         logger.info(f"Delete mirrored cards jobs ")
         delete_request = self.factory.get(f'/model_builder/delete_object/{job_id}/')
         self._add_session_to_request(delete_request, system_data=self.system_data)
-        response =  delete_object(delete_request,  job_id)
+        response =  delete_object(delete_request, job_id)
 
         self.assertEqual(response.status_code, 200)
         mock_render_exception_modal.assert_not_called()

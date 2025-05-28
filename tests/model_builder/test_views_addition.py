@@ -1,9 +1,18 @@
 import os
 
+from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.constants.units import u
+from efootprint.core.country import Country
+from efootprint.core.hardware.device import Device
+from efootprint.core.hardware.network import Network
 from efootprint.logger import logger
 from django.http import QueryDict
 
 from model_builder.addition.views_addition import add_object
+from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.views import model_builder_main
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
@@ -15,6 +24,41 @@ class TestViewsAddition(TestModelingBase):
     @classmethod
     def setUpClass(cls):
         cls.system_data_path = os.path.join("tests", "model_builder", "default_system_data.json")
+
+    def test_add_new_usage_pattern_pure_efootprint(self):
+        class_obj_dict, flat_obj_dict = json_to_system(self.system_data)
+        device, exp_obj_dict = Device.from_json_dict(next(iter(default_devices().values())), flat_obj_dict, False)
+        device.trigger_modeling_updates = True
+        network, exp_obj_dict = Network.from_json_dict(next(iter(default_networks().values())), flat_obj_dict, False)
+        network.trigger_modeling_updates = True
+        country, exp_obj_dict = Country.from_json_dict(next(iter(default_countries().values())), flat_obj_dict, False)
+        country.trigger_modeling_updates = True
+        new_usage_pattern = UsagePatternFromForm(
+            name="New usage pattern",
+            devices=[device],
+            network=network,
+            country=country,
+            usage_journey=flat_obj_dict["uuid-Daily-video-usage"],
+            start_date=SourceObject("2025-02-01"),
+            modeling_duration_value=SourceValue(5 * u.dimensionless),
+            modeling_duration_unit=SourceObject("month"),
+            net_growth_rate_in_percentage=SourceValue(10 * u.dimensionless),
+            net_growth_rate_timespan=SourceObject("year"),
+            initial_usage_journey_volume=SourceValue(1000 * u.dimensionless),
+            initial_usage_journey_volume_timespan=SourceObject("year")
+        )
+        system = class_obj_dict["System"]["uuid-system-1"]
+        system.usage_patterns.append(new_usage_pattern)
+
+        new_network, exp_obj_dict = Network.from_json_dict(list(default_networks().values())[1], flat_obj_dict, False)
+        new_network.trigger_modeling_updates = True
+        ModelingUpdate([
+            [new_usage_pattern.network, new_network],
+            [new_usage_pattern.modeling_duration_unit, SourceObject("year")],
+            [new_usage_pattern.start_date, SourceObject("2025-02-02")],
+        ])
+
+        system_data = system_to_json(system, True)
 
     def test_add_new_usage_pattern_from_form(self):
         post_data = QueryDict(mutable=True)

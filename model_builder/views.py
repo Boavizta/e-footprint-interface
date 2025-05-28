@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
-from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint import __version__ as efootprint_version
@@ -73,8 +73,7 @@ def open_import_json_panel(request):
 def download_json(request):
     model_web = ModelWeb(request.session)
     system = model_web.system
-    system_data_without_calculated_attributes = system_to_json(
-        system, save_calculated_attributes=False, output_filepath=None)
+    system_data_without_calculated_attributes = model_web.to_json(save_calculated_attributes=False)
     json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")

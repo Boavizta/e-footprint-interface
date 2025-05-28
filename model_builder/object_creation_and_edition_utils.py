@@ -5,11 +5,10 @@ from typing import List, get_origin, get_args
 from django.http import QueryDict
 from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
-from efootprint.abstract_modeling_classes.explainable_objects import ExplainableQuantity
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
-from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.logger import logger
 from efootprint.constants.units import u
 
@@ -18,7 +17,8 @@ from model_builder.model_web import ModelWeb
 from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 
 
-def create_efootprint_obj_from_post_data(create_form_data: QueryDict, model_web: ModelWeb, object_type: str):
+def create_efootprint_obj_from_post_data(
+    create_form_data: QueryDict, model_web: ModelWeb, object_type: str) -> ModelingObject:
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
     init_sig_params = signature(new_efootprint_obj_class.__init__).parameters
     default_values = new_efootprint_obj_class.default_values()
@@ -152,9 +152,9 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
         for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs]
     ModelingUpdate(changes_list)
 
-    # Update session data
-    model_web.session["system_data"] = system_to_json(
-        obj_to_edit.systems[0].modeling_obj, save_calculated_attributes=True)
+    # Don’t replace but update system_data by model_web.to_json() because it would remove objects not linked to the system.
+    model_web.session["system_data"].update(model_web.to_json())
+    model_web.session.modified = True
 
     return obj_to_edit
 

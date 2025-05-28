@@ -85,9 +85,6 @@ def add_new_service(request, model_web: ModelWeb):
     mutable_post[f"{service_type}_server"] = server_efootprint_id
     new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
 
-    efootprint_server = model_web.get_web_object_from_efootprint_id(server_efootprint_id).modeling_obj
-    efootprint_server.compute_calculated_attributes()
-
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
     response = render(request, "model_builder/object_cards/service_card.html",
@@ -133,15 +130,8 @@ def add_new_job(request, model_web: ModelWeb):
 
 def add_new_usage_pattern(request, model_web: ModelWeb):
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, "UsagePatternFromForm")
+    model_web.system.modeling_obj.usage_patterns.append(new_efootprint_obj)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-
-    mutable_post = QueryDict(mutable=True)
-    mutable_post["name"] = model_web.system.name
-    usage_patterns_ids = [usage_pattern.efootprint_id for usage_pattern in model_web.system.usage_patterns]
-    usage_patterns_ids.append(added_obj.efootprint_id)
-    mutable_post.setlist("usage_patterns", usage_patterns_ids)
-    request.POST = mutable_post
-    edit_object_in_system(request.POST, model_web.system)
 
     response = render(
         request, "model_builder/object_cards/usage_pattern_card.html", {"usage_pattern": added_obj})
