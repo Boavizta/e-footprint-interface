@@ -1,6 +1,6 @@
 {% load static %}
 {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
-<div class="position-relative mx-0 d-flex flex-row overflow-hidden" id="model-builder-page">
+<div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
         <div class="d-flex flex-row" id="model-canva">
             <div class="equal-width p-2">
@@ -71,7 +71,7 @@
             </div>
         </div>
     </div>
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto" id="sidePanel"></div>
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel"></div>
     <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
         <div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
             hx-get="/model_builder/result-chart/"
@@ -96,7 +96,7 @@
 </div>
 
 <button id="model-scroll-to-right"
-    class="d-block d-xl-none position-absolute top-50 end-0 top-0 border-0 rounded-start-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-2"
+    class="d-block d-xl-none position-absolute top-50 end-0 top-0 border-0 rounded-start-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-1"
         onclick="scrollToRight()"
 >
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
@@ -105,7 +105,7 @@
 </button>
 
 <button id="model-scroll-to-left"
-    class="d-block d-xl-none position-absolute top-50 start-0 border-0 rounded-end-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-2"
+    class="d-block d-xl-none position-absolute top-50 start-0 border-0 rounded-end-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-1"
         onclick="scrollToLeft()"
 >
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">

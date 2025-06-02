@@ -329,15 +329,15 @@ input:disabled{
     animation: none;
 }
 
-.leader-line{
-    z-index: map-get($zindex-levels, 1);
-    pointer-events: none !important;
-}
-
 #leaderlines-layer {
   pointer-events: none;
-  z-index: 1;
+  z-index: map-get($zindex-levels, 0) !important;
   overflow: hidden;
+}
+
+.leader-line{
+    z-index: map-get($zindex-levels, 0) !important;
+    pointer-events: none !important;
 }
 
 #model-builder-page{
@@ -537,15 +537,28 @@ input:disabled{
         min-width: 300px;
     }
 
-    #sidePanel{
-        width: 100dvw !important;
+    #sidePanel {
+        width: 100vw;
+        max-width: 100vw;
+        left: 0;
+        right: 0;
+        position: fixed;
     }
+
 }
 
 /* tablette */
 @media (min-width:576px) and (max-width:1199.9px){
     #model-canva{
         width:50%;
+    }
+
+    #sidePanel {
+        width: 50vw;
+        max-width: 50vw;
+        left: 50%;
+        right: 0;
+        position: fixed;
     }
 }
 
