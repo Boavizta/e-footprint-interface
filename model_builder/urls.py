@@ -25,6 +25,7 @@ urlpatterns = [
          name='display-calculus-graph'),
     path('graph/<cache_key>/<efootprint_id>/<attr_name>/<graph_key>', model_builder.views.get_calculus_graph,
          name='get-graph'),
-    path('save-model-name/', model_builder.edition.views_edition.save_model_name, name='save-model-name'),
     path('download-sources/', views.download_sources, name='download-sources'),
+    path('open-panel-system-name/', model_builder.edition.views_edition.open_panel_system_name, name='open-panel-system-name'),
+    path('save-system-name/', model_builder.edition.views_edition.save_system_name, name='save-system-name'),
 ]

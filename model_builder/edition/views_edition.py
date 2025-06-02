@@ -1,6 +1,7 @@
 import json
 
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from efootprint.core.hardware.server_base import ServerBase
 
@@ -75,11 +76,13 @@ def edit_object(request, object_id):
        toast_and_highlight_data)
 
 
-def save_model_name(request):
-    if request.method == "POST":
-        model_web = ModelWeb(request.session)
-        obj_to_edit = model_web.system
-        edited_obj = edit_object_in_system(request.POST, obj_to_edit)
-        return HttpResponse(status=204)
-    else:
-        return HttpResponse(status=400)
+def open_panel_system_name(request):
+    return render(request, "model_builder/side_panels/rename_system.html",context={
+        "header_name": "Rename your model",
+        "system_name": request.GET.get("system_name", "My Model"),
+    })
+
+
+def save_system_name(request):
+    edited_obj = edit_object_in_system(request.POST, ModelWeb(request.session).system)
+    return HttpResponse(edited_obj.name)
