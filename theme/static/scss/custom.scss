@@ -217,6 +217,10 @@ input:disabled{
   height: 80vh !important;
 }
 
+.vh-70 {
+  height: 70vh !important;
+}
+
 /*Bootstrap overwrite*/
 .btn-white:hover, .chevron-btn:hover{
     background-color: var(--gray-100);
@@ -553,6 +557,7 @@ input:disabled{
         width:50%;
     }
 
+
     #sidePanel {
         width: 50vw;
         max-width: 50vw;
@@ -604,6 +609,19 @@ input:disabled{
     .custom-ms-4 {
         margin-left: 4px;
     }
+
+    #barChart{
+        min-height: 400px;
+    }
+
+    #lineChart{
+        min-height: 400px;
+    }
+
+    #panel-result-btn, #result-block {
+       max-height:  var(--result-panel-opened);
+    }
+
 }
 
 @media (min-width: 1200px) {
@@ -655,6 +673,14 @@ input:disabled{
 
     .custom-ms-4 {
         margin-left: calc(1rem + 20px);
+    }
+
+    #sidePanel {
+        min-width: 25vw;
+    }
+
+    #barChart, #lineChart {
+       min-height: 500px;
     }
 }
 

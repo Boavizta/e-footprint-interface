@@ -1,6 +1,7 @@
 let resultChartJSOptions = {
     locale: "en-EN",
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
         x: {
             offset: true,

@@ -1,4 +1,4 @@
-<div class="rounded-top-5 shadow-sm-up h-100 bg-white p-4">
+<div class="rounded-top-5 shadow-sm-up h-100 bg-white px-2 px-xl-4 py-4">
     <div class="row align-items-center">
         <div class="col-4 text-start px-4 py-0">
             <p class="h5 m-0"><b>Results</b></p>
@@ -39,10 +39,10 @@
             <b>Sources</b>
         </button>
     </div>
-    <div id="graph-block" class="col d-block">
+    <div id="graph-block" class="col d-block overflow-y-auto w-100 vh-70 px-0 py-2">
         {% include 'model_builder/result/result_graph.html' %}
     </div>
-    <div id="source-block" class="col d-none">
+    <div id="source-block" class="col d-none overflow-auto w-100 vh-70 px-0 py-2">
         {% include 'model_builder/result/source_table.html' %}
     </div>
 </div>
