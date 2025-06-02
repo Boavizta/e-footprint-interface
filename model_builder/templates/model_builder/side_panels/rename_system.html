@@ -1,0 +1,27 @@
+{% extends "model_builder/side_panels/components/side_panel_structure.html" %}
+{% load static %}
+
+{% block panel_body %}
+<form class="my-3"
+        hx-post="{% url 'save-system-name' %}"
+        hx-disabled-elt="button"
+        hx-swap="innerHTML"
+        hx-target="#system-name"
+        hx-on::after-request="closeAndEmptySidePanel()"
+>
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="name" class="form-label">Choose a new name for your system</label>
+        <input  class="form-control" id="name" name="name" type="text" value="{{ system_name }}" required>
+    </div>
+
+    <div class="mb-3">
+            <button
+                    id="btn-submit-form"
+                    class="btn btn-primary rounded-pill w-100"
+                    type="submit">
+                Save
+            </button>
+        </div>
+</form>
+{% endblock %}
