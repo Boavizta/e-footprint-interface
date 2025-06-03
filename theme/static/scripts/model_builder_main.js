@@ -1,3 +1,10 @@
+function initModelBuilderMain() {
+    initLeaderLines();
+    initSortableObjectCards();
+    initGrabEffect();
+    initHammer();
+}
+
 function initSortableObjectCards() {
     const options = {
         animation: 150,
@@ -19,41 +26,27 @@ function initSortableObjectCards() {
     new Sortable(document.getElementById("server-list"), options);
 }
 
+let timer = null;
 
-function addLongPressListener(selector, callback, delay = 300) {
-    let timer = null;
-
-    document.querySelectorAll(selector).forEach(element => {
-        element.addEventListener('mousedown', e => {
+function initGrabEffect() {
+    document.querySelectorAll(".grab").forEach(element => {
+        if (element.dataset.grabListenerAdded === "true") {
+            return;
+        }
+        element.addEventListener("mousedown", e => {
             timer = setTimeout(() => {
-                callback(e, element);
-            }, delay);
+                element.classList.add('grabbing');
+            }, 200);
         });
-
-        ['mouseup', 'mouseleave'].forEach(event => {
+        ["mouseup", "mouseleave"].forEach(event => {
             element.addEventListener(event, () => {
+                element.classList.remove('grabbing');
                 clearTimeout(timer);
                 timer = null;
             });
         });
+        element.dataset.grabListenerAdded = "true";
     });
-}
-
-addLongPressListener('.grab', (e, el) => {
-    el.classList.add('grabbing');
-});
-
-document.addEventListener('mouseup', () => {
-    document.querySelectorAll('.grabbing').forEach(el => {
-        el.classList.remove('grabbing');
-    });
-});
-
-function initModelBuilderMain() {
-    initLeaderLines();
-    initSortableObjectCards();
-    initHammer();
-    //resizeSystemNameHeader();
 }
 
 function reverseIconAccordion(objectId){
@@ -152,14 +145,10 @@ function scrollToLeft() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const wrapper = document.getElementById("model-canva-scrollable-area");
-    const btnRight = document.getElementById("model-scroll-to-right");
-    const btnLeft = document.getElementById("model-scroll-to-left");
-
-    if (!wrapper) return;
-
-    const updateScrollButtons = () => {
+function updateScrollButtons(){
+        const wrapper = document.getElementById("model-canva-scrollable-area");
+        const btnRight = document.getElementById("model-scroll-to-right");
+        const btnLeft = document.getElementById("model-scroll-to-left");
         const maxScrollLeft = wrapper.scrollWidth - wrapper.clientWidth;
         const currentScroll = wrapper.scrollLeft;
 
@@ -182,8 +171,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnLeft.classList.add("d-block");
             }
         }
-    };
+    }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const wrapper = document.getElementById("model-canva-scrollable-area");
+    if (!wrapper) return;
     wrapper.addEventListener("scroll", updateScrollButtons);
     updateScrollButtons();
 });

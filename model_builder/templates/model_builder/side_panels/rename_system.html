@@ -9,7 +9,6 @@
         hx-target="#system-name"
         hx-on::after-request="closeAndEmptySidePanel()"
 >
-    {% csrf_token %}
     <div class="mb-3">
         <label for="name" class="form-label">Choose a new name for your system</label>
         <input  class="form-control" id="name" name="name" type="text" value="{{ system_name }}" required>

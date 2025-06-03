@@ -8,7 +8,6 @@
         enctype="multipart/form-data"
         hx-swap="innerHTML"
         hx-target="#main-content-block">
-    {% csrf_token %}
     <div class="mb-3">
         <label for="import-json-input" class="form-label">Choose a json file</label>
         <input  class="form-control" id="import-json-input" name="import-json-input" type="file" required>

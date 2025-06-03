@@ -204,6 +204,7 @@ function setLeaderLineListeners() {
         event.detail['accordionIds'].forEach(accordionId => {
             addAccordionListener(document.getElementById(accordionId));
         });
+        initGrabEffect();
     });
 
     let resizeTimeout = null;

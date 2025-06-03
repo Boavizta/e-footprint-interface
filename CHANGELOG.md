@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.5] - 2025-06-12
+
+### Changed
+- Update UI to implement responsive design. The interface now adapts to different screen sizes, ensuring a consistent user experience across devices.
+- Updates HTML/CSS part to simplify the code and improve readability.
+
 ## [0.8 3] - 2025-06-11
 
 ### Fixed
