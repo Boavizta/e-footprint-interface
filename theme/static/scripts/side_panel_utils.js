@@ -7,6 +7,7 @@ function openSidePanel() {
         btn.classList.remove("w-100");
         btn.classList.add("result-width");
     }
+    hideEditIcons();
     updateLines();
 }
 
