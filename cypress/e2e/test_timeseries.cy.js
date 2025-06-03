@@ -178,5 +178,36 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#modeling_duration_value').invoke('val', '25').trigger('input');
        cy.get('#modeling_duration_value_error_message').should('not.contain.text','Modeling duration value must be' +
            ' less than or equal to 10');
+    });
+
+    it('test UP sidePanel if the chart timeseries is not displayed on phone', ()=>{
+        cy.viewport('iphone-x');
+        cy.visit('/model_builder/');
+
+        cy.window().then((win) => {
+            cy.spy(win, 'openOrCloseTimeseriesChartAndTriggerUpdate').as('openOrCloseTimeseriesChartAndTriggerUpdate');
         });
+
+        cy.get('button').contains('Add usage pattern').should('be.visible').click();
+        cy.get('#initial_usage_journey_volume').click().type('1000');
+
+        cy.get('@openOrCloseTimeseriesChartAndTriggerUpdate').should('have.been.called');
+        cy.get('#timeSeriesChart').should('exist').should('not.contain.html');
+    });
+
+    it('test UP sidePanel if the chart timeseries is not displayed on tablet', ()=>{
+        cy.viewport('ipad-mini');
+        cy.visit('/model_builder/');
+
+        cy.window().then((win) => {
+            cy.spy(win, 'openOrCloseTimeseriesChartAndTriggerUpdate').as('openOrCloseTimeseriesChartAndTriggerUpdate');
+        });
+
+        cy.get('button').contains('Add usage pattern').should('be.visible').click();
+        cy.get('#initial_usage_journey_volume').click().type('1000');
+
+        cy.get('@openOrCloseTimeseriesChartAndTriggerUpdate').should('have.been.called');
+        cy.get('#timeSeriesChart').should('exist').should('not.contain.html');
+    });
+
 });

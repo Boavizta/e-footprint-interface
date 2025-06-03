@@ -1,3 +1,5 @@
+let resizeTimeout;
+
 let dictLeaderLineOption = {
     'object-to-object': {
         color: "#9CA3AF",
@@ -209,7 +211,9 @@ function setLeaderLineListeners() {
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            updateLines();
+            requestAnimationFrame(() => {
+                updateLines();
+            });
         }, 100);
     });
 }

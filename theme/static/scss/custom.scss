@@ -48,7 +48,6 @@ $zindex-levels: (
     --model-canva-calculated-height : calc(
         100vh - var(--navbar-height)
         - var(--toolbar-height)
-        - var(--open-result-btn)
         - var(--loading-bar-height)
         - var(--margin-padding-model)
     );
@@ -369,10 +368,6 @@ input:disabled{
     cursor: pointer;
 }
 
-.result-width{
-    width: var(--result-width);
-}
-
 #sidePanel .accordion-panel .accordion-button{
     background-color: var(--gray-100);
     color: var(--gray-500) ;
@@ -622,6 +617,9 @@ input:disabled{
        max-height:  var(--result-panel-opened);
     }
 
+    .result-width{
+        width: 100vw;
+    }
 }
 
 @media (min-width: 1200px) {
@@ -677,6 +675,10 @@ input:disabled{
 
     #sidePanel {
         width: 33vw;
+    }
+
+    .result-width{
+        width: 75vw;
     }
 
     #barChart, #lineChart {
