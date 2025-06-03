@@ -48,7 +48,6 @@ $zindex-levels: (
     --model-canva-calculated-height : calc(
         100vh - var(--navbar-height)
         - var(--toolbar-height)
-        - var(--open-result-btn)
         - var(--loading-bar-height)
         - var(--margin-padding-model)
     );
@@ -300,6 +299,11 @@ input:disabled{
 
 /* CSS Custom rules for home page*/
 /*----------------------------------*/
+
+#system-name{
+    max-width: 75vw;
+}
+
 #home-page-container{
     height: var(--home-page-height);
 }
@@ -367,10 +371,6 @@ input:disabled{
 
 #btn-open-panel-result{
     cursor: pointer;
-}
-
-.result-width{
-    width: var(--result-width);
 }
 
 #sidePanel .accordion-panel .accordion-button{
@@ -492,7 +492,6 @@ input:disabled{
 
 .model-builder-card{
     border: 2px solid var(--gray-200) !important;
-    border-radius: 15px !important;
 }
 
 .model-builder-card-opened{
@@ -532,6 +531,11 @@ input:disabled{
 
 
 @media (max-width:575.98px){
+
+    .side-panel-open{
+        width: 100vw;
+    }
+
     #model-canva{
         overflow-x: auto;
         scroll-behavior: smooth;
@@ -553,10 +557,10 @@ input:disabled{
 
 /* tablette */
 @media (min-width:576px) and (max-width:1199.9px){
-    #model-canva{
-        width:50%;
-    }
 
+    .list-object-efootprint{
+        min-width: 300px;
+    }
 
     #sidePanel {
         width: 50vw;
@@ -564,6 +568,10 @@ input:disabled{
         left: 50%;
         right: 0;
         position: fixed;
+    }
+
+    .side-panel-open{
+        width: 50vw;
     }
 }
 
@@ -622,6 +630,9 @@ input:disabled{
        max-height:  var(--result-panel-opened);
     }
 
+    .result-width{
+        width: 100vw;
+    }
 }
 
 @media (min-width: 1200px) {
@@ -676,7 +687,15 @@ input:disabled{
     }
 
     #sidePanel {
-        min-width: 25vw;
+        width: 33vw;
+    }
+
+    .side-panel-open{
+        width: 67vw;
+    }
+
+    .result-width{
+        width: 75vw;
     }
 
     #barChart, #lineChart {

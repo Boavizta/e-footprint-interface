@@ -1,5 +1,7 @@
 let timeSeriesChartJSOptions = {
     locale: "en-EN",
+    responsive: true,
+    maintainAspectRatio: false,
     scales: {
         x: {
             type: 'time',
@@ -48,6 +50,7 @@ let timeSeriesChartJSOptions = {
 };
 
 function openOrCloseTimeseriesChartAndTriggerUpdate() {
+    if( window.innerWidth < 1200){return}
     let element = document.getElementById("chartTimeseries");
     let startDate = document.getElementById("start_date").value;
     let modelingDurationValue = document.getElementById("modeling_duration_value").value;

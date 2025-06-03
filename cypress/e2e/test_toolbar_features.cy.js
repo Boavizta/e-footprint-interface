@@ -106,17 +106,20 @@ describe("Test - Toolbars import/export/reboot", () => {
     });
 
     it("Change the name of the model and check that the name has been changed", () => {
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
+        cy.visit("/model_builder/");
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
         cy.get('input[type="file"]').should("not.exist");
 
-        cy.get('#SystemNameHeader').clear().invoke('val', newSystemName).trigger('input').wait(1200);
-        cy.visit("/model_builder/");
-        cy.get('#SystemNameHeader').should('have.value', newSystemName);
+        cy.get('#btn-change-system-name').should('exist').click()
+        cy.get('#name').should('exist').clear().type(newSystemName);
+        cy.get('#btn-submit-form').should('exist').click();
+        cy.get('#system-name').should('contain.text', newSystemName);
+        //refresh the page to check that the name is still there
+        cy.reload();
+        cy.get('#system-name').should('contain.text', newSystemName);
     });
 
     it("Export a model and check that the file has been downloaded and is correctly named", () => {

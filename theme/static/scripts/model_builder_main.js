@@ -67,25 +67,15 @@ function reverseIconAccordion(objectId){
     updateLines();
 }
 
-/*
-function resizeSystemNameHeader() {
-    let systemNameHeader = document.getElementById("SystemNameHeader");
-
-    let span = document.createElement("span");
-    span.style.visibility = "hidden";
-    span.style.position = "absolute";
-    span.style.whiteSpace = "pre";
-    span.style.font = window.getComputedStyle(systemNameHeader).font;
-    document.body.appendChild(span);
-    span.textContent = systemNameHeader.value;
-    systemNameHeader.style.width = `${span.offsetWidth + 5}px`;
-    document.body.removeChild(span);
+function hideEditIcons(){
+    let editIcons = document.querySelectorAll("[id^='edit-icon-']");
+    editIcons.forEach(icon => {
+        icon.classList.add("d-none");
+    })
 }
 
- */
-
-
 function removeAllOpenedObjectsHighlights(){
+    hideEditIcons();
     let objectsActivated = document.querySelectorAll(".model-builder-card-opened");
     objectsActivated.forEach(function (object) {
         object.classList.remove("model-builder-card-opened");
