@@ -1,3 +1,8 @@
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe('Tests dedicated to the timeseries generation', () => {
     it('Check if we can open several times the form about usage patten and chart is always displayed', () => {
 

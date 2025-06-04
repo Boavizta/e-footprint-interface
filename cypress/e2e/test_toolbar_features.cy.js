@@ -1,3 +1,8 @@
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe("Test - Toolbars import/export/reboot", () => {
     let ujName = "Test E2E UJ";
     let ujsOne = "Test E2E UJ 1";

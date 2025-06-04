@@ -1,5 +1,10 @@
 import "cypress-real-events";
 
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe("Test - Result panel", () => {
     let ujNameTwo = "Test E2E UJ 2";
 
@@ -69,6 +74,9 @@ describe("Test - Result panel", () => {
 
     it("Check if labels on bar chart has been updated when granularity changed", () => {
         let upName = "Test E2E Usage Pattern";
+        let nbElementInit;
+        let nbElementAfter;
+        let nbElementReturnInit;
         cy.visit("/model_builder/");
         cy.get('#model-canva').should('be.visible');
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
@@ -84,18 +92,25 @@ describe("Test - Result panel", () => {
         .realTouch('end', { x: 100, y: 200 });
 
         cy.window().its('charts').should('exist');
-        cy.get('#results_temporal_granularity').select('month');
-        cy.window().its('charts').its('barChart').then((chart) => {
-            chart.data.labels.forEach(label => {
-                expect(label.length).to.be.greaterThan(6);
-            });
+
+        cy.window().its('charts').its('barChart').should('exist').then((chart) => {
+            nbElementInit = chart.data.labels.length;
+        });
+
+        //wait all js loading
+        cy.wait(1000);
+        cy.get('#results_temporal_granularity').should('exist').select('month');
+        cy.get('#results_temporal_granularity').should('have.value', 'month');
+
+        cy.window().its('charts').its('barChart').should('exist').then((chart) => {
+            nbElementAfter = chart.data.labels.length;
+            expect(nbElementInit).to.be.lessThan(nbElementAfter);
         });
 
         cy.get('#results_temporal_granularity').select('year');
          cy.window().its('charts').its('barChart').then((chart) => {
-            chart.data.labels.forEach(label => {
-                expect(label.length).to.equal(4);
-            });
+            nbElementReturnInit = chart.data.labels.length;
+            expect(nbElementInit).to.be.equal(nbElementReturnInit);
         });
     });
 

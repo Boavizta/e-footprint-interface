@@ -1,3 +1,8 @@
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe("Test - Model Canva div", () => {
     let ujsOne = "Test E2E UJ 1";
         let ujsTwo = "Test E2E UJ 2";

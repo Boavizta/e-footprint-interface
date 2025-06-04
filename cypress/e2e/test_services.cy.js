@@ -1,3 +1,8 @@
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe('Test services', () => {
     it('Try to install a new service on a server and edit it', () => {
         let server = "Test E2E Server";
