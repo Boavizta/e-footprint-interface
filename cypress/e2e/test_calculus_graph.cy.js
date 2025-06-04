@@ -1,3 +1,8 @@
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe("Calculus graph", () => {
     it("Make sure simple calculus graph opens", () => {
         let ujsOne = "Test E2E UJ 1";

@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.5] - 2025-06-12
+## [0.8.4] - 2025-06-12
+
+### Fixed
+- Remove all object highlighting when adding a new object.  
 
 ### Changed
 - Update UI to implement responsive design. The interface now adapts to different screen sizes, ensuring a consistent user experience across devices.

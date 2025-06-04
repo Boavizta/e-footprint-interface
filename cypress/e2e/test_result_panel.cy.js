@@ -1,5 +1,10 @@
 import "cypress-real-events";
 
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
 describe("Test - Result panel", () => {
     let ujNameTwo = "Test E2E UJ 2";
 
