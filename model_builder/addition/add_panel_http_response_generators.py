@@ -98,6 +98,28 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
     return http_response
 
 
+def generate_external_api_add_panel_http_response(request, model_web: ModelWeb):
+    installable_services = SERVICE_CLASSES
+    services_dict, dynamic_form_data = generate_object_creation_structure(
+        "Service",
+        available_efootprint_classes=installable_services,
+        attributes_to_skip=["gpu_latency_alpha", "gpu_latency_beta", "server"],
+        model_web=model_web,
+    )
+
+    http_response = render(
+        request, "model_builder/side_panels/external_api.html", {
+            "form_sections": services_dict,
+            "dynamic_form_data": dynamic_form_data,
+            "obj_type": "service",
+            "obj_label": FORM_TYPE_OBJECT["Service"]["label"],
+            "header_name": "Add new external API",
+        })
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+
+    return http_response
+
+
 def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     servers = model_web.servers
 
