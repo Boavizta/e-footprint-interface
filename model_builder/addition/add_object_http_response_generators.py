@@ -2,10 +2,15 @@ import json
 
 from django.http import QueryDict
 from django.shortcuts import render
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
+from efootprint.core.hardware.gpu_server import GPUServer
 
+from model_builder.class_structure import generate_object_creation_structure
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
-from model_builder.model_web import ModelWeb
+from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS, default_gpu_server, default_web_server, \
+    default_storage_for_server
 from model_builder.object_creation_and_edition_utils import (create_efootprint_obj_from_post_data,
                                                              render_exception_modal_if_error, edit_object_in_system)
 
@@ -95,6 +100,45 @@ def add_new_service(request, model_web: ModelWeb):
     })
     return response
 
+@render_exception_modal_if_error
+def add_new_external_api(request, model_web):
+    added_storage = model_web.add_new_efootprint_object_to_system(default_storage_for_server())
+    service_type = request.POST.get("type_object_available")
+    if service_type == "GenAIModel":
+        default_server = default_gpu_server()
+        server_type = "GPUServer"
+    else :
+        default_server = default_web_server()
+        server_type = "BoaviztaCloudServer"
+
+    default_server_post_data = {}
+    for attr in default_server.keys():
+        print(attr)
+        if isinstance(default_server[attr], SourceObject):
+            default_server_post_data[f'{server_type}_{attr}'] = default_server[attr].value
+        elif isinstance(default_server[attr], SourceValue):
+            default_server_post_data[f'{server_type}_{attr}'] = default_server[attr].value.magnitude
+            default_server_post_data[f'{server_type}_{attr}_unit'] = f"{default_server[attr].value.units:~P}"
+
+    default_server_post_data[f'{server_type}_name'] = f'{service_type} {request.POST.get("name")}'
+    default_server_post_data[f'{server_type}_storage'] = added_storage.efootprint_id
+    new_efootprint_obj = create_efootprint_obj_from_post_data(default_server_post_data, model_web, server_type)
+    added_server = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+
+    mutable_post = request.POST.copy()
+    mutable_post[f"{service_type}_server"] = added_server.efootprint_id
+    new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+
+    added_service = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+
+    response = render(
+        request, "model_builder/object_cards/server_card.html", {"server": added_server})
+    response["HX-Trigger-After-Swap"] = json.dumps({
+        "displayToastAndHighlightObjects": {
+            "ids": [added_server.web_id], "name": added_server.name, "action_type": "add_new_object"}
+    })
+
+    return response
 
 @render_exception_modal_if_error
 def add_new_job(request, model_web: ModelWeb):

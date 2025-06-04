@@ -11,8 +11,11 @@ from efootprint.abstract_modeling_classes.explainable_quantity import Explainabl
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
+from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server_base import ServerBase
+from efootprint.core.hardware.storage import Storage
 from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
 from efootprint.constants.units import u
@@ -47,6 +50,17 @@ def default_devices():
 def default_countries():
     with open(os.path.join(model_web_root, "default_countries.json"), "r") as f:
         return json.load(f)
+
+def default_gpu_server():
+    with open(os.path.join(model_web_root, "default_gpu_server.json"), "r") as f:
+        return GPUServer.default_values()
+
+def default_web_server():
+    with open(os.path.join(model_web_root, "default_web_server.json"), "r") as f:
+        return BoaviztaCloudServer.default_values()
+
+def default_storage_for_server():
+    return Storage.ssd()
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {
     "Network": default_networks, "Device": default_devices, "Country": default_countries}

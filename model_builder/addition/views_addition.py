@@ -1,10 +1,12 @@
 from django.template.loader import render_to_string
 
-from model_builder.addition.add_object_http_response_generators import add_new_usage_journey, add_new_usage_journey_step, \
-    add_new_server, add_new_service, add_new_job, add_new_usage_pattern
+from model_builder.addition.add_object_http_response_generators import add_new_usage_journey, \
+    add_new_usage_journey_step, \
+    add_new_server, add_new_service, add_new_job, add_new_usage_pattern, add_new_external_api
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
     generate_server_add_panel_http_response, generate_service_add_panel_http_response, \
-    generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response
+    generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
+    generate_external_api_add_panel_http_response
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
@@ -19,6 +21,8 @@ def open_create_object_panel(request, object_type):
         http_response = generate_job_add_panel_http_response(request, model_web)
     elif object_type == "UsagePatternFromForm":
         http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
+    elif object_type == "ExternalApi":
+        http_response = generate_external_api_add_panel_http_response(request, model_web)
     else:
         http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
 
@@ -44,6 +48,8 @@ def add_object(request, object_type):
         http_response =  add_new_job(request, model_web)
     elif object_type == "UsagePatternFromForm":
         http_response =  add_new_usage_pattern(request, model_web)
+    elif object_type == "ExternalApi":
+        http_response =  add_new_external_api(request, model_web)
 
     if recompute_modeling:
         refresh_content_response = render_to_string(

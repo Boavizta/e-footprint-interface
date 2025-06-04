@@ -1,0 +1,134 @@
+{
+    "name": "OpenAI API",
+    "id": "id-514844-GenAI-APIs",
+    "lifespan": {
+        "label": "Lifespan of GenAI APIs from hypothesis",
+        "value": 6.0,
+        "unit": "year",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "fraction_of_usage_time": {
+        "label": "GenAI APIs fraction of usage time from hypothesis",
+        "value": 1.0,
+        "unit": "dimensionless",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "server_type": {
+        "label": "Server type of GenAI APIs from user data",
+        "value": "serverless",
+        "source": {
+            "name": "user data",
+            "link": null
+        }
+    },
+    "compute": {
+        "label": "Nb gpus of GenAI APIs from hypothesis from user data",
+        "value": 16.0,
+        "unit": "gpu",
+        "source": {
+            "name": "user data",
+            "link": null
+        }
+    },
+    "power_usage_effectiveness": {
+        "label": "PUE of GenAI APIs from hypothesis",
+        "value": 1.2,
+        "unit": "dimensionless",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "average_carbon_intensity": {
+        "label": "unnamed source from hypothesis",
+        "value": 100.0,
+        "unit": "gram / kilowatt_hour",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "server_utilization_rate": {
+        "label": "GenAI APIs utilization rate from hypothesis",
+        "value": 1.0,
+        "unit": "dimensionless",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "base_ram_consumption": {
+        "label": "Base RAM consumption of GenAI APIs from hypothesis",
+        "value": 0.0,
+        "unit": "gigabyte",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "base_compute_consumption": {
+        "label": "Base gpu consumption of GenAI APIs from hypothesis",
+        "value": 0.0,
+        "unit": "gpu",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "fixed_nb_of_instances": {
+        "label": "User defined number of GenAI APIs instances",
+        "value": null
+    },
+    "storage": "id-d36c62-GenAI-APIs-default-ssd",
+    "gpu_power": {
+        "label": "GenAI APIs GPU power from hypothesis",
+        "value": 400.0,
+        "unit": "watt / gpu",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "gpu_idle_power": {
+        "label": "GenAI APIs GPU idle power from hypothesis",
+        "value": 50.0,
+        "unit": "watt / gpu",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "ram_per_gpu": {
+        "label": "GenAI APIs RAM per GPU from hypothesis",
+        "value": 80.0,
+        "unit": "gigabyte / gpu",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "carbon_footprint_fabrication_without_gpu": {
+        "label": "GenAI APIs carbon footprint without GPU from hypothesis",
+        "value": 2500.0,
+        "unit": "kilogram",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    },
+    "carbon_footprint_fabrication_per_gpu": {
+        "label": "GenAI APIs carbon footprint one GPU from hypothesis",
+        "value": 150.0,
+        "unit": "kilogram / gpu",
+        "source": {
+            "name": "hypothesis",
+            "link": null
+        }
+    }
+}

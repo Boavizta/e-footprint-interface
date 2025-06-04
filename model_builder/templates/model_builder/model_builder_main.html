@@ -64,8 +64,8 @@
                         <div class="w-100 mb-2">
                             <h5><b>Infrastructure</b></h5>
                         </div>
-                        <div class="w-100">
-                            <button class="w-75 btn bg-white dotted-border text-start h8 rounded-2 d-flex flex-row px-0 py-2"
+                        <div class="w-100 d-flex flex-row gap-1">
+                            <button class="equal-width btn bg-white dotted-border text-start h8 rounded-2 d-flex flex-row px-0 py-2"
                                     id="btn-add-server"
                                     hx-get="/model_builder/open-create-object-panel/ServerBase/"
                                     hx-target="#sidePanel"
@@ -73,8 +73,19 @@
                                     hx-swap="innerHTML"
                                     hx-disabled-elt="button"
                             >
-                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
+                                <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3"  width="16px" height="16px" alt="add icon" />
                                 <p class="mb-0 text-addition">Add server</p>
+                            </button>
+                            <button class="equal-width btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                                    id="btn-add-external-api"
+                                    hx-get="{% url 'open-add-new-object-panel' 'ExternalApi' %}"
+                                    hx-target="#sidePanel"
+                                    hx-trigger="click"
+                                    hx-swap="innerHTML"
+                                    hx-disabled-elt="button"
+                            >
+                                 <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3"  width="16px" height="16px" alt="add icon" />
+                                <p class="mb-0 text-addition">Add external API</p>
                             </button>
                         </div>
                     </div>
