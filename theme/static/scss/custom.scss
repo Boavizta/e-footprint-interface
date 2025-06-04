@@ -299,6 +299,11 @@ input:disabled{
 
 /* CSS Custom rules for home page*/
 /*----------------------------------*/
+
+#system-name{
+    max-width: 75vw;
+}
+
 #home-page-container{
     height: var(--home-page-height);
 }
@@ -487,7 +492,6 @@ input:disabled{
 
 .model-builder-card{
     border: 2px solid var(--gray-200) !important;
-    border-radius: 15px !important;
 }
 
 .model-builder-card-opened{
@@ -527,6 +531,11 @@ input:disabled{
 
 
 @media (max-width:575.98px){
+
+    .side-panel-open{
+        width: 100vw;
+    }
+
     #model-canva{
         overflow-x: auto;
         scroll-behavior: smooth;
@@ -548,10 +557,10 @@ input:disabled{
 
 /* tablette */
 @media (min-width:576px) and (max-width:1199.9px){
-    #model-canva{
-        width:50%;
-    }
 
+    .list-object-efootprint{
+        min-width: 300px;
+    }
 
     #sidePanel {
         width: 50vw;
@@ -559,6 +568,10 @@ input:disabled{
         left: 50%;
         right: 0;
         position: fixed;
+    }
+
+    .side-panel-open{
+        width: 50vw;
     }
 }
 
@@ -675,6 +688,10 @@ input:disabled{
 
     #sidePanel {
         width: 33vw;
+    }
+
+    .side-panel-open{
+        width: 67vw;
     }
 
     .result-width{

@@ -1,5 +1,6 @@
 function openSidePanel() {
     let sidePanel = document.getElementById("sidePanel");
+    let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");
     sidePanel.classList.remove("d-none");
     updateLines();
     let btn = document.getElementById("btn-open-panel-result");
@@ -7,6 +8,8 @@ function openSidePanel() {
         btn.classList.remove("w-100");
         btn.classList.add("result-width");
     }
+    modelCanvaScrollableArea.classList.remove("w-100");
+    modelCanvaScrollableArea.classList.add("side-panel-open");
     hideEditIcons();
     updateLines();
 }
@@ -14,6 +17,7 @@ function openSidePanel() {
 function closeAndEmptySidePanel() {
     let sidePanel = document.getElementById("sidePanel");
     let flatpickrCalendar = document.querySelector('.flatpickr-calendar')
+    let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");
     if (flatpickrCalendar) {
         flatpickrCalendar.remove();
     }
@@ -32,6 +36,10 @@ function closeAndEmptySidePanel() {
         btn.classList.remove("result-width");
         btn.classList.add("w-100");
     }
+
+    modelCanvaScrollableArea.classList.remove("side-panel-open");
+    modelCanvaScrollableArea.classList.add("w-100");
+
     removeAllOpenedObjectsHighlights()
     updateLines();
 }
