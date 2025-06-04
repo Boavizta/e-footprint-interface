@@ -53,18 +53,32 @@
             <div class="equal-width p-2">
                 <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container">
                     <h5><b>Infrastructure</b></h5>
-                    <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                            id="btn-add-server"
-                            hx-get="/model_builder/open-create-object-panel/ServerBase/"
-                            hx-target="#sidePanel"
-                            hx-trigger="click"
-                            hx-swap="innerHTML"
-                            hx-disabled-elt="button"
-                            _="on click removeAllOpenedObjectsHighlights()"
-                    >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                        <p class="mb-0 text-addition">Add server</p>
-                    </button>
+                    <div class="w-100 d-flex flex-row gap-1">
+                        <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                                id="btn-add-server"
+                                hx-get="/model_builder/open-create-object-panel/ServerBase/"
+                                hx-target="#sidePanel"
+                                hx-trigger="click"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="button"
+                                _="on click removeAllOpenedObjectsHighlights()"
+                        >
+                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
+                            <p class="mb-0 text-addition">Add server</p>
+                        </button>
+                        <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                                id="btn-add-external-api"
+                                hx-get="{% url 'open-add-new-object-panel' 'ExternalApi' %}"
+                                hx-target="#sidePanel"
+                                hx-trigger="click"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="button"
+                                _="on click removeAllOpenedObjectsHighlights()"
+                        >
+                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3"  width="16px" height="16px" alt="add icon" />
+                            <p class="mb-0 text-addition">Add external API</p>
+                        </button>
+                    </div>
                     <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">
                         {% for server in model_web.servers %}
                         {% include 'model_builder/object_cards/server_card.html' %}

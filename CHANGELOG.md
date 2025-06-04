@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.16] - 2025-06-19
+## [0.8.17] - 2025-07-18
+
+### Added
+- Add external API functionality for gen AI models: now a model can be directly selected and a GPU server with just enough specs will be created to host it.
+
+## [0.8.16] - 2025-07-11
 
 ### Added
 - Add a new button in the toolbar to open the result panel.

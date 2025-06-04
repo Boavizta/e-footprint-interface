@@ -127,9 +127,7 @@ describe("Test - Result panel", () => {
         cy.get('button[type="submit"]').click();
         cy.get('#sidePanelForm').should('not.exist')
 
-
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-
         cy.get('#btn-open-panel-result').should("exist").click()
 
         //get button with text Sources

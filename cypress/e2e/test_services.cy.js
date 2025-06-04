@@ -64,4 +64,16 @@ describe('Test services', () => {
         cy.get('#model-builder-modal').should('be.visible');
         cy.get('#model-builder-modal').contains('but is asked');
     });
+    it("Install new service and its server through external service button", () => {
+        cy.visit("/");
+        cy.get('#btn-start-modeling-my-service').click();
+        cy.get('#model-canva').should('be.visible');
+        cy.get('#btn-add-external-api').click();
+        cy.get('#GenAIModel_provider').select('openai');
+        cy.get('#GenAIModel_model_name').clear('gpt-4');
+        cy.get('#GenAIModel_model_name').type('gpt-4');
+        cy.get('#btn-submit-form').click();
+        cy.get('[id$="-Generative-AI-model-1-API-servers"]').should("be.visible");
+        cy.get('[id$="-Generative-AI-model-1"').should("exist");
+    });
 });

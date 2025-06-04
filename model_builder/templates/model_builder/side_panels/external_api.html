@@ -1,0 +1,20 @@
+{% extends "model_builder/side_panels/add/add_panel__generic.html" %}
+
+{% block add_form %}
+    <p class="h6 my-3">
+        Choose a service type
+    </p>
+    <form
+            hx-post="{% url 'add-new-object' 'ExternalApi' %}"
+            hx-target="#server-list"
+            hx-swap="beforeend"
+            hx-disabled-elt="button"
+            hx-on::after-request="closeAndEmptySidePanel()"
+            id="sidePanelForm"
+    >
+        {% include "model_builder/side_panels/add/add_form_content.html" %}
+    </form>
+    <p>
+        A matching server will be autocreated and you will be able to fine tune it later.
+    </p>
+{% endblock %}

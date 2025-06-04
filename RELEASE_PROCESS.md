@@ -20,6 +20,11 @@ nvm install node
 
 ## Generate latest requirements files with poetry
 
+if not already done, install the export plugin:
+```shell
+poetry self add poetry-plugin-export
+```
+then
 ```shell
 poetry export -f requirements.txt --without-hashes -o requirements.txt 
 ```

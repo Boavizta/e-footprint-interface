@@ -1,13 +1,20 @@
 import json
+import math
 
-from django.http import QueryDict
 from django.shortcuts import render
+from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.core.hardware.gpu_server import GPUServer
+from efootprint.core.hardware.infra_hardware import InsufficientCapacityError
+from efootprint.core.hardware.server_base import ServerTypes
+from efootprint.core.hardware.storage import Storage
+from efootprint.constants.units import u
 
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 from model_builder.model_web import ModelWeb
-from model_builder.object_creation_and_edition_utils import (create_efootprint_obj_from_post_data,
-                                                             render_exception_modal_if_error, edit_object_in_system)
+from model_builder.object_creation_and_edition_utils import (
+    create_efootprint_obj_from_post_data, render_exception_modal_if_error)
 
 
 def add_new_usage_journey(request, model_web: ModelWeb):
@@ -92,6 +99,42 @@ def add_new_service(request, model_web: ModelWeb):
     })
     return response
 
+@render_exception_modal_if_error
+def add_new_external_api(request, model_web):
+    new_storage = Storage.ssd()
+    model_web.add_new_efootprint_object_to_system(new_storage)
+    service_type = request.POST.get("type_object_available")
+    if service_type != "GenAIModel":
+        raise Exception(f"External service {service_type} not supported yet.")
+
+    new_server = GPUServer.from_defaults(
+        name=f'{request.POST.get("GenAIModel_name")} API servers', server_type=ServerTypes.serverless(),
+        storage=new_storage, compute=SourceValue(1 * u.gpu))
+    new_server_web = model_web.add_new_efootprint_object_to_system(new_server)
+    mutable_post = request.POST.copy()
+    mutable_post[f"{service_type}_server"] = new_server.id
+
+    try:
+        new_service = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+    except InsufficientCapacityError as e:
+        new_service = new_server.installed_services[0]
+        nb_of_gpus_required = math.ceil((e.requested_capacity / new_server.ram_per_gpu).to(u.gpu).magnitude)
+        new_server.compute = SourceValue(
+            nb_of_gpus_required * u.gpu, source=Source("Computed to match model size", link=None))
+        # Important to re-run after_init because it had been interrupted by the error.
+        # Otherwise, server base ram and compute consumption won’t be updated and neither will System total footprint.
+        new_service.after_init()
+
+    model_web.add_new_efootprint_object_to_system(new_service)
+
+    response = render(
+        request, "model_builder/object_cards/server_card.html", {"server": new_server_web})
+    response["HX-Trigger-After-Swap"] = json.dumps({
+        "displayToastAndHighlightObjects": {
+            "ids": [new_server_web.web_id], "name": new_server_web.name, "action_type": "add_new_object"}
+    })
+
+    return response
 
 @render_exception_modal_if_error
 def add_new_job(request, model_web: ModelWeb):

@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
+from efootprint.builders.services.generative_ai_ecologits import GenAIModel
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
@@ -44,7 +45,7 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
         "ServerBase",
         available_efootprint_classes = [GPUServer, BoaviztaCloudServer, Server],
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["storage"],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
 
@@ -79,7 +80,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
     services_dict, dynamic_form_data = generate_object_creation_structure(
         "Service",
         available_efootprint_classes=installable_services,
-        attributes_to_skip=["gpu_latency_alpha", "gpu_latency_beta", "server"],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
 
@@ -93,6 +94,30 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
             "header_name": "Add new service",
         })
 
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+
+    return http_response
+
+
+def generate_external_api_add_panel_http_response(request, model_web: ModelWeb):
+    installable_services = [GenAIModel]
+    services_dict, dynamic_form_data = generate_object_creation_structure(
+        "Service",
+        available_efootprint_classes=installable_services,
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=model_web,
+    )
+
+    services_dict[0]["fields"][0]["label"] = "Available services"
+
+    http_response = render(
+        request, "model_builder/side_panels/external_api.html", {
+            "form_sections": services_dict,
+            "dynamic_form_data": dynamic_form_data,
+            "obj_type": "service",
+            "obj_label": FORM_TYPE_OBJECT["Service"]["label"],
+            "header_name": "Add new external API",
+        })
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
     return http_response
@@ -113,7 +138,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     form_sections, dynamic_form_data = generate_object_creation_structure(
         "Job",
         available_efootprint_classes=list(available_job_classes),
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS + ["server", "service"],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
     additional_item = {

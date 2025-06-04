@@ -163,14 +163,7 @@ class TestViewsAddition(TestModelingBase):
         add_request = self.factory.post("/add-object/UsageJourney", data=post_data)
         system_data = {
             "efootprint_version": "9.1.4",
-            "System": {
-                "uuid-system-1": {
-                    "name": "system 1",
-                    "id": "uuid-system-1",
-                    "usage_patterns": []
-                }
-            }
-        }
+            "System": {"uuid-system-1": {"name": "system 1", "id": "uuid-system-1", "usage_patterns": []}}}
         self._add_session_to_request(add_request, system_data)
 
         response = add_object(add_request, "UsageJourney")
@@ -363,4 +356,22 @@ class TestViewsAddition(TestModelingBase):
         request = self.factory.post("/add-object/ServerBase", data=post_data)
         self._add_session_to_request(request, self.system_data)
         response = add_object(request, "ServerBase")
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_external_api_with_large_model_that_needs_gpu_server_sizing_adaptation(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        post_data = QueryDict(mutable=True)
+        post_data.update(
+            {"type_object_available": ["GenAIModel"], "GenAIModel_name": ["Generative AI model 3"],
+             "GenAIModel_provider": ["openai"], "GenAIModel_model_name": ["gpt-4"],
+             "GenAIModel_nb_of_bits_per_parameter": ["16"], "GenAIModel_llm_memory_factor": ["1.2"],
+             "GenAIModel_bits_per_token": ["24"]})
+        add_request = self.factory.post("/add-object/ExternalApi", data=post_data)
+        system_data = {
+            "efootprint_version": "10.1.13",
+            "System": {"uuid-system-1": {"name": "system 1", "id": "uuid-system-1", "usage_patterns": []}}}
+        self._add_session_to_request(add_request, system_data)
+
+        response = add_object(add_request, "ExternalApi")
+
         self.assertEqual(response.status_code, 200)
