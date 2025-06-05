@@ -18,7 +18,10 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
-                }
+                },
+                "direct_ancestors_with_id": [],
+                "direct_children_with_id": [],
+                "explain_nested_tuples": []
             },
             "jobs": []
         }
@@ -29,7 +32,14 @@
             "id": "uid-my-first-usage-journey-1",
             "uj_steps": [
                 "uid-my-first-usage-journey-step-1"
-            ]
+            ],
+            "duration": {
+                "value": null,
+                "label": "no value",
+                "direct_ancestors_with_id": [],
+                "direct_children_with_id": [],
+                "explain_nested_tuples": []
+            }
         }
     }
 }

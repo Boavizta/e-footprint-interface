@@ -160,7 +160,8 @@ class ModelWeb:
             self.response_objs[object_type] = {}
         # It is necessary to have redundancy of updating with self.to_json() and then adding efootprint_object.to_json()
         # because in case of an object not created to a system self.to_json() will not contain the object
-        self.session["system_data"][object_type][efootprint_object.id] = efootprint_object.to_json()
+        self.session["system_data"][object_type][efootprint_object.id] = efootprint_object.to_json(
+            save_calculated_attributes=True)
         self.update_system_data_with_up_to_date_calculated_attributes()
 
         self.response_objs[object_type][efootprint_object.id] = efootprint_object

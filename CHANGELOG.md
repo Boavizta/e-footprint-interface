@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.23] - 2025-06-04
+## [0.8.0] - 2025-06-04
 
 ### Changed
 - Cache calculated attributes and update model in real time as the user interacts with it.

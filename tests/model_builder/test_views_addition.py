@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 from efootprint.logger import logger
 from django.http import QueryDict
@@ -163,3 +164,74 @@ class TestViewsAddition(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nb_uj_steps_before + 1, len(add_request.session["system_data"]["UsageJourneyStep"]))
 
+    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
+    def test_add_usage_journey_step_to_usage_journey_unlinked_to_system_in_existing_computed_system(
+        self, mock_render_exception_modal):
+        self.system_data_path = os.path.join(root_test_dir, "model_builder", "system_with_mirrored_cards.json")
+        self.setUp()
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
+            "UsageJourney_name": ["New usage journey"],
+            "UsageJourney_uj_steps": [""]
+        })
+        add_request = self.factory.post("/add-object/UsageJourney", data=post_data)
+        self._add_session_to_request(add_request, self.system_data)
+        nb_uj = len(add_request.session["system_data"]["UsageJourney"])
+        response = add_object(add_request, "UsageJourney")
+        self.assertEqual(nb_uj + 1, len(add_request.session["system_data"]["UsageJourney"]))
+        new_uj_id = list(add_request.session["system_data"]["UsageJourney"].keys())[-1]
+
+        # Add a new usage journey step to the newly created usage journey
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
+            "UsageJourneyStep_name": ["New usage journey step"],
+            "efootprint_id_of_parent_to_link_to": [new_uj_id],
+            "UsageJourneyStep_user_time_spent": ["1"],
+            "UsageJourneyStep_user_time_spent_unit": ["min"],
+            "UsageJourneyStep_jobs": [""],
+        })
+        add_request = self.factory.post("/add-object/UsageJourneyStep", data=post_data)
+        self._add_session_to_request(add_request, self.system_data)
+        nb_uj_steps_before = len(add_request.session["system_data"]["UsageJourneyStep"])
+        response = add_object(add_request, "UsageJourneyStep")
+        mock_render_exception_modal.assert_not_called()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nb_uj_steps_before + 1, len(add_request.session["system_data"]["UsageJourneyStep"]))
+
+        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
+
+    def test_add_usage_journey_without_uj_step_and_link_usage_pattern_to_it(self):
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
+            "UsageJourney_name": ["New usage journey"],
+            "UsageJourney_uj_steps": [""]
+        })
+        add_request = self.factory.post("/add-object/UsageJourney", data=post_data)
+        self._add_session_to_request(add_request, self.system_data)
+        nb_uj = len(add_request.session["system_data"]["UsageJourney"])
+        response = add_object(add_request, "UsageJourney")
+        self.assertEqual(nb_uj + 1, len(add_request.session["system_data"]["UsageJourney"]))
+        new_uj_id = list(add_request.session["system_data"]["UsageJourney"].keys())[-1]
+        logger.info("Linking usage pattern to newly created usage journey")
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
+            "UsagePatternFromForm_devices": [list(default_devices().keys())[0]],
+            "UsagePatternFromForm_network": [list(default_networks().keys())[0]],
+            "UsagePatternFromForm_country": [list(default_countries().keys())[0]],
+            "UsagePatternFromForm_usage_journey": [new_uj_id],
+            "UsagePatternFromForm_start_date": ["2025-02-01"],
+            "UsagePatternFromForm_modeling_duration_value": ["5"],
+            "UsagePatternFromForm_modeling_duration_unit": ["month"],
+            "UsagePatternFromForm_net_growth_rate_in_percentage": ["10"],
+            "UsagePatternFromForm_net_growth_rate_timespan": ["year"],
+            "UsagePatternFromForm_initial_usage_journey_volume": ["1000"],
+            "UsagePatternFromForm_initial_usage_journey_volume_timespan": ["year"],
+            "UsagePatternFromForm_name": ["2New usage pattern"],
+        })
+
+        add_request = self.factory.post("/add-object/UsagePatternFromForm", data=post_data)
+        self._add_session_to_request(add_request, self.system_data)
