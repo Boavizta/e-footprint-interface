@@ -164,9 +164,6 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
         for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs]
     ModelingUpdate(changes_list)
 
-    if len(obj_to_edit.systems) == 0:
-        # The object edition won’t be included in model_web.to_json() so we need to update the session directly.
-        model_web.session["system_data"][object_type][obj_to_edit.efootprint_id] = obj_to_edit.to_json()
     model_web.update_system_data_with_up_to_date_calculated_attributes()
 
     return obj_to_edit

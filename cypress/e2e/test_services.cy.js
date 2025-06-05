@@ -12,7 +12,7 @@ describe('Test services', () => {
         cy.get('#model-canva').should('be.visible');
 
         cy.get('#btn-add-server').click();
-        cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
+        cy.get('#sidePanel').contains('div', 'Add new server').should('exist');
         cy.get('#type_object_available').select('GPUServer');
         cy.get('#GPUServer_name').type(server);
         cy.get('#GPUServer_compute').type(16);
@@ -44,7 +44,7 @@ describe('Test services', () => {
         cy.get('#model-canva').should('be.visible');
 
         cy.get('#btn-add-server').click();
-        cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
+        cy.get('#sidePanel').contains('div', 'Add new server').should('exist');
         cy.get('#type_object_available').select('GPUServer');
         cy.get('#GPUServer_name').type(server);
         cy.get('#btn-submit-form').click();

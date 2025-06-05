@@ -95,6 +95,13 @@ def upload_json(request):
                 data["efootprint_version"] = "9.1.4"
             request.session["system_data"] = data
             model_web = ModelWeb(request.session)
+            for uj in model_web.usage_journeys:
+                if len(uj.systems) == 0 and getattr(uj, "duration", None) is None:
+                    # usage journey is not linked to any system and has no duration so it means it has been saved
+                    # without its calculated attributes. This can create a bug in case a uj step is later added to it
+                    # before it is linked to a system.
+                    request.session["system_data"]["UsageJourney"][uj.id] = uj.to_json(
+                        save_calculated_attributes=True)
             model_web.update_system_data_with_up_to_date_calculated_attributes()
             logger.info(f"Importing system from JSON took {round((time() - start), 3)} seconds")
             return redirect("model-builder")

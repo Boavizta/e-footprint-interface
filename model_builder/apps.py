@@ -1,3 +1,5 @@
+import os
+
 from django.apps import AppConfig
 
 
@@ -6,4 +8,5 @@ class ModelBuilderConfig(AppConfig):
     name = "model_builder"
 
     def ready(self):
-        from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT
+        if os.getenv('DJANGO_PROD') == 'True':
+            from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT

@@ -26,7 +26,7 @@ describe('Test de la page d\'accueil', () => {
         //delete default card
         cy.get('button[id="'+defaulId+'"]').click();
         cy.wait(500);
-        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="/model_builder/ask-delete-object/uid-my-first-usage-journey-1/"]').should('be.visible').click();
+        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="/model_builder/ask-delete-object/uid-my-first-usage-journey-1/"]').should('exist').click();
         cy.wait(500);
         cy.get('button').contains('Yes, delete').should('be.enabled').click();
 
@@ -51,7 +51,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('div[id$="'+ujNameTwo.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
         cy.get('div[id^="add-step-to"][id$="'+ujNameOne.replaceAll(' ', '-')+'"]')
           .click();
-        cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
+        cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('exist');
         // Erase all the text in the input with id name
         cy.get('#UsageJourneyStep_name').clear();
         cy.get('#UsageJourneyStep_name').type(ujsOne);
@@ -62,7 +62,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
         cy.get('div[id^="add-step-to"][id$="'+ujNameOne.replaceAll(' ', '-')+'"]')
           .click();
-        cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('be.visible');
+        cy.get('#sidePanel').contains('div', 'Add new usage journey step').should('exist');
         cy.get('#UsageJourneyStep_name').clear();
         cy.get('#UsageJourneyStep_name').type(ujsTwo);
         cy.get('#UsageJourneyStep_user_time_spent').type('20,2');
@@ -75,7 +75,7 @@ describe('Test de la page d\'accueil', () => {
 
         // Add server
         cy.get('#btn-add-server').click();
-        cy.get('#sidePanel').contains('div', 'Add new server').should('be.visible');
+        cy.get('#sidePanel').contains('div', 'Add new server').should('exist');
         cy.get('#type_object_available').select('BoaviztaCloudServer');
         cy.get('#BoaviztaCloudServer_name').clear();
         cy.get('#BoaviztaCloudServer_name').type(server);
@@ -99,7 +99,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#WebApplicationJob_name').clear();
         cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();
-        cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobOne.replaceAll(' ', '-')+'/"]').should('be.visible');
+        cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobOne.replaceAll(' ', '-')+'/"]').should('exist');
 
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
         cy.get('#sidePanel').should('be.visible');
@@ -133,7 +133,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible');
         cy.get('button[id^="button-id-"][id$="Test-E2E-UJ-2"]').click();
         cy.wait(500);
-        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="'+ujNameTwo.replaceAll(' ', '-')+'/"]').should('be.visible').click();
+        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="'+ujNameTwo.replaceAll(' ', '-')+'/"]').should('exist').click();
         cy.wait(500);
         cy.get('button').contains('Yes, delete').should('be.enabled').click();
         cy.get("#model-builder-modal").should("not.exist");

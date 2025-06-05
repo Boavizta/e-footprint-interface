@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.23] - 2025-06-04
+## [0.8.1] - 2025-06-10
+
+### Fixed
+- Save calculated attributes to json for objects not linked to system + upgrade to e-footprint 10.1.6 so that server and system recompute their attributes when a service is installed on a server.
+
+## [0.8.0] - 2025-06-04
 
 ### Changed
 - Cache calculated attributes and update model in real time as the user interacts with it.

@@ -82,8 +82,9 @@ def delete_object(request, object_id):
         system.set_efootprint_value("usage_patterns", new_up_list)
         elements_with_lines_to_remove.append(object_id)
         web_obj.modeling_obj.self_delete()
-        request.session["system_data"]["System"][system.efootprint_id] = system.to_json()
         del request.session["system_data"][obj_type.__name__][object_id]
+        del model_web.flat_efootprint_objs_dict[object_id]
+        del model_web.response_objs[obj_type.__name__][object_id]
         if len(request.session["system_data"][obj_type.__name__]) == 0:
             del request.session["system_data"][obj_type.__name__]
         model_web.update_system_data_with_up_to_date_calculated_attributes()

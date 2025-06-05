@@ -78,12 +78,9 @@ class ModelWeb:
         :param system_data: Dictionary containing the new system data.
         """
         self.session.modified = True
-        system_data_with_calculated_attributes_but_without_objects_not_linked_to_system = self.to_json()
-        for object_type in system_data_with_calculated_attributes_but_without_objects_not_linked_to_system:
-            if object_type == "efootprint_version":
-                continue
-            self.session["system_data"][object_type].update(
-                system_data_with_calculated_attributes_but_without_objects_not_linked_to_system[object_type])
+        for efootprint_obj in self.flat_efootprint_objs_dict.values():
+            self.session["system_data"][efootprint_obj.class_as_simple_str][efootprint_obj.id] = efootprint_obj.to_json(
+                save_calculated_attributes=True)
 
     def raise_incomplete_modeling_errors(self):
         if len(self.system.servers) == 0:
@@ -158,13 +155,9 @@ class ModelWeb:
         if object_type not in self.session["system_data"]:
             self.session["system_data"][object_type] = {}
             self.response_objs[object_type] = {}
-        # It is necessary to have redundancy of updating with self.to_json() and then adding efootprint_object.to_json()
-        # because in case of an object not created to a system self.to_json() will not contain the object
-        self.session["system_data"][object_type][efootprint_object.id] = efootprint_object.to_json()
-        self.update_system_data_with_up_to_date_calculated_attributes()
-
         self.response_objs[object_type][efootprint_object.id] = efootprint_object
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
+        self.update_system_data_with_up_to_date_calculated_attributes()
 
         return wrap_efootprint_object(efootprint_object, self)
 

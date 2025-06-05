@@ -1,10 +1,17 @@
 {
-    "efootprint_version": "10.1.5",
+    "efootprint_version": "10.1.6",
     "System": {
         "uuid-system-1": {
             "name": "My system",
             "id": "uuid-system-1",
-            "usage_patterns": []
+            "usage_patterns": [],
+            "total_footprint": {
+                "value": null,
+                "label": "no value",
+                "direct_ancestors_with_id": [],
+                "direct_children_with_id": [],
+                "explain_nested_tuples": []
+            }
         }
     },
     "UsageJourneyStep": {
@@ -18,7 +25,10 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
-                }
+                },
+                "direct_ancestors_with_id": [],
+                "direct_children_with_id": [],
+                "explain_nested_tuples": []
             },
             "jobs": []
         }
@@ -29,7 +39,14 @@
             "id": "uid-my-first-usage-journey-1",
             "uj_steps": [
                 "uid-my-first-usage-journey-step-1"
-            ]
+            ],
+            "duration": {
+                "value": null,
+                "label": "no value",
+                "direct_ancestors_with_id": [],
+                "direct_children_with_id": [],
+                "explain_nested_tuples": []
+            }
         }
     }
 }
