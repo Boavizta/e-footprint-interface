@@ -705,13 +705,13 @@ openai = ["openai (>=1.61.1,<2.0.0)"]
 
 [[package]]
 name = "efootprint"
-version = "10.1.5"
+version = "10.1.6"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 files = [
-    {file = "efootprint-10.1.5-py3-none-any.whl", hash = "sha256:ec1bead01f0874e3d2afad4404329ca8aba5b9f064b08d386dbf3b5f9820b2f9"},
-    {file = "efootprint-10.1.5.tar.gz", hash = "sha256:e7b0bc35cc1c06b59e6a654bcb9cd6155a0e80e4feef59ce8dfba9cbd3d66ea3"},
+    {file = "efootprint-10.1.6-py3-none-any.whl", hash = "sha256:df5210d53b075cb36c126992e339b9e720fb487cb82afe6666762a0f5826009d"},
+    {file = "efootprint-10.1.6.tar.gz", hash = "sha256:9c76b513885fc4b8eba1dcda763810fa9d63e48c10e404635cbb75c1d8edfac1"},
 ]
 
 [package.dependencies]
@@ -977,13 +977,12 @@ httplib2 = ">=0.19.0"
 
 [[package]]
 name = "google-cloud-secret-manager"
-version = "2.23.3"
+version = "2.24.0"
 description = "Google Cloud Secret Manager API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_cloud_secret_manager-2.23.3-py3-none-any.whl", hash = "sha256:fe06ebb2f71eb739ecc6c14ea9e8dafcb9bbc6123b78b2f8986ece6733d23a1a"},
-    {file = "google_cloud_secret_manager-2.23.3.tar.gz", hash = "sha256:598c4c0a9d10d49d500eb4aea3255dff250aa2f92c028f5c97e3b367f768c808"},
+    {file = "google_cloud_secret_manager-2.24.0.tar.gz", hash = "sha256:ce573d40ffc2fb7d01719243a94ee17aa243ea642a6ae6c337501e58fbf642b5"},
 ]
 
 [package.dependencies]
@@ -3241,4 +3240,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "746f0cd1b32cfd900942fb0c2782767f58aaea52c2de3b1f99f75e4de02571bc"
+content-hash = "538ab016e6dd8fb02eb48ecfc74e2e8d3549ce52ed794f6c6b92c4aa53b3fc07"

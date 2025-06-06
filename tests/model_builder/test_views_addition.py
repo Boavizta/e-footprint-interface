@@ -5,7 +5,7 @@ from efootprint.logger import logger
 from django.http import QueryDict
 
 from model_builder.addition.views_addition import add_object
-from model_builder.views import model_builder_main
+from model_builder.views import model_builder_main, result_chart
 from model_builder.model_web import default_networks, default_devices, default_countries
 from model_builder.views_deletion import delete_object
 from model_builder.edition.views_edition import edit_object, open_edit_object_panel
@@ -202,27 +202,31 @@ class TestViewsAddition(TestModelingBase):
 
         self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
-    def test_add_usage_journey_without_uj_step_and_link_usage_pattern_to_it(self):
-        post_data = QueryDict(mutable=True)
-        post_data.update({
-            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
-            "UsageJourney_name": ["New usage journey"],
-            "UsageJourney_uj_steps": [""]
-        })
-        add_request = self.factory.post("/add-object/UsageJourney", data=post_data)
-        self._add_session_to_request(add_request, self.system_data)
-        nb_uj = len(add_request.session["system_data"]["UsageJourney"])
-        response = add_object(add_request, "UsageJourney")
-        self.assertEqual(nb_uj + 1, len(add_request.session["system_data"]["UsageJourney"]))
-        new_uj_id = list(add_request.session["system_data"]["UsageJourney"].keys())[-1]
-        logger.info("Linking usage pattern to newly created usage journey")
+    def test_delete_uj_step_from_default_uj_then_link_usage_pattern_to_it(self):
+        self.system_data_path = os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json")
+        self.setUp()
+        # delete system data file
+        system_data_with_calculated_attributes_path = self.system_data_path.replace(
+            ".json", "_with_calculated_attributes.json")
+        if os.path.exists(system_data_with_calculated_attributes_path):
+            os.remove(system_data_with_calculated_attributes_path)
+        uj_step_id = next(iter(self.system_data["UsageJourneyStep"].keys()))
+        delete_request = self.factory.post(f"/delete-object/{uj_step_id}")
+        self._add_session_to_request(delete_request, self.system_data)
+        nb_uj_steps = len(delete_request.session["system_data"]["UsageJourneyStep"])
+        self.assertEqual(1, nb_uj_steps)
+        logger.info("Deleting usage journey step")
+        response = delete_object(delete_request, uj_step_id)
+        self.assertNotIn("UsageJourneyStep", delete_request.session["system_data"])
+        uj_id = next(iter(delete_request.session["system_data"]["UsageJourney"].keys()))
+        logger.info("Linking usage pattern to usage journey without uj step")
         post_data = QueryDict(mutable=True)
         post_data.update({
             "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
             "UsagePatternFromForm_devices": [list(default_devices().keys())[0]],
             "UsagePatternFromForm_network": [list(default_networks().keys())[0]],
             "UsagePatternFromForm_country": [list(default_countries().keys())[0]],
-            "UsagePatternFromForm_usage_journey": [new_uj_id],
+            "UsagePatternFromForm_usage_journey": [uj_id],
             "UsagePatternFromForm_start_date": ["2025-02-01"],
             "UsagePatternFromForm_modeling_duration_value": ["5"],
             "UsagePatternFromForm_modeling_duration_unit": ["month"],
@@ -235,3 +239,16 @@ class TestViewsAddition(TestModelingBase):
 
         add_request = self.factory.post("/add-object/UsagePatternFromForm", data=post_data)
         self._add_session_to_request(add_request, self.system_data)
+
+        response = add_object(add_request, "UsagePatternFromForm")
+        self.assertEqual(response.status_code, 200)
+
+        result_request = self.factory.get("/model_builder/result-chart/")
+        self._add_session_to_request(result_request, add_request.session["system_data"])
+        logger.info("Requesting result chart after adding usage pattern to usage journey without uj step")
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        with self.assertRaises(ValueError) as context:
+            response = result_chart(result_request)
+        self.assertIn("No impact could be computed because the modeling is incomplete", str(context.exception))
+
+        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
