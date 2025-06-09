@@ -169,3 +169,119 @@ function addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption(){
         }
     })
 }
+
+function sortSelectMultipleFields(fieldId, selectedValue, direction) {
+    let index = window.selectedOptions.findIndex(option => option.value === selectedValue);
+    if (index === -1) return;
+
+    if (direction === "up" && index > 0) {
+        [window.selectedOptions[index - 1], window.selectedOptions[index]] =
+            [window.selectedOptions[index], window.selectedOptions[index - 1]];
+    }
+
+    if (direction === "dpwn" && index < window.selectedOptions.length - 1) {
+        [window.selectedOptions[index + 1], window.selectedOptions[index]] =
+            [window.selectedOptions[index], window.selectedOptions[index + 1]];
+    }
+    refreshSelectMultipleFields(fieldId);
+}
+
+function deleteValueFromSelectMultiple(fieldId, selectedValue) {
+    let index = window.selectedOptions.findIndex(option => option.value === selectedValue);
+    if (index === -1) return;
+    let removedItem = window.selectedOptions.splice(index, 1)[0];
+
+    window.unselectedOptions.push(removedItem);
+
+    let newOption = document.createElement("option");
+    newOption.value = removedItem.value;
+    newOption.textContent = removedItem.label;
+    document.getElementById("add-new-object-"+fieldId).appendChild(newOption);
+
+    refreshSelectMultipleFields(fieldId);
+}
+
+function addValueToSelectMultiple(fieldId) {
+    let addNewObjectElement = document.getElementById("add-new-object-" + fieldId);
+
+    let unselectedValues = window.unselectedOptions;
+    let selectedValues = window.selectedOptions;
+
+    let indexToRemove = unselectedValues.findIndex(unselectedValue =>
+        unselectedValue.value === addNewObjectElement.value
+    );
+
+    if (indexToRemove !== -1) {
+        selectedValues.push(unselectedValues[indexToRemove]);
+        unselectedValues.splice(indexToRemove, 1);
+    }
+
+    let optionToRemove = addNewObjectElement.querySelector(`option[value="${addNewObjectElement.value}"]`);
+    if (optionToRemove) {
+        optionToRemove.remove();
+    }
+
+    window.selectedOptions = selectedValues;
+    window.unselectedOptions = unselectedValues;
+
+    refreshSelectMultipleFields(fieldId);
+}
+
+function refreshSelectMultipleFields(fieldId) {
+    let objectsAlreadyAddElement = document.getElementById("objects-already-add-for-" + fieldId);
+    objectsAlreadyAddElement.innerHTML = "";
+
+    if(!window.selectedOptions || window.selectedOptions.length === 0) {
+        let newSelectedValue = document.createElement("tr");
+        let noValue = document.createElement("td");
+        noValue.setAttribute("colspan", "4");
+        noValue.innerHTML = `<span class="text-muted">No values selected</span>`;
+        newSelectedValue.appendChild(noValue);
+        objectsAlreadyAddElement.appendChild(newSelectedValue);
+        return;
+    }
+
+    window.selectedOptions.forEach((selectedValue, index) => {
+        let newSelectedValue = document.createElement("tr");
+        let nameSelectedValue = document.createElement("td");
+        nameSelectedValue.innerHTML = `${selectedValue.label}`;
+        let ctaSortUp = document.createElement("td");
+        let ctaSortDown = document.createElement("td");
+        let removeSelectedValue = document.createElement("td");
+
+        nameSelectedValue.className = "width-70";
+        ctaSortUp.className = "width-10";
+        ctaSortDown.className = "width-10";
+        removeSelectedValue.className = "width-10";
+
+        if (index !== window.selectedOptions.length - 1) {
+            ctaSortDown.innerHTML = `
+            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','dpwn')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                  <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                </svg>
+            </button>`
+        }else{
+            ctaSortDown.innerHTML = '';
+        }
+        if(index !== 0){
+            ctaSortUp.innerHTML = `
+            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','up')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                  <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                </svg>
+            </button>`
+        }else{
+            ctaSortUp.innerHTML = '';
+        }
+        removeSelectedValue.innerHTML = `
+            <button type="button" class="btn btn-white  border-0 rounded-2 fs-xl p-2" onclick="deleteValueFromSelectMultiple('${fieldId}','${selectedValue.value}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </button>`
+        newSelectedValue.innerHTML = nameSelectedValue.outerHTML + ctaSortUp.outerHTML + ctaSortDown.outerHTML + removeSelectedValue.outerHTML;
+        objectsAlreadyAddElement.appendChild(newSelectedValue);
+    });
+    document.getElementById(fieldId).value = window.selectedOptions.map(option => option.value).join(";");
+}

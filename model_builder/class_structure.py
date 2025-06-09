@@ -98,16 +98,17 @@ def generate_dynamic_form(
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             if attr_name in default_values.keys():
-                selected = [elt.id for elt in default_values[attr_name]]
+                selected = [elt for elt in default_values[attr_name]]
             else:
                 selected = []
+            unselected = [{'value':option.id,'label':option.name} for option in
+                          model_web.get_efootprint_objects_from_efootprint_type(
+                        list_attribute_object_type_str) if option not in selected]
             structure_field.update({
                 "input_type": "select-multiple",
                 "selected": selected,
-                "options": [
-                    {"label": attr_value.name, "value": attr_value.id}
-                    for attr_value in model_web.get_efootprint_objects_from_efootprint_type(
-                        list_attribute_object_type_str)]
+                "unselected": unselected,
+                "label_multiple": FORM_FIELD_REFERENCES[attr_name]["label_multiple"]
             })
         elif issubclass(annotation, str):
             structure_field.update({

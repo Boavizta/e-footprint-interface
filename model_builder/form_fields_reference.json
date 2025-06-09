@@ -241,7 +241,8 @@
         "modeling_obj_containers": [
             "UsageJourney"
         ],
-        "label": "existing usage journey steps you can pick"
+        "label": "existing usage journey steps you can pick",
+        "label_multiple": "Usage journey steps linked"
     },
     "usage_journey": {
         "modeling_obj_containers": [
