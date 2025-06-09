@@ -18,7 +18,7 @@ def add_new_usage_journey(request, model_web: ModelWeb):
         request, "model_builder/object_cards/usage_journey_card.html", {"usage_journey": added_obj})
 
     response["HX-Trigger-After-Swap"] = json.dumps({
-        "updateTopParentLines": {"topParentIds": [added_obj.web_id]},
+        "resetLeaderLines": "",
         "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
         "displayToastAndHighlightObjects": {
             "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
@@ -36,11 +36,10 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
     mutable_post["name"] = usage_journey_to_edit.name
     usage_journey_step_ids = [uj_step.efootprint_id for uj_step in usage_journey_to_edit.uj_steps]
     usage_journey_step_ids.append(added_obj.efootprint_id)
-    mutable_post.setlist("uj_steps", usage_journey_step_ids)
+    mutable_post["uj_steps"] =  ";".join(usage_journey_step_ids)
     request.POST = mutable_post
 
-    response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
-        compute_edit_object_html_and_event_response(request.POST, usage_journey_to_edit))
+    response_html = compute_edit_object_html_and_event_response(request.POST, usage_journey_to_edit)
 
     # There will always be only one mirrored card for a newly created usage journey step
     toast_and_highlight_data = {
@@ -48,9 +47,7 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
         "action_type": "add_new_object"
     }
 
-    return generate_http_response_from_edit_html_and_events(
-        response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
-        toast_and_highlight_data)
+    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
 
 def add_new_server(request, model_web: ModelWeb):
@@ -112,20 +109,17 @@ def add_new_job(request, model_web: ModelWeb):
     mutable_post["user_time_spent_unit"] = str(usage_journey_step_to_edit.user_time_spent.value.units)
     job_ids = [job.efootprint_id for job in usage_journey_step_to_edit.jobs]
     job_ids.append(added_obj.efootprint_id)
-    mutable_post.setlist("jobs", job_ids)
+    mutable_post["jobs"]= ";".join(job_ids)
     request.POST = mutable_post
 
-    response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
-        compute_edit_object_html_and_event_response(request.POST, usage_journey_step_to_edit))
+    response_html = compute_edit_object_html_and_event_response(request.POST, usage_journey_step_to_edit)
 
     toast_and_highlight_data = {
         "ids": [mirrored_card.web_id for mirrored_card in added_obj.mirrored_cards], "name": added_obj.name,
         "action_type": "add_new_object"
     }
 
-    return generate_http_response_from_edit_html_and_events(
-        response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
-        toast_and_highlight_data)
+    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
 
 def add_new_usage_pattern(request, model_web: ModelWeb):
@@ -137,7 +131,7 @@ def add_new_usage_pattern(request, model_web: ModelWeb):
         request, "model_builder/object_cards/usage_pattern_card.html", {"usage_pattern": added_obj})
 
     response["HX-Trigger-After-Swap"] = json.dumps({
-        "updateTopParentLines": {"topParentIds": [added_obj.web_id]},
+        "resetLeaderLines": "",
         "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
         "displayToastAndHighlightObjects": {
             "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}

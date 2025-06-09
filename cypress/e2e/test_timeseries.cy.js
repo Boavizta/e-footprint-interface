@@ -43,7 +43,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#initial_usage_journey_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
 
-        cy.wait(500);
+        cy.get('#sidePanelForm').should('not.exist');
 
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
@@ -64,7 +64,6 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
-        cy.wait(500)
         cy.get('button[id^="button-id-"][id$="' + upNameOne.replaceAll(' ', '-') + '"]').should('be.visible').click();
         cy.get("#chartTimeseries").should("have.class", "d-block")
         cy.get('#timeSeriesChart').then(($canvas) => {

@@ -45,8 +45,7 @@ describe("Test - Result panel", () => {
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
-        cy.wait(500);
-        cy.get('#result-block').should('be.visible').find('div[onclick="hidePanelResult()"]')
+        cy.get('#result-block').should('exist').should('be.visible').find('div[onclick="hidePanelResult()"]')
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
         .realTouch('end', { x: 100, y: 400 });
@@ -83,7 +82,9 @@ describe("Test - Result panel", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-        cy.wait(500);
+
+        cy.get('#sidePanelForm').should('not.exist');
+
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
 
         cy.get('#btn-open-panel-result')
@@ -122,7 +123,9 @@ describe("Test - Result panel", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-        cy.wait(500);
+        cy.get('#sidePanelForm').should('not.exist')
+
+
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
 
         cy.get('#btn-open-panel-result').click()
@@ -162,7 +165,7 @@ describe("Test - Result panel", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-        cy.wait(500);
+        cy.get('#sidePanelForm').should('not.exist');
         cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('exist').click()
         cy.get('#btn-open-panel-result').click()
         cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")

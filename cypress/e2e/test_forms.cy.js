@@ -13,31 +13,28 @@ describe("Test - Forms panel", () => {
         let serverOne = "Test E2E Server 1";
         let serverTwo = "Test E2E Server 2";
 
-    it("Check that the UJS list is not displayed when adding a UJ with no UJS in the system, then check that it is displayed after having created a UJS", () => {
+    it("Check that the UJS list is displayed and disabled when adding a UJ with no UJS in the system, then check" +
+        " that it is enabled after having created a UJS", () => {
         cy.visit("/model_builder/");
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-no-job-no-uj-step.json'
         cy.get('input[type="file"]').selectFile(fileTest);
-        cy.wait(500);
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
-        cy.get('#UsageJourney_uj_steps').should('exist').should('not.be.visible');
-
-        cy.get('#btn-add-usage-journey').click();
-        cy.get('#UsageJourney_uj_steps').should('exist').should('not.be.visible');
+        cy.get("#sidePanelForm").should('exist').should('be.visible');
+        cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('not.be.enabled');
+        cy.get("#btn-submit-form").click();
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="' + uj.replaceAll(' ',
         '-') + '"]').should('exist').click();
-        cy.wait(500);
         cy.get("#btn-submit-form").should('exist').click();
         cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
-        cy.wait(500);
-        cy.get('#UsageJourney_uj_steps').should('exist').should('be.visible');
+        cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.not.enabled');
         cy.get('#btn-add-usage-journey').click();
-        cy.wait(500);
-        cy.get('#UsageJourney_uj_steps').should('exist').should('be.visible');
+        cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.enabled');
     });
 
     it("Check that the jobs list in not displayed when adding a UJS with no job in the system, then check that it is displayed after having created a job", () => {
@@ -45,28 +42,25 @@ describe("Test - Forms panel", () => {
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
         cy.get('input[type="file"]').selectFile(fileTest);
-        cy.wait(500);
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
-        cy.wait(500);
         cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
         cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
          '-')+'"]').click();
-        cy.wait(500);
-        cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
+        cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('not.be.enabled');
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ',
         '-')+'"]').click();
-        cy.wait(500);
         cy.get("#btn-submit-form").click();
+        cy.get("#sidePanelForm").should('not.exist');
+
 
         cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
-        cy.wait(500);
-        cy.get('#UsageJourneyStep_jobs').should('exist').should('be.visible');
+        cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('be.not.enabled');
         cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
          '-')+'"]').click();
-        cy.get('#UsageJourneyStep_jobs').should('exist').should('be.visible');
+        cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('be.enabled');
     });
 
     it("Try to create a server with and without edit fields into advanced options", () => {
@@ -74,21 +68,19 @@ describe("Test - Forms panel", () => {
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
         cy.get('input[type="file"]').selectFile(fileTest);
-        cy.wait(500);
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get("#btn-add-server").click();
-        cy.wait(500);
         cy.get("#type_object_available").select('Server');
         cy.get("#Server_name").clear().type(serverOne);
         cy.get("#Server_average_carbon_intensity").clear().type('700');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get("#btn-add-server").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('be.visible');
         cy.get("#type_object_available").select('Server');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#Server_name").clear().type(serverTwo);
@@ -99,19 +91,15 @@ describe("Test - Forms panel", () => {
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
-
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get('button[id^="button-id-"][id$="'+serverOne.replaceAll(' ', '-')+'"]').should('exist').click();
-        cy.wait(500);
         cy.get("#Server_average_carbon_intensity").should('have.value', '700');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
         cy.get("#Server_power").should('have.value', '300');
-
         cy.get('button[id^="button-id-"][id$="'+serverTwo.replaceAll(' ', '-')+'"]').should('exist').click();
-        cy.wait(500);
         cy.get("#Server_average_carbon_intensity").should('have.value', '800');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#display-advanced-Server").click();
@@ -125,14 +113,14 @@ describe("Test - Forms panel", () => {
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/test-unit-edit.json'
         cy.get('input[type="file"]').selectFile(fileTest);
-        cy.wait(500);
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
         cy.get('#Storage_data_storage_duration').clear().type('3');
         cy.get('#btn-submit-form').click();
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');

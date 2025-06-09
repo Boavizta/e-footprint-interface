@@ -20,31 +20,23 @@ describe('Test de la page d\'accueil', () => {
         cy.visit("/");
         cy.get('#btn-start-modeling-my-service').click();
         cy.get('#model-canva').should('be.visible');
-        cy.wait(500);
-        cy.window().its('LeaderLine')
-
-        //delete default card
-        cy.get('button[id="'+defaulId+'"]').click();
-        cy.wait(500);
-        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="/model_builder/ask-delete-object/uid-my-first-usage-journey-1/"]').should('exist').click();
-        cy.wait(500);
-        cy.get('button').contains('Yes, delete').should('be.enabled').click();
+        cy.window().its('LeaderLine').should('exist');
 
         // Create UJ one and two
-        cy.get('#btn-add-usage-journey').click();
-        cy.get('#btn-add-usage-journey').should('be.visible');
-        cy.get('#UsageJourney_name').clear();
-        cy.get('#UsageJourney_name').type(ujNameOne);
-        cy.get('#btn-submit-form').click();
+        cy.get('#btn-add-usage-journey').should('be.visible').click();
+        cy.get('#sidePanelForm').should('be.visible');
+        cy.get('#UsageJourney_name').should('exist').should('be.enabled').click().type(ujNameOne);
+        cy.get('#btn-submit-form').should('be.enabled').should('be.visible').click();
         cy.get('#form-add-usage-journey').should('not.exist');
+        cy.get("button[id^='button-id-'][id$='"+ujNameOne.replaceAll(' ', '-')+"']").should('exist').should('be.visible');
 
-        cy.wait(500);
-
-        cy.get('#btn-add-usage-journey').click();
-        cy.get('#UsageJourney_name').clear();
-        cy.get('#UsageJourney_name').type(ujNameTwo);
-        cy.get('#btn-submit-form').click();
-        cy.get('#form-add-usage-journey').should('not.exist');
+        cy.get('#btn-add-usage-journey').should("be.visible").click();
+        cy.get('#sidePanelForm').should('be.visible');
+        cy.get('#UsageJourney_name').invoke('val').then(val => console.log('Current value:', val));
+        cy.get('#UsageJourney_name').should('exist').should('be.enabled').click().type(ujNameTwo);
+        cy.get('#btn-submit-form').should('be.enabled').should('be.visible').click();
+        cy.get('#form-add-usage-journey').should('not.exist')
+         cy.get("button[id^='button-id-'][id$='"+ujNameTwo.replaceAll(' ', '-')+"']").should('exist').should('be.visible');
 
         // User journeys must be visible then add user journey steps to UJ 1
         cy.get('div[id$="'+ujNameOne.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
@@ -94,8 +86,7 @@ describe('Test de la page d\'accueil', () => {
 
         // Add jobs
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').click({force: true});
-        cy.wait(500);
-        cy.get('#service').should('exist').select(service);
+        cy.get('#service').should('be.visible').select(service);
         cy.get('#WebApplicationJob_name').clear();
         cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();
@@ -107,11 +98,10 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#Job_name').clear();
         cy.get('#Job_name').type(jobTwo);
         cy.get('#btn-submit-form').click();
-        cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobTwo.replaceAll(' ', '-')+'/"]').should('be.visible');
+        cy.get('button[hx-get^="/model_builder/open-edit-object-panel/"][hx-get$="'+jobTwo.replaceAll(' ', '-')+'/"]').should('exist');
 
         // Add usagePattern
         cy.get('#add_usage_pattern').click();
-        cy.wait(500);
         cy.get('#sidePanel').should('be.visible');
         cy.get('#UsagePatternFromForm_name').clear();
         cy.get('#UsagePatternFromForm_name').type(upNameOne);
@@ -133,12 +123,23 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#sidePanel').should('not.contain.html');
         cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible');
         cy.get('button[id^="button-id-"][id$="Test-E2E-UJ-2"]').click();
-        cy.wait(500);
-        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="'+ujNameTwo.replaceAll(' ', '-')+'/"]').should('exist').click();
-        cy.wait(500);
-        cy.get('button').contains('Yes, delete').should('be.enabled').click();
+        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="'+ujNameTwo.replaceAll(' ', '-')+'/"]').should('be.visible').click();
+        cy.get('button').contains('Yes, delete').should('be.visible').should('be.enabled').click();
         cy.get("#model-builder-modal").should("not.exist");
         cy.get('button[id^="button-id-"][id$="Test-E2E-UJ-2"]').should('not.exist');
+
+        //delete default card
+        cy.get('button[id="'+defaulId+'"]').click();
+        cy.get('button[hx-get^="/model_builder/ask-delete-object/"][hx-get$="/model_builder/ask-delete-object/uid-my-first-usage-journey-1/"]')
+            .should('exist')
+            .and('be.visible')
+            .click();
+        cy.get('button').contains('Yes, delete')
+            .should('be.visible')
+            .and('be.enabled')
+            .click();
+
+        cy.get('#model-builder-modal').should('not.exist');
 
         cy.get('#btn-open-panel-result').click();
         cy.get('#lineChart').should('be.visible');

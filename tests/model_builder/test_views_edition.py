@@ -34,32 +34,32 @@ class TestViewsEdition(TestModelingBase):
     def test_edition(self):
         logger.info(f"Creating service")
         post_data = QueryDict(mutable=True)
-        post_data.update({'WebApplication_name': ['New service'],
-                            'efootprint_id_of_parent_to_link_to': ['uuid-Server-1'],
-                          'type_object_available': ['WebApplication'],
-                          'WebApplication_technology': ['php-symfony'], 'WebApplication_base_ram_consumption': ['2'],
-                          'WebApplication_bits_per_pixel': ['0.1'], 'WebApplication_static_delivery_cpu_cost': ['4.0'],
-                          'WebApplication_ram_buffer_per_user': ['50']}
+        post_data.update({"WebApplication_name": ["New service"],
+                            "efootprint_id_of_parent_to_link_to": ["uuid-Server-1"],
+                          "type_object_available": ["WebApplication"],
+                          "WebApplication_technology": ["php-symfony"], "WebApplication_base_ram_consumption": ["2"],
+                          "WebApplication_bits_per_pixel": ["0.1"], "WebApplication_static_delivery_cpu_cost": ["4.0"],
+                          "WebApplication_ram_buffer_per_user": ["50"]}
         )
 
-        service_request = self.factory.post('/add-object/Service', data=post_data)
+        service_request = self.factory.post("/add-object/Service", data=post_data)
         self._add_session_to_request(service_request, self.system_data)
-        response = add_object(service_request, 'Service')
+        response = add_object(service_request, "Service")
         service_id = next(iter(service_request.session["system_data"]["WebApplication"].keys()))
         self.assertEqual(response.status_code, 200)
 
         logger.info(f"Creating job")
         post_data = QueryDict(mutable=True)
         post_data.update(
-        {'WebApplicationJob_name': ['New job'], 'WebApplicationJob_server': ['uuid-Server-1'],
-         'efootprint_id_of_parent_to_link_to': ['uuid-20-min-streaming-on-Youtube'],
-         'WebApplicationJob_service': [service_id],
-         'type_object_available': ['WebApplicationJob'],
-         'WebApplicationJob_implementation_details': ['aggregation-code-side'],
-         'WebApplicationJob_data_transferred': ['150'], 'WebApplicationJob_data_stored': ['100']}
+        {"WebApplicationJob_name": ["New job"], "WebApplicationJob_server": ["uuid-Server-1"],
+         "efootprint_id_of_parent_to_link_to": ["uuid-20-min-streaming-on-Youtube"],
+         "WebApplicationJob_service": [service_id],
+         "type_object_available": ["WebApplicationJob"],
+         "WebApplicationJob_implementation_details": ["aggregation-code-side"],
+         "WebApplicationJob_data_transferred": ["150"], "WebApplicationJob_data_stored": ["100"]}
         )
 
-        job_request = self.factory.post('/model_builder/add-object/Job/', data=post_data)
+        job_request = self.factory.post("/model_builder/add-object/Job/", data=post_data)
         self._add_session_to_request(job_request, service_request.session["system_data"])
         response = add_object(job_request, "Job")
         self.assertEqual(response.status_code, 200)
@@ -71,13 +71,13 @@ class TestViewsEdition(TestModelingBase):
         job_edition_fields, job_edition_fields_advanced, dynamic_form_data = generate_object_edition_structure(
             job, attributes_to_skip=["service"])
 
-        ref_dynamic_form_data = {'dynamic_lists': []}
+        ref_dynamic_form_data = {"dynamic_lists": []}
 
         self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
         self.assertEqual(job_request.session["system_data"]["WebApplicationJob"][new_job_id]["name"], "New job")
 
-    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
-    def test_edit_genai_model_provider_with_recompute_true(self, mock_render_exception_modal):
+    def test_edit_genai_model_provider_with_recompute_true(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         gpu_server = GPUServer.from_defaults("GPU server", compute=SourceValue(16 * u.gpu), storage=Storage.ssd())
         first_provider = GenAIModel.list_values()["provider"][0]
         first_model_name = GenAIModel.conditional_list_values()[
@@ -99,17 +99,16 @@ class TestViewsEdition(TestModelingBase):
         second_model_name = GenAIModel.conditional_list_values()[
             "model_name"]["conditional_list_values"][second_provider][0]
         post_data.update(
-            {'GenAIModel_name': ['Gen AI service'], 'GenAIModel_server': [gpu_server.id],
+            {"GenAIModel_name": ["Gen AI service"], "GenAIModel_server": [gpu_server.id],
              "GenAIModel_provider": [second_provider], "GenAIModel_model_name": [second_model_name],
              "recomputation": ["true"],}
         )
 
-        edit_service_request = self.factory.post(f'/edit-object/{genai_service.id}', data=post_data)
+        edit_service_request = self.factory.post(f"/edit-object/{genai_service.id}", data=post_data)
         self._add_session_to_request(
             edit_service_request, system_to_json(system, save_calculated_attributes=False))
 
         response = edit_object(edit_service_request, genai_service.id)
-        mock_render_exception_modal.assert_not_called()
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_edit_server_and_storage(self, mock_render_exception_modal):
@@ -118,14 +117,14 @@ class TestViewsEdition(TestModelingBase):
 
         post_data = QueryDict(mutable=True)
         post_data.update(
-            {'name': ['New server'], 'carbon_footprint_fabrication': ['60'], 'carbon_footprint_fabrication_unit': 'kg',
-                'storage_form_data':
+            {"name": ["New server"], "carbon_footprint_fabrication": ["60"], "carbon_footprint_fabrication_unit": "kg",
+                "storage_form_data":
                 [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", '
                  f'"carbon_footprint_fabrication_per_storage_capacity":"160.0",'
                  f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}']}
         )
 
-        edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)
+        edit_server_request = self.factory.post(f"/edit-object/{server_id}", data=post_data)
         self._add_session_to_request(edit_server_request, self.system_data)
         response = edit_object(edit_server_request, server_id)
 
@@ -147,15 +146,15 @@ class TestViewsEdition(TestModelingBase):
 
         post_data = QueryDict(mutable=True)
         post_data.update(
-            {'name': ['New server'], 'carbon_footprint_fabrication': ['60'], 'carbon_footprint_fabrication_unit': 'kg',
-             'storage_form_data':
+            {"name": ["New server"], "carbon_footprint_fabrication": ["60"], "carbon_footprint_fabrication_unit": "kg",
+             "storage_form_data":
                  [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", '
                   f'"carbon_footprint_fabrication_per_storage_capacity":"170.0",'
                   f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}'],
              "recomputation": ["true"],}
         )
 
-        edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)
+        edit_server_request = self.factory.post(f"/edit-object/{server_id}", data=post_data)
         self._add_session_to_request(edit_server_request, self.system_data)
         response = edit_object(edit_server_request, server_id)
 
@@ -175,15 +174,55 @@ class TestViewsEdition(TestModelingBase):
         server_id = "uuid-Server-1"
         post_data = QueryDict(mutable=True)
         post_data.update(
-            {'name': ['New server'], 'average_carbon_intensity': ['60'], 'average_carbon_intensity_unit':
-                'gram / kilowatt_hour',
-             'storage_form_data':
+            {"name": ["New server"], "average_carbon_intensity": ["60"], "average_carbon_intensity_unit":
+                "gram / kilowatt_hour",
+             "storage_form_data":
                  [f'{{"storage_id":"uuid-Default-SSD-storage-1", "name":"server 1 default ssd", '
                   f'"carbon_footprint_fabrication_per_storage_capacity":"160.0",'
                   f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}'],
              "recomputation": ["true"],}
         )
-        edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)
+        edit_server_request = self.factory.post(f"/edit-object/{server_id}", data=post_data)
         self._add_session_to_request(edit_server_request, delete_request.session["system_data"])
         response = edit_object(edit_server_request, server_id)
         self.assertEqual(response.status_code, 200)
+
+    def test_reorder_objects(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        new_uj_steps = ("uuid-02e4s-of-upload;uuid-Dailymotion-step;uuid-20-min-streaming-on-Youtube;"
+                        "uuid-20-min-streaming-on-TikTok")
+        logger.info("Edit daily video usage reordering step 1 to position 2 and step 3 to position 4")
+        post_data = QueryDict(mutable=True)
+        post_data.update(
+            {"UsageJourney_name": ["Daily video usage"],"UsageJourney_uj_steps": [new_uj_steps]})
+
+        edit_usage_journey_request = self.factory.post(f"/edit-object/uuid-Daily-video-usage", data=post_data)
+        self._add_session_to_request(edit_usage_journey_request, self.system_data)
+        response = edit_object(edit_usage_journey_request, "uuid-Daily-video-usage")
+        self.assertEqual(response.status_code, 200)
+
+        model_web = ModelWeb(edit_usage_journey_request.session)
+        usage_journey = model_web.get_web_object_from_efootprint_id("uuid-Daily-video-usage")
+        uj_steps_ids = [uj_step.efootprint_id for uj_step in usage_journey.uj_steps]
+        self.assertEqual(new_uj_steps, ";".join(uj_steps_ids))
+
+
+    def test_reorder_objects_with_element_remove(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        new_uj_steps = ("uuid-02e4s-of-upload;uuid-Dailymotion-step;uuid-20-min-streaming-on-TikTok")
+        logger.info("Edit daily video usage reordering step 1 to position 2 and removing step 3")
+        post_data = QueryDict(mutable=True)
+        post_data.update(
+            {"UsageJourney_name": ["Daily video usage"],"UsageJourney_uj_steps": [new_uj_steps]})
+
+        edit_usage_journey_request = self.factory.post(f"/edit-object/uuid-Daily-video-usage", data=post_data)
+        self._add_session_to_request(edit_usage_journey_request, self.system_data)
+        response = edit_object(edit_usage_journey_request, "uuid-Daily-video-usage")
+        self.assertEqual(response.status_code, 200)
+
+        model_web = ModelWeb(edit_usage_journey_request.session)
+        usage_journey = model_web.get_web_object_from_efootprint_id("uuid-Daily-video-usage")
+        uj_steps_ids = [uj_step.efootprint_id for uj_step in usage_journey.uj_steps]
+        self.assertEqual(new_uj_steps, ";".join(uj_steps_ids))
+
+

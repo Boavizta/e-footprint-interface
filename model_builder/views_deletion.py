@@ -78,28 +78,22 @@ def delete_object(request, object_id):
 
     if isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
         response_html = ""
-        ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = [], [], []
-        for mirrored_card in web_obj.mirrored_cards:
+        for contextual_modeling_obj_container in web_obj.contextual_modeling_obj_containers:
+            modeling_obj_container = contextual_modeling_obj_container.modeling_obj_container
+            attr_name_in_mod_obj_container = contextual_modeling_obj_container.attr_name_in_mod_obj_container
             mutable_post = request.POST.copy()
-            parent = mirrored_card.accordion_parent
-            logger.info(f"Removing {mirrored_card.name} from {parent.name}")
-            mutable_post['name'] = parent.name
-            new_list_attribute_ids = [list_attribute.efootprint_id for list_attribute in parent.accordion_children
-                                      if list_attribute.efootprint_id != mirrored_card.efootprint_id]
-            list_attribute_name = mirrored_card.modeling_obj.contextual_modeling_obj_containers[0].attr_name_in_mod_obj_container
-            mutable_post.setlist(f'{list_attribute_name}', new_list_attribute_ids)
+            logger.info(f"Removing {web_obj.name} from {modeling_obj_container.name}")
+            mutable_post['name'] = modeling_obj_container.name
+            new_list_attribute_ids = [
+                list_attribute.efootprint_id
+                for list_attribute in getattr(modeling_obj_container, attr_name_in_mod_obj_container)
+                if list_attribute.efootprint_id != web_obj.efootprint_id]
+            mutable_post[attr_name_in_mod_obj_container] = ";".join(new_list_attribute_ids)
             request.POST = mutable_post
-            (partial_response_html, partial_ids_of_web_elements_with_lines_to_remove,
-             partial_data_attribute_updates, partial_top_parent_ids) = compute_edit_object_html_and_event_response(
-                request.POST, parent)
+            partial_response_html = compute_edit_object_html_and_event_response(request.POST, modeling_obj_container)
             response_html += partial_response_html
-            ids_of_web_elements_with_lines_to_remove += partial_ids_of_web_elements_with_lines_to_remove
-            data_attribute_updates += partial_data_attribute_updates
-            top_parent_ids += partial_top_parent_ids
 
-            http_response = generate_http_response_from_edit_html_and_events(
-                response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
-                toast_and_highlight_data)
+            http_response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
     else:
         if issubclass(obj_type, UsagePattern):
             new_up_list = [up for up in system.get_efootprint_value("usage_patterns") if up.id != object_id]
@@ -111,10 +105,10 @@ def delete_object(request, object_id):
 
     if elements_with_lines_to_remove:
         http_response["HX-Trigger"] = json.dumps({
-            "removeLinesAndUpdateDataAttributes": {
-                "elementIdsOfLinesToRemove": elements_with_lines_to_remove,
-                "dataAttributeUpdates": []
-            },
+            "resetLeaderLines": ""
+        })
+
+        http_response["HX-Trigger-After-Settle"] = json.dumps({
             "displayToastAndHighlightObjects": toast_and_highlight_data
         })
 

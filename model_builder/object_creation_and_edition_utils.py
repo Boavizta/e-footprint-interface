@@ -37,7 +37,8 @@ def create_efootprint_obj_from_post_data(
             annotation = str
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             # Exclude the empty initial value that is only here to make sure that the list is not empty and thus submitted
-            selected_values = [value for value in create_form_data.getlist(attr_name_with_prefix) if len(value) > 0]
+            selected_values = [value for value in create_form_data.get(attr_name_with_prefix).split(";") if len(
+                value) > 0]
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             obj_creation_kwargs[attr_name] = [
                 model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
@@ -87,19 +88,19 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
             annotation = str
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             # Exclude the empty initial value that is only here to make sure that the list is not empty and thus submitted
-            new_mod_obj_ids = [value for value in edit_form_data.getlist(attr_name_with_prefix) if len(value) > 0]
+            new_mod_obj_ids = [value for value in edit_form_data.get(attr_name_with_prefix).split(";") if len(
+                value) > 0]
             current_mod_obj_ids = [mod_obj.efootprint_id for mod_obj in getattr(obj_to_edit, attr_name)]
-            added_mod_obj_ids = [obj_id for obj_id in new_mod_obj_ids if obj_id not in current_mod_obj_ids]
-            removed_mod_obj_ids = [obj_id for obj_id in current_mod_obj_ids if obj_id not in new_mod_obj_ids]
+            if new_mod_obj_ids == current_mod_obj_ids:
+                continue
             logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
-            unchanged_mod_obj_ids = [obj_id for obj_id in current_mod_obj_ids if obj_id not in removed_mod_obj_ids]
-            if new_mod_obj_ids != current_mod_obj_ids:
-                list_attribute_object_type_str = get_args(annotation)[0].__name__
-                attr_name_new_value_check_input_validity_pairs.append(
+            list_attribute_object_type_str = get_args(annotation)[0].__name__
+            attr_name_new_value_check_input_validity_pairs.append(
                     [attr_name,
-                    [model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
-                     for obj_id in unchanged_mod_obj_ids + added_mod_obj_ids],
+                     [model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
+                      for obj_id in new_mod_obj_ids],
                      False])
+
             continue
         if issubclass(annotation, str):
             # It should only be the case for the name parameter.

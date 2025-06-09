@@ -170,34 +170,9 @@ function initLeaderLines() {
 }
 
 function setLeaderLineListeners() {
-    document.body.addEventListener('removeLinesAndUpdateDataAttributes', function (event) {
-        event.detail['elementIdsOfLinesToRemove'].forEach(elementIdWithLinesToRemove => {
-            removeAllLinesDepartingFromElement(elementIdWithLinesToRemove);
-            removeAllLinesArrivingAtElement(elementIdWithLinesToRemove);
-            let leaderlineObjectChildren = document.getElementById(elementIdWithLinesToRemove)
-                .querySelectorAll('.leader-line-object');
-            leaderlineObjectChildren.forEach(leaderlineObjectChild => {
-                removeAllLinesDepartingFromElement(leaderlineObjectChild.id);
-                removeAllLinesArrivingAtElement(leaderlineObjectChild.id);
-            });
-        });
-        event.detail['dataAttributeUpdates'].forEach(dataAttributeUpdate => {
-            let element = document.getElementById(dataAttributeUpdate['id']);
-            if (element) {
-                element.setAttribute('data-link-to', dataAttributeUpdate['data-link-to']);
-                if (dataAttributeUpdate['data-line-opt'] !== '') {
-                    element.setAttribute('data-line-opt', dataAttributeUpdate['data-line-opt']);
-                }
-                removeAllLinesDepartingFromElement(dataAttributeUpdate['id']);
-            }
-        });
-    });
-
-    document.body.addEventListener('updateTopParentLines', function (event) {
-        event.detail['topParentIds'].forEach(topParentId => {
-            updateOrCreateLines(document.getElementById(topParentId));
-        });
-        updateLines();
+    document.body.addEventListener('resetLeaderLines', function (event) {
+        removeAllLines();
+        setTimeout(() => {initLeaderLines();}, 100);
     });
 
     document.body.addEventListener('setAccordionListeners', function (event) {

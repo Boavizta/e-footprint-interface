@@ -13,8 +13,8 @@ class TestViewsDeletion(TestModelingBase):
     def setUpClass(cls):
         cls.system_data_path = os.path.join(root_test_dir, "model_builder", "system_with_mirrored_cards.json")
 
-    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
-    def test_deletion(self, mock_render_exception_modal):
+    def test_deletion(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         job_id = "id-e01f58-Video-streaming-job-1"
         logger.info(f"Delete mirrored cards jobs ")
         delete_request = self.factory.get(f'/model_builder/delete_object/{job_id}/')
@@ -23,7 +23,6 @@ class TestViewsDeletion(TestModelingBase):
         response =  delete_object(delete_request, job_id)
 
         self.assertEqual(response.status_code, 200)
-        mock_render_exception_modal.assert_not_called()
         self.assertNotIn("VideoStreamingJob", delete_request.session["system_data"])
 
     def test_delete_job_linked_to_service_then_service(self):

@@ -1,109 +1,19 @@
 <div id="field-group-{{ field.id }}" class="mb-3">
-    <div class="row gy-0 p-0 m-0 w-100
-            {% if field.input_type == "select-multiple" and not field.options %} d-none {% endif %}">
-        <div class="col-auto">
-            <label for="{{ field.id }}" class="form-label">
-                {{ field.label|capfirst }}
-            </label>
-        </div>
-        {% if field.tooltip %}
-            {% include "model_builder/side_panels/components/tooltip.html" %}
-        {% endif %}
-    </div>
+    {% include "model_builder/side_panels/components/label.html" %}
     {% if field.input_type == "select" %}
-        <select
-            class="form-control p-2"
-            id="{{ field.id }}"
-            name="{{ field.id }}"
-            required
-        >
-            {% for option in field.options %}
-                <option value="{{ option.value }}" {% if option.value == field.selected %}selected{% endif %}>
-                    {{ option.label }}</option>
-            {% endfor %}
-        </select>
+        {% include "model_builder/side_panels/components/select.html" %}
     {% elif field.input_type == "select-multiple" %}
-            <select
-                class="form-control p-2 {% if not field.options %} d-none {% endif %}"
-                id="{{ field.id }}" name="{{ field.id }}"
-                multiple>
-                {% for option in field.options %}
-                     <option value="{{ option.value }}"
-                     {% for selected_obj_id in field.selected %}
-                         {% if selected_obj_id == option.value %}
-                             selected
-                         {% endif %}
-                     {% endfor %} >{{ option.label }}</option>
-                {% endfor %}
-            </select>
+        {% include "model_builder/side_panels/components/select_multiple.html" %}
     {% elif field.input_type == "datalist" %}
-        <input
-                class="form-control p-2"
-                list="datalist_{{ field.id }}"
-                id="{{ field.id }}"
-                name="{{ field.id }}"
-                {% if field.selected %}value="{{ field.selected }}"{% endif %}
-                {% if object_to_edit %}
-                     _="on focusout if my value is empty set my value to '{{ field.default }}'"
-               {% else %}
-                    _="on click set my value to ''
-                  on focusout if my value is empty set my value to '{{ field.default }}'"
-               {% endif %}
-                required
-        >
-        <datalist id="datalist_{{ field.id }}">
-            <option selected value="select a provider">
-        </datalist>
+        {% include "model_builder/side_panels/components/datalist.html" %}
     {% elif field.input_type == "str" %}
-        <input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}"
-               {% if object_to_edit %}
-                     _="on focusout if my value is empty set my value to '{{ field.default }}'"
-               {% else %}
-                    _="on click set my value to ''
-                  on focusout if my value is empty set my value to '{{ field.default }}'"
-               {% endif %}
-               required>
+        {% include "model_builder/side_panels/components/str.html" %}
     {% elif field.input_type == "input" %}
-        <div class="input-group">
-            <input type="number"
-                    class="form-control input_with_add_on {% if field.unit != "" %} rounded-start-2 w-75{% else %} rounded-2 w-100 {% endif %} }"
-                    id="{{ field.id }}"
-                    name="{{ field.id }}"
-                    value="{{ field.default }}"
-                    step="{{ field.step }}"
-                    placeholder="Enter value"
-                    required
-                    {% if field.source %}
-                        data-defaultValue="{{ field.default }}"
-                        data-sourceName="{{ field.source.name }}"
-                        data-sourceLink="{{ field.source.link }}"
-                        oninput="updateSource(this)"
-                    {% endif %}
-                    {% if not field.can_be_negative %}
-                        min="0"
-                   {% endif %}
-            >
-             {% if field.unit != "" %}
-                <input
-                       class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
-                       name="{{ field.id }}_unit"
-                       id="{{ field.id }}_unit"
-                       value="{{ field.unit }}"
-                       readonly
-                >
-             {% endif %}
-        </div>
+        {% include "model_builder/side_panels/components/input.html" %}
     {% else %}
         <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>
     {% endif %}
     {% if field.source %}
-        <div class="form-text fs-xl" id="source-{{ field.id }}">
-            {% if field.source.link %}
-                Source : <a target="_blank" class="sources-label" href="{{ field.source.link }}">{{ field.source.name }}
-            </a>
-            {% else %}
-                Source : {{ field.source.name }}
-            {% endif %}
-        </div>
+        {% include "model_builder/side_panels/components/source.html" %}
     {% endif %}
 </div>

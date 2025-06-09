@@ -197,6 +197,10 @@ class ServiceWeb(ModelingObjectWeb):
     def class_title_style(self):
         return "h8"
 
+    @property
+    def template_name(self):
+        return "service"
+
 class ServerWeb(ModelingObjectWeb):
     @property
     def template_name(self):
@@ -397,6 +401,10 @@ class UsagePatternWeb(ModelingObjectWeb):
     @property
     def class_title_style(self):
         return "h6"
+
+    @property
+    def template_name(self):
+        return "usage_pattern"
 
 EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Server": ServerWeb,

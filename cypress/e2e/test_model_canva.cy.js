@@ -21,7 +21,6 @@ describe("Test - Model Canva div", () => {
         cy.visit("/model_builder/");
         cy.get("#button-uid-my-first-usage-journey-1").click();
         cy.get('#btn-submit-form').click();
-        cy.wait(500);
         cy.get("#button-uid-my-first-usage-journey-1_uid-my-first-usage-journey-step-1").should("exist");
     });
 
@@ -31,24 +30,26 @@ describe("Test - Model Canva div", () => {
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
         cy.get('input[type="file"]').selectFile(fileTest);
-        cy.wait(500);
         cy.get("#btn-submit-form").click();
-        cy.wait(500);
+        cy.get("#sidePanelForm").should('not.exist');
+
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').click();
         cy.get('#service').select(service);
         cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();
+        cy.get("#sidePanelForm").should('not.exist');
 
-        cy.wait(1000);
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#service').select(service);
         cy.get('#WebApplicationJob_name').type(jobTwo);
         cy.get('#btn-submit-form').click();
+        cy.get("#sidePanelForm").should('not.exist');
 
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist');
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist');
 
+        cy.get('button[data-bs-target="#flush-id-9a4204-Test-E2E-UJ_id-f9b3b3-Test-E2E-UJ-1"]').should('exist').click()
         cy.get('div[id^="flush-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').within(() => {
             cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").then(($firstButton) => {
                 cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ', '-')+'"]').then(($secondButton) => {

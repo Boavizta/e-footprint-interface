@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.7] - 2025-06-17
+
+### Changed
+- The select multiple field for UsageJourneyStep in UsageJourney and for 
+  Jobs in UsageJourneyStep form has been updated to use a new component for a
+  better user experience and allows user to re-organize the order of selected 
+  items.
+
 ## [0.8.6] - 2025-06-12
 
 ### Fixed

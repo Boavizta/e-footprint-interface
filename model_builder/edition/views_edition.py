@@ -56,8 +56,7 @@ def edit_object(request, object_id):
         storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
         edit_object_in_system(storage_data, storage)
 
-    response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = (
-        compute_edit_object_html_and_event_response(request.POST, obj_to_edit))
+    response_html = compute_edit_object_html_and_event_response(request.POST, obj_to_edit)
 
     if recompute_modeling:
         refresh_content_response = render_to_string(
@@ -71,9 +70,7 @@ def edit_object(request, object_id):
         "action_type": "edit_object"
     }
 
-    return generate_http_response_from_edit_html_and_events(
-        response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
-       toast_and_highlight_data)
+    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
 
 def open_panel_system_name(request):
