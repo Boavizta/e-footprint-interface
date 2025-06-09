@@ -1,3 +1,5 @@
+import re
+
 from efootprint.constants.countries import Countries
 from django.shortcuts import render
 
@@ -18,6 +20,10 @@ def camelcase_html_filename_from_path(html_file_path: str):
 def format_snakecase_string(string: str) -> str:
     format_str = str.replace(string, "_", " ")
     return format_str.capitalize()
+
+def camel_to_snake(name: str) -> str:
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 def htmx_render(request, html_file_path: str, context=None):

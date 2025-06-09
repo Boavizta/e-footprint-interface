@@ -23,7 +23,15 @@
             {% endfor %}
         </select>
     {% elif field.input_type == "select-multiple" %}
-        <div class="d-flex flex-row mb-2 gap-2 {% if not field.unselected %} d-none {% endif %}">
+        <div class="col-auto">
+            <label for="add-new-object-{{ field.id }}" class="form-label">
+                {{ field.label|capfirst }}
+            </label>
+        </div>
+        {% if field.tooltip %}
+            {% include "model_builder/side_panels/components/tooltip.html" %}
+        {% endif %}
+        <div class="d-flex flex-row mb-2 gap-2">
             <select
                 class="flex-grow-1 form-control p-2"
                 id="add-new-object-{{ field.id }}" name="add-new-object-{{ field.id }}">
@@ -37,19 +45,19 @@
                 </svg>
             </button>
         </div>
-        <hr>
-        <div class="mb-3">
-            <p class="h8">
-                {{ field.label_multiple }}
-            </p>
+        <div class="mb-3 bg-light rounded-2 p-2">
             <table class="w-100" id="objects-already-add-for-{{ field.id }}">
                 <tr>
-                    <td colspan="4">
+                    {% if field.selected.length  == 0  %}
+                        <td colspan="4">
                         select a value on select above
                     </td>
+                    {% endif %}
                 </tr>
             </table>
         </div>
+        <div id="selected_data" data-json="{{ field.selected|safe }}"></div>
+        <div id="unselected_data" data-json="{{ field.unselected|safe }}" onload="refreshSelectMultipleFields('{{ field.id }}')"></div>
         <input type="hidden" id="{{ field.id }}" name="{{ field.id }}" value="">
     {% elif field.input_type == "datalist" %}
         <input
@@ -122,10 +130,3 @@
         </div>
     {% endif %}
 </div>
-
-{% if field.input_type == "select-multiple" %}
-<script>
-    window.unselectedOptions = {{ field.unselected|safe }}
-    window.selectedOptions = {{ field.selected|safe }}
-</script>
-{% endif %}

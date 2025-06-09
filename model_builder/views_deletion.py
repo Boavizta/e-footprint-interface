@@ -78,7 +78,7 @@ def delete_object(request, object_id):
 
     if isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
         response_html = ""
-        ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = [], [], []
+        top_parent_ids = []
         for mirrored_card in web_obj.mirrored_cards:
             mutable_post = request.POST.copy()
             parent = mirrored_card.accordion_parent
@@ -87,18 +87,15 @@ def delete_object(request, object_id):
             new_list_attribute_ids = [list_attribute.efootprint_id for list_attribute in parent.accordion_children
                                       if list_attribute.efootprint_id != mirrored_card.efootprint_id]
             list_attribute_name = mirrored_card.modeling_obj.contextual_modeling_obj_containers[0].attr_name_in_mod_obj_container
-            mutable_post.setlist(f'{list_attribute_name}', new_list_attribute_ids)
+            mutable_post[list_attribute_name]= ";".join(new_list_attribute_ids)
             request.POST = mutable_post
-            (partial_response_html, partial_ids_of_web_elements_with_lines_to_remove,
-             partial_data_attribute_updates, partial_top_parent_ids) = compute_edit_object_html_and_event_response(
+            (partial_response_html, partial_top_parent_ids) = compute_edit_object_html_and_event_response(
                 request.POST, parent)
             response_html += partial_response_html
-            ids_of_web_elements_with_lines_to_remove += partial_ids_of_web_elements_with_lines_to_remove
-            data_attribute_updates += partial_data_attribute_updates
             top_parent_ids += partial_top_parent_ids
 
             http_response = generate_http_response_from_edit_html_and_events(
-                response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
+                response_html, top_parent_ids,
                 toast_and_highlight_data)
     else:
         if issubclass(obj_type, UsagePattern):
@@ -111,10 +108,10 @@ def delete_object(request, object_id):
 
     if elements_with_lines_to_remove:
         http_response["HX-Trigger"] = json.dumps({
-            "removeLinesAndUpdateDataAttributes": {
-                "elementIdsOfLinesToRemove": elements_with_lines_to_remove,
-                "dataAttributeUpdates": []
-            },
+            "removeLinesAndUpdateDataAttributes": ""
+        })
+
+        http_response["HX-Trigger-After-Settle"] = json.dumps({
             "displayToastAndHighlightObjects": toast_and_highlight_data
         })
 

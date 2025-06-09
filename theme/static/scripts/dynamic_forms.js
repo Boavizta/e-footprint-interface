@@ -138,6 +138,11 @@ document.addEventListener("initDynamicForm", function () {
   }
 });
 
+function convertToPythonLikeString(obj) {
+    const jsonStr = JSON.stringify(obj);
+    return jsonStr.replace(/\"/g, "'").replace(/\\'/g, "'");
+}
+
 function updateSource(input){
     let divSource = document.getElementById("source-"+input.id);
     if(input.value && parseFloat(input.value.length) > 0){
@@ -171,41 +176,52 @@ function addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption(){
 }
 
 function sortSelectMultipleFields(fieldId, selectedValue, direction) {
-    let index = window.selectedOptions.findIndex(option => option.value === selectedValue);
+    let selectedOptions = JSON.parse(document.getElementById("selected_data").dataset.json.replace(/'/g, '"'));
+
+    let index = selectedOptions.findIndex(option => option.value === selectedValue);
     if (index === -1) return;
 
     if (direction === "up" && index > 0) {
-        [window.selectedOptions[index - 1], window.selectedOptions[index]] =
-            [window.selectedOptions[index], window.selectedOptions[index - 1]];
+        [selectedOptions[index - 1], selectedOptions[index]] =
+            [selectedOptions[index], selectedOptions[index - 1]];
     }
 
-    if (direction === "dpwn" && index < window.selectedOptions.length - 1) {
-        [window.selectedOptions[index + 1], window.selectedOptions[index]] =
-            [window.selectedOptions[index], window.selectedOptions[index + 1]];
+    if (direction === "dpwn" && index < selectedOptions.length - 1) {
+        [selectedOptions[index + 1], selectedOptions[index]] =
+            [selectedOptions[index], selectedOptions[index + 1]];
     }
+
+    document.getElementById("selected_data").dataset.json = convertToPythonLikeString(selectedOptions);
     refreshSelectMultipleFields(fieldId);
 }
 
 function deleteValueFromSelectMultiple(fieldId, selectedValue) {
-    let index = window.selectedOptions.findIndex(option => option.value === selectedValue);
-    if (index === -1) return;
-    let removedItem = window.selectedOptions.splice(index, 1)[0];
+    let selectedOptions = JSON.parse(document.getElementById("selected_data").dataset.json.replace(/'/g, '"'));
+    let unselectedOptions = JSON.parse(document.getElementById("unselected_data").dataset.json.replace(/'/g, '"'));
 
-    window.unselectedOptions.push(removedItem);
+    let index = selectedOptions.findIndex(option => option.value === selectedValue);
+    if (index === -1) return;
+    let removedItem = selectedOptions.splice(index, 1)[0];
+
+   unselectedOptions.push(removedItem);
 
     let newOption = document.createElement("option");
     newOption.value = removedItem.value;
     newOption.textContent = removedItem.label;
     document.getElementById("add-new-object-"+fieldId).appendChild(newOption);
 
+    document.getElementById("unselected_data").dataset.json = convertToPythonLikeString(unselectedOptions);
+    document.getElementById("selected_data").dataset.json = convertToPythonLikeString(selectedOptions);
     refreshSelectMultipleFields(fieldId);
 }
 
 function addValueToSelectMultiple(fieldId) {
     let addNewObjectElement = document.getElementById("add-new-object-" + fieldId);
+    let selectedOptions = JSON.parse(document.getElementById("selected_data").dataset.json.replace(/'/g, '"'));
+    let unselectedOptions = JSON.parse(document.getElementById("unselected_data").dataset.json.replace(/'/g, '"'));
 
-    let unselectedValues = window.unselectedOptions;
-    let selectedValues = window.selectedOptions;
+    let unselectedValues = unselectedOptions;
+    let selectedValues = selectedOptions;
 
     let indexToRemove = unselectedValues.findIndex(unselectedValue =>
         unselectedValue.value === addNewObjectElement.value
@@ -221,8 +237,8 @@ function addValueToSelectMultiple(fieldId) {
         optionToRemove.remove();
     }
 
-    window.selectedOptions = selectedValues;
-    window.unselectedOptions = unselectedValues;
+    document.getElementById("selected_data").dataset.json = convertToPythonLikeString(selectedOptions);
+    document.getElementById("unselected_data").dataset.json = convertToPythonLikeString(unselectedOptions);
 
     refreshSelectMultipleFields(fieldId);
 }
@@ -231,7 +247,9 @@ function refreshSelectMultipleFields(fieldId) {
     let objectsAlreadyAddElement = document.getElementById("objects-already-add-for-" + fieldId);
     objectsAlreadyAddElement.innerHTML = "";
 
-    if(!window.selectedOptions || window.selectedOptions.length === 0) {
+    let selectedOptions = JSON.parse(document.getElementById("selected_data").dataset.json.replace(/'/g, '"'));
+
+    if(!selectedOptions || selectedOptions.length === 0) {
         let newSelectedValue = document.createElement("tr");
         let noValue = document.createElement("td");
         noValue.setAttribute("colspan", "4");
@@ -241,7 +259,7 @@ function refreshSelectMultipleFields(fieldId) {
         return;
     }
 
-    window.selectedOptions.forEach((selectedValue, index) => {
+    selectedOptions.forEach((selectedValue, index) => {
         let newSelectedValue = document.createElement("tr");
         let nameSelectedValue = document.createElement("td");
         nameSelectedValue.innerHTML = `${selectedValue.label}`;
@@ -254,7 +272,7 @@ function refreshSelectMultipleFields(fieldId) {
         ctaSortDown.className = "width-10";
         removeSelectedValue.className = "width-10";
 
-        if (index !== window.selectedOptions.length - 1) {
+        if (index !== selectedOptions.length - 1) {
             ctaSortDown.innerHTML = `
             <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','dpwn')">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
@@ -283,5 +301,5 @@ function refreshSelectMultipleFields(fieldId) {
         newSelectedValue.innerHTML = nameSelectedValue.outerHTML + ctaSortUp.outerHTML + ctaSortDown.outerHTML + removeSelectedValue.outerHTML;
         objectsAlreadyAddElement.appendChild(newSelectedValue);
     });
-    document.getElementById(fieldId).value = window.selectedOptions.map(option => option.value).join(";");
+    document.getElementById(fieldId).value = selectedOptions.map(option => option.value).join(";");
 }

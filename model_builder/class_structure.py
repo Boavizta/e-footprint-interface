@@ -106,9 +106,8 @@ def generate_dynamic_form(
                         list_attribute_object_type_str) if option not in selected]
             structure_field.update({
                 "input_type": "select-multiple",
-                "selected": selected,
-                "unselected": unselected,
-                "label_multiple": FORM_FIELD_REFERENCES[attr_name]["label_multiple"]
+                "selected": [{"value": elt.id, "label": elt.name} for elt in selected],
+                "unselected": unselected
             })
         elif issubclass(annotation, str):
             structure_field.update({

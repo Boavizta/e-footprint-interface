@@ -31,7 +31,11 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
     if request.GET.get("efootprint_id_of_parent_to_link_to"):
         context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 
-    return render(request, f"model_builder/side_panels/{template_name}_add.html", context=context_data)
+    http_response = render(request, f"model_builder/side_panels/{template_name}_add.html", context=context_data)
+
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+
+    return http_response
 
 
 def generate_server_add_panel_http_response(request, model_web: ModelWeb):
@@ -207,6 +211,8 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
     for field in form_sections[1]["fields"]:
         if field["attr_name"] == "devices":
             field["input_type"] = "select"
+            field["options"] = field["unselected"]
+            field["selected" ] = field["unselected"][0]['value']
 
     usage_pattern_input_values = UsagePatternFromForm.default_values()
     usage_pattern_input_values["initial_usage_journey_volume"] = None
