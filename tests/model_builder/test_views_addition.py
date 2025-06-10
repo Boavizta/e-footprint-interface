@@ -1,4 +1,5 @@
 import os
+from copy import copy
 from unittest.mock import patch
 
 from efootprint.logger import logger
@@ -11,6 +12,35 @@ from model_builder.views_deletion import delete_object
 from model_builder.edition.views_edition import edit_object, open_edit_object_panel
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
+
+
+server_post_data = {'GPUServer_average_carbon_intensity': ['100'],
+             'GPUServer_average_carbon_intensity_unit': ['g/kWh'],
+             'GPUServer_base_compute_consumption': ['0'],
+             'GPUServer_base_compute_consumption_unit': ['gpu'],
+             'GPUServer_base_ram_consumption': ['0'],
+             'GPUServer_base_ram_consumption_unit': ['GB'],
+             'GPUServer_carbon_footprint_fabrication_per_gpu': ['150'],
+             'GPUServer_carbon_footprint_fabrication_per_gpu_unit': ['kg/gpu'],
+             'GPUServer_carbon_footprint_fabrication_without_gpu': ['2500'],
+             'GPUServer_carbon_footprint_fabrication_without_gpu_unit': ['kg'],
+             'GPUServer_compute': ['4'],
+             'GPUServer_compute_unit': ['gpu'],
+             'GPUServer_gpu_idle_power': ['50'],
+             'GPUServer_gpu_idle_power_unit': ['W/gpu'],
+             'GPUServer_gpu_power': ['400'],
+             'GPUServer_gpu_power_unit': ['W/gpu'],
+             'GPUServer_lifespan': ['6'],
+             'GPUServer_lifespan_unit': ['yr'],
+             'GPUServer_name': ['AI server 1'],
+             'GPUServer_power_usage_effectiveness': ['1.2'],
+             'GPUServer_ram_per_gpu': ['80'],
+             'GPUServer_ram_per_gpu_unit': ['GB/gpu'],
+             'GPUServer_server_type': ['serverless'],
+             'GPUServer_server_utilization_rate': ['1'],
+             'storage_form_data': ['{"type_object_available":"Storage","Storage_name":"Storage '
+                                   '1","Storage_data_replication_factor":"3","Storage_data_storage_duration":"5","Storage_data_storage_duration_unit":"yr","Storage_storage_capacity":"1","Storage_storage_capacity_unit":"TB","Storage_carbon_footprint_fabrication_per_storage_capacity":"160","Storage_carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB","Storage_power_per_storage_capacity":"1.3","Storage_power_per_storage_capacity_unit":"W/TB","Storage_idle_power":"0","Storage_idle_power_unit":"W","Storage_base_storage_need":"0","Storage_base_storage_need_unit":"TB","Storage_lifespan":"6","Storage_lifespan_unit":"yr"}'],
+             'type_object_available': ['GPUServer']}
 
 
 class TestViewsAddition(TestModelingBase):
@@ -259,35 +289,7 @@ class TestViewsAddition(TestModelingBase):
         self.setUp()
         logger.info("Adding a new server")
         post_data = QueryDict(mutable=True)
-        post_data.update(
-            {'GPUServer_average_carbon_intensity': ['100'],
-             'GPUServer_average_carbon_intensity_unit': ['g/kWh'],
-             'GPUServer_base_compute_consumption': ['0'],
-             'GPUServer_base_compute_consumption_unit': ['gpu'],
-             'GPUServer_base_ram_consumption': ['0'],
-             'GPUServer_base_ram_consumption_unit': ['GB'],
-             'GPUServer_carbon_footprint_fabrication_per_gpu': ['150'],
-             'GPUServer_carbon_footprint_fabrication_per_gpu_unit': ['kg/gpu'],
-             'GPUServer_carbon_footprint_fabrication_without_gpu': ['2500'],
-             'GPUServer_carbon_footprint_fabrication_without_gpu_unit': ['kg'],
-             'GPUServer_compute': ['4'],
-             'GPUServer_compute_unit': ['gpu'],
-             'GPUServer_gpu_idle_power': ['50'],
-             'GPUServer_gpu_idle_power_unit': ['W/gpu'],
-             'GPUServer_gpu_power': ['400'],
-             'GPUServer_gpu_power_unit': ['W/gpu'],
-             'GPUServer_lifespan': ['6'],
-             'GPUServer_lifespan_unit': ['yr'],
-             'GPUServer_name': ['AI server 1'],
-             'GPUServer_power_usage_effectiveness': ['1.2'],
-             'GPUServer_ram_per_gpu': ['80'],
-             'GPUServer_ram_per_gpu_unit': ['GB/gpu'],
-             'GPUServer_server_type': ['serverless'],
-             'GPUServer_server_utilization_rate': ['1'],
-             'storage_form_data': ['{"type_object_available":"Storage","Storage_name":"Storage '
-                                   '1","Storage_data_replication_factor":"3","Storage_data_storage_duration":"5","Storage_data_storage_duration_unit":"yr","Storage_storage_capacity":"1","Storage_storage_capacity_unit":"TB","Storage_carbon_footprint_fabrication_per_storage_capacity":"160","Storage_carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB","Storage_power_per_storage_capacity":"1.3","Storage_power_per_storage_capacity_unit":"W/TB","Storage_idle_power":"0","Storage_idle_power_unit":"W","Storage_base_storage_need":"0","Storage_base_storage_need_unit":"TB","Storage_lifespan":"6","Storage_lifespan_unit":"yr"}'],
-             'type_object_available': ['GPUServer']}
-        )
+        post_data.update(copy(server_post_data))
         request = self.factory.post("/add-object/ServerBase", data=post_data)
         self._add_session_to_request(request, self.system_data)
         response = add_object(request, "ServerBase")
@@ -326,6 +328,58 @@ class TestViewsAddition(TestModelingBase):
         request = self.factory.post("/model_builder/add-object/Job", data=post_data)
         self._add_session_to_request(request, self.system_data)
         response = add_object(request, "Job")
+        self.assertEqual(response.status_code, 200)
+
+        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
+
+    def test_add_up_to_default_system_then_delete_it_then_add_server(self):
+        self.system_data_path = os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json")
+        self.setUp()
+        # delete system data file
+        system_data_with_calculated_attributes_path = self.system_data_path.replace(
+            ".json", "_with_calculated_attributes.json")
+        if os.path.exists(system_data_with_calculated_attributes_path):
+            os.remove(system_data_with_calculated_attributes_path)
+        uj_id = next(iter(self.system_data["UsageJourney"].keys()))
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        logger.info("Linking usage pattern to usage journey without uj step")
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
+            "UsagePatternFromForm_devices": [list(default_devices().keys())[0]],
+            "UsagePatternFromForm_network": [list(default_networks().keys())[0]],
+            "UsagePatternFromForm_country": [list(default_countries().keys())[0]],
+            "UsagePatternFromForm_usage_journey": [uj_id],
+            "UsagePatternFromForm_start_date": ["2025-02-01"],
+            "UsagePatternFromForm_modeling_duration_value": ["5"],
+            "UsagePatternFromForm_modeling_duration_unit": ["month"],
+            "UsagePatternFromForm_net_growth_rate_in_percentage": ["10"],
+            "UsagePatternFromForm_net_growth_rate_timespan": ["year"],
+            "UsagePatternFromForm_initial_usage_journey_volume": ["1000"],
+            "UsagePatternFromForm_initial_usage_journey_volume_timespan": ["year"],
+            "UsagePatternFromForm_name": ["New usage pattern"],
+        })
+
+        add_request = self.factory.post("/add-object/UsagePatternFromForm", data=post_data)
+        self._add_session_to_request(add_request, self.system_data)
+
+        response = add_object(add_request, "UsagePatternFromForm")
+        self.assertEqual(response.status_code, 200)
+
+        logger.info("Delete usage pattern")
+        up_id = next(iter(add_request.session["system_data"]["UsagePatternFromForm"].keys()))
+        delete_request = self.factory.post(f"/model_builder/delete-object/{up_id}/")
+        self._add_session_to_request(delete_request, add_request.session["system_data"])
+
+        response = delete_object(delete_request, up_id)
+        self.assertEqual(response.status_code, 204)
+
+        logger.info("Add server")
+        post_data = QueryDict(mutable=True)
+        post_data.update(copy(server_post_data))
+        request = self.factory.post("/add-object/ServerBase", data=post_data)
+        self._add_session_to_request(request, self.system_data)
+        response = add_object(request, "ServerBase")
         self.assertEqual(response.status_code, 200)
 
         self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")

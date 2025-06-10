@@ -177,9 +177,14 @@ class ModelingObjectWeb:
         request_session = self.model_web.session
         objects_to_delete_afterwards = []
         for modeling_obj in self.mod_obj_attributes:
-            if (not ((modeling_obj.class_as_simple_str in [service_class.__name__ for service_class in SERVICE_CLASSES])
-                     or isinstance(modeling_obj, ServerWeb))
-                and len(modeling_obj.modeling_obj_containers) == 1):
+            if (
+                not (
+                    (modeling_obj.class_as_simple_str in [service_class.__name__ for service_class in SERVICE_CLASSES])
+                    or isinstance(modeling_obj, ServerWeb)
+                    or isinstance(modeling_obj, UsageJourneyWeb)
+                )
+                and len(modeling_obj.modeling_obj_containers) == 1
+            ):
                 objects_to_delete_afterwards.append(modeling_obj)
         logger.info(f"Deleting {self.name}")
         request_session["system_data"][obj_type].pop(object_id, None)
@@ -190,7 +195,6 @@ class ModelingObjectWeb:
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
-        self.model_web.update_system_data_with_up_to_date_calculated_attributes()
 
 class ServiceWeb(ModelingObjectWeb):
     @property

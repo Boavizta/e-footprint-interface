@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.2] - 2025-06-10
+
+### Fixed
+- Call generic self_delete() method when deleting UsagePattern, to make sure that its Devices, Network and Country are deleted if they are not attributes of any UsagePattern anymore.
+
 ## [0.8.1] - 2025-06-10
 
 ### Fixed

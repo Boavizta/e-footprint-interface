@@ -77,18 +77,7 @@ def delete_object(request, object_id):
 
     http_response = HttpResponse(status=204)
 
-    if issubclass(obj_type, UsagePattern):
-        new_up_list = [up for up in system.get_efootprint_value("usage_patterns") if up.id != object_id]
-        system.set_efootprint_value("usage_patterns", new_up_list)
-        elements_with_lines_to_remove.append(object_id)
-        web_obj.modeling_obj.self_delete()
-        del request.session["system_data"][obj_type.__name__][object_id]
-        del model_web.flat_efootprint_objs_dict[object_id]
-        del model_web.response_objs[obj_type.__name__][object_id]
-        if len(request.session["system_data"][obj_type.__name__]) == 0:
-            del request.session["system_data"][obj_type.__name__]
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
-    elif isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
+    if isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
         response_html = ""
         ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids = [], [], []
         for mirrored_card in web_obj.mirrored_cards:
@@ -113,8 +102,12 @@ def delete_object(request, object_id):
                 response_html, ids_of_web_elements_with_lines_to_remove, data_attribute_updates, top_parent_ids,
                 toast_and_highlight_data)
     else:
-        web_obj.self_delete()
+        if issubclass(obj_type, UsagePattern):
+            new_up_list = [up for up in system.get_efootprint_value("usage_patterns") if up.id != object_id]
+            system.set_efootprint_value("usage_patterns", new_up_list)
         elements_with_lines_to_remove.append(object_id)
+        web_obj.self_delete()
+        model_web.update_system_data_with_up_to_date_calculated_attributes()
 
     if elements_with_lines_to_remove:
         http_response["HX-Trigger"] = json.dumps({
