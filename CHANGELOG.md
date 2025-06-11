@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8 3] - 2025-06-11
+
+### Fixed
+- ModelWeb.to_json() to include objects not linked to any System when downloading json file.
+- upgrade to e-footprint 10.1.7 to fix object deletion logic.
+
 ## [0.8.2] - 2025-06-10
 
 ### Fixed

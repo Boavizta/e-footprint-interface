@@ -21,6 +21,7 @@ from model_builder.class_structure import generate_object_edition_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
+from model_builder.views_deletion import delete_object
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
@@ -159,4 +160,30 @@ class TestViewsEdition(TestModelingBase):
         response = edit_object(edit_server_request, server_id)
 
         mock_render_exception_modal.assert_not_called()
+        self.assertEqual(response.status_code, 200)
+
+    def test_suppress_one_of_2_usage_patterns_then_update_server_used_by_both(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        logger.info("Deleting first usage pattern")
+        up_id = "uuid-Video-watching-in-France-in-the-morning"
+        delete_request = self.factory.post(f"/model_builder/delete-object/{up_id}/")
+        self._add_session_to_request(delete_request, self.system_data)
+        response = delete_object(delete_request, up_id)
+        self.assertEqual(response.status_code, 204)
+
+        logger.info("Updating server used by both usage patterns")
+        server_id = "uuid-Server-1"
+        post_data = QueryDict(mutable=True)
+        post_data.update(
+            {'name': ['New server'], 'average_carbon_intensity': ['60'], 'average_carbon_intensity_unit':
+                'gram / kilowatt_hour',
+             'storage_form_data':
+                 [f'{{"storage_id":"uuid-Default-SSD-storage-1", "name":"server 1 default ssd", '
+                  f'"carbon_footprint_fabrication_per_storage_capacity":"160.0",'
+                  f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}'],
+             "recomputation": ["true"],}
+        )
+        edit_server_request = self.factory.post(f'/edit-object/{server_id}', data=post_data)
+        self._add_session_to_request(edit_server_request, delete_request.session["system_data"])
+        response = edit_object(edit_server_request, server_id)
         self.assertEqual(response.status_code, 200)

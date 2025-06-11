@@ -6,7 +6,7 @@ from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
 from model_builder.views import result_chart
-from model_builder.model_web import default_networks, default_devices, default_countries
+from model_builder.model_web import default_networks, default_devices, default_countries, ModelWeb
 from model_builder.views_deletion import delete_object
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
@@ -39,6 +39,8 @@ class IntegrationTest(TestModelingBase):
         up_request = self.factory.post('/add-object/UsagePatternFromForm', data=post_data)
         self._add_session_to_request(up_request, self.system_data)  # Attach a valid session
         len_system_up = len(up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"])
+        initial_model_web = ModelWeb(up_request.session)
+        initial_total_footprint = initial_model_web.system.total_footprint
 
         response = add_object(up_request, "UsagePatternFromForm")
         new_up_id = up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"][-1]
@@ -87,7 +89,16 @@ class IntegrationTest(TestModelingBase):
         logger.info(f"Manually deleting service")
         delete_object(job_request, service_id)
 
-        self.assertEqual(job_request.session["system_data"], self.system_data)
+        self.maxDiff = None
+        self.assertEqual(set(job_request.session["system_data"].keys()), set(self.system_data.keys()))
+        for efootprint_class in self.system_data:
+            if efootprint_class == "efootprint_version":
+                continue
+            self.assertEqual(
+                set(job_request.session["system_data"][efootprint_class].keys()),
+                set(self.system_data[efootprint_class].keys()),
+                f"Mismatch in {efootprint_class} data")
+        self.assertTrue(initial_total_footprint.value.equals(ModelWeb(job_request.session).system.total_footprint.value))
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_raise_error_if_users_tries_to_see_results_with_incomplete_modeling(self, mock_exception_modal):

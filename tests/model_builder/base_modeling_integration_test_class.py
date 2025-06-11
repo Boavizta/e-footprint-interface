@@ -1,11 +1,15 @@
 import json
+import os
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import TestCase, RequestFactory
+from django import setup
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 
 from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT
+
+setup()
 
 
 class TestModelingBase(TestCase):
@@ -49,3 +53,14 @@ class TestModelingBase(TestCase):
         middleware.process_request(request)
         request.session["system_data"] = system_data
         request.session.save()
+
+    def change_system_data(self, new_system_data_path):
+        old_system_data_path = self.system_data_path
+        self.system_data_path = new_system_data_path
+        self.setUp()
+        # delete system data file
+        system_data_with_calculated_attributes_path = new_system_data_path.replace(
+            ".json", "_with_calculated_attributes.json")
+        if os.path.exists(system_data_with_calculated_attributes_path):
+            os.remove(system_data_with_calculated_attributes_path)
+        self.system_data_path = old_system_data_path

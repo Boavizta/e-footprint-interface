@@ -33,14 +33,13 @@ def ask_delete_object(request, object_id):
     else:
         message = f"Are you sure you want to delete this {web_obj.class_as_simple_str} ?"
         sub_message = ""
-        if isinstance(web_obj, UsageJourneyWeb):
+        if isinstance(web_obj, UsageJourneyWeb) and len(web_obj.uj_steps) > 0:
             message= (f"This usage journey is associated with {len(web_obj.uj_steps)} steps. This action will delete "
                       f"them all")
             sub_message = "Steps and jobs used in other usage journeys will remain in those."
-        if isinstance(web_obj, UsageJourneyStepWeb):
+        if isinstance(web_obj, UsageJourneyStepWeb) and len(web_obj.jobs) > 0:
             message= (f"This usage journey step is associated with {len(web_obj.jobs)} jobs. This action will "
-                      f"delete "
-                      f"them all")
+                      f"delete them all")
         remove_card_with_hyperscript = True
         if isinstance(web_obj, JobWeb) or isinstance(web_obj, UsageJourneyStepWeb):
             remove_card_with_hyperscript = False
@@ -107,7 +106,8 @@ def delete_object(request, object_id):
             system.set_efootprint_value("usage_patterns", new_up_list)
         elements_with_lines_to_remove.append(object_id)
         web_obj.self_delete()
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+
+    model_web.update_system_data_with_up_to_date_calculated_attributes()
 
     if elements_with_lines_to_remove:
         http_response["HX-Trigger"] = json.dumps({

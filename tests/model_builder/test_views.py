@@ -14,7 +14,7 @@ class TestViews(TestModelingBase):
         cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_default_system_data_has_right_efootprint_version(self):
-        with open(os.path.join("model_builder", "default_system_data.json"), "r") as file:
+        with open(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"), "r") as file:
             system_data = json.load(file)
             self.assertEqual(system_data["efootprint_version"], efootprint_version)
 

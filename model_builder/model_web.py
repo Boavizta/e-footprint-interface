@@ -10,12 +10,12 @@ from efootprint.abstract_modeling_classes.explainable_hourly_quantities import E
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
-from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
 from efootprint.constants.units import u
+from efootprint import __version__ as efootprint_version
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
@@ -70,7 +70,14 @@ class ModelWeb:
         :param save_calculated_attributes: If True, calculated attributes will be included in the serialization.
         :return: JSON representation of the system data.
         """
-        return system_to_json(self.system.modeling_obj, save_calculated_attributes=save_calculated_attributes)
+        output_json = {"efootprint_version": efootprint_version}
+        for efootprint_obj in reversed(self.flat_efootprint_objs_dict.values()):
+            if efootprint_obj.class_as_simple_str not in output_json:
+                output_json[efootprint_obj.class_as_simple_str] = {}
+            output_json[efootprint_obj.class_as_simple_str][efootprint_obj.id] = efootprint_obj.to_json(
+                save_calculated_attributes=save_calculated_attributes)
+
+        return output_json
 
     def update_system_data_with_up_to_date_calculated_attributes(self):
         """
@@ -78,9 +85,7 @@ class ModelWeb:
         :param system_data: Dictionary containing the new system data.
         """
         self.session.modified = True
-        for efootprint_obj in self.flat_efootprint_objs_dict.values():
-            self.session["system_data"][efootprint_obj.class_as_simple_str][efootprint_obj.id] = efootprint_obj.to_json(
-                save_calculated_attributes=True)
+        self.session["system_data"] = self.to_json(save_calculated_attributes=True)
 
     def raise_incomplete_modeling_errors(self):
         if len(self.system.servers) == 0:
@@ -152,8 +157,7 @@ class ModelWeb:
 
     def add_new_efootprint_object_to_system(self, efootprint_object: ModelingObject):
         object_type = efootprint_object.class_as_simple_str
-        if object_type not in self.session["system_data"]:
-            self.session["system_data"][object_type] = {}
+        if object_type not in self.response_objs:
             self.response_objs[object_type] = {}
         self.response_objs[object_type][efootprint_object.id] = efootprint_object
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object

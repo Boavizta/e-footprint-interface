@@ -174,7 +174,6 @@ class ModelingObjectWeb:
     def self_delete(self):
         obj_type = self.class_as_simple_str
         object_id = self.efootprint_id
-        request_session = self.model_web.session
         objects_to_delete_afterwards = []
         for modeling_obj in self.mod_obj_attributes:
             if (
@@ -187,10 +186,7 @@ class ModelingObjectWeb:
             ):
                 objects_to_delete_afterwards.append(modeling_obj)
         logger.info(f"Deleting {self.name}")
-        request_session["system_data"][obj_type].pop(object_id, None)
-        if len(request_session["system_data"][obj_type]) == 0:
-            del request_session["system_data"][obj_type]
-        self._modeling_obj.self_delete()
+        self.modeling_obj.self_delete()
         self.model_web.response_objs[obj_type].pop(object_id, None)
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
         for mod_obj in objects_to_delete_afterwards:

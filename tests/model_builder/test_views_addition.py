@@ -49,6 +49,7 @@ class TestViewsAddition(TestModelingBase):
         cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_add_new_usage_pattern_from_form(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         post_data = QueryDict(mutable=True)
         post_data.update({
             "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
@@ -90,30 +91,30 @@ class TestViewsAddition(TestModelingBase):
                           "UsagePatternFromForm_modeling_duration_unit": ["year"],
                           "UsagePatternFromForm_start_date": ["2025-02-02"]})
         edit_request = self.factory.post(f"/model_builder/edit-usage-pattern/{up_id}/", data=post_data)
-        self._add_session_to_request(edit_request, add_request.session["system_data"])
+        self._add_session_to_request(edit_request, open_edit_panel_request.session["system_data"])
 
         response = edit_object(edit_request, up_id)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            add_request.session["system_data"]["UsagePatternFromForm"][up_id]["start_date"]["value"][:10], "2025-02-02")
+            edit_request.session["system_data"]["UsagePatternFromForm"][up_id]["start_date"]["value"][:10],
+            "2025-02-02")
 
         logger.info("Reloading page")
         results_request = self.factory.get("/model_builder/")
-        self._add_session_to_request(results_request, add_request.session["system_data"])
+        self._add_session_to_request(results_request, edit_request.session["system_data"])
 
         response = model_builder_main(results_request)
         self.assertEqual(response.status_code, 200)
 
         logger.info("Deleting usage pattern")
         delete_request = self.factory.post(f"/model_builder/delete-object/{up_id}/")
-        self._add_session_to_request(delete_request, add_request.session["system_data"])
+        self._add_session_to_request(delete_request, results_request.session["system_data"])
 
-        os.environ["RAISE_EXCEPTIONS"] = "True"
         response = delete_object(delete_request, up_id)
 
         self.assertEqual(response.status_code, 204)
-        self.assertNotIn("UsagePatternFromForm", add_request.session["system_data"])
+        self.assertNotIn("UsagePatternFromForm", delete_request.session["system_data"])
         self.assertEqual(
             len(delete_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]), len_system_up)
 
@@ -127,11 +128,11 @@ class TestViewsAddition(TestModelingBase):
                           "WebApplication_ram_buffer_per_user": ["50"]}
         )
 
-        request = self.factory.post("/add-object/Service", data=post_data)
-        self._add_session_to_request(request, self.system_data)
+        add_service_request = self.factory.post("/add-object/Service", data=post_data)
+        self._add_session_to_request(add_service_request, self.system_data)
 
-        response = add_object(request, "Service")
-        service_id = next(iter(request.session["system_data"]["WebApplication"].keys()))
+        response = add_object(add_service_request, "Service")
+        service_id = next(iter(add_service_request.session["system_data"]["WebApplication"].keys()))
         self.assertEqual(response.status_code, 200)
 
         post_data = QueryDict(mutable=True)
@@ -146,10 +147,10 @@ class TestViewsAddition(TestModelingBase):
          "WebApplicationJob_ram_needed": ["50"]}
         )
 
-        request = self.factory.post("/model_builder/add-object/Job", data=post_data)
-        self._add_session_to_request(request, self.system_data)
+        add_job_request = self.factory.post("/model_builder/add-object/Job", data=post_data)
+        self._add_session_to_request(add_job_request, add_service_request.session["system_data"])
 
-        response = add_object(request, "Job")
+        response = add_object(add_job_request, "Job")
         self.assertEqual(response.status_code, 200)
 
     def test_add_usage_journey_with_no_uj_step(self):
@@ -198,8 +199,7 @@ class TestViewsAddition(TestModelingBase):
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_add_usage_journey_step_to_usage_journey_unlinked_to_system_in_existing_computed_system(
         self, mock_render_exception_modal):
-        self.system_data_path = os.path.join(root_test_dir, "model_builder", "system_with_mirrored_cards.json")
-        self.setUp()
+        self.change_system_data(os.path.join(root_test_dir, "model_builder", "system_with_mirrored_cards.json"))
         post_data = QueryDict(mutable=True)
         post_data.update({
             "csrfmiddlewaretoken": ["ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv"],
@@ -231,16 +231,9 @@ class TestViewsAddition(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nb_uj_steps_before + 1, len(add_request.session["system_data"]["UsageJourneyStep"]))
 
-        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
-
     def test_delete_uj_step_from_default_uj_then_link_usage_pattern_to_it(self):
-        self.system_data_path = os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json")
-        self.setUp()
-        # delete system data file
-        system_data_with_calculated_attributes_path = self.system_data_path.replace(
-            ".json", "_with_calculated_attributes.json")
-        if os.path.exists(system_data_with_calculated_attributes_path):
-            os.remove(system_data_with_calculated_attributes_path)
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"))
         uj_step_id = next(iter(self.system_data["UsageJourneyStep"].keys()))
         delete_request = self.factory.post(f"/delete-object/{uj_step_id}")
         self._add_session_to_request(delete_request, self.system_data)
@@ -248,6 +241,7 @@ class TestViewsAddition(TestModelingBase):
         self.assertEqual(1, nb_uj_steps)
         logger.info("Deleting usage journey step")
         response = delete_object(delete_request, uj_step_id)
+        self.assertEqual(response.status_code, 200)
         self.assertNotIn("UsageJourneyStep", delete_request.session["system_data"])
         uj_id = next(iter(delete_request.session["system_data"]["UsageJourney"].keys()))
         logger.info("Linking usage pattern to usage journey without uj step")
@@ -277,23 +271,20 @@ class TestViewsAddition(TestModelingBase):
         result_request = self.factory.get("/model_builder/result-chart/")
         self._add_session_to_request(result_request, add_request.session["system_data"])
         logger.info("Requesting result chart after adding usage pattern to usage journey without uj step")
-        os.environ["RAISE_EXCEPTIONS"] = "True"
         with self.assertRaises(ValueError) as context:
             response = result_chart(result_request)
         self.assertIn("No impact could be computed because the modeling is incomplete", str(context.exception))
 
-        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
-
     def test_add_server_then_ai_model_then_job(self):
-        self.system_data_path = os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json")
-        self.setUp()
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"))
         logger.info("Adding a new server")
         post_data = QueryDict(mutable=True)
         post_data.update(copy(server_post_data))
-        request = self.factory.post("/add-object/ServerBase", data=post_data)
-        self._add_session_to_request(request, self.system_data)
-        response = add_object(request, "ServerBase")
-        server_id = next(iter(request.session["system_data"]["GPUServer"].keys()))
+        server_add_request = self.factory.post("/add-object/ServerBase", data=post_data)
+        self._add_session_to_request(server_add_request, self.system_data)
+        response = add_object(server_add_request, "ServerBase")
+        server_id = next(iter(server_add_request.session["system_data"]["GPUServer"].keys()))
 
         logger.info("Installing genAI service on server")
         post_data = QueryDict(mutable=True)
@@ -308,13 +299,13 @@ class TestViewsAddition(TestModelingBase):
              'type_object_available': ['GenAIModel']}
         )
 
-        request = self.factory.post("/add-object/Service", data=post_data)
-        self._add_session_to_request(request, self.system_data)
-        response = add_object(request, "Service")
-        gen_ai_model_id = next(iter(request.session["system_data"]["GenAIModel"].keys()))
+        service_add_request = self.factory.post("/add-object/Service", data=post_data)
+        self._add_session_to_request(service_add_request, server_add_request.session["system_data"])
+        response = add_object(service_add_request, "Service")
+        gen_ai_model_id = next(iter(service_add_request.session["system_data"]["GenAIModel"].keys()))
 
         logger.info("Adding a new job for the genAI model")
-        uj_step_id = next(iter(request.session["system_data"]["UsageJourneyStep"].keys()))
+        uj_step_id = next(iter(service_add_request.session["system_data"]["UsageJourneyStep"].keys()))
         post_data = QueryDict(mutable=True)
         post_data.update(
             {'GenAIJob_name': ['Generative AI job 1'],
@@ -326,20 +317,12 @@ class TestViewsAddition(TestModelingBase):
         )
         os.environ["RAISE_EXCEPTIONS"] = "True"
         request = self.factory.post("/model_builder/add-object/Job", data=post_data)
-        self._add_session_to_request(request, self.system_data)
+        self._add_session_to_request(request, service_add_request.session["system_data"])
         response = add_object(request, "Job")
         self.assertEqual(response.status_code, 200)
 
-        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
-
     def test_add_up_to_default_system_then_delete_it_then_add_server(self):
-        self.system_data_path = os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json")
-        self.setUp()
-        # delete system data file
-        system_data_with_calculated_attributes_path = self.system_data_path.replace(
-            ".json", "_with_calculated_attributes.json")
-        if os.path.exists(system_data_with_calculated_attributes_path):
-            os.remove(system_data_with_calculated_attributes_path)
+        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"))
         uj_id = next(iter(self.system_data["UsageJourney"].keys()))
         os.environ["RAISE_EXCEPTIONS"] = "True"
         logger.info("Linking usage pattern to usage journey without uj step")
@@ -381,5 +364,3 @@ class TestViewsAddition(TestModelingBase):
         self._add_session_to_request(request, self.system_data)
         response = add_object(request, "ServerBase")
         self.assertEqual(response.status_code, 200)
-
-        self.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")

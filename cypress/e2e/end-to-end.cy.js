@@ -128,6 +128,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
         cy.get('#net_growth_rate_timespan').select('year');
+        cy.get("#UsagePatternFromForm_usage_journey").select(ujNameOne);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
         cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible');

@@ -101,7 +101,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
 
     available_job_classes = {Job, GPUJob}
     for service in SERVICE_CLASSES:
-        if service.__name__ in request.session["system_data"].keys():
+        if service.__name__ in model_web.response_objs:
             available_job_classes.update(service.compatible_jobs())
 
     form_sections, dynamic_form_data = generate_object_creation_structure(

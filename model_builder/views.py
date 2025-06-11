@@ -41,19 +41,20 @@ def model_builder_main(request, reboot=False):
         model_web.update_system_data_with_up_to_date_calculated_attributes()
 
         return redirect("model-builder")
-    if "system_data" not in request.session.keys():
+    if "system_data" not in request.session:
         return redirect("model-builder", reboot="reboot")
 
-    if "efootprint_version" not in request.session["system_data"].keys():
+    if "efootprint_version" not in request.session["system_data"]:
         request.session["system_data"]["efootprint_version"] = "9.1.4"
     system_data_efootprint_version = request.session["system_data"]["efootprint_version"]
 
     model_web = ModelWeb(request.session)
 
     if efootprint_version != system_data_efootprint_version:
-        logger.info(f"Upgraded system data from version {system_data_efootprint_version} to {efootprint_version}")
+        logger.info(f"Upgrading system data from version {system_data_efootprint_version} to {efootprint_version}")
         request.session["system_data"]["efootprint_version"] = efootprint_version
-        request.session.modified = True
+        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        logger.info("Upgrade successful")
 
     http_response = htmx_render(
         request, "model_builder/model_builder_main.html", context={"model_web": model_web})
