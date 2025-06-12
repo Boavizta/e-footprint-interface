@@ -100,6 +100,7 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     let toastElement = document.getElementById("toast-push-notification");
     let toastBody = document.getElementById("toast-content");
     let toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastElement);
+    const container = document.getElementById("model-canva-scrollable-area");
 
     let actionType = event.detail["action_type"];
     let modelObjectName = event.detail["name"];
@@ -112,10 +113,17 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     }
 
     event.detail["ids"].forEach((mirrorObjetWebId, index) => {
-        if(index === 0){
-            document.getElementById(`button-${mirrorObjetWebId}`).scrollIntoView(
-                { behavior: "smooth", block: "center" });
+        if (index === 0) {
+        const element = document.getElementById(`button-${mirrorObjetWebId}`);
+        if (element) {
+            const rect = element.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }, 100);
+            }
         }
+    }
         highlightObjectAfterAddOrEdit(`button-${mirrorObjetWebId}`);
     })
 

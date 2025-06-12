@@ -50,6 +50,7 @@ $zindex-levels: (
         - var(--toolbar-height)
         - var(--loading-bar-height)
         - var(--margin-padding-model)
+        - var(--open-result-btn)
     );
     --list-object-calculated-height : calc(
         var(--model-canva-calculated-height)- var(--open-result-btn)
