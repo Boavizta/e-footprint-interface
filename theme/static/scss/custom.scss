@@ -12,6 +12,16 @@ $zindex-levels: (
 ) !default;
 
 :root {
+  --full-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --full-height: 100dvh;
+  }
+}
+
+:root {
     --h6-min: 0.8rem;
     --h6-ideal: 1vw;
     --h6-max: 1.5rem;
@@ -44,9 +54,9 @@ $zindex-levels: (
     --loading-bar-height : 2px;
     --margin-padding-model : 6px;
 
-    --model-height : calc(100vh - var(--navbar-height) - var(--loading-bar-height) - var(--toolbar-height));
+    --model-height : calc(var(--full-height) - var(--navbar-height) - var(--loading-bar-height) - var(--toolbar-height));
     --model-canva-calculated-height : calc(
-        100vh - var(--navbar-height)
+        var(--full-height) - var(--navbar-height)
         - var(--toolbar-height)
         - var(--loading-bar-height)
         - var(--margin-padding-model)
@@ -55,8 +65,8 @@ $zindex-levels: (
     --list-object-calculated-height : calc(
         var(--model-canva-calculated-height)- var(--open-result-btn)
     );
-    --result-panel-opened : calc(100vh - var(--navbar-height) - var(--toolbar-height) );
-    --home-page-height : calc(100vh - var(--navbar-height))
+    --result-panel-opened : calc(var(--full-height) - var(--navbar-height) - var(--toolbar-height) );
+    --home-page-height : calc(var(--full-height) - var(--navbar-height));
 }
 
 /* CSS class utilities*/
@@ -74,7 +84,7 @@ $breakpoints: (
   sm: 576px,
   md: 768px,
   lg: 992px,
-  xl: 1200px,
+  xl: 1200px,a
   xxl: 1400px
 );
 
@@ -92,7 +102,7 @@ body{
     color: var(--dark-blue);
     font-size: 0.8em;
     margin: 0;
-    height: 100vh;
+    height: var(--full-height);
 }
 
 #main-content-block{
