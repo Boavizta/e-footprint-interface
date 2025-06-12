@@ -1,0 +1,8 @@
+<div class="form-text fs-xl" id="source-{{ field.id }}">
+    {% if field.source.link %}
+        Source : <a target="_blank" class="sources-label" href="{{ field.source.link }}">{{ field.source.name }}
+    </a>
+    {% else %}
+        Source : {{ field.source.name }}
+    {% endif %}
+</div>

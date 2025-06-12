@@ -1,0 +1,11 @@
+<div class="row gy-0 p-0 m-0 w-100
+        {% if field.input_type == "select-multiple" and not field.options %} d-none {% endif %}">
+    <div class="col-auto">
+        <label for="{{ field.id }}" class="form-label">
+            {{ field.label|capfirst }}
+        </label>
+    </div>
+    {% if field.tooltip %}
+        {% include "model_builder/side_panels/components/tooltip.html" %}
+    {% endif %}
+</div>
