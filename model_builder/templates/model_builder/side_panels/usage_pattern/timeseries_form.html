@@ -4,9 +4,16 @@
            name="start_date"
            id="start_date"
            value="{{ usage_pattern_input_values.start_date.value }}"
-           _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+           data-default-value="{{ usage_pattern_input_values.start_date.value }}"
+           data-default-name="{{ usage_pattern_input_values.start_date.source.name }}"
+           data-source-url="{{ usage_pattern_input_values.start_date.source.link }}"
+           _="on input updateSource(@id) then openOrCloseTimeseriesChartAndTriggerUpdate()"
            required
-           >
+    >
+    <div class="form-text fs-xl mb-3" id="source-start_date"
+         _="on load updateSource('start_date')"
+    >
+    </div>
 </div>
 <div class="mb-3">
     <label for="modeling_duration_value" class="form-label w-100">Modeling duration</label>
@@ -18,10 +25,16 @@
                max=
                    {% if usage_pattern_input_values.modeling_duration_unit.value == "year" %}10{% else %}120{% endif %}
                _="on input if my value is not empty applyMaxLimitOnModelingDurationValue()
+                then updateSource('modeling_duration_value')
                 then openOrCloseTimeseriesChartAndTriggerUpdate()
                 "
                aria-describedby="basic-addon3 basic-addon4"
-                required>
+               required
+               data-default-value="{{ usage_pattern_input_values.modeling_duration_value.value }}"
+               data-default-name="{{ usage_pattern_input_values.modeling_duration_value.source.name }}"
+               data-source-url="{{ usage_pattern_input_values.modeling_duration_value.source.link }}"
+               data-source-linked-to="modeling_duration_unit"
+        >
         <select class="input-group-text"
                 name="modeling_duration_unit"
                 id="modeling_duration_unit"
@@ -32,12 +45,22 @@
                     else
                         set {max:120} on #modeling_duration_value
                     end
+                    updateSource('modeling_duration_value')
                     then applyMaxLimitOnModelingDurationValue()
-                    then openOrCloseTimeseriesChartAndTriggerUpdate()"
+                    then openOrCloseTimeseriesChartAndTriggerUpdate()
+                "
+                data-default-value="{{ usage_pattern_input_values.modeling_duration_unit.value }}"
+                data-default-name="{{ usage_pattern_input_values.modeling_duration_unit.source.name }}"
+                data-source-url="{{ usage_pattern_input_values.modeling_duration_unit.source.link }}"
+                data-source-linked-to="modeling_duration_value"
         >
             <option value="month" {% if usage_pattern_input_values.modeling_duration_unit.value == "month" %}selected{% endif %}>Months</option>
             <option value="year" {% if usage_pattern_input_values.modeling_duration_unit.value == "year" %}selected{% endif %}>Years</option>
         </select>
+    </div>
+    <div class="form-text fs-xl mb-3" id="source-modeling_duration_value"
+         _="on load updateSource('modeling_duration_value')"
+    >
     </div>
     <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
 </div>
@@ -50,18 +73,32 @@
                min="0"
                value="{{ usage_pattern_input_values.initial_usage_journey_volume.magnitude|floatformat }}"
                placeholder="Input a number"
-               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()
+               then updateSource(@id)"
                aria-describedby="basic-addon3 basic-addon4"
                required
-       >
+               data-default-value="{{ usage_pattern_input_values.initial_usage_journey_volume.value }}"
+               data-default-name="{{ usage_pattern_input_values.initial_usage_journey_volume.source.name }}"
+               data-source-url="{{ usage_pattern_input_values.initial_usage_journey_volume.source.link }}"
+               data-source-linked-to="initial_usage_journey_volume_timespan"
+        >
         <select class="input-group-text"
                 name="initial_usage_journey_volume_timespan"
                 id="initial_usage_journey_volume_timespan"
-                _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
+                _="on change openOrCloseTimeseriesChartAndTriggerUpdate()
+                then updateSource(initial_usage_journey_volume)"
+                data-default-value="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.value }}"
+               data-default-name="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.source.name }}"
+               data-source-url="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.source.link }}"
+               data-source-linked-to="initial_usage_journey_volume"
         >
             <option value="month" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "month" %}selected{% endif %}>Monthly</option>
             <option value="year" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
+    </div>
+    <div class="form-text fs-xl mb-3" id="source-initial_usage_journey_volume"
+         _="on load updateSource('initial_usage_journey_volume')"
+    >
     </div>
 </div>
 <div class="mb-3">
@@ -72,19 +109,31 @@
                name="net_growth_rate_in_percentage"
                id="net_growth_rate_in_percentage"
                min="0"
-               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+               _="on input openOrCloseTimeseriesChartAndTriggerUpdate() then updateSource(@id)"
                value="{{ usage_pattern_input_values.net_growth_rate_in_percentage.magnitude|floatformat }}"
                aria-describedby="basic-addon3 basic-addon4"
                required
-               >
+               data-default-value="{{ usage_pattern_input_values.net_growth_rate_in_percentage.value }}"
+               data-default-name="{{ usage_pattern_input_values.net_growth_rate_in_percentage.source.name }}"
+               data-source-url="{{ usage_pattern_input_values.net_growth_rate_in_percentage.source.link }}"
+               data-source-linked-to="net_growth_rate_timespan"
+        >
         <select class="input-group-text"
                 name="net_growth_rate_timespan"
                 id="net_growth_rate_timespan"
-                _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
+                _="on change openOrCloseTimeseriesChartAndTriggerUpdate() then updateSource(net_growth_rate_in_percentage)"
+                data-default-value="{{ usage_pattern_input_values.net_growth_rate_timespan.value }}"
+               data-default-name="{{ usage_pattern_input_values.net_growth_rate_timespan.source.name }}"
+               data-source-url="{{ usage_pattern_input_values.net_growth_rate_timespan.source.link }}"
+               data-source-linked-to="net_growth_rate_in_percentage"
         >
             <option value="month" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "month" %}selected{% endif %}>Monthly</option>
             <option value="year" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
+    </div>
+    <div class="form-text fs-xl mb-3" id="source-net_growth_rate_in_percentage"
+         _="on load updateSource('net_growth_rate_in_percentage')"
+    >
     </div>
 </div>
 

@@ -12,7 +12,8 @@
                         "label": "Usage pattern",
                         "value": "UsagePatternFromForm"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             }
         ]
     },
@@ -35,6 +36,7 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "efootprint_id1",
+                "default": "efootprint_id1",
                 "options": [
                     {
                         "label": "option1",
@@ -44,7 +46,8 @@
                         "label": "option2",
                         "value": "efootprint_id2"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             },
             {
                 "id": "UsagePatternFromForm_devices",
@@ -71,6 +74,7 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "efootprint_id1",
+                "default": "efootprint_id1",
                 "options": [
                     {
                         "label": "option1",
@@ -80,7 +84,8 @@
                         "label": "option2",
                         "value": "efootprint_id2"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             },
             {
                 "id": "UsagePatternFromForm_country",
@@ -89,6 +94,7 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "efootprint_id1",
+                "default": "efootprint_id1",
                 "options": [
                     {
                         "label": "option1",
@@ -98,7 +104,8 @@
                         "label": "option2",
                         "value": "efootprint_id2"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             },
             {
                 "id": "UsagePatternFromForm_start_date",
@@ -106,7 +113,11 @@
                 "label": "start date",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "2025-01-01"
+                "default": "2025-01-01",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                }
             },
             {
                 "id": "UsagePatternFromForm_modeling_duration_value",
@@ -130,6 +141,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "year",
+                "default": "year",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "month",
@@ -163,6 +179,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "month",
+                "default": "month",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "day",
@@ -201,6 +222,10 @@
                 "input_type": "datalist",
                 "selected": "year",
                 "default": "year",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": null
             }
         ],

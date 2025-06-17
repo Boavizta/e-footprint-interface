@@ -54,8 +54,12 @@ def create_efootprint_obj_from_post_data(
             obj_creation_kwargs[attr_name] = SourceValue(
                 float(create_form_data[attr_name_with_prefix]) * u(unit), source)
         elif issubclass(annotation, ExplainableObject):
+            if create_form_data[attr_name_with_prefix] != default_values.get(attr_name).value:
+                source = Sources.USER_DATA
+            else :
+                source = default_values.get(attr_name).source
             obj_creation_kwargs[attr_name] = SourceObject(
-                create_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
+                create_form_data[attr_name_with_prefix], source=source)
         elif issubclass(annotation, ModelingObject):
             new_mod_obj_id = create_form_data[attr_name_with_prefix]
             mod_obj_attribute_object_type_str = annotation.__name__

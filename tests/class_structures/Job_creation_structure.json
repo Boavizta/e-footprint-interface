@@ -24,7 +24,8 @@
                         "label": "Generative AI job",
                         "value": "GenAIJob"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             }
         ]
     },
@@ -168,6 +169,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "default",
+                "default": "default",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "aggregation-code-side",
@@ -217,6 +223,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "1080p (1920 x 1080)",
+                "default": "1080p (1920 x 1080)",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "480p (640 x 480)",

@@ -94,7 +94,8 @@ describe('Test de la page d\'accueil', () => {
 
         cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsTwo.replaceAll(' ', '-')+'"]').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#service').select("direct_server_call");
+        cy.get('#service').should('be.visible').select("direct_server_call");
+
         cy.get('#Job_name').clear();
         cy.get('#Job_name').type(jobTwo);
         cy.get('#btn-submit-form').click();
@@ -139,6 +140,7 @@ describe('Test de la page d\'accueil', () => {
             .and('be.enabled')
             .click();
 
+        cy.get('#model-builder-modal').should('not.exist');
         cy.get('#model-builder-modal').should('not.exist');
 
         cy.get('#btn-open-panel-result').click();

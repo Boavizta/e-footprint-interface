@@ -20,7 +20,8 @@
                         "label": "Cloud server (CPUs, for webapps, streaming, etc.)",
                         "value": "BoaviztaCloudServer"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             }
         ]
     },
@@ -43,6 +44,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "autoscaling",
+                "default": "autoscaling",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "autoscaling",
@@ -246,6 +252,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "serverless",
+                "default": "serverless",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "autoscaling",
@@ -464,6 +475,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "scaleway",
+                "default": "scaleway",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "aws",
@@ -491,6 +507,10 @@
                 "input_type": "datalist",
                 "selected": "ent1-s",
                 "default": "ent1-s",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": null
             },
             {
@@ -500,6 +520,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "autoscaling",
+                "default": "autoscaling",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "autoscaling",

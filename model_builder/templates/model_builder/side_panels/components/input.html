@@ -8,10 +8,10 @@
            placeholder="Enter value"
            required
         {% if field.source %}
-           data-defaultValue="{{ field.default }}"
-           data-sourceName="{{ field.source.name }}"
-           data-sourceLink="{{ field.source.link }}"
-           oninput="updateSource(this)"
+           data-default-value="{{ field.default }}"
+           data-default-name="{{ field.source.name }}"
+           data-source-url="{{ field.source.link }}"
+           oninput="updateSource(this.id)"
         {% endif %}
         {% if not field.can_be_negative %}
            min="0"
