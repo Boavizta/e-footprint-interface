@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.hardware.gpu_server import GPUServer
@@ -197,7 +199,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
     dynamic_select_options = {
         str(conditional_value): [str(possible_value) for possible_value in possible_values]
         for conditional_value, possible_values in
-        UsagePatternFromForm.conditional_list_values()["net_growth_rate_timespan"]["conditional_list_values"].items()
+        UsagePatternFromForm.conditional_list_values["net_growth_rate_timespan"]["conditional_list_values"].items()
     }
     dynamic_select = {
         "input_id": "net_growth_rate_timespan",
@@ -214,7 +216,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             field["options"] = field["unselected"]
             field["selected"] = field["unselected"][0]["value"]
 
-    usage_pattern_input_values = UsagePatternFromForm.default_values()
+    usage_pattern_input_values = deepcopy(UsagePatternFromForm.default_values)
     usage_pattern_input_values["initial_usage_journey_volume"] = None
     http_response = render(
         request, "model_builder/side_panels/usage_pattern/usage_pattern_add.html", {

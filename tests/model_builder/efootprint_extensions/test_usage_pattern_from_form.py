@@ -161,19 +161,16 @@ class TestUsagePatternFromForm(unittest.TestCase):
 
         self.usage_pattern.update_hourly_usage_journey_starts()
 
-        # We expect 48 hours * (240 / 24) = 48 * 10 = 480 total values,
-        # each hour = 10 journeys
-        hourly_df = self.usage_pattern.hourly_usage_journey_starts.value
+        # We expect 48 hours * (240 / 24) = 48 * 10 = 480 total journeys, each hour = 10 journeys
+        hourly_values = self.usage_pattern.hourly_usage_journey_starts.value
 
-        self.assertEqual(len(hourly_df), 48)
+        self.assertEqual(len(hourly_values), 48)
         # Check that all values are 10
-        self.assertTrue(np.allclose(hourly_df["value"].values._data, 10.0))
+        self.assertTrue(np.allclose(hourly_values, 10.0))
 
         # Check the index starts at the specified start_date and spans 48 hours
         expected_start = pd.to_datetime(self.start_date_val.value)
-        expected_end = expected_start + pd.Timedelta(hours=47)
-        self.assertEqual(hourly_df.index[0], expected_start)
-        self.assertEqual(hourly_df.index[-1], expected_end)
+        self.assertEqual(self.usage_pattern.hourly_usage_journey_starts.start_date, expected_start)
 
     def test_update_hourly_usage_journey_starts_growth_scenario(self):
         """
@@ -199,8 +196,8 @@ class TestUsagePatternFromForm(unittest.TestCase):
 
         # Day0 daily usage = 200 => hourly => 200/24 ~ 8.3333
         # Day1 daily usage = 1.0005 * 200 = 200.1 => hourly => 200.1/24 ~ 8.3375
-        day0_hours = hourly_df.iloc[:24]["value"].values._data
-        day1_hours = hourly_df.iloc[24:]["value"].values._data
+        day0_hours = hourly_df[:24]
+        day1_hours = hourly_df[24:]
 
         # Check day0 hours are all about 8.333
         self.assertTrue(np.allclose(day0_hours, 200.0 / 24, atol=1e-3))

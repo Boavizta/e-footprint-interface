@@ -19,7 +19,7 @@ def generate_usage_pattern_edit_panel_http_response(
     dynamic_select_options = {
         str(conditional_value): [str(possible_value) for possible_value in possible_values]
         for conditional_value, possible_values in
-        UsagePatternFromForm.conditional_list_values()["net_growth_rate_timespan"]["conditional_list_values"].items()
+        UsagePatternFromForm.conditional_list_values["net_growth_rate_timespan"]["conditional_list_values"].items()
     }
     dynamic_select = {
         "input_id": "net_growth_rate_timespan",

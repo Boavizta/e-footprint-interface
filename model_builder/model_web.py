@@ -1,9 +1,12 @@
 import json
+import math
 import os
+from datetime import timedelta
 from time import time
 
 import numpy as np
 import pandas as pd
+import pytz
 from django.contrib.sessions.backends.base import SessionBase
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
@@ -16,6 +19,7 @@ from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
 from efootprint.constants.units import u
 from efootprint import __version__ as efootprint_version
+from pint import Quantity
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
@@ -229,61 +233,69 @@ class ModelWeb:
     def usage_patterns(self):
         return self.get_web_objects_from_efootprint_type("UsagePattern")
 
-    def get_reindexed_system_energy_and_fabrication_footprint_as_df_dict(self):
+    @property
+    def system_emissions(self):
         energy_footprints = self.system.total_energy_footprints
         fabrication_footprints = self.system.total_fabrication_footprints
 
-        all_explainable_hourly_quantities_values = [
-            elt for elt in list(energy_footprints.values()) + list(fabrication_footprints.values())
-            if isinstance(elt, ExplainableHourlyQuantities)]
+        # Step 1: Collect all ExplainableHourlyQuantities and compute global time bounds
+        all_ehqs = [
+            q for q in list(energy_footprints.values()) + list(fabrication_footprints.values())
+            if isinstance(q, ExplainableHourlyQuantities)
+        ]
 
-        combined_index = pd.date_range(
-            start=min(
-                explainable_hourly_quantities.value.index.min() for explainable_hourly_quantities in
-                all_explainable_hourly_quantities_values),
-            end=max(explainable_hourly_quantities.value.index.max() for explainable_hourly_quantities in
-                    all_explainable_hourly_quantities_values),
-            freq='h'
-        )
+        for ehq in all_ehqs:
+            assert ehq.start_date.tzinfo == pytz.utc, f"Wrong tzinfo for {ehq.label}: {ehq.start_date.tzinfo}"
+            assert ehq.start_date.hour == 0, f"{ehq.label} start date doesn’t start at midnight: {ehq.start_date}"
 
-        for footprint_dict in [energy_footprints, fabrication_footprints]:
-            for key, explainable_hourly_quantities in footprint_dict.items():
-                if isinstance(explainable_hourly_quantities, EmptyExplainableObject):
-                    footprint_dict[key] = pd.DataFrame(
-                {"value": np.full(shape=len(combined_index), fill_value=0.0)}, index=combined_index, dtype="pint[kg]")
-                else:
-                    footprint_dict[key] = explainable_hourly_quantities.value.reindex(combined_index, fill_value=0)
 
-        return energy_footprints, fabrication_footprints, combined_index
+        if not all_ehqs:
+            raise ValueError("No ExplainableHourlyQuantities found.")
 
-    @property
-    def system_emissions(self):
-        energy_footprints, fabrication_footprints, combined_index = (
-            self.get_reindexed_system_energy_and_fabrication_footprint_as_df_dict())
+        global_start = min(ehq.start_date for ehq in all_ehqs)
+        global_end = max(ehq.start_date + timedelta(hours=len(ehq.magnitude) - 1) for ehq in all_ehqs)
+        total_hours = int((global_end - global_start).total_seconds() // 3600) + 1
 
-        day_indexes_from_unix_epoch = (combined_index.view("int64") // (24 * 3600 * 1e9)).astype(int)
-        day_indexes_from_df_start = day_indexes_from_unix_epoch - day_indexes_from_unix_epoch.min()
-        def to_rounded_daily_values_list(df, rounding_depth=5):
-            daily_sums = np.bincount(day_indexes_from_df_start, weights=df["value"].pint.to(u.tonne).values._data)
+        # Step 2: Build aligned time grid and reindexed arrays
+        def reindex_array(ehq: ExplainableHourlyQuantities) -> Quantity:
+            start_offset = int((ehq.start_date - global_start).total_seconds() // 3600)
+            ehq.to(u.tonne)
+            values = ehq.magnitude.astype(np.float32, copy=False)
+            padded = np.zeros(total_hours, dtype=np.float32)
+            padded[start_offset:start_offset + len(values)] = values
 
-            # Round the results and return as a list
+            return padded * ehq.unit
+
+        # Step 3: Build padded arrays or zeros for missing data
+        def get(key: str, d: dict[str, ExplainableHourlyQuantities]) -> Quantity:
+            val = d.get(key)
+            if isinstance(val, EmptyExplainableObject):
+                return np.zeros(total_hours, dtype=np.float32) * u.tonne
+
+            return reindex_array(val)
+
+        # Step 4: Compute daily emissions using np.bincount
+        def to_rounded_daily_values(quantity_arr: Quantity, rounding_depth=5) -> list:
+            day_indexes = np.arange(total_hours) // 24
+            weights = quantity_arr.magnitude
+            daily_sums = np.bincount(day_indexes, weights=weights, minlength=(total_hours + 23) // 24)
+
             return np.round(daily_sums, rounding_depth).tolist()
 
-        values = {
-            "Servers_and_storage_energy": to_rounded_daily_values_list(
-            energy_footprints["Servers"] + energy_footprints["Storage"]),
-            "Devices_energy": to_rounded_daily_values_list(energy_footprints["Devices"]),
-            "Network_energy": to_rounded_daily_values_list(energy_footprints["Network"]),
-            "Servers_and_storage_fabrication": to_rounded_daily_values_list(
-            fabrication_footprints["Servers"] + fabrication_footprints["Storage"]),
-            "Devices_fabrication": to_rounded_daily_values_list(fabrication_footprints["Devices"])
-        }
-
-        # normalize converts all datetime indexes to midnight time
-        date_index = combined_index.normalize().drop_duplicates()
         emissions = {
-            "dates": date_index.strftime("%Y-%m-%d").tolist(),
-            "values": values
+            "dates": [
+                (global_start + timedelta(days=i)).strftime("%Y-%m-%d")
+                for i in range(math.ceil(total_hours / 24))
+            ],
+            "values": {
+                "Servers_and_storage_energy": to_rounded_daily_values(
+                    get("Servers", energy_footprints) + get("Storage", energy_footprints)),
+                "Devices_energy": to_rounded_daily_values(get("Devices", energy_footprints)),
+                "Network_energy": to_rounded_daily_values(get("Network", energy_footprints)),
+                "Servers_and_storage_fabrication": to_rounded_daily_values(
+                    get("Servers", fabrication_footprints) + get("Storage", fabrication_footprints)),
+                "Devices_fabrication": to_rounded_daily_values(get("Devices", fabrication_footprints)),
+            }
         }
 
         return emissions

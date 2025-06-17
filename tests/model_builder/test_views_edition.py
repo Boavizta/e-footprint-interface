@@ -79,8 +79,8 @@ class TestViewsEdition(TestModelingBase):
     def test_edit_genai_model_provider_with_recompute_true(self):
         os.environ["RAISE_EXCEPTIONS"] = "True"
         gpu_server = GPUServer.from_defaults("GPU server", compute=SourceValue(16 * u.gpu), storage=Storage.ssd())
-        first_provider = GenAIModel.list_values()["provider"][0]
-        first_model_name = GenAIModel.conditional_list_values()[
+        first_provider = GenAIModel.list_values["provider"][0]
+        first_model_name = GenAIModel.conditional_list_values[
             "model_name"]["conditional_list_values"][first_provider][0]
         genai_service = GenAIModel.from_defaults(
             "GenAI service", server=gpu_server, provider=first_provider, model_name=first_model_name)
@@ -95,8 +95,8 @@ class TestViewsEdition(TestModelingBase):
         logger.info(f"Created GenAI service with provider {first_provider} and model name {first_model_name}")
 
         post_data = QueryDict(mutable=True)
-        second_provider = GenAIModel.list_values()["provider"][1]
-        second_model_name = GenAIModel.conditional_list_values()[
+        second_provider = GenAIModel.list_values["provider"][1]
+        second_model_name = GenAIModel.conditional_list_values[
             "model_name"]["conditional_list_values"][second_provider][0]
         post_data.update(
             {"GenAIModel_name": ["Gen AI service"], "GenAIModel_server": [gpu_server.id],
@@ -139,8 +139,8 @@ class TestViewsEdition(TestModelingBase):
         self.assertEqual(storage["name"], "server 1 default ssd")
         self.assertEqual(storage["carbon_footprint_fabrication_per_storage_capacity"]["value"], 160.0)
 
-    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
-    def test_edition_with_recompute(self, mock_render_exception_modal):
+    def test_edition_with_recompute(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         server_id = "uuid-Server-1"
         storage_id = "uuid-Default-SSD-storage-1"
 
@@ -158,7 +158,6 @@ class TestViewsEdition(TestModelingBase):
         self._add_session_to_request(edit_server_request, self.system_data)
         response = edit_object(edit_server_request, server_id)
 
-        mock_render_exception_modal.assert_not_called()
         self.assertEqual(response.status_code, 200)
 
     def test_suppress_one_of_2_usage_patterns_then_update_server_used_by_both(self):

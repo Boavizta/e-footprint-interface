@@ -46,7 +46,7 @@ class IntegrationTest(TestModelingBase):
         new_up_id = up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"][-1]
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 1)
+        self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 3)
 
         logger.info(f"Creating service")
         post_data = QueryDict(mutable=True)
@@ -83,7 +83,7 @@ class IntegrationTest(TestModelingBase):
 
         logger.info(f"Manually deleting usage pattern")
         delete_object(job_request, new_up_id)
-        self.assertNotIn("UsagePatternFromForm", job_request.session["system_data"])
+        self.assertEqual(2, len(job_request.session["system_data"]["UsagePatternFromForm"]))
         logger.info(f"Manually deleting job")
         delete_object(job_request, new_job_id)
         logger.info(f"Manually deleting service")
@@ -98,7 +98,8 @@ class IntegrationTest(TestModelingBase):
                 set(job_request.session["system_data"][efootprint_class].keys()),
                 set(self.system_data[efootprint_class].keys()),
                 f"Mismatch in {efootprint_class} data")
-        self.assertTrue(initial_total_footprint.value.equals(ModelWeb(job_request.session).system.total_footprint.value))
+        self.assertEqual(initial_total_footprint.explainable_object,
+                         ModelWeb(job_request.session).system.total_footprint.explainable_object)
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_raise_error_if_users_tries_to_see_results_with_incomplete_modeling(self, mock_exception_modal):

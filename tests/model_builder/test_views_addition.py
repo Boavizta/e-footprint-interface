@@ -75,7 +75,7 @@ class TestViewsAddition(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(add_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]),
                          len_system_up + 1)
-        self.assertEqual(len(add_request.session["system_data"]["UsagePatternFromForm"]),1)
+        self.assertEqual(3, len(add_request.session["system_data"]["UsagePatternFromForm"]))
         up_id = list(add_request.session["system_data"]["UsagePatternFromForm"].keys())[-1]
 
         logger.info("Open edit usage pattern panel")
@@ -114,7 +114,7 @@ class TestViewsAddition(TestModelingBase):
         response = delete_object(delete_request, up_id)
 
         self.assertEqual(response.status_code, 204)
-        self.assertNotIn("UsagePatternFromForm", delete_request.session["system_data"])
+        self.assertEqual(2, len(delete_request.session["system_data"]["UsagePatternFromForm"]))
         self.assertEqual(
             len(delete_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]), len_system_up)
 

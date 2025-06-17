@@ -14,14 +14,13 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
 from efootprint.constants.units import u
+from pint import Quantity
 
 from model_builder.efootprint_extensions.explainable_start_date import ExplainableStartDate
 
 
 class UsagePatternFromForm(UsagePattern):
-    @classmethod
-    def default_values(cls):
-        return {
+    default_values = {
             "start_date": SourceObject("2025-01-01"),
             "modeling_duration_value": SourceValue(3 * u.dimensionless),
             "modeling_duration_unit": SourceObject("year"),
@@ -30,17 +29,14 @@ class UsagePatternFromForm(UsagePattern):
             "net_growth_rate_in_percentage": SourceValue(0 * u.dimensionless),
             "net_growth_rate_timespan": SourceObject("year")
         }
-    @classmethod
-    def list_values(cls):
-        return {
+
+    list_values ={
             "initial_usage_journey_volume_timespan": [
                 SourceObject("day"), SourceObject("month"), SourceObject("year")],
             "modeling_duration_unit": [SourceObject("month"), SourceObject("year")]
         }
 
-    @classmethod
-    def conditional_list_values(cls):
-        return {
+    conditional_list_values = {
             "net_growth_rate_timespan": {
                 "depends_on": "initial_usage_journey_volume_timespan",
                 "conditional_list_values": {
@@ -58,9 +54,8 @@ class UsagePatternFromForm(UsagePattern):
                  net_growth_rate_in_percentage: SourceValue, net_growth_rate_timespan: SourceObject):
         super().__init__(
             name, usage_journey, devices, network, country,
-            SourceHourlyValues(pd.DataFrame(
-                {"value": [0]}, dtype=f"pint[]",
-                index=pd.date_range(start=datetime.strptime(start_date.value, "%Y-%m-%d"), periods=1, freq='h'))))
+            SourceHourlyValues(Quantity(np.array([0], dtype=np.float32), u.dimensionless),
+                start_date=datetime.strptime(start_date.value, "%Y-%m-%d")))
 
         self.start_date = start_date.set_label(f"{self.name} start date")
         self.modeling_duration_value = modeling_duration_value.set_label(f"{self.name} modeling duration value")
@@ -153,13 +148,11 @@ class UsagePatternFromForm(UsagePattern):
 
         # Since the exponential growth is computed daily,
         # each day’s hourly value remains constant (daily value divided equally among 24 hours).
-        hourly_values = np.repeat(daily_values / 24, 24)
-
-        hourly_index = pd.date_range(start=self.local_timezone_start_date.value, periods=len(hourly_values), freq='h')
-        values_df = pd.DataFrame({"value": hourly_values}, index=hourly_index, dtype=f"pint[]")
+        hourly_values = np.repeat(daily_values / 24, 24).astype(np.float32)
 
         self.hourly_usage_journey_starts = ExplainableHourlyQuantities(
-            values_df, left_parent=self.first_daily_usage_journey_volume, right_parent=self.daily_growth_rate,
+            Quantity(hourly_values, u.dimensionless), start_date=self.local_timezone_start_date.value,
+            left_parent=self.first_daily_usage_journey_volume, right_parent=self.daily_growth_rate,
             operator="exponentially growing with daily rate"
         ).generate_explainable_object_with_logical_dependency(
             self.local_timezone_start_date

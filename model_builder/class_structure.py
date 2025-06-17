@@ -1,3 +1,4 @@
+from copy import deepcopy
 from inspect import signature, _empty as empty_annotation
 from typing import get_origin, List, get_args
 
@@ -36,7 +37,7 @@ def generate_object_creation_structure(
     form_sections = [type_efootprint_classes_available]
 
     for index, efootprint_class in enumerate(available_efootprint_classes):
-        default_values = efootprint_class.default_values()
+        default_values = deepcopy(efootprint_class.default_values)
         available_efootprint_class_str = efootprint_class.__name__
         available_efootprint_class_label = FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]
         default_values["name"] = (
@@ -74,8 +75,8 @@ def generate_dynamic_form(
     dynamic_lists = []
 
     efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
-    list_values = efootprint_obj_class.list_values()
-    conditional_list_values = efootprint_obj_class.conditional_list_values()
+    list_values = efootprint_obj_class.list_values
+    conditional_list_values = efootprint_obj_class.conditional_list_values
     id_prefix = efootprint_class_str
     init_sig_params = signature(efootprint_obj_class.__init__).parameters
 
@@ -117,7 +118,7 @@ def generate_dynamic_form(
             })
         elif issubclass(annotation, ExplainableQuantity):
             default = default_values[attr_name]
-            default_value = round(default.magnitude, 2)
+            default_value = float(round(default.magnitude, 2))
             step = FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
             if default_value == int(default_value):
                 default_value = int(default_value)

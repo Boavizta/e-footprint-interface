@@ -34,14 +34,50 @@ obj_creation_structure_dict = {
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+def assert_json_equal(json1, json2, path=""):
+    """
+    Recursively asserts that two JSON-like Python structures are equal,
+    ignoring dictionary key order and list element order.
+
+    Raises an AssertionError if a mismatch is found.
+    """
+    if type(json1) != type(json2):
+        raise AssertionError(f"Type mismatch at {path or 'root'}: {type(json1).__name__} != {type(json2).__name__}")
+
+    if isinstance(json1, dict):
+        keys1 = set(json1.keys())
+        keys2 = set(json2.keys())
+        if keys1 != keys2:
+            raise AssertionError(f"Key mismatch at {path or 'root'}: {keys1} != {keys2}")
+        for key in keys1:
+            assert_json_equal(json1[key], json2[key], path + f".{key}")
+    elif isinstance(json1, list):
+        unmatched = list(json2)
+        for i, item1 in enumerate(json1):
+            for j, item2 in enumerate(unmatched):
+                try:
+                    assert_json_equal(item1, item2, path + f"[{i}]")
+                    unmatched.pop(j)
+                    break
+                except AssertionError:
+                    continue
+            else:
+                raise AssertionError(f"No match found for list element at {path}[{i}]: {item1}")
+        if unmatched:
+            raise AssertionError(f"Extra elements in second list at {path}: {unmatched}")
+    else:
+        if json1 != json2:
+            raise AssertionError(f"Value mismatch at {path or 'root'}: {json1} != {json2}")
+
+
 class TestsClassStructure(TestCase):
-    def _test_dict_equal_to_ref(self, dict_to_test, tmp_filepath):
+    @staticmethod
+    def _test_dict_equal_to_ref(dict_to_test, tmp_filepath):
         with open(tmp_filepath, "w") as f:
             json.dump(dict_to_test, f, indent=4)
 
         with open(tmp_filepath, "r") as tmp_file, open(tmp_filepath.replace("_tmp", ""), "r") as ref_file:
-            # the trailing \n is added because Pycharm adds it when saving reference files
-            self.assertEqual(tmp_file.read() + "\n", ref_file.read())
+            assert_json_equal(json.load(tmp_file), json.load(ref_file))
             os.remove(tmp_filepath)
 
     def test_class_creation_structures(self):

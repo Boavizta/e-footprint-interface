@@ -22,7 +22,7 @@ def create_efootprint_obj_from_post_data(
     create_form_data: QueryDict, model_web: ModelWeb, object_type: str) -> ModelingObject:
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
     init_sig_params = signature(new_efootprint_obj_class.__init__).parameters
-    default_values = new_efootprint_obj_class.default_values()
+    default_values = new_efootprint_obj_class.default_values
 
     obj_creation_kwargs = {}
     for attr_name_with_prefix in create_form_data.keys():
@@ -71,7 +71,6 @@ def create_efootprint_obj_from_post_data(
 def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObjectWeb):
     model_web = obj_to_edit.model_web
     object_type = obj_to_edit.class_as_simple_str
-    default_values = obj_to_edit.default_values()
 
     init_sig_params = signature(obj_to_edit.modeling_obj.__init__).parameters
 
@@ -136,7 +135,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                     source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
         elif issubclass(annotation, ExplainableObject):
-            if attr_name in obj_to_edit.list_values():
+            if attr_name in obj_to_edit.list_values:
                 new_value = SourceObject(edit_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
                 if new_value.value != current_value.value:
                     logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
@@ -148,7 +147,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                                     f"{obj_to_edit.attributes_with_depending_values()[attr_name]}")
                         check_input_validity = False
                     attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, check_input_validity])
-            elif attr_name in obj_to_edit.conditional_list_values():
+            elif attr_name in obj_to_edit.conditional_list_values:
                 # Always update value for conditional str attribute to make sure that they belong to authorized values
                 new_value = SourceObject(
                     edit_form_data[attr_name_with_prefix], label=current_value.label, source=Sources.USER_DATA)
@@ -163,7 +162,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
     changes_list = [
         [getattr(obj_to_edit.modeling_obj, attr_name), new_value]
         for attr_name, new_value, check_input_validity in attr_name_new_value_check_input_validity_pairs]
-    ModelingUpdate(changes_list)
+    ModelingUpdate(changes_list, compute_previous_system_footprints=False)
 
     model_web.update_system_data_with_up_to_date_calculated_attributes()
 

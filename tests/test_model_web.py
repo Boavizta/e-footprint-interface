@@ -1,13 +1,17 @@
 import unittest
 from unittest.mock import MagicMock
+
+import ciso8601
+import numpy as np
 import pandas as pd
+import pytz
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
+from efootprint.constants.units import u
+from pint import Quantity
 
 from model_builder.model_web import ModelWeb
-import pint_pandas
 
-from efootprint.constants.units import u
 
 class TestModelWeb(unittest.TestCase):
     def setUp(self):
@@ -15,47 +19,25 @@ class TestModelWeb(unittest.TestCase):
 
         self.model_web.system = MagicMock()
         self.model_web.system.total_energy_footprints = {
-            "Servers": pd.DataFrame(
-                {"value": [100, 200]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
-            "Storage": pd.DataFrame(
-                {"value": [300, 400]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
-            "Devices": pd.DataFrame(
-                {"value": [500, 600]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
-            "Network": pd.DataFrame(
-                {"value": [700, 800]}, index=pd.date_range("2023-01-01 03:00", periods=2, freq='h'), dtype="pint[kg]")
+            "Servers": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
+            "Storage": {"value": [300, 400], "start_date": "2023-01-01 00:00"},
+            "Devices": {"value": [500, 600], "start_date": "2023-01-02 00:00"},
+            "Network": {"value": [700, 800], "start_date": "2023-01-01 00:00"}
         }
         self.model_web.system.total_fabrication_footprints = {
-            "Servers": pd.DataFrame(
-                {"value": [900, 1000]}, index=pd.date_range("2023-01-01 00:00", periods=2, freq='h'), dtype="pint[kg]"),
-            "Storage": pd.DataFrame(
-                {"value": [1100, 1200]}, index=pd.date_range("2023-01-01 01:00", periods=2, freq='h'), dtype="pint[kg]"),
-            "Devices": pd.DataFrame(
-                {"value": [1300, 1400]}, index=pd.date_range("2023-01-02 02:00", periods=2, freq='h'), dtype="pint[kg]"),
+            "Servers": {"value": [900, 1000], "start_date": "2023-01-01 00:00"},
+            "Storage": {"value": [1100, 1200], "start_date": "2023-01-01 00:00"},
+            "Devices": {"value": [1300, 1400], "start_date": "2023-01-02 00:00"},
             "Network": EmptyExplainableObject()
         }
 
         for footprint_dict in [
             self.model_web.system.total_energy_footprints, self.model_web.system.total_fabrication_footprints]:
-            for key, df in footprint_dict.items():
-                if not isinstance(df, EmptyExplainableObject):
-                    footprint_dict[key] = ExplainableHourlyQuantities(df, label="test")
-
-    def test_get_reindexed_system_energy_and_fabrication_footprint(self):
-        energy_footprints, fabrication_footprints, combined_index = (
-            self.model_web.get_reindexed_system_energy_and_fabrication_footprint_as_df_dict())
-
-        # Check if the indices are correctly reindexed
-        ref_combined_index = pd.date_range("2023-01-01 00:00", periods=28, freq='h')
-        for df in energy_footprints.values():
-            self.assertTrue(df.index.equals(ref_combined_index))
-        for df in fabrication_footprints.values():
-            self.assertTrue(df.index.equals(ref_combined_index))
-
-        # Check if the values are correctly filled with 0
-        for df in energy_footprints.values():
-            self.assertTrue((df.loc[pd.Timestamp("2023-01-01 13:00")]["value"] == 0 * u.kg))
-        for df in fabrication_footprints.values():
-            self.assertTrue((df.loc[pd.Timestamp("2023-01-01 13:00")]["value"] == 0 * u.kg))
+            for key, data in footprint_dict.items():
+                if not isinstance(data, EmptyExplainableObject):
+                    footprint_dict[key] = ExplainableHourlyQuantities(
+                        Quantity(np.array(data["value"]), u.kg),
+                        start_date=pytz.utc.localize(ciso8601.parse_datetime(data["start_date"])), label="test")
 
     def test_system_emissions(self):
         emissions = self.model_web.system_emissions
