@@ -12,7 +12,8 @@
                         "label": "Usage journey",
                         "value": "UsageJourney"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             }
         ]
     },

@@ -5,11 +5,15 @@
     name="{{ field.id }}"
     {% if field.selected %}value="{{ field.selected }}"{% endif %}
     {% if object_to_edit %}
-    _="on focusout if my value is empty set my value to '{{ field.default }}'"
+    _="on focusout if my value is empty set my value to '{{ field.default }}' then updateSource(@id)"
     {% else %}
     _="on click set my value to ''
-          on focusout if my value is empty set my value to '{{ field.default }}'"
+          on focusout if my value is empty set my value to '{{ field.default }}' then updateSource(@id)"
     {% endif %}
+    data-default-value="{{ field.default }}"
+   data-default-name="{{ field.source.name }}"
+   data-source-url="{{ field.source.link }}"
+    oninput="updateSource(this.id)"
     required
 >
 <datalist id="datalist_{{ field.id }}">

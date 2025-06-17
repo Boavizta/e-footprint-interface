@@ -29,7 +29,8 @@ def generate_object_creation_structure(
                 {"label": FORM_TYPE_OBJECT[available_class.__name__].get(
                     "more_descriptive_label_for_select_inputs", FORM_TYPE_OBJECT[available_class.__name__]["label"]),
                     "value": available_class.__name__}
-                for available_class in available_efootprint_classes]
+                for available_class in available_efootprint_classes],
+            "source_attribute_to_skip": True
         }
         ]
     }
@@ -94,7 +95,7 @@ def generate_dynamic_form(
             "id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
             "label": FORM_FIELD_REFERENCES[attr_name]["label"],
-            "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False),
+            "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False)
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
@@ -137,6 +138,9 @@ def generate_dynamic_form(
                 structure_field.update({
                     "input_type": "select",
                     "selected": default_values[attr_name].value,
+                    "default": default_values[attr_name].value,
+                    "source": {"name": default_values[attr_name].source.name,
+                               "link": default_values[attr_name].source.link},
                     "options": [
                         {"label": str(attr_value), "value": str(attr_value)} for attr_value in list_values[attr_name]]
                 })
@@ -145,6 +149,7 @@ def generate_dynamic_form(
                     "input_type": "datalist",
                     "selected": default_values[attr_name].value,
                     "default": default_values[attr_name].value,
+                    "source": {"name": default_values[attr_name].source.name, "link": default_values[attr_name].source.link},
                     "options": None
                 })
                 dynamic_lists.append(
@@ -161,7 +166,9 @@ def generate_dynamic_form(
                 structure_field.update(
                     {
                         "input_type": "str",
-                        "default": default_values[attr_name].value
+                        "default": default_values[attr_name].value,
+                        "source": {"name": default_values[attr_name].source.name,
+                                   "link": default_values[attr_name].source.link}
                     }
                 )
         elif issubclass(annotation, ModelingObject):
@@ -174,8 +181,10 @@ def generate_dynamic_form(
             structure_field.update({
                 "input_type": "select",
                 "selected": selected.id,
+                "default": selected.id,
                 "options": [
-                    {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
+                    {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options],
+                "source_attribute_to_skip": True
             })
 
         if FORM_FIELD_REFERENCES[attr_name].get("is_advanced_parameter", False):

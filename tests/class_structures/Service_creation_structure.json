@@ -20,7 +20,8 @@
                         "label": "Generative AI model",
                         "value": "GenAIModel"
                     }
-                ]
+                ],
+                "source_attribute_to_skip": true
             }
         ]
     },
@@ -43,6 +44,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "php-symfony",
+                "default": "php-symfony",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "go-pgx",
@@ -164,6 +170,11 @@
                 "tooltip": false,
                 "input_type": "select",
                 "selected": "mistralai",
+                "default": "mistralai",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "anthropic",
@@ -199,6 +210,10 @@
                 "input_type": "datalist",
                 "selected": "open-mistral-7b",
                 "default": "open-mistral-7b",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": null
             }
         ],
