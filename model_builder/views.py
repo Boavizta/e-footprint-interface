@@ -19,7 +19,7 @@ from efootprint.utils.tools import time_it
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
-from utils import htmx_render
+from utils import htmx_render, sanitize_filename, smart_truncate
 
 import json
 import os
@@ -75,7 +75,10 @@ def download_json(request):
     json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
-    response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system.name}.e-f.json"
+    filename = f"{current_date_time}_UTC {system.name}"
+    filename = sanitize_filename(filename)
+    filename = smart_truncate(filename, max_length=45)
+    response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"
     return response
 
 def upload_json(request):
