@@ -212,7 +212,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
         if field["attr_name"] == "devices":
             field["input_type"] = "select"
             field["options"] = field["unselected"]
-            field["selected" ] = field["unselected"][0]["value"]
+            field["selected"] = field["unselected"][0]["value"]
 
     usage_pattern_input_values = UsagePatternFromForm.default_values()
     usage_pattern_input_values["initial_usage_journey_volume"] = None
