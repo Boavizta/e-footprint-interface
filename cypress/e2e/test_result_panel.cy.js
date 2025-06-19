@@ -27,8 +27,7 @@ describe("Test - Result panel", () => {
     it("Check that when the model can be calculated the panel is displayed and can be swiped down", () => {
         let upName = "Test E2E Usage Pattern";
 
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
+        cy.visit("/model_builder/");
         cy.get('#model-canva').should('be.visible');
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
@@ -39,13 +38,15 @@ describe("Test - Result panel", () => {
         });
         cy.get('button[type="submit"]').click();
         cy.get('input[type="file"]').should("not.exist");
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
+        cy.get('#sidePanelForm').should('not.exist');
 
-        cy.get('#btn-open-panel-result')
+        cy.get("#panel-result-btn").should('exist').should('be.visible').should('have.class', 'w-100');
+        cy.get('#btn-open-panel-result').should('be.visible').click()
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
-        cy.get('#result-block').should('exist').should('be.visible').find('div[onclick="hidePanelResult()"]')
+        cy.wait(1000); // wait for the result panel to be fully loaded
+        cy.get('#result-block').should('exist').find('div[onclick="hidePanelResult()"]')
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
         .realTouch('end', { x: 100, y: 400 });
@@ -167,9 +168,11 @@ describe("Test - Result panel", () => {
         cy.get('button[type="submit"]').click();
         cy.get('#sidePanelForm').should('not.exist');
         cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('exist').click()
-        cy.get('#btn-open-panel-result').click()
-        cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")
+        cy.get('#sidePanelForm').should('exist').should('be.visible');
         cy.get("#Storage_data_replication_factor").should('be.visible').type("1000")
+        cy.get('#btn-open-panel-result').click()
+        cy.wait(1000); // wait for the result panel to be fully loaded
+        cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")
         cy.get('#panel-result-btn').should('have.class', 'result-width')
         cy.window().then((win) => {
             cy.spy(win, 'displayLoaderResult').as('displayLoaderResult');

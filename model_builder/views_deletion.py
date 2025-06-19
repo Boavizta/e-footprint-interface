@@ -103,13 +103,9 @@ def delete_object(request, object_id):
 
     model_web.update_system_data_with_up_to_date_calculated_attributes()
 
-    if elements_with_lines_to_remove:
-        http_response["HX-Trigger"] = json.dumps({
-            "resetLeaderLines": ""
-        })
-
-        http_response["HX-Trigger-After-Settle"] = json.dumps({
-            "displayToastAndHighlightObjects": toast_and_highlight_data
-        })
+    http_response["HX-Trigger"] = json.dumps({
+        "resetLeaderLines": "",
+        "displayToastAndHighlightObjects": toast_and_highlight_data
+    })
 
     return http_response

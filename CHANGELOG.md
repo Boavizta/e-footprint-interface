@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.10] - 2025-06-23
+## [0.8.11] - 20225-06-19
+
+### Changed
+- Change notification background color to respect e-footprint chart.
+
+### Fixed
+- Fix notification after an object deletion.
+
+#[0.8.10] - 2025-06-23
 
 ### Fixed
 - Fix chart resize issue when panel result is opened during an edit.

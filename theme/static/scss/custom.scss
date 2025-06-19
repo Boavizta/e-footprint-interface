@@ -241,6 +241,12 @@ input:disabled{
     height: var(--navbar-height);
 }
 
+/*Bootstrap overwrite*/
+.text-bg-primary {
+  color: #fff !important;
+  background-color: var(--new-primary) !important;
+}
+
 .dotted-border {
     border: 2px var(--gray-350) dotted;
 }
@@ -511,10 +517,10 @@ input:disabled{
 
 @keyframes pulse-border {
     0% {
-        box-shadow: 0 0 0 0 rgb(56, 120, 69);
+        box-shadow: 0 0 0 0 rgb(45, 70, 117);
     }
     70% {
-        box-shadow: 0 0 0 10px rgba(255, 102, 0, 0);
+        box-shadow: 0 0 0 10px rgba(45, 70, 117, 0);
     }
     100% {
         box-shadow: 0 0 0 0 rgba(255, 102, 0, 0);
@@ -522,7 +528,7 @@ input:disabled{
 }
 
 .border-pulse-after-add-edit-object {
-    border: 3px solid #428e51;
+    border: 3px solid var(--new-primary);
     border-radius: 5px;
     transition: border 0.3s ease;
     animation: pulse-border 0.5s ease-out infinite;

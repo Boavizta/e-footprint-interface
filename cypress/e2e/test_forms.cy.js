@@ -31,6 +31,7 @@ describe("Test - Forms panel", () => {
         cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="' + uj.replaceAll(' ',
         '-') + '"]').should('exist').click();
         cy.get("#btn-submit-form").should('exist').click();
+        cy.get("#sidePanelForm").should('not.exist');
         cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
         cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.not.enabled');
         cy.get('#btn-add-usage-journey').click();
@@ -71,15 +72,15 @@ describe("Test - Forms panel", () => {
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.get("#btn-add-server").click();
-        cy.get("#type_object_available").select('Server');
+        cy.get("#btn-add-server").should('be.enabled').click();
+        cy.get("#type_object_available").should('be.visible').select('Server');
         cy.get("#Server_name").clear().type(serverOne);
         cy.get("#Server_average_carbon_intensity").clear().type('700');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.get("#btn-add-server").click();
+        cy.get("#btn-add-server").should('be.enabled').click();
         cy.get("#sidePanelForm").should('be.visible');
         cy.get("#type_object_available").select('Server');
         cy.get("#advanced-Server").should('be.not.visible');
