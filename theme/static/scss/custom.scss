@@ -241,6 +241,12 @@ input:disabled{
     height: var(--navbar-height);
 }
 
+/*Bootstrap overwrite*/
+.text-bg-primary {
+  color: #fff !important;
+  background-color: var(--new-primary) !important;
+}
+
 .dotted-border {
     border: 2px var(--gray-350) dotted;
 }
