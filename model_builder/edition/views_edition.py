@@ -76,7 +76,7 @@ def edit_object(request, object_id):
 def open_panel_system_name(request):
     return render(request, "model_builder/side_panels/rename_system.html",context={
         "header_name": "Rename your model",
-        "system_name": request.GET.get("system_name", "My Model"),
+        "system_name": next(iter(request.session["system_data"]["System"].values()))["name"],
     })
 
 
