@@ -132,6 +132,7 @@ def result_chart(request):
 
     http_response = htmx_render(
         request, "model_builder/result/result_panel.html", context={"model_web": model_web})
+    http_response["HX-Trigger-After-Settle"] = "triggerResultRendering"
 
     return http_response
 

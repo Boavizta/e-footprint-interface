@@ -42,15 +42,20 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
 
 
 def generate_http_response_from_edit_html_and_events(
-    response_html: str, toast_and_highlight_data: dict) -> HttpResponse:
+    response_html: str, toast_and_highlight_data: dict, trigger_result_display = False) -> HttpResponse:
     http_response = HttpResponse(response_html)
 
     http_response["HX-Trigger"] = json.dumps({
         "resetLeaderLines": ""
     })
 
-    http_response["HX-Trigger-After-Settle"] = json.dumps({
+    after_settle_trigger = {
         "displayToastAndHighlightObjects": toast_and_highlight_data
-    })
+    }
+
+    if trigger_result_display:
+        after_settle_trigger.update({"triggerResultRendering": ""})
+
+    http_response["HX-Trigger-After-Settle"] = json.dumps(after_settle_trigger)
 
     return http_response

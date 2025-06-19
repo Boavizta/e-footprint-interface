@@ -12,6 +12,12 @@ function openSidePanel() {
     modelCanvaScrollableArea.classList.add("side-panel-open");
     hideEditIcons();
     updateLines();
+
+    let scrollTarget = document.getElementById("sidePanelTitle");
+    sidePanel.scrollTo({
+        top: scrollTarget.offsetTop,
+        behavior: "smooth"
+    })
 }
 
 function closeAndEmptySidePanel() {
