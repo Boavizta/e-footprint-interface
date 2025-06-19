@@ -47,7 +47,7 @@ def open_edit_object_panel(request, object_id):
 
 
 @render_exception_modal_if_error
-def edit_object(request, object_id):
+def edit_object(request, object_id, trigger_result_display=False):
     recompute_modeling = request.POST.get("recomputation", False)
     model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
@@ -63,6 +63,7 @@ def edit_object(request, object_id):
             "model_builder/result/result_panel.html", context={"model_web": model_web})
         response_html += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
                          f"{refresh_content_response}</div>")
+        trigger_result_display = True
 
     toast_and_highlight_data = {
         "ids": [mirrored_card.web_id for mirrored_card in obj_to_edit.mirrored_cards],
@@ -70,7 +71,8 @@ def edit_object(request, object_id):
         "action_type": "edit_object"
     }
 
-    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
+    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data,
+                                                            trigger_result_display)
 
 
 def open_panel_system_name(request):

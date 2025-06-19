@@ -123,3 +123,8 @@ function drawBarResultChart(){
     let resultsTemporalGranularity = document.getElementById('results_temporal_granularity').value;
     drawResultChart('bar', resultsTemporalGranularity);
 }
+
+document.body.addEventListener("triggerResultRendering", function (event) {
+    drawResultChart('line', 'month');
+    drawBarResultChart();
+});
