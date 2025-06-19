@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+#[0.8.10] - 2025-06-19
+
+### Fixed
+- Fix chart issue when panel result is opened after an edit and affect 
+  charts sizes
+
+### Changed
+- Disable browsers zoom when users touch an input
+- Scroll to top when sidePanel is displayed
+
 ## [0.8.8] - 2025-06-18
 
 ### Changed

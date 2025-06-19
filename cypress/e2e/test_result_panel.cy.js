@@ -169,7 +169,7 @@ describe("Test - Result panel", () => {
         cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('exist').click()
         cy.get('#btn-open-panel-result').click()
         cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")
-        cy.get("#Storage_data_replication_factor").type("1000")
+        cy.get("#Storage_data_replication_factor").should('be.visible').type("1000")
         cy.get('#panel-result-btn').should('have.class', 'result-width')
         cy.window().then((win) => {
             cy.spy(win, 'displayLoaderResult').as('displayLoaderResult');
