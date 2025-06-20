@@ -1,9 +1,16 @@
 import re
 
+from efootprint.abstract_modeling_classes.explainable_dict import ExplainableDict
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
+
+from model_builder.efootprint_extensions.explainable_start_date import ExplainableStartDate
+from utils import camel_to_snake
 
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
@@ -14,6 +21,35 @@ def retrieve_attributes_by_type(modeling_obj, attribute_type):
             output_list.append({'attr_name': attr_name, 'attr_value': attr_value})
 
     return output_list
+
+class ExplainableObjectDictWeb:
+    def __init__(self, explainable_object_dict: ExplainableObjectDict, modeling_obj_container):
+        self.explainable_object_dict = explainable_object_dict
+        self.modeling_obj_container = modeling_obj_container
+
+    def __getattr__(self, name):
+        attr = getattr(self.explainable_object_dict, name)
+
+        return attr
+
+
+    @property
+    def attr_name_web(self):
+        from model_builder.model_web import FORM_FIELD_REFERENCES
+        if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
+            return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
+        else:
+            return self.explainable_object_dict.attr_name_in_mod_obj_container.replace("_", " ")
+
+    @property
+    def get_template_name_calculated_attribute(self):
+        return re.search(r"<class 'efootprint\.abstract_modeling_classes\.([^.]*)\.",
+                         str(self.explainable_object_dict.__class__)).group(1)
+
+    @property
+    def get_list_of_explainable_objects(self):
+        return [ExplainableObjectWeb(explainable_object, self.modeling_obj_container)
+                for explainable_object in self.explainable_object_dict.values()]
 
 
 class ExplainableObjectWeb:
@@ -27,12 +63,28 @@ class ExplainableObjectWeb:
         return attr
 
     @property
-    def label(self):
+    def attr_name_web(self):
         from model_builder.model_web import FORM_FIELD_REFERENCES
         if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
             return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
         else:
             return self.attr_name_in_mod_obj_container.replace("_", " ")
+
+    @property
+    def get_template_name_calculated_attribute(self):
+        if isinstance(self.explainable_object, ExplainableHourlyQuantities):
+            return "explainable_hourly_quantities"
+        elif isinstance(self.explainable_object, ExplainableQuantity):
+            return "explainable_quantity"
+        elif isinstance(self.explainable_object, ExplainableStartDate) :
+            return "explainable_start_date"
+        elif isinstance(self.explainable_object, ExplainableDict):
+            return "explainable_dict"
+        else:
+            raise ValueError(
+                f"Unknown explainable object type: {self.explainable_object.__class__.__name__}. "
+                f"Please implement a template for it in the model web."
+            )
 
 
 class ModelingObjectWeb:
@@ -59,6 +111,9 @@ class ModelingObjectWeb:
 
         if isinstance(attr, ExplainableObject):
             return ExplainableObjectWeb(attr, self)
+
+        if isinstance(attr, ExplainableObjectDict):
+            return ExplainableObjectDictWeb(attr, self)
 
         return attr
 
@@ -94,7 +149,7 @@ class ModelingObjectWeb:
 
     @property
     def calculated_attributes_values(self):
-        return [getattr(self, attr_name) for attr_name in self.calculated_attributes]
+        return [self.__getattr__(attr_name) for attr_name in self.calculated_attributes]
 
     @property
     def modeling_obj(self):

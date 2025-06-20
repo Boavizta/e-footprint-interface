@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.14] - 2025-06-25
+
+### Changed
+- Calculated attributes display now the formula used to compute them in the 
+  edit form. For explainableQuantity attributes, the formula is displayed 
+  with the value. For ExplainableHourlyQuantity attributes, the formula is 
+  displayed with the chart of the timeseries.
+
 ## [0.8.13] - 20225-06-25
 
 ### Added
