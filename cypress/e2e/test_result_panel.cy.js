@@ -10,7 +10,7 @@ describe("Test - Result panel", () => {
 
     it("Check if the model cannot be calculated then the modal exception is displayed and the result panel not showed", () => {
         cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
+        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').should("exist").click();
         let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
@@ -21,7 +21,7 @@ describe("Test - Result panel", () => {
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
 
-        cy.get('button').contains('Go back').should('be.exist');
+        cy.get('button').should("exist").contains('Go back').should('be.exist');
     });
 
     it("Check that when the model can be calculated the panel is displayed and can be swiped down", () => {
@@ -50,12 +50,14 @@ describe("Test - Result panel", () => {
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
         .realTouch('end', { x: 100, y: 400 });
+
+
     });
 
     it("check if an exception modal is displayed when the calculation is launched with an UsageJourney without any" +
     " UserJourneyStep", () => {
         cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
+        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').should("exist").click();
         let fileTest = 'cypress/fixtures/model-test-uj-not-linked-to-uj-step.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
@@ -83,7 +85,6 @@ describe("Test - Result panel", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
-
         cy.get('#sidePanelForm').should('not.exist');
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
@@ -131,7 +132,7 @@ describe("Test - Result panel", () => {
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
 
-        cy.get('#btn-open-panel-result').click()
+        cy.get('#btn-open-panel-result').should("exist").click()
 
         //get button with text Sources
         cy.get('#header-btn-result-sources').should('be.visible').click();
@@ -169,7 +170,7 @@ describe("Test - Result panel", () => {
         cy.get('input[type="file"]').selectFile(fileTest);
         cy.get('button[type="submit"]').click();
         cy.get('#sidePanelForm').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('exist').click()
+        cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('be.enabled').click()
         cy.get('#sidePanelForm').should('exist').should('be.visible');
         cy.get("#Storage_data_replication_factor").should('be.visible').type("1000")
         cy.get('#btn-open-panel-result').click()
@@ -185,6 +186,8 @@ describe("Test - Result panel", () => {
         cy.get('#btn-submit-form').click();
         cy.get('@displayLoaderResult').should('have.been.called');
         cy.get('@drawBarResultChart').should('have.been.called');
+        cy.wait(1000);
         cy.get('#panel-result-btn').should('not.have.class', 'result-width')
+
     });
 });

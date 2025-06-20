@@ -1,0 +1,43 @@
+{% load static %}
+{% load custom_filters %}
+
+<div class="row align-items-center mb-3">
+    <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
+        {{ item.attr_name_web|capfirst }}:
+    </label>
+
+    <div class="col-auto">
+        <button type="button"
+                class="btn btn-light p-1"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}"
+                aria-expanded="false"
+                aria-controls="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
+            <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon">
+        </button>
+    </div>
+</div>
+
+<div class="collapse" id="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
+    <div class="card card-body mb-3 no-truncate">
+        {% for sub_item in item.get_list_of_explainable_objects %}
+            <div class="row align-items-center mb-3">
+                <div class="col-11">
+                    <p class="mb-0">{{ sub_item.label }}</p>
+                </div>
+                <div class="col-1">
+                    <div class="btn btn-light p-1"
+                         hx-get="{% url 'get_chart_and_explanation_calculated_attribute_from_dict' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container sub_item.id%}"
+                         hx-target="#chart-calculated-attribute"
+                         hx-trigger="click"
+                         hx-swap="innerHTML"
+                         hx-disabled-elt="button"
+                         _="on click openCalculatedAttributesChart()"
+                    >
+                        <img src="{% static 'icons/timeseries-chart.svg' %}" width="16" height="16" alt="calculus-graph-icon">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>

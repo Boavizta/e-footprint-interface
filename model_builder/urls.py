@@ -28,4 +28,13 @@ urlpatterns = [
     path('download-sources/', views.download_sources, name='download-sources'),
     path('open-panel-system-name/', model_builder.edition.views_edition.open_panel_system_name, name='open-panel-system-name'),
     path('save-system-name/', model_builder.edition.views_edition.save_system_name, name='save-system-name'),
+    path('get_chart_and_explanation_calculated_attribute/<efootprint_id>/<attr_name>/',
+         model_builder.views.get_chart_and_explanation_calculated_attribute,
+         name='get_chart_and_explanation_calculated_attribute'),
+    path('get_chart_and_explanation_calculated_attribute/<efootprint_id>/<attr_name>/<exp_obj_id>',
+         model_builder.views.get_chart_and_explanation_calculated_attribute,
+         name='get_chart_and_explanation_calculated_attribute_from_dict'),
+    path('get_explanation_calculated_attribute/<efootprint_id>/<attr_name>/',
+         model_builder.views.get_explanation_calculated_attribute,
+         name='get_explanation_calculated_attribute'),
 ]

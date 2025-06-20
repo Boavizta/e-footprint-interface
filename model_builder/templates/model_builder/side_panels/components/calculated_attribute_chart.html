@@ -1,0 +1,28 @@
+{% load static %}
+<div class="w-100 d-flex flex-row justify-content-between mb-3">
+    <h5 id="calculate-attribute-label"
+        data-label="{{ attr_name }}"
+        data-unit="{{ unit }}"
+    >{{ label }}</h5>
+    <button type="button" class="btn btn-white" aria-label="Close" onclick="closeCalculatedAttributesChart()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+        </svg>
+    </button>
+</div>
+{{ data_timeseries|json_script:"data_timeseries" }}
+<canvas id="chart-render-calculated-attribute" class="mb-3"
+    _="on load createOrUpdateCalculatedAttributeChart()"
+></canvas>
+<div id="calculated-attribute-explanation" class="mb-3">
+    {{ explanation }}
+</div>
+{% if not exp_obj_id %}
+    <a class="btn bg-white border border-1 border-light py-auto bg-light h8" id="link-render-calculated-attribute"
+        href="{% url 'display-calculus-graph' efootprint_id attr_name %}"
+        target="_blank"
+    >
+        See the calculus graph
+        <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+    </a>
+{% endif %}
