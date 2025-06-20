@@ -4,7 +4,7 @@
         "header": "Service selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available services for this server",
                 "options": [
@@ -41,8 +41,13 @@
                 "attr_name": "technology",
                 "label": "technology",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "php-symfony",
+                "default": "php-symfony",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "go-pgx",
@@ -162,8 +167,13 @@
                 "attr_name": "provider",
                 "label": "provider",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "mistralai",
+                "default": "mistralai",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "anthropic",
@@ -199,6 +209,10 @@
                 "input_type": "datalist",
                 "selected": "open-mistral-7b",
                 "default": "open-mistral-7b",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": null
             }
         ],

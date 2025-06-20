@@ -4,7 +4,7 @@
         "header": "Usage pattern selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available usage patterns",
                 "options": [
@@ -33,7 +33,7 @@
                 "attr_name": "usage_journey",
                 "label": "usage journey",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -51,9 +51,8 @@
                 "attr_name": "devices",
                 "label": "devices",
                 "tooltip": false,
-                "input_type": "select-multiple",
-                "selected": [],
-                "unselected": [
+                "input_type": "select-object",
+                "options": [
                     {
                         "value": "efootprint_id1",
                         "label": "option1"
@@ -62,14 +61,15 @@
                         "value": "efootprint_id2",
                         "label": "option2"
                     }
-                ]
+                ],
+                "selected": "efootprint_id1"
             },
             {
                 "id": "UsagePatternFromForm_network",
                 "attr_name": "network",
                 "label": "network",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -87,7 +87,7 @@
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -106,7 +106,11 @@
                 "label": "start date",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "2025-01-01"
+                "default": "2025-01-01",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                }
             },
             {
                 "id": "UsagePatternFromForm_modeling_duration_value",
@@ -128,8 +132,13 @@
                 "attr_name": "modeling_duration_unit",
                 "label": "modeling duration unit",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "year",
+                "default": "year",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "month",
@@ -161,8 +170,13 @@
                 "attr_name": "initial_usage_journey_volume_timespan",
                 "label": "initial usage journey volume timespan",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "month",
+                "default": "month",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": [
                     {
                         "label": "day",
@@ -201,6 +215,10 @@
                 "input_type": "datalist",
                 "selected": "year",
                 "default": "year",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
                 "options": null
             }
         ],

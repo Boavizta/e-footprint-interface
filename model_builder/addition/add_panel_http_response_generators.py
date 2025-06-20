@@ -121,19 +121,19 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         "header": "Job creation helper",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "server",
                 "name": "Server",
                 "options": [
                     {"label": server.name, "value": server.efootprint_id} for server in servers],
-                "label": "Choose a server"
+                "label": "Choose a server",
             },
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "service",
                 "name": "Service used",
                 "options": None,
-                "label": "Service used"
+                "label": "Service used",
             },
         ]
     }
@@ -209,13 +209,6 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             for key, value in dynamic_select_options.items()
         }
     }
-
-    for field in form_sections[1]["fields"]:
-        if field["attr_name"] == "devices":
-            field["input_type"] = "select"
-            field["options"] = field["unselected"]
-            field["selected"] = field["unselected"][0]["value"]
-
     usage_pattern_input_values = deepcopy(UsagePatternFromForm.default_values)
     usage_pattern_input_values["initial_usage_journey_volume"] = None
     http_response = render(

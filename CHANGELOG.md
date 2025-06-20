@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.9] - 2025-06-19
+
+### Fixed
+- Truncate system name to 50 characters + normalize characters when exporting it into JSON file.
+
+### Added
+- Sources for the UsagePattern form have been added.
+- Sources for all attributes with ExplainableObject type (like genAI model and provider) have been added.
+
+### Changed
+- JS logic related to sources has been updated to take in account sources for value/unit fields in addition to simple fields.
+
 ## [0.8.8] - 2025-06-18
 
 ### Changed

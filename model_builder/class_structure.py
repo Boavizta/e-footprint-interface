@@ -22,7 +22,7 @@ def generate_object_creation_structure(
         "category": "efootprint_classes_available",
         "header": f"{FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]} selection",
         "fields": [{
-            "input_type": "select",
+            "input_type": "select-object",
             "id": "type_object_available",
             "label": FORM_TYPE_OBJECT[available_efootprint_class_str]["type_object_available"],
             "options": [
@@ -94,7 +94,7 @@ def generate_dynamic_form(
             "id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
             "label": FORM_FIELD_REFERENCES[attr_name]["label"],
-            "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False),
+            "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False)
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
@@ -106,11 +106,20 @@ def generate_dynamic_form(
                 {"value":option.id,"label":option.name}
                 for option in model_web.get_efootprint_objects_from_efootprint_type(list_attribute_object_type_str)
                 if option not in selected]
-            structure_field.update({
-                "input_type": "select-multiple",
-                "selected": [{"value": elt.id, "label": elt.name} for elt in selected],
-                "unselected": unselected
-            })
+            if attr_name == "devices":
+                # Special case for UsagePatternFromForm’s devices, to remove possibility for user to select multiple
+                # devices for now.
+                structure_field.update({
+                    "input_type": "select-object",
+                    "options": unselected,
+                    "selected": unselected[0]["value"]
+                })
+            else:
+                structure_field.update({
+                    "input_type": "select-multiple",
+                    "selected": [{"value": elt.id, "label": elt.name} for elt in selected],
+                    "unselected": unselected
+                })
         elif issubclass(annotation, str):
             structure_field.update({
                 "input_type": "str",
@@ -135,8 +144,11 @@ def generate_dynamic_form(
         elif issubclass(annotation, ExplainableObject):
             if attr_name in list_values.keys():
                 structure_field.update({
-                    "input_type": "select",
+                    "input_type": "select-str-input",
                     "selected": default_values[attr_name].value,
+                    "default": default_values[attr_name].value,
+                    "source": {"name": default_values[attr_name].source.name,
+                               "link": default_values[attr_name].source.link},
                     "options": [
                         {"label": str(attr_value), "value": str(attr_value)} for attr_value in list_values[attr_name]]
                 })
@@ -145,6 +157,8 @@ def generate_dynamic_form(
                     "input_type": "datalist",
                     "selected": default_values[attr_name].value,
                     "default": default_values[attr_name].value,
+                    "source": {"name": default_values[attr_name].source.name,
+                               "link": default_values[attr_name].source.link},
                     "options": None
                 })
                 dynamic_lists.append(
@@ -161,7 +175,9 @@ def generate_dynamic_form(
                 structure_field.update(
                     {
                         "input_type": "str",
-                        "default": default_values[attr_name].value
+                        "default": default_values[attr_name].value,
+                        "source": {"name": default_values[attr_name].source.name,
+                                   "link": default_values[attr_name].source.link}
                     }
                 )
         elif issubclass(annotation, ModelingObject):
@@ -172,7 +188,7 @@ def generate_dynamic_form(
             else:
                 selected = selection_options[0]
             structure_field.update({
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": selected.id,
                 "options": [
                     {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
