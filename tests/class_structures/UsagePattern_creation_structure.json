@@ -4,7 +4,7 @@
         "header": "Usage pattern selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available usage patterns",
                 "options": [
@@ -12,8 +12,7 @@
                         "label": "Usage pattern",
                         "value": "UsagePatternFromForm"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             }
         ]
     },
@@ -34,9 +33,8 @@
                 "attr_name": "usage_journey",
                 "label": "usage journey",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": "efootprint_id1",
-                "default": "efootprint_id1",
                 "options": [
                     {
                         "label": "option1",
@@ -46,17 +44,15 @@
                         "label": "option2",
                         "value": "efootprint_id2"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             },
             {
                 "id": "UsagePatternFromForm_devices",
                 "attr_name": "devices",
                 "label": "devices",
                 "tooltip": false,
-                "input_type": "select-multiple",
-                "selected": [],
-                "unselected": [
+                "input_type": "select-object",
+                "options": [
                     {
                         "value": "efootprint_id1",
                         "label": "option1"
@@ -65,16 +61,16 @@
                         "value": "efootprint_id2",
                         "label": "option2"
                     }
-                ]
+                ],
+                "selected": "efootprint_id1"
             },
             {
                 "id": "UsagePatternFromForm_network",
                 "attr_name": "network",
                 "label": "network",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": "efootprint_id1",
-                "default": "efootprint_id1",
                 "options": [
                     {
                         "label": "option1",
@@ -84,17 +80,15 @@
                         "label": "option2",
                         "value": "efootprint_id2"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             },
             {
                 "id": "UsagePatternFromForm_country",
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-object",
                 "selected": "efootprint_id1",
-                "default": "efootprint_id1",
                 "options": [
                     {
                         "label": "option1",
@@ -104,8 +98,7 @@
                         "label": "option2",
                         "value": "efootprint_id2"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             },
             {
                 "id": "UsagePatternFromForm_start_date",
@@ -139,7 +132,7 @@
                 "attr_name": "modeling_duration_unit",
                 "label": "modeling duration unit",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "year",
                 "default": "year",
                 "source": {
@@ -177,7 +170,7 @@
                 "attr_name": "initial_usage_journey_volume_timespan",
                 "label": "initial usage journey volume timespan",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "month",
                 "default": "month",
                 "source": {

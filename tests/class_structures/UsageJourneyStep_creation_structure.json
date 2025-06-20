@@ -4,7 +4,7 @@
         "header": "Usage journey step selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available usage journey steps",
                 "options": [
@@ -12,8 +12,7 @@
                         "label": "Usage journey step",
                         "value": "UsageJourneyStep"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             }
         ]
     },

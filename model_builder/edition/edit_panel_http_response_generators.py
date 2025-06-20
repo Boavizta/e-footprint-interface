@@ -30,13 +30,6 @@ def generate_usage_pattern_edit_panel_http_response(
         }
     }
 
-    for field in filtered_form_fields:
-        if field["attr_name"] == "devices":
-            field["input_type"] = "select"
-            field["options"] = field["unselected"]
-            field["selected"] = field["unselected"][0]["value"]
-            field.update({"source_attribute_to_skip": True})
-
     http_response = render(
         request, "model_builder/side_panels/usage_pattern/usage_pattern_edit.html",
         {

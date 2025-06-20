@@ -4,7 +4,7 @@
         "header": "Server selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available server types",
                 "options": [
@@ -20,8 +20,7 @@
                         "label": "Cloud server (CPUs, for webapps, streaming, etc.)",
                         "value": "BoaviztaCloudServer"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             }
         ]
     },
@@ -42,7 +41,7 @@
                 "attr_name": "server_type",
                 "label": "infrastructure type",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "autoscaling",
                 "default": "autoscaling",
                 "source": {
@@ -250,7 +249,7 @@
                 "attr_name": "server_type",
                 "label": "infrastructure type",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "serverless",
                 "default": "serverless",
                 "source": {
@@ -473,7 +472,7 @@
                 "attr_name": "provider",
                 "label": "provider",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "scaleway",
                 "default": "scaleway",
                 "source": {
@@ -518,7 +517,7 @@
                 "attr_name": "server_type",
                 "label": "infrastructure type",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "autoscaling",
                 "default": "autoscaling",
                 "source": {

@@ -4,7 +4,7 @@
         "header": "Usage journey selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available usage journeys",
                 "options": [
@@ -12,8 +12,7 @@
                         "label": "Usage journey",
                         "value": "UsageJourney"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             }
         ]
     },
