@@ -1,6 +1,8 @@
 import re
 
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
@@ -33,6 +35,15 @@ class ExplainableObjectWeb:
             return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
         else:
             return self.attr_name_in_mod_obj_container.replace("_", " ")
+
+    @property
+    def get_template_name_calculated_attribute(self):
+        if isinstance(self.explainable_object, ExplainableHourlyQuantities):
+            return 'explainable_hourly_quantities'
+        elif isinstance(self.explainable_object, ExplainableQuantity):
+            return 'explainable_quantity'
+        else :
+            return 'explainable_object'
 
 
 class ModelingObjectWeb:

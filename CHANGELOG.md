@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.11] - 20225-06-19
+## [0.8.12] - 2025-06-25
+
+### Changed
+- Calculated attributes now display the formula used to compute them in the 
+  edit form. For explainableQuantity attributes, the formula is displayed 
+  with the value. For ExplainableHourlyQuantity attributes, the formula is 
+  displayed with the chart of the timeseries.
+
+## [0.8.11] - 20225-06-24
 
 ### Changed
 - Change notification background color to respect e-footprint chart.

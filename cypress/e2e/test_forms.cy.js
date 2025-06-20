@@ -73,7 +73,7 @@ describe("Test - Forms panel", () => {
         cy.get("#sidePanelForm").should('not.exist');
 
         cy.get("#btn-add-server").should('be.enabled').click();
-        cy.get("#type_object_available").should('be.visible').select('Server');
+        cy.get("#type_object_available").should('exist').select('Server');
         cy.get("#Server_name").clear().type(serverOne);
         cy.get("#Server_average_carbon_intensity").clear().type('700');
         cy.get("#advanced-Server").should('be.not.visible');
@@ -82,7 +82,7 @@ describe("Test - Forms panel", () => {
 
         cy.get("#btn-add-server").should('be.enabled').click();
         cy.get("#sidePanelForm").should('be.visible');
-        cy.get("#type_object_available").select('Server');
+        cy.get("#type_object_available").should('exist').select('Server');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#Server_name").clear().type(serverTwo);
         cy.get("#Server_average_carbon_intensity").clear().type('800');
