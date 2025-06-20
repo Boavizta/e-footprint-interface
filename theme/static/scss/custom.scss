@@ -255,6 +255,12 @@ input:disabled{
     box-shadow: 0 5px 8px 4px rgba(138, 138, 138, 0.24);
 }
 
+.no-truncate {
+    text-overflow: clip;
+    overflow: visible;
+    white-space: normal;
+}
+
 .bg-radiant{
     background: var(
             --Gradient-onLight, linear-gradient(
