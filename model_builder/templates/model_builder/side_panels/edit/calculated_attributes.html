@@ -12,25 +12,13 @@
              class="accordion-collapse collapse" data-bs-parent="#accordionAllAttributes">
             <div class="accordion-body gy-2">
                 {% for item in object_to_edit.calculated_attributes_values %}
-                    <div class="d-flex flex-row mb-3 align-items-center">
-                        <input disabled name="calculated_attributes{{ item.attr_name_in_mod_obj_container }}" value="{{ item.label|capfirst }}" class="form-control">
-                        <button type="button" class="btn bg-white border-0 py-auto"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}"
-                                aria-expanded="false"
-                                aria-controls="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}"
-                            >
-                            <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon" >
-                        </button>
-                        <a href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}" target="_blank">
-                            <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
-                        </a>
-                    </div>
-                    <div class="collapse" id="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
-                        <div class="card card-body mb-3 no-truncate">
-                            {{ item.explain }}
-                        </div>
-                    </div>
+                    {% if item.get_template_name_calculated_attribute == "explainable_quantity" %}
+                        {% include 'model_builder/side_panels/components/explainable_quantity.html' %}
+                    {% elif item.get_template_name_calculated_attribute == "explainable_hourly_quantities" %}
+                        explainable_hourly_quantities
+                    {% else %}
+                        explainable_object
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>

@@ -1,0 +1,25 @@
+{% load static %}
+<div class="d-flex flex-row mb-3 align-items-center">
+    <div class="input-group">
+        <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="form-label w-100">{{ item.label|capfirst }}:</label>
+        <input disabled name="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" id="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" value="{{ item.value }}" class="form-control">
+    </div>
+    <p class="btn bg-white border border-1 border-light py-auto bg-light"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}"
+            aria-expanded="false"
+            aria-controls="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}"
+        >
+        <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon" >
+    </p>
+    <a href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}" target="_blank">
+        <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+    </a>
+</div>
+<div class="collapse" id="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
+    <div class="card card-body mb-3 no-truncate">
+        {{ item.explain }}
+        <hr>
+        {{ item.get_calculated_attributes_html_content }}
+    </div>
+</div>
