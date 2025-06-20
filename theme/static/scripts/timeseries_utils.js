@@ -7,6 +7,8 @@ function sumDailyValuesByDisplayGranularity(dates, dailyValues, displayGranulari
                 key = `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}`;
             } else if (displayGranularity === "year") {
                 key = `${dateObj.year}`;
+            } else if (displayGranularity === "day") {
+                key = `${dateObj.year}-${String(dateObj.month).padStart(2, "0")}-${String(dateObj.day).padStart(2, "0")}`;
             } else {
                 key = dateAtIndex;
             }

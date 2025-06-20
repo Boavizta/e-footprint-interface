@@ -30,6 +30,7 @@ function closeAndEmptySidePanel() {
     sidePanel.classList.add("d-none");
     sidePanel.innerHTML = "";
     closeTimeseriesChart();
+    closeCalculatedAttributesChart();
 
     let panel = document.getElementById("panel-result-btn");
     if (panel.classList.contains("result-width")) {

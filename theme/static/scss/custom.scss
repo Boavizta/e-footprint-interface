@@ -261,6 +261,12 @@ input:disabled{
     box-shadow: 0 5px 8px 4px rgba(138, 138, 138, 0.24);
 }
 
+.no-truncate {
+    text-overflow: clip;
+    overflow: visible;
+    white-space: normal;
+}
+
 .bg-radiant{
     background: var(
             --Gradient-onLight, linear-gradient(
@@ -459,13 +465,19 @@ input:disabled{
     color: var(--gray-400);
 }
 
-.chartTimeseries{
+.chartTimeseries, #chart-calculated-attribute{
     position: fixed;
     height: 70vh !important;
     top: 15vh !important;
     border-radius: 15px;
     background-color: #FFFFFF;
     padding: 2rem;
+
+}
+
+#chart-render-calculated-attribute{
+    height: 400px !important;
+    width: 100%;
 }
 
 .panel-result-btn, #btn-open-panel-result {
@@ -622,6 +634,13 @@ input:disabled{
         width: 100%;
     }
 
+    #chart-calculated-attribute{
+        width: 100vw;
+        height: var(--full-height) !important;
+        right: 0 !important;
+        top: 0 !important;
+    }
+
     #chartTimeseries{
         width: 50vw;
         right:33vw;
@@ -654,7 +673,7 @@ input:disabled{
         flex-wrap:wrap;
     }
 
-    #chartTimeseries{
+    #chartTimeseries, #chart-calculated-attribute{
         width: 50vw;
         right: 33vw;
     }

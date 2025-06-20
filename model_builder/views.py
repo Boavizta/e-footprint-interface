@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from time import time
 import json
@@ -9,6 +9,8 @@ import os
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from efootprint.abstract_modeling_classes.explainable_dict import ExplainableDict
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from openpyxl import Workbook
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -19,8 +21,9 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
+from model_builder.model_builder_utils import aggregate_daily_ehq
 from model_builder.model_web import ModelWeb
-from model_builder.modeling_objects_web import ExplainableObjectWeb
+from model_builder.modeling_objects_web import ExplainableObjectWeb, ExplainableObjectDictWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
 
@@ -197,7 +200,7 @@ def download_sources(request):
                 source = Source("Computed", "")
 
             sources.append([
-                web_attr_value.label,
+                web_attr_value.attr_name_web,
                 web_efootprint_object.name,
                 web_efootprint_object.class_label,
                 attr_value.value.magnitude,
@@ -233,3 +236,58 @@ def download_sources(request):
     response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system_name}_sources.xlsx"
 
     return response
+
+@time_it
+def get_chart_and_explanation_calculated_attribute(request, efootprint_id, attr_name, exp_obj_id=None):
+    from time import time
+    start = time()
+    model_web = ModelWeb(request.session)
+    obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+
+    if exp_obj_id is not None:
+        for exp in obj.values():
+            if exp.id == exp_obj_id:
+                ehq = exp
+                break
+    else:
+        ehq = obj
+
+    dates, sums = aggregate_daily_ehq(ehq)
+    data_dict = dict(zip(dates, sums))
+
+    logger.info(f"Aggregating data for {attr_name} took {round((time() - start), 3)} seconds")
+
+    context = {
+        "efootprint_id": efootprint_id,
+        "label": getattr(ehq, "attr_name_web", None) or getattr(ehq, "label", ""),
+        "unit": ehq.unit,
+        "attr_name": attr_name,
+        "data_timeseries": data_dict,
+        "explanation": ehq.explain()
+    }
+    if exp_obj_id is not None:
+        context["exp_obj_id"] = exp_obj_id
+
+    return render(
+        request,
+        "model_builder/side_panels/components/calculated_attribute_chart.html",
+        context=context,
+    )
+
+
+def get_explanation_calculated_attribute(request, efootprint_id, attr_name):
+    model_web = ModelWeb(request.session)
+    exp_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id),attr_name)
+    if isinstance(exp_obj.explainable_object, ExplainableDict):
+        explanation = exp_obj.value
+    else:
+        explanation = exp_obj.explain()
+    return render(
+        request,
+        "model_builder/side_panels/components/calculated_attribute_explanation.html",
+        {
+            "efootprint_id": efootprint_id,
+            "attr_name": attr_name,
+            "explanation": explanation
+        }
+    )

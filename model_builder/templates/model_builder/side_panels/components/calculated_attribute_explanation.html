@@ -1,0 +1,11 @@
+{% load static %}
+{% load custom_filters %}
+<div class="card card-body mb-3 no-truncate">
+    <p class="mb-3">{{ explanation|explain_format|safe }}</p>
+    <a class="btn btn-light btn-sm"
+       href="{% url 'display-calculus-graph' efootprint_id attr_name %}"
+       target="_blank">
+        See the calculus graph
+        <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+    </a>
+</div>

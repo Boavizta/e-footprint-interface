@@ -21,6 +21,7 @@ from efootprint import __version__ as efootprint_version
 from pint import Quantity
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
+from model_builder.model_builder_utils import determine_global_time_bounds, to_rounded_daily_values, get_quantity_array
 from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
 from utils import EFOOTPRINT_COUNTRIES
 
@@ -234,69 +235,43 @@ class ModelWeb:
 
     @property
     def system_emissions(self):
-        energy_footprints = self.system.total_energy_footprints
-        fabrication_footprints = self.system.total_fabrication_footprints
+        energy = self.system.total_energy_footprints
+        fab = self.system.total_fabrication_footprints
 
-        # Step 1: Collect all ExplainableHourlyQuantities and compute global time bounds
-        all_ehqs = [
-            q for q in list(energy_footprints.values()) + list(fabrication_footprints.values())
+        ehqs = [
+            q for q in list(energy.values()) + list(fab.values())
             if isinstance(q, ExplainableHourlyQuantities)
         ]
+        if not ehqs:
+            raise ValueError("Aucun ExplainableHourlyQuantities trouvé.")
 
-        for ehq in all_ehqs:
-            assert ehq.start_date.tzinfo == pytz.utc, f"Wrong tzinfo for {ehq.label}: {ehq.start_date.tzinfo}"
-            if ehq.start_date.hour != 0:
-                logger.warning(
-                    f"{ehq.label} start date doesn’t start at midnight: {ehq.start_date}. "
-                    f"This shouldn’t happen if this times series has been created with a UsagePatternFromForm.")
-
-        if not all_ehqs:
-            raise ValueError("No ExplainableHourlyQuantities found.")
-
-        global_start = min(ehq.start_date for ehq in all_ehqs).replace(hour=0, minute=0, second=0, microsecond=0)
-        global_end = max(ehq.start_date + timedelta(hours=len(ehq.magnitude) - 1) for ehq in all_ehqs)
-        total_hours = int((global_end - global_start).total_seconds() // 3600) + 1
-
-        # Step 2: Build aligned time grid and reindexed arrays
-        def reindex_array(ehq: ExplainableHourlyQuantities) -> Quantity:
-            start_offset = int((ehq.start_date - global_start).total_seconds() // 3600)
-            ehq.to(u.tonne)
-            values = ehq.magnitude.astype(np.float32, copy=False)
-            padded = np.zeros(total_hours, dtype=np.float32)
-            padded[start_offset:start_offset + len(values)] = values
-
-            return padded * ehq.unit
-
-        # Step 3: Build padded arrays or zeros for missing data
-        def get(key: str, d: dict[str, ExplainableHourlyQuantities]) -> Quantity:
-            val = d.get(key)
-            if isinstance(val, EmptyExplainableObject):
-                return np.zeros(total_hours, dtype=np.float32) * u.tonne
-
-            return reindex_array(val)
-
-        # Step 4: Compute daily emissions using np.bincount
-        def to_rounded_daily_values(quantity_arr: Quantity, rounding_depth=5) -> list:
-            day_indexes = np.arange(total_hours) // 24
-            weights = quantity_arr.magnitude
-            daily_sums = np.bincount(day_indexes, weights=weights, minlength=(total_hours + 23) // 24)
-
-            return np.round(daily_sums, rounding_depth).tolist()
+        global_start, total_hours = determine_global_time_bounds(ehqs)
 
         emissions = {
-            "dates": [
+            "dates" : [
                 (global_start + timedelta(days=i)).strftime("%Y-%m-%d")
                 for i in range(math.ceil(total_hours / 24))
             ],
-            "values": {
+            "values" : {
                 "Servers_and_storage_energy": to_rounded_daily_values(
-                    get("Servers", energy_footprints) + get("Storage", energy_footprints)),
-                "Devices_energy": to_rounded_daily_values(get("Devices", energy_footprints)),
-                "Network_energy": to_rounded_daily_values(get("Network", energy_footprints)),
+                    get_quantity_array("Servers", energy, global_start, total_hours)
+                    + get_quantity_array("Storage", energy, global_start, total_hours)
+                ),
+                "Devices_energy": to_rounded_daily_values(
+                    get_quantity_array("Devices", energy, global_start, total_hours)
+                ),
+                "Network_energy": to_rounded_daily_values(
+                    get_quantity_array("Network", energy, global_start, total_hours)
+                ),
                 "Servers_and_storage_fabrication": to_rounded_daily_values(
-                    get("Servers", fabrication_footprints) + get("Storage", fabrication_footprints)),
-                "Devices_fabrication": to_rounded_daily_values(get("Devices", fabrication_footprints)),
+                    get_quantity_array("Servers", fab, global_start, total_hours)
+                    + get_quantity_array("Storage", fab, global_start, total_hours)
+                ),
+                "Devices_fabrication": to_rounded_daily_values(
+                    get_quantity_array("Devices", fab, global_start, total_hours)
+                ),
             }
         }
 
         return emissions
+
