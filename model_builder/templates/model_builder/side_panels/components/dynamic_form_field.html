@@ -1,9 +1,11 @@
 <div id="field-group-{{ field.id }}" class="mb-3">
     {% include "model_builder/side_panels/components/label.html" %}
-    {% if field.input_type == "select" %}
-        {% include "model_builder/side_panels/components/select.html" %}
+    {% if field.input_type == "select-str-input" %}
+        {% include "model_builder/side_panels/components/select_str_input.html" %}
     {% elif field.input_type == "select-multiple" %}
         {% include "model_builder/side_panels/components/select_multiple.html" %}
+    {% elif field.input_type == "select-object" %}
+        {% include "model_builder/side_panels/components/select_object.html" %}
     {% elif field.input_type == "datalist" %}
         {% include "model_builder/side_panels/components/datalist.html" %}
     {% elif field.input_type == "str" %}

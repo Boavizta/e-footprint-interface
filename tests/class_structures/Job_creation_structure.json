@@ -4,7 +4,7 @@
         "header": "Job selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available job types",
                 "options": [
@@ -24,8 +24,7 @@
                         "label": "Generative AI job",
                         "value": "GenAIJob"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             }
         ]
     },
@@ -167,7 +166,7 @@
                 "attr_name": "implementation_details",
                 "label": "implementation details",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "default",
                 "default": "default",
                 "source": {
@@ -221,7 +220,7 @@
                 "attr_name": "resolution",
                 "label": "resolution",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "1080p (1920 x 1080)",
                 "default": "1080p (1920 x 1080)",
                 "source": {

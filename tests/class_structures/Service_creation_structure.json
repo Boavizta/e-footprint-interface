@@ -4,7 +4,7 @@
         "header": "Service selection",
         "fields": [
             {
-                "input_type": "select",
+                "input_type": "select-object",
                 "id": "type_object_available",
                 "label": "Available services for this server",
                 "options": [
@@ -20,8 +20,7 @@
                         "label": "Generative AI model",
                         "value": "GenAIModel"
                     }
-                ],
-                "source_attribute_to_skip": true
+                ]
             }
         ]
     },
@@ -42,7 +41,7 @@
                 "attr_name": "technology",
                 "label": "technology",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "php-symfony",
                 "default": "php-symfony",
                 "source": {
@@ -168,7 +167,7 @@
                 "attr_name": "provider",
                 "label": "provider",
                 "tooltip": false,
-                "input_type": "select",
+                "input_type": "select-str-input",
                 "selected": "mistralai",
                 "default": "mistralai",
                 "source": {
