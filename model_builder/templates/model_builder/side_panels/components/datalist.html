@@ -11,8 +11,8 @@
           on focusout if my value is empty set my value to '{{ field.default }}' then updateSource(@id)"
     {% endif %}
     data-default-value="{{ field.default }}"
-   data-default-name="{{ field.source.name }}"
-   data-source-url="{{ field.source.link }}"
+    data-default-name="{{ field.source.name }}"
+    data-source-url="{{ field.source.link }}"
     oninput="updateSource(this.id)"
     required
 >

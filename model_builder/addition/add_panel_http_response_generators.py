@@ -128,7 +128,6 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
                     {"label": server.name, "value": server.efootprint_id} for server in servers],
                 "label": "Choose a server",
                 "source_attribute_to_skip": True
-
             },
             {
                 "input_type": "select",

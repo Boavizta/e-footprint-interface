@@ -98,7 +98,6 @@ document.addEventListener("initDynamicForm", function () {
             }
             targetElem.dispatchEvent(new Event("change", { bubbles: true }));
         }
-        // Update the source information
     }
 
 
@@ -143,13 +142,11 @@ document.addEventListener("initDynamicForm", function () {
 function checkCurrentValueVsDefaultValue(input) {
     let defaultValue = input.dataset.defaultValue;
     let fromDefaultValue = true;
-    if ( (input.type === 'date' || input.type === 'text'  ) && input.value !== defaultValue){
+    if ( (input.type === 'date' || input.type === 'text' || input.tagName.toLowerCase() === 'select')
+        && input.value !== defaultValue){
         fromDefaultValue = false;
     }
     if (input.type === 'number' && parseFloat(input.value) !== parseFloat(defaultValue)){
-        fromDefaultValue = false;
-    }
-    if (input.tagName.toLowerCase() === 'select' && input.value !== defaultValue){
         fromDefaultValue = false;
     }
     return fromDefaultValue;
@@ -159,51 +156,36 @@ function checkCurrentValueVsDefaultValue(input) {
 function updateSource(inputId) {
     let input = document.getElementById(inputId);
 
-    if (input.dataset.sourceAttributeToSkip && input.dataset.attributeToSkip !== '') {
+    if (input.dataset.sourceAttributeToSkip && input.dataset.sourceAttributeToSkip !== '') {
         return;
     }
 
     let sourceDiv = document.getElementById("source-" + input.id);
-    let linkedTo = input.dataset.sourceLinkedTo;
-    let htmlCodeForDefaultSource = `source : <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
-    let htmlCodeForUserSource = `source : user data`;
-    let inputLinkedTo;
-
     if(input.dataset.defaultValue === '' && input.value === ''){
         sourceDiv.innerHTML = "";
         return;
     }
 
-    let isSameFromDefault = checkCurrentValueVsDefaultValue(input);
+    let isSameAsDefault = checkCurrentValueVsDefaultValue(input);
+    let displayDefaultSource;
 
-    let linkedToIsSameFromDefault = false;
-    if (linkedTo) {
-        inputLinkedTo = document.getElementById(linkedTo);
-        linkedToIsSameFromDefault = checkCurrentValueVsDefaultValue(inputLinkedTo);
+    let associatedUnitId = input.dataset.associatedUnitId;
+    if (!associatedUnitId) {
+        displayDefaultSource = isSameAsDefault;
+    }else{
+        let associatedUnit = document.getElementById(associatedUnitId);
+        let associatedUnitIsSameAsDefault = checkCurrentValueVsDefaultValue(associatedUnit);
+        displayDefaultSource = isSameAsDefault && associatedUnitIsSameAsDefault;
     }
 
-    if(isSameFromDefault && !linkedTo){
+    if (displayDefaultSource) {
         if(input.dataset.sourceUrl && input.dataset.sourceUrl !== '' && input.dataset.sourceUrl !== 'None'){
-            sourceDiv.innerHTML = htmlCodeForDefaultSource
+            sourceDiv.innerHTML = `source : <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
         }else{
             sourceDiv.innerHTML = `source : ${input.dataset.defaultName}`
         }
-    }
-    if(!isSameFromDefault && !linkedTo){
-        sourceDiv.innerHTML = htmlCodeForUserSource
-    }
-
-    if(linkedTo){
-        if(inputLinkedTo.dataset.defaultValue === '' && inputLinkedTo.value === ''){
-            sourceDiv.innerHTML = "";
-            return;
-        }
-        if(isSameFromDefault && linkedToIsSameFromDefault){
-            sourceDiv.innerHTML = htmlCodeForDefaultSource;
-        }
-        if(!isSameFromDefault || !linkedToIsSameFromDefault){
-            sourceDiv.innerHTML = htmlCodeForUserSource
-        }
+    }else{
+        sourceDiv.innerHTML = "source : user data";
     }
 }
 
@@ -311,7 +293,7 @@ function refreshSelectMultipleFields(fieldId) {
     selectedOptions.forEach((selectedValue, index) => {
         let newSelectedValue = document.createElement("tr");
         let nameSelectedValue = document.createElement("td");
-        nameSelectedValue.innerHTML = `${selectedValue.label}`;
+        nameSelectedValue.innerHTML = "${selectedValue.label}";
         let ctaSortUp = document.createElement("td");
         let ctaSortDown = document.createElement("td");
         let removeSelectedValue = document.createElement("td");
