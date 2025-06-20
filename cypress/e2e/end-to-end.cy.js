@@ -141,7 +141,6 @@ describe('Test de la page d\'accueil', () => {
             .click();
 
         cy.get('#model-builder-modal').should('not.exist');
-        cy.get('#model-builder-modal').should('not.exist');
 
         cy.get('#btn-open-panel-result').click();
         cy.get('#lineChart').should('be.visible');

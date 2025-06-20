@@ -194,4 +194,3 @@ if os.getenv('DJANGO_PROD') == 'True':
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 CSP_FRAME_ANCESTORS = ["'self'"]
-

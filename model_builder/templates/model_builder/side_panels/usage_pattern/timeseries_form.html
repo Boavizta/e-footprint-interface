@@ -10,10 +10,7 @@
            _="on input updateSource(@id) then openOrCloseTimeseriesChartAndTriggerUpdate()"
            required
     >
-    <div class="form-text fs-xl mb-3" id="source-start_date"
-         _="on load updateSource('start_date')"
-    >
-    </div>
+    {% include "model_builder/side_panels/components/source.html" with source_id="source-start_date" %}
 </div>
 <div class="mb-3">
     <label for="modeling_duration_value" class="form-label w-100">Modeling duration</label>
@@ -33,7 +30,7 @@
                data-default-value="{{ usage_pattern_input_values.modeling_duration_value.value }}"
                data-default-name="{{ usage_pattern_input_values.modeling_duration_value.source.name }}"
                data-source-url="{{ usage_pattern_input_values.modeling_duration_value.source.link }}"
-               data-source-linked-to="modeling_duration_unit"
+               data-associated-unit-id="modeling_duration_unit"
         >
         <select class="input-group-text"
                 name="modeling_duration_unit"
@@ -52,16 +49,12 @@
                 data-default-value="{{ usage_pattern_input_values.modeling_duration_unit.value }}"
                 data-default-name="{{ usage_pattern_input_values.modeling_duration_unit.source.name }}"
                 data-source-url="{{ usage_pattern_input_values.modeling_duration_unit.source.link }}"
-                data-source-linked-to="modeling_duration_value"
         >
             <option value="month" {% if usage_pattern_input_values.modeling_duration_unit.value == "month" %}selected{% endif %}>Months</option>
             <option value="year" {% if usage_pattern_input_values.modeling_duration_unit.value == "year" %}selected{% endif %}>Years</option>
         </select>
     </div>
-    <div class="form-text fs-xl mb-3" id="source-modeling_duration_value"
-         _="on load updateSource('modeling_duration_value')"
-    >
-    </div>
+    {% include "model_builder/side_panels/components/source.html" with source_id="source-modeling_duration_value" %}
     <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
 </div>
 <div class="mb-3">
@@ -80,7 +73,7 @@
                data-default-value="{{ usage_pattern_input_values.initial_usage_journey_volume.value }}"
                data-default-name="{{ usage_pattern_input_values.initial_usage_journey_volume.source.name }}"
                data-source-url="{{ usage_pattern_input_values.initial_usage_journey_volume.source.link }}"
-               data-source-linked-to="initial_usage_journey_volume_timespan"
+               data-associated-unit-id="initial_usage_journey_volume_timespan"
         >
         <select class="input-group-text"
                 name="initial_usage_journey_volume_timespan"
@@ -90,16 +83,12 @@
                 data-default-value="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.value }}"
                data-default-name="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.source.name }}"
                data-source-url="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.source.link }}"
-               data-source-linked-to="initial_usage_journey_volume"
         >
             <option value="month" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "month" %}selected{% endif %}>Monthly</option>
             <option value="year" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
     </div>
-    <div class="form-text fs-xl mb-3" id="source-initial_usage_journey_volume"
-         _="on load updateSource('initial_usage_journey_volume')"
-    >
-    </div>
+    {% include "model_builder/side_panels/components/source.html" with source_id="source-initial_usage_journey_volume" %}
 </div>
 <div class="mb-3">
     <label for="net_growth_rate_in_percentage" class="form-label w-100">Net growth rate (%)</label>
@@ -116,7 +105,7 @@
                data-default-value="{{ usage_pattern_input_values.net_growth_rate_in_percentage.value }}"
                data-default-name="{{ usage_pattern_input_values.net_growth_rate_in_percentage.source.name }}"
                data-source-url="{{ usage_pattern_input_values.net_growth_rate_in_percentage.source.link }}"
-               data-source-linked-to="net_growth_rate_timespan"
+               data-associated-unit-id="net_growth_rate_timespan"
         >
         <select class="input-group-text"
                 name="net_growth_rate_timespan"
@@ -125,16 +114,12 @@
                 data-default-value="{{ usage_pattern_input_values.net_growth_rate_timespan.value }}"
                data-default-name="{{ usage_pattern_input_values.net_growth_rate_timespan.source.name }}"
                data-source-url="{{ usage_pattern_input_values.net_growth_rate_timespan.source.link }}"
-               data-source-linked-to="net_growth_rate_in_percentage"
         >
             <option value="month" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "month" %}selected{% endif %}>Monthly</option>
             <option value="year" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
     </div>
-    <div class="form-text fs-xl mb-3" id="source-net_growth_rate_in_percentage"
-         _="on load updateSource('net_growth_rate_in_percentage')"
-    >
-    </div>
+    {% include "model_builder/side_panels/components/source.html" with source_id="source-net_growth_rate_in_percentage" %}
 </div>
 
 <script>
