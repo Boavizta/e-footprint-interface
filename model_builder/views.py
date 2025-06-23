@@ -75,7 +75,7 @@ def download_json(request):
     json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
-    filename = f"{current_date_time}_UTC {system.name}"
+    filename = f"{current_date_time} UTC {system.name}"
     filename = sanitize_filename(filename)
     filename = smart_truncate(filename, max_length=45)
     response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"

@@ -22,9 +22,11 @@ def format_snakecase_string(string: str) -> str:
     format_str = str.replace(string, "_", " ")
     return format_str.capitalize()
 
+
 def camel_to_snake(name: str) -> str:
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
 
 def smart_truncate(text, max_length=45, suffix='_[...]'):
     if len(text) <= max_length:
@@ -34,9 +36,10 @@ def smart_truncate(text, max_length=45, suffix='_[...]'):
         cut_pos = max_length
     return text[:cut_pos].rstrip() + suffix
 
+
 def sanitize_filename(name):
     name = unicodedata.normalize('NFKD', name)
-    name = re.sub(r'[^a-zA-Z0-9_\-]', '_', name)
+    name = re.sub(r'[^a-zA-Z0-9_\- ]', '_', name)
     return name
 
 
