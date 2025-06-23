@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - JS logic related to sources has been updated to take in account sources for value/unit fields in addition to simple fields.
+- Put timeseries form at the end of usage pattern form.
 
 ## [0.8.8] - 2025-06-18
 

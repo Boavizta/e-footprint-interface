@@ -11,18 +11,6 @@
         <div class="accordion" id="accordionFormUsagePattern">
             <div class="accordion-item">
                 <h2 class="accordion-header accordion-header-panel">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-attribute-timeseries-attributes" aria-expanded="true" aria-controls="collapse-attribute-timeseries-attributes">
-                        Build my usage volume projection
-                    </button>
-                </h2>
-                <div id="collapse-attribute-timeseries-attributes" class="accordion-collapse collapse show">
-                    <div class="accordion-body">
-                        {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" %}
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header accordion-header-panel">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-attribute-link-to-other-objet" aria-expanded="true" aria-controls="collapse-attribute-link-to-other-objet">
                         Usage pattern attributes
                     </button>
@@ -32,6 +20,18 @@
                         {% for field in form_fields %}
                             {%  include "model_builder/side_panels/components/dynamic_form_field.html" %}
                         {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header accordion-header-panel">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-attribute-timeseries-attributes" aria-expanded="true" aria-controls="collapse-attribute-timeseries-attributes">
+                        Build my usage volume projection
+                    </button>
+                </h2>
+                <div id="collapse-attribute-timeseries-attributes" class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                        {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" %}
                     </div>
                 </div>
             </div>
