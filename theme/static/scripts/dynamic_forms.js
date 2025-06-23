@@ -293,7 +293,7 @@ function refreshSelectMultipleFields(fieldId) {
     selectedOptions.forEach((selectedValue, index) => {
         let newSelectedValue = document.createElement("tr");
         let nameSelectedValue = document.createElement("td");
-        nameSelectedValue.innerHTML = "${selectedValue.label}";
+        nameSelectedValue.innerHTML = `${selectedValue.label}`;
         let ctaSortUp = document.createElement("td");
         let ctaSortDown = document.createElement("td");
         let removeSelectedValue = document.createElement("td");
