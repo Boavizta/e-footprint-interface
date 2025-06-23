@@ -4,6 +4,7 @@ env_variables:
   APPENGINE_URL: https://e-footprint-interface.nw.r.appspot.com
 
 instance_class: F1
+entrypoint: gunicorn -b :$PORT -w 2 main:app
 automatic_scaling:
   min_instances: 1
   max_instances: 5

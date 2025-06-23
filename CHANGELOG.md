@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-#[0.8.10] - 2025-06-23
+## [0.8.10] - 2025-06-23
 
 ### Fixed
 - Fix chart resize issue when panel result is opened during an edit.
