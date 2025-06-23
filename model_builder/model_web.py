@@ -5,7 +5,6 @@ from datetime import timedelta
 from time import time
 
 import numpy as np
-import pandas as pd
 import pytz
 from django.contrib.sessions.backends.base import SessionBase
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject

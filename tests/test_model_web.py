@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 
 import ciso8601
 import numpy as np
-import pandas as pd
 import pytz
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject

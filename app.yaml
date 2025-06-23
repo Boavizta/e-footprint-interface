@@ -3,7 +3,7 @@ runtime: python312
 env_variables:
   APPENGINE_URL: https://e-footprint-interface.nw.r.appspot.com
 
-instance_class: F4_1G
+instance_class: F1
 automatic_scaling:
   min_instances: 1
   max_instances: 5

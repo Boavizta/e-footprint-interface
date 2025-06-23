@@ -4,7 +4,6 @@ from datetime import datetime
 from io import BytesIO
 from time import time
 
-import pandas as pd
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
@@ -24,10 +23,6 @@ from utils import htmx_render, sanitize_filename, smart_truncate
 import json
 import os
 from django.http import HttpResponse
-import matplotlib
-
-matplotlib.use("Agg")
-DEFAULT_GRAPH_WIDTH = 700
 
 
 def model_builder_main(request, reboot=False):
@@ -210,7 +205,7 @@ def download_sources(request):
                 "Source name": source.name if source else "",
                 "Source link": source.link if source else "",
             })
-
+    import pandas as pd
     df = pd.DataFrame(sources)
 
     output = BytesIO()

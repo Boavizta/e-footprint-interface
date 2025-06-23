@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix chart resize issue when panel result is opened during an edit.
 
 ### Changed
+- Upgrade to e-footprint 10.1.11 for 2x lower memory footprint.
 - Disable browsers zoom when users touch an input
 - Scroll to top when sidePanel is displayed
 

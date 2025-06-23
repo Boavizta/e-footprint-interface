@@ -71,8 +71,8 @@ def edit_object(request, object_id, trigger_result_display=False):
         "action_type": "edit_object"
     }
 
-    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data,
-                                                            trigger_result_display)
+    return generate_http_response_from_edit_html_and_events(
+        response_html, toast_and_highlight_data, trigger_result_display)
 
 
 def open_panel_system_name(request):
