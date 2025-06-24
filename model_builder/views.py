@@ -3,9 +3,13 @@ import string
 from datetime import datetime
 from io import BytesIO
 from time import time
+import json
+import os
 
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from openpyxl import Workbook
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
@@ -19,10 +23,6 @@ from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
-
-import json
-import os
-from django.http import HttpResponse
 
 
 def model_builder_main(request, reboot=False):
@@ -196,32 +196,40 @@ def download_sources(request):
             if attr_name in efootprint_object.calculated_attributes:
                 source = Source("Computed", "")
 
-            sources.append({
-                "Item name": web_attr_value.label,
-                "Attribute of": web_efootprint_object.name,
-                "Object type": web_efootprint_object.class_label,
-                "Value": attr_value.value.magnitude,
-                "Unit": str(attr_value.value.units),
-                "Source name": source.name if source else "",
-                "Source link": source.link if source else "",
-            })
-    import pandas as pd
-    df = pd.DataFrame(sources)
+            sources.append([
+                web_attr_value.label,
+                web_efootprint_object.name,
+                web_efootprint_object.class_label,
+                attr_value.value.magnitude,
+                str(attr_value.value.units),
+                source.name if source else "",
+                source.link if source else "",
+            ])
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sources"
+
+    headers = ["Item name", "Attribute of", "Object type", "Value", "Unit", "Source name", "Source link"]
+    ws.append(headers)
+
+    for row in sources:
+        ws.append(row)
+
+    for col in ws.columns:
+        ws.column_dimensions[col[0].column_letter].width = 30
 
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        sheet_name = "Sources"
-        df.to_excel(writer, index=False, sheet_name=sheet_name)
-        worksheet = writer.sheets[sheet_name]
-        for col in worksheet.columns:
-            worksheet.column_dimensions[col[0].column_letter].width = 30
-
+    wb.save(output)
     output.seek(0)
 
     system_name = next(iter(request.session["system_data"]["System"].values()))["name"]
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    response = HttpResponse(output.read(),
-                            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+    response = HttpResponse(
+        output.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
     response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system_name}_sources.xlsx"
 
     return response

@@ -7,7 +7,6 @@ from datetime import datetime
 from io import BytesIO
 from time import time
 
-import pandas as pd
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source

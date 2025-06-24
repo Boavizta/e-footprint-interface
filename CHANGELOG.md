@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Change notification background color to respect e-footprint chart.
+- Remove use of pandas for source xlsx export, to reduce memory footprint.
 
 ### Fixed
 - Fix notification after an object deletion.

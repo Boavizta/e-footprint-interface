@@ -2,8 +2,8 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock
 
+import ciso8601
 import numpy as np
-import pandas as pd
 import pytz
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, SourceObject
@@ -169,7 +169,7 @@ class TestUsagePatternFromForm(unittest.TestCase):
         self.assertTrue(np.allclose(hourly_values, 10.0))
 
         # Check the index starts at the specified start_date and spans 48 hours
-        expected_start = pd.to_datetime(self.start_date_val.value)
+        expected_start = ciso8601.parse_datetime(self.start_date_val.value)
         self.assertEqual(self.usage_pattern.hourly_usage_journey_starts.start_date, expected_start)
 
     def test_update_hourly_usage_journey_starts_growth_scenario(self):
