@@ -6,10 +6,6 @@ beforeEach(() => {
 describe("Test - Forms panel", () => {
         let uj = "Test E2E UJ";
         let ujsOne = "Test E2E UJ 1";
-        let ujsTwo = "Test E2E UJ 2";
-        let service = "Test E2E Service";
-        let jobOne = "Test E2E Job 1";
-        let jobTwo = "Test E2E Job 2";
         let serverOne = "Test E2E Server 1";
         let serverTwo = "Test E2E Server 2";
 
@@ -73,6 +69,7 @@ describe("Test - Forms panel", () => {
         cy.get("#sidePanelForm").should('not.exist');
 
         cy.get("#btn-add-server").should('be.enabled').click();
+        cy.get("#sidePanelForm").should('be.visible');
         cy.get("#type_object_available").should('be.visible').select('Server');
         cy.get("#Server_name").clear().type(serverOne);
         cy.get("#Server_average_carbon_intensity").clear().type('700');
@@ -126,6 +123,30 @@ describe("Test - Forms panel", () => {
         cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
         cy.get('#Storage_data_storage_duration').should('have.value', '3');
+    });
+
+    it("Check sources are displayed in the form with the right values before and after addition and edition", () => {
+        cy.visit("/model_builder/");
+        cy.get("#add_usage_pattern").should("exist").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#modeling_duration_value").should("be.visible").should("be.enabled").clear().type("2");
+        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","source : e-footprint hypothesis");
+        cy.get("#source-modeling_duration_value").should("contain.text","source : user data");
+        cy.get("#initial_usage_journey_volume").should('be.visible').type("1000");
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+        cy.get("button[id^='button-id-'][id$='Usage-pattern-1']").should("exist").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","source : e-footprint hypothesis");
+        cy.get("#source-modeling_duration_value").should("contain.text","source : user data");
+        cy.get("#net_growth_rate_in_percentage").clear().type("5");
+        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","source : user data");
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+        cy.get("button[id^='button-id-'][id$='Usage-pattern-1']").should("exist").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","source : user data");
+        cy.get("#source-modeling_duration_value").should("contain.text","source : user data");
     });
 
 });
