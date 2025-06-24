@@ -93,6 +93,8 @@ describe("Test - Result panel", () => {
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
 
+        cy.wait(1000); // wait for the result panel to be displayed
+
         cy.window().its('charts').should('exist');
 
         cy.window().its('charts').its('barChart').should('exist').then((chart) => {
