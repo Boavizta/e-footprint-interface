@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.12] - 2025-06-25
+## [0.8.12] - 20225-06-25
+
+### Added
+- Add a variant of UsagePattern side panel to display UsagePatterns created with Python script with minimal information and features, and inability for user to edit the timeseries.
 
 ### Fixed
 - Fix issue with usage pattern sources not being displayed in the side panel when adding/editing a usage pattern.
+- To fit with old usage patterns, results view now didn't raise an error when global start_date doesn’t start at midnight but rounds to the previous midnight global start_date.
 
 ## [0.8.11] - 20225-06-19
 

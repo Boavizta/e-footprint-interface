@@ -245,13 +245,11 @@ class ModelWeb:
 
         for ehq in all_ehqs:
             assert ehq.start_date.tzinfo == pytz.utc, f"Wrong tzinfo for {ehq.label}: {ehq.start_date.tzinfo}"
-            assert ehq.start_date.hour == 0, f"{ehq.label} start date doesn’t start at midnight: {ehq.start_date}"
-
 
         if not all_ehqs:
             raise ValueError("No ExplainableHourlyQuantities found.")
 
-        global_start = min(ehq.start_date for ehq in all_ehqs)
+        global_start = min(ehq.start_date for ehq in all_ehqs).replace(hour=0, minute=0, second=0, microsecond=0)
         global_end = max(ehq.start_date + timedelta(hours=len(ehq.magnitude) - 1) for ehq in all_ehqs)
         total_hours = int((global_end - global_start).total_seconds() // 3600) + 1
 

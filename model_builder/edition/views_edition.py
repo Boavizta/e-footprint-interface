@@ -4,12 +4,14 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from efootprint.core.hardware.server_base import ServerBase
+from efootprint.core.usage.usage_pattern import UsagePattern
 
 from model_builder.class_structure import generate_object_edition_structure
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 from model_builder.edition.edit_panel_http_response_generators import generate_usage_pattern_edit_panel_http_response, \
-    generate_server_edit_panel_http_response, generate_generic_edit_panel_http_response
+    generate_server_edit_panel_http_response, generate_generic_edit_panel_http_response, \
+    generate_usage_pattern_generic_edit_panel_http_response
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
@@ -28,6 +30,9 @@ def open_edit_object_panel(request, object_id):
 
     if issubclass(obj_to_edit.efootprint_class, UsagePatternFromForm):
         http_response = generate_usage_pattern_edit_panel_http_response(
+            request, obj_to_edit, form_fields, form_fields_advanced, object_belongs_to_computable_system)
+    elif issubclass(obj_to_edit.efootprint_class, UsagePattern):
+        http_response = generate_usage_pattern_generic_edit_panel_http_response(
             request, obj_to_edit, form_fields, form_fields_advanced, object_belongs_to_computable_system)
     elif issubclass(obj_to_edit.efootprint_class, ServerBase):
         http_response = generate_server_edit_panel_http_response(

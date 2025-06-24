@@ -1,0 +1,16 @@
+{% extends "model_builder/side_panels/edit/edit_generic_form.html" %}
+
+{% block edit_form_content %}
+    {% for field in form_fields %}
+        {% if field.attr_name == "hourly_usage_journey_starts" %}
+            <p class="form-label ps-3">Hourly number of usage journey starts local time</p>
+            <p class="form-control p-2 mb-3 disabled">{{ field.default }}</p>
+            <p>
+                You cannot change this field directly in e-footprint interface. To update it, please directly use the efootprint library.
+            </p>
+        {% else %}
+            {%  include "model_builder/side_panels/components/dynamic_form_field.html" %}
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+
