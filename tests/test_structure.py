@@ -2,7 +2,6 @@ import os
 import re
 import json
 from dataclasses import dataclass
-from inspect import signature
 from unittest import TestCase
 import sys
 from unittest.mock import MagicMock
@@ -15,6 +14,7 @@ from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
 from efootprint.core.usage.job import Job
 from efootprint.logger import logger
+from efootprint.utils.tools import get_init_signature_params
 
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -131,7 +131,7 @@ class TestsClassStructure(TestCase):
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
-            init_sig_params = signature(efootprint_obj_class.__init__).parameters
+            init_sig_params = get_init_signature_params(efootprint_obj_class)
             for attr_name in init_sig_params.keys():
                 if attr_name == 'self':
                     continue

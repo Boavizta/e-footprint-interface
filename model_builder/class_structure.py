@@ -1,11 +1,12 @@
 from copy import deepcopy
-from inspect import signature, _empty as empty_annotation
+from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
+from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT, FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
 
@@ -78,7 +79,7 @@ def generate_dynamic_form(
     list_values = efootprint_obj_class.list_values
     conditional_list_values = efootprint_obj_class.conditional_list_values
     id_prefix = efootprint_class_str
-    init_sig_params = signature(efootprint_obj_class.__init__).parameters
+    init_sig_params = get_init_signature_params(efootprint_obj_class)
 
     attributes_that_can_have_negative_values = efootprint_obj_class.attributes_that_can_have_negative_values()
 

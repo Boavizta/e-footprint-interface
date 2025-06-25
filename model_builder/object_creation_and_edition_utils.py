@@ -1,5 +1,5 @@
 import os
-from inspect import signature, _empty as empty_annotation
+from inspect import _empty as empty_annotation
 from typing import List, get_origin, get_args
 
 from django.http import QueryDict
@@ -12,6 +12,7 @@ from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
 from efootprint.logger import logger
 from efootprint.constants.units import u
+from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.modeling_objects_web import ModelingObjectWeb
 from model_builder.model_web import ModelWeb
@@ -21,7 +22,7 @@ from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 def create_efootprint_obj_from_post_data(
     create_form_data: QueryDict, model_web: ModelWeb, object_type: str) -> ModelingObject:
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
-    init_sig_params = signature(new_efootprint_obj_class.__init__).parameters
+    init_sig_params = get_init_signature_params(new_efootprint_obj_class)
     default_values = new_efootprint_obj_class.default_values
 
     obj_creation_kwargs = {}
@@ -76,7 +77,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
     model_web = obj_to_edit.model_web
     object_type = obj_to_edit.class_as_simple_str
 
-    init_sig_params = signature(obj_to_edit.modeling_obj.__init__).parameters
+    init_sig_params = get_init_signature_params(obj_to_edit.modeling_obj)
 
     attr_name_new_value_check_input_validity_pairs = []
     for attr_name_with_prefix in edit_form_data.keys():
