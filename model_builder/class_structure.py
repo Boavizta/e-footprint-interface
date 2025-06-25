@@ -2,6 +2,7 @@ from copy import deepcopy
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args
 
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -126,61 +127,6 @@ def generate_dynamic_form(
                 "input_type": "str",
                 "default": default_values[attr_name]
             })
-        elif issubclass(annotation, ExplainableQuantity):
-            default = default_values[attr_name]
-            default_value = float(round(default.magnitude, 2))
-            step = FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
-            if default_value == int(default_value):
-                default_value = int(default_value)
-            else:
-                step = 0.1
-            structure_field.update({
-                "input_type": "input",
-                "unit": f"{default.value.units:~P}",
-                "default": default_value,
-                "source": {"name":default.source.name, "link":default.source.link},
-                "can_be_negative": attr_name in attributes_that_can_have_negative_values,
-                "step": step
-            })
-        elif issubclass(annotation, ExplainableObject):
-            if attr_name in list_values.keys():
-                structure_field.update({
-                    "input_type": "select-str-input",
-                    "selected": default_values[attr_name].value,
-                    "default": default_values[attr_name].value,
-                    "source": {"name": default_values[attr_name].source.name,
-                               "link": default_values[attr_name].source.link},
-                    "options": [
-                        {"label": str(attr_value), "value": str(attr_value)} for attr_value in list_values[attr_name]]
-                })
-            elif attr_name in conditional_list_values.keys():
-                structure_field.update({
-                    "input_type": "datalist",
-                    "selected": default_values[attr_name].value,
-                    "default": default_values[attr_name].value,
-                    "source": {"name": default_values[attr_name].source.name,
-                               "link": default_values[attr_name].source.link},
-                    "options": None
-                })
-                dynamic_lists.append(
-                    {
-                        "input_id": id_prefix + "_" + attr_name,
-                        "filter_by": id_prefix + "_" + conditional_list_values[attr_name]["depends_on"],
-                        "list_value": {
-                            str(conditional_value): [str(possible_value) for possible_value in possible_values]
-                            for conditional_value, possible_values in
-                            conditional_list_values[attr_name]["conditional_list_values"].items()
-                        }
-                    })
-            else:
-                structure_field.update(
-                    {
-                        "input_type": "str",
-                        "default": default_values[attr_name].value,
-                        "source": {"name": default_values[attr_name].source.name,
-                                   "link": default_values[attr_name].source.link}
-                    }
-                )
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
             selection_options = model_web.get_efootprint_objects_from_efootprint_type(mod_obj_attribute_object_type_str)
@@ -194,6 +140,53 @@ def generate_dynamic_form(
                 "options": [
                     {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
             })
+        else:
+            default = default_values[attr_name]
+            source_json = {"name":default.source.name, "link":default.source.link} if default.source else None
+            structure_field.update({"default": default.value, "source": source_json})
+            if issubclass(annotation, ExplainableQuantity):
+                default_value = float(round(default.magnitude, 2))
+                step = FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
+                if default_value == int(default_value):
+                    default_value = int(default_value)
+                else:
+                    step = 0.1
+                structure_field.update({
+                    "input_type": "input",
+                    "unit": f"{default.value.units:~P}",
+                    "default": default_value,
+                    "can_be_negative": attr_name in attributes_that_can_have_negative_values,
+                    "step": step
+                })
+            elif issubclass(annotation, ExplainableHourlyQuantities):
+                structure_field.update({"input_type": "timeseries-input"})
+            elif issubclass(annotation, ExplainableObject):
+                if attr_name in list_values.keys():
+                    structure_field.update({
+                        "input_type": "select-str-input",
+                        "selected": default_values[attr_name].value,
+                        "options": [
+                            {"label": str(attr_value), "value": str(attr_value)}
+                            for attr_value in list_values[attr_name]]
+                    })
+                elif attr_name in conditional_list_values.keys():
+                    structure_field.update({
+                        "input_type": "datalist",
+                        "selected": default_values[attr_name].value,
+                        "options": None
+                    })
+                    dynamic_lists.append(
+                        {
+                            "input_id": id_prefix + "_" + attr_name,
+                            "filter_by": id_prefix + "_" + conditional_list_values[attr_name]["depends_on"],
+                            "list_value": {
+                                str(conditional_value): [str(possible_value) for possible_value in possible_values]
+                                for conditional_value, possible_values in
+                                conditional_list_values[attr_name]["conditional_list_values"].items()
+                            }
+                        })
+                else:
+                    structure_field.update({"input_type": "str"})
 
         if FORM_FIELD_REFERENCES[attr_name].get("is_advanced_parameter", False):
             structure_fields_advanced.append(structure_field)

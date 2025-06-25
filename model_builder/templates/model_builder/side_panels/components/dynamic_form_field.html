@@ -12,6 +12,8 @@
         {% include "model_builder/side_panels/components/str.html" %}
     {% elif field.input_type == "input" %}
         {% include "model_builder/side_panels/components/input.html" %}
+    {% elif field.input_type == "timeseries-input" %}
+        {% include "model_builder/side_panels/components/timeseries-input.html" %}
     {% else %}
         <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>
     {% endif %}

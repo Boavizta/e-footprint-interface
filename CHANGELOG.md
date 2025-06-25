@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.13] - 20225-06-25
+
+### Added
+- Add a variant input field for disabled fields in forms.
+
+### Fixed
+- To fit with old usage patterns, results view now doesn’t raise an error when global start_date doesn’t start at midnight but rounds to the previous midnight global start_date.
+
 ## [0.8.12] - 2025-06-25
 
 ### Fixed
