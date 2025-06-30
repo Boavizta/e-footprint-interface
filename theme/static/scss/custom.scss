@@ -478,15 +478,18 @@ input:disabled{
     border-bottom: 2px solid var(--new-primary);
 }
 
-#model-builder-modal .modal-header{
+#model-builder-modal .modal-header,
+#unsavedModal .modal-header{
     border-bottom: none;
 }
 
-#model-builder-modal .modal-footer{
+#model-builder-modal .modal-footer,
+#unsavedModal .modal-footer{
     border-top: none;
 }
 
-#model-builder-modal p {
+#model-builder-modal p,
+#unsavedModal p{
     font-family: 'Inter', sans-serif;
     font-style: normal;
     font-weight: 400;

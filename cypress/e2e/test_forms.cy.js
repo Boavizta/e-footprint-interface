@@ -149,4 +149,24 @@ describe("Test - Forms panel", () => {
         cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
     });
 
+    it("Check if user is warned before close side panel without save current modifications", () => {
+        cy.visit("/model_builder/");
+        cy.get("#btn-add-usage-journey").should("exist").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#UsageJourney_name").should("be.visible").clear().type("test name");
+        cy.get("#btn-close-side-panel").should("be.enabled").should("be.visible").click();
+        cy.get("#unsavedModal").should('be.visible');
+        cy.get("#cancel-unsaved-modal").should("be.visible").click();
+    });
+
+    it("Check if user is warned before open new side panel without save current modifications", () => {
+        cy.visit("/model_builder/");
+        cy.get("#btn-add-usage-journey").should("exist").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#UsageJourney_name").should("be.visible").clear().type("test name");
+        cy.get("#button-uid-my-first-usage-journey-1").should("be.enabled").should("be.visible").click();
+        cy.get("#unsavedModal").should('be.visible');
+        cy.get("#cancel-unsaved-modal").should("be.visible").click();
+    });
+
 });

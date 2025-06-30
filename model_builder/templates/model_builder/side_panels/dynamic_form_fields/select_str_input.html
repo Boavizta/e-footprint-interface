@@ -7,7 +7,7 @@
     data-default-name="{{ field.source.name }}"
     data-source-url="{{ field.source.link }}"
     data-source-attribute-to-skip = "{{ field.source_attribute_to_skip }}"
-    oninput="updateSource(this.id)"
+    oninput="updateSource(this.id);tagFormAsModified()"
 >
     {% for option in field.options %}
         <option value="{{ option.value }}" {% if option.value == field.selected %}selected{% endif %}>

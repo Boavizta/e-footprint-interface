@@ -229,6 +229,7 @@ function sortSelectMultipleFields(fieldId, selectedValue, direction) {
     }
     document.getElementById("selected_data").dataset.json = convertJsonToStringLikeDjango(selectedOptions);
     refreshSelectMultipleFields(fieldId);
+    tagFormAsModified();
 }
 
 function deleteValueFromSelectMultiple(fieldId, selectedValue) {
@@ -247,6 +248,7 @@ function deleteValueFromSelectMultiple(fieldId, selectedValue) {
     document.getElementById("add-btn-" + fieldId).removeAttribute("disabled");
     document.getElementById("select-new-object-"+fieldId).removeAttribute("disabled");
     refreshSelectMultipleFields(fieldId);
+    tagFormAsModified();
 }
 
 function addValueToSelectMultiple(fieldId) {

@@ -13,7 +13,7 @@
     data-default-value="{{ field.default }}"
     data-default-name="{{ field.source.name }}"
     data-source-url="{{ field.source.link }}"
-    oninput="updateSource(this.id)"
+    oninput="updateSource(this.id);tagFormAsModified()"
     required
 >
 <datalist id="datalist_{{ field.web_id }}">

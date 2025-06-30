@@ -2,6 +2,7 @@
     class="form-control p-2"
     id="{{ field.web_id }}"
     name="{{ field.web_id }}"
+    onclick="tagFormAsModified()"
     required
 >
     {% for option in field.options %}
