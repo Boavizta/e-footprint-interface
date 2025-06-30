@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.15] - 2025-07-08
+
+### Changed
+- Names rules for JSON export files have been updated. Max 120 characters and sanitize characters to avoid issues with special characters in filenames.
+
 ## [0.8.14] - 2025-07-08
 
 ### Changed
