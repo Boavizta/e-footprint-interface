@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.16] - 2025-06-30
+
+### Added
+- A modal to warn users when is currently editing/adding an object and try 
+  to do any action that would change the panel or close it, that they will 
+  lose their changes if they don’t save them.
+
 ## [0.8.13] - 20225-06-25
 
 ### Added

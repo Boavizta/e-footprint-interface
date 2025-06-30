@@ -1,3 +1,6 @@
+let formModified = false;
+let pendingRequest = null;
+
 function openSidePanel() {
     let sidePanel = document.getElementById("sidePanel");
     let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");
@@ -18,6 +21,9 @@ function openSidePanel() {
         top: scrollTarget.offsetTop,
         behavior: "smooth"
     })
+
+    formModified = false
+    pendingRequest = null
 }
 
 function closeAndEmptySidePanel() {
@@ -46,6 +52,9 @@ function closeAndEmptySidePanel() {
     modelCanvaScrollableArea.classList.remove("side-panel-open");
     modelCanvaScrollableArea.classList.add("w-100");
 
+    formModified = false
+    pendingRequest = null
+
     removeAllOpenedObjectsHighlights()
     updateLines();
 }
@@ -68,4 +77,58 @@ function setRecomputationToTrueIfResultPaneIsOpen(){
         form.setAttribute("hx-vals", JSON.stringify(vals));
         displayLoaderResult();
     }
+}
+
+function updateFormModified(){
+    formModified = true;
+}
+
+document.body.addEventListener("htmx:beforeRequest", function (event) {
+    const elt = event.target;
+    if (event.detail.elt.getAttribute("hx-target") === "#sidePanel" && formModified) {
+        event.preventDefault();
+        pendingRequest = elt;
+        const modal = new bootstrap.Modal(document.getElementById("unsavedModal"));
+        document.getElementById('continue-unsaved-modal').setAttribute("onclick", "proceedWithChange()");
+        modal.show();
+    }
+});
+
+function warnBeforeCloseSidePanel() {
+    if (formModified) {
+        const modal = new bootstrap.Modal(document.getElementById("unsavedModal"));
+        modal.show();
+        document.getElementById('continue-unsaved-modal').setAttribute("onclick", "triggerCloseWarnModalAndTriggerCloseSidePanel()");
+    } else {
+        closeAndEmptySidePanel();
+    }
+}
+
+function triggerCloseWarnModalAndTriggerCloseSidePanel() {
+    closeWarnModal()
+    closeAndEmptySidePanel();
+}
+
+function closeWarnModal(){
+    const modalEl = document.getElementById("unsavedModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+    modal.hide();
+    modalEl.addEventListener("hidden.bs.modal", () => {
+        document.getElementById("add_usage_pattern")?.focus();
+    }, { once: true });
+}
+
+function proceedWithChange() {
+    if (pendingRequest) {
+        formModified = false;
+        htmx.ajax("GET", pendingRequest.getAttribute("hx-get"), {
+            target: "#sidePanel",
+            swap: "innerHTML"
+        });
+        pendingRequest = null;
+    }
+    closeWarnModal();
 }
