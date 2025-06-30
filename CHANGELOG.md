@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Names rules for JSON export files have been updated. Max 120 characters and sanitize characters to avoid issues with special characters in filenames.
+- Update CSS to overwrite disabled style for buttons.
 
 ## [0.8.14] - 2025-07-08
 
