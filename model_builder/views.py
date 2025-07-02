@@ -264,7 +264,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
 
     return render(
         request,
-        "model_builder/side_panels/components/calculated_attribute_chart.html", context=context)
+        "model_builder/side_panels/calculated_attributes/calculated_attribute_chart.html", context=context)
 
 
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
@@ -276,7 +276,7 @@ def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
         explanation = exp_obj.explain()
     return render(
         request,
-        "model_builder/side_panels/components/calculated_attribute_explanation.html",
+        "model_builder/side_panels/calculated_attributes/calculated_attribute_explanation.html",
         {
             "efootprint_id": efootprint_id,
             "attr_name": attr_name,
