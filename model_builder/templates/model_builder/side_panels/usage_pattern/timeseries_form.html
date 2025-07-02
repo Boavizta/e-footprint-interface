@@ -10,7 +10,7 @@
            _="on input updateSource(@id) then openOrCloseTimeseriesChartAndTriggerUpdate()"
            required
     >
-    {% include "model_builder/side_panels/components/source.html" with source_id="start_date" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id="start_date" %}
 </div>
 <div class="mb-3">
     <label for="modeling_duration_value" class="form-label w-100">Modeling duration</label>
@@ -54,7 +54,7 @@
             <option value="year" {% if usage_pattern_input_values.modeling_duration_unit.value == "year" %}selected{% endif %}>Years</option>
         </select>
     </div>
-    {% include "model_builder/side_panels/components/source.html" with source_id="modeling_duration_value" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id="modeling_duration_value" %}
     <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
 </div>
 <div class="mb-3">
@@ -88,7 +88,7 @@
             <option value="year" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
     </div>
-    {% include "model_builder/side_panels/components/source.html" with source_id="initial_usage_journey_volume" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id="initial_usage_journey_volume" %}
 </div>
 <div class="mb-3">
     <label for="net_growth_rate_in_percentage" class="form-label w-100">Net growth rate (%)</label>
@@ -119,7 +119,7 @@
             <option value="year" {% if usage_pattern_input_values.net_growth_rate_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
     </div>
-    {% include "model_builder/side_panels/components/source.html" with source_id="net_growth_rate_in_percentage" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id="net_growth_rate_in_percentage" %}
 </div>
 
 <script>

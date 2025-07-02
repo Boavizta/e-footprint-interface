@@ -1,5 +1,5 @@
 {% for field in form_fields %}
-    {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
 {% endfor %}
 {% if form_fields_advanced|length > 0 %}
     <button type="button" class="btn btn-white border border-dark rounded-2 fs-xl mb-3"
@@ -19,7 +19,7 @@
     </button>
     <div id="advanced-{{ object_type }}" class="d-none mb-3">
         {% for field in form_fields_advanced %}
-            {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
         {% endfor %}
     </div>
 {% endif %}
