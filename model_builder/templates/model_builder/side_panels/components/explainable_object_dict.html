@@ -20,7 +20,7 @@
 
 <div class="collapse" id="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
     <div class="card card-body mb-3 no-truncate">
-        {% for sub_item in item.get_list_of_explainable_objects %}
+        {% for sub_item in item.get_values_as_list %}
             <div class="row align-items-center mb-3">
                 <div class="col-11">
                     <p class="mb-0">{{ sub_item.label }}</p>

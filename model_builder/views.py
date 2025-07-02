@@ -1,6 +1,7 @@
+import math
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from time import time
 import json
@@ -20,7 +21,7 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
-from model_builder.model_builder_utils import aggregate_daily_ehq
+from model_builder.model_builder_utils import to_rounded_daily_values
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
@@ -251,8 +252,10 @@ def get_chart_and_explanation_calculated_attribute(request, efootprint_id, attr_
     else:
         ehq = obj
 
-    dates, sums = aggregate_daily_ehq(ehq)
-    data_dict = dict(zip(dates, sums))
+    n_days = math.ceil(len(ehq) / 24)
+    dates = [(ehq.start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n_days)]
+    daily_data = to_rounded_daily_values(ehq.value)
+    data_dict = dict(zip(dates, daily_data))
 
     logger.info(f"Aggregating data for {attr_name} took {round((time() - start), 3)} seconds")
 
