@@ -12,7 +12,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_dict import ExplainableDict
 from openpyxl import Workbook
-from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
+from efootprint.abstract_modeling_classes.explainable_object_base_class import Source, ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
@@ -238,43 +238,33 @@ def download_sources(request):
     return response
 
 @time_it
-def get_chart_and_explanation_calculated_attribute(request, efootprint_id, attr_name, exp_obj_id=None):
-    from time import time
-    start = time()
+def get_chart_and_explanation_calculated_attribute(
+    request, efootprint_id: str, attr_name: str, key_in_dict: str=None):
     model_web = ModelWeb(request.session)
-    obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
-
-    if exp_obj_id is not None:
-        for exp in obj.values():
-            if exp.id == exp_obj_id:
-                ehq = exp
-                break
+    web_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+    if key_in_dict is None:
+        web_ehq = web_obj
     else:
-        ehq = obj
+        web_ehq = ObjectLinkedToModelingObjWeb(
+            web_obj.efootprint_object[model_web.get_efootprint_object_from_efootprint_id(key_in_dict)])
 
-    n_days = math.ceil(len(ehq) / 24)
-    dates = [(ehq.start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n_days)]
-    daily_data = to_rounded_daily_values(ehq.value)
+
+    n_days = math.ceil(len(web_ehq.value) / 24)
+    dates = [(web_ehq.start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n_days)]
+    daily_data = to_rounded_daily_values(web_ehq.value)
     data_dict = dict(zip(dates, daily_data))
-
-    logger.info(f"Aggregating data for {attr_name} took {round((time() - start), 3)} seconds")
 
     context = {
         "efootprint_id": efootprint_id,
-        "label": getattr(ehq, "attr_name_web", None) or getattr(ehq, "label", ""),
-        "unit": ehq.unit,
+        "label": web_ehq.attr_name_web,
+        "unit": web_ehq.unit,
         "attr_name": attr_name,
         "data_timeseries": data_dict,
-        "explanation": ehq.explain()
     }
-    if exp_obj_id is not None:
-        context["exp_obj_id"] = exp_obj_id
 
     return render(
         request,
-        "model_builder/side_panels/components/calculated_attribute_chart.html",
-        context=context,
-    )
+        "model_builder/side_panels/components/calculated_attribute_chart.html", context=context)
 
 
 def get_explanation_calculated_attribute(request, efootprint_id, attr_name):

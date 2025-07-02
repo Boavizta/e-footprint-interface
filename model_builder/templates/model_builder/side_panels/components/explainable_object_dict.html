@@ -27,7 +27,7 @@
                 </div>
                 <div class="col-1">
                     <div class="btn btn-light p-1"
-                         hx-get="{% url 'get_chart_and_explanation_calculated_attribute_from_dict' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container sub_item.id%}"
+                         hx-get="{% url 'get_chart_and_explanation_calculated_attribute_from_dict' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container sub_item.key_in_dict%}"
                          hx-target="#chart-calculated-attribute"
                          hx-trigger="click"
                          hx-swap="innerHTML"
