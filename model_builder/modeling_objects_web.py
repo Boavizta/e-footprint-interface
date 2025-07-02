@@ -1,15 +1,12 @@
 import re
 
-from efootprint.abstract_modeling_classes.explainable_dict import ExplainableDict
-from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
-from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
-from model_builder.efootprint_extensions.explainable_start_date import ExplainableStartDate
 from utils import camel_to_snake
 
 
@@ -22,43 +19,14 @@ def retrieve_attributes_by_type(modeling_obj, attribute_type):
 
     return output_list
 
-class ExplainableObjectDictWeb:
-    def __init__(self, explainable_object_dict: ExplainableObjectDict, modeling_obj_container):
-        self.explainable_object_dict = explainable_object_dict
+
+class ObjectLinkedToModelingObjWeb:
+    def __init__(self, object_linked_to_modeling_obj: ObjectLinkedToModelingObj, modeling_obj_container):
+        self.efootprint_object = object_linked_to_modeling_obj
         self.modeling_obj_container = modeling_obj_container
 
     def __getattr__(self, name):
-        attr = getattr(self.explainable_object_dict, name)
-
-        return attr
-
-
-    @property
-    def attr_name_web(self):
-        from model_builder.model_web import FORM_FIELD_REFERENCES
-        if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
-            return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
-        else:
-            return self.explainable_object_dict.attr_name_in_mod_obj_container.replace("_", " ")
-
-    @property
-    def get_template_name_calculated_attribute(self):
-        return re.search(r"<class 'efootprint\.abstract_modeling_classes\.([^.]*)\.",
-                         str(self.explainable_object_dict.__class__)).group(1)
-
-    @property
-    def get_list_of_explainable_objects(self):
-        return [ExplainableObjectWeb(explainable_object, self.modeling_obj_container)
-                for explainable_object in self.explainable_object_dict.values()]
-
-
-class ExplainableObjectWeb:
-    def __init__(self, explainable_object: ExplainableObject, modeling_obj_container):
-        self.explainable_object = explainable_object
-        self.modeling_obj_container = modeling_obj_container
-
-    def __getattr__(self, name):
-        attr = getattr(self.explainable_object, name)
+        attr = getattr(self.efootprint_object, name)
 
         return attr
 
@@ -71,20 +39,15 @@ class ExplainableObjectWeb:
             return self.attr_name_in_mod_obj_container.replace("_", " ")
 
     @property
-    def get_template_name_calculated_attribute(self):
-        if isinstance(self.explainable_object, ExplainableHourlyQuantities):
-            return "explainable_hourly_quantities"
-        elif isinstance(self.explainable_object, ExplainableQuantity):
-            return "explainable_quantity"
-        elif isinstance(self.explainable_object, ExplainableStartDate) :
-            return "explainable_start_date"
-        elif isinstance(self.explainable_object, ExplainableDict):
-            return "explainable_dict"
-        else:
-            raise ValueError(
-                f"Unknown explainable object type: {self.explainable_object.__class__.__name__}. "
-                f"Please implement a template for it in the model web."
-            )
+    def class_as_snake_str(self):
+        return camel_to_snake(type(self.efootprint_object).__name__)
+
+
+class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
+    @property
+    def get_list_of_explainable_objects(self):
+        return [ObjectLinkedToModelingObjWeb(explainable_object, self.modeling_obj_container)
+                for explainable_object in self.efootprint_object.values()]
 
 
 class ModelingObjectWeb:
@@ -110,7 +73,7 @@ class ModelingObjectWeb:
             return wrap_efootprint_object(attr, self.model_web)
 
         if isinstance(attr, ExplainableObject):
-            return ExplainableObjectWeb(attr, self)
+            return ObjectLinkedToModelingObjWeb(attr, self)
 
         if isinstance(attr, ExplainableObjectDict):
             return ExplainableObjectDictWeb(attr, self)
@@ -139,7 +102,7 @@ class ModelingObjectWeb:
         if isinstance(value, ModelingObjectWeb):
             raise PermissionError(error_message)
 
-        if isinstance(value, ExplainableObjectWeb):
+        if isinstance(value, ObjectLinkedToModelingObjWeb):
             raise PermissionError(error_message)
 
         self._modeling_obj.__setattr__(key, value, check_input_validity)

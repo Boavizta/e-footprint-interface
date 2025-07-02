@@ -4,10 +4,8 @@ import os
 from datetime import timedelta
 from time import time
 
-import numpy as np
 import pytz
 from django.contrib.sessions.backends.base import SessionBase
-from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
@@ -16,13 +14,11 @@ from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.usage.job import JobBase
 from efootprint.logger import logger
-from efootprint.constants.units import u
 from efootprint import __version__ as efootprint_version
-from pint import Quantity
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_builder_utils import determine_global_time_bounds, to_rounded_daily_values, get_quantity_array
-from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
+from model_builder.modeling_objects_web import wrap_efootprint_object, ObjectLinkedToModelingObjWeb
 from utils import EFOOTPRINT_COUNTRIES
 
 
@@ -177,7 +173,7 @@ class ModelWeb:
         for efootprint_object in self.flat_efootprint_objs_dict.values():
             web_efootprint_object = self.get_web_object_from_efootprint_id(efootprint_object.id)
             web_explainable_quantities += [
-                ExplainableObjectWeb(explainable_object, web_efootprint_object)
+                ObjectLinkedToModelingObjWeb(explainable_object, web_efootprint_object)
                 for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
 
         return web_explainable_quantities
@@ -244,8 +240,15 @@ class ModelWeb:
             q for q in list(energy.values()) + list(fab.values())
             if isinstance(q, ExplainableHourlyQuantities)
         ]
+        for ehq in ehqs:
+            assert ehq.start_date.tzinfo == pytz.utc, f"Wrong tzinfo for {ehq.label}: {ehq.start_date.tzinfo}"
+            if ehq.start_date.hour != 0:
+                logger.warning(
+                    f"{ehq.label} start date doesn’t start at midnight: {ehq.start_date}. "
+                    f"This shouldn’t happen if this times series has been created with a UsagePatternFromForm.")
+
         if not ehqs:
-            raise ValueError("Aucun ExplainableHourlyQuantities trouvé.")
+            raise ValueError("No ExplainableHourlyQuantities found.")
 
         global_start, total_hours = determine_global_time_bounds(ehqs)
 
