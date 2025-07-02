@@ -72,7 +72,7 @@ def download_json(request):
     response = HttpResponse(json_data, content_type="application/json")
     filename = f"{current_date_time} UTC {system.name}"
     filename = sanitize_filename(filename)
-    filename = smart_truncate(filename, max_length=45)
+    filename = smart_truncate(filename)
     response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"
     return response
 

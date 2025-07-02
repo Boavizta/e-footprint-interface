@@ -28,18 +28,18 @@ def camel_to_snake(name: str) -> str:
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
-def smart_truncate(text, max_length=45, suffix='_[...]'):
+def smart_truncate(text, max_length=120, suffix='_[...]'):
     if len(text) <= max_length:
         return text
-    cut_pos = max(text.rfind(sep, 0, max_length) for sep in [' ', '_', '-'])
-    if cut_pos == -1 or cut_pos < 10:
-        cut_pos = max_length
-    return text[:cut_pos].rstrip() + suffix
+    else:
+        return text[:max_length-5].rstrip() + suffix
 
 
 def sanitize_filename(name):
-    name = unicodedata.normalize('NFKD', name)
+    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('ascii')
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', name)
     name = re.sub(r'[^a-zA-Z0-9_\- ]', '_', name)
+    name = name.strip()
     return name
 
 
