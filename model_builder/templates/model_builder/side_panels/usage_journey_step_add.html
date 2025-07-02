@@ -9,7 +9,7 @@
                 hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
     >
         {% for field in form_fields %}
-            {% include "model_builder/side_panels/components/dynamic_form_field.html" %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
         {% endfor %}
     </form>
 {% endblock %}
