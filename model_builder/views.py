@@ -238,7 +238,7 @@ def download_sources(request):
     return response
 
 @time_it
-def get_chart_and_explanation_calculated_attribute(
+def get_explainable_hourly_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str, key_in_dict: str=None):
     model_web = ModelWeb(request.session)
     web_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
@@ -267,7 +267,7 @@ def get_chart_and_explanation_calculated_attribute(
         "model_builder/side_panels/components/calculated_attribute_chart.html", context=context)
 
 
-def get_explanation_calculated_attribute(request, efootprint_id, attr_name):
+def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
     model_web = ModelWeb(request.session)
     exp_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
     if isinstance(exp_obj.efootprint_object, ExplainableDict):
