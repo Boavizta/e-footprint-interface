@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculus graph</title>
+    <style>
+        html, body{
+            height: 100%;
+            background-color: #fefefe;
+        }
+        .graph-container {
+            border: 1px solid #AAA;
+            border-radius: 10px;
+            width: 90%;
+            margin-left: 5%;
+            height: {{ iframe_height }}%;
+        }
+        .title-graph {
+            margin-left: 5%;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    {% for graph in graphs %}
+        <p class="title-graph">{{ graph.name }}</p>
+        <iframe class="graph-container" src="{{ graph.url }}" frameborder="0"></iframe>
+    {% endfor %}
+</body>
+</html>

@@ -1,0 +1,114 @@
+<nav class="navbar navbar-expand-lg bg-white z-3">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+        {# TODO: Replace placeholder with actual url_for for model_builder.open_panel_system_name #}
+        <div class="navbar-brand position-relative" role="button"
+                id="btn-change-system-name"
+                hx-get="{{ url_for('model_builder_placeholder_open_panel_system_name') }}"
+                hx-target="#sidePanel"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                hx-disabled-elt="button"
+                _="
+                    on mouseover remove .d-none from #edit-icon-system-name
+                    on mouseout add .d-none to #edit-icon-system-name
+                    on click removeAllOpenedObjectsHighlights()
+                "
+        >
+            <p id="system-name" class="m-0 pe-3 text-truncate">{{ model_web.system.name }}</p>
+
+            <span class="d-none position-absolute top-50 start-100 translate-middle badge rounded-circle badge-gray-100 text-black z-3 p-1"
+                    id="edit-icon-system-name"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil-fill"
+                     viewBox="0 0 16 16">
+                  <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                </svg>
+            </span>
+
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end mt-1 m-lg-0" id="navbarSupportedContent">
+            <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3">
+                <li class="nav-item">
+                    {# TODO: Replace placeholder with actual url_for for model_builder.open_import_json_panel #}
+                    <button hx-get="{{ url_for('model_builder_placeholder_open_import_json_panel') }}"
+                            hx-target="#sidePanel"
+                            hx-swap="innerHTML"
+                            hx-disabled-elt="button"
+                            class="nav-link d-flex flex-row gap-2 mx-2"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Import a model"
+                            data-bs-custom-class="custom-tooltip"
+                            data-location="upload_download_reboot_model_tooltips"
+                            _="on click call collapseNavbarIfShown()"
+                    >
+                        <img src="{{ url_for('static', filename='icons/tooltip/upload.svg') }}" width="24px" height="24px" alt="import_icon">
+                        <p class="d-block d-lg-none">
+                            Import your model
+                        </p>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    {# TODO: Replace placeholder with actual url_for for model_builder.download_json #}
+                    <a href="{{ url_for('model_builder_placeholder_download_json') }}"
+                           target="_blank"
+                           class="nav-link d-flex flex-row gap-2 mx-2"
+                           data-bs-title="Export your model"
+                           data-bs-placement="bottom"
+                           data-bs-custom-class="custom-tooltip"
+                           data-location="upload_download_reboot_model_tooltips"
+                            _="on click call collapseNavbarIfShown()"
+                    >
+                        <img src="{{ url_for('static', filename='icons/tooltip/export.svg') }}" width="24px" height="24px" alt="export_icon">
+                        <p class="d-block d-lg-none">
+                            Export your model
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    {# TODO: Replace placeholder with actual url_for for model_builder.model_builder_main with reboot=True #}
+                    <a href="{{ url_for('model_builder_placeholder_reboot') }}"
+                       id="btn-reboot-modeling"
+                           class="nav-link d-flex flex-row gap-2 mx-2"
+                           data-bs-title="Reset to default model"
+                           data-bs-placement="bottom"
+                           data-bs-custom-class="custom-tooltip"
+                           data-location="upload_download_reboot_model_tooltips"
+                            _="on click call collapseNavbarIfShown()"
+                    >
+                        <img src="{{ url_for('static', filename='icons/tooltip/reboot.svg') }}" width="24px" height="24px" alt="reboot_icon">
+                        <p class="d-block d-lg-none">
+                            Reset to default model
+                        </p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script>
+
+    window.tooltipTriggerList = document.querySelectorAll('[data-location="upload_download_reboot_model_tooltips"]')
+    window.tooltipTriggerList.forEach(el => {
+        if (window.innerWidth >= 992) {
+            new bootstrap.Tooltip(el)
+        } else {
+            el.removeAttribute('data-bs-toggle')
+        }
+    })
+
+    function collapseNavbarIfShown() {
+        const isExpanded = document.getElementById("navbarSupportedContent").classList.contains("show");
+        if (isExpanded) {
+            const collapse = new bootstrap.Collapse(document.getElementById("navbarSupportedContent"), {
+                toggle: false
+            });
+            collapse.hide();
+        }
+    }
+</script>

@@ -2,7 +2,7 @@ import re
 import unicodedata
 
 from efootprint.constants.countries import Countries
-from django.shortcuts import render
+from flask import render_template, request
 
 
 def camelcase_html_filename_from_path(html_file_path: str):
@@ -43,18 +43,19 @@ def sanitize_filename(name):
     return name
 
 
-def htmx_render(request, html_file_path: str, context=None):
+def htmx_render(html_file_path: str, context=None):
     if context is None:
         context = {}
 
     if request.headers.get("HX-Request") == "true":
-        return render(request, html_file_path, context)
+        # For HTMX requests, render the partial template
+        return render_template(html_file_path, **context)
     else:
-        html_filename = camelcase_html_filename_from_path(html_file_path)
-        context[html_filename] = True
-        response = render(request, "base.html", context)
-
-        return response
+        # For full page loads, render base.html and pass a flag
+        # for conditional inclusion of the main content.
+        html_filename_as_context_key = camelcase_html_filename_from_path(html_file_path)
+        context[html_filename_as_context_key] = True
+        return render_template("base.html", **context)
 
 
 EFOOTPRINT_COUNTRIES = []

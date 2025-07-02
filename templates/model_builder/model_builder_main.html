@@ -1,0 +1,151 @@
+{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+<div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
+    <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
+        <div class="d-flex flex-row" id="model-canva">
+            <div class="equal-width p-2">
+                <div class="d-flex flex-column text-start rounded-4 list-object-efootprint p-4" id="usage-pattern-container">
+                    <h5><b>Usage patterns</b></h5>
+                    {# TODO: Replace placeholder with actual url_for for model_builder.open_create_object_panel #}
+                    <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                            id="add_usage_pattern"
+                                hx-get="{{ url_for('model_builder_placeholder_open_create_object_panel', object_type='UsagePatternFromForm') }}"
+                                hx-target="#sidePanel"
+                                hx-trigger="click"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="button"
+                                _="on click removeAllOpenedObjectsHighlights()"
+                    >
+                        <img src="{{ url_for('static', filename='icons/add_icon.svg') }}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
+                        <p class="mb-0 text-addition">Add usage pattern</p>
+                    </button>
+                    <div id="up-list" class="list-group w-75 ps-0">
+                        {% for usage_pattern in model_web.usage_patterns %}
+                        {% include 'model_builder/object_cards/usage_pattern_card.html' %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="equal-width p-2">
+                <div class="d-flex flex-column text-start rounded-4 list-object-efootprint p-4" id="usage-journey-container">
+                     <h5><b>Usage journeys</b></h5>
+                    {# TODO: Replace placeholder with actual url_for for model_builder.open_create_object_panel #}
+                    <button class="w-100 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                        id="btn-add-usage-journey"
+                            hx-get="{{ url_for('model_builder_placeholder_open_create_object_panel', object_type='UsageJourney') }}"
+                            hx-target="#sidePanel"
+                            hx-trigger="click"
+                            hx-swap="innerHTML"
+                            hx-disabled-elt="button"
+                            _="on click removeAllOpenedObjectsHighlights()"
+                    >
+                        <img src="{{ url_for('static', filename='icons/add_icon.svg') }}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
+                        <p class="mb-0 text-addition">Add usage journey</p>
+                    </button>
+                    <div id="uj-list" class="list-group w-100 ps-0">
+                        {% for usage_journey in model_web.usage_journeys %}
+                        {% include 'model_builder/object_cards/usage_journey_card.html' %}
+                        {% endfor %}
+                        {% for empty_usage_journey in model_web.empty_usage_journeys %}
+                        {% include 'model_builder/object_cards/usage_journey_empty.html' with usage_journey=empty_usage_journey %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="equal-width p-2">
+                <div class="d-flex flex-column text-start rounded-4 list-object-efootprint p-4" id="server-container">
+                    <h5><b>Infrastructure</b></h5>
+                    {# TODO: Replace placeholder with actual url_for for model_builder.open_create_object_panel #}
+                    <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                            id="btn-add-server"
+                            hx-get="{{ url_for('model_builder_placeholder_open_create_object_panel', object_type='ServerBase') }}"
+                            hx-target="#sidePanel"
+                            hx-trigger="click"
+                            hx-swap="innerHTML"
+                            hx-disabled-elt="button"
+                            _="on click removeAllOpenedObjectsHighlights()"
+                    >
+                        <img src="{{ url_for('static', filename='icons/add_icon.svg') }}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
+                        <p class="mb-0 text-addition">Add server</p>
+                    </button>
+                    <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">
+                        {% for server in model_web.servers %}
+                        {% include 'model_builder/object_cards/server_card.html' %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel"></div>
+    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
+        {# TODO: Replace placeholder with actual url_for for model_builder.result_chart #}
+        <div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
+            hx-get="{{ url_for('model_builder_placeholder_result_chart') }}"
+            hx-target="#result-block"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+            hx-disabled-elt="button"
+        >
+            <div class="row h-100 text-start align-items-center">
+                <div class="col-4">
+                    <p class="h5 my-0 ms-3">Results</p>
+                </div>
+                <div class="col-4 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="40" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
+                        <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div id="result-block" class="bg-transparent overflow-y-auto pt-1"></div>
+    </div>
+</div>
+
+<button id="model-scroll-to-right"
+    class="d-block d-xl-none position-absolute top-50 end-0 top-0 border-0 rounded-start-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-1"
+        onclick="scrollToRight()"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+</svg>
+</button>
+
+<button id="model-scroll-to-left"
+    class="d-block d-xl-none position-absolute top-50 start-0 border-0 rounded-end-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-1"
+        onclick="scrollToLeft()"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+      <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+    </svg>
+</button>
+
+{% include 'model_builder/side_panels/usage_pattern/timeseries_chart.html' %}
+
+{% include 'model_builder/components/toast.html' %}
+
+<div id="modal-container">
+</div>
+
+<div id="loader-container">
+</div>
+
+<div class="modal fade" id="error-import-modal" tabindex="-1" aria-labelledby="error-import-modal-Label" aria-hidden="true"  data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-x-octagon" viewBox="0 0 16 16">
+                    <path d="M4.54.146A.5.5 0 0 1 4.893 0h6.214a.5.5 0 0 1 .353.146l4.394 4.394a.5.5 0 0 1 .146.353v6.214a.5.5 0 0 1-.146.353l-4.394 4.394a.5.5 0 0 1-.353.146H4.893a.5.5 0 0 1-.353-.146L.146 11.46A.5.5 0 0 1 0 11.107V4.893a.5.5 0 0 1 .146-.353zM5.1 1 1 5.1v5.8L5.1 15h5.8l4.1-4.1V5.1L10.9 1z"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                </svg>
+                <p><strong role="status">Import errror</strong></p>
+                <p>{{ import_error_message }}</p>
+                <div class="progress mt-3">
+                    <div id="progressBar" class="progress-bar bg-primary w-100" style="width: 100%;"></div>
+                </div>
+                <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="leaderlines-layer" class="position-absolute top-0 start-0 w-100 h-100"></div>

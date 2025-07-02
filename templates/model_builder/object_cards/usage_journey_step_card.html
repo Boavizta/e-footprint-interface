@@ -1,0 +1,88 @@
+<div id="{{ usage_journey_step.web_id }}" class="leader-line-object d-flex my-3 custom-ms-3 border border-0 border-white align-items-start"
+     data-link-to="{{ usage_journey_step.links_to }}"
+     data-line-opt="{{ usage_journey_step.data_line_opt }}">
+    <div class="w-100 p-0">
+        <div class="accordion accordion-flush">
+            <div class="accordion-item">
+                <div class="accordion-header p-0 d-flex align-self-start">
+                    <img src="{{ url_for('static', filename='images/step-circle.svg') }}"
+                         data-link-to="{{ usage_journey_step.icon_links_to }}"
+                         data-line-opt="{{ usage_journey_step.icon_leaderline_style }}"
+                         id="icon-{{ usage_journey_step.web_id }}"
+                         width="16" height="16"
+                         class="align-self-center leader-line-object mx-1"
+                        alt="icon line step">
+                    <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#flush-{{ usage_journey_step.web_id }}"
+                            onclick="reverseIconAccordion('{{ usage_journey_step.web_id }}')"
+                            aria-expanded="{% if usage_journey_step.jobs|length == 0 %}true{% else %}false{% endif %}"
+                            aria-controls="flush-{{ usage_journey_step.web_id }}">
+                        <svg id="icon_accordion_{{ usage_journey_step.web_id }}" xmlns="http://www.w3.org/2000/svg"
+                             width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                             class="bi bi-chevron-right {% if usage_journey_step.jobs|length == 0 %}chevron-rotate{% endif %}"
+                             viewBox="0 0 16 16">
+                            <path fill="none" stroke-linecap="round" stroke-linejoin="round"
+                                  d="M4.646 1.646l6 6-6 6"/>
+                        </svg>
+                    </button>
+                    {# TODO: Replace placeholder with actual url_for for model_builder.open_edit_object_panel #}
+                    <button id="button-{{ usage_journey_step.web_id }}"
+                            class="btn btn-white p-2 text-start w-100 d-flex flex-row justify-content-between align-items-center text-break position-relative border-2"
+                            type="button"
+                            hx-get="{{ url_for('model_builder_placeholder_open_edit_object_panel', object_id=usage_journey_step.efootprint_id) }}"
+                            hx-target="#sidePanel"
+                            hx-trigger="click"
+                            hx-swap="innerHTML"
+                            hx-disabled-elt="button"
+                            _="
+                                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened on me
+                                on mouseover remove .d-none from #edit-icon-{{ usage_journey_step.web_id }}
+                                on mouseout add .d-none to #edit-icon-{{ usage_journey_step.web_id }}
+                            "
+                    >
+                        {% include 'model_builder/components/button_card_header.html' with object_card=usage_journey_step %}
+                    </button>
+                </div>
+                <div id="flush-{{ usage_journey_step.web_id }}"
+                     class="accordion-collapse collapse {% if usage_journey_step.jobs|length == 0 %}show{% endif %}"
+                     data-bs-parent="#{{ usage_journey_step.web_id }}">
+                    <div class="accordion-body w-100 pe-0 m-0 d-flex flex-column py-1">
+                        {% for job in usage_journey_step.jobs %}
+                            {% include 'model_builder/object_cards/job_card.html' with job=job %}
+                        {% endfor %}
+                        <div class="w-85 ms-15 px-0 py-1 d-flex justify-content-end position-relative">
+                            {# TODO: Replace placeholder with actual url_for for model_builder.open_create_object_panel #}
+                            <button
+                                    class="btn btn-white text-end w-100 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
+                                    hx-get="{{ url_for('model_builder_placeholder_open_create_object_panel', object_type='Job') }}"
+                                    hx-target="#sidePanel"
+                                    hx-trigger="click"
+                                    hx-swap="innerHTML"
+                                    hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ usage_journey_step.efootprint_id }}"}'
+                                    hx-disabled-elt="button"
+                                    _="on click removeAllOpenedObjectsHighlights()"
+                            >
+                                <p class='h8 mb-0 text-break text-addition px-1' id="name-{{ object_card.web_id }}">
+                                    Add new job
+                                </p>
+                            </button>
+                            <span class="position-absolute top-50 start-100 translate-middle bg-transparent rounded-circle">
+                                <img src="{{ url_for('static', filename='icons/circle_add_icon.svg') }}"  width="14" height="14" class="cursor"
+                                    hx-get="{{ url_for('model_builder_placeholder_open_create_object_panel', object_type='Job') }}"
+                                    hx-target="#sidePanel"
+                                    hx-trigger="click"
+                                    hx-swap="innerHTML"
+                                    hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ usage_journey_step.efootprint_id }}"}'
+                                    hx-disabled-elt="button"
+                                    _="on click removeAllOpenedObjectsHighlights()"
+                                >
+                                <span class="visually-hidden">Add new job</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

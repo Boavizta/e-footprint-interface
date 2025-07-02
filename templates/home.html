@@ -1,0 +1,35 @@
+<div class="container-fluid justify-content-center overflow-y-auto overflow-x-hidden" id="home-page-container">
+    <div class="row m-0 p-0 align-items-center">
+        <div class="col-12 col-xl-8 p-2 p-xl-5 home-page">
+            <div class="row h-100">
+                <div class="col-10 offset-1 text-start rounded-2 p-4">
+                    <div class="d-flex px-4 py-5">
+                        <img src="{{ url_for('static', filename='images/e-footprint-logo-Hori-full.svg') }}" alt="e-footprint-logo" />
+                    </div>
+                    <p class="h1 mt-5 mb-4"><b>Do you know the carbon footprint<br>of your digital service ?</b></p>
+                    {# TODO: Replace 'model_builder_main_placeholder' with the actual route name for model_builder e.g. 'model_builder.model_builder_main' #}
+                    <button id="btn-start-modeling-my-service" class="btn bg-radiant rounded-pill mt-3 h3 py-3 px-4 text-white no-loader"
+                            hx-get="{{ url_for('model_builder_main_placeholder') }}"
+                            hx-target="#main-content-block" hx-swap="innerHTML"
+                            hx-push-url="{{ url_for('model_builder_main_placeholder') }}"
+                    >Start modeling my service
+                    </button>
+                </div>
+            </div>
+        </div>
+         <div class="col-12 col-xl-4 bg-body-tertiary d-flex flex-column justify-content-center align-items-center home-page ">
+            <div>
+                <img src="{{ url_for('static', filename='images/understand.svg') }}" class="img-fluid home-img" alt="understand" />
+                <p><b>Understand</b><br>our approach</p>
+            </div>
+            <div>
+                <img src="{{ url_for('static', filename='images/analyze.svg') }}" class="img-fluid home-img" alt="analyze" />
+                <p><b>Analyze</b><br>model your service to calculate its impact</p>
+            </div>
+            <div>
+                <img src="{{ url_for('static', filename='images/identify.svg') }}" class="img-fluid home-img" alt="identify" />
+                <p><b>Identify</b><br>the most impactful parts of your service</p>
+            </div>
+        </div>
+    </div>
+</div>

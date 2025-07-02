@@ -1,0 +1,27 @@
+<div id="chartTimeseries" class="chartTimeseries text-start shadow-custom z-2 d-none d-flex flex-column">
+    <h5 id="formModalLabel" class="my-2">
+        <b>Usage volume projection</b>
+    </h5>
+    <div class="row align-items-center my-2">
+        <div class="col-auto">
+            <label for="display_granularity" class="form-label w-100 text-start fs-xl">Time period</label>
+            <select class="form-select light-select fs-xl height-30"
+                    id="display_granularity"
+                    name="display_granularity"
+                _="on input createOrUpdateTimeSeriesChart()">
+                <option value="month" selected>Month</option>
+                <option value="year">Year</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-white border border-1 border-body-tertiary rounded-pill fs-xl"
+                    id="reset_zoom"
+                onclick="window.chart.resetZoom();">
+                Reset zoom
+            </button>
+        </div>
+    </div>
+    <div class="col-12 mt-2 flex-grow-1">
+        <canvas id="timeSeriesChart"></canvas>
+    </div>
+</div>

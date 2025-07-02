@@ -1,0 +1,21 @@
+<div id="{{ usage_pattern.web_id }}"
+     class="leader-line-object list-group-item mb-3 py-2 ps-2 pe-0 rounded-3 model-builder-card grab"
+     data-link-to="{{ usage_pattern.links_to }}" data-line-opt="{{ usage_pattern.data_line_opt }}">
+    {# TODO: Replace placeholder with actual url_for for model_builder.open_edit_object_panel #}
+    <button id="button-{{ usage_pattern.web_id }}"
+            class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center w-100"
+            type="button"
+            hx-get="{{ url_for('model_builder_placeholder_open_edit_object_panel', object_id=usage_pattern.efootprint_id) }}"
+            hx-target="#sidePanel"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+            hx-disabled-elt="button"
+            _="
+                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ usage_pattern.web_id }}
+                on mouseout add .d-none to #edit-icon-{{ usage_pattern.web_id }}
+                on mouseover remove .d-none from #edit-icon-{{ usage_pattern.web_id }}
+            "
+    >
+        {% include 'model_builder/components/button_card_header.html' with object_card=usage_pattern %}
+    </button>
+</div>
