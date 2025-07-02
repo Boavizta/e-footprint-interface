@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 from time import time
 import json
@@ -10,7 +10,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from efootprint.abstract_modeling_classes.explainable_dict import ExplainableDict
-from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from openpyxl import Workbook
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -23,7 +22,7 @@ from efootprint.utils.tools import time_it
 
 from model_builder.model_builder_utils import aggregate_daily_ehq
 from model_builder.model_web import ModelWeb
-from model_builder.modeling_objects_web import ExplainableObjectWeb, ExplainableObjectDictWeb
+from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
 
@@ -195,7 +194,7 @@ def download_sources(request):
         for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
             source = attr_value.source
             web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
-            web_attr_value = ExplainableObjectWeb(attr_value, web_efootprint_object)
+            web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, web_efootprint_object)
             if attr_name in efootprint_object.calculated_attributes:
                 source = Source("Computed", "")
 
@@ -277,8 +276,8 @@ def get_chart_and_explanation_calculated_attribute(request, efootprint_id, attr_
 
 def get_explanation_calculated_attribute(request, efootprint_id, attr_name):
     model_web = ModelWeb(request.session)
-    exp_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id),attr_name)
-    if isinstance(exp_obj.explainable_object, ExplainableDict):
+    exp_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+    if isinstance(exp_obj.efootprint_object, ExplainableDict):
         explanation = exp_obj.value
     else:
         explanation = exp_obj.explain()

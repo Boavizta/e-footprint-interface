@@ -50,8 +50,6 @@ describe("Test - Result panel", () => {
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
         .realTouch('end', { x: 100, y: 400 });
-
-
     });
 
     it("check if an exception modal is displayed when the calculation is launched with an UsageJourney without any" +
@@ -188,6 +186,5 @@ describe("Test - Result panel", () => {
         cy.get('@drawBarResultChart').should('have.been.called');
         cy.wait(1000);
         cy.get('#panel-result-btn').should('not.have.class', 'result-width')
-
     });
 });

@@ -98,8 +98,8 @@ class IntegrationTest(TestModelingBase):
                 set(job_request.session["system_data"][efootprint_class].keys()),
                 set(self.system_data[efootprint_class].keys()),
                 f"Mismatch in {efootprint_class} data")
-        self.assertEqual(initial_total_footprint.explainable_object,
-                         ModelWeb(job_request.session).system.total_footprint.explainable_object)
+        self.assertEqual(initial_total_footprint.efootprint_object,
+                         ModelWeb(job_request.session).system.total_footprint.efootprint_object)
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_raise_error_if_users_tries_to_see_results_with_incomplete_modeling(self, mock_exception_modal):
