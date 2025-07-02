@@ -180,12 +180,12 @@ function updateSource(inputId) {
 
     if (displayDefaultSource) {
         if(input.dataset.sourceUrl && input.dataset.sourceUrl !== '' && input.dataset.sourceUrl !== 'None'){
-            sourceDiv.innerHTML = `source : <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
+            sourceDiv.innerHTML = `Source: <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
         }else{
-            sourceDiv.innerHTML = `source : ${input.dataset.defaultName}`
+            sourceDiv.innerHTML = `Source: ${input.dataset.defaultName}`
         }
     }else{
-        sourceDiv.innerHTML = "source : user data";
+        sourceDiv.innerHTML = "Source: user data";
     }
 }
 
