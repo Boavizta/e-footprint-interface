@@ -31,7 +31,7 @@
             {
                 "web_id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
-                "label": "existing usage journey steps you can pick",
+                "label": "Usage journey steps in this usage journey",
                 "tooltip": false,
                 "input_type": "select-multiple",
                 "selected": [],

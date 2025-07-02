@@ -65,7 +65,7 @@ $zindex-levels: (
     --list-object-calculated-height : calc(
         var(--model-canva-calculated-height)- var(--open-result-btn)
     );
-    --result-panel-opened : calc(var(--full-height) - var(--navbar-height) - var(--toolbar-height) );
+    --result-panel-opened : calc(var(--full-height) - var(--navbar-height) - var(--toolbar-height) - 8px );
     --home-page-height : calc(var(--full-height) - var(--navbar-height));
 }
 

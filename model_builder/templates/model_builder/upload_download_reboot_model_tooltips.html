@@ -1,5 +1,5 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg bg-white z-3">
+<nav class="navbar navbar-expand-lg bg-white z-3 pt-3">
     <div class="container-fluid d-flex align-items-center justify-content-between">
         <div class="navbar-brand position-relative" role="button"
                 id="btn-change-system-name"
@@ -32,7 +32,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end mt-1 m-lg-0" id="navbarSupportedContent">
-            <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3">
+            <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3 align-items-center">
                 <li class="nav-item">
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"
@@ -82,6 +82,17 @@
                             Reset to default model
                         </p>
                     </a>
+                </li>
+                <li class="nav-item">
+                    <div class="btn bg-radiant-reverse text-white rounded-pill mx-2"
+                         hx-get="/model_builder/result-chart/"
+                            hx-target="#result-block"
+                            hx-swap="innerHTML"
+                            hx-trigger="click"
+                            hx-disabled-elt="button"
+                    >
+                        Show results
+                    </div>
                 </li>
             </ul>
         </div>

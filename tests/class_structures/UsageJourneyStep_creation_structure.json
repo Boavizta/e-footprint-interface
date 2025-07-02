@@ -46,7 +46,7 @@
             {
                 "web_id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
-                "label": "existing jobs you can pick",
+                "label": "Jobs in this usage journey step",
                 "tooltip": false,
                 "input_type": "select-multiple",
                 "selected": [],

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.16] - 2025-06-19
+
+### Added
+- Add a new button in the toolbar to open the result panel.
+
+### Changed
+- Review SCSS rules and update CSS class in templates to unify styles.
+
 ## [0.8.15] - 2025-07-09
 
 ### Added

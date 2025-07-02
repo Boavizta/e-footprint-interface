@@ -308,8 +308,8 @@ function refreshSelectMultipleFields(fieldId) {
         if (index !== selectedOptions.length - 1) {
             ctaSortDown.innerHTML = `
             <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','down')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
-                  <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
                 </svg>
             </button>`
         }else{
@@ -318,8 +318,8 @@ function refreshSelectMultipleFields(fieldId) {
         if(index !== 0){
             ctaSortUp.innerHTML = `
             <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','up')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
-                  <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/>
                 </svg>
             </button>`
         }else{
