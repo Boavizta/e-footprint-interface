@@ -2,6 +2,7 @@
     class="form-control p-2"
     id="{{ field.id }}"
     name="{{ field.id }}"
+    onclick="updateFormModified()"
     required
 >
     {% for option in field.options %}
