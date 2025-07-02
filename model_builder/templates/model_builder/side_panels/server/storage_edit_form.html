@@ -7,7 +7,7 @@
     >
         {% block edit_form_content %}
             <input type="hidden" value="{{ object_to_edit.efootprint_id }}" name="storage_id" id="storage_id">
-            {% include "model_builder/side_panels/components/object_form_content.html" with object_type=object_to_edit.class_as_simple_str %}
+            {% include "model_builder/side_panels/object_form_content.html" with object_type=object_to_edit.class_as_simple_str %}
         {% endblock %}
     </form>
 {% endblock %}

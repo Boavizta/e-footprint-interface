@@ -32,7 +32,7 @@ urlpatterns = [
     path("get_explainable_hourly_quantity_chart_and_explanation/<efootprint_id>/<attr_name>/",
          model_builder.views.get_explainable_hourly_quantity_chart_and_explanation,
          name="get_explainable_hourly_quantity_chart_and_explanation"),
-    path("get_explainable_hourly_quantity_chart_and_explanation/<efootprint_id>/<attr_name>/<exp_obj_id>",
+    path("get_explainable_hourly_quantity_chart_and_explanation/<efootprint_id>/<attr_name>/<key_in_dict>",
          model_builder.views.get_explainable_hourly_quantity_chart_and_explanation,
          name="get_explainable_hourly_quantity_chart_and_explanation_from_dict"),
     path("get_explanation_calculated_attribute/<efootprint_id>/<attr_name>/",
