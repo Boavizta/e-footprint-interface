@@ -17,7 +17,7 @@ from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_builder_utils import determine_global_time_bounds, to_rounded_daily_values, get_quantity_array
+from model_builder.model_builder_utils import determine_global_time_bounds, to_rounded_daily_values, get_reindexed_array_from_dict
 from model_builder.modeling_objects_web import wrap_efootprint_object, ObjectLinkedToModelingObjWeb
 from utils import EFOOTPRINT_COUNTRIES
 
@@ -236,16 +236,7 @@ class ModelWeb:
         energy = self.system.total_energy_footprints
         fab = self.system.total_fabrication_footprints
 
-        ehqs = [
-            q for q in list(energy.values()) + list(fab.values())
-            if isinstance(q, ExplainableHourlyQuantities)
-        ]
-        for ehq in ehqs:
-            assert ehq.start_date.tzinfo == pytz.utc, f"Wrong tzinfo for {ehq.label}: {ehq.start_date.tzinfo}"
-            if ehq.start_date.hour != 0:
-                logger.warning(
-                    f"{ehq.label} start date doesn’t start at midnight: {ehq.start_date}. "
-                    f"This shouldn’t happen if this times series has been created with a UsagePatternFromForm.")
+        ehqs = [q for q in list(energy.values()) + list(fab.values()) if isinstance(q, ExplainableHourlyQuantities)]
 
         if not ehqs:
             raise ValueError("No ExplainableHourlyQuantities found.")
@@ -259,24 +250,23 @@ class ModelWeb:
             ],
             "values" : {
                 "Servers_and_storage_energy": to_rounded_daily_values(
-                    get_quantity_array("Servers", energy, global_start, total_hours)
-                    + get_quantity_array("Storage", energy, global_start, total_hours)
+                    get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
+                    + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
                 ),
                 "Devices_energy": to_rounded_daily_values(
-                    get_quantity_array("Devices", energy, global_start, total_hours)
+                    get_reindexed_array_from_dict("Devices", energy, global_start, total_hours)
                 ),
                 "Network_energy": to_rounded_daily_values(
-                    get_quantity_array("Network", energy, global_start, total_hours)
+                    get_reindexed_array_from_dict("Network", energy, global_start, total_hours)
                 ),
                 "Servers_and_storage_fabrication": to_rounded_daily_values(
-                    get_quantity_array("Servers", fab, global_start, total_hours)
-                    + get_quantity_array("Storage", fab, global_start, total_hours)
+                    get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
+                    + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
                 ),
                 "Devices_fabrication": to_rounded_daily_values(
-                    get_quantity_array("Devices", fab, global_start, total_hours)
+                    get_reindexed_array_from_dict("Devices", fab, global_start, total_hours)
                 ),
             }
         }
 
         return emissions
-

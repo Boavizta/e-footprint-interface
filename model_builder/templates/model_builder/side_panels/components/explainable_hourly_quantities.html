@@ -5,7 +5,7 @@
     <p class="col-auto col-form-label">{{ item.attr_name_web|capfirst }}</p>
     <div class="col-auto">
         <div class="btn btn-light p-1"
-             hx-get="{% url 'get_chart_and_explanation_calculated_attribute' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
+             hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
              hx-target="#chart-calculated-attribute"
              hx-trigger="click"
              hx-swap="innerHTML"

@@ -1,4 +1,5 @@
 import re
+from typing import List
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -45,7 +46,7 @@ class ObjectLinkedToModelingObjWeb:
 
 class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
     @property
-    def get_list_of_explainable_objects(self):
+    def get_values_as_list(self) -> List[ObjectLinkedToModelingObjWeb]:
         return [ObjectLinkedToModelingObjWeb(explainable_object, self.modeling_obj_container)
                 for explainable_object in self.efootprint_object.values()]
 

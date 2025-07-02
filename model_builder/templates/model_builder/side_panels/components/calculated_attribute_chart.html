@@ -17,12 +17,10 @@
 <div id="calculated-attribute-explanation" class="mb-3">
     {{ explanation }}
 </div>
-{% if not exp_obj_id %}
-    <a class="btn bg-white border border-1 border-light py-auto bg-light h8" id="link-render-calculated-attribute"
-        href="{% url 'display-calculus-graph' efootprint_id attr_name %}"
-        target="_blank"
-    >
-        See the calculus graph
-        <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
-    </a>
-{% endif %}
+<a class="btn bg-white border border-1 border-light py-auto bg-light h8" id="link-render-calculated-attribute"
+    href="{% url 'display-calculus-graph' efootprint_id attr_name %}"
+    target="_blank"
+>
+    See the calculus graph
+    <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+</a>

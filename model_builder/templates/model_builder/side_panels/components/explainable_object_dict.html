@@ -20,14 +20,14 @@
 
 <div class="collapse" id="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
     <div class="card card-body mb-3 no-truncate">
-        {% for sub_item in item.get_list_of_explainable_objects %}
+        {% for sub_item in item.get_values_as_list %}
             <div class="row align-items-center mb-3">
                 <div class="col-11">
                     <p class="mb-0">{{ sub_item.label }}</p>
                 </div>
                 <div class="col-1">
                     <div class="btn btn-light p-1"
-                         hx-get="{% url 'get_chart_and_explanation_calculated_attribute_from_dict' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container sub_item.id%}"
+                         hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container sub_item.key_in_dict%}"
                          hx-target="#chart-calculated-attribute"
                          hx-trigger="click"
                          hx-swap="innerHTML"
