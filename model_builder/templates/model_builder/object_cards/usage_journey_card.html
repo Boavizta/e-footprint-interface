@@ -33,7 +33,8 @@
                     {% for usage_journey_step in usage_journey.uj_steps %}
                         {% include 'model_builder/object_cards/usage_journey_step_card.html' %}
                     {% endfor %}
-                    <div id="add-step-to-{{ usage_journey.efootprint_id }}" class="d-flex custom-ms-4 mt-3 align-items-center move"
+                    <div id="add-step-to-{{ usage_journey.efootprint_id }}" class="d-flex custom-ms-4 mt-3 mb-2
+                    align-items-center move"
                         hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"
                         hx-target="#sidePanel"
                         hx-trigger="click"
