@@ -63,6 +63,8 @@ class ModelWeb:
         start = time()
         self.session = session
         self.system_data = session["system_data"]
+        logger.info(f"Session data loaded in {time() - start:.3f} seconds.")
+        start = time()
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
             self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
