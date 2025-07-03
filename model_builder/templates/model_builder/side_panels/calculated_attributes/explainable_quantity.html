@@ -30,6 +30,11 @@
             <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon">
         </button>
     </div>
+    <div class="col-2">
+        <a href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}" target="_blank">
+            <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+        </a>
+    </div>
 </div>
 
 <div class="collapse" id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"></div>
