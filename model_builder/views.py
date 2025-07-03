@@ -256,8 +256,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
 
     context = {
         "efootprint_id": efootprint_id,
-        "label": web_ehq.attr_name_web,
-        "unit": web_ehq.unit,
+        "web_ehq": web_ehq,
         "attr_name": attr_name,
         "data_timeseries": data_dict,
         "explanation": web_ehq.explain()

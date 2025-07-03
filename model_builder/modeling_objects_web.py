@@ -1,5 +1,6 @@
 import re
-from typing import List
+import string
+from typing import List, Tuple, Dict
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -50,6 +51,49 @@ class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
         return [ObjectLinkedToModelingObjWeb(explainable_object, self.modeling_obj_container)
                 for explainable_object in self.efootprint_object.values()]
 
+
+class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
+    def compute_literal_formula_and_ancestors_mapped_to_symbols_list(self) \
+        -> Tuple[List[str|ExplainableObject], List[Dict[str, ExplainableObject]]]:
+        # Base symbols: Roman lowercase + Greek lowercase
+        base_symbols = list(string.ascii_lowercase) + [
+            'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ',
+            'χ', 'ψ', 'ω']
+
+        def get_symbol(i: int) -> str:
+            n = len(base_symbols)
+            index = i % n
+            cycle = i // n
+            base = base_symbols[index]
+            return base if cycle == 0 else f"{base}{cycle}"
+
+        ancestor_ids_to_symbols_mapping = {}
+        ids_to_ancestors_mapping = {}
+        flat_tuple_formula = self.compute_formula_as_flat_tuple(self.explain_nested_tuples)
+        literal_formula = []
+        current_symbol_index = 0
+        for elt in flat_tuple_formula:
+            if isinstance(elt, ExplainableObject):
+                if elt.id in ancestor_ids_to_symbols_mapping:
+                    literal_formula.append(
+                        {"symbol": ancestor_ids_to_symbols_mapping[elt.id], "explainable_object": elt})
+                else:
+                    ancestor_ids_to_symbols_mapping[elt.id] = get_symbol(current_symbol_index)
+                    literal_formula.append(
+                        {"symbol": ancestor_ids_to_symbols_mapping[elt.id], "explainable_object": elt})
+                    current_symbol_index += 1
+                    ids_to_ancestors_mapping[elt.id] = elt
+            else:
+                literal_formula.append(elt)
+
+        ancestors_mapped_to_symbols_list = []
+
+        for ancestor_id in ids_to_ancestors_mapping:
+            ancestor = ids_to_ancestors_mapping[ancestor_id]
+            ancestors_mapped_to_symbols_list.append(
+                {"symbol": ancestor_ids_to_symbols_mapping[ancestor_id], "explainable_object": ancestor})
+
+        return literal_formula, ancestors_mapped_to_symbols_list
 
 class ModelingObjectWeb:
     def __init__(self, modeling_obj: ModelingObject, model_web):
