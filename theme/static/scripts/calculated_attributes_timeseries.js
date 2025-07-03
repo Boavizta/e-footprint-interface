@@ -6,8 +6,8 @@ let calculatedAttributeChartJSOptions = {
         x: {
             type: 'time',
             time: {
-                tooltipFormat: 'yyyy',
-                unit: 'year'
+                unit: "day",
+                tooltipFormat: "yyyy-MM-dd"
             },
             title: { display: false },
             grid: { display: false }
@@ -47,7 +47,7 @@ let calculatedAttributeChartJSOptions = {
     }
 };
 
-const chartRegistry = new Map();
+window.calculatedAttributesChart = null;
 
 function openCalculatedAttributesChart() {
    let element = document.getElementById("chart-calculated-attribute");
@@ -63,68 +63,51 @@ function closeCalculatedAttributesChart() {
         element.classList.remove("d-block");
         element.classList.add("d-none");
     }
-    let canva = document.getElementById("chart-render-calculated-attribute");
-    if (canva && chartRegistry.has(canva)) {
-        chartRegistry.get(canva).destroy();
-        chartRegistry.delete(canva);
-    }
+    window.calculatedAttributesChart = null;
 }
 
 function createOrUpdateCalculatedAttributeChart() {
-    let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
-    let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({
-        x: date,
-        y: value
-    }));
-
-    let canva = document.getElementById("chart-render-calculated-attribute");
-    if (chartRegistry.has(canva)) {
-        chartRegistry.get(canva).destroy();
+    if (window.calculatedAttributesChart !== null) {
+        window.calculatedAttributesChart.destroy();
+        window.calculatedAttributesChart = null;
     }
 
-    let labelUnit = document.getElementById("calculate-attribute-label");
-    let label = labelUnit.dataset.label;
-    let unit = labelUnit.dataset.unit || "";
+    setTimeout(() => {
+        let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
+        let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({
+            x: date,
+            y: value
+        }));
+        let labelUnit = document.getElementById("calculate-attribute-label");
+        let label = labelUnit.dataset.label;
+        let unit = labelUnit.dataset.unit || "";
 
-    let chart = new Chart(canva.getContext("2d"), {
-        type: "line",
-        data: {
-            datasets: [{
-                label: label + (unit ? ` (${unit})` : ""),
-                data: timeSeries,
-                borderColor: "#007bff",
-                fill: false,
-                pointRadius: 2,
-                tension: 0.1
-            }]
-        },
-        options: {
-            ...calculatedAttributeChartJSOptions,
-            scales: {
-                ...calculatedAttributeChartJSOptions.scales,
-                x: {
-                    ...calculatedAttributeChartJSOptions.scales.x,
-                    type: "time",
-                    time: {
-                        unit: "day",
-                        tooltipFormat: "yyyy-MM-dd"
-                    }
-                },
-                y: {
-                    ...calculatedAttributeChartJSOptions.scales.y,
-                    title: {
-                        ...calculatedAttributeChartJSOptions.scales.y.title,
-                        text: label + (unit ? ` (${unit})` : "")
+        let canva = document.getElementById("chart-render-calculated-attribute");
+        window.calculatedAttributesChart = new Chart(canva.getContext("2d"), {
+            type: "line",
+            data: {
+                datasets: [{
+                    label: label + (unit ? ` (${unit})` : ""),
+                    data: timeSeries,
+                    borderColor: "#007bff",
+                    fill: false,
+                    pointRadius: 2,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                ...calculatedAttributeChartJSOptions,
+                scales: {
+                    ...calculatedAttributeChartJSOptions.scales,
+                    y: {
+                        ...calculatedAttributeChartJSOptions.scales.y,
+                        title: {
+                            ...calculatedAttributeChartJSOptions.scales.y.title,
+                            text: label + (unit ? ` (${unit})` : "")
+                        }
                     }
                 }
             }
-        }
-    });
-
-    chartRegistry.set(canva, chart);
-    /*
-    document.getElementById("calculated-attribute-formula").innerHTML = `${sourceElement.dataset.formula}`;
-    document.getElementById("link-render-calculated-attribute").href = "/model_builder/display-calculus-graph/"+sourceElement.dataset.modObjContainer+"/"+sourceElement.dataset.attrNameInModObjContainer+"/"
-     */
+        });
+    }, 500); // 200ms wait before creating chart
 }
-
