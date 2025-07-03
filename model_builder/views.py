@@ -260,6 +260,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
         "unit": web_ehq.unit,
         "attr_name": attr_name,
         "data_timeseries": data_dict,
+        "explanation": web_ehq.explain()
     }
 
     return render(
