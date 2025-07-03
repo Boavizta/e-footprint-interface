@@ -18,7 +18,7 @@ from efootprint import __version__ as efootprint_version
 
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_builder_utils import determine_global_time_bounds, to_rounded_daily_values, get_reindexed_array_from_dict
-from model_builder.modeling_objects_web import wrap_efootprint_object, ObjectLinkedToModelingObjWeb
+from model_builder.modeling_objects_web import wrap_efootprint_object, ExplainableObjectWeb
 from utils import EFOOTPRINT_COUNTRIES
 
 
@@ -173,7 +173,7 @@ class ModelWeb:
         for efootprint_object in self.flat_efootprint_objs_dict.values():
             web_efootprint_object = self.get_web_object_from_efootprint_id(efootprint_object.id)
             web_explainable_quantities += [
-                ObjectLinkedToModelingObjWeb(explainable_object, web_efootprint_object)
+                ExplainableObjectWeb(explainable_object, web_efootprint_object)
                 for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
 
         return web_explainable_quantities

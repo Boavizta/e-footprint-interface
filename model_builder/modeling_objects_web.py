@@ -1,8 +1,10 @@
 import re
-from typing import List
+import string
+from typing import List, Tuple, Dict
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
@@ -44,10 +46,74 @@ class ObjectLinkedToModelingObjWeb:
         return camel_to_snake(type(self.efootprint_object).__name__)
 
 
+class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
+    def compute_literal_formula_and_ancestors_mapped_to_symbols_list(self) \
+        -> Tuple[List[str|ExplainableObject], List[Dict[str, ExplainableObject]]]:
+        # Base symbols: Roman lowercase + Greek lowercase
+        base_symbols = list(string.ascii_lowercase) + [
+            'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ',
+            'χ', 'ψ', 'ω']
+
+        def get_symbol(i: int) -> str:
+            n = len(base_symbols)
+            index = i % n
+            cycle = i // n
+            base = base_symbols[index]
+            return base if cycle == 0 else f"{base}{cycle}"
+
+        ancestor_ids_to_symbols_mapping = {}
+        ids_to_ancestors_mapping = {}
+        flat_tuple_formula = self.compute_formula_as_flat_tuple(self.explain_nested_tuples)
+        literal_formula = []
+        current_symbol_index = 0
+        for elt in flat_tuple_formula:
+            if isinstance(elt, ExplainableObject):
+                web_wrapper = ExplainableQuantityWeb if isinstance(elt, ExplainableQuantity) else ExplainableObjectWeb
+                if elt.modeling_obj_container is None:
+                    elt.attr_name_web = elt.label
+                    literal_formula.append(
+                        {"symbol": elt.label,
+                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                elif elt.id in ancestor_ids_to_symbols_mapping:
+                    literal_formula.append(
+                        {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
+                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                else:
+                    ancestor_ids_to_symbols_mapping[elt.id] = get_symbol(current_symbol_index)
+                    literal_formula.append(
+                        {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
+                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                    current_symbol_index += 1
+                    ids_to_ancestors_mapping[elt.id] = elt
+            else:
+                literal_formula.append(elt)
+
+        ancestors_mapped_to_symbols_list = []
+
+        for ancestor_id in ids_to_ancestors_mapping:
+            ancestor = ids_to_ancestors_mapping[ancestor_id]
+            web_wrapper = ExplainableQuantityWeb if isinstance(ancestor, ExplainableQuantity) else ExplainableObjectWeb
+            ancestors_mapped_to_symbols_list.append(
+                {"symbol": ancestor_ids_to_symbols_mapping[ancestor_id],
+                 "explainable_object": web_wrapper(ancestor, ancestor.modeling_obj_container)})
+
+        return literal_formula, ancestors_mapped_to_symbols_list
+
+
+class ExplainableQuantityWeb(ExplainableObjectWeb):
+    @property
+    def rounded_value(self):
+        return round(self.value, 2)
+
+    @property
+    def unit(self):
+        return self.value.units
+
+
 class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
     @property
-    def get_values_as_list(self) -> List[ObjectLinkedToModelingObjWeb]:
-        return [ObjectLinkedToModelingObjWeb(explainable_object, self.modeling_obj_container)
+    def get_values_as_list(self) -> List[ExplainableObjectWeb]:
+        return [ExplainableObjectWeb(explainable_object, self.modeling_obj_container)
                 for explainable_object in self.efootprint_object.values()]
 
 
@@ -74,7 +140,7 @@ class ModelingObjectWeb:
             return wrap_efootprint_object(attr, self.model_web)
 
         if isinstance(attr, ExplainableObject):
-            return ObjectLinkedToModelingObjWeb(attr, self)
+            return ExplainableObjectWeb(attr, self)
 
         if isinstance(attr, ExplainableObjectDict):
             return ExplainableObjectDictWeb(attr, self)
