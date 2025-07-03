@@ -67,47 +67,62 @@ function closeCalculatedAttributesChart() {
 }
 
 function createOrUpdateCalculatedAttributeChart() {
+    function resetCanvas(canva) {
+      // Remove inline styles that might affect size
+      canva.style.width = "";
+      canva.style.height = "";
+      canva.style.maxWidth = "";
+      canva.style.maxHeight = "";
+
+      // Set fixed size (essential for reset to work)
+      canva.width = canva.parentElement.clientWidth;
+      canva.height = 400;
+
+      // Clear drawing area to be safe
+      const ctx = canva.getContext("2d");
+      ctx.clearRect(0, 0, canva.width, canva.height);
+    }
+    let canva = document.getElementById("chart-render-calculated-attribute");
+
     if (window.calculatedAttributesChart !== null) {
         window.calculatedAttributesChart.destroy();
         window.calculatedAttributesChart = null;
+        resetCanvas(canva);
     }
 
-    setTimeout(() => {
-        let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
-        let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({
-            x: date,
-            y: value
-        }));
-        let labelUnit = document.getElementById("calculate-attribute-label");
-        let label = labelUnit.dataset.label;
-        let unit = labelUnit.dataset.unit || "";
+    let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
+    let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({
+        x: date,
+        y: value
+    }));
+    let labelUnit = document.getElementById("calculate-attribute-label");
+    let label = labelUnit.dataset.label;
+    let unit = labelUnit.dataset.unit || "";
 
-        let canva = document.getElementById("chart-render-calculated-attribute");
-        window.calculatedAttributesChart = new Chart(canva.getContext("2d"), {
-            type: "line",
-            data: {
-                datasets: [{
-                    label: label + (unit ? ` (${unit})` : ""),
-                    data: timeSeries,
-                    borderColor: "#007bff",
-                    fill: false,
-                    pointRadius: 2,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                ...calculatedAttributeChartJSOptions,
-                scales: {
-                    ...calculatedAttributeChartJSOptions.scales,
-                    y: {
-                        ...calculatedAttributeChartJSOptions.scales.y,
-                        title: {
-                            ...calculatedAttributeChartJSOptions.scales.y.title,
-                            text: label + (unit ? ` (${unit})` : "")
-                        }
+    window.calculatedAttributesChart = new Chart(canva.getContext("2d"), {
+        type: "line",
+        data: {
+            datasets: [{
+                label: label + (unit ? ` (${unit})` : ""),
+                data: timeSeries,
+                borderColor: "#007bff",
+                fill: false,
+                pointRadius: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            ...calculatedAttributeChartJSOptions,
+            scales: {
+                ...calculatedAttributeChartJSOptions.scales,
+                y: {
+                    ...calculatedAttributeChartJSOptions.scales.y,
+                    title: {
+                        ...calculatedAttributeChartJSOptions.scales.y.title,
+                        text: label + (unit ? ` (${unit})` : "")
                     }
                 }
             }
-        });
-    }, 500); // 200ms wait before creating chart
+        }
+    });
 }
