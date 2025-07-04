@@ -1,9 +1,19 @@
 import re
+import string
+from typing import List, Tuple, Dict, TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
+
+from utils import camel_to_snake
+
+if TYPE_CHECKING:
+    from model_builder.model_web import ModelWeb
 
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
@@ -16,27 +26,106 @@ def retrieve_attributes_by_type(modeling_obj, attribute_type):
     return output_list
 
 
-class ExplainableObjectWeb:
-    def __init__(self, explainable_object: ExplainableObject, modeling_obj_container):
-        self.explainable_object = explainable_object
-        self.modeling_obj_container = modeling_obj_container
+class ObjectLinkedToModelingObjWeb:
+    def __init__(self, object_linked_to_modeling_obj: ObjectLinkedToModelingObj, model_web: "ModelWeb"):
+        self.efootprint_object = object_linked_to_modeling_obj
+        self.model_web = model_web
 
     def __getattr__(self, name):
-        attr = getattr(self.explainable_object, name)
+        attr = getattr(self.efootprint_object, name)
 
         return attr
 
     @property
-    def label(self):
+    def modeling_obj_container(self):
+        return wrap_efootprint_object(self.efootprint_object.modeling_obj_container, self.model_web)
+
+    @property
+    def attr_name_web(self):
         from model_builder.model_web import FORM_FIELD_REFERENCES
         if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
             return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
         else:
             return self.attr_name_in_mod_obj_container.replace("_", " ")
 
+    @property
+    def class_as_snake_str(self):
+        return camel_to_snake(type(self.efootprint_object).__name__)
+
+
+class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
+    def compute_literal_formula_and_ancestors_mapped_to_symbols_list(self) \
+        -> Tuple[List[str|ExplainableObject], List[Dict[str, ExplainableObject]]]:
+        # Base symbols: Roman lowercase + Greek lowercase
+        base_symbols = list(string.ascii_lowercase) + [
+            'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ',
+            'χ', 'ψ', 'ω']
+
+        def get_symbol(i: int) -> str:
+            n = len(base_symbols)
+            index = i % n
+            cycle = i // n
+            base = base_symbols[index]
+            return base if cycle == 0 else f"{base}{cycle}"
+
+        ancestor_ids_to_symbols_mapping = {}
+        ids_to_ancestors_mapping = {}
+        flat_tuple_formula = self.compute_formula_as_flat_tuple(self.explain_nested_tuples)
+        literal_formula = []
+        current_symbol_index = 0
+        for elt in flat_tuple_formula:
+            if isinstance(elt, ExplainableObject):
+                web_wrapper = ExplainableQuantityWeb if isinstance(elt, ExplainableQuantity) else ExplainableObjectWeb
+                if elt.modeling_obj_container is None:
+                    elt.attr_name_web = elt.label
+                    literal_formula.append(
+                        {"symbol": elt.label,
+                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                elif elt.id in ancestor_ids_to_symbols_mapping:
+                    literal_formula.append(
+                        {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
+                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                else:
+                    ancestor_ids_to_symbols_mapping[elt.id] = get_symbol(current_symbol_index)
+                    literal_formula.append(
+                        {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
+                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                    current_symbol_index += 1
+                    ids_to_ancestors_mapping[elt.id] = elt
+            else:
+                literal_formula.append(elt)
+
+        ancestors_mapped_to_symbols_list = []
+
+        for ancestor_id in ids_to_ancestors_mapping:
+            ancestor = ids_to_ancestors_mapping[ancestor_id]
+            web_wrapper = ExplainableQuantityWeb if isinstance(ancestor, ExplainableQuantity) else ExplainableObjectWeb
+            ancestors_mapped_to_symbols_list.append(
+                {"symbol": ancestor_ids_to_symbols_mapping[ancestor_id],
+                 "explainable_object": web_wrapper(ancestor, ancestor.modeling_obj_container)})
+
+        return literal_formula, ancestors_mapped_to_symbols_list
+
+
+class ExplainableQuantityWeb(ExplainableObjectWeb):
+    @property
+    def rounded_value(self):
+        return round(self.value, 2)
+
+    @property
+    def unit(self):
+        return self.value.units
+
+
+class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
+    @property
+    def get_values_as_list(self) -> List[ExplainableObjectWeb]:
+        return [ExplainableObjectWeb(explainable_object, self.model_web)
+                for explainable_object in self.efootprint_object.values()]
+
 
 class ModelingObjectWeb:
-    def __init__(self, modeling_obj: ModelingObject, model_web):
+    def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb"):
         self._modeling_obj = modeling_obj
         self.model_web = model_web
 
@@ -58,7 +147,10 @@ class ModelingObjectWeb:
             return wrap_efootprint_object(attr, self.model_web)
 
         if isinstance(attr, ExplainableObject):
-            return ExplainableObjectWeb(attr, self)
+            return ExplainableObjectWeb(attr, self.model_web)
+
+        if isinstance(attr, ExplainableObjectDict):
+            return ExplainableObjectDictWeb(attr, self.model_web)
 
         return attr
 
@@ -84,7 +176,7 @@ class ModelingObjectWeb:
         if isinstance(value, ModelingObjectWeb):
             raise PermissionError(error_message)
 
-        if isinstance(value, ExplainableObjectWeb):
+        if isinstance(value, ObjectLinkedToModelingObjWeb):
             raise PermissionError(error_message)
 
         self._modeling_obj.__setattr__(key, value, check_input_validity)
@@ -94,7 +186,7 @@ class ModelingObjectWeb:
 
     @property
     def calculated_attributes_values(self):
-        return [getattr(self, attr_name) for attr_name in self.calculated_attributes]
+        return [self.__getattr__(attr_name) for attr_name in self.calculated_attributes]
 
     @property
     def modeling_obj(self):
@@ -425,7 +517,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Storage": ModelingObjectWeb
 }
 
-def wrap_efootprint_object(modeling_obj, model_web):
+def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):
     if modeling_obj.class_as_simple_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
         return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[modeling_obj.class_as_simple_str](modeling_obj, model_web)
 

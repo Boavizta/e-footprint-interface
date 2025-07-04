@@ -138,7 +138,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
                 from pytz import timezone
                 new_value = ExplainableTimezone(
-                    timezone(edit_form_data[attr_name_with_prefix]), label=current_value.label,
+                    timezone(edit_form_data[attr_name_with_prefix]), label=current_value.attr_name_web,
                     source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
         elif issubclass(annotation, ExplainableObject):
@@ -146,7 +146,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
                 new_value = SourceObject(edit_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
                 if new_value.value != current_value.value:
                     logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
-                    new_value.set_label(current_value.label)
+                    new_value.set_label(current_value.attr_name_web)
                     check_input_validity = True
                     if attr_name in obj_to_edit.attributes_with_depending_values():
                         logger.info(f"Won’t check input validity for {attr_name} "
@@ -157,12 +157,12 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObject
             elif attr_name in obj_to_edit.conditional_list_values:
                 # Always update value for conditional str attribute to make sure that they belong to authorized values
                 new_value = SourceObject(
-                    edit_form_data[attr_name_with_prefix], label=current_value.label, source=Sources.USER_DATA)
+                    edit_form_data[attr_name_with_prefix], label=current_value.attr_name_web, source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
             elif str(current_value.value) != edit_form_data[attr_name_with_prefix]:
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
                 new_value = SourceObject(
-                    edit_form_data[attr_name_with_prefix], label=current_value.label, source=Sources.USER_DATA)
+                    edit_form_data[attr_name_with_prefix], label=current_value.attr_name_web, source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
 
 

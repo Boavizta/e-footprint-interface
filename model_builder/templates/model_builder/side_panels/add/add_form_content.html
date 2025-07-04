@@ -12,7 +12,7 @@
                 <div id="collapse_{{ form_section.category }}"
                      class="accordion-collapse show" data-bs-parent="accordionFormAdd">
                     <div class="accordion-body">
-                        {% include "model_builder/side_panels/components/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
+                        {% include "model_builder/side_panels/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
                     </div>
                 </div>
             </div>

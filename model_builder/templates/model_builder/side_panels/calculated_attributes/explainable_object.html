@@ -1,0 +1,32 @@
+{% load static %}
+{% load custom_filters %}
+
+<div class="row align-items-center mb-3">
+    <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
+        {{ item.label|capfirst }}:
+    </label>
+
+    <div class="col-auto">
+        <button type="button"
+                class="btn btn-light p-1"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}"
+                aria-expanded="false"
+                aria-controls="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
+            <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon">
+        </button>
+    </div>
+</div>
+
+<div class="collapse" id="collapse-calculated_attributes{{ item.attr_name_in_mod_obj_container }}">
+    <div class="card card-body mb-3 no-truncate">
+        <p class="mb-3">{{ item.explain|explain_format|safe }}</p>
+        <a class="btn btn-light btn-sm"
+           href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
+           target="_blank">
+            See the calculus graph
+            <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+        </a>
+    </div>
+</div>
+

@@ -1,3 +1,4 @@
+import math
 import random
 import string
 from datetime import datetime
@@ -6,9 +7,11 @@ from time import time
 import json
 import os
 
+import numpy as np
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from efootprint.abstract_modeling_classes.explainable_dict import ExplainableDict
 from openpyxl import Workbook
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -19,8 +22,10 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
+from model_builder.model_builder_utils import to_rounded_daily_values
 from model_builder.model_web import ModelWeb
-from model_builder.modeling_objects_web import ExplainableObjectWeb
+from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb, ExplainableObjectWeb, \
+    ExplainableQuantityWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
 
@@ -192,12 +197,12 @@ def download_sources(request):
         for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
             source = attr_value.source
             web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
-            web_attr_value = ExplainableObjectWeb(attr_value, web_efootprint_object)
+            web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, model_web)
             if attr_name in efootprint_object.calculated_attributes:
                 source = Source("Computed", "")
 
             sources.append([
-                web_attr_value.label,
+                web_attr_value.attr_name_web,
                 web_efootprint_object.name,
                 web_efootprint_object.class_label,
                 attr_value.value.magnitude,
@@ -233,3 +238,62 @@ def download_sources(request):
     response["Content-Disposition"] = f"attachment; filename={current_date_time}_UTC {system_name}_sources.xlsx"
 
     return response
+
+@time_it
+def get_explainable_hourly_quantity_chart_and_explanation(
+    request, efootprint_id: str, attr_name: str, key_in_dict: str=None):
+    model_web = ModelWeb(request.session)
+    edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
+    web_attr = getattr(edited_web_obj, attr_name)
+    if key_in_dict is None:
+        web_ehq = web_attr
+    else:
+        web_ehq = ExplainableObjectWeb(
+            web_attr.efootprint_object[model_web.get_efootprint_object_from_efootprint_id(key_in_dict)], model_web)
+
+
+    n_days = math.ceil(len(web_ehq.value) / 24)
+    start = np.datetime64(web_ehq.start_date)
+    dates = (start + np.arange(n_days)).astype(str).tolist()
+    daily_data = to_rounded_daily_values(web_ehq.value)
+    data_dict = dict(zip(dates, daily_data))
+    literal_formula, ancestors_mapped_to_symbols_list = (
+        web_ehq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
+    web_children = []
+    for child in web_ehq.direct_children_with_id:
+        assert child.modeling_obj_container is not None
+        web_wrapper = ExplainableQuantityWeb if isinstance(child, ExplainableQuantity) else ExplainableObjectWeb
+        web_children.append(web_wrapper(child, model_web))
+
+    context = {
+        "edited_web_obj": edited_web_obj,
+        "web_ehq": web_ehq,
+        "attr_name": attr_name,
+        "data_timeseries": data_dict,
+        "explanation": web_ehq.explain(),
+        "literal_formula": literal_formula,
+        "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
+        "children": web_children,
+    }
+
+    return render(
+        request,
+        "model_builder/side_panels/calculated_attributes/calculated_attribute_chart.html", context=context)
+
+
+def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
+    model_web = ModelWeb(request.session)
+    exp_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+    if isinstance(exp_obj.efootprint_object, ExplainableDict):
+        explanation = exp_obj.value
+    else:
+        explanation = exp_obj.explain()
+    return render(
+        request,
+        "model_builder/side_panels/calculated_attributes/calculated_attribute_explanation.html",
+        {
+            "efootprint_id": efootprint_id,
+            "attr_name": attr_name,
+            "explanation": explanation
+        }
+    )

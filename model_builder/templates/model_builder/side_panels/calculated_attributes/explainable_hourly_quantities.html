@@ -1,0 +1,34 @@
+{% load custom_filters %}
+{% load static %}
+
+<div class="row mb-3">
+    <p class="col-auto col-form-label">{{ item.attr_name_web|capfirst }}</p>
+    <div class="col-auto">
+        <div class="btn btn-light p-1"
+             hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
+             hx-target="#chart-calculated-attribute"
+             hx-trigger="click"
+             hx-swap="innerHTML"
+             hx-disabled-elt="button"
+             _="on click openCalculatedAttributesChart()"
+        >
+            <img src="{% static 'icons/timeseries-chart.svg' %}" width="16" height="16" alt="calculus-graph-icon">
+        </div>
+    </div>
+    <div class="col-2">
+        <a href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}" target="_blank">
+            <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+        </a>
+    </div>
+</div>
+
+<div class="collapse" id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}">
+    <div class="card card-body mb-3 no-truncate">
+        <a class="btn btn-light btn-sm"
+           href="{% url 'display-calculus-graph' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
+           target="_blank">
+            See the calculus graph
+            <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+        </a>
+    </div>
+</div>
