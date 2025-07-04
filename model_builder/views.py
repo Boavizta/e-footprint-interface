@@ -197,7 +197,7 @@ def download_sources(request):
         for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
             source = attr_value.source
             web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
-            web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, web_efootprint_object)
+            web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, model_web)
             if attr_name in efootprint_object.calculated_attributes:
                 source = Source("Computed", "")
 
@@ -249,7 +249,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
         web_ehq = web_attr
     else:
         web_ehq = ExplainableObjectWeb(
-            web_attr.efootprint_object[model_web.get_efootprint_object_from_efootprint_id(key_in_dict)])
+            web_attr.efootprint_object[model_web.get_efootprint_object_from_efootprint_id(key_in_dict)], model_web)
 
 
     n_days = math.ceil(len(web_ehq.value) / 24)
@@ -263,7 +263,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
     for child in web_ehq.direct_children_with_id:
         assert child.modeling_obj_container is not None
         web_wrapper = ExplainableQuantityWeb if isinstance(child, ExplainableQuantity) else ExplainableObjectWeb
-        web_children.append(web_wrapper(child, child.modeling_obj_container))
+        web_children.append(web_wrapper(child, model_web))
 
     context = {
         "edited_web_obj": edited_web_obj,

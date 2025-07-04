@@ -33,7 +33,7 @@
                  ({{ obj.unit }})
               <a
                 href="#"
-                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' obj.modeling_obj_container.id obj.attr_name_in_mod_obj_container %}"
+                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' obj.modeling_obj_container.efootprint_id obj.attr_name_in_mod_obj_container %}"
                 hx-target="#chart-calculated-attribute"
                 hx-trigger="click"
                 hx-swap="innerHTML"
@@ -47,7 +47,7 @@
             {% endif %}
             <a
                 href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ obj.modeling_obj_container.id }}/"
+                hx-get="/model_builder/open-edit-object-panel/{{ obj.modeling_obj_container.efootprint_id }}/"
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"
@@ -90,7 +90,7 @@
                  ({{ child.unit }})
               <a
                 href="#"
-                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' child.modeling_obj_container.id child.attr_name_in_mod_obj_container %}"
+                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container %}"
                 hx-target="#chart-calculated-attribute"
                 hx-trigger="click"
                 hx-swap="innerHTML"
@@ -104,7 +104,7 @@
             {% endif %}
             <a
                 href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ child.modeling_obj_container.id }}/"
+                hx-get="/model_builder/open-edit-object-panel/{{ child.modeling_obj_container.efootprint_id }}/"
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"

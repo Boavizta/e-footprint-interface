@@ -4,7 +4,6 @@ import os
 from datetime import timedelta
 from time import time
 
-import pytz
 from django.contrib.sessions.backends.base import SessionBase
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
@@ -173,7 +172,7 @@ class ModelWeb:
         for efootprint_object in self.flat_efootprint_objs_dict.values():
             web_efootprint_object = self.get_web_object_from_efootprint_id(efootprint_object.id)
             web_explainable_quantities += [
-                ExplainableObjectWeb(explainable_object, web_efootprint_object)
+                ExplainableObjectWeb(explainable_object, self)
                 for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
 
         return web_explainable_quantities
