@@ -1,6 +1,6 @@
 import re
 import string
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -11,6 +11,9 @@ from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 
 from utils import camel_to_snake
+
+if TYPE_CHECKING:
+    from model_builder.model_web import ModelWeb
 
 
 def retrieve_attributes_by_type(modeling_obj, attribute_type):
@@ -24,14 +27,18 @@ def retrieve_attributes_by_type(modeling_obj, attribute_type):
 
 
 class ObjectLinkedToModelingObjWeb:
-    def __init__(self, object_linked_to_modeling_obj: ObjectLinkedToModelingObj, modeling_obj_container):
+    def __init__(self, object_linked_to_modeling_obj: ObjectLinkedToModelingObj, model_web: "ModelWeb"):
         self.efootprint_object = object_linked_to_modeling_obj
-        self.modeling_obj_container = modeling_obj_container
+        self.model_web = model_web
 
     def __getattr__(self, name):
         attr = getattr(self.efootprint_object, name)
 
         return attr
+
+    @property
+    def modeling_obj_container(self):
+        return wrap_efootprint_object(self.efootprint_object.modeling_obj_container, self.model_web)
 
     @property
     def attr_name_web(self):
@@ -113,12 +120,12 @@ class ExplainableQuantityWeb(ExplainableObjectWeb):
 class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
     @property
     def get_values_as_list(self) -> List[ExplainableObjectWeb]:
-        return [ExplainableObjectWeb(explainable_object, self.modeling_obj_container)
+        return [ExplainableObjectWeb(explainable_object, self.model_web)
                 for explainable_object in self.efootprint_object.values()]
 
 
 class ModelingObjectWeb:
-    def __init__(self, modeling_obj: ModelingObject, model_web):
+    def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb"):
         self._modeling_obj = modeling_obj
         self.model_web = model_web
 
@@ -140,10 +147,10 @@ class ModelingObjectWeb:
             return wrap_efootprint_object(attr, self.model_web)
 
         if isinstance(attr, ExplainableObject):
-            return ExplainableObjectWeb(attr, self)
+            return ExplainableObjectWeb(attr, self.model_web)
 
         if isinstance(attr, ExplainableObjectDict):
-            return ExplainableObjectDictWeb(attr, self)
+            return ExplainableObjectDictWeb(attr, self.model_web)
 
         return attr
 
@@ -510,7 +517,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Storage": ModelingObjectWeb
 }
 
-def wrap_efootprint_object(modeling_obj, model_web):
+def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):
     if modeling_obj.class_as_simple_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
         return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[modeling_obj.class_as_simple_str](modeling_obj, model_web)
 

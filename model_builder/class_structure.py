@@ -9,11 +9,11 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT, FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
+from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT, FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT, ModelWeb
 
 
 def generate_object_creation_structure(
-    available_efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip, model_web):
+    available_efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip, model_web: ModelWeb):
 
     dynamic_form_dict = {
         "switch_item": "type_object_available",
@@ -71,7 +71,7 @@ def generate_object_edition_structure(web_object, attributes_to_skip=None):
 
 
 def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web):
+    efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web: ModelWeb):
     structure_fields = []
     structure_fields_advanced = []
     dynamic_lists = []
