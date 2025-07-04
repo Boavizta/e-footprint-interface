@@ -15,7 +15,56 @@
     _="on load createOrUpdateCalculatedAttributeChart()"
 ></canvas>
 <div id="calculated-attribute-explanation" class="mb-3">
-    {{ explanation }}
+    <div class="explainable-ancestors">
+      <h6>Input Variables</h6>
+      <ul>
+        {% for item in ancestors_mapped_to_symbols_list %}
+          {% with obj=item.explainable_object %}
+            <li>
+            {% if obj.class_as_snake_str == "explainable_hourly_quantities" %}
+              <a
+                href="#"
+                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' efootprint_id obj.attr_name_in_mod_obj_container %}"
+                hx-target="#chart-calculated-attribute"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                hx-disabled-elt="button"
+                _="on click openCalculatedAttributesChart()"
+              >
+                {{ item.symbol }}:
+                {{ obj.attr_name_web }} in {{ obj.modeling_obj_container.name }} ({{ obj.unit }})
+              </a>
+            {% elif obj.class_as_snake_str == "explainable_quantity" %}
+              {{ item.symbol }}: {{ obj.attr_name_web }} in {{ obj.modeling_obj_container.name }} = {{ obj.rounded_value|stringformat:"s"|truncatechars:30 }}
+            {% else %}
+                {{ item.symbol }}: {{ obj.attr_name_web }} in {{ obj.modeling_obj_container.name }} = {{ obj.value|stringformat:"s"|truncatechars:30 }}
+            {% endif %}
+            </li>
+          {% endwith %}
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="explainable-formula mt-4">
+      <h6>Formula</h6>
+      <p style="font-family: monospace; font-size: 1.1em;">
+      {{ web_ehq.attr_name_web }} =
+        {% for token in literal_formula %}
+          {% if token.symbol %}
+            {% with obj=token.explainable_object %}
+              <span
+                data-bs-toggle="tooltip"
+                title="{{ obj.attr_name_web }} in {{ obj.unit }}"
+                class="text-decoration-dotted border-bottom border-dark border-opacity-50"
+                style="cursor: help;"
+              >{{ token.symbol }}</span>
+            {% endwith %}
+          {% else %}
+            {{ token }}
+          {% endif %}
+        {% endfor %}
+      </p>
+    </div>
 </div>
 <a class="btn bg-white border border-1 border-light py-auto bg-light h8" id="link-render-calculated-attribute"
     href="{% url 'display-calculus-graph' efootprint_id attr_name %}"
@@ -24,3 +73,8 @@
     See the calculus graph
     <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
 </a>
+<script>
+    document.querySelectorAll('#calculated-attribute-explanation [data-bs-toggle="tooltip"]').forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>

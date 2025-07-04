@@ -23,7 +23,7 @@ from efootprint.utils.tools import time_it
 
 from model_builder.model_builder_utils import to_rounded_daily_values
 from model_builder.model_web import ModelWeb
-from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb
+from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb, ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
 
@@ -245,7 +245,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
     if key_in_dict is None:
         web_ehq = web_obj
     else:
-        web_ehq = ObjectLinkedToModelingObjWeb(
+        web_ehq = ExplainableObjectWeb(
             web_obj.efootprint_object[model_web.get_efootprint_object_from_efootprint_id(key_in_dict)])
 
 
@@ -253,13 +253,17 @@ def get_explainable_hourly_quantity_chart_and_explanation(
     dates = [(web_ehq.start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n_days)]
     daily_data = to_rounded_daily_values(web_ehq.value)
     data_dict = dict(zip(dates, daily_data))
+    literal_formula, ancestors_mapped_to_symbols_list = (
+        web_ehq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
 
     context = {
         "efootprint_id": efootprint_id,
         "web_ehq": web_ehq,
         "attr_name": attr_name,
         "data_timeseries": data_dict,
-        "explanation": web_ehq.explain()
+        "explanation": web_ehq.explain(),
+        "literal_formula": literal_formula,
+        "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
     }
 
     return render(
