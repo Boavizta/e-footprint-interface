@@ -4,7 +4,7 @@
       <ul>
         {% for ancestor_mapped_to_symbol in ancestors_mapped_to_symbols_list %}
           {% with ancestor=ancestor_mapped_to_symbol.explainable_object %}
-              {% with elt=ancestor elt_base_label=ancestor_mapped_to_symbol.symbol|add:": "|add:ancestor.attr_name_web|add:" in "|add:ancestor.modeling_obj_container.name %}
+              {% with elt=ancestor label_prefix=ancestor_mapped_to_symbol.symbol|add:": " %}
                 {% include "model_builder/side_panels/calculated_attributes/components/ancestor_or_child_list_element.html" %}
               {% endwith %}
           {% endwith %}
@@ -37,7 +37,7 @@
           <h6>Direct children</h6>
           <ul>
             {% for child in explained_obj.web_children %}
-                {% with elt=child elt_base_label=child.attr_name_web|add:" in "|add:child.modeling_obj_container.name %}
+                {% with elt=child label_prefix="" %}
                     {% include "model_builder/side_panels/calculated_attributes/components/ancestor_or_child_list_element.html" %}
                 {% endwith %}
             {% endfor %}
