@@ -17,6 +17,16 @@
         </svg>
     </button>
 </div>
+{% if web_ehq.dict_container %}
+    <h6>Usage pattern: <a
+                href="#"
+                hx-get="/model_builder/open-edit-object-panel/{{ web_ehq.key_in_dict.id }}/"
+                hx-target="#sidePanel"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                hx-disabled-elt="button"
+            >{{ web_ehq.key_in_dict.name }}</a></h6>
+{% endif %}
 {{ data_timeseries|json_script:"data_timeseries" }}
 <canvas id="chart-render-calculated-attribute" class="mb-3"
     _="on load createOrUpdateCalculatedAttributeChart()"

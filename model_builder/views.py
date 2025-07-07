@@ -241,15 +241,19 @@ def download_sources(request):
 
 @time_it
 def get_explainable_hourly_quantity_chart_and_explanation(
-    request, efootprint_id: str, attr_name: str, key_in_dict: str=None):
+    request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
     model_web = ModelWeb(request.session)
     edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
     web_attr = getattr(edited_web_obj, attr_name)
-    if key_in_dict is None:
+    if id_of_key_in_dict is None:
         web_ehq = web_attr
     else:
         web_ehq = ExplainableObjectWeb(
-            web_attr.efootprint_object[model_web.get_efootprint_object_from_efootprint_id(key_in_dict)], model_web)
+            web_attr.efootprint_object[
+                model_web.get_efootprint_object_from_efootprint_id(
+                    id_of_key_in_dict,
+                    "object_type unnecessary because the usage pattern necessarily already belongs to the system")],
+            model_web)
 
 
     n_days = math.ceil(len(web_ehq.value) / 24)
