@@ -106,6 +106,15 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
 
         return literal_formula, ancestors_mapped_to_symbols_list
 
+    def web_children(self):
+        web_children = []
+        for child in self.direct_children_with_id:
+            assert child.modeling_obj_container is not None
+            web_wrapper = ExplainableQuantityWeb if isinstance(child, ExplainableQuantity) else ExplainableObjectWeb
+            web_children.append(web_wrapper(child, self.model_web))
+
+        return web_children
+
 
 class ExplainableQuantityWeb(ExplainableObjectWeb):
     @property
@@ -145,6 +154,9 @@ class ModelingObjectWeb:
 
         if isinstance(attr, ModelingObject):
             return wrap_efootprint_object(attr, self.model_web)
+
+        if isinstance(attr, ExplainableQuantity):
+            return ExplainableQuantityWeb(attr, self.model_web)
 
         if isinstance(attr, ExplainableObject):
             return ExplainableObjectWeb(attr, self.model_web)

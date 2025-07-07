@@ -3,7 +3,7 @@
 
 <div class="row align-items-center mb-3">
     <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
-        {{ item.label|capfirst }}:
+        {{ item.attr_name_web|capfirst }}:
     </label>
 
     <div class="col-auto">
@@ -14,21 +14,11 @@
                class="form-control form-control-sm"
         >
     </div>
-
-    <div class="col-auto">
-        <button type="button"
-                hx-get="{% url 'get_explanation_calculated_attribute' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
-                hx-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
-                hx-trigger="click once"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-                class="btn btn-light p-1"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
-                aria-expanded="false"
-                aria-controls="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}">
-            <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon">
-        </button>
+    <div class="col-2">
+        {% include "model_builder/side_panels/calculated_attributes/components/get_calculated_attribute_explanation_button.html" %}
+    </div>
+    <div class="col-2">
+        {% include "model_builder/side_panels/calculated_attributes/components/calculus_graph_link.html" %}
     </div>
 </div>
 

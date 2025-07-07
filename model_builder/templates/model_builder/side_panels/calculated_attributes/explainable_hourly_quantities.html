@@ -10,9 +10,9 @@
     <div class="col-auto">
         <div class="btn btn-light p-1"
              {% if item.dict_container %}
-                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container item.key_in_dict.id %}"
+                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container item.key_in_dict.id %}"
             {% else %}
-             hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' object_to_edit.efootprint_id item.attr_name_in_mod_obj_container %}"
+             hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container %}"
              {% endif %}
              hx-target="#chart-calculated-attribute"
              hx-trigger="click"

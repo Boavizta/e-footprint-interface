@@ -1,11 +1,4 @@
-{% load static %}
-{% load custom_filters %}
 <div class="card card-body mb-3 no-truncate">
-    <p class="mb-3">{{ explanation|explain_format|safe }}</p>
-    <a class="btn btn-light btn-sm"
-       href="{% url 'display-calculus-graph' efootprint_id attr_name %}"
-       target="_blank">
-        See the calculus graph
-        <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
-    </a>
+    {% include "model_builder/side_panels/calculated_attributes/components/ancestors_formula_and_children.html" %}
+    {% include "model_builder/side_panels/calculated_attributes/components/calculus_graph_link.html" with calculus_graph_link_text="See the calculus graph" item=explained_obj %}
 </div>

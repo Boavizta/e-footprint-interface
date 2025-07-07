@@ -1,16 +1,16 @@
 {% load static %}
 <div class="w-100 d-flex flex-row justify-content-between mb-3">
     <h5 id="calculate-attribute-label"
-        data-label="{{ attr_name }}"
+        data-label="{{ web_ehq.attr_name_web }}"
         data-unit="{{ web_ehq.unit }}"
-    >{{ web_ehq.attr_name_web }} in <a
+    >{{ web_ehq.attr_name_web|capfirst }} in <a
                 href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ edited_web_obj.efootprint_id }}/"
+                hx-get="/model_builder/open-edit-object-panel/{{ web_ehq.modeling_obj_container.efootprint_id }}/"
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"
                 hx-disabled-elt="button"
-            >{{ edited_web_obj.name }}</a></h5>
+            >{{ web_ehq.modeling_obj_container.name }}</a></h5>
     <button type="button" class="btn btn-white" aria-label="Close" onclick="closeCalculatedAttributesChart()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
           <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
@@ -31,111 +31,5 @@
 <canvas id="chart-render-calculated-attribute" class="mb-3"
     _="on load createOrUpdateCalculatedAttributeChart()"
 ></canvas>
-<div id="calculated-attribute-explanation" class="mb-3">
-    <div class="explainable-ancestors">
-      <h6>Input Variables</h6>
-      <ul>
-        {% for item in ancestors_mapped_to_symbols_list %}
-          {% with obj=item.explainable_object %}
-            <li>
-            {{ item.symbol }}: {{ obj.attr_name_web }} in {{ obj.modeling_obj_container.name }}
-            {% if obj.class_as_snake_str == "explainable_hourly_quantities" %}
-                 ({{ obj.unit }})
-              <a
-                href="#"
-                {% if obj.dict_container %}
-                    hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' obj.modeling_obj_container.efootprint_id obj.attr_name_in_mod_obj_container obj.key_in_dict.id %}"
-                {% else %}
-                 hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' obj.modeling_obj_container.efootprint_id obj.attr_name_in_mod_obj_container %}"
-                {% endif %}
-                hx-target="#chart-calculated-attribute"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-                _="on click openCalculatedAttributesChart()"
-              >(see graph)</a>
-            {% elif obj.class_as_snake_str == "explainable_quantity" %}
-                = {{ obj.rounded_value|stringformat:"s"|truncatechars:30 }}
-            {% else %}
-                = {{ obj.value|stringformat:"s"|truncatechars:30 }}
-            {% endif %}
-            <a
-                href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ obj.modeling_obj_container.efootprint_id }}/"
-                hx-target="#sidePanel"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-            >(edit {{ obj.modeling_obj_container.name }})</a>
-            </li>
-          {% endwith %}
-        {% endfor %}
-      </ul>
-    </div>
-
-    <div class="explainable-formula mt-4">
-      <h6>Formula</h6>
-      <p style="font-family: monospace; font-size: 1.1em;">
-      {{ web_ehq.attr_name_web }} =
-        {% for token in literal_formula %}
-          {% if token.symbol %}
-            {% with obj=token.explainable_object %}
-              <span
-                data-bs-toggle="tooltip"
-                title="{{ obj.attr_name_web }} in {{ obj.unit }}"
-                class="text-decoration-dotted border-bottom border-dark border-opacity-50"
-                style="cursor: help;"
-              >{{ token.symbol }}</span>
-            {% endwith %}
-          {% else %}
-            {{ token }}
-          {% endif %}
-        {% endfor %}
-      </p>
-    </div>
-
-    <div class="explainable-children">
-      <h6>Direct children</h6>
-      <ul>
-        {% for child in children %}
-            <li>
-            {{ child.attr_name_web }} in {{ child.modeling_obj_container.name }}
-            {% if child.class_as_snake_str == "explainable_hourly_quantities" %}
-                 ({{ child.unit }})
-              <a
-                href="#"
-                {% if child.dict_container %}
-                    hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container child.key_in_dict.id %}"
-                {% else %}
-                 hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container %}"
-                {% endif %}
-                hx-target="#chart-calculated-attribute"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-                _="on click openCalculatedAttributesChart()"
-              >(see graph)</a>
-            {% elif child.class_as_snake_str == "explainable_quantity" %}
-                = {{ child.rounded_value|stringformat:"s"|truncatechars:30 }}
-            {% else %}
-                = {{ child.value|stringformat:"s"|truncatechars:30 }}
-            {% endif %}
-            <a
-                href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ child.modeling_obj_container.efootprint_id }}/"
-                hx-target="#sidePanel"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-            >(edit {{ child.modeling_obj_container.name }})</a>
-            </li>
-        {% endfor %}
-      </ul>
-    </div>
-</div>
+{% include "model_builder/side_panels/calculated_attributes/components/ancestors_formula_and_children.html" with explained_obj=web_ehq %}
 {% include "model_builder/side_panels/calculated_attributes/components/calculus_graph_link.html" with calculus_graph_link_text="See the calculus graph" item=web_ehq %}
-<script>
-    document.querySelectorAll('#calculated-attribute-explanation [data-bs-toggle="tooltip"]').forEach(function (tooltipTriggerEl) {
-      new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-</script>

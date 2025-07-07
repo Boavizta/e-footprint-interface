@@ -94,7 +94,7 @@ class UsagePatternFromForm(UsagePattern):
 
         self.daily_growth_rate = ExplainableQuantity(
             daily_rate * u.dimensionless, left_parent=self.net_growth_rate_in_percentage, right_parent=timespan,
-            operator="combined and converted to daily growth rate").set_label(f"{self.name} daily growth rate")
+            operator="converted to daily growth rate given timespan").set_label(f"{self.name} daily growth rate")
 
     def update_first_daily_usage_journey_volume(self):
         timespan = self._timestamp_sourceobject_to_explainable_quantity(self.initial_usage_journey_volume_timespan)

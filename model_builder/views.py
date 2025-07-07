@@ -243,21 +243,12 @@ def get_explainable_hourly_quantity_chart_and_explanation(
     data_dict = dict(zip(dates, daily_data))
     literal_formula, ancestors_mapped_to_symbols_list = (
         web_ehq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
-    web_children = []
-    for child in web_ehq.direct_children_with_id:
-        assert child.modeling_obj_container is not None
-        web_wrapper = ExplainableQuantityWeb if isinstance(child, ExplainableQuantity) else ExplainableObjectWeb
-        web_children.append(web_wrapper(child, model_web))
 
     context = {
-        "edited_web_obj": edited_web_obj,
         "web_ehq": web_ehq,
-        "attr_name": attr_name,
         "data_timeseries": data_dict,
-        "explanation": web_ehq.explain(),
         "literal_formula": literal_formula,
         "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
-        "children": web_children,
     }
 
     return render(
@@ -267,17 +258,16 @@ def get_explainable_hourly_quantity_chart_and_explanation(
 
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
     model_web = ModelWeb(request.session)
-    exp_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
-    if isinstance(exp_obj.efootprint_object, ExplainableDict):
-        explanation = exp_obj.value
-    else:
-        explanation = exp_obj.explain()
+    explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+    literal_formula, ancestors_mapped_to_symbols_list = (
+        explained_obj.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
+
     return render(
         request,
         "model_builder/side_panels/calculated_attributes/calculated_attribute_explanation.html",
         {
-            "efootprint_id": efootprint_id,
-            "attr_name": attr_name,
-            "explanation": explanation
+            "literal_formula": literal_formula,
+            "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
+            "explained_obj": explained_obj
         }
     )
