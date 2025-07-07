@@ -18,6 +18,7 @@ function openSidePanel() {
         top: scrollTarget.offsetTop,
         behavior: "smooth"
     })
+    closeCalculatedAttributesChart();
 }
 
 function closeAndEmptySidePanel() {
