@@ -94,7 +94,6 @@ def upload_json(request):
         except ValueError:
             import_error_message = "Invalid JSON data"
         try:
-            from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
             if "efootprint_version" not in data.keys():
                 data["efootprint_version"] = "9.1.4"
             request.session["system_data"] = data

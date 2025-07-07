@@ -170,7 +170,6 @@ class ModelWeb:
     def web_explainable_quantities(self):
         web_explainable_quantities = []
         for efootprint_object in self.flat_efootprint_objs_dict.values():
-            web_efootprint_object = self.get_web_object_from_efootprint_id(efootprint_object.id)
             web_explainable_quantities += [
                 ExplainableObjectWeb(explainable_object, self)
                 for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
