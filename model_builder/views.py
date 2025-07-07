@@ -135,56 +135,37 @@ def result_chart(request):
 
     return http_response
 
-def get_calculus_graph(request, cache_key, efootprint_id, attr_name, graph_key):
-    content_to_return = request.session[cache_key][f"{efootprint_id}-{attr_name}-{graph_key}"]
-    cache_content = request.session[cache_key]
-    del cache_content[f"{efootprint_id}-{attr_name}-{graph_key}"]
-    request.session[cache_key] = cache_content
+def get_calculus_graph(request, cache_key):
+    content_to_return = request.session.pop(cache_key)
+    request.session.modified = True
 
     return HttpResponse(content_to_return, content_type="text/html")
 
-def display_calculus_graph(request, efootprint_id, attr_name):
+def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
     model_web = ModelWeb(request.session)
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
-    graphs = []
-    graphs_html_contents = {}
     iframe_height = 95
     cache_key = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
 
-    calculated_attribute_to_display = efootprint_object.__getattr__(attr_name)
+    web_attr = getattr(efootprint_object, attr_name)
+    if id_of_key_in_dict is None:
+        calculated_attribute = web_attr
+    else:
+        calculated_attribute = ExplainableObjectWeb(
+            web_attr.efootprint_object[
+                model_web.get_efootprint_object_from_efootprint_id(
+                    id_of_key_in_dict,
+                    "object_type unnecessary because the usage pattern necessarily already belongs to the system")],
+            model_web)
 
-    if isinstance(calculated_attribute_to_display, ExplainableObjectDict):
-        for key, value in calculated_attribute_to_display.items():
-            url = reverse("get-graph", kwargs={
-                "cache_key": cache_key,
-                "efootprint_id": efootprint_id,
-                "attr_name": attr_name,
-                "graph_key": key.id
-            })
-            graphs.append({"url": url, "name": f"{attr_name} - {key.name}"})
-            calculus_graph = build_calculus_graph(value)
-            calculus_graph.cdn_resources = "remote"
-            graphs_html_contents[f"{efootprint_id}-{attr_name}-{key.id}"] = calculus_graph.generate_html()
+    calculus_graph = build_calculus_graph(calculated_attribute)
+    calculus_graph.cdn_resources = "remote"
+    request.session[cache_key] = calculus_graph.generate_html()
 
-        if len(list(calculated_attribute_to_display.keys())) > 1:
-            iframe_height=45
-    else :
-        url = reverse("get-graph", kwargs={
-            "cache_key": cache_key,
-            "efootprint_id": efootprint_id,
-            "attr_name": attr_name,
-            "graph_key": "none"
-        })
-        graphs.append({"url": url, "name": f"{attr_name}"})
-        calculus_graph = build_calculus_graph(calculated_attribute_to_display)
-        calculus_graph.cdn_resources = "remote"
-        graphs_html_contents[f"{efootprint_id}-{attr_name}-none"] = calculus_graph.generate_html()
+    url = reverse("get-graph", kwargs={"cache_key": cache_key})
 
-    request.session[cache_key] = graphs_html_contents
-
-    return render(request, "model_builder/calculus_graphs.html", {
-        "graphs": graphs,
-        "iframe_height": iframe_height,
+    return render(request, "model_builder/calculus_graph.html", {
+        "graph": {"url": url, "calculated_attribute": calculated_attribute}, "iframe_height": iframe_height
     })
 
 

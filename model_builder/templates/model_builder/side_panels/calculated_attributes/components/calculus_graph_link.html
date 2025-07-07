@@ -1,0 +1,12 @@
+{% load static %}
+<a
+    class="btn bg-white border border-1 border-light py-auto bg-light h8"
+    {% if item.dict_container %}
+        href="{% url 'display-calculus-graph-from-dict' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container item.key_in_dict.id %}"
+    {% else %}
+        href="{% url 'display-calculus-graph' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container %}"
+    {% endif %}
+    target="_blank">
+    {{ calculus_graph_link_text }}
+    <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
+</a>

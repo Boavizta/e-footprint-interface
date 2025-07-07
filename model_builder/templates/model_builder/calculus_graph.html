@@ -24,9 +24,12 @@
     </style>
 </head>
 <body>
-    {% for graph in graphs %}
-        <p class="title-graph">{{ graph.name }}</p>
-        <iframe class="graph-container" src="{{ graph.url }}" frameborder="0"></iframe>
-    {% endfor %}
+    <p class="title-graph">
+        {{ graph.calculated_attribute.attr_name_web }} in {{ graph.calculated_attribute.modeling_obj_container.name }}
+        {% if graph.calculated_attribute.dict_container %}
+            : data for usage pattern {{ graph.calculated_attribute.key_in_dict.name }}
+        {% endif %}
+    </p>
+    <iframe class="graph-container" src="{{ graph.url }}" frameborder="0"></iframe>
 </body>
 </html>

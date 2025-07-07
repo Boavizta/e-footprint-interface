@@ -133,13 +133,7 @@
       </ul>
     </div>
 </div>
-<a class="btn bg-white border border-1 border-light py-auto bg-light h8" id="link-render-calculated-attribute"
-    href="{% url 'display-calculus-graph' edited_web_obj.efootprint_id attr_name %}"
-    target="_blank"
->
-    See the calculus graph
-    <img src="{% static 'icons/calculus-graph.svg' %}" alt="calculus-graph-icon">
-</a>
+{% include "model_builder/side_panels/calculated_attributes/components/calculus_graph_link.html" with calculus_graph_link_text="See the calculus graph" item=web_ehq %}
 <script>
     document.querySelectorAll('#calculated-attribute-explanation [data-bs-toggle="tooltip"]').forEach(function (tooltipTriggerEl) {
       new bootstrap.Tooltip(tooltipTriggerEl);
