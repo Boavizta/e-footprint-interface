@@ -43,7 +43,11 @@
                  ({{ obj.unit }})
               <a
                 href="#"
-                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' obj.modeling_obj_container.efootprint_id obj.attr_name_in_mod_obj_container %}"
+                {% if obj.dict_container %}
+                    hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' obj.modeling_obj_container.efootprint_id obj.attr_name_in_mod_obj_container obj.key_in_dict.id %}"
+                {% else %}
+                 hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' obj.modeling_obj_container.efootprint_id obj.attr_name_in_mod_obj_container %}"
+                {% endif %}
                 hx-target="#chart-calculated-attribute"
                 hx-trigger="click"
                 hx-swap="innerHTML"
@@ -100,7 +104,11 @@
                  ({{ child.unit }})
               <a
                 href="#"
-                hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container %}"
+                {% if child.dict_container %}
+                    hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container child.key_in_dict.id %}"
+                {% else %}
+                 hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container %}"
+                {% endif %}
                 hx-target="#chart-calculated-attribute"
                 hx-trigger="click"
                 hx-swap="innerHTML"
