@@ -1,0 +1,33 @@
+<li>
+    {{ elt_base_label }}
+    {% if elt.class_as_snake_str == "explainable_hourly_quantities" %}
+         {% if elt.dict_container %} for usage pattern {{ elt.key_in_dict.name }}{% endif %}({{ elt.unit }})
+      <a
+        href="#"
+        {% if elt.dict_container %}
+            hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' elt.modeling_obj_container.efootprint_id elt.attr_name_in_mod_obj_container elt.key_in_dict.id %}"
+        {% else %}
+         hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' elt.modeling_obj_container.efootprint_id elt.attr_name_in_mod_obj_container %}"
+        {% endif %}
+        hx-target="#chart-calculated-attribute"
+        hx-trigger="click"
+        hx-swap="innerHTML"
+        hx-disabled-elt="button"
+        _="on click openCalculatedAttributesChart()"
+      >(see graph)</a>
+    {% elif elt.class_as_snake_str == "explainable_quantity" %}
+        = {{ elt.rounded_value|stringformat:"s"|truncatechars:30 }}
+    {% else %}
+        = {{ elt.value|stringformat:"s"|truncatechars:30 }}
+    {% endif %}
+    {% if elt.modeling_obj_container.class_as_simple_str != "System" and elt.modeling_obj_container.class_as_simple_str != "Device" and elt.modeling_obj_container.class_as_simple_str != "Network" and elt.modeling_obj_container.class_as_simple_str != "Country" %}
+        <a
+            href="#"
+            hx-get="/model_builder/open-edit-object-panel/{{ elt.modeling_obj_container.efootprint_id }}/"
+            hx-target="#sidePanel"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+            hx-disabled-elt="button"
+        >(got to {{ elt.modeling_obj_container.name }})</a>
+    {% endif %}
+</li>

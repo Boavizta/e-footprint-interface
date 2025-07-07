@@ -4,37 +4,9 @@
       <ul>
         {% for ancestor_mapped_to_symbol in ancestors_mapped_to_symbols_list %}
           {% with ancestor=ancestor_mapped_to_symbol.explainable_object %}
-            <li>
-            {{ ancestor_mapped_to_symbol.symbol }}: {{ ancestor.attr_name_web }} in {{ ancestor.modeling_obj_container.name }}
-            {% if ancestor.class_as_snake_str == "explainable_hourly_quantities" %}
-                 {% if ancestor.dict_container %} for usage pattern {{ ancestor.key_in_dict.name }}{% endif %}({{ ancestor.unit }})
-              <a
-                href="#"
-                {% if ancestor.dict_container %}
-                    hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' ancestor.modeling_obj_container.efootprint_id ancestor.attr_name_in_mod_obj_container ancestor.key_in_dict.id %}"
-                {% else %}
-                 hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' ancestor.modeling_obj_container.efootprint_id ancestor.attr_name_in_mod_obj_container %}"
-                {% endif %}
-                hx-target="#chart-calculated-attribute"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-                _="on click openCalculatedAttributesChart()"
-              >(see graph)</a>
-            {% elif ancestor.class_as_snake_str == "explainable_quantity" %}
-                = {{ ancestor.rounded_value|stringformat:"s"|truncatechars:30 }}
-            {% else %}
-                = {{ ancestor.value|stringformat:"s"|truncatechars:30 }}
-            {% endif %}
-            <a
-                href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ ancestor.modeling_obj_container.efootprint_id }}/"
-                hx-target="#sidePanel"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-            >(edit {{ ancestor.modeling_obj_container.name }})</a>
-            </li>
+              {% with elt=ancestor elt_base_label=ancestor_mapped_to_symbol.symbol|add:": "|add:ancestor.attr_name_web|add:" in "|add:ancestor.modeling_obj_container.name %}
+                {% include "model_builder/side_panels/calculated_attributes/components/ancestor_or_child_list_element.html" %}
+              {% endwith %}
           {% endwith %}
         {% endfor %}
       </ul>
@@ -60,49 +32,21 @@
         {% endfor %}
       </p>
     </div>
-
-    <div class="explainable-children">
-      <h6>Direct children</h6>
-      <ul>
-        {% for child in explained_obj.web_children %}
-            <li>
-            {{ child.attr_name_web }} in {{ child.modeling_obj_container.name }}
-            {% if child.class_as_snake_str == "explainable_hourly_quantities" %}
-                 ({{ child.unit }})
-              <a
-                href="#"
-                {% if child.dict_container %}
-                    hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container child.key_in_dict.id %}"
-                {% else %}
-                 hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' child.modeling_obj_container.efootprint_id child.attr_name_in_mod_obj_container %}"
-                {% endif %}
-                hx-target="#chart-calculated-attribute"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-                _="on click openCalculatedAttributesChart()"
-              >(see graph)</a>
-            {% elif child.class_as_snake_str == "explainable_quantity" %}
-                = {{ child.rounded_value|stringformat:"s"|truncatechars:30 }}
-            {% else %}
-                = {{ child.value|stringformat:"s"|truncatechars:30 }}
-            {% endif %}
-            <a
-                href="#"
-                hx-get="/model_builder/open-edit-object-panel/{{ child.modeling_obj_container.efootprint_id }}/"
-                hx-target="#sidePanel"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                hx-disabled-elt="button"
-            >(edit {{ child.modeling_obj_container.name }})</a>
-            </li>
-        {% endfor %}
-      </ul>
-    </div>
+    {% if explained_obj.modeling_obj_container.class_as_simple_str != "System" %}
+        <div class="explainable-children">
+          <h6>Direct children</h6>
+          <ul>
+            {% for child in explained_obj.web_children %}
+                {% with elt=child elt_base_label=child.attr_name_web|add:" in "|add:child.modeling_obj_container.name %}
+                    {% include "model_builder/side_panels/calculated_attributes/components/ancestor_or_child_list_element.html" %}
+                {% endwith %}
+            {% endfor %}
+          </ul>
+        </div>
+    {% endif %}
 </div>
 <script>
     document.querySelectorAll('#ancestors-formula-and-children-{{ explained_obj.id }} [data-bs-toggle="tooltip"]').forEach(function (tooltipTriggerEl) {
       new bootstrap.Tooltip(tooltipTriggerEl);
     });
 </script>
-
