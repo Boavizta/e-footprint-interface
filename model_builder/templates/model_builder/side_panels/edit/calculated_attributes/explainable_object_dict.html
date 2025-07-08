@@ -20,7 +20,7 @@
 <div class="collapse" id="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}">
     <div class="card card-body mb-3 no-truncate">
         {% for sub_item in item.get_values_as_list %}
-            {% include "model_builder/side_panels/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}
+            {% include "model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}
         {% endfor %}
     </div>
 </div>

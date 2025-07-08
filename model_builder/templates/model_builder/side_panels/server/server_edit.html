@@ -5,6 +5,6 @@
     {% include "model_builder/side_panels/server/storage_edit_form.html" with object_to_edit=storage_to_edit form_fields=storage_form_fields form_fields_advanced=storage_form_fields_advanced dynamic_form_data=storage_dynamic_form_data %}
 {% endblock %}
 {% block calculated_attributes %}
-    {% include "model_builder/side_panels/edit/calculated_attributes.html" %}
-    {% include "model_builder/side_panels/edit/calculated_attributes.html" with object_to_edit=storage_to_edit %}
+    {% include "model_builder/side_panels/edit/calculated_attributes_section.html" %}
+    {% include "model_builder/side_panels/edit/calculated_attributes_section.html" with object_to_edit=storage_to_edit %}
 {% endblock %}

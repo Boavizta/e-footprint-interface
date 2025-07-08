@@ -12,7 +12,7 @@
              class="accordion-collapse collapse" data-bs-parent="#accordionAllAttributes">
             <div class="accordion-body gy-2">
                 {% for item in object_to_edit.calculated_attributes_values %}
-                    {% include "model_builder/side_panels/calculated_attributes/"|add:item.class_as_snake_str|add:".html" %}
+                    {% include "model_builder/side_panels/edit/calculated_attributes/"|add:item.class_as_snake_str|add:".html" %}
                 {% endfor %}
             </div>
         </div>
