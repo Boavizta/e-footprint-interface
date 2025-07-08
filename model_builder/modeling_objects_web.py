@@ -36,13 +36,16 @@ class ObjectLinkedToModelingObjWeb:
 
         return attr
 
+    @property
     def id(self):
         raise AttributeError("The id attribute shouldn’t be retrieved by ObjectLinkedToModelingObjWeb objects. "
                          "Use efootprint_id and web_id for clear disambiguation.")
 
+    @property
     def web_id(self):
         return css_escape(self.efootprint_object.id)
 
+    @property
     def efootprint_id(self):
         return self.efootprint_object.id
 
