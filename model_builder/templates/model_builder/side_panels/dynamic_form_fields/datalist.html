@@ -1,8 +1,8 @@
 <input
     class="form-control p-2"
-    list="datalist_{{ field.id }}"
-    id="{{ field.id }}"
-    name="{{ field.id }}"
+    list="datalist_{{ field.web_id }}"
+    id="{{ field.web_id }}"
+    name="{{ field.web_id }}"
     {% if field.selected %}value="{{ field.selected }}"{% endif %}
     {% if object_to_edit %}
     _="on focusout if my value is empty set my value to '{{ field.default }}' then updateSource(@id)"
@@ -16,6 +16,6 @@
     oninput="updateSource(this.id)"
     required
 >
-<datalist id="datalist_{{ field.id }}">
+<datalist id="datalist_{{ field.web_id }}">
     <option selected value="select a provider">
 </datalist>

@@ -5,7 +5,7 @@
         "fields": [
             {
                 "input_type": "select-object",
-                "id": "type_object_available",
+                "web_id": "type_object_available",
                 "label": "Available usage journeys",
                 "options": [
                     {
@@ -21,7 +21,7 @@
         "header": "Usage journey creation",
         "fields": [
             {
-                "id": "UsageJourney_name",
+                "web_id": "UsageJourney_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -29,7 +29,7 @@
                 "default": "Usage journey 1"
             },
             {
-                "id": "UsageJourney_uj_steps",
+                "web_id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
                 "label": "existing usage journey steps you can pick",
                 "tooltip": false,

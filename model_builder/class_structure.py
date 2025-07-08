@@ -25,7 +25,7 @@ def generate_object_creation_structure(
         "header": f"{FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]} selection",
         "fields": [{
             "input_type": "select-object",
-            "id": "type_object_available",
+            "web_id": "type_object_available",
             "label": FORM_TYPE_OBJECT[available_efootprint_class_str]["type_object_available"],
             "options": [
                 {"label": FORM_TYPE_OBJECT[available_class.__name__].get(
@@ -93,7 +93,7 @@ def generate_dynamic_form(
                 f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
             annotation = str
         structure_field = {
-            "id": id_prefix + "_" + attr_name,
+            "web_id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
             "label": FORM_FIELD_REFERENCES[attr_name]["label"],
             "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False)

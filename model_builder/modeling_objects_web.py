@@ -1,11 +1,11 @@
 import re
 import string
-from typing import List, Tuple, Dict, TYPE_CHECKING
+from typing import List, Tuple, Dict, TYPE_CHECKING, Type
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject, css_escape
 from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
@@ -36,9 +36,23 @@ class ObjectLinkedToModelingObjWeb:
 
         return attr
 
+    def id(self):
+        raise AttributeError("The id attribute shouldn’t be retrieved by ObjectLinkedToModelingObjWeb objects. "
+                         "Use efootprint_id and web_id for clear disambiguation.")
+
+    def web_id(self):
+        return css_escape(self.efootprint_object.id)
+
+    def efootprint_id(self):
+        return self.efootprint_object.id
+
     @property
     def modeling_obj_container(self):
         return wrap_efootprint_object(self.efootprint_object.modeling_obj_container, self.model_web)
+
+    @property
+    def key_in_dict(self):
+        return wrap_efootprint_object(self.efootprint_object.key_in_dict, self.model_web)
 
     @property
     def attr_name_web(self):
@@ -55,7 +69,7 @@ class ObjectLinkedToModelingObjWeb:
 
 class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
     def compute_literal_formula_and_ancestors_mapped_to_symbols_list(self) \
-        -> Tuple[List[str|ExplainableObject], List[Dict[str, ExplainableObject]]]:
+        -> Tuple[List[str|Type["ExplainableObjectWeb"]], List[Dict[str, Type["ExplainableObjectWeb"]]]]:
         # Base symbols: Roman lowercase + Greek lowercase
         base_symbols = list(string.ascii_lowercase) + [
             'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ',
@@ -80,16 +94,16 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
                     elt.attr_name_web = elt.label
                     literal_formula.append(
                         {"symbol": elt.label,
-                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                         "explainable_object_web": web_wrapper(elt, elt.modeling_obj_container)})
                 elif elt.id in ancestor_ids_to_symbols_mapping:
                     literal_formula.append(
                         {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
-                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                         "explainable_object_web": web_wrapper(elt, elt.modeling_obj_container)})
                 else:
                     ancestor_ids_to_symbols_mapping[elt.id] = get_symbol(current_symbol_index)
                     literal_formula.append(
                         {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
-                         "explainable_object": web_wrapper(elt, elt.modeling_obj_container)})
+                         "explainable_object_web": web_wrapper(elt, elt.modeling_obj_container)})
                     current_symbol_index += 1
                     ids_to_ancestors_mapping[elt.id] = elt
             else:
@@ -102,7 +116,7 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
             web_wrapper = ExplainableQuantityWeb if isinstance(ancestor, ExplainableQuantity) else ExplainableObjectWeb
             ancestors_mapped_to_symbols_list.append(
                 {"symbol": ancestor_ids_to_symbols_mapping[ancestor_id],
-                 "explainable_object": web_wrapper(ancestor, ancestor.modeling_obj_container)})
+                 "explainable_object_web": web_wrapper(ancestor, ancestor.modeling_obj_container)})
 
         return literal_formula, ancestors_mapped_to_symbols_list
 
@@ -146,7 +160,7 @@ class ModelingObjectWeb:
         attr = getattr(self._modeling_obj, name)
 
         if name == "id":
-            raise ValueError("The id attribute shouldn’t be retrieved by ModelingObjectWrapper objects. "
+            raise AttributeError("The id attribute shouldn’t be retrieved by ModelingObjectWrapper objects. "
                              "Use efootprint_id and web_id for clear disambiguation.")
 
         if isinstance(attr, list) and len(attr) > 0 and isinstance(attr[0], ModelingObject):

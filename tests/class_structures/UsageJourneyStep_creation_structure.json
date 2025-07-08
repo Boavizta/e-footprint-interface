@@ -5,7 +5,7 @@
         "fields": [
             {
                 "input_type": "select-object",
-                "id": "type_object_available",
+                "web_id": "type_object_available",
                 "label": "Available usage journey steps",
                 "options": [
                     {
@@ -21,7 +21,7 @@
         "header": "Usage journey step creation",
         "fields": [
             {
-                "id": "UsageJourneyStep_name",
+                "web_id": "UsageJourneyStep_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -29,7 +29,7 @@
                 "default": "Usage journey step 1"
             },
             {
-                "id": "UsageJourneyStep_user_time_spent",
+                "web_id": "UsageJourneyStep_user_time_spent",
                 "attr_name": "user_time_spent",
                 "label": "time spent by user",
                 "tooltip": false,
@@ -44,7 +44,7 @@
                 "step": 0.1
             },
             {
-                "id": "UsageJourneyStep_jobs",
+                "web_id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
                 "label": "existing jobs you can pick",
                 "tooltip": false,

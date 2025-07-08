@@ -122,7 +122,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         "fields": [
             {
                 "input_type": "select-object",
-                "id": "server",
+                "web_id": "server",
                 "name": "Server",
                 "options": [
                     {"label": server.name, "value": server.efootprint_id} for server in servers],
@@ -130,7 +130,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
             },
             {
                 "input_type": "select-object",
-                "id": "service",
+                "web_id": "service",
                 "name": "Service used",
                 "options": None,
                 "label": "Service used",

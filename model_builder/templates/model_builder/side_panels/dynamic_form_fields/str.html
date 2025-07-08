@@ -1,4 +1,4 @@
-<input type="text" class="form-control p-2" id="{{ field.id }}" name="{{ field.id }}" value="{{ field.default }}"
+<input type="text" class="form-control p-2" id="{{ field.web_id }}" name="{{ field.web_id }}" value="{{ field.default }}"
     {% if object_to_edit %}
        _="on focusout if my value is empty set my value to '{{ field.default }}'"
     {% else %}

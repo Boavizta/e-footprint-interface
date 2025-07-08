@@ -5,7 +5,7 @@
         "fields": [
             {
                 "input_type": "select-object",
-                "id": "type_object_available",
+                "web_id": "type_object_available",
                 "label": "Available usage patterns",
                 "options": [
                     {
@@ -21,7 +21,7 @@
         "header": "Usage pattern creation",
         "fields": [
             {
-                "id": "UsagePatternFromForm_name",
+                "web_id": "UsagePatternFromForm_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -29,7 +29,7 @@
                 "default": "Usage pattern 1"
             },
             {
-                "id": "UsagePatternFromForm_usage_journey",
+                "web_id": "UsagePatternFromForm_usage_journey",
                 "attr_name": "usage_journey",
                 "label": "usage journey",
                 "tooltip": false,
@@ -47,7 +47,7 @@
                 ]
             },
             {
-                "id": "UsagePatternFromForm_devices",
+                "web_id": "UsagePatternFromForm_devices",
                 "attr_name": "devices",
                 "label": "devices",
                 "tooltip": false,
@@ -65,7 +65,7 @@
                 "selected": "efootprint_id1"
             },
             {
-                "id": "UsagePatternFromForm_network",
+                "web_id": "UsagePatternFromForm_network",
                 "attr_name": "network",
                 "label": "network",
                 "tooltip": false,
@@ -83,7 +83,7 @@
                 ]
             },
             {
-                "id": "UsagePatternFromForm_country",
+                "web_id": "UsagePatternFromForm_country",
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
@@ -101,7 +101,7 @@
                 ]
             },
             {
-                "id": "UsagePatternFromForm_start_date",
+                "web_id": "UsagePatternFromForm_start_date",
                 "attr_name": "start_date",
                 "label": "start date",
                 "tooltip": false,
@@ -113,7 +113,7 @@
                 }
             },
             {
-                "id": "UsagePatternFromForm_modeling_duration_value",
+                "web_id": "UsagePatternFromForm_modeling_duration_value",
                 "attr_name": "modeling_duration_value",
                 "label": "modeling duration value",
                 "tooltip": false,
@@ -128,7 +128,7 @@
                 "step": 0.1
             },
             {
-                "id": "UsagePatternFromForm_modeling_duration_unit",
+                "web_id": "UsagePatternFromForm_modeling_duration_unit",
                 "attr_name": "modeling_duration_unit",
                 "label": "modeling duration unit",
                 "tooltip": false,
@@ -151,7 +151,7 @@
                 ]
             },
             {
-                "id": "UsagePatternFromForm_initial_usage_journey_volume",
+                "web_id": "UsagePatternFromForm_initial_usage_journey_volume",
                 "attr_name": "initial_usage_journey_volume",
                 "label": "initial usage journey volume",
                 "tooltip": false,
@@ -166,7 +166,7 @@
                 "step": 0.1
             },
             {
-                "id": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
+                "web_id": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
                 "attr_name": "initial_usage_journey_volume_timespan",
                 "label": "initial usage journey volume timespan",
                 "tooltip": false,
@@ -193,7 +193,7 @@
                 ]
             },
             {
-                "id": "UsagePatternFromForm_net_growth_rate_in_percentage",
+                "web_id": "UsagePatternFromForm_net_growth_rate_in_percentage",
                 "attr_name": "net_growth_rate_in_percentage",
                 "label": "net growth rate in percentage",
                 "tooltip": false,
@@ -208,7 +208,7 @@
                 "step": 0.1
             },
             {
-                "id": "UsagePatternFromForm_net_growth_rate_timespan",
+                "web_id": "UsagePatternFromForm_net_growth_rate_timespan",
                 "attr_name": "net_growth_rate_timespan",
                 "label": "net growth rate timespan",
                 "tooltip": false,

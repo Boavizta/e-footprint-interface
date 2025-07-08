@@ -5,7 +5,7 @@
         "fields": [
             {
                 "input_type": "select-object",
-                "id": "type_object_available",
+                "web_id": "type_object_available",
                 "label": "Available job types",
                 "options": [
                     {
@@ -33,7 +33,7 @@
         "header": "Job creation",
         "fields": [
             {
-                "id": "Job_name",
+                "web_id": "Job_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -41,7 +41,7 @@
                 "default": "Job 1"
             },
             {
-                "id": "Job_data_transferred",
+                "web_id": "Job_data_transferred",
                 "attr_name": "data_transferred",
                 "label": "data transferred",
                 "tooltip": false,
@@ -56,7 +56,7 @@
                 "step": 1
             },
             {
-                "id": "Job_data_stored",
+                "web_id": "Job_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
                 "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
@@ -71,7 +71,7 @@
                 "step": 1
             },
             {
-                "id": "Job_request_duration",
+                "web_id": "Job_request_duration",
                 "attr_name": "request_duration",
                 "label": "request duration",
                 "tooltip": false,
@@ -88,7 +88,7 @@
         ],
         "advanced_fields": [
             {
-                "id": "Job_compute_needed",
+                "web_id": "Job_compute_needed",
                 "attr_name": "compute_needed",
                 "label": "compute needed",
                 "tooltip": false,
@@ -103,7 +103,7 @@
                 "step": 0.1
             },
             {
-                "id": "Job_ram_needed",
+                "web_id": "Job_ram_needed",
                 "attr_name": "ram_needed",
                 "label": "RAM needed",
                 "tooltip": false,
@@ -124,7 +124,7 @@
         "header": "Web application job creation",
         "fields": [
             {
-                "id": "WebApplicationJob_name",
+                "web_id": "WebApplicationJob_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -132,7 +132,7 @@
                 "default": "Web application job 1"
             },
             {
-                "id": "WebApplicationJob_data_transferred",
+                "web_id": "WebApplicationJob_data_transferred",
                 "attr_name": "data_transferred",
                 "label": "data transferred",
                 "tooltip": false,
@@ -147,7 +147,7 @@
                 "step": 0.1
             },
             {
-                "id": "WebApplicationJob_data_stored",
+                "web_id": "WebApplicationJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
                 "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
@@ -162,7 +162,7 @@
                 "step": 1
             },
             {
-                "id": "WebApplicationJob_implementation_details",
+                "web_id": "WebApplicationJob_implementation_details",
                 "attr_name": "implementation_details",
                 "label": "implementation details",
                 "tooltip": false,
@@ -208,7 +208,7 @@
         "header": "Video streaming job creation",
         "fields": [
             {
-                "id": "VideoStreamingJob_name",
+                "web_id": "VideoStreamingJob_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -216,7 +216,7 @@
                 "default": "Video streaming job 1"
             },
             {
-                "id": "VideoStreamingJob_resolution",
+                "web_id": "VideoStreamingJob_resolution",
                 "attr_name": "resolution",
                 "label": "resolution",
                 "tooltip": false,
@@ -259,7 +259,7 @@
                 ]
             },
             {
-                "id": "VideoStreamingJob_video_duration",
+                "web_id": "VideoStreamingJob_video_duration",
                 "attr_name": "video_duration",
                 "label": "video duration",
                 "tooltip": false,
@@ -274,7 +274,7 @@
                 "step": 0.1
             },
             {
-                "id": "VideoStreamingJob_data_stored",
+                "web_id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
                 "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
@@ -291,7 +291,7 @@
         ],
         "advanced_fields": [
             {
-                "id": "VideoStreamingJob_refresh_rate",
+                "web_id": "VideoStreamingJob_refresh_rate",
                 "attr_name": "refresh_rate",
                 "label": "refresh rate",
                 "tooltip": false,
@@ -312,7 +312,7 @@
         "header": "Generative AI job creation",
         "fields": [
             {
-                "id": "GenAIJob_name",
+                "web_id": "GenAIJob_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -320,7 +320,7 @@
                 "default": "Generative AI job 1"
             },
             {
-                "id": "GenAIJob_output_token_count",
+                "web_id": "GenAIJob_output_token_count",
                 "attr_name": "output_token_count",
                 "label": "output token count",
                 "tooltip": false,

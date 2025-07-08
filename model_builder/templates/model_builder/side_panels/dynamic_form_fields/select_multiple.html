@@ -1,5 +1,5 @@
 <div class="col-auto">
-    <label for="select-new-object-{{ field.id }}" class="form-label">
+    <label for="select-new-object-{{ field.web_id }}" class="form-label">
         {{ field.label|capfirst }}
     </label>
 </div>
@@ -9,12 +9,12 @@
 <div class="d-flex flex-row mb-2 gap-2">
     <select
         class="flex-grow-1 form-control p-2"
-        id="select-new-object-{{ field.id }}" name="select-new-object-{{ field.id }}"
+        id="select-new-object-{{ field.web_id }}" name="select-new-object-{{ field.web_id }}"
         _="
         on load
             if my options.length == 0 then
                 set my.disabled to true
-                add .disabled to #add-btn-{{ field.id }}
+                add .disabled to #add-btn-{{ field.web_id }}
         "
     >
         {% for option in field.unselected %}
@@ -22,17 +22,17 @@
         {% endfor %}
     </select>
     <button
-            id="add-btn-{{ field.id }}"
+            id="add-btn-{{ field.web_id }}"
             type="button"
             class="btn btn-white border border-dark rounded-2 fs-xl p-2"
-            onclick="addValueToSelectMultiple('{{ field.id }}')">
+            onclick="addValueToSelectMultiple('{{ field.web_id }}')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
         </svg>
     </button>
 </div>
 <div class="mb-3 bg-light rounded-2 p-2">
-    <table class="w-100" id="objects-already-selected-for-{{ field.id }}">
+    <table class="w-100" id="objects-already-selected-for-{{ field.web_id }}">
         <tr>
             {% if field.selected.length  == 0  %}
                 <td colspan="4">
@@ -44,6 +44,6 @@
 </div>
 <div id="selected_data" data-json="{{ field.selected|safe }}"></div>
 <div id="unselected_data" data-json="{{ field.unselected|safe }}"></div>
-<input type="hidden" id="{{ field.id }}" name="{{ field.id }}" value=""
-    _="on load call refreshSelectMultipleFields('{{ field.id }}')"
+<input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value=""
+    _="on load call refreshSelectMultipleFields('{{ field.web_id }}')"
 >

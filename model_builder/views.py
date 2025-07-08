@@ -22,7 +22,7 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
-from model_builder.model_builder_utils import to_rounded_daily_values
+from model_builder.model_builder_utils import to_rounded_daily_values, reindex_array
 from model_builder.model_web import ModelWeb
 from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb, ExplainableObjectWeb, \
     ExplainableQuantityWeb
@@ -235,11 +235,17 @@ def get_explainable_hourly_quantity_chart_and_explanation(
                     "object_type unnecessary because the usage pattern necessarily already belongs to the system")],
             model_web)
 
-
-    n_days = math.ceil(len(web_ehq.value) / 24)
-    start = np.datetime64(web_ehq.start_date, "D")
+    if web_ehq.start_date.hour == 0:
+        reindexed_values = web_ehq.value
+        start_date_starting_at_midnight = web_ehq.start_date
+    else:
+        start_date_starting_at_midnight = web_ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        reindexed_values = reindex_array(
+            web_ehq, start_date_starting_at_midnight, len(web_ehq.value) + web_ehq.start_date.hour)
+    n_days = math.ceil(len(reindexed_values) / 24)
+    start = np.datetime64(start_date_starting_at_midnight, "D")
     dates = (start + np.arange(n_days)).astype(str).tolist()
-    daily_data = to_rounded_daily_values(web_ehq.value)
+    daily_data = to_rounded_daily_values(reindexed_values)
     data_dict = dict(zip(dates, daily_data))
     literal_formula, ancestors_mapped_to_symbols_list = (
         web_ehq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())

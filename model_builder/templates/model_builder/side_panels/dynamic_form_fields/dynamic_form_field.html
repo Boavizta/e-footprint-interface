@@ -1,4 +1,4 @@
-<div id="field-group-{{ field.id }}" class="mb-3">
+<div id="field-group-{{ field.web_id }}" class="mb-3">
     {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
     {% if field.input_type == "select-str-input" %}
         {% include "model_builder/side_panels/dynamic_form_fields/select_str_input.html" %}
@@ -18,6 +18,6 @@
         <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>
     {% endif %}
     {% if field.source %}
-        {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id=field.id %}
+        {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id=field.web_id %}
     {% endif %}
 </div>

@@ -27,7 +27,6 @@ def determine_global_time_bounds(ehqs: List[ExplainableHourlyQuantities]) -> Tup
 
 def reindex_array(ehq: ExplainableHourlyQuantities, global_start, total_hours: int) -> u.Quantity:
     offset = int((ehq.start_date - global_start).total_seconds() // 3600)
-    ehq.to(u.tonne)
     vals = ehq.magnitude.astype(np.float32, copy=False)
     padded = np.zeros(total_hours, dtype=np.float32)
     padded[offset: offset + len(vals)] = vals
@@ -40,8 +39,9 @@ def get_reindexed_array_from_dict(
     val = d.get(key)
     if isinstance(val, EmptyExplainableObject):
         return np.zeros(total_hours, dtype=np.float32) * u.tonne
+    converted_to_tonnes = val.to(u.tonne)
 
-    return reindex_array(val, global_start, total_hours)
+    return reindex_array(converted_to_tonnes, global_start, total_hours)
 
 
 def to_rounded_daily_values(quantity_arr: u.Quantity, rounding_depth: int = 5) -> List[float]:

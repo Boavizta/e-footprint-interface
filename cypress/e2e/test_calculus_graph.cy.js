@@ -60,8 +60,8 @@ describe("Calculus graph", () => {
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist').click();
         cy.get("button[data-bs-target='#collapseCalculatedAttributesWebApplicationJob']").should('exist').click();
 
-        cy.get("button[data-bs-target='#collapse-calculated_attributes-hourly_occurrences_across_usage_patterns").should('be.enabled').click();
-        cy.get("a[href^='/model_builder/display-calculus-graph/id-4f5352-Test-E2E-Job-1/hourly_occurrences_across_usage_patterns/']").then(($a) => {
+        cy.get("button[data-bs-target='#collapse-calculated_attributes_hourly_occurrences_per_usage_pattern").should('be.enabled').click();
+        cy.get("a[href^='/model_builder/display-calculus-graph/id-4f5352-Test-E2E-Job-1/hourly_occurrences_per_usage_pattern/id-77cd46-UP3']").then(($a) => {
             const url = $a.prop('href');
             cy.visit(url);
             cy.get('iframe').should('exist');
