@@ -1,6 +1,6 @@
 // MODAL
 document.body.addEventListener("openModalDialog", function(event) {
-    let modalElement = document.getElementById("model-builder-modal");
+    let modalElement = document.getElementById(event.detail["modal_id"]);
     let modal = new bootstrap.Modal(modalElement);
     modal.show();
 });
@@ -34,19 +34,4 @@ document.addEventListener('hidden.bs.modal', function(event) {
     document.querySelectorAll('.modal-backdrop').forEach(function(el) {
         el.remove();
     });
-});
-
-document.body.addEventListener("alertImportError", function(event) {
-    let modalElement = document.getElementById("error-import-modal");
-    let modal = new bootstrap.Modal(modalElement);
-    modal.show();
-    let progress = 100
-    const intervalId = setInterval(() => {
-        progress = progress -2
-        document.getElementById('progressBar').style.width = progress + '%'
-        if (progress <= 0) {
-            clearInterval(intervalId)
-            modal.hide()
-        }
-    }, 100)
 });

@@ -1,3 +1,4 @@
+import json
 import os
 from inspect import _empty as empty_annotation
 from typing import List, get_origin, get_args
@@ -182,7 +183,7 @@ def render_exception_modal(request, exception):
     http_response = render(request, "model_builder/modals/exception_modal.html", {
         "modal_id": "model-builder-modal", "message": exception})
 
-    http_response["HX-Trigger-After-Swap"] = "openModalDialog"
+    http_response["HX-Trigger-After-Swap"] = json.dumps({"openModalDialog": {"modal_id": "model-builder-modal"}})
 
     return http_response
 

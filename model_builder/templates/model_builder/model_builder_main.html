@@ -129,24 +129,7 @@ flex-column align-items-start overflow-y-auto overflow-x-hidden"></div>
 <div id="loader-container">
 </div>
 
-<div class="modal fade" id="error-import-modal" tabindex="-1" aria-labelledby="error-import-modal-Label" aria-hidden="true"  data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-x-octagon" viewBox="0 0 16 16">
-                    <path d="M4.54.146A.5.5 0 0 1 4.893 0h6.214a.5.5 0 0 1 .353.146l4.394 4.394a.5.5 0 0 1 .146.353v6.214a.5.5 0 0 1-.146.353l-4.394 4.394a.5.5 0 0 1-.353.146H4.893a.5.5 0 0 1-.353-.146L.146 11.46A.5.5 0 0 1 0 11.107V4.893a.5.5 0 0 1 .146-.353zM5.1 1 1 5.1v5.8L5.1 15h5.8l4.1-4.1V5.1L10.9 1z"/>
-                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                </svg>
-                <p><strong role="status">Import errror</strong></p>
-                <p>{{ import_error_message }}</p>
-                <div class="progress mt-3">
-                    <div id="progressBar" class="progress-bar bg-primary w-100" style="width: 100%;"></div>
-                </div>
-                <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+{% include "model_builder/modals/import_error_modal.html" with modal_id=import_error_modal_id message=import_error_message %}
 
 {% include "model_builder/modals/warn_before_side_panel_closing_modal.html" with message="The currently opened side panel has pending changes. Would you like to continue and lose them ?" modal_id="unsavedModal" %}
 

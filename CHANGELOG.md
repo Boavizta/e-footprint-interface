@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.15] - 2025-07-08
+## [0.8.15] - 2025-07-09
 
 ### Added
 - A modal to warn users that changes might be discarded when trying to close an open side panel with unsaved inputs.

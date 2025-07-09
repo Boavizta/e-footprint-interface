@@ -53,7 +53,7 @@ def ask_delete_object(request, object_id):
             context={"modal_id": "model-builder-modal", "obj": web_obj, "message": message, "sub_message": sub_message,
                      "remove_card_with_hyperscript": remove_card_with_hyperscript})
 
-    http_response["HX-Trigger-After-Swap"] = "openModalDialog"
+    http_response["HX-Trigger-After-Swap"] = json.dumps({"openModalDialog": {"modal_id": "model-builder-modal"}})
 
     return http_response
 
