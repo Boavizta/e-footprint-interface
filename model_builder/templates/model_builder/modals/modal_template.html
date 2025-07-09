@@ -1,0 +1,32 @@
+{% load static %}
+
+<div id="{{ modal_id }}" class="modal fade"
+     data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="model-builder-modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                {% block modal-header %}
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="dropModal('{{ modal_id }}')"></button>
+                {% endblock %}
+            </div>
+            <div class="modal-body text-center px-5">
+                <img src="{% static 'icons/warning.svg' %}" class="mb-4" width="50px" height="50px" alt="error icon" />
+                <p id="exception-msg">{{ message|linebreaksbr }}</p>
+                <p class="fs-xl">{{ sub_message }}</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                {% block modal-footer %}
+                    <button type="button" id="btn-go-back-modal" class="btn btn-primary rounded-pill px-4 py-3 mb-3" data-bs-dismiss="modal">Go back</button>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block script %}
+    <script>
+        closeAndEmptySidePanel();
+        hidePanelResult();
+    </script>
+{% endblock %}

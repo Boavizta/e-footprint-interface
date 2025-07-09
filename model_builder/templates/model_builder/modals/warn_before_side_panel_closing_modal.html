@@ -1,0 +1,25 @@
+{% extends "model_builder/modals/modal_template.html" %}
+
+{% block modal-header %}
+{% endblock %}
+{% block modal-footer %}
+    <button type="button"
+            id="cancel-unsaved-modal"
+            class="btn btn-white border border-1 border-body-tertiary rounded-2 px-4 py-3 mb-3"
+            onclick="closeWarningModal();hideLoadingBar()"
+            tabindex="-1"
+    >
+        No, Cancel
+    </button>
+    <button
+        type="button"
+        class="btn btn-danger rounded-2 px-4 py-3 mb-3"
+        id="continue-unsaved-modal"
+        tabindex="-1"
+    >
+        Yes, Continue
+    </button>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

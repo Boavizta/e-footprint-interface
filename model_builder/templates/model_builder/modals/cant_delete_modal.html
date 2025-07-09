@@ -1,22 +1,13 @@
-{% load static %}
-<div class="modal fade" id="model-builder-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="model-builder-modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="dropModal('model-builder-modal')"></button>
-                </div>
-            <div class="modal-body text-center px-5">
-                <img src="{% static 'icons/warning.svg' %}" class="mb-4" width="50px" height="50px" alt="error icon" />
-                <p class="lead">
-                    {{ msg }}
-                </p>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-primary rounded-pill px-4 py-3 mb-3" onclick="dropModal('model-builder-modal')" data-bs-dismiss="modal">Go back</button>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    closeAndEmptySidePanel();
-</script>
+{% extends "model_builder/modals/modal_template.html" %}
+
+{% block modal-footer %}
+    <button type="button" class="btn btn-primary rounded-pill px-4 py-3 mb-3" onclick="dropModal('model-builder-modal')" data-bs-dismiss="modal">
+        Go back
+    </button>
+{% endblock %}
+
+{% block script %}
+    <script>
+        closeAndEmptySidePanel();
+    </script>
+{% endblock %}

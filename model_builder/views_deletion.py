@@ -29,7 +29,7 @@ def ask_delete_object(request, object_id):
                    f"{web_obj.modeling_obj_containers[0].class_as_simple_str}s.")
 
         http_response = render(request, "model_builder/modals/cant_delete_modal.html",
-            context={"msg": msg})
+            context={"modal_id": "model-builder-modal", "message": msg})
     else:
         message = f"Are you sure you want to delete this {web_obj.class_as_simple_str} ?"
         sub_message = ""
@@ -50,7 +50,7 @@ def ask_delete_object(request, object_id):
 
         http_response = render(
             request, "model_builder/modals/delete_card_modal.html",
-            context={"obj": web_obj, "message": message, "sub_message": sub_message,
+            context={"modal_id": "model-builder-modal", "obj": web_obj, "message": message, "sub_message": sub_message,
                      "remove_card_with_hyperscript": remove_card_with_hyperscript})
 
     http_response["HX-Trigger-After-Swap"] = "openModalDialog"

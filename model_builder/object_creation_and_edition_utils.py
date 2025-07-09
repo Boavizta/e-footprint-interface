@@ -180,7 +180,7 @@ def render_exception_modal(request, exception):
     if os.environ.get("RAISE_EXCEPTIONS"):
         raise exception
     http_response = render(request, "model_builder/modals/exception_modal.html", {
-        "msg": exception})
+        "modal_id": "model-builder-modal", "message": exception})
 
     http_response["HX-Trigger-After-Swap"] = "openModalDialog"
 
