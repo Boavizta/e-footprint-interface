@@ -1,5 +1,1 @@
-<div class="row align-items-center mb-3">
-    <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
-        {{ item.label|capfirst }}: object type ExplainableObject shouldn’t exist in calculated attributes. Please send a mail to vincent.villet@publicissapient.com with steps to reproduce the bug.
-    </label>
-</div>
+{% extends "model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html" %}

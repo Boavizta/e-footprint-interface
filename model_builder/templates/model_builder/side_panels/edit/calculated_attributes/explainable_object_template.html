@@ -1,0 +1,22 @@
+<div class="row align-items-center mb-3">
+    <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
+        {{ item.attr_name_web|capfirst }}:
+    </label>
+
+    <div class="col-auto">
+        {% block input %}
+            <input disabled
+                   name="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
+                   id="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
+                   value="{{ item.value|stringformat:"s"|truncatechars:30 }}"
+                   class="form-control form-control-sm"
+            >
+        {% endblock %}
+    </div>
+    <div class="col-auto d-flex gap-1">
+        {% include "model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html" %}
+        {% include "model_builder/side_panels/edit/calculated_attributes/components/calculus_graph_link.html" %}
+    </div>
+</div>
+
+<div class="collapse" id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"></div>
