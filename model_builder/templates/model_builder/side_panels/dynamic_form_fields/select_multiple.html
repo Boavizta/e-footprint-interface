@@ -28,12 +28,6 @@
         <select
             class="form-select flex-grow-1 form-control p-2"
             id="select-new-object-{{ field.web_id }}" name="select-new-object-{{ field.web_id }}"
-            _="
-            on load
-                if my options.length == 0 then
-                    set my.disabled to true
-                    add .disabled to #add-btn-{{ field.web_id }}
-            "
         >
             {% for option in field.unselected %}
                 <option value="{{ option.value }}">{{ option.label }}</option>
