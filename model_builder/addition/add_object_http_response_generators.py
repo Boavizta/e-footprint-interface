@@ -1,16 +1,11 @@
 import json
 
-from django.http import QueryDict
 from django.shortcuts import render
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
-from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
-from efootprint.core.hardware.gpu_server import GPUServer
 
-from model_builder.class_structure import generate_object_creation_structure
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
-from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS, default_gpu_server, default_web_server, \
-    default_storage_for_server
+from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import (create_efootprint_obj_from_post_data,
                                                              render_exception_modal_if_error, edit_object_in_system)
 

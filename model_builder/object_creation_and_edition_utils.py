@@ -28,9 +28,6 @@ def create_efootprint_obj_from_post_data(
 
     obj_creation_kwargs = {}
     for attr_name_with_prefix in create_form_data.keys():
-
-        print(attr_name_with_prefix)
-
         attr_name = attr_name_with_prefix.replace(object_type + "_", "")
         if attr_name not in init_sig_params:
             continue
