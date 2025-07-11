@@ -25,9 +25,13 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
     first_mirrored_card = next(iter(accordion_children_after_edit.keys()))
     removed_accordion_children = [acc_child for acc_child in accordion_children_before_edit[first_mirrored_card]
                                   if acc_child not in accordion_children_after_edit[first_mirrored_card]]
+    there_has_been_deletions = False
     for removed_accordion_child in removed_accordion_children:
         if len(removed_accordion_child.modeling_obj_containers) == 0:
             removed_accordion_child.self_delete()
+            there_has_been_deletions = True
+    if there_has_been_deletions:
+        obj_to_edit.model_web.update_system_data_with_up_to_date_calculated_attributes()
 
     for top_parent_card in list(set([mirrored_card.top_parent for mirrored_card in
                                edited_obj.mirrored_cards])):
