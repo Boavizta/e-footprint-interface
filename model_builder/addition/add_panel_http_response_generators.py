@@ -108,6 +108,8 @@ def generate_external_api_add_panel_http_response(request, model_web: ModelWeb):
         model_web=model_web,
     )
 
+    services_dict[0]["fields"][0]["label"] = "Available services"
+
     http_response = render(
         request, "model_builder/side_panels/external_api.html", {
             "form_sections": services_dict,
