@@ -1,8 +1,13 @@
 import json
+import math
 
 from django.shortcuts import render
+from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.core.hardware.gpu_server import GPUServer
+from efootprint.core.hardware.infra_hardware import InsufficientCapacityError
 from efootprint.core.hardware.storage import Storage
+from efootprint.constants.units import u
 
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
@@ -98,19 +103,27 @@ def add_new_external_api(request, model_web):
     new_storage = Storage.ssd()
     model_web.add_new_efootprint_object_to_system(new_storage)
     service_type = request.POST.get("type_object_available")
-    if service_type == "GenAIModel":
-        new_server = GPUServer.from_defaults(
-            name=f'{request.POST.get("GenAIModel_name")} API servers', storage=new_storage)
-    else:
+    if service_type != "GenAIModel":
         raise Exception(f"External service {service_type} not supported yet.")
 
+    new_server = GPUServer.from_defaults(
+        name=f'{request.POST.get("GenAIModel_name")} API servers', storage=new_storage,
+        compute=SourceValue(4 * u.gpu))
     new_server_web = model_web.add_new_efootprint_object_to_system(new_server)
-
     mutable_post = request.POST.copy()
-    mutable_post[f"{service_type}_server"] = new_server_web.efootprint_id
-    new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+    mutable_post[f"{service_type}_server"] = new_server.id
 
-    model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+    try:
+        new_service = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+    except InsufficientCapacityError as e:
+        from efootprint.logger import logger
+        logger.info(f"{e}")
+        nb_of_gpus_required = math.ceil((e.requested_capacity / new_server.ram_per_gpu).to(u.gpu).magnitude)
+        new_server.compute = SourceValue(
+            nb_of_gpus_required * u.gpu, source=Source("Computed to match model size", link=None))
+        new_service = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+
+    model_web.add_new_efootprint_object_to_system(new_service)
 
     response = render(
         request, "model_builder/object_cards/server_card.html", {"server": new_server_web})
