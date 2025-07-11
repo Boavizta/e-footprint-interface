@@ -15,7 +15,7 @@ function sortSelectMultipleFields(fieldId, selectedValue, direction) {
     tagFormAsModified();
 }
 
-function deleteValueFromSelectMultiple(fieldId, selectedValue) {
+function removeValueFromSelectMultiple(fieldId, selectedValue) {
     let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data");
     let unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data");
     let index = selectedOptions.findIndex(option => option.value === selectedValue);
@@ -57,74 +57,59 @@ function addValueToSelectMultiple(fieldId) {
 
 function refreshSelectMultipleFields(fieldId) {
     let objectsAlreadySelectedElement = document.getElementById("objects-already-selected-for-" + fieldId);
-    objectsAlreadySelectedElement.innerHTML = "";
     let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data");
     let selectNewObjectElement = document.getElementById("select-new-object-" + fieldId);
 
+    objectsAlreadySelectedElement.innerHTML = '';
+
     if(!selectedOptions || selectedOptions.length === 0) {
-        let newSelectedValue = document.createElement("tr");
-        let noValue = document.createElement("td");
         if(selectNewObjectElement.options.length === 0 ){
             document.getElementById("add-btn-" + fieldId).setAttribute("disabled", "true");
             selectNewObjectElement.setAttribute("disabled", "true");
-            noValue.setAttribute("colspan", "4");
-            noValue.innerHTML = `<span class="text-muted">No available options</span>`;
+            objectsAlreadySelectedElement.innerHTML = `<tr><td colspan="4"><span class="text-muted">No available options</span></td></tr>`;
         }else{
-            noValue.setAttribute("colspan", "4");
-            noValue.innerHTML = `<span class="text-muted">No values selected</span>`;
+            objectsAlreadySelectedElement.innerHTML = `<tr><td colspan="4"><span class="text-muted">No values selected</span></td></tr>`;
         }
-        newSelectedValue.appendChild(noValue);
-        objectsAlreadySelectedElement.appendChild(newSelectedValue);
+        document.getElementById(fieldId).value = "";
         return;
     }
 
+    let tableHTML = '';
     selectedOptions.forEach((selectedValue, index) => {
-        let newSelectedValue = document.createElement("tr");
-        let nameSelectedValue = document.createElement("td");
-        nameSelectedValue.innerHTML = `${selectedValue.label}`;
-        let ctaSortUp = document.createElement("td");
-        let ctaSortDown = document.createElement("td");
-        let removeSelectedValue = document.createElement("td");
-
-        nameSelectedValue.className = "width-70";
-        ctaSortUp.className = "width-10";
-        ctaSortDown.className = "width-10";
-        removeSelectedValue.className = "width-10";
-
-        if (index !== selectedOptions.length - 1) {
-            ctaSortDown.innerHTML = `
-            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','down')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
-                </svg>
-            </button>`
-        }else{
-            ctaSortDown.innerHTML = '';
-        }
-        if(index !== 0){
-            ctaSortUp.innerHTML = `
-            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','up')">
+        // Use event.stopPropagation(); in buttons to avoid htmx errors
+        let upButton = index !== 0 ? `
+            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="event.stopPropagation();sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','up')">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/>
                 </svg>
-            </button>`
-        }else{
-            ctaSortUp.innerHTML = '';
-        }
-        removeSelectedValue.innerHTML = `<button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2"
-            onclick="deleteValueFromSelectMultiple('${fieldId}','${selectedValue.value}')"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-            </svg>
-        </button>`
-        newSelectedValue.appendChild(nameSelectedValue);
-        newSelectedValue.appendChild(ctaSortUp);
-        newSelectedValue.appendChild(ctaSortDown);
-        newSelectedValue.appendChild(removeSelectedValue);
+            </button>` : '';
 
-        objectsAlreadySelectedElement.appendChild(newSelectedValue);
+        let downButton = index !== selectedOptions.length - 1 ? `
+            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="event.stopPropagation();sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','down')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </button>` : '';
+
+        tableHTML += `
+            <tr>
+                <td class="width-70">${selectedValue.label}</td>
+                <td class="width-10">${upButton}</td>
+                <td class="width-10">${downButton}</td>
+                <td class="width-10">
+                    <button type="button" id="remove-${selectedValue.value}"
+                        class="btn btn-white border-0 rounded-2 fs-xl p-2"
+                        onclick="event.stopPropagation();removeValueFromSelectMultiple('${fieldId}','${selectedValue.value}')"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </button>
+                </td>
+            </tr>`;
     });
+
+    objectsAlreadySelectedElement.innerHTML = tableHTML;
 
     if(selectNewObjectElement.options.length === 0){
         document.getElementById("add-btn-" + fieldId).setAttribute("disabled", "true");

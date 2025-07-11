@@ -45,7 +45,8 @@
     </div>
     <div id="selected_data" data-json="{{ field.selected|safe }}"></div>
     <div id="unselected_data" data-json="{{ field.unselected|safe }}"></div>
-    <input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value=""
-        _="on load call refreshSelectMultipleFields('{{ field.web_id }}')"
-    >
+    <input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value="">
 </div>
+<script>
+    refreshSelectMultipleFields('{{ field.web_id }}');
+</script>

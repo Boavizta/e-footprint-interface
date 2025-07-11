@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Add a new button in the toolbar to open the result panel.
 
+### Fixed
+- Add empty_explainable_object calculated attribute template.
+- Update system data after objects have been deleted due to an edition
+- Select multiple logic refacto and fixes: send null value if no option selected + fix htmx errors with event propagation stops in buttons.
+
 ### Changed
 - Review SCSS rules and update CSS class in templates to unify styles.
 
