@@ -11,12 +11,7 @@ describe("Test - Forms panel", () => {
 
     it("Check that the UJS list is displayed and disabled when adding a UJ with no UJS in the system, then check" +
         " that it is enabled after having created a UJS", () => {
-        cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-no-job-no-uj-step.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get("#btn-submit-form").click();
-        cy.get("#sidePanelForm").should('not.exist');
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-no-job-no-uj-step.json');
 
         cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
         cy.get("#sidePanelForm").should('exist').should('be.visible');
@@ -35,12 +30,7 @@ describe("Test - Forms panel", () => {
     });
 
     it("Check that the jobs list in not displayed when adding a UJS with no job in the system, then check that it is displayed after having created a job", () => {
-        cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get("#btn-submit-form").click();
-        cy.get("#sidePanelForm").should('not.exist');
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-no-job.json');
 
         cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
@@ -61,12 +51,7 @@ describe("Test - Forms panel", () => {
     });
 
     it("Try to create a server with and without edit fields into advanced options", () => {
-        cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-no-job.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get("#btn-submit-form").click();
-        cy.get("#sidePanelForm").should('not.exist');
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-no-job.json');
 
         cy.get("#btn-add-server").should('be.enabled').click();
         cy.get("#sidePanelForm").should('be.visible');
@@ -107,12 +92,7 @@ describe("Test - Forms panel", () => {
 
     it("Check that object keep units defined in model", () => {
         let serverName = 'cloud server test'
-        cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/test-unit-edit.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get("#btn-submit-form").click();
-        cy.get("#sidePanelForm").should('not.exist');
+        cy.loadEfootprintTestModel('cypress/fixtures/test-unit-edit.json');
 
         cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');

@@ -15,17 +15,7 @@ describe("Test - Toolbars import/export/reboot", () => {
     let newSystemName = "New_system_name";
 
     it("Import one JSON file when the model is empty and check that objects have been added", () => {
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('input[type="file"]').then(($input) => {
-          expect($input[0].files.length).to.equal(1);
-          expect($input[0].files[0].name).to.equal('efootprint-model-system-data.json');
-        });
-        cy.get('button[type="submit"]').click();
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
         cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
@@ -39,17 +29,8 @@ describe("Test - Toolbars import/export/reboot", () => {
 
     it("Import a new JSON file when the model already contained objets to check previous objects are removed and" +
         "  new objets has been added", () => {
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('input[type="file"]').then(($input) => {
-          expect($input[0].files.length).to.equal(1);
-          expect($input[0].files[0].name).to.equal('efootprint-model-system-data.json');
-        });
-        cy.get('button[type="submit"]').click();
+        cy.loadEfootprintTestModel(fileTest);
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
         cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
@@ -84,16 +65,11 @@ describe("Test - Toolbars import/export/reboot", () => {
     });
 
     it("check if we reset the model all objets and leaderlines have been removed", () => {
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('button[type="submit"]').click();
-        cy.get('input[type="file"]').should("not.exist");
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
+        cy.intercept("GET", "/model_builder/reboot").as("reboot")
         cy.get('a[id="btn-reboot-modeling"]').click();
-        cy.wait(500);
+        cy.wait("@reboot");
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('not.exist');
         cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('not.exist');
@@ -111,14 +87,10 @@ describe("Test - Toolbars import/export/reboot", () => {
     });
 
     it("Change the name of the model and check that the name has been changed", () => {
-        cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('button[type="submit"]').click();
-        cy.get('input[type="file"]').should("not.exist");
-
-        cy.get('#btn-change-system-name').should('exist').click()
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
+        // Wait for htmx to load the page
+        cy.wait(50);
+        cy.get('#btn-change-system-name').should('exist').should("be.visible").click()
         cy.get('#name').should('exist').clear().type(newSystemName);
         cy.get('#btn-submit-form').should('exist').click();
         cy.get('#system-name').should('contain.text', newSystemName);
@@ -128,33 +100,28 @@ describe("Test - Toolbars import/export/reboot", () => {
     });
 
     it("Export a model and check that the file has been downloaded and is correctly named", () => {
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('button[type="submit"]').click();
-        cy.get('input[type="file"]').should("not.exist");
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
         let now = new Date();
         let nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-        let day = String(nowUtc.getDate()).padStart(2, '0');
-        let month = String(nowUtc.getMonth() + 1).padStart(2, '0');
+        let day = String(nowUtc.getDate()).padStart(2, "0");
+        let month = String(nowUtc.getMonth() + 1).padStart(2, "0");
         let year = nowUtc.getFullYear();
-        let hours = String(nowUtc.getHours()).padStart(2, '0');
-        let minutes = String(nowUtc.getMinutes()).padStart(2, '0');
-        let fileName = `${year}-${month}-${day} ${hours}_${minutes} UTC system 1.e-f.json`;
+        let hours = String(nowUtc.getHours()).padStart(2, "0");
+        let fileNameBeforeMinutes = `${year}-${month}-${day} ${hours}_`;
+        let fileNameAfterMinutes = " UTC system 1.e-f.json";
 
         //to get the filedownload in cypress, we need to remove the target blank attribute
-        cy.intercept('GET', '**/download-json/**').as('fileDownload');
+        cy.intercept("GET", "**/download-json/**").as("fileDownload");
         cy.get('a[href="download-json/"]')
-          .invoke('removeAttr', 'target')
+          .invoke("removeAttr", "target")
           .click();
 
-        cy.wait('@fileDownload').then((interception) => {
-            const contentDisposition = interception.response.headers['content-disposition'];
-            expect(contentDisposition).to.include('attachment');
-            expect(contentDisposition).to.include(fileName);
+        cy.wait("@fileDownload").then((interception) => {
+            const contentDisposition = interception.response.headers["content-disposition"];
+            expect(contentDisposition).to.include("attachment");
+            expect(contentDisposition).to.include(fileNameBeforeMinutes);
+            expect(contentDisposition).to.include(fileNameAfterMinutes);
         });
 
     });

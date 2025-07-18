@@ -25,27 +25,16 @@ describe("Test - Result panel", () => {
     });
 
     it("Check that when the model can be calculated the panel is displayed and can be swiped down", () => {
-        let upName = "Test E2E Usage Pattern";
-
-        cy.visit("/model_builder/");
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('input[type="file"]').then(($input) => {
-          expect($input[0].files.length).to.equal(1);
-          expect($input[0].files[0].name).to.equal('efootprint-model-system-data.json');
-        });
-        cy.get('button[type="submit"]').click();
-        cy.get('input[type="file"]').should("not.exist");
-        cy.get('#sidePanelForm').should('not.exist');
-
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
+        // Wait for htmx to load the page
+        cy.wait(50);
         cy.get("#panel-result-btn").should('exist').should('be.visible').should('have.class', 'w-100');
+        cy.intercept("GET", "/model_builder/result-chart/").as("openResults")
         cy.get('#btn-open-panel-result').should('be.visible').click()
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
-        cy.wait(1000); // wait for the result panel to be fully loaded
+        cy.wait("@openResults"); // wait for the result panel to be fully loaded
         cy.get('#result-block').should('exist').find('div[onclick="hidePanelResult()"]')
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 400 })
@@ -77,31 +66,23 @@ describe("Test - Result panel", () => {
         let nbElementInit;
         let nbElementsMonthlyGranularity;
         let nbElementsYearlyGranularity;
-        cy.visit("/model_builder/");
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('button[type="submit"]').click();
-        cy.get('#sidePanelForm').should('not.exist');
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-
+        cy.intercept("GET", "/model_builder/result-chart/").as("openResults")
         cy.get('#btn-open-panel-result')
         .realTouch('start', { x: 100, y: 300 })
         .realTouch('move', { x: 100, y: 200 })
         .realTouch('end', { x: 100, y: 200 });
-
-        cy.wait(1000); // wait for the result panel to be displayed
+        cy.wait("@openResults"); // wait for the result panel to be displayed
 
         cy.window().its('charts').should('exist');
-
         cy.window().its('charts').its('barChart').should('exist').then((chart) => {
             nbElementInit = chart.data.labels.length;
         });
 
-        //wait all js loading
-        cy.wait(1000);
+        // Wait for all js loading
+        cy.wait(200);
         cy.get('#results_temporal_granularity').should('exist').select('month');
         cy.get('#results_temporal_granularity').should('have.value', 'month');
 
@@ -119,13 +100,7 @@ describe("Test - Result panel", () => {
 
     it("Check that sources are displayed and can be downloaded", () => {
         let upName = "Test E2E Usage Pattern";
-        cy.visit("/model_builder/");
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('button[type="submit"]').click();
-        cy.get('#sidePanelForm').should('not.exist')
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
         cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
         cy.get('#btn-open-panel-result').should("exist").click()
@@ -160,17 +135,14 @@ describe("Test - Result panel", () => {
 
     it("Check edition when the result panel is open and model recomputation", () => {
         let serverTest = "Test-E2E-Server"
-        cy.visit("/model_builder/");
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('button[type="submit"]').click();
-        cy.get('#sidePanelForm').should('not.exist');
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
+
         cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('be.enabled').click()
         cy.get('#sidePanelForm').should('exist').should('be.visible');
         cy.get("#Storage_data_replication_factor").should('be.visible').type("1000")
+        cy.intercept("GET", "/model_builder/result-chart/").as("openResults")
         cy.get('#btn-open-panel-result').click()
-        cy.wait(1000); // wait for the result panel to be fully loaded
+        cy.wait("@openResults"); // wait for the result panel to be fully loaded
         cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")
         cy.get('#panel-result-btn').should('have.class', 'result-width')
         cy.window().then((win) => {
@@ -179,10 +151,11 @@ describe("Test - Result panel", () => {
         cy.window().then((win) => {
             cy.spy(win, 'drawBarResultChart').as('drawBarResultChart');
         });
+        cy.intercept("POST", "/model_builder/edit-object/id-fb1308-Test-E2E-Server/").as("editServer")
         cy.get('#btn-submit-form').click();
         cy.get('@displayLoaderResult').should('have.been.called');
         cy.get('@drawBarResultChart').should('have.been.called');
-        cy.wait(1000);
+        cy.wait("@editServer");
         cy.get('#panel-result-btn').should('not.have.class', 'result-width')
     });
 });

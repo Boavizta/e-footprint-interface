@@ -8,17 +8,7 @@ describe("Calculus graph", () => {
         let ujsOne = "Test E2E UJ 1";
         let jobOne = "Test E2E Job 1";
 
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('input[type="file"]').then(($input) => {
-          expect($input[0].files.length).to.equal(1);
-          expect($input[0].files[0].name).to.equal('efootprint-model-system-data.json');
-        });
-        cy.get('button[type="submit"]').click();
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
         cy.get("svg[id^='icon_accordion_id-'][id*='"+ujsOne.replaceAll(' ', '-')+"']").should('be.visible').click();
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist').click();
@@ -44,17 +34,7 @@ describe("Calculus graph", () => {
         let ujsOne = "Test E2E UJ 1";
         let jobOne = "Test E2E Job 1";
 
-        cy.visit("/");
-        cy.get('#btn-start-modeling-my-service').click();
-        cy.get('#model-canva').should('be.visible');
-        cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
-        let fileTest = 'cypress/fixtures/efootprint-model-system-data-multiple.json'
-        cy.get('input[type="file"]').selectFile(fileTest);
-        cy.get('input[type="file"]').then(($input) => {
-          expect($input[0].files.length).to.equal(1);
-          expect($input[0].files[0].name).to.equal('efootprint-model-system-data-multiple.json');
-        });
-        cy.get('button[type="submit"]').click();
+        cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data-multiple.json');
 
         cy.get("svg[id^='icon_accordion_id-'][id*='"+ujsOne.replaceAll(' ', '-')+"']").should('be.visible').click();
         cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist').click();
