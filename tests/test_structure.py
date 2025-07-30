@@ -6,6 +6,7 @@ from unittest import TestCase
 import sys
 from unittest.mock import MagicMock
 
+from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, SERVER_CLASSES, SERVICE_JOB_CLASSES, \
@@ -105,9 +106,17 @@ class TestsClassStructure(TestCase):
         default_efootprint_networks = [network_archetype() for network_archetype in Network.archetypes()]
         default_efootprint_hardwares = [Device.laptop(), Device.smartphone()]
 
-        network_archetypes = {network.id: network.to_json() for network in default_efootprint_networks}
-        hardware_archetypes = {hardware.id: hardware.to_json() for hardware in default_efootprint_hardwares}
-        countries = {country.id: country.to_json() for country in EFOOTPRINT_COUNTRIES}
+        def create_object_dict_while_normalizing_ids(object_list: list):
+            output_dict = {}
+            for elt in object_list:
+                elt.id = "id-XXXXXX-" + css_escape(elt.name)
+                output_dict[elt.id] = elt.to_json()
+
+            return output_dict
+
+        network_archetypes = create_object_dict_while_normalizing_ids(default_efootprint_networks)
+        hardware_archetypes = create_object_dict_while_normalizing_ids(default_efootprint_hardwares)
+        countries = create_object_dict_while_normalizing_ids(EFOOTPRINT_COUNTRIES)
 
         with open(os.path.join(model_web_root, "default_networks.json"), "r") as f:
             default_networks = json.load(f)

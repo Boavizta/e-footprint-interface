@@ -17,7 +17,7 @@
       <a
         href="#"
         {% if elt.dict_container %}
-            hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' elt.modeling_obj_container.efootprint_id elt.attr_name_in_mod_obj_container elt.key_in_dict.web_id %}"
+            hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' elt.modeling_obj_container.efootprint_id elt.attr_name_in_mod_obj_container elt.key_in_dict.efootprint_id %}"
         {% else %}
          hx-get="{% url 'get_explainable_hourly_quantity_chart_and_explanation' elt.modeling_obj_container.efootprint_id elt.attr_name_in_mod_obj_container %}"
         {% endif %}

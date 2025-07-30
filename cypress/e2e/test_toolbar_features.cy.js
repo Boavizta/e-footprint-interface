@@ -17,14 +17,14 @@ describe("Test - Toolbars import/export/reboot", () => {
     it("Import one JSON file when the model is empty and check that objects have been added", () => {
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+server.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujsTwo.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+jobOne.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
-        cy.get('button[id^="button-id-"][id$="'+jobTwo.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
-        cy.get('button[id^="button-id-"][id$="'+service.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourney", ujName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", server).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsTwo).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobOne).should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobTwo).should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplication", service).should('exist').should('not.be.visible');
     });
 
     it("Import a new JSON file when the model already contained objets to check previous objects are removed and" +
@@ -32,14 +32,14 @@ describe("Test - Toolbars import/export/reboot", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.loadEfootprintTestModel(fileTest);
 
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+server.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujsTwo.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+jobOne.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
-        cy.get('button[id^="button-id-"][id$="'+jobTwo.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
-        cy.get('button[id^="button-id-"][id$="'+service.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourney", ujName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", server).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsTwo).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobOne).should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobTwo).should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplication", service).should('exist').should('not.be.visible');
 
         cy.get('button[hx-get="/model_builder/open-import-json-panel/"]').click();
         cy.get('input[type="file"]').selectFile(fileTest);
@@ -54,14 +54,14 @@ describe("Test - Toolbars import/export/reboot", () => {
         cy.get('button[type="submit"]').click();
         cy.get('@initLeaderLines').should('have.been.called');
 
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+server.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+ujsTwo.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
-        cy.get('button[id^="button-id-"][id$="'+jobOne.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
-        cy.get('button[id^="button-id-"][id$="'+jobTwo.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
-        cy.get('button[id^="button-id-"][id$="'+service.replaceAll(' ', '-')+'"]').should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourney", ujName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", server).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsTwo).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobOne).should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobTwo).should('exist').should('not.be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("WebApplication", service).should('exist').should('not.be.visible');
     });
 
     it("check if we reset the model all objets and leaderlines have been removed", () => {
@@ -71,16 +71,16 @@ describe("Test - Toolbars import/export/reboot", () => {
         cy.get('a[id="btn-reboot-modeling"]').click();
         cy.wait("@reboot");
 
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+ujName.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+server.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+ujsTwo.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+jobOne.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="button-id-"][id$="'+jobTwo.replaceAll(' ', '-')+'"]').should('not.exist');
-        cy.get('button[id^="id-"][id$="'+service.replaceAll(' ', '-')+'"]').should('not.exist');
+        cy.contains("div", upName).should("not.exist");
+        cy.contains("div", ujName).should("not.exist");
+        cy.contains("div", server).should("not.exist");
+        cy.contains("div", ujsOne).should("not.exist");
+        cy.contains("div", ujsTwo).should("not.exist");
+        cy.contains("div", jobOne).should("not.exist");
+        cy.contains("div", jobTwo).should("not.exist");
+        cy.contains("div", service).should("not.exist");
 
-        //there is only one card and it must cointain the text "My first usage journey"
+        //there is only one card and it must contain the text "My first usage journey"
         cy.get('div[class*="card"]').should('have.length',1);
         cy.get('div[class*="card"]').should('contain.text','My first usage journey');
         cy.get('div[class*="card"]').should('contain.text','My first usage journey step');

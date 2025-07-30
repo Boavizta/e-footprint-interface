@@ -20,7 +20,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#UsageJourney_name').type(ujName);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
-        cy.get('div[id$="' + ujName.replaceAll(' ', '-') + '"]').should('have.class', 'leader-line-object')
+        cy.getObjectCardFromObjectTypeAndName("UsageJourney", ujName).should('have.class', 'leader-line-object')
 
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
@@ -64,7 +64,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
-        cy.get('button[id^="button-id-"][id$="' + upNameOne.replaceAll(' ', '-') + '"]').should('be.visible').click();
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upNameOne).should('be.visible').click();
         cy.get("#chartTimeseries").should("have.class", "d-block")
         cy.get('#timeSeriesChart').then(($canvas) => {
             let canvas = $canvas[0]
@@ -89,7 +89,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#UsageJourney_name').type(ujName);
         cy.get('#btn-submit-form').click();
         cy.get('#form-add-usage-journey').should('not.exist');
-        cy.get('div[id$="'+ujName.replaceAll(' ', '-')+'"]').should('have.class', 'leader-line-object')
+        cy.getObjectCardFromObjectTypeAndName("UsageJourney", ujName).should('have.class', 'leader-line-object')
 
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
@@ -178,7 +178,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
         cy.get('#initial_usage_journey_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
-        cy.get('button[id^="button-id-"][id$="'+upNameOne.replaceAll(' ', '-')+'"]').should('be.visible').click();
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upNameOne).should('be.visible').click();
         cy.get('#modeling_duration_value').invoke('val', '25').trigger('input');
        cy.get('#modeling_duration_value_error_message').should('not.contain.text','Modeling duration value must be' +
            ' less than or equal to 10');

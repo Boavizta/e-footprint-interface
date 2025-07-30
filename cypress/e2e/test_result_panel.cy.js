@@ -68,7 +68,7 @@ describe("Test - Result panel", () => {
         let nbElementsYearlyGranularity;
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
         cy.intercept("GET", "/model_builder/result-chart/").as("openResults")
         cy.get('#btn-open-panel-result')
         .realTouch('start', { x: 100, y: 300 })
@@ -102,7 +102,7 @@ describe("Test - Result panel", () => {
         let upName = "Test E2E Usage Pattern";
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.get('button[id^="button-id-"][id$="'+upName.replaceAll(' ', '-')+'"]').should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
         cy.get('#btn-open-panel-result').should("exist").click()
 
         //get button with text Sources
@@ -134,10 +134,10 @@ describe("Test - Result panel", () => {
     });
 
     it("Check edition when the result panel is open and model recomputation", () => {
-        let serverTest = "Test-E2E-Server"
+        let serverTest = "Test E2E Server"
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.get('button[id^="button-id-"][id$="'+serverTest.replaceAll(' ', '-')+'"]').should('be.enabled').click()
+        cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", serverTest).should('be.enabled').click()
         cy.get('#sidePanelForm').should('exist').should('be.visible');
         cy.get("#Storage_data_replication_factor").should('be.visible').type("1000")
         cy.intercept("GET", "/model_builder/result-chart/").as("openResults")

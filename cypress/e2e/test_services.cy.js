@@ -23,15 +23,15 @@ describe('Test services', () => {
         cy.get('#GPUServer_compute').type(16);
 
         cy.get('#btn-submit-form').click();
-        cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
-        cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
+        cy.getObjectCardFromObjectTypeAndName("GPUServer", server).should('have.class', 'list-group-item')
+        cy.getObjectCardFromObjectTypeAndName("GPUServer", server).find('button[id^="add-service-to"]').click();
         cy.get('#GenAIModel_name').type(service);
         cy.get('#GenAIModel_provider').select(providerName1);
         cy.get('#GenAIModel_model_name').type(modelName1);
         cy.get('#btn-submit-form').click();
 
         //edit du service
-        cy.get('button').contains(service).click();
+        cy.getObjectButtonFromObjectTypeAndName("GenAIModel", service).click();
 
         cy.get('#GenAIModel_provider').select(providerName2);
         cy.get('#GenAIModel_model_name').clear().type(modelName2);
@@ -54,8 +54,8 @@ describe('Test services', () => {
         cy.get('#GPUServer_name').type(server);
         cy.get('#btn-submit-form').click();
 
-        cy.get('div[id$="'+server.replaceAll(' ', '-')+'"]').should('have.class', 'list-group-item')
-        cy.get('button[hx-get="/model_builder/open-create-object-panel/Service/"][hx-vals*="'+server.replaceAll(' ', '-')+'"]').click();
+        cy.getObjectCardFromObjectTypeAndName("GPUServer", server).should('have.class', 'list-group-item')
+        cy.getObjectCardFromObjectTypeAndName("GPUServer", server).find('button[id^="add-service-to"]').click();
         cy.get('#GenAIModel_name').type(service);
         cy.get('#GenAIModel_provider').select('openai');
         cy.get('#GenAIModel_model_name').type('gpt-4');
@@ -73,7 +73,7 @@ describe('Test services', () => {
         cy.get('#GenAIModel_model_name').clear('gpt-4');
         cy.get('#GenAIModel_model_name').type('gpt-4');
         cy.get('#btn-submit-form').click();
-        cy.get('[id$="-Generative-AI-model-1-API-servers"]').should("be.visible");
-        cy.get('[id$="-Generative-AI-model-1"').should("exist");
+        cy.getObjectCardFromObjectTypeAndName('GPUServer', 'Generative AI model 1 API servers').should("be.visible");
+        cy.getObjectCardFromObjectTypeAndName("GenAIModel", "Generative AI model 1").should("exist");
     });
 });

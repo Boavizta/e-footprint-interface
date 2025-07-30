@@ -368,7 +368,7 @@ class TestViewsAddition(TestModelingBase):
              "GenAIModel_bits_per_token": ["24"]})
         add_request = self.factory.post("/add-object/ExternalApi", data=post_data)
         system_data = {
-            "efootprint_version": "10.1.13",
+            "efootprint_version": "10.1.14",
             "System": {"uuid-system-1": {"name": "system 1", "id": "uuid-system-1", "usage_patterns": []}}}
         self._add_session_to_request(add_request, system_data)
 

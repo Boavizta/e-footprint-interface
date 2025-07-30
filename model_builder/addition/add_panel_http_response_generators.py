@@ -86,7 +86,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
 
     http_response = render(
         request, "model_builder/side_panels/service_add.html", {
-            "server_id": server_efootprint_id,
+            "server": server,
             "form_sections": services_dict,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "service",

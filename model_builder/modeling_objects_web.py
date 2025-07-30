@@ -240,7 +240,7 @@ class ModelingObjectWeb:
 
     @property
     def web_id(self):
-        return self._modeling_obj.id
+        return f"{self.class_as_simple_str}-{self._modeling_obj.id}"
 
     @property
     def mirrored_cards(self):
@@ -371,7 +371,7 @@ class MirroredJobWeb(ModelingObjectWeb):
 
     @property
     def web_id(self):
-        return f"{self.usage_journey_step.web_id}_{self.efootprint_id}"
+        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.usage_journey_step.web_id}"
 
     @property
     def links_to(self):
@@ -416,7 +416,7 @@ class MirroredUsageJourneyStepWeb(UsageJourneyStepWeb):
 
     @property
     def web_id(self):
-        return f"{self.usage_journey.web_id}_{self.efootprint_id}"
+        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.usage_journey.web_id}"
 
     @property
     def links_to(self):

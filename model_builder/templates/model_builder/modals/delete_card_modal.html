@@ -5,7 +5,7 @@
             data-bs-dismiss="modal"
             hx-get="/model_builder/delete-object/{{ obj.efootprint_id }}/"
             script="on htmx:afterRequest
-                    {% if remove_card_with_hyperscript %}remove #{{ obj.efootprint_id }} then updateLines() then {% endif %}"
+                    {% if remove_card_with_hyperscript %}remove #{{ obj.web_id }} then updateLines() then {% endif %}"
             hx-on::after-request="dropModal('{{ modal_id }}');closeAndEmptySidePanel();"
             hx-disabled-elt="button">
         Yes, delete

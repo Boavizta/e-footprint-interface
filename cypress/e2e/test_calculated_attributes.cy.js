@@ -10,8 +10,8 @@ describe("Calculated attributes", () => {
 
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data-multiple.json');
 
-        cy.get("svg[id^='icon_accordion_id-'][id*='"+ujsOne.replaceAll(' ', '-')+"']").should('be.visible').click();
-        cy.get("button[id^='button-id-'][id$='"+jobOne.replaceAll(' ', '-')+"']").should('exist').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find("svg[id^='icon_accordion_']").should('be.visible').click();
+        cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobOne).should('exist').click();
         cy.get("button[data-bs-target='#collapseCalculatedAttributesWebApplicationJob']").should('exist').click();
 
         cy.get("button[data-bs-target='#collapse-calculated_attributes_hourly_occurrences_per_usage_pattern").should('be.enabled').click();

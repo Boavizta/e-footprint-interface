@@ -12,3 +12,11 @@ Cypress.Commands.add("loadEfootprintTestModel", (filePath = 'cypress/fixtures/ef
   cy.wait('@importModel');
   cy.get("#sidePanelForm").should("not.exist");
 });
+
+Cypress.Commands.add('getObjectCardFromObjectTypeAndName', (objectType, name) => {
+  return cy.contains(`div[id^="${objectType}"] p`, name).closest(`div[id^="${objectType}"]`);
+});
+
+Cypress.Commands.add('getObjectButtonFromObjectTypeAndName', (objectType, name) => {
+  return cy.getObjectCardFromObjectTypeAndName(objectType, name).find(`button[id^="button-${objectType}-"]`);
+});

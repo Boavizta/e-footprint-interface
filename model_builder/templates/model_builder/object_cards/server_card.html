@@ -44,6 +44,7 @@
                         {% endfor %}
                         <div id="{{ service.web_id }}">
                         <button
+                            id="add-service-to-{{ server.web_id }}"
                             class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2"
                             hx-get="/model_builder/open-create-object-panel/Service/"
                             hx-target="#sidePanel"

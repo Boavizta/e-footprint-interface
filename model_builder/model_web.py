@@ -5,6 +5,7 @@ from datetime import timedelta
 from time import time
 
 from django.contrib.sessions.backends.base import SessionBase
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
@@ -63,6 +64,14 @@ class ModelWeb:
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
             self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
+        if self.system.storages and getattr(self.system.storages[0]._modeling_obj, "storage_needed", None) is None:
+            # TODO: Remove this conditional block for V1
+            logger.info("Storage attributes need be recomputed because of e-footprint update from 10.1.13 to 10.1.14")
+            for storage in self.system.storages:
+                storage._modeling_obj.storage_needed = EmptyExplainableObject()
+                storage._modeling_obj.storage_freed = EmptyExplainableObject()
+                storage._modeling_obj.automatic_storage_dumps_after_storage_duration = EmptyExplainableObject()
+                storage.compute_calculated_attributes()
         logger.info(f"ModelWeb object created in {time() - start:.3f} seconds.")
 
     def to_json(self, save_calculated_attributes=True):

@@ -13,17 +13,16 @@ describe("Test - Forms panel", () => {
         " that it is enabled after having created a UJS", () => {
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-no-job-no-uj-step.json');
 
-        cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourney", uj).should('exist').click();
         cy.get("#sidePanelForm").should('exist').should('be.visible');
         cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('not.be.enabled');
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="' + uj.replaceAll(' ',
-        '-') + '"]').should('exist').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourney", uj).find('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"]').should('exist').click();
         cy.get("#btn-submit-form").should('exist').click();
         cy.get("#sidePanelForm").should('not.exist');
-        cy.get('button[id^="button-id-"][id$="' + uj.replaceAll(' ', '-') + '"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourney", uj).should('exist').click();
         cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.not.enabled');
         cy.get('#btn-add-usage-journey').click();
         cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.enabled');
@@ -32,21 +31,18 @@ describe("Test - Forms panel", () => {
     it("Check that the jobs list in not displayed when adding a UJS with no job in the system, then check that it is displayed after having created a job", () => {
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-no-job.json');
 
-        cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').click();
         cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
-        cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
-         '-')+'"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourney", uj).find('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"]').click();
         cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('not.be.enabled');
-        cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"][hx-vals*="'+ujsOne.replaceAll(' ',
-        '-')+'"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').click();
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
 
-        cy.get('button[id^="button-id-"][id$="'+ujsOne.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').click();
         cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('be.not.enabled');
-        cy.get('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"][hx-vals*="'+uj.replaceAll(' ',
-         '-')+'"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourney", uj).find('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"]').click();
         cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('be.enabled');
     });
 
@@ -76,13 +72,13 @@ describe("Test - Forms panel", () => {
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.get('button[id^="button-id-"][id$="'+serverOne.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("Server", serverOne).should('exist').click();
         cy.get("#Server_average_carbon_intensity").should('have.value', '700');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
         cy.get("#Server_power").should('have.value', '300');
-        cy.get('button[id^="button-id-"][id$="'+serverTwo.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("Server", serverTwo).should('exist').click();
         cy.get("#Server_average_carbon_intensity").should('have.value', '800');
         cy.get("#advanced-Server").should('be.not.visible');
         cy.get("#display-advanced-Server").click();
@@ -94,13 +90,13 @@ describe("Test - Forms panel", () => {
         let serverName = 'cloud server test'
         cy.loadEfootprintTestModel('cypress/fixtures/test-unit-edit.json');
 
-        cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", serverName).should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
         cy.get('#Storage_data_storage_duration').clear().type('3');
         cy.get('#btn-submit-form').click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.get('button[id^="button-id-"][id$="'+serverName.replaceAll(' ', '-')+'"]').should('exist').click();
+        cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", serverName).should('exist').click();
         cy.get('#Storage_data_storage_duration_unit').should('have.value', 'month');
         cy.get('#Storage_data_storage_duration').should('have.value', '3');
     });
@@ -115,7 +111,7 @@ describe("Test - Forms panel", () => {
         cy.get("#initial_usage_journey_volume").should('be.visible').type("1000");
         cy.get("#btn-submit-form").should("be.visible").click();
         cy.get("#sidePanelForm").should("not.exist");
-        cy.get("button[id^='button-id-'][id$='Usage-pattern-1']").should("exist").click();
+        cy.contains("div", "Usage pattern 1").find("button[id^='button']").should("exist").click();
         cy.get("#sidePanelForm").should("be.visible");
         cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: e-footprint hypothesis");
         cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
@@ -123,7 +119,7 @@ describe("Test - Forms panel", () => {
         cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: user data");
         cy.get("#btn-submit-form").should("be.visible").click();
         cy.get("#sidePanelForm").should("not.exist");
-        cy.get("button[id^='button-id-'][id$='Usage-pattern-1']").should("exist").click();
+        cy.contains("div", "Usage pattern 1").find("button[id^='button']").should("exist").click();
         cy.get("#sidePanelForm").should("be.visible");
         cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: user data");
         cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
@@ -144,7 +140,8 @@ describe("Test - Forms panel", () => {
         cy.get("#btn-add-usage-journey").should("exist").click();
         cy.get("#sidePanelForm").should("be.visible");
         cy.get("#UsageJourney_name").should("be.visible").clear().type("test name");
-        cy.get("#button-uid-my-first-usage-journey-1").should("be.enabled").should("be.visible").click();
+        cy.getObjectButtonFromObjectTypeAndName("UsageJourney", "My first usage journey")
+            .should("be.enabled").should("be.visible").click();
         cy.get("#unsavedModal").should('be.visible');
         cy.get("#cancel-unsaved-modal").should("be.visible").click();
     });
