@@ -55,6 +55,4 @@ cloud-sql-proxy
 pylintrc
 
 staticfiles/
-/theme/static/css/bs_main.css
-/theme/static/css/bs_main.css.map
 /theme/static/scripts/external_librairies/htmx_full.js
