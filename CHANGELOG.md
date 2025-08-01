@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.18] - 2025-08-01
+
+### Fixed
+- Devices list in UsagePatternFromForm. Selected object didn’t appear.
+
+### Changed
+- Upgrade to e-footprint 10.1.15 for performance improvements.
+
 ## [0.8.17] - 2025-07-18
 
 ### Added

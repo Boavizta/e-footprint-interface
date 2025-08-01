@@ -108,18 +108,19 @@ def generate_dynamic_form(
                 {"value":option.id,"label":option.name}
                 for option in model_web.get_efootprint_objects_from_efootprint_type(list_attribute_object_type_str)
                 if option not in selected]
+            selected = [{"value": elt.id, "label": elt.name} for elt in selected]
             if attr_name == "devices":
                 # Special case for UsagePatternFromForm’s devices, to remove possibility for user to select multiple
                 # devices for now.
                 structure_field.update({
                     "input_type": "select-object",
-                    "options": unselected,
-                    "selected": unselected[0]["value"]
+                    "options": selected + unselected,
+                    "selected": selected[0]["value"] if len(selected) > 0 else unselected[0]["value"]
                 })
             else:
                 structure_field.update({
                     "input_type": "select-multiple",
-                    "selected": [{"value": elt.id, "label": elt.name} for elt in selected],
+                    "selected": selected,
                     "unselected": unselected
                 })
         elif issubclass(annotation, str):
