@@ -33,14 +33,9 @@ class TestViewsEdition(TestModelingBase):
 
     def test_edition(self):
         logger.info(f"Creating service")
+        service_data = self.create_web_application_data(name="New service", parent_id="uuid-Server-1")
         post_data = QueryDict(mutable=True)
-        post_data.update({"WebApplication_name": ["New service"],
-                            "efootprint_id_of_parent_to_link_to": ["uuid-Server-1"],
-                          "type_object_available": ["WebApplication"],
-                          "WebApplication_technology": ["php-symfony"], "WebApplication_base_ram_consumption": ["2"],
-                          "WebApplication_bits_per_pixel": ["0.1"], "WebApplication_static_delivery_cpu_cost": ["4.0"],
-                          "WebApplication_ram_buffer_per_user": ["50"]}
-        )
+        post_data.update(service_data)
 
         service_request = self.factory.post("/add-object/Service", data=post_data)
         self._add_session_to_request(service_request, self.system_data)
@@ -49,15 +44,10 @@ class TestViewsEdition(TestModelingBase):
         self.assertEqual(response.status_code, 200)
 
         logger.info(f"Creating job")
+        job_data = self.create_web_application_job_data(
+            name="New job", parent_id="uuid-20-min-streaming-on-Youtube", service_id=service_id, server="uuid-Server-1")
         post_data = QueryDict(mutable=True)
-        post_data.update(
-        {"WebApplicationJob_name": ["New job"], "WebApplicationJob_server": ["uuid-Server-1"],
-         "efootprint_id_of_parent_to_link_to": ["uuid-20-min-streaming-on-Youtube"],
-         "WebApplicationJob_service": [service_id],
-         "type_object_available": ["WebApplicationJob"],
-         "WebApplicationJob_implementation_details": ["aggregation-code-side"],
-         "WebApplicationJob_data_transferred": ["150"], "WebApplicationJob_data_stored": ["100"]}
-        )
+        post_data.update(job_data)
 
         job_request = self.factory.post("/model_builder/add-object/Job/", data=post_data)
         self._add_session_to_request(job_request, service_request.session["system_data"])
@@ -91,18 +81,17 @@ class TestViewsEdition(TestModelingBase):
         usage_pattern = UsagePatternFromForm.from_defaults(
             "usage pattern", usage_journey=usage_journey, devices=[Device.laptop()], network=Network.wifi_network(),
             country=Countries.FRANCE())
-        system = System("Test system", usage_patterns=[usage_pattern])
+        system = System("Test system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
         logger.info(f"Created GenAI service with provider {first_provider} and model name {first_model_name}")
 
         post_data = QueryDict(mutable=True)
         second_provider = GenAIModel.list_values["provider"][1]
         second_model_name = GenAIModel.conditional_list_values[
             "model_name"]["conditional_list_values"][second_provider][0]
-        post_data.update(
-            {"GenAIModel_name": ["Gen AI service"], "GenAIModel_server": [gpu_server.id],
-             "GenAIModel_provider": [second_provider], "GenAIModel_model_name": [second_model_name],
-             "recomputation": ["true"],}
-        )
+        edit_data = self.create_genai_model_data(
+            name="Gen AI service",provider=second_provider,model_name=second_model_name, recomputation="true")
+        edit_data["GenAIModel_server"] = gpu_server.id
+        post_data.update(edit_data)
 
         edit_service_request = self.factory.post(f"/edit-object/{genai_service.id}", data=post_data)
         self._add_session_to_request(
@@ -223,5 +212,3 @@ class TestViewsEdition(TestModelingBase):
         usage_journey = model_web.get_web_object_from_efootprint_id("uuid-Daily-video-usage")
         uj_steps_ids = [uj_step.efootprint_id for uj_step in usage_journey.uj_steps]
         self.assertEqual(new_uj_steps, ";".join(uj_steps_ids))
-
-

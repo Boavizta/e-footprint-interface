@@ -56,3 +56,4 @@ pylintrc
 
 staticfiles/
 /theme/static/scripts/external_librairies/htmx_full.js
+opencode.json
