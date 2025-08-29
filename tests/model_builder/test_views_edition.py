@@ -91,7 +91,7 @@ class TestViewsEdition(TestModelingBase):
         usage_pattern = UsagePatternFromForm.from_defaults(
             "usage pattern", usage_journey=usage_journey, devices=[Device.laptop()], network=Network.wifi_network(),
             country=Countries.FRANCE())
-        system = System("Test system", usage_patterns=[usage_pattern])
+        system = System("Test system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
         logger.info(f"Created GenAI service with provider {first_provider} and model name {first_model_name}")
 
         post_data = QueryDict(mutable=True)

@@ -1,10 +1,11 @@
 {
-    "efootprint_version": "10.1.15",
+    "efootprint_version": "11.0.0",
     "System": {
         "uuid-system-1": {
             "name": "My system",
             "id": "uuid-system-1",
             "usage_patterns": [],
+            "edge_usage_patterns": [],
             "total_footprint": {
                 "value": null,
                 "label": "no value",

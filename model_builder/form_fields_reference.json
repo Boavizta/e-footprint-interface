@@ -97,7 +97,7 @@
         "label": "average carbon intensity of electricity",
         "step": 1
     },
-    "server_utilization_rate": {
+    "utilization_rate": {
         "modeling_obj_containers": [
             "Server",
             "GPUServer",

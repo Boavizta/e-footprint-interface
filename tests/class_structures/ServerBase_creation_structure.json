@@ -186,8 +186,8 @@
                 "step": 0.1
             },
             {
-                "web_id": "Server_server_utilization_rate",
-                "attr_name": "server_utilization_rate",
+                "web_id": "Server_utilization_rate",
+                "attr_name": "utilization_rate",
                 "label": "server utilization rate",
                 "tooltip": false,
                 "default": 0.9,
@@ -409,8 +409,8 @@
                 "step": 0.1
             },
             {
-                "web_id": "GPUServer_server_utilization_rate",
-                "attr_name": "server_utilization_rate",
+                "web_id": "GPUServer_utilization_rate",
+                "attr_name": "utilization_rate",
                 "label": "server utilization rate",
                 "tooltip": false,
                 "default": 1,
@@ -602,8 +602,8 @@
                 "step": 0.1
             },
             {
-                "web_id": "BoaviztaCloudServer_server_utilization_rate",
-                "attr_name": "server_utilization_rate",
+                "web_id": "BoaviztaCloudServer_utilization_rate",
+                "attr_name": "utilization_rate",
                 "label": "server utilization rate",
                 "tooltip": false,
                 "default": 0.9,

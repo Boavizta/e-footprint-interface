@@ -5,7 +5,7 @@ from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.core.hardware.gpu_server import GPUServer
-from efootprint.core.hardware.infra_hardware import InsufficientCapacityError
+from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 from efootprint.constants.units import u
