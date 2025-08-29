@@ -3,6 +3,10 @@
         "label": "Server",
         "type_object_available": "Available server types"
     },
+    "EdgeDevice": {
+        "label": "Edge device",
+        "type_object_available": "Available edge devices"
+    },
     "Job": {
         "label": "Job",
         "type_object_available": "Available job types"
@@ -18,6 +22,10 @@
     "Storage": {
         "label": "Storage",
         "type_object_available": "Available storage types"
+    },
+    "EdgeStorage": {
+        "label": "Edge Storage",
+        "type_object_available": "Available edge storage types"
     },
     "UsagePatternFromForm": {
         "label": "Usage pattern",

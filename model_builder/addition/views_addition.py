@@ -6,7 +6,7 @@ from model_builder.addition.add_object_http_response_generators import add_new_u
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
     generate_server_add_panel_http_response, generate_service_add_panel_http_response, \
     generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
-    generate_external_api_add_panel_http_response
+    generate_external_api_add_panel_http_response, generate_edge_device_add_panel_http_response
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
@@ -15,6 +15,8 @@ def open_create_object_panel(request, object_type):
     model_web = ModelWeb(request.session)
     if object_type == "ServerBase":
         http_response = generate_server_add_panel_http_response(request, model_web)
+    elif object_type == "EdgeDevice":
+        http_response = generate_edge_device_add_panel_http_response(request, model_web)
     elif object_type == "Service":
         http_response = generate_service_add_panel_http_response(request, model_web)
     elif object_type == "Job":

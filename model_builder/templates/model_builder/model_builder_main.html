@@ -79,6 +79,20 @@
                             <p class="mb-0 text-addition">Add external API</p>
                         </button>
                     </div>
+                    <div class="w-50 d-flex flex-row gap-1">
+                        <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+                                id="btn-add-server"
+                                hx-get="/model_builder/open-create-object-panel/EdgeDevice/"
+                                hx-target="#sidePanel"
+                                hx-trigger="click"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="button"
+                                _="on click removeAllOpenedObjectsHighlights()"
+                        >
+                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
+                            <p class="mb-0 text-addition">Add edge device</p>
+                        </button>
+                    </div>
                     <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">
                         {% for server in model_web.servers %}
                         {% include 'model_builder/object_cards/server_card.html' %}
