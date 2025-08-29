@@ -3,6 +3,8 @@ from copy import deepcopy
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.builders.services.generative_ai_ecologits import GenAIModel
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
+from efootprint.core.hardware.edge_device import EdgeDevice
+from efootprint.core.hardware.edge_storage import EdgeStorage
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
@@ -52,6 +54,37 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
     storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
         "Storage",
         available_efootprint_classes=[Storage],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=model_web,
+    )
+
+    http_response = render(request, f"model_builder/side_panels/server/server_add.html",
+                           context={
+                               "form_sections": form_sections,
+                               "dynamic_form_data": dynamic_form_data,
+                               "storage_form_sections": storage_form_sections,
+                               "storage_dynamic_form_data": storage_dynamic_form_data,
+                               "obj_type": "server",
+                               "storage_obj_type": "storage",
+                               "header_name": "Add new server",
+                           })
+
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+
+    return http_response
+
+
+def generate_edge_device_add_panel_http_response(request, model_web: ModelWeb):
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+        "EdgeDevice",
+        available_efootprint_classes = [EdgeDevice],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=model_web,
+    )
+
+    storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
+        "EdgeStorage",
+        available_efootprint_classes=[EdgeStorage],
         attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
