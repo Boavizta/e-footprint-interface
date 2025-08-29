@@ -4,7 +4,7 @@ This document orients AI/code agents and new contributors. It explains how the r
 
 ## What this repository is
 
-A Django-based web UI for the e-footprint modeler/engine. It embeds:
+A Django-based web UI for the digital service carbon footprint model [e-footprint](https://github.com/Boavizta/e-footprint). It embeds:
 - A Python/Django backend orchestrating sessions, model building, and HTTP views
 - A Bootstrap/HTMX frontend for dynamic, partial-page updates and a lightweight SPA feel
 - Templates and small JS utilities to render forms, charts, and explainable results
@@ -23,17 +23,19 @@ Upstream domain logic (carbon/energy modeling) is provided by the e-footprint Py
 
 Flow in short:
 1) User interacts with pages (HTMX requests, forms, buttons) → Django views
-2) Views (mostly in `model_builder/views*.py`) mutate/serialize a "system" in session
-3) `ModelWeb` wraps the domain model and exposes web-friendly accessors
+2) Views (mostly in `model_builder/views*.py`) mutate/serialize a modeling saved as a dictionary in the user’s session data, under the "system_data" key.
+3) `ModelWeb` wraps the domain model and exposes web-friendly accessors. Web-entry code avoids heavy computations; all modeling logic is delegated to `efootprint` domain classes.
 4) Templates render partials/sidenav/forms/charts; JS augments UX where needed
 
 
 ## Code style & conventions
 
+- AI agents
+  - Favor making all edits on the same file at once rather than step-by-step changes.
 - Python
   - Formatter/lint: follow `.pylintrc`; prefer PEP 8; type hints where helpful
   - Keep functions small; raise explicit errors with actionable messages
-  - Web-entry code avoids heavy computations; delegate to `efootprint` domain classes
+  - Keep number of lines low; prefer to write long lines while respecting the 120 characters limit, rather than writing each parameter on a new line.
 - Django
   - Views: thin controllers calling helpers in `model_builder/*_utils.py`
   - Templates: small, composable partials (see `model_builder/templates/model_builder/...`)
@@ -44,8 +46,6 @@ Flow in short:
 - Tests
   - Python tests go under `tests/` (and app-specific subfolders)
   - Cypress E2E tests under `cypress/`
-- Git
-  - Write concise, purpose-driven commit messages; avoid committing secrets
 
 
 ## Core logic and main classes
@@ -67,16 +67,13 @@ Key files:
     - `DEFAULT_OBJECTS_CLASS_MAPPING` to seed networks/devices/countries
     - `ATTRIBUTES_TO_SKIP_IN_FORMS` to filter technical attributes out of forms
 - `model_builder/modeling_objects_web.py`
-  - Web wrappers (`wrap_efootprint_object`, `ExplainableObjectWeb`) that adapt domain objects to template-friendly shapes and provide computed properties for display
+  - Web wrappers (`wrap_efootprint_object`, `ExplainableObjectWeb`) that adapt e-footprint domain objects to template-friendly shapes and provide computed properties for display. The `EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING` constant maps e-footprint class names to their web object counterparts, for transparent wrapping.
 - `model_builder/model_builder_utils.py`
   - Utilities for timeseries alignment, rounding, and date-window computations used by charts and summaries
 - Views and CRUD layers:
-  - `model_builder/addition/views_addition.py`, `model_builder/edition/...`, `model_builder/views_deletion.py`, and `model_builder/views.py` implement the flows to create/edit/delete objects and sections. They return full pages or HTMX partials.
+  - `model_builder/addition/...`, `model_builder/edition/...`, `model_builder/views_deletion.py`, and `model_builder/views.py` implement the flows to create/edit/delete objects and sections. They return full pages or HTMX partials.
 - Extensions:
-  - `model_builder/efootprint_extensions/usage_pattern_from_form.py` adds web-only helpers (e.g., create UsagePattern from dynamic form data)
-
-Relevant upstream domain classes (from `efootprint`):
-- Modeling objects like `ServerBase`/`Server`, `GPUServer`, `Service` types, `JobBase`, `UsageJourney`, `UsageJourneyStep`, `UsagePattern`, `Network`, `Device`, `Country` and their explainable/calculated quantities (`ExplainableQuantity`, `ExplainableHourlyQuantities`)
+  - The `model_builder/efootprint_extensions` package allows for the creation of modeling classes that extend e-footprint logic, like for example the `UsagePatternFromForm` class found in the `model_builder/efootprint_extensions/usage_pattern_from_form` module. Extension classes need to be added to the `MODELING_OBJECT_CLASSES_DICT` constant.
 
 
 ## Rendering in the web context
@@ -96,20 +93,6 @@ Relevant upstream domain classes (from `efootprint`):
 - Charts and results
   - Daily emissions series derived by `ModelWeb.system_emissions`; rendered via templates + JS chart helper in `theme/static/scripts/result_charts.js`
   - Explainable attributes rendered with dedicated templates to drill down drivers and formulae
-
-
-## Main technological choices
-
-- Backend: Django
-  - Rationale: mature, batteries-included, session management, templating, static handling, robust testing
-- Domain engine: e-footprint (Python package)
-  - Rationale: dedicated carbon/energy modeling with explainability and reproducible calculations
-- Frontend: Bootstrap + HTMX + lightweight JS
-  - Rationale: simple mental model, server-driven UI with partial updates; avoids heavy SPA complexity
-- Testing: pytest/unittest for Python (`tests/`), Cypress for E2E (`cypress/`)
-- Packaging: Poetry + `pyproject.toml`; `requirements.txt` maintained for deployment compatibility
-- CI: GitHub Actions (`.github/workflows/ci.yml`)
-- Deployment: `app.yaml` hints at App Engine-like deployment; see `DEPLOY_TO_PROD.md`
 
 
 ## Typical request lifecycle
@@ -146,11 +129,3 @@ Relevant upstream domain classes (from `efootprint`):
 
 - Session-only by default; no PII expected. Do not log sensitive info.
 - Validate inputs in views; trust computations to the domain engine but validate shape/types at boundaries.
-
-
-## Where to look next
-
-- `README.md` for quick overview
-- `INSTALL.md` to run locally
-- `tests/` and `cypress/` for behavior examples and expected flows
-- `model_builder/model_web.py` and `model_builder/templates/model_builder/` to understand how data becomes UI
