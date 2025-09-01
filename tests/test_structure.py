@@ -7,6 +7,8 @@ import sys
 from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
+from efootprint.core.hardware.edge_device import EdgeDevice
+from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, SERVER_CLASSES, SERVICE_JOB_CLASSES, \
@@ -25,13 +27,15 @@ from model_builder.class_structure import generate_object_creation_structure, MO
 from model_builder.model_web import model_web_root, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.modeling_objects_web import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
+from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 
 from utils import EFOOTPRINT_COUNTRIES
 
 obj_creation_structure_dict = {
-        "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
-        "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
-        "UsageJourneyStep": [UsageJourneyStep]}
+    "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
+    "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
+    "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
+    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeDevice": [EdgeDevice]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -161,17 +165,17 @@ if __name__ == "__main__":
         init_sig_params = get_init_signature_params(efootprint_class)
         for attr_name in init_sig_params.keys():
             annotation = init_sig_params[attr_name].annotation
-            if not get_origin(annotation) and issubclass(annotation, ExplainableQuantity):
-                if attr_name not in reformatted_form_fields:
-                    reformatted_form_fields[attr_name] = {
-                        "modeling_obj_containers": [efootprint_class.__name__],
-                        "label": attr_name.replace("_", " "),
-                        "is_advanced_parameter": True,
-                        "step": 1
-                    }
-                elif (efootprint_class.__name__
-                      not in reformatted_form_fields[attr_name]["modeling_obj_containers"]):
-                    reformatted_form_fields[attr_name]["modeling_obj_containers"].append(efootprint_class.__name__)
+            if attr_name == "self":
+                continue
+            if attr_name not in reformatted_form_fields:
+                reformatted_form_fields[attr_name] = {
+                    "modeling_obj_containers": [efootprint_class.__name__],
+                    "label": attr_name.replace("_", " "),
+                }
+                if not get_origin(annotation) and issubclass(annotation, ExplainableQuantity):
+                    reformatted_form_fields[attr_name].update({"is_advanced_parameter": True, "step": 1})
+            if efootprint_class.__name__ not in reformatted_form_fields[attr_name]["modeling_obj_containers"]:
+                reformatted_form_fields[attr_name]["modeling_obj_containers"].append(efootprint_class.__name__)
 
     with open(os.path.join(model_web_root, "form_fields_reference.json"), "w") as f:
         json.dump(reformatted_form_fields, f, indent=4)

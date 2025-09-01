@@ -109,7 +109,7 @@ Key files:
 - Tests
   - Python: `pytest` or `python -m pytest`
   - Cypress: `npx cypress open` or `npx cypress run`
-- When adding new modeling objects, extend `MODELING_OBJECT_CLASSES_DICT` (usually by importing new classes) and create templates/partials for forms and display
+- When creating a new e-footprint extension object, develop the extension in @model_builder/efootprint_extensions, extend `_extension_classes` in @model_builder/model_web with the newly created object, add the new object to @model_builder/form_type_object.json, then run @tests/tests_structure.py as a python script, after having made sure that the new class is in the obj_creation_structure_dict, to automatically add the new object parameters to @model_builder/form_fields_reference.json. You can then update the new object parameters in @model_builder/form_fields_reference.json to fine-tune their properties.
 - Keep forms dynamic and DRY by using `side_panels/dynamic_form_fields/*` partials
 - For computed/calculated fields, prefer rendering through explainable objects templates so users can understand the provenance
 
