@@ -48,8 +48,7 @@ def generate_usage_pattern_edit_panel_http_response(
 
 def generate_server_edit_panel_http_response(
     request, form_fields: dict, form_fields_advanced: dict, obj_to_edit: ModelingObjectWeb,
-    object_belongs_to_computable_system: bool,
-    dynamic_form_data: dict):
+    object_belongs_to_computable_system: bool, dynamic_form_data: dict):
     storage_to_edit = obj_to_edit.storage
     storage_form_fields, storage_form_fields_advanced, storage_dynamic_form_data = generate_object_edition_structure(
         storage_to_edit, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS)

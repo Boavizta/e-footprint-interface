@@ -328,26 +328,13 @@ class ServerWeb(ModelingObjectWeb):
         return "server"
 
     @property
-    def accordion_parent(self):
-        return None
-
-    @property
     def class_title_style(self):
         return "h6"
 
 class EdgeDeviceWeb(ModelingObjectWeb):
     @property
-    def template_name(self):
-        return "server"
-
-    @property
-    def accordion_parent(self):
-        return None
-
-    @property
     def class_title_style(self):
         return "h6"
-
 
 class JobWeb(ModelingObjectWeb):
     @property
