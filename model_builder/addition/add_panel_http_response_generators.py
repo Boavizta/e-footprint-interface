@@ -60,6 +60,7 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
+                               "object_type": "ServerBase",
                                "form_sections": form_sections,
                                "dynamic_form_data": dynamic_form_data,
                                "storage_form_sections": storage_form_sections,
@@ -89,11 +90,12 @@ def generate_edge_device_add_panel_http_response(request, model_web: ModelWeb):
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
+                               "object_type": "EdgeDevice",
                                "form_sections": form_sections,
                                "dynamic_form_data": dynamic_form_data,
                                "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
-                               "header_name": "Add new server",
+                               "header_name": "Add new edge device",
                            })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"

@@ -29,7 +29,9 @@
     },
     "carbon_footprint_fabrication": {
         "modeling_obj_containers": [
-            "Server"
+            "Server",
+            "Device",
+            "EdgeDevice"
         ],
         "label": "carbon footprint fabrication",
         "is_advanced_parameter": true,
@@ -37,7 +39,9 @@
     },
     "power": {
         "modeling_obj_containers": [
-            "Server"
+            "Server",
+            "Device",
+            "EdgeDevice"
         ],
         "label": "power",
         "is_advanced_parameter": true,
@@ -48,7 +52,10 @@
             "Server",
             "GPUServer",
             "BoaviztaCloudServer",
-            "Storage"
+            "Storage",
+            "Device",
+            "EdgeDevice",
+            "EdgeStorage"
         ],
         "label": "lifespan",
         "is_advanced_parameter": true,
@@ -58,7 +65,9 @@
         "modeling_obj_containers": [
             "Server",
             "BoaviztaCloudServer",
-            "Storage"
+            "Storage",
+            "EdgeDevice",
+            "EdgeStorage"
         ],
         "label": "idle power",
         "is_advanced_parameter": true,
@@ -66,7 +75,8 @@
     },
     "ram": {
         "modeling_obj_containers": [
-            "Server"
+            "Server",
+            "EdgeDevice"
         ],
         "label": "RAM",
         "step": 1
@@ -74,7 +84,8 @@
     "compute": {
         "modeling_obj_containers": [
             "Server",
-            "GPUServer"
+            "GPUServer",
+            "EdgeDevice"
         ],
         "label": "compute",
         "step": 1
@@ -83,7 +94,8 @@
         "modeling_obj_containers": [
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer"
+            "BoaviztaCloudServer",
+            "EdgeDevice"
         ],
         "label": "power usage effectiveness",
         "is_advanced_parameter": true
@@ -92,7 +104,8 @@
         "modeling_obj_containers": [
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer"
+            "BoaviztaCloudServer",
+            "Country"
         ],
         "label": "average carbon intensity of electricity",
         "step": 1
@@ -101,7 +114,8 @@
         "modeling_obj_containers": [
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer"
+            "BoaviztaCloudServer",
+            "EdgeDevice"
         ],
         "label": "server utilization rate",
         "is_advanced_parameter": true
@@ -111,7 +125,8 @@
             "Server",
             "GPUServer",
             "BoaviztaCloudServer",
-            "VideoStreaming"
+            "VideoStreaming",
+            "EdgeDevice"
         ],
         "label": "base RAM consumption",
         "is_advanced_parameter": true,
@@ -121,7 +136,8 @@
         "modeling_obj_containers": [
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer"
+            "BoaviztaCloudServer",
+            "EdgeDevice"
         ],
         "label": "base compute consumption",
         "is_advanced_parameter": true
@@ -149,7 +165,8 @@
             "Server",
             "GPUServer",
             "BoaviztaCloudServer",
-            "Storage"
+            "Storage",
+            "Device"
         ],
         "label": "fraction of usage time",
         "is_advanced_parameter": true
@@ -352,7 +369,8 @@
     "data_transferred": {
         "modeling_obj_containers": [
             "Job",
-            "WebApplicationJob"
+            "WebApplicationJob",
+            "GPUJob"
         ],
         "label": "data transferred",
         "step": 1
@@ -361,7 +379,8 @@
         "modeling_obj_containers": [
             "Job",
             "VideoStreamingJob",
-            "WebApplicationJob"
+            "WebApplicationJob",
+            "GPUJob"
         ],
         "label": "data stored",
         "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
@@ -369,20 +388,23 @@
     },
     "request_duration": {
         "modeling_obj_containers": [
-            "Job"
+            "Job",
+            "GPUJob"
         ],
         "label": "request duration"
     },
     "compute_needed": {
         "modeling_obj_containers": [
-            "Job"
+            "Job",
+            "GPUJob"
         ],
         "label": "compute needed",
         "is_advanced_parameter": true
     },
     "ram_needed": {
         "modeling_obj_containers": [
-            "Job"
+            "Job",
+            "GPUJob"
         ],
         "label": "RAM needed",
         "is_advanced_parameter": true,
@@ -520,7 +542,8 @@
     },
     "carbon_footprint_fabrication_per_storage_capacity": {
         "modeling_obj_containers": [
-            "Storage"
+            "Storage",
+            "EdgeStorage"
         ],
         "label": "carbon footprint fabrication per storage capacity",
         "is_advanced_parameter": true,
@@ -528,7 +551,8 @@
     },
     "power_per_storage_capacity": {
         "modeling_obj_containers": [
-            "Storage"
+            "Storage",
+            "EdgeStorage"
         ],
         "label": "power per storage capacity",
         "is_advanced_parameter": true,
@@ -536,10 +560,10 @@
     },
     "storage_capacity": {
         "modeling_obj_containers": [
-            "Storage"
+            "Storage",
+            "EdgeStorage"
         ],
         "label": "storage capacity",
-        "is_advanced_parameter": true,
         "step": 1
     },
     "data_replication_factor": {
@@ -556,7 +580,8 @@
     },
     "base_storage_need": {
         "modeling_obj_containers": [
-            "Storage"
+            "Storage",
+            "EdgeStorage"
         ],
         "label": "base storage need",
         "is_advanced_parameter": true
@@ -566,5 +591,21 @@
             "Storage"
         ],
         "label": "number of active instances"
+    },
+    "usage_span": {
+        "modeling_obj_containers": [
+            "EdgeUsageJourney"
+        ],
+        "label": "usage span",
+        "is_advanced_parameter": true,
+        "step": 1
+    },
+    "bandwidth_energy_intensity": {
+        "modeling_obj_containers": [
+            "Network"
+        ],
+        "label": "bandwidth energy intensity",
+        "is_advanced_parameter": true,
+        "step": 1
     }
 }

@@ -194,6 +194,10 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("ServerBase")
 
     @property
+    def edge_devices(self):
+        return self.get_web_objects_from_efootprint_type("EdgeDevice")
+
+    @property
     def services(self):
         return sum(
             [self.get_web_objects_from_efootprint_type(service.__name__) for service in SERVICE_CLASSES], start=[])

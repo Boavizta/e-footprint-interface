@@ -57,10 +57,10 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
     return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
 
-def add_new_server(request, model_web: ModelWeb):
+def add_new_object_with_storage(request, model_web: ModelWeb, storage_type: str):
     storage_data = json.loads(request.POST.get("storage_form_data"))
 
-    storage = create_efootprint_obj_from_post_data(storage_data, model_web, "Storage")
+    storage = create_efootprint_obj_from_post_data(storage_data, model_web, storage_type)
     added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
     mutable_post = request.POST.copy()
@@ -72,7 +72,7 @@ def add_new_server(request, model_web: ModelWeb):
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
     response = render(
-        request, "model_builder/object_cards/server_card.html", {"server": added_obj})
+        request, f"model_builder/object_cards/{added_obj.template_name}_card.html", {"server": added_obj})
     response["HX-Trigger-After-Swap"] = json.dumps({
         "displayToastAndHighlightObjects": {
             "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
