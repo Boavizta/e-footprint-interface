@@ -1,0 +1,185 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Edge device selection",
+        "fields": [
+            {
+                "input_type": "select-object",
+                "web_id": "type_object_available",
+                "label": "Available edge devices",
+                "options": [
+                    {
+                        "label": "Edge device",
+                        "value": "EdgeDevice"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "EdgeDevice",
+        "header": "Edge device creation",
+        "fields": [
+            {
+                "web_id": "EdgeDevice_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Edge device 1"
+            },
+            {
+                "web_id": "EdgeDevice_ram",
+                "attr_name": "ram",
+                "label": "RAM",
+                "tooltip": false,
+                "default": 8,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "EdgeDevice_compute",
+                "attr_name": "compute",
+                "label": "compute",
+                "tooltip": false,
+                "default": 4,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "EdgeDevice_carbon_footprint_fabrication",
+                "attr_name": "carbon_footprint_fabrication",
+                "label": "carbon footprint fabrication",
+                "tooltip": false,
+                "default": 60,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "kg",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "EdgeDevice_power",
+                "attr_name": "power",
+                "label": "power",
+                "tooltip": false,
+                "default": 30,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "W",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "EdgeDevice_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 4,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "EdgeDevice_idle_power",
+                "attr_name": "idle_power",
+                "label": "idle power",
+                "tooltip": false,
+                "default": 5,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "W",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "EdgeDevice_power_usage_effectiveness",
+                "attr_name": "power_usage_effectiveness",
+                "label": "power usage effectiveness",
+                "tooltip": false,
+                "default": 1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "EdgeDevice_utilization_rate",
+                "attr_name": "utilization_rate",
+                "label": "server utilization rate",
+                "tooltip": false,
+                "default": 0.8,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "EdgeDevice_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "tooltip": false,
+                "default": 1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "EdgeDevice_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "tooltip": false,
+                "default": 0.1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ]
+    }
+]

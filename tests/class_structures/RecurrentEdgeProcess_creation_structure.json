@@ -1,0 +1,79 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Recurrent edge process selection",
+        "fields": [
+            {
+                "input_type": "select-object",
+                "web_id": "type_object_available",
+                "label": "Recurrent edge process",
+                "options": [
+                    {
+                        "label": "Recurrent edge process",
+                        "value": "RecurrentEdgeProcessFromForm"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "RecurrentEdgeProcessFromForm",
+        "header": "Recurrent edge process creation",
+        "fields": [
+            {
+                "web_id": "RecurrentEdgeProcessFromForm_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Recurrent edge process 1"
+            },
+            {
+                "web_id": "RecurrentEdgeProcessFromForm_constant_compute_needed",
+                "attr_name": "constant_compute_needed",
+                "label": "constant compute needed",
+                "tooltip": false,
+                "default": 1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "RecurrentEdgeProcessFromForm_constant_ram_needed",
+                "attr_name": "constant_ram_needed",
+                "label": "constant ram needed",
+                "tooltip": false,
+                "default": 1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "RecurrentEdgeProcessFromForm_constant_storage_needed",
+                "attr_name": "constant_storage_needed",
+                "label": "constant storage needed",
+                "tooltip": false,
+                "default": 100,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": []
+    }
+]

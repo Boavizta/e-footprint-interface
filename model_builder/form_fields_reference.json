@@ -15,7 +15,18 @@
             "GenAIModel",
             "VideoStreaming",
             "WebApplication",
-            "Storage"
+            "Storage",
+            "Device",
+            "Country",
+            "EdgeUsageJourney",
+            "EdgeUsagePattern",
+            "EdgeDevice",
+            "EdgeStorage",
+            "GPUJob",
+            "RecurrentEdgeProcess",
+            "Network",
+            "System",
+            "RecurrentEdgeProcessFromForm"
         ],
         "label": "name"
     },
@@ -146,7 +157,8 @@
         "modeling_obj_containers": [
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer"
+            "BoaviztaCloudServer",
+            "EdgeDevice"
         ],
         "label": "storage"
     },
@@ -284,7 +296,8 @@
     "country": {
         "modeling_obj_containers": [
             "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePatternFromForm",
+            "EdgeUsagePattern"
         ],
         "label": "country"
     },
@@ -362,7 +375,8 @@
             "Job",
             "GenAIModel",
             "VideoStreaming",
-            "WebApplication"
+            "WebApplication",
+            "GPUJob"
         ],
         "label": "server"
     },
@@ -597,7 +611,6 @@
             "EdgeUsageJourney"
         ],
         "label": "usage span",
-        "is_advanced_parameter": true,
         "step": 1
     },
     "bandwidth_energy_intensity": {
@@ -606,6 +619,93 @@
         ],
         "label": "bandwidth energy intensity",
         "is_advanced_parameter": true,
+        "step": 1
+    },
+    "short_name": {
+        "modeling_obj_containers": [
+            "Country"
+        ],
+        "label": "short name"
+    },
+    "timezone": {
+        "modeling_obj_containers": [
+            "Country"
+        ],
+        "label": "timezone"
+    },
+    "edge_processes": {
+        "modeling_obj_containers": [
+            "EdgeUsageJourney"
+        ],
+        "label": "edge processes"
+    },
+    "edge_device": {
+        "modeling_obj_containers": [
+            "EdgeUsageJourney"
+        ],
+        "label": "edge device"
+    },
+    "edge_usage_journey": {
+        "modeling_obj_containers": [
+            "EdgeUsagePattern"
+        ],
+        "label": "edge usage journey"
+    },
+    "hourly_edge_usage_journey_starts": {
+        "modeling_obj_containers": [
+            "EdgeUsagePattern"
+        ],
+        "label": "hourly edge usage journey starts"
+    },
+    "recurrent_compute_needed": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeProcess"
+        ],
+        "label": "recurrent compute needed"
+    },
+    "recurrent_ram_needed": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeProcess"
+        ],
+        "label": "recurrent ram needed"
+    },
+    "recurrent_storage_needed": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeProcess"
+        ],
+        "label": "recurrent storage needed"
+    },
+    "usage_patterns": {
+        "modeling_obj_containers": [
+            "System"
+        ],
+        "label": "usage patterns"
+    },
+    "edge_usage_patterns": {
+        "modeling_obj_containers": [
+            "System"
+        ],
+        "label": "edge usage patterns"
+    },
+    "constant_compute_needed": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeProcessFromForm"
+        ],
+        "label": "constant compute needed",
+        "step": 0.1
+    },
+    "constant_ram_needed": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeProcessFromForm"
+        ],
+        "label": "constant ram needed",
+        "step": 0.1
+    },
+    "constant_storage_needed": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeProcessFromForm"
+        ],
+        "label": "constant storage needed",
         "step": 1
     }
 }

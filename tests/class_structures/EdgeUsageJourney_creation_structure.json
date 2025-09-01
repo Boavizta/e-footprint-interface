@@ -1,0 +1,85 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Edge usage journey selection",
+        "fields": [
+            {
+                "input_type": "select-object",
+                "web_id": "type_object_available",
+                "label": "Available edge usage journeys",
+                "options": [
+                    {
+                        "label": "Edge usage journey",
+                        "value": "EdgeUsageJourney"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "EdgeUsageJourney",
+        "header": "Edge usage journey creation",
+        "fields": [
+            {
+                "web_id": "EdgeUsageJourney_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Edge usage journey 1"
+            },
+            {
+                "web_id": "EdgeUsageJourney_edge_processes",
+                "attr_name": "edge_processes",
+                "label": "edge processes",
+                "tooltip": false,
+                "input_type": "select-multiple",
+                "selected": [],
+                "unselected": [
+                    {
+                        "value": "efootprint_id1",
+                        "label": "option1"
+                    },
+                    {
+                        "value": "efootprint_id2",
+                        "label": "option2"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsageJourney_edge_device",
+                "attr_name": "edge_device",
+                "label": "edge device",
+                "tooltip": false,
+                "input_type": "select-object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsageJourney_usage_span",
+                "attr_name": "usage_span",
+                "label": "usage span",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": []
+    }
+]

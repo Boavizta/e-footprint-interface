@@ -15,6 +15,14 @@
         "label": "GPU job",
         "type_object_available": "Available job types"
     },
+    "RecurrentEdgeProcessFromForm": {
+        "label": "Recurrent edge process",
+        "type_object_available": "Recurrent edge process"
+    },
+    "RecurrentEdgeProcess": {
+        "label": "Recurrent edge process",
+        "type_object_available": "Recurrent edge process"
+    },
     "Service": {
         "label": "Service",
         "type_object_available": "Available services for this server"
@@ -35,6 +43,10 @@
         "label": "Usage pattern",
         "type_object_available": "Available usage patterns"
     },
+    "EdgeUsagePattern": {
+        "label": "Edge usage pattern",
+        "type_object_available": "Available edge usage patterns"
+    },
     "UsageJourneyStep": {
         "label": "Usage journey step",
         "type_object_available": "Available usage journey steps"
@@ -42,6 +54,10 @@
     "UsageJourney": {
         "label": "Usage journey",
         "type_object_available": "Available usage journeys"
+    },
+    "EdgeUsageJourney": {
+        "label": "Edge usage journey",
+        "type_object_available": "Available edge usage journeys"
     },
     "Server": {
         "label": "Custom server",
