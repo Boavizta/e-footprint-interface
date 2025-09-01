@@ -3,7 +3,7 @@
 
 {% block panel_body %}
     <form id="sidePanelForm"
-        hx-post="{% url 'add-new-object' 'ServerBase' %}"
+        hx-post="/model_builder/add-object/{{ object_type }}/"
         hx-target="#server-list"
         hx-swap="beforeend"
         hx-disabled-elt="button"
