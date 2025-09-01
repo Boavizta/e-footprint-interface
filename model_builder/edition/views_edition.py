@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from efootprint.core.hardware.edge_device import EdgeDevice
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.utils.tools import time_it
 
@@ -30,9 +31,10 @@ def open_edit_object_panel(request, object_id):
     if issubclass(obj_to_edit.efootprint_class, UsagePatternFromForm):
         http_response = generate_usage_pattern_edit_panel_http_response(
             request, obj_to_edit, form_fields, form_fields_advanced, object_belongs_to_computable_system)
-    elif issubclass(obj_to_edit.efootprint_class, ServerBase):
+    elif issubclass(obj_to_edit.efootprint_class, ServerBase) or issubclass(obj_to_edit.efootprint_class, EdgeDevice):
         http_response = generate_server_edit_panel_http_response(
-            request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system, dynamic_form_data)
+            request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
+            dynamic_form_data)
     else:
         http_response = generate_generic_edit_panel_http_response(
             request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
@@ -52,7 +54,7 @@ def edit_object(request, object_id, trigger_result_display=False):
     recompute_modeling = request.POST.get("recomputation", False)
     model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
-    if issubclass(obj_to_edit.efootprint_class, ServerBase):
+    if issubclass(obj_to_edit.efootprint_class, ServerBase) or issubclass(obj_to_edit.efootprint_class, EdgeDevice):
         storage_data = json.loads(request.POST.get("storage_form_data"))
         storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
         edit_object_in_system(storage_data, storage)
