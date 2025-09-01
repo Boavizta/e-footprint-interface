@@ -332,8 +332,17 @@ class ServerWeb(ModelingObjectWeb):
         return None
 
     @property
-    def accordion_children(self):
-        return [self.storage]
+    def class_title_style(self):
+        return "h6"
+
+class EdgeDeviceWeb(ModelingObjectWeb):
+    @property
+    def template_name(self):
+        return "server"
+
+    @property
+    def accordion_parent(self):
+        return None
 
     @property
     def class_title_style(self):
@@ -380,10 +389,6 @@ class MirroredJobWeb(ModelingObjectWeb):
     @property
     def accordion_parent(self):
         return self.usage_journey_step
-
-    @property
-    def accordion_children(self):
-        return []
 
     @property
     def class_title_style(self):
@@ -543,7 +548,9 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GenAIModel": ServiceWeb,
     "VideoStreaming": ServiceWeb,
     "WebApplication": ServiceWeb,
-    "Storage": ModelingObjectWeb
+    "Storage": ModelingObjectWeb,
+    "EdgeDevice": EdgeDeviceWeb,
+    "EdgeStorage": ModelingObjectWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):
