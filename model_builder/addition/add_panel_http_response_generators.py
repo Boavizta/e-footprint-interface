@@ -64,8 +64,6 @@ def generate_server_add_panel_http_response(request, model_web: ModelWeb):
                                "dynamic_form_data": dynamic_form_data,
                                "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
-                               "obj_type": "server",
-                               "storage_obj_type": "storage",
                                "header_name": "Add new server",
                            })
 
@@ -95,8 +93,6 @@ def generate_edge_device_add_panel_http_response(request, model_web: ModelWeb):
                                "dynamic_form_data": dynamic_form_data,
                                "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
-                               "obj_type": "server",
-                               "storage_obj_type": "storage",
                                "header_name": "Add new server",
                            })
 
