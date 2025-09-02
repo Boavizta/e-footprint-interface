@@ -27,7 +27,8 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
         model_web=model_web
     )
     template_name_mapping = {
-        "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step"}
+        "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step",
+        "EdgeUsageJourney": "edge_usage_journey"}
     template_name = template_name_mapping[efootprint_class_str]
     context_data = {"form_fields": form_sections[1]["fields"],
                     "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),

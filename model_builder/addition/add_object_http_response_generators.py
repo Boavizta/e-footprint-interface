@@ -17,12 +17,13 @@ from model_builder.object_creation_and_edition_utils import (
     create_efootprint_obj_from_post_data, render_exception_modal_if_error)
 
 
-def add_new_usage_journey(request, model_web: ModelWeb):
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, "UsageJourney")
+def add_new_journey(request, model_web: ModelWeb, journey_type: str):
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, journey_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
     response = render(
-        request, "model_builder/object_cards/usage_journey_card.html", {"usage_journey": added_obj})
+        request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
+        {added_obj.template_name: added_obj})
 
     response["HX-Trigger-After-Swap"] = json.dumps({
         "resetLeaderLines": "",

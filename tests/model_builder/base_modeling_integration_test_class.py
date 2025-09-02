@@ -14,7 +14,7 @@ from efootprint.api_utils.system_to_json import system_to_json
 from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT, default_networks, default_devices, default_countries
 from tests.test_constants import (
     USAGE_PATTERN_FORM_DATA, WEB_APPLICATION_FORM_DATA, WEB_APPLICATION_JOB_FORM_DATA,
-    GPU_SERVER_FORM_DATA, HTTP_OK, HTTP_NO_CONTENT
+    GPU_SERVER_FORM_DATA, HTTP_OK, HTTP_NO_CONTENT, EDGE_DEVICE_FORM_DATA
 )
 
 setup()
@@ -62,7 +62,7 @@ class TestModelingBase(TestCase):
         request.session["system_data"] = system_data
         request.session.save()
 
-    def change_system_data(self, new_system_data_path):
+    def change_system_data(new_system_data_path):
         old_system_data_path = self.system_data_path
         self.system_data_path = new_system_data_path
         self.setUp()
@@ -88,23 +88,24 @@ class TestModelingBase(TestCase):
         self._add_session_to_request(request, system_data or self.system_data)
         return request
 
-    def create_usage_pattern_data(self, name: str = "Test Usage Pattern", 
+    @staticmethod
+    def create_usage_pattern_data(name: str = "Test Usage Pattern",
                                 usage_journey_id: Optional[str] = None, **overrides) -> Dict[str, Any]:
         """Create usage pattern form data with sensible defaults."""
         data = deepcopy(USAGE_PATTERN_FORM_DATA)
         data["UsagePatternFromForm_name"] = name
-        
+
         # Set default device, network, country if available
         if not overrides.get("UsagePatternFromForm_devices"):
             devices = list(default_devices().keys())
             if devices:
                 data["UsagePatternFromForm_devices"] = devices[0]
-        
+
         if not overrides.get("UsagePatternFromForm_network"):
             networks = list(default_networks().keys())
             if networks:
                 data["UsagePatternFromForm_network"] = networks[0]
-                
+
         if not overrides.get("UsagePatternFromForm_country"):
             countries = list(default_countries().keys())
             if countries:
@@ -116,7 +117,8 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_web_application_data(self, name: str = "Test Service", 
+    @staticmethod
+    def create_web_application_data(name: str = "Test Service",
                                    parent_id: Optional[str] = None, **overrides) -> Dict[str, Any]:
         """Create web application form data with sensible defaults."""
         data = deepcopy(WEB_APPLICATION_FORM_DATA)
@@ -126,7 +128,8 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_web_application_job_data(self, name: str = "Test Job", 
+    @staticmethod
+    def create_web_application_job_data(name: str = "Test Job",
                                        parent_id: Optional[str] = None,
                                        service_id: Optional[str] = None,
                                        server: Optional[str] = None, **overrides) -> Dict[str, Any]:
@@ -142,14 +145,24 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_gpu_server_data(self, name: str = "Test GPU Server", **overrides) -> Dict[str, Any]:
+    @staticmethod
+    def create_gpu_server_data(name: str = "Test GPU Server", **overrides) -> Dict[str, Any]:
         """Create GPU server form data with sensible defaults."""
         data = deepcopy(GPU_SERVER_FORM_DATA)
         data["GPUServer_name"] = name
         data.update(overrides)
         return data
 
-    def create_usage_journey_data(self, name: str = "Test Usage Journey", 
+    @staticmethod
+    def create_edge_device_data(name: str = "Test Edge Device", **overrides) -> Dict[str, Any]:
+        """Create edge device form data with sensible defaults."""
+        data = deepcopy(EDGE_DEVICE_FORM_DATA)
+        data["EdgeDevice_name"] = name
+        data.update(overrides)
+        return data
+
+    @staticmethod
+    def create_usage_journey_data(name: str = "Test Usage Journey",
                                  uj_steps: str = "", **overrides) -> Dict[str, Any]:
         """Create usage journey form data with sensible defaults."""
         data = {
@@ -160,7 +173,8 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_usage_journey_step_data(self, name: str = "Test Usage Journey Step",
+    @staticmethod
+    def create_usage_journey_step_data(name: str = "Test Usage Journey Step",
                                       parent_id: Optional[str] = None,
                                       user_time_spent: str = "1",
                                       user_time_spent_unit: str = "min",
@@ -178,7 +192,8 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_genai_model_data(self, name: str = "Test GenAI Model",
+    @staticmethod
+    def create_genai_model_data(name: str = "Test GenAI Model",
                                parent_id: Optional[str] = None,
                                provider: str = "mistralai",
                                model_name: str = "open-mistral-7b",
@@ -200,7 +215,8 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_genai_job_data(self, name: str = "Test GenAI Job",
+    @staticmethod
+    def create_genai_job_data(name: str = "Test GenAI Job",
                              parent_id: Optional[str] = None,
                              service_id: Optional[str] = None,
                              server_id: Optional[str] = None,
@@ -220,7 +236,8 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
-    def create_external_api_data(self, name: str = "Test External API",
+    @staticmethod
+    def create_external_api_data(name: str = "Test External API",
                                 provider: str = "openai",
                                 model_name: str = "gpt-4",
                                 bits_per_token: str = "24",
@@ -239,14 +256,49 @@ class TestModelingBase(TestCase):
         data.update(overrides)
         return data
 
+    @staticmethod
+    def create_edge_usage_journey_data(name: str = "Test Edge Usage Journey",
+                                      edge_device: str = "",
+                                      usage_span: str = "6",
+                                      edge_processes: str = "", **overrides):
+        """Create edge usage journey form data with sensible defaults."""
+        data = {
+            "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
+            "EdgeUsageJourney_name": name,
+            "EdgeUsageJourney_edge_device": edge_device,
+            "EdgeUsageJourney_usage_span": usage_span,
+            "EdgeUsageJourney_usage_span_unit": "yr",
+            "EdgeUsageJourney_edge_processes": edge_processes,
+        }
+        data.update(overrides)
+        return data
+
+    @staticmethod
+    def create_recurrent_edge_process_data(name: str = "Test Recurrent Edge Process",
+                                          parent_id: str = "",
+                                          constant_compute_needed: str = "1",
+                                          constant_ram_needed: str = "1",
+                                          constant_storage_needed: str = "100", **overrides):
+        """Create recurrent edge process form data with sensible defaults."""
+        data = {
+            "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
+            "RecurrentEdgeProcessFromForm_name": name,
+            "RecurrentEdgeProcessFromForm_constant_compute_needed": constant_compute_needed,
+            "RecurrentEdgeProcessFromForm_constant_ram_needed": constant_ram_needed,
+            "RecurrentEdgeProcessFromForm_constant_storage_needed": constant_storage_needed,
+            "efootprint_id_of_parent_to_link_to": parent_id,
+        }
+        data.update(overrides)
+        return data
+
     def assert_response_ok(self, response):
         """Assert that response status is 200 OK."""
-        self.assertEqual(response.status_code, HTTP_OK, 
+        self.assertEqual(response.status_code, HTTP_OK,
                         f"Expected HTTP 200, got {response.status_code}")
 
     def assert_response_no_content(self, response):
         """Assert that response status is 204 No Content."""
-        self.assertEqual(response.status_code, HTTP_NO_CONTENT, 
+        self.assertEqual(response.status_code, HTTP_NO_CONTENT,
                         f"Expected HTTP 204, got {response.status_code}")
 
     def get_object_id_from_session(self, request, object_type: str, index: int = -1) -> str:
@@ -263,7 +315,7 @@ class TestModelingBase(TestCase):
         for key, value in env_vars.items():
             original_values[key] = os.environ.get(key)
             os.environ[key] = value
-        
+
         try:
             yield
         finally:

@@ -12,7 +12,7 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 from tests.test_constants import TEST_SERVER_ID, TEST_UJ_STEP_ID
 
 
-class TestViewsAddition(TestModelingBase):
+class TestViewsAdditionWeb(TestModelingBase):
     @classmethod
     def setUpClass(cls):
         cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
