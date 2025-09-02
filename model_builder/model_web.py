@@ -244,6 +244,10 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("UsagePattern")
 
     @property
+    def edge_usage_journeys(self):
+        return self.get_web_objects_from_efootprint_type("EdgeUsageJourney")
+
+    @property
     def system_emissions(self):
         energy = self.system.total_energy_footprints
         fab = self.system.total_fabrication_footprints

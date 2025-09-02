@@ -84,6 +84,36 @@ GPU_SERVER_FORM_DATA = {
                         '"Storage_lifespan_unit":"yr"}',
 }
 
+EDGE_DEVICE_FORM_DATA = {
+    "type_object_available": "EdgeDevice",
+    "EdgeDevice_base_compute_consumption": "0",
+    "EdgeDevice_base_compute_consumption_unit": "cpu_core",
+    "EdgeDevice_base_ram_consumption": "0",
+    "EdgeDevice_base_ram_consumption_unit": "GB",
+    "EdgeDevice_carbon_footprint_fabrication": "150",
+    "EdgeDevice_carbon_footprint_fabrication_unit": "kg",
+    "EdgeDevice_compute": "4",
+    "EdgeDevice_compute_unit": "cpu_core",
+    "EdgeDevice_idle_power": "50",
+    "EdgeDevice_idle_power_unit": "W",
+    "EdgeDevice_power": "400",
+    "EdgeDevice_power_unit": "W",
+    "EdgeDevice_lifespan": "6",
+    "EdgeDevice_lifespan_unit": "yr",
+    "EdgeDevice_power_usage_effectiveness": "1.2",
+    "EdgeDevice_utilization_rate": "1",
+    "storage_form_data": '{"type_object_available":"EdgeStorage","EdgeStorage_name":"EdgeStorage 1",'
+                        '"EdgeStorage_storage_capacity":"1",'
+                        '"EdgeStorage_storage_capacity_unit":"TB",'
+                        '"EdgeStorage_carbon_footprint_fabrication_per_storage_capacity":"160",'
+                        '"EdgeStorage_carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB",'
+                        '"EdgeStorage_power_per_storage_capacity":"1.3",'
+                        '"EdgeStorage_power_per_storage_capacity_unit":"W/TB","EdgeStorage_idle_power":"0",'
+                        '"EdgeStorage_idle_power_unit":"W","EdgeStorage_base_storage_need":"0",'
+                        '"EdgeStorage_base_storage_need_unit":"TB","EdgeStorage_lifespan":"6",'
+                        '"EdgeStorage_lifespan_unit":"yr"}',
+}
+
 # System data templates
 MINIMAL_SYSTEM_DATA = {
     "efootprint_version": "9.1.4",

@@ -1,0 +1,58 @@
+{% load static %}
+<div id="{{ edge_usage_journey.web_id }}"
+     class="leader-line-object card list-group-item mt-0 mb-3 py-2 px-0 rounded-3 model-builder-card grab"
+     data-link-to="{{ edge_usage_journey.links_to }}" data-line-opt="{{ edge_usage_journey.data_line_opt }}">
+    <div class="accordion accordion-flush">
+        <div class="accordion-item">
+            <div class="accordion-header p-0 d-flex align-items-center">
+                <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0"
+                        data-bs-toggle="collapse" data-bs-target="#flush-{{ edge_usage_journey.web_id }}" onclick="reverseIconAccordion('{{ edge_usage_journey.web_id }}')" aria-expanded="true" aria-controls="collapseOne">
+                        <svg id="icon_accordion_{{ edge_usage_journey.web_id }}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3" class="bi bi-chevron-right chevron-rotate" viewBox="0 0 16 16">
+                            <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                        </svg>
+                </button>
+                <button id="button-{{ edge_usage_journey.web_id }}"
+                        class="btn btn-white ms-1 w-100 text-start d-flex flex-row justify-content-between align-items-center text-break position-relative"
+                        type="button"
+                        hx-get="/model_builder/open-edit-object-panel/{{ edge_usage_journey.efootprint_id }}/"
+                        hx-target="#sidePanel"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-disabled-elt="button"
+                        _="
+                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ edge_usage_journey.web_id }}
+                            on mouseover remove .d-none from #edit-icon-{{ edge_usage_journey.web_id }}
+                            on mouseout add .d-none to #edit-icon-{{ edge_usage_journey.web_id }}
+                        "
+                >
+                    {% include 'model_builder/components/button_card_header.html' with object_card=edge_usage_journey %}
+                </button>
+            </div>
+            <div id="flush-{{ edge_usage_journey.web_id }}" class="accordion-collapse show accordion-all" data-bs-parent="#{{ edge_usage_journey.web_id }}">
+                <div class="accordion-body py-0 ps-3 pe-0">
+                    {% for edge_process in edge_usage_journey.edge_processes %}
+                        {% include 'model_builder/object_cards/recurrent_edge_process_card.html' %}
+                    {% endfor %}
+                    <div id="add-edge-process-to-{{ edge_usage_journey.web_id }}" class="d-flex custom-ms-4 mt-3 mb-2
+                    align-items-center move"
+                        hx-get="/model_builder/open-create-object-panel/RecurrentEdgeProcessFromForm"
+                        hx-target="#sidePanel"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ edge_usage_journey.efootprint_id }}"}'
+                        hx-disabled-elt="button"
+                         _="on click removeAllOpenedObjectsHighlights()"
+                    >
+                        <img src="{% static 'icons/circle_add_icon.svg' %}" class="cursor" width="16" height="16" id="add-edge-process-{{ edge_usage_journey.web_id }}">
+                        <div class="mb-0 ms-2 ps-1 d-flex align-items-center cursor">
+                            <img src="{% static 'icons/add-gray-icon.svg' %}"  width="16" height="16">
+                            <div class="h8 mb-0 ms-2 ps-2 text-addition">
+                                Add recurrent edge process
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

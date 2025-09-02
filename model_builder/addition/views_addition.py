@@ -1,6 +1,6 @@
 from django.template.loader import render_to_string
 
-from model_builder.addition.add_object_http_response_generators import add_new_usage_journey, \
+from model_builder.addition.add_object_http_response_generators import add_new_journey, \
     add_new_usage_journey_step, \
     add_new_object_with_storage, add_new_service, add_new_job, add_new_usage_pattern, add_new_external_api
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
@@ -40,8 +40,8 @@ def add_object(request, object_type):
 
     if object_type == "UsageJourneyStep":
         http_response =  add_new_usage_journey_step(request, model_web)
-    elif object_type == "UsageJourney":
-        http_response =  add_new_usage_journey(request, model_web)
+    elif object_type in ["UsageJourney", "EdgeUsageJourney"]:
+        http_response =  add_new_journey(request, model_web, object_type)
     elif object_type == "ServerBase":
         http_response = add_new_object_with_storage(request, model_web, storage_type="Storage")
     elif object_type == "EdgeDevice":
