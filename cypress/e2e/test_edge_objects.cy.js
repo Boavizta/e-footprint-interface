@@ -3,7 +3,7 @@ beforeEach(() => {
   cy.clearLocalStorage();
 });
 
-describe('Test edge devices', () => {
+describe('Test edge objects', () => {
     it('Add an edge device, verify creation, then edit and verify changes', () => {
         let edgeDeviceName = "Test E2E Edge Device";
         let originalRam = "16";

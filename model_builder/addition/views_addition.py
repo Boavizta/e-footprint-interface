@@ -31,10 +31,14 @@ def open_create_object_panel(request, object_type):
     elif object_type == "ExternalApi":
         http_response = generate_external_api_add_panel_http_response(request, model_web)
     else:
-        if object_type == "EdgeUsageJourney" and len(model_web.edge_devices) == 0:
-            error = PermissionError(
-                "You need to have created at least one edge device to create an edge usage journey.")
-            return render_exception_modal(request, error)
+        if object_type == "EdgeUsageJourney":
+            edge_devices_that_are_not_already_linked = [edge_device for edge_device in model_web.edge_devices
+                                                        if edge_device.edge_usage_journey is None]
+            if len(edge_devices_that_are_not_already_linked) == 0:
+                error = PermissionError(
+                    "You need to have at least one edge device not already linked to an edge usage journey to create a "
+                    "new edge usage journey.")
+                return render_exception_modal(request, error)
         http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
 
     return http_response
