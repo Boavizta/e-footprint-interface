@@ -69,7 +69,6 @@
             "EdgeStorage"
         ],
         "label": "lifespan",
-        "is_advanced_parameter": true,
         "step": 1
     },
     "idle_power": {

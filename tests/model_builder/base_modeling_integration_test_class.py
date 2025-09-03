@@ -284,8 +284,11 @@ class TestModelingBase(TestCase):
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
             "RecurrentEdgeProcessFromForm_name": name,
             "RecurrentEdgeProcessFromForm_constant_compute_needed": constant_compute_needed,
+            "RecurrentEdgeProcessFromForm_constant_compute_needed_unit": "cpu_core",
             "RecurrentEdgeProcessFromForm_constant_ram_needed": constant_ram_needed,
+            "RecurrentEdgeProcessFromForm_constant_ram_needed_unit": "GB",
             "RecurrentEdgeProcessFromForm_constant_storage_needed": constant_storage_needed,
+            "RecurrentEdgeProcessFromForm_constant_storage_needed_unit": "GB",
             "efootprint_id_of_parent_to_link_to": parent_id,
         }
         data.update(overrides)

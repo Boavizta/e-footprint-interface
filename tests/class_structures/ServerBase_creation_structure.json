@@ -64,6 +64,21 @@
                 ]
             },
             {
+                "web_id": "Server_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
                 "web_id": "Server_ram",
                 "attr_name": "ram",
                 "label": "RAM",
@@ -137,21 +152,6 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "can_be_negative": false,
-                "step": 1
-            },
-            {
-                "web_id": "Server_lifespan",
-                "attr_name": "lifespan",
-                "label": "lifespan",
-                "tooltip": false,
-                "default": 6,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "yr",
                 "can_be_negative": false,
                 "step": 1
             },
@@ -300,6 +300,21 @@
                 "unit": "gpu",
                 "can_be_negative": false,
                 "step": 1
+            },
+            {
+                "web_id": "GPUServer_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
             }
         ],
         "advanced_fields": [
@@ -375,21 +390,6 @@
                 },
                 "input_type": "input",
                 "unit": "kg",
-                "can_be_negative": false,
-                "step": 1
-            },
-            {
-                "web_id": "GPUServer_lifespan",
-                "attr_name": "lifespan",
-                "label": "lifespan",
-                "tooltip": false,
-                "default": 6,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "yr",
                 "can_be_negative": false,
                 "step": 1
             },
@@ -540,6 +540,21 @@
                 ]
             },
             {
+                "web_id": "BoaviztaCloudServer_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
                 "web_id": "BoaviztaCloudServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
@@ -556,21 +571,6 @@
             }
         ],
         "advanced_fields": [
-            {
-                "web_id": "BoaviztaCloudServer_lifespan",
-                "attr_name": "lifespan",
-                "label": "lifespan",
-                "tooltip": false,
-                "default": 6,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "yr",
-                "can_be_negative": false,
-                "step": 1
-            },
             {
                 "web_id": "BoaviztaCloudServer_idle_power",
                 "attr_name": "idle_power",

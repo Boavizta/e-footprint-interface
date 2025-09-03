@@ -69,8 +69,8 @@ class TestViewsAdditionEdge(TestModelingBase):
         rep_data = self.create_recurrent_edge_process_data(
             name="Test Process", parent_id=edge_usage_journey_id, constant_compute_needed="2",
             constant_ram_needed="1.5", constant_storage_needed="200")
-        rep_request = self.create_post_request("/add-object/RecurrentEdgeProcessFromForm", rep_data,
-                                             euj_request.session["system_data"])
+        rep_request = self.create_post_request(
+            "/add-object/RecurrentEdgeProcessFromForm", rep_data, euj_request.session["system_data"])
 
         # Check initial state
         initial_rep_count = len(rep_request.session["system_data"].get("RecurrentEdgeProcessFromForm", {}))
@@ -87,9 +87,9 @@ class TestViewsAdditionEdge(TestModelingBase):
         recurrent_process = rep_request.session["system_data"]["RecurrentEdgeProcessFromForm"][rep_id]
 
         self.assertEqual(recurrent_process["name"], "Test Process")
-        self.assertEqual(recurrent_process["constant_compute_needed"], 2.0)
-        self.assertEqual(recurrent_process["constant_ram_needed"], 1.5)
-        self.assertEqual(recurrent_process["constant_storage_needed"], 200.0)
+        self.assertEqual(recurrent_process["constant_compute_needed"]["value"], 2.0)
+        self.assertEqual(recurrent_process["constant_ram_needed"]["value"], 1.5)
+        self.assertEqual(recurrent_process["constant_storage_needed"]["value"], 200.0)
 
         # Verify the edge usage journey contains the process
         updated_edge_usage_journey = rep_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
@@ -101,24 +101,15 @@ class TestViewsAdditionEdge(TestModelingBase):
         """Test that ModelWeb.edge_usage_journeys property works correctly"""
         from model_builder.model_web import ModelWeb
 
-        # Create an edge device first
-        edge_device_data = {
-            "csrfmiddlewaretoken": "test",
-            "EdgeDevice_name": "Test Edge Device",
-            "EdgeDevice_ram": "4",
-            "EdgeDevice_compute": "2",
-        }
+        edge_device_data = self.create_edge_device_data("Test Edge Device")
         edge_device_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)
         add_object(edge_device_request, "EdgeDevice")
         edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
 
         # Create edge usage journey
-        euj_data = self.create_edge_usage_journey_data(
-            name="Test Edge Usage Journey",
-            edge_device=edge_device_id
-        )
-        euj_request = self.create_post_request("/add-object/EdgeUsageJourney", euj_data,
-                                             edge_device_request.session["system_data"])
+        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device=edge_device_id)
+        euj_request = self.create_post_request(
+            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
         add_object(euj_request, "EdgeUsageJourney")
 
         # Test ModelWeb property

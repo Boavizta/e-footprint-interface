@@ -29,6 +29,21 @@
                 "default": "Edge device 1"
             },
             {
+                "web_id": "EdgeDevice_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 4,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
                 "web_id": "EdgeDevice_ram",
                 "attr_name": "ram",
                 "label": "RAM",
@@ -87,21 +102,6 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "can_be_negative": false,
-                "step": 1
-            },
-            {
-                "web_id": "EdgeDevice_lifespan",
-                "attr_name": "lifespan",
-                "label": "lifespan",
-                "tooltip": false,
-                "default": 4,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "yr",
                 "can_be_negative": false,
                 "step": 1
             },

@@ -35,8 +35,6 @@ def add_object(request, object_type):
     recompute_modeling = request.POST.get("recomputation", False)
     model_web = ModelWeb(request.session)
 
-    http_response = None
-
     if object_type == "ServerBase":
         http_response = add_new_object_with_storage(request, model_web, storage_type="Storage")
     elif object_type == "EdgeDevice":
