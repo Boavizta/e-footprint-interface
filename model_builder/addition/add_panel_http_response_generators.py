@@ -1,13 +1,9 @@
 from copy import deepcopy
+from typing import List
 
-from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.builders.services.generative_ai_ecologits import GenAIModel
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
-from efootprint.core.hardware.edge_device import EdgeDevice
-from efootprint.core.hardware.edge_storage import EdgeStorage
 from efootprint.core.hardware.gpu_server import GPUServer
-from efootprint.core.hardware.server import Server
-from efootprint.core.hardware.storage import Storage
 from django.shortcuts import render
 from efootprint.core.usage.job import Job, GPUJob
 
@@ -15,7 +11,6 @@ from model_builder.class_structure import generate_object_creation_structure, MO
     FORM_TYPE_OBJECT
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
-from model_builder.object_creation_and_edition_utils import render_exception_modal
 
 
 def generate_generic_add_panel_http_response(request, efootprint_class_str: str,  model_web: ModelWeb):
@@ -40,59 +35,31 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
     return http_response
 
 
-def generate_server_add_panel_http_response(request, model_web: ModelWeb):
+def generate_object_with_storage_add_panel_http_response(
+    request, model_web: ModelWeb, object_type: str, available_efootprint_classes: List,
+    storage_type: str, available_storage_classes: List):
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        "ServerBase",
-        available_efootprint_classes = [GPUServer, BoaviztaCloudServer, Server],
+        object_type,
+        available_efootprint_classes=available_efootprint_classes,
         attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
 
     storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
-        "Storage",
-        available_efootprint_classes=[Storage],
+        storage_type,
+        available_efootprint_classes=available_storage_classes,
         attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
 
     http_response = render(request, f"model_builder/side_panels/server/server_add.html",
                            context={
-                               "object_type": "ServerBase",
+                               "object_type": object_type,
                                "form_sections": form_sections,
                                "dynamic_form_data": dynamic_form_data,
                                "storage_form_sections": storage_form_sections,
                                "storage_dynamic_form_data": storage_dynamic_form_data,
-                               "header_name": "Add new server",
-                           })
-
-    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
-
-    return http_response
-
-
-def generate_edge_device_add_panel_http_response(request, model_web: ModelWeb):
-    form_sections, dynamic_form_data = generate_object_creation_structure(
-        "EdgeDevice",
-        available_efootprint_classes = [EdgeDevice],
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
-        model_web=model_web,
-    )
-
-    storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
-        "EdgeStorage",
-        available_efootprint_classes=[EdgeStorage],
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
-        model_web=model_web,
-    )
-
-    http_response = render(request, f"model_builder/side_panels/server/server_add.html",
-                           context={
-                               "object_type": "EdgeDevice",
-                               "form_sections": form_sections,
-                               "dynamic_form_data": dynamic_form_data,
-                               "storage_form_sections": storage_form_sections,
-                               "storage_dynamic_form_data": storage_dynamic_form_data,
-                               "header_name": "Add new edge device",
+                               "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}",
                            })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
