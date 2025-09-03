@@ -382,6 +382,44 @@ class MirroredJobWeb(ModelingObjectWeb):
         return "h8"
 
 
+class RecurrentEdgeProcessFromFormWeb(ModelingObjectWeb):
+    @property
+    def web_id(self):
+        raise PermissionError(
+            f"RecurrentEdgeProcessFromFormWeb objects don’t have a web_id attribute because their html "
+            f"representation should be managed by the MirroredRecurrentEdgeProcessFromFormWeb object")
+
+    @property
+    def mirrored_cards(self):
+        mirrored_cards = []
+        for edge_usage_journey in self.edge_usage_journeys:
+            mirrored_cards.append(MirroredRecurrentEdgeProcessFromFormWeb(self._modeling_obj, edge_usage_journey))
+
+        return mirrored_cards
+
+
+class MirroredRecurrentEdgeProcessFromFormWeb(ModelingObjectWeb):
+    def __init__(self, modeling_obj: ModelingObject, euj: "EdgeUsageJourneyWeb"):
+        super().__init__(modeling_obj, euj.model_web)
+        self.edge_usage_journey = euj
+
+    @property
+    def settable_attributes(self):
+        return super().settable_attributes + ["edge_usage_journey"]
+
+    @property
+    def web_id(self):
+        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.edge_usage_journey.web_id}"
+
+    @property
+    def accordion_parent(self):
+        return self.edge_usage_journey
+
+    @property
+    def class_title_style(self):
+        return "h8"
+
+
 class UsageJourneyStepWeb(ModelingObjectWeb):
     @property
     def web_id(self):
@@ -497,6 +535,32 @@ class UsageJourneyWeb(ModelingObjectWeb):
         return "h6"
 
 
+class EdgeUsageJourneyWeb(ModelingObjectWeb):
+    @property
+    def links_to(self):
+        return self.edge_device.web_id
+
+    @property
+    def accordion_parent(self):
+        return None
+
+    @property
+    def accordion_children(self):
+        return self.edge_processes
+
+    @property
+    def edge_processes(self):
+        web_edge_processes = []
+        for edge_process in self._modeling_obj.edge_processes:
+            web_edge_processes.append(MirroredRecurrentEdgeProcessFromFormWeb(edge_process, self))
+
+        return web_edge_processes
+
+    @property
+    def class_title_style(self):
+        return "h6"
+
+
 class UsagePatternWeb(ModelingObjectWeb):
     @property
     def links_to(self):
@@ -538,6 +602,8 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Storage": ModelingObjectWeb,
     "EdgeDevice": EdgeDeviceWeb,
     "EdgeStorage": ModelingObjectWeb,
+    "EdgeUsageJourney": EdgeUsageJourneyWeb,
+    "RecurrentEdgeProcessFromForm": RecurrentEdgeProcessFromFormWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):
