@@ -123,19 +123,15 @@ class TestViewsAdditionEdge(TestModelingBase):
 
     def test_edge_usage_journey_without_edge_device(self):
         """Test EdgeUsageJourney creation fails gracefully without edge device"""
-        os.environ["RAISE_EXCEPTIONS"] = "True"
+        if "RAISE_EXCEPTIONS" in os.environ:
+            os.environ.pop("RAISE_EXCEPTIONS")
 
-        euj_data = self.create_edge_usage_journey_data(
-            name="Test Edge Usage Journey",
-            edge_device="",  # No edge device specified
-        )
+        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device="")
         add_request = self.create_post_request("/add-object/EdgeUsageJourney", euj_data)
 
         # This should handle the case where no edge device is selected
-        with patch('model_builder.object_creation_and_edition_utils.render_exception_modal_if_error') as mock_error:
+        with patch('model_builder.object_creation_and_edition_utils.render_exception_modal') as mock_error:
             response = add_object(add_request, "EdgeUsageJourney")
-
-            # The response might be an error, but we want to ensure it doesn't crash
-            self.assertIsNotNone(response)
+            mock_error.assert_called_once()
 
         logger.info("EdgeUsageJourney creation handled gracefully without edge device")
