@@ -139,7 +139,7 @@ describe("Test - Result panel", () => {
 
         cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", serverTest).should('be.enabled').click()
         cy.get('#sidePanelForm').should('exist').should('be.visible');
-        cy.get("#Storage_data_replication_factor").should('be.visible').type("1000")
+        cy.get("#Storage_data_replication_factor").should('exist').type("1000")
         cy.intercept("GET", "/model_builder/result-chart/").as("openResults")
         cy.get('#btn-open-panel-result').click()
         cy.wait("@openResults"); // wait for the result panel to be fully loaded

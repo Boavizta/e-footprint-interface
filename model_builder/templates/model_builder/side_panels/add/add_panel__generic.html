@@ -1,14 +1,44 @@
 {% extends "model_builder/side_panels/side_panel_structure.html" %}
 
 {% block panel_body %}
-    {% block add_form %}
-    {% endblock %}
-
-    <div class="mb-3">
-        <p class="mt-4">
-            You will be able to edit all attributes of the created {{ obj_label|lower }} later by clicking on the object card.
+    {% if obj_formatting_data.pre_addition_help %}
+        <p>
+            {{ obj_formatting_data.pre_addition_help }}
         </p>
-    </div>
+    {% endif %}
+    {% block add_form %}
+        <form id="sidePanelForm" class="my-3"
+            hx-post="/model_builder/add-object/{{ object_type }}/"
+            {% if object_type == "UsageJourneyStep" or object_type == "Job" or object_type == "RecurrentEdgeProcessFromForm" %}
+              hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
+              hx-swap="none"
+            {% elif object_type == "UsageJourney" or object_type == "EdgeUsageJourney" %}
+              hx-target="#uj-list"
+              hx-swap="beforeend"
+            {% elif object_type == "Service" %}
+              hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
+              hx-target="#add-service-to-{{ server.web_id }}"
+              hx-swap="beforebegin"
+            {% elif object_type == "ExternalApi" %}
+              hx-target="#server-list"
+              hx-swap="beforeend"
+            {% endif %}
+
+            hx-disabled-elt="button"
+            hx-on::after-request="closeAndEmptySidePanel()"
+    >
+        {% include "model_builder/side_panels/add/add_form_content.html" %}
+    </form>
+    {% endblock %}
+    {% if obj_formatting_data.post_addition_help %}
+        <p>
+            {{ obj_formatting_data.post_addition_help }}
+        </p>
+    {% endif %}
+
+    <p class="mb-3 mt-4">
+        You will be able to edit all attributes of the created {{ obj_formatting_data.label|lower }} later by clicking on the object card.
+    </p>
 
     <div class="mb-3">
         <button
