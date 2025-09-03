@@ -7,7 +7,7 @@ from model_builder.addition.add_panel_http_response_generators import generate_g
     generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
     generate_external_api_add_panel_http_response, generate_edge_device_add_panel_http_response
 from model_builder.model_web import ModelWeb
-from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
+from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error, render_exception_modal
 
 
 def open_create_object_panel(request, object_type):
@@ -19,12 +19,22 @@ def open_create_object_panel(request, object_type):
     elif object_type == "Service":
         http_response = generate_service_add_panel_http_response(request, model_web)
     elif object_type == "Job":
+        if len(model_web.servers) == 0:
+            exception = ValueError("Please go to the infrastructure section and create a server before adding a job")
+            return render_exception_modal(request, exception)
         http_response = generate_job_add_panel_http_response(request, model_web)
     elif object_type == "UsagePatternFromForm":
+        if len(model_web.usage_journeys) == 0:
+            error = PermissionError("You need to have created at least one usage journey to create a usage pattern.")
+            return render_exception_modal(request, error)
         http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
     elif object_type == "ExternalApi":
         http_response = generate_external_api_add_panel_http_response(request, model_web)
     else:
+        if object_type == "EdgeUsageJourney" and len(model_web.edge_devices) == 0:
+            error = PermissionError(
+                "You need to have created at least one edge device to create an edge usage journey.")
+            return render_exception_modal(request, error)
         http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
 
     return http_response

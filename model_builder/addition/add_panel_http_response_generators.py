@@ -158,10 +158,6 @@ def generate_external_api_add_panel_http_response(request, model_web: ModelWeb):
 def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     servers = model_web.servers
 
-    if len(servers) == 0:
-        exception = ValueError("Please go to the infrastructure section and create a server before adding a job")
-        return render_exception_modal(request, exception)
-
     available_job_classes = {Job, GPUJob}
     for service in SERVICE_CLASSES:
         if service.__name__ in model_web.response_objs:
@@ -240,10 +236,6 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
 
 
 def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb):
-    if len(model_web.usage_journeys) == 0:
-        error = PermissionError("You need to have created at least one usage journey to create a usage pattern.")
-        return render_exception_modal(request, error)
-
     form_sections, dynamic_form_data = generate_object_creation_structure(
         "UsagePatternFromForm",
         available_efootprint_classes=[UsagePatternFromForm],
