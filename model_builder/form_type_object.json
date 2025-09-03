@@ -9,7 +9,8 @@
     },
     "Job": {
         "label": "Job",
-        "type_object_available": "Available job types"
+        "type_object_available": "Available job types",
+        "pre_addition_help": "To facilitate job creation, install services on servers."
     },
     "GPUJob": {
         "label": "GPU job",
@@ -26,6 +27,10 @@
     "Service": {
         "label": "Service",
         "type_object_available": "Available services for this server"
+    },
+    "ExternalApi": {
+        "label": "server and service",
+        "post_addition_help": "A matching server will be autocreated and you will be able to fine tune it later."
     },
     "Storage": {
         "label": "Storage",
