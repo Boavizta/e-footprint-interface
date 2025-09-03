@@ -28,7 +28,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
     )
     template_name_mapping = {
         "UsageJourney": "usage_journey", "UsageJourneyStep": "usage_journey_step",
-        "EdgeUsageJourney": "edge_usage_journey"}
+        "EdgeUsageJourney": "edge_usage_journey", "RecurrentEdgeProcessForm": "recurrent_edge_form",}
     template_name = template_name_mapping[efootprint_class_str]
     context_data = {"form_fields": form_sections[1]["fields"],
                     "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
@@ -37,7 +37,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
     if request.GET.get("efootprint_id_of_parent_to_link_to"):
         context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 
-    http_response = render(request, f"model_builder/side_panels/{template_name}_add.html", context=context_data)
+    http_response = render(request, f"model_builder/side_panels/add/{template_name}_add.html", context=context_data)
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
@@ -117,7 +117,7 @@ def generate_service_add_panel_http_response(request, model_web: ModelWeb):
     )
 
     http_response = render(
-        request, "model_builder/side_panels/service_add.html", {
+        request, "model_builder/side_panels/add/service_add.html", {
             "server": server,
             "form_sections": services_dict,
             "dynamic_form_data": dynamic_form_data,
@@ -143,7 +143,7 @@ def generate_external_api_add_panel_http_response(request, model_web: ModelWeb):
     services_dict[0]["fields"][0]["label"] = "Available services"
 
     http_response = render(
-        request, "model_builder/side_panels/external_api.html", {
+        request, "model_builder/side_panels/add/external_api.html", {
             "form_sections": services_dict,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "service",
@@ -226,7 +226,7 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
         }]
 
     http_response = render(
-        request, "model_builder/side_panels/job_add.html", {
+        request, "model_builder/side_panels/add/job_add.html", {
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "obj_type": "job",
