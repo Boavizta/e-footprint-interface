@@ -5,12 +5,14 @@ from efootprint.builders.services.generative_ai_ecologits import GenAIModel
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.hardware.gpu_server import GPUServer
 from django.shortcuts import render
+from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.job import Job, GPUJob
 
 from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
     FORM_TYPE_OBJECT
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.object_creation_and_edition_utils import render_exception_modal
 
 
 def generate_generic_add_panel_http_response(request, efootprint_class_str: str,  model_web: ModelWeb):
@@ -121,6 +123,9 @@ def generate_external_api_add_panel_http_response(request, model_web: ModelWeb):
 
 def generate_job_add_panel_http_response(request, model_web: ModelWeb):
     servers = model_web.servers
+    if len(servers) == 0:
+        exception = ValueError("Please go to the infrastructure section and create a server before adding a job")
+        return render_exception_modal(request, exception)
 
     available_job_classes = {Job, GPUJob}
     for service in SERVICE_CLASSES:
@@ -200,6 +205,9 @@ def generate_job_add_panel_http_response(request, model_web: ModelWeb):
 
 
 def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb):
+    if len(model_web.usage_journeys) == 0:
+        error = PermissionError("You need to have created at least one usage journey to create a usage pattern.")
+        return render_exception_modal(request, error)
     form_sections, dynamic_form_data = generate_object_creation_structure(
         "UsagePatternFromForm",
         available_efootprint_classes=[UsagePatternFromForm],
@@ -233,6 +241,48 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             "obj_type": "Usage pattern",
             "obj_label": FORM_TYPE_OBJECT["UsagePatternFromForm"]["label"],
         })
+
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+
+    return http_response
+
+
+def generate_edge_usage_journey_add_panel_http_response(request, model_web: ModelWeb):
+    edge_devices_that_are_not_already_linked = [edge_device for edge_device in model_web.edge_devices
+                                                if edge_device.edge_usage_journey is None]
+    if len(edge_devices_that_are_not_already_linked) == 0:
+        error = PermissionError(
+            "You need to have at least one edge device not already linked to an edge usage journey to create a "
+            "new edge usage journey.")
+        return render_exception_modal(request, error)
+
+    efootprint_class_str = "EdgeUsageJourney"
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+        efootprint_class_str,
+        available_efootprint_classes=[EdgeUsageJourney],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=model_web
+    )
+
+    # Enforce constraint to only be able to select edge devices that are not already linked to another edge UJ.
+    edge_usage_journey_creation_data = form_sections[1]
+    for field in edge_usage_journey_creation_data["fields"]:
+        if field["attr_name"] == "edge_device":
+            selection_options = edge_devices_that_are_not_already_linked
+            selected = selection_options[0]
+            field.update({
+                "selected": selected.efootprint_id,
+                "options": [
+                    {"label": attr_value.name, "value": attr_value.efootprint_id} for attr_value in selection_options]
+            })
+            break
+
+    context_data = {"form_sections": form_sections,
+                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
+                    "object_type": efootprint_class_str,
+                    "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]["label"], }
+
+    http_response = render(request, f"model_builder/side_panels/add/add_panel__generic.html", context=context_data)
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
