@@ -198,4 +198,86 @@ describe('Test edge objects', () => {
         cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').should('have.value', updatedRam1);
         cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').should('have.value', storage1);
     });
+
+    it('Enforce single edge usage journey to edge device constraint', () => {
+        let firstEdgeDeviceName = "First Edge Device";
+        let secondEdgeDeviceName = "Second Edge Device";
+        let firstJourneyName = "First Edge Usage Journey";
+        let secondJourneyName = "Second Edge Usage Journey";
+        let edgeRam = "16";
+        let edgeCompute = "8";
+        let usageSpan = "2";
+
+        cy.visit("/");
+        cy.get('#btn-start-modeling-my-service').click();
+        cy.get('#model-canva').should('be.visible');
+
+        // Step 1: Try to add edge usage journey without any edge devices - should show error modal
+        cy.get('#btn-add-edge-usage-journey').click();
+        // Verify error modal appears
+        cy.get('#model-builder-modal').should("exist").should('be.visible');
+        cy.reload();
+        cy.get('#model-builder-modal').should('not.exist');
+
+        // Step 2: Create first edge device
+        cy.get('#btn-add-edge-device').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#EdgeDevice_name').type(firstEdgeDeviceName);
+        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
+        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify first edge device was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", firstEdgeDeviceName).should('exist');
+
+        // Step 3: Create first edge usage journey - should work now
+        cy.get('#btn-add-edge-usage-journey').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
+        cy.get('#EdgeUsageJourney_name').type(firstJourneyName);
+        cy.get('#EdgeUsageJourney_edge_device').select(firstEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify first edge usage journey was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", firstJourneyName).should('exist');
+
+        // Step 4: Try to create second edge usage journey - should show error modal since edge device is taken
+        cy.get('#btn-add-edge-usage-journey').click();
+        // Verify error modal appears
+        cy.get('#model-builder-modal').should("exist").should('be.visible');
+        cy.reload();
+        cy.get('#model-builder-modal').should('not.exist');
+
+        // Step 5: Create second edge device
+        cy.get('#btn-add-edge-device').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#EdgeDevice_name').type(secondEdgeDeviceName);
+        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
+        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify second edge device was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", secondEdgeDeviceName).should('exist');
+
+        // Step 6: Create second edge usage journey - should work and only show second edge device in select
+        cy.get('#btn-add-edge-usage-journey').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
+        cy.get('#EdgeUsageJourney_name').type(secondJourneyName);
+
+        // Verify that only the second edge device is available in the select
+        cy.get('#EdgeUsageJourney_edge_device option').should('have.length', 1);
+        cy.get('#EdgeUsageJourney_edge_device option').contains(firstEdgeDeviceName).should('not.exist');
+        cy.get('#EdgeUsageJourney_edge_device option').contains(secondEdgeDeviceName).should('exist');
+
+        cy.get('#EdgeUsageJourney_edge_device').select(secondEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify second edge usage journey was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", secondJourneyName).should('exist');
+    });
 });

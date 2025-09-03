@@ -11,7 +11,7 @@ from model_builder.addition.add_object_http_response_generators import add_new_o
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
     generate_object_with_storage_add_panel_http_response, generate_service_add_panel_http_response, \
     generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
-    generate_external_api_add_panel_http_response
+    generate_external_api_add_panel_http_response, generate_edge_usage_journey_add_panel_http_response
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error, render_exception_modal
 
@@ -29,26 +29,14 @@ def open_create_object_panel(request, object_type):
     elif object_type == "Service":
         http_response = generate_service_add_panel_http_response(request, model_web)
     elif object_type == "Job":
-        if len(model_web.servers) == 0:
-            exception = ValueError("Please go to the infrastructure section and create a server before adding a job")
-            return render_exception_modal(request, exception)
         http_response = generate_job_add_panel_http_response(request, model_web)
     elif object_type == "UsagePatternFromForm":
-        if len(model_web.usage_journeys) == 0:
-            error = PermissionError("You need to have created at least one usage journey to create a usage pattern.")
-            return render_exception_modal(request, error)
         http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
     elif object_type == "ExternalApi":
         http_response = generate_external_api_add_panel_http_response(request, model_web)
+    elif object_type == "EdgeUsageJourney":
+        http_response = generate_edge_usage_journey_add_panel_http_response(request, model_web)
     else:
-        if object_type == "EdgeUsageJourney":
-            edge_devices_that_are_not_already_linked = [edge_device for edge_device in model_web.edge_devices
-                                                        if edge_device.edge_usage_journey is None]
-            if len(edge_devices_that_are_not_already_linked) == 0:
-                error = PermissionError(
-                    "You need to have at least one edge device not already linked to an edge usage journey to create a "
-                    "new edge usage journey.")
-                return render_exception_modal(request, error)
         http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
 
     return http_response
