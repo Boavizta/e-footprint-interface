@@ -62,7 +62,7 @@ class TestModelingBase(TestCase):
         request.session["system_data"] = system_data
         request.session.save()
 
-    def change_system_data(new_system_data_path):
+    def change_system_data(self, new_system_data_path):
         old_system_data_path = self.system_data_path
         self.system_data_path = new_system_data_path
         self.setUp()
