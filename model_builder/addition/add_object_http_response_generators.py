@@ -1,6 +1,8 @@
 import json
 import math
+from typing import get_origin, List, get_args
 
+from django.http import QueryDict
 from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
@@ -9,6 +11,7 @@ from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 from efootprint.constants.units import u
+from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
@@ -19,44 +22,52 @@ from model_builder.object_creation_and_edition_utils import (
 
 @render_exception_modal_if_error
 def add_new_object(request, model_web: ModelWeb, object_type: str):
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_type)
+    object_creation_type = request.POST.get("type_object_available", object_type)
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_creation_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
-    response = render(
-        request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
-        {added_obj.template_name: added_obj})
+    object_to_link_to_id = request.POST.get("efootprint_id_of_parent_to_link_to", None)
 
-    response["HX-Trigger-After-Swap"] = json.dumps({
-        "resetLeaderLines": "",
-        "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
-        "displayToastAndHighlightObjects": {
-            "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
-    })
+    if object_to_link_to_id is None:
+        response = render(
+            request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
+            {added_obj.template_name: added_obj})
+
+        response["HX-Trigger-After-Swap"] = json.dumps({
+            "resetLeaderLines": "",
+            "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
+            "displayToastAndHighlightObjects": {
+                "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
+        })
+    else:
+        web_object_to_link_to = model_web.get_web_object_from_efootprint_id(object_to_link_to_id)
+        efootprint_object_to_link_to = web_object_to_link_to.modeling_obj
+        # Find the attr name for the list of objects to append the added object to in the efootprint_object_to_link_to
+        init_sig_params = get_init_signature_params(type(efootprint_object_to_link_to))
+        list_attr_name = None
+        for attr_name in init_sig_params:
+            annotation = init_sig_params[attr_name].annotation
+            if (get_origin(annotation) and get_origin(annotation) in (list, List)
+                and isinstance(new_efootprint_obj, get_args(annotation)[0])):
+                list_attr_name = attr_name
+                break
+        assert list_attr_name is not None, f"A list attr name should always be found"
+
+        mutable_post = QueryDict(mutable=True)
+        existing_element_ids = [elt.id for elt in getattr(efootprint_object_to_link_to, list_attr_name)]
+        existing_element_ids.append(added_obj.efootprint_id)
+        mutable_post[list_attr_name] = ";".join(existing_element_ids)
+
+        response_html = compute_edit_object_html_and_event_response(mutable_post, web_object_to_link_to)
+
+        toast_and_highlight_data = {
+            "ids": [mirrored_card.web_id for mirrored_card in added_obj.mirrored_cards], "name": added_obj.name,
+            "action_type": "add_new_object"
+        }
+
+        response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
     return response
-
-@render_exception_modal_if_error
-def add_new_usage_journey_step(request, model_web: ModelWeb):
-    usage_journey_efootprint_id = request.POST.get("efootprint_id_of_parent_to_link_to")
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, "UsageJourneyStep")
-    added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-    usage_journey_to_edit = model_web.get_web_object_from_efootprint_id(usage_journey_efootprint_id)
-    mutable_post = request.POST.copy()
-    mutable_post["name"] = usage_journey_to_edit.name
-    usage_journey_step_ids = [uj_step.efootprint_id for uj_step in usage_journey_to_edit.uj_steps]
-    usage_journey_step_ids.append(added_obj.efootprint_id)
-    mutable_post["uj_steps"] =  ";".join(usage_journey_step_ids)
-    request.POST = mutable_post
-
-    response_html = compute_edit_object_html_and_event_response(request.POST, usage_journey_to_edit)
-
-    # There will always be only one mirrored card for a newly created usage journey step
-    toast_and_highlight_data = {
-        "ids": [added_obj.mirrored_cards[0].web_id], "name": added_obj.name,
-        "action_type": "add_new_object"
-    }
-
-    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
 @render_exception_modal_if_error
 def add_new_object_with_storage(request, model_web: ModelWeb, storage_type: str):
@@ -136,31 +147,3 @@ def add_new_external_api(request, model_web):
     })
 
     return response
-
-@render_exception_modal_if_error
-def add_new_job(request, model_web: ModelWeb):
-    usage_journey_step_efootprint_id = request.POST.get("efootprint_id_of_parent_to_link_to")
-    usage_journey_step_to_edit = model_web.get_web_object_from_efootprint_id(usage_journey_step_efootprint_id)
-
-    new_efootprint_obj = create_efootprint_obj_from_post_data(
-        request.POST, model_web, request.POST.get("type_object_available"))
-
-    added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-
-    mutable_post = request.POST.copy()
-    mutable_post["name"] = usage_journey_step_to_edit.name
-    mutable_post["user_time_spent"] = usage_journey_step_to_edit.user_time_spent.magnitude
-    mutable_post["user_time_spent_unit"] = str(usage_journey_step_to_edit.user_time_spent.value.units)
-    job_ids = [job.efootprint_id for job in usage_journey_step_to_edit.jobs]
-    job_ids.append(added_obj.efootprint_id)
-    mutable_post["jobs"]= ";".join(job_ids)
-    request.POST = mutable_post
-
-    response_html = compute_edit_object_html_and_event_response(request.POST, usage_journey_step_to_edit)
-
-    toast_and_highlight_data = {
-        "ids": [mirrored_card.web_id for mirrored_card in added_obj.mirrored_cards], "name": added_obj.name,
-        "action_type": "add_new_object"
-    }
-
-    return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
