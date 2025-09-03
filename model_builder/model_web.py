@@ -12,7 +12,9 @@ from efootprint.abstract_modeling_classes.modeling_object import get_instance_at
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
+from efootprint.core.usage.edge_usage_pattern import EdgeUsagePattern
 from efootprint.core.usage.job import JobBase
+from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
@@ -172,6 +174,12 @@ class ModelWeb:
             self.response_objs[object_type] = {}
         self.response_objs[object_type][efootprint_object.id] = efootprint_object
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
+
+        if isinstance(efootprint_object, UsagePattern):
+            self.system.modeling_obj.usage_patterns.append(efootprint_object)
+        elif isinstance(efootprint_object, EdgeUsagePattern):
+            self.system.modeling_obj.edge_usage_patterns.append(efootprint_object)
+
         self.update_system_data_with_up_to_date_calculated_attributes()
 
         return wrap_efootprint_object(efootprint_object, self)
