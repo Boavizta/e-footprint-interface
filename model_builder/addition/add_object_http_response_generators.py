@@ -17,8 +17,9 @@ from model_builder.object_creation_and_edition_utils import (
     create_efootprint_obj_from_post_data, render_exception_modal_if_error)
 
 
-def add_new_journey(request, model_web: ModelWeb, journey_type: str):
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, journey_type)
+@render_exception_modal_if_error
+def add_new_object(request, model_web: ModelWeb, object_type: str):
+    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_type)
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
     response = render(
@@ -34,7 +35,7 @@ def add_new_journey(request, model_web: ModelWeb, journey_type: str):
 
     return response
 
-
+@render_exception_modal_if_error
 def add_new_usage_journey_step(request, model_web: ModelWeb):
     usage_journey_efootprint_id = request.POST.get("efootprint_id_of_parent_to_link_to")
     new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, "UsageJourneyStep")
@@ -57,7 +58,7 @@ def add_new_usage_journey_step(request, model_web: ModelWeb):
 
     return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
-
+@render_exception_modal_if_error
 def add_new_object_with_storage(request, model_web: ModelWeb, storage_type: str):
     storage_data = json.loads(request.POST.get("storage_form_data"))
 
@@ -80,7 +81,6 @@ def add_new_object_with_storage(request, model_web: ModelWeb, storage_type: str)
     })
 
     return response
-
 
 @render_exception_modal_if_error
 def add_new_service(request, model_web: ModelWeb):
@@ -164,21 +164,3 @@ def add_new_job(request, model_web: ModelWeb):
     }
 
     return generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
-
-
-def add_new_usage_pattern(request, model_web: ModelWeb):
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, "UsagePatternFromForm")
-    model_web.system.modeling_obj.usage_patterns.append(new_efootprint_obj)
-    added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-
-    response = render(
-        request, "model_builder/object_cards/usage_pattern_card.html", {"usage_pattern": added_obj})
-
-    response["HX-Trigger-After-Swap"] = json.dumps({
-        "resetLeaderLines": "",
-        "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
-        "displayToastAndHighlightObjects": {
-            "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
-    })
-
-    return response

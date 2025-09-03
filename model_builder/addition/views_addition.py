@@ -1,8 +1,8 @@
 from django.template.loader import render_to_string
 
-from model_builder.addition.add_object_http_response_generators import add_new_journey, \
+from model_builder.addition.add_object_http_response_generators import add_new_object, \
     add_new_usage_journey_step, \
-    add_new_object_with_storage, add_new_service, add_new_job, add_new_usage_pattern, add_new_external_api
+    add_new_object_with_storage, add_new_service, add_new_job,  add_new_external_api
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
     generate_server_add_panel_http_response, generate_service_add_panel_http_response, \
     generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
@@ -40,8 +40,8 @@ def add_object(request, object_type):
 
     if object_type == "UsageJourneyStep":
         http_response =  add_new_usage_journey_step(request, model_web)
-    elif object_type in ["UsageJourney", "EdgeUsageJourney"]:
-        http_response =  add_new_journey(request, model_web, object_type)
+    elif object_type in ["UsageJourney", "EdgeUsageJourney", "UsagePatternFromForm"]:
+        http_response =  add_new_object(request, model_web, object_type)
     elif object_type == "ServerBase":
         http_response = add_new_object_with_storage(request, model_web, storage_type="Storage")
     elif object_type == "EdgeDevice":
@@ -50,8 +50,6 @@ def add_object(request, object_type):
         http_response =  add_new_service(request, model_web)
     elif object_type == "Job":
         http_response =  add_new_job(request, model_web)
-    elif object_type == "UsagePatternFromForm":
-        http_response =  add_new_usage_pattern(request, model_web)
     elif object_type == "ExternalApi":
         http_response =  add_new_external_api(request, model_web)
 
