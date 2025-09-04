@@ -156,7 +156,6 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcess1Name).should('exist');
 
         // Step 4: Add second recurrent edge process
-        cy.getObjectButtonFromObjectTypeAndName("EdgeUsageJourney", edgeUsageJourneyName).click();
         cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", edgeUsageJourneyName).find('div[id^="add-edge-process-to"]').click();
         cy.get('#RecurrentEdgeProcessFromForm_name').type(recurrentProcess2Name);
         cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').clear().type(compute2);
@@ -279,5 +278,120 @@ describe('Test edge objects', () => {
 
         // Verify second edge usage journey was created
         cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", secondJourneyName).should('exist');
+    });
+
+    it('Verify recurrent edge process mirroring logic works correctly', () => {
+        let firstEdgeDeviceName = "First Mirror Edge Device";
+        let secondEdgeDeviceName = "Second Mirror Edge Device";
+        let firstJourneyName = "First Mirror Edge Usage Journey";
+        let secondJourneyName = "Second Mirror Edge Usage Journey";
+        let recurrentProcessName = "Mirrored Recurrent Process";
+        let updatedProcessName = "Updated Mirrored Process";
+        let edgeRam = "16";
+        let edgeCompute = "8";
+        let usageSpan = "3";
+        let processCompute = "2.0";
+        let processRam = "3.0";
+        let processStorage = "50";
+
+        cy.visit("/");
+        cy.get('#btn-start-modeling-my-service').click();
+        cy.get("#btn-reboot-modeling").click();
+        cy.get('#model-canva').should('be.visible');
+
+        // Step 1: Create first edge device
+        cy.get('#btn-add-edge-device').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#EdgeDevice_name').type(firstEdgeDeviceName);
+        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
+        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify first edge device was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", firstEdgeDeviceName).should('exist');
+
+        // Step 2: Create first edge usage journey
+        cy.get('#btn-add-edge-usage-journey').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
+        cy.get('#EdgeUsageJourney_name').type(firstJourneyName);
+        cy.get('#EdgeUsageJourney_edge_device').select(firstEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify first edge usage journey was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", firstJourneyName).should('exist');
+
+        // Step 3: Add recurrent edge process to first journey
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", firstJourneyName).find('div[id^="add-edge-process-to"]').click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#RecurrentEdgeProcessFromForm_name').type(recurrentProcessName);
+        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').clear().type(processCompute);
+        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').clear().type(processRam);
+        cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').clear().type(processStorage);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify recurrent edge process was created
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcessName).should('exist');
+
+        // Step 4: Create second edge device
+        cy.get('#btn-add-edge-device').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#EdgeDevice_name').type(secondEdgeDeviceName);
+        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
+        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify second edge device was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", secondEdgeDeviceName).should('exist');
+
+        // Step 5: Create second edge usage journey linked to the first recurrent edge process
+        cy.get('#btn-add-edge-usage-journey').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
+        cy.get('#EdgeUsageJourney_name').type(secondJourneyName);
+        cy.get('#EdgeUsageJourney_edge_device').select(secondEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
+        // Link to the existing recurrent edge process using select_multiple
+        cy.get('#select-new-object-EdgeUsageJourney_edge_processes').select(recurrentProcessName);
+        cy.get('#add-btn-EdgeUsageJourney_edge_processes').click();
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify second edge usage journey was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", secondJourneyName).should('exist');
+
+        // Step 6: Verify both edge usage journeys have recurrent edge process cards with the same name
+        // Check first edge usage journey card contains the recurrent process
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", firstJourneyName).within(() => {
+            cy.contains(recurrentProcessName).should('exist');
+        });
+
+        // Check second edge usage journey card contains the recurrent process
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", secondJourneyName).within(() => {
+            cy.contains(recurrentProcessName).should('exist');
+        });
+
+        // Step 7: Edit the name of one recurrent edge process and verify mirroring
+        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcessName).click();
+        cy.get('#RecurrentEdgeProcessFromForm_name').should('have.value', recurrentProcessName);
+        cy.get('#RecurrentEdgeProcessFromForm_name').clear().type(updatedProcessName);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Step 8: Verify both edge usage journeys now show the updated process name in their cards
+        // Check first edge usage journey card shows updated name
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", firstJourneyName).within(() => {
+            cy.contains(updatedProcessName).should('exist');
+            cy.contains(recurrentProcessName).should('not.exist');
+        });
+
+        // Check second edge usage journey card shows updated name
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", secondJourneyName).within(() => {
+            cy.contains(updatedProcessName).should('exist');
+            cy.contains(recurrentProcessName).should('not.exist');
+        });
     });
 });
