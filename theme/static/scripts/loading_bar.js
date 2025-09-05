@@ -7,7 +7,6 @@ document.addEventListener("htmx:beforeRequest", function() {
 
 document.addEventListener("htmx:afterRequest", function() {
     hideLoadingBar();
-    updateLines();
 });
 
 function hideLoadingBar() {
