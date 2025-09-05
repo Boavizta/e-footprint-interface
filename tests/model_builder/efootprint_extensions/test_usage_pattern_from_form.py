@@ -56,7 +56,7 @@ class TestUsagePatternFromForm(unittest.TestCase):
         """Check that the newly introduced attributes are in calculated_attributes."""
         attrs = self.usage_pattern.calculated_attributes
         # "first_daily_usage_journey_volume", "daily_growth_rate", "hourly_usage_journey_starts" + parent's
-        self.assertIn("first_daily_usage_journey_volume", attrs)
+        self.assertIn("first_daily_volume", attrs)
         self.assertIn("daily_growth_rate", attrs)
         self.assertIn("hourly_usage_journey_starts", attrs)
         # Also check one of the parent's attributes:
@@ -87,20 +87,20 @@ class TestUsagePatternFromForm(unittest.TestCase):
         expected = 1.00878
         self.assertAlmostEqual(daily_rate, expected, places=5)
 
-    def test_update_first_daily_usage_journey_volume_monthly_no_growth_rate(self):
+    def test_update_first_daily_volume_monthly_no_growth_rate(self):
         """
         If initial usage is 1000 journeys per 'monthly' timespan and there is no growth,
         we should see (approximately) 1000 / (1 month in days) journeys per day.
         Pint usually interprets 1 * month as ~30.437 days, so we check accordingly.
         """
         self.usage_pattern.daily_growth_rate = SourceValue(1 * u.dimensionless)
-        self.usage_pattern.update_first_daily_usage_journey_volume()
-        val_per_day = self.usage_pattern.first_daily_usage_journey_volume.to(u.dimensionless).magnitude
+        self.usage_pattern.update_first_daily_volume()
+        val_per_day = self.usage_pattern.first_daily_volume.to(u.dimensionless).magnitude
 
         # 1 month ~ 30 days => 1000 / 30 ~ 33.33 journeys/day
         self.assertAlmostEqual(val_per_day, 1000.0 / 30, places=2)
 
-    def test_update_first_daily_usage_journey_volume_yearly_no_growth_rate(self):
+    def test_update_first_daily_volume_yearly_no_growth_rate(self):
         """
         If initial usage is 1000 journeys per 'yearly' timespan and there is no growth,
         we should see 1000 / (1 year in days) journeys per day.
@@ -108,15 +108,15 @@ class TestUsagePatternFromForm(unittest.TestCase):
         # We'll switch to "year" to check
         self.usage_pattern.initial_usage_journey_volume_timespan = SourceObject("year")
         self.usage_pattern.daily_growth_rate = SourceValue(1 * u.dimensionless)
-        self.usage_pattern.update_first_daily_usage_journey_volume()
+        self.usage_pattern.update_first_daily_volume()
 
-        val_per_day = self.usage_pattern.first_daily_usage_journey_volume.to(u.dimensionless).magnitude
+        val_per_day = self.usage_pattern.first_daily_volume.to(u.dimensionless).magnitude
         self.assertAlmostEqual(val_per_day, 1000.0 / 365, places=3)
 
     def test_sum_over_first_month_is_very_close_to_initial_usage_journey_volume_input(self):
         self.usage_pattern.net_growth_rate_timespan = SourceObject("month")
         self.usage_pattern.update_daily_growth_rate()
-        self.usage_pattern.update_first_daily_usage_journey_volume()
+        self.usage_pattern.update_first_daily_volume()
         self.usage_pattern.update_modeling_duration()
         self.usage_pattern.update_local_timezone_start_date()
         self.usage_pattern.update_hourly_usage_journey_starts()
@@ -153,7 +153,7 @@ class TestUsagePatternFromForm(unittest.TestCase):
         # Set an initial volume of 240 journeys per day
         self.usage_pattern.initial_usage_journey_volume = SourceValue(240.0 * u.dimensionless)
         self.usage_pattern.initial_usage_journey_volume_timespan = SourceObject("day")
-        self.usage_pattern.update_first_daily_usage_journey_volume()
+        self.usage_pattern.update_first_daily_volume()
 
         # We only want a 2-day modeling duration => 48 hours
         self.usage_pattern.modeling_duration = SourceValue(2.0 * u.day)
@@ -180,7 +180,7 @@ class TestUsagePatternFromForm(unittest.TestCase):
         """
         self.usage_pattern.initial_usage_journey_volume_timespan = SourceObject("day")
         self.usage_pattern.initial_usage_journey_volume = SourceValue(200.0 * u.dimensionless)
-        self.usage_pattern.update_first_daily_usage_journey_volume()
+        self.usage_pattern.update_first_daily_volume()
 
         # Let’s say net_growth_rate is 20% for 'yearly' => daily growth = 1.0005
         self.usage_pattern.net_growth_rate_in_percentage = SourceValue(20 * u.dimensionless)
@@ -207,7 +207,7 @@ class TestUsagePatternFromForm(unittest.TestCase):
 
     def test_variations_on_inputs_update_computations(self):
         self.usage_pattern.update_daily_growth_rate()
-        self.usage_pattern.update_first_daily_usage_journey_volume()
+        self.usage_pattern.update_first_daily_volume()
         self.usage_pattern.update_modeling_duration()
         self.usage_pattern.update_local_timezone_start_date()
         self.usage_pattern.update_hourly_usage_journey_starts()
@@ -239,43 +239,44 @@ class TestUsagePatternFromForm(unittest.TestCase):
             'country': 'FR-id',
             'devices': ['device-id', 'device-id2'],
             'modeling_duration_value': {
-                'label': 'test_usage_pattern_from_form modeling duration value from e-footprint hypothesis',
+                'label': 'modeling duration value from e-footprint hypothesis',
                 'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'unit': 'dimensionless',
                 'value': 2.0},
             "modeling_duration_unit": {
-                "label": "test_usage_pattern_from_form modeling duration unit from e-footprint hypothesis",
+                "label": "modeling duration unit from e-footprint hypothesis",
                 "source": {"link": None, "name": "e-footprint hypothesis"},
                 "value": "month"
             },
             'net_growth_rate_in_percentage': {
-                'label': 'test_usage_pattern_from_form net growth rate in percentage from e-footprint hypothesis',
+                'label': 'net growth rate in percentage from e-footprint hypothesis',
                 'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'unit': 'dimensionless',
                 'value': 20},
             'net_growth_rate_timespan': {
-                'label': 'test_usage_pattern_from_form net growth rate timespan from e-footprint hypothesis',
+                'label': 'net growth rate timespan from e-footprint hypothesis',
                 'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'value': 'year'},
             "initial_usage_journey_volume": {
-                "label": "test_usage_pattern_from_form initial usage journey volume from e-footprint hypothesis",
+                "label": "initial usage journey volume from e-footprint hypothesis",
                 "source": {"link": None, "name": "e-footprint hypothesis"},
                 "unit": "dimensionless",
                 "value": 1000.0
             },
             "initial_usage_journey_volume_timespan": {
-                "label": "test_usage_pattern_from_form initial usage journey volume timespan from e-footprint hypothesis",
+                "label": "initial usage journey volume timespan from e-footprint hypothesis",
                 "source": {"link": None, "name": "e-footprint hypothesis"},
                 "value": "month"
             },
             'network': 'network-id',
             'start_date': {
-                'label': 'test_usage_pattern_from_form start date from e-footprint hypothesis',
+                'label': 'start date from e-footprint hypothesis',
                 'source': {'link': None, 'name': 'e-footprint hypothesis'},
                 'value': '2025-01-01'},
             'usage_journey': 'usage-journey-id'}
         result_json = self.usage_pattern.to_json()
         result_json.pop("id")
+        self.maxDiff = None
         self.assertDictEqual(expected_json_without_id, result_json)
 
 
