@@ -50,9 +50,14 @@
     <script src="{% static 'scripts/calculated_attributes_timeseries.js' %}"></script>
     <script>
         window.initModelBuilderMain = initModelBuilderMain;
+        window.removeAllLines = removeAllLines;
 
         document.body.addEventListener('initModelBuilderMain', function (event) {
            window.initModelBuilderMain();
+        });
+
+        document.body.addEventListener('removeAllLines', function (event) {
+           window.removeAllLines();
         });
 
         window.addEventListener("load", function () {

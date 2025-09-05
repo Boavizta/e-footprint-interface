@@ -166,6 +166,9 @@ function initLeaderLines() {
     const scrollContainer = document.querySelector('#model-canva');
     scrollContainer.addEventListener('scroll', updateLines);
     updateLines();
+    document.addEventListener("htmx:afterSettle", function() {
+        updateLines();
+    });
     setLeaderLineListeners();
 }
 

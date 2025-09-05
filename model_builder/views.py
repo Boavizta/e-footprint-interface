@@ -57,6 +57,9 @@ def model_builder_main(request, reboot=False):
         request, "model_builder/model_builder_main.html", context={"model_web": model_web})
 
     if request.headers.get("HX-Request") == "true":
+        # Lines updates are triggered at the after settle element, so might be triggered before initModelBuilderMain
+        # and cause an error, unless we remove all lines before.
+        http_response["HX-Trigger"] = "removeAllLines"
         http_response["HX-Trigger-After-Settle"] = "initModelBuilderMain"
 
     return http_response
