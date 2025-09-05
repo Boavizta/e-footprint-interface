@@ -5,7 +5,6 @@ function openSidePanel() {
     let sidePanel = document.getElementById("sidePanel");
     let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");
     sidePanel.classList.remove("d-none");
-    updateLines();
     let btn = document.getElementById("btn-open-panel-result");
     if (!btn.classList.contains("result-width")) {
         btn.classList.remove("w-100");
@@ -14,7 +13,6 @@ function openSidePanel() {
     modelCanvaScrollableArea.classList.remove("w-100");
     modelCanvaScrollableArea.classList.add("side-panel-open");
     hideEditIcons();
-    updateLines();
 
     let scrollTarget = document.getElementById("sidePanelTitle");
     sidePanel.scrollTo({
