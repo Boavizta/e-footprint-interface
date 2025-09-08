@@ -26,7 +26,7 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
     context_data = {"form_sections": form_sections,
                     "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
                     "object_type": efootprint_class_str,
-                    "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]["label"],}
+                    "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str],}
     if request.GET.get("efootprint_id_of_parent_to_link_to"):
         context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 
@@ -217,17 +217,14 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
         model_web=model_web
     )
 
-    dynamic_select_options = {
-        str(conditional_value): [str(possible_value) for possible_value in possible_values]
-        for conditional_value, possible_values in
-        UsagePatternFromForm.conditional_list_values["net_growth_rate_timespan"]["conditional_list_values"].items()
-    }
+    # Turn dynamic list into dynamic select for conditional values
+    dynamic_list_options = dynamic_form_data["dynamic_lists"][0]["List_value"]
     dynamic_select = {
         "input_id": "net_growth_rate_timespan",
         "filter_by": "initial_usage_journey_volume_timespan",
         "list_value": {
             key: [{"label": {"day": "Daily", "month": "Monthly", "year": "Yearly"}[elt], "value": elt} for elt in value]
-            for key, value in dynamic_select_options.items()
+            for key, value in dynamic_list_options.items()
         }
     }
     usage_pattern_input_values = deepcopy(UsagePatternFromForm.default_values)
@@ -238,7 +235,7 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             "usage_pattern_input_values": usage_pattern_input_values,
             "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
             "header_name": "Add new usage pattern",
-            "obj_type": "Usage pattern",
+            "object_type": "UsagePatternFromForm",
             "obj_label": FORM_TYPE_OBJECT["UsagePatternFromForm"]["label"],
         })
 
