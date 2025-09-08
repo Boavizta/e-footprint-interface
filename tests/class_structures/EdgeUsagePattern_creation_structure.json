@@ -1,0 +1,192 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Edge usage pattern selection",
+        "fields": [
+            {
+                "input_type": "select-object",
+                "web_id": "type_object_available",
+                "label": "Available edge usage patterns",
+                "options": [
+                    {
+                        "label": "Edge usage pattern",
+                        "value": "EdgeUsagePatternFromForm"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "EdgeUsagePatternFromForm",
+        "header": "Edge usage pattern creation",
+        "fields": [
+            {
+                "web_id": "EdgeUsagePatternFromForm_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Edge usage pattern 1"
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_edge_usage_journey",
+                "attr_name": "edge_usage_journey",
+                "label": "edge usage journey",
+                "tooltip": false,
+                "input_type": "select-object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_country",
+                "attr_name": "country",
+                "label": "country",
+                "tooltip": false,
+                "input_type": "select-object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_start_date",
+                "attr_name": "start_date",
+                "label": "start date",
+                "tooltip": false,
+                "default": "2025-01-01",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "str"
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_modeling_duration_value",
+                "attr_name": "modeling_duration_value",
+                "label": "modeling duration value",
+                "tooltip": false,
+                "default": 3,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_modeling_duration_unit",
+                "attr_name": "modeling_duration_unit",
+                "label": "modeling duration unit",
+                "tooltip": false,
+                "default": "year",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select-str-input",
+                "selected": "year",
+                "options": [
+                    {
+                        "label": "month",
+                        "value": "month"
+                    },
+                    {
+                        "label": "year",
+                        "value": "year"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_initial_edge_usage_journey_volume_timespan",
+                "attr_name": "initial_edge_usage_journey_volume_timespan",
+                "label": "initial edge usage journey volume timespan",
+                "tooltip": false,
+                "default": "month",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select-str-input",
+                "selected": "month",
+                "options": [
+                    {
+                        "label": "day",
+                        "value": "day"
+                    },
+                    {
+                        "label": "month",
+                        "value": "month"
+                    },
+                    {
+                        "label": "year",
+                        "value": "year"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_net_growth_rate_in_percentage",
+                "attr_name": "net_growth_rate_in_percentage",
+                "label": "net growth rate in percentage",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "EdgeUsagePatternFromForm_net_growth_rate_timespan",
+                "attr_name": "net_growth_rate_timespan",
+                "label": "net growth rate timespan",
+                "tooltip": false,
+                "default": "year",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "datalist",
+                "selected": "year",
+                "options": null
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "EdgeUsagePatternFromForm_initial_edge_usage_journey_volume",
+                "attr_name": "initial_edge_usage_journey_volume",
+                "label": "initial edge usage journey volume",
+                "tooltip": false,
+                "default": 10000,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ]
+    }
+]

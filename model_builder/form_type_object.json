@@ -52,6 +52,10 @@
         "label": "Edge usage pattern",
         "type_object_available": "Available edge usage patterns"
     },
+    "EdgeUsagePatternFromForm": {
+        "label": "Edge usage pattern",
+        "type_object_available": "Available edge usage patterns"
+    },
     "UsageJourneyStep": {
         "label": "Usage journey step",
         "type_object_available": "Available usage journey steps"

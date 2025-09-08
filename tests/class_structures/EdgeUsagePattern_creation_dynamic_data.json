@@ -1,0 +1,25 @@
+{
+    "switch_item": "type_object_available",
+    "switch_values": [
+        "EdgeUsagePatternFromForm"
+    ],
+    "dynamic_lists": [
+        {
+            "input_id": "EdgeUsagePatternFromForm_net_growth_rate_timespan",
+            "filter_by": "EdgeUsagePatternFromForm_initial_edge_usage_journey_volume_timespan",
+            "list_value": {
+                "day": [
+                    "month",
+                    "year"
+                ],
+                "month": [
+                    "month",
+                    "year"
+                ],
+                "year": [
+                    "year"
+                ]
+            }
+        }
+    ]
+}

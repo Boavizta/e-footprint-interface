@@ -19,6 +19,8 @@ from efootprint.core.usage.job import Job
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
+from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
+
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -35,7 +37,8 @@ obj_creation_structure_dict = {
     "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
     "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
-    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeDevice": [EdgeDevice]}
+    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeDevice": [EdgeDevice],
+    "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 
