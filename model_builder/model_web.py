@@ -33,23 +33,23 @@ MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_
 model_web_root = os.path.dirname(os.path.abspath(__file__))
 ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
 
-with open(os.path.join(model_web_root, "form_fields_reference.json"), "r") as f:
+with open(os.path.join(model_web_root, "reference_data/form_fields_reference.json"), "r") as f:
     FORM_FIELD_REFERENCES = json.load(f)
 
-with open(os.path.join(model_web_root, "form_type_object.json"), "r") as f:
+with open(os.path.join(model_web_root, "reference_data/form_type_object.json"), "r") as f:
     FORM_TYPE_OBJECT = json.load(f)
 
 
 def default_networks():
-    with open(os.path.join(model_web_root, "default_networks.json"), "r") as f:
+    with open(os.path.join(model_web_root, "reference_data/default_networks.json"), "r") as f:
         return json.load(f)
 
 def default_devices():
-    with open(os.path.join(model_web_root, "default_devices.json"), "r") as f:
+    with open(os.path.join(model_web_root, "reference_data/default_devices.json"), "r") as f:
         return json.load(f)
 
 def default_countries():
-    with open(os.path.join(model_web_root, "default_countries.json"), "r") as f:
+    with open(os.path.join(model_web_root, "reference_data/default_countries.json"), "r") as f:
         return json.load(f)
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {

@@ -143,7 +143,7 @@ class TestViewsAdditionWeb(TestModelingBase):
 
     def test_delete_uj_step_from_default_uj_then_link_usage_pattern_to_it(self):
         os.environ["RAISE_EXCEPTIONS"] = "True"
-        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"))
+        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "reference_data", "default_system_data.json"))
 
         # Delete usage journey step
         uj_step_id = next(iter(self.system_data["UsageJourneyStep"].keys()))
@@ -173,7 +173,7 @@ class TestViewsAdditionWeb(TestModelingBase):
 
     def test_add_server_then_ai_model_then_job(self):
         os.environ["RAISE_EXCEPTIONS"] = "True"
-        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"))
+        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "reference_data", "default_system_data.json"))
 
         # Create GPU server
         logger.info("Adding a new server")
@@ -201,7 +201,7 @@ class TestViewsAdditionWeb(TestModelingBase):
         self.assert_response_ok(response)
 
     def test_add_up_to_default_system_then_delete_it_then_add_server(self):
-        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "default_system_data.json"))
+        self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "reference_data", "default_system_data.json"))
         uj_id = next(iter(self.system_data["UsageJourney"].keys()))
         os.environ["RAISE_EXCEPTIONS"] = "True"
 

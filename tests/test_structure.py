@@ -125,11 +125,11 @@ class TestsClassStructure(TestCase):
         hardware_archetypes = create_object_dict_while_normalizing_ids(default_efootprint_hardwares)
         countries = create_object_dict_while_normalizing_ids(EFOOTPRINT_COUNTRIES)
 
-        with open(os.path.join(model_web_root, "default_networks.json"), "r") as f:
+        with open(os.path.join(model_web_root, "reference_data", "default_networks.json"), "r") as f:
             default_networks = json.load(f)
-        with open(os.path.join(model_web_root, "default_devices.json"), "r") as f:
+        with open(os.path.join(model_web_root, "reference_data", "default_devices.json"), "r") as f:
             default_devices = json.load(f)
-        with open(os.path.join(model_web_root, "default_countries.json"), "r") as f:
+        with open(os.path.join(model_web_root, "reference_data", "default_countries.json"), "r") as f:
             default_countries = json.load(f)
 
         def remove_ids_from_str(json_str):

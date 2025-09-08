@@ -115,6 +115,21 @@
                 ]
             },
             {
+                "web_id": "EdgeUsagePatternFromForm_initial_edge_usage_journey_volume",
+                "attr_name": "initial_edge_usage_journey_volume",
+                "label": "initial edge usage journey volume",
+                "tooltip": false,
+                "default": 10000,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
                 "web_id": "EdgeUsagePatternFromForm_initial_edge_usage_journey_volume_timespan",
                 "attr_name": "initial_edge_usage_journey_volume_timespan",
                 "label": "initial edge usage journey volume timespan",
@@ -171,22 +186,6 @@
                 "options": null
             }
         ],
-        "advanced_fields": [
-            {
-                "web_id": "EdgeUsagePatternFromForm_initial_edge_usage_journey_volume",
-                "attr_name": "initial_edge_usage_journey_volume",
-                "label": "initial edge usage journey volume",
-                "tooltip": false,
-                "default": 10000,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "",
-                "can_be_negative": false,
-                "step": 1
-            }
-        ]
+        "advanced_fields": []
     }
 ]

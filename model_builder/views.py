@@ -31,7 +31,7 @@ def model_builder_main(request, reboot=False):
     if reboot and reboot != "reboot":
         raise ValueError("reboot must be False or 'reboot'")
     if reboot == "reboot":
-        with open(os.path.join("model_builder", "default_system_data.json"), "r") as file:
+        with open(os.path.join("model_builder", "reference_data", "default_system_data.json"), "r") as file:
             system_data = json.load(file)
         request.session["system_data"] = system_data
         model_web = ModelWeb(request.session)
