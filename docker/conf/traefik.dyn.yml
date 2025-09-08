@@ -1,0 +1,25 @@
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.boavizta.dev`) || Host(`traefik`)"
+      service: "api@internal"
+      tls:
+        domains:
+          - main: "boavizta.dev"
+            sans:
+              - "*.boavizta.dev"
+          - main: "services.boavizta.dev"
+            sans:
+              - "*.services.boavizta.dev"
+
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/certs/local-cert.pem"
+        keyFile: "/etc/certs/local-key.pem"
+  certificates:
+    - certFile: "/etc/certs/local-cert.pem"
+      keyFile: "/etc/certs/local-key.pem"
+      stores:
+        - default

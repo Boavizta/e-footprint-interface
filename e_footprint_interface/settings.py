@@ -36,7 +36,7 @@ elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
     name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
     payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
     env.read_env(io.StringIO(payload))
-else:
+elif os.getenv('DJANGO_CLEVER_CLOUD') != 'True':
     raise Exception("No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.")
 
 ALLOWED_HOSTS = []
@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "theme",
     "django_browser_reload",
     'django_bootstrap5',
+    "django_redis",
 ]
 
 INTERNAL_IPS = [
@@ -191,6 +192,54 @@ if os.getenv('DJANGO_PROD') == 'True':
 
     # [END gaestd_py_django_database_config]
     # [END db_setup]
+
+# Local Docker
+if os.getenv('DJANGO_DOCKER') == 'True':
+    ALLOWED_HOSTS = ["efootprint.boavizta.dev", "*.boavizta.dev"]
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://redis:6379/0',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default' # cache alias name
+    CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.dev"]
+
+
+# Production & Dev Clever Cloud
+if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
+    # Misc
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_PRELOAD = True
+    SECRET_KEY = os.getenv("SECRET_KEY")
+
+    # SECURITY WARNING: don't run with debug turned on in production!
+    # Change this to "False" when you are ready for production
+    DEBUG = False
+
+    # Hosts config
+    ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
+
+    # Cache config
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': os.getenv('CACHE_URL'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+    CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 CSP_FRAME_ANCESTORS = ["'self'"]
