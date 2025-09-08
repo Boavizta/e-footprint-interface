@@ -26,7 +26,8 @@
             "RecurrentEdgeProcess",
             "Network",
             "System",
-            "RecurrentEdgeProcessFromForm"
+            "RecurrentEdgeProcessFromForm",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "name"
     },
@@ -296,7 +297,8 @@
         "modeling_obj_containers": [
             "UsagePattern",
             "UsagePatternFromForm",
-            "EdgeUsagePattern"
+            "EdgeUsagePattern",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "country"
     },
@@ -309,19 +311,22 @@
     },
     "start_date": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePatternFromForm",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "start date"
     },
     "modeling_duration_value": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePatternFromForm",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "modeling duration value"
     },
     "modeling_duration_unit": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePatternFromForm",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "modeling duration unit"
     },
@@ -339,13 +344,15 @@
     },
     "net_growth_rate_in_percentage": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePatternFromForm",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "net growth rate in percentage"
     },
     "net_growth_rate_timespan": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePatternFromForm",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "net growth rate timespan"
     },
@@ -646,7 +653,8 @@
     },
     "edge_usage_journey": {
         "modeling_obj_containers": [
-            "EdgeUsagePattern"
+            "EdgeUsagePattern",
+            "EdgeUsagePatternFromForm"
         ],
         "label": "edge usage journey"
     },
@@ -706,5 +714,19 @@
         ],
         "label": "constant storage needed",
         "step": 1
+    },
+    "initial_edge_usage_journey_volume": {
+        "modeling_obj_containers": [
+            "EdgeUsagePatternFromForm"
+        ],
+        "label": "initial edge usage journey volume",
+        "is_advanced_parameter": true,
+        "step": 1
+    },
+    "initial_edge_usage_journey_volume_timespan": {
+        "modeling_obj_containers": [
+            "EdgeUsagePatternFromForm"
+        ],
+        "label": "initial edge usage journey volume timespan"
     }
 }
