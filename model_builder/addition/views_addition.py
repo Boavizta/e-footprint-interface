@@ -12,8 +12,8 @@ from model_builder.addition.add_panel_http_response_generators import generate_g
     generate_object_with_storage_add_panel_http_response, generate_service_add_panel_http_response, \
     generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
     generate_external_api_add_panel_http_response, generate_edge_usage_journey_add_panel_http_response
-from model_builder.model_web import ModelWeb
-from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error, render_exception_modal
+from model_builder.web_core.model_web import ModelWeb
+from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
 
 def open_create_object_panel(request, object_type):

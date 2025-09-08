@@ -99,7 +99,7 @@ class TestViewsAdditionEdge(TestModelingBase):
 
     def test_model_web_edge_usage_journeys_property(self):
         """Test that ModelWeb.edge_usage_journeys property works correctly"""
-        from model_builder.model_web import ModelWeb
+        from model_builder.web_core.model_web import ModelWeb
 
         edge_device_data = self.create_edge_device_data("Test Edge Device")
         edge_device_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)

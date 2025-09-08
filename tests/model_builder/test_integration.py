@@ -6,7 +6,7 @@ from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
 from model_builder.views import result_chart
-from model_builder.model_web import default_networks, default_devices, default_countries, ModelWeb
+from model_builder.web_core.model_web import default_networks, default_devices, default_countries, ModelWeb
 from model_builder.views_deletion import delete_object
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase

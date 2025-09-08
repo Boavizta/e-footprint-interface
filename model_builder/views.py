@@ -20,9 +20,10 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
-from model_builder.model_builder_utils import to_rounded_daily_values, reindex_array
-from model_builder.model_web import ModelWeb
-from model_builder.modeling_objects_web import ObjectLinkedToModelingObjWeb, ExplainableObjectWeb
+from model_builder.web_core.model_web_utils import to_rounded_daily_values, reindex_array
+from model_builder.web_core.model_web import ModelWeb
+from model_builder.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
+from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
 

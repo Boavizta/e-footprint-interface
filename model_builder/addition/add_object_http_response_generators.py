@@ -15,7 +15,7 @@ from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
-from model_builder.model_web import ModelWeb
+from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import (
     create_efootprint_obj_from_post_data, render_exception_modal_if_error)
 

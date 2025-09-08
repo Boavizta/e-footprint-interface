@@ -11,7 +11,7 @@ from django import setup
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 
-from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT, default_networks, default_devices, default_countries
+from model_builder.web_core.model_web import MODELING_OBJECT_CLASSES_DICT, default_networks, default_devices, default_countries
 from tests.test_constants import (
     USAGE_PATTERN_FORM_DATA, WEB_APPLICATION_FORM_DATA, WEB_APPLICATION_JOB_FORM_DATA,
     GPU_SERVER_FORM_DATA, HTTP_OK, HTTP_NO_CONTENT, EDGE_DEVICE_FORM_DATA

@@ -4,7 +4,7 @@ from copy import copy
 from django.http import QueryDict, HttpResponse
 from django.template.loader import render_to_string
 
-from model_builder.modeling_objects_web import ModelingObjectWeb
+from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
 from model_builder.object_creation_and_edition_utils import edit_object_in_system
 
 

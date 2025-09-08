@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock, Mock
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 
-from model_builder.modeling_objects_web import ExplainableObjectWeb
+from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 
 
 class TestExplainableObjectWebTestCase(unittest.TestCase):

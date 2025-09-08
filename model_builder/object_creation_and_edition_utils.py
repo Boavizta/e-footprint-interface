@@ -15,8 +15,8 @@ from efootprint.logger import logger
 from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.modeling_objects_web import ModelingObjectWeb
-from model_builder.model_web import ModelWeb
+from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
+from model_builder.web_core.model_web import ModelWeb
 from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
 
 

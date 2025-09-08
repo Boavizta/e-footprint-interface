@@ -19,7 +19,7 @@ from efootprint.constants.units import u
 from model_builder.addition.views_addition import add_object
 from model_builder.class_structure import generate_object_edition_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_web import ModelWeb
+from model_builder.web_core.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
 from model_builder.views_deletion import delete_object
 from tests import root_test_dir

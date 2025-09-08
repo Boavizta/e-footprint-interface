@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.modeling_objects_web import ModelingObjectWeb
+from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
 
 
 class StorageWeb(ModelingObjectWeb):

@@ -9,4 +9,4 @@ class ModelBuilderConfig(AppConfig):
 
     def ready(self):
         if os.getenv('DJANGO_PROD') == 'True':
-            from model_builder.model_web import MODELING_OBJECT_CLASSES_DICT
+            pass

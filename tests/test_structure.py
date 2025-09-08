@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
     FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
-from model_builder.model_web import model_web_root, ATTRIBUTES_TO_SKIP_IN_FORMS
-from model_builder.modeling_objects_web import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+from model_builder.web_core.model_web import model_builder_root, ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 
@@ -125,11 +125,11 @@ class TestsClassStructure(TestCase):
         hardware_archetypes = create_object_dict_while_normalizing_ids(default_efootprint_hardwares)
         countries = create_object_dict_while_normalizing_ids(EFOOTPRINT_COUNTRIES)
 
-        with open(os.path.join(model_web_root, "reference_data", "default_networks.json"), "r") as f:
+        with open(os.path.join(model_builder_root, "reference_data", "default_networks.json"), "r") as f:
             default_networks = json.load(f)
-        with open(os.path.join(model_web_root, "reference_data", "default_devices.json"), "r") as f:
+        with open(os.path.join(model_builder_root, "reference_data", "default_devices.json"), "r") as f:
             default_devices = json.load(f)
-        with open(os.path.join(model_web_root, "reference_data", "default_countries.json"), "r") as f:
+        with open(os.path.join(model_builder_root, "reference_data", "default_countries.json"), "r") as f:
             default_countries = json.load(f)
 
         def remove_ids_from_str(json_str):
@@ -180,5 +180,5 @@ if __name__ == "__main__":
             if efootprint_class.__name__ not in reformatted_form_fields[attr_name]["modeling_obj_containers"]:
                 reformatted_form_fields[attr_name]["modeling_obj_containers"].append(efootprint_class.__name__)
 
-    with open(os.path.join(model_web_root, "form_fields_reference.json"), "w") as f:
+    with open(os.path.join(model_builder_root, "form_fields_reference.json"), "w") as f:
         json.dump(reformatted_form_fields, f, indent=4)

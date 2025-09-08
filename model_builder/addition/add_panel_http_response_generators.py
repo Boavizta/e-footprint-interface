@@ -11,7 +11,7 @@ from efootprint.core.usage.job import Job, GPUJob
 from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
     FORM_TYPE_OBJECT
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_core.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 
 
