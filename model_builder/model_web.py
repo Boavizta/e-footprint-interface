@@ -18,6 +18,7 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
+from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.model_builder_utils import determine_global_time_bounds, to_rounded_daily_values, get_reindexed_array_from_dict
@@ -25,7 +26,7 @@ from model_builder.modeling_objects_web import wrap_efootprint_object, Explainab
 from utils import EFOOTPRINT_COUNTRIES
 
 
-_extension_classes = [UsagePatternFromForm, RecurrentEdgeProcessFromForm]
+_extension_classes = [UsagePatternFromForm, RecurrentEdgeProcessFromForm, EdgeUsagePatternFromForm]
 MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
                                 for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
 

@@ -2,7 +2,7 @@
 
 {% block add_form %}
     <form id="sidePanelForm" class="my-3"
-            hx-post="{% url 'add-new-object' 'UsagePatternFromForm' %}"
+            hx-post="{% url 'add-new-object' object_type %}"
             hx-target="#up-list"
             hx-swap="beforeend"
             hx-disabled-elt="button"

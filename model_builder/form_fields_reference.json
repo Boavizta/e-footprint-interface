@@ -720,7 +720,6 @@
             "EdgeUsagePatternFromForm"
         ],
         "label": "initial edge usage journey volume",
-        "is_advanced_parameter": true,
         "step": 1
     },
     "initial_edge_usage_journey_volume_timespan": {

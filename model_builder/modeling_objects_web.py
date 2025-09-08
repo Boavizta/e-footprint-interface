@@ -567,13 +567,18 @@ class UsagePatternWeb(ModelingObjectWeb):
         return self.usage_journey.web_id
 
     @property
-    def accordion_parent(self):
-        return None
+    def class_title_style(self):
+        return "h6"
 
     @property
-    def accordion_children(self):
-        # TODO: Add Device mix Network mix and Country mix
-        return []
+    def template_name(self):
+        return "usage_pattern"
+
+
+class EdgeUsagePatternWeb(ModelingObjectWeb):
+    @property
+    def links_to(self):
+        return self.edge_usage_journey.web_id
 
     @property
     def class_title_style(self):
@@ -591,6 +596,8 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "UsageJourney": UsageJourneyWeb,
     "UsagePattern": UsagePatternWeb,
     "UsagePatternFromForm": UsagePatternWeb,
+    "EdgeUsagePattern": EdgeUsagePatternWeb,
+    "EdgeUsagePatternFromForm": EdgeUsagePatternWeb,
     "Job": JobWeb,
     "GPUJob": JobWeb,
     "GenAIJob": JobWeb,
