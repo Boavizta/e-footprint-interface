@@ -1,0 +1,25 @@
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.sapient.dev`) || Host(`traefik`)"
+      service: "api@internal"
+      tls:
+        domains:
+          - main: "sapient.dev"
+            sans:
+              - "*.sapient.dev"
+          - main: "services.sapient.dev"
+            sans:
+              - "*.services.sapient.dev"
+
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/certs/local-cert.pem"
+        keyFile: "/etc/certs/local-key.pem"
+  certificates:
+    - certFile: "/etc/certs/local-cert.pem"
+      keyFile: "/etc/certs/local-key.pem"
+      stores:
+        - default

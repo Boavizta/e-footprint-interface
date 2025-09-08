@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "theme",
     "django_browser_reload",
     'django_bootstrap5',
+    "django_redis",
 ]
 
 INTERNAL_IPS = [
@@ -191,6 +192,23 @@ if os.getenv('DJANGO_PROD') == 'True':
 
     # [END gaestd_py_django_database_config]
     # [END db_setup]
+
+# Local Docker
+if os.getenv('DJANGO_DOCKER') == 'True':
+    ALLOWED_HOSTS = ["efootprint.sapient.dev", "*.sapient.dev"]
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://redis:6379/0',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default' # cache alias name
+    CSRF_TRUSTED_ORIGINS = ["https://*.sapient.dev"]
+
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 CSP_FRAME_ANCESTORS = ["'self'"]
