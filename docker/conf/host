@@ -1,0 +1,7 @@
+# Host config
+127.0.0.1	sapient.dev
+127.0.0.1	traefik.sapient.dev
+127.0.0.1	efootprint.sapient.dev
+
+# Docker Local Config
+127.0.0.1	redis
