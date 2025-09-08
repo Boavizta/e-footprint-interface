@@ -213,12 +213,12 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
         available_efootprint_classes=[UsagePatternFromForm],
         attributes_to_skip=["start_date", "modeling_duration_value", "modeling_duration_unit",
                             "initial_usage_journey_volume", "initial_usage_journey_volume_timespan",
-                            "net_growth_rate_in_percentage", "net_growth_rate_timespan"],
+                            "net_growth_rate_in_percentage"],
         model_web=model_web
     )
 
     # Turn dynamic list into dynamic select for conditional values
-    dynamic_list_options = dynamic_form_data["dynamic_lists"][0]["List_value"]
+    dynamic_list_options = dynamic_form_data["dynamic_lists"][0]["list_value"]
     dynamic_select = {
         "input_id": "net_growth_rate_timespan",
         "filter_by": "initial_usage_journey_volume_timespan",
