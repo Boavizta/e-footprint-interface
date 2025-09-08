@@ -11,6 +11,7 @@ from efootprint.core.usage.job import Job, GPUJob
 from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
     FORM_TYPE_OBJECT
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
+from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
 from model_builder.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import render_exception_modal
 
@@ -31,6 +32,57 @@ def generate_generic_add_panel_http_response(request, efootprint_class_str: str,
         context_data["efootprint_id_of_parent_to_link_to"] = request.GET["efootprint_id_of_parent_to_link_to"]
 
     http_response = render(request, f"model_builder/side_panels/add/add_panel__generic.html", context=context_data)
+
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+
+    return http_response
+
+
+def generate_edge_usage_pattern_add_panel_http_response(request, model_web: ModelWeb):
+    if len(model_web.edge_usage_journeys) == 0:
+        error = PermissionError("You need to have created at least one edge usage journey to create an edge usage pattern.")
+        return render_exception_modal(request, error)
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+        "EdgeUsagePatternFromForm",
+        available_efootprint_classes=[EdgeUsagePatternFromForm],
+        attributes_to_skip=["start_date", "modeling_duration_value", "modeling_duration_unit",
+                            "initial_edge_usage_journey_volume", "initial_edge_usage_journey_volume_timespan",
+                            "net_growth_rate_in_percentage", "net_growth_rate_timespan"],
+        model_web=model_web
+    )
+
+    dynamic_select_options = {
+        str(conditional_value): [str(possible_value) for possible_value in possible_values]
+        for conditional_value, possible_values in
+        EdgeUsagePatternFromForm.conditional_list_values["net_growth_rate_timespan"]["conditional_list_values"].items()
+    }
+    dynamic_select = {
+        "input_id": "net_growth_rate_timespan",
+        "filter_by": "initial_edge_usage_journey_volume_timespan",
+        "list_value": {
+            key: [{"label": {"day": "Daily", "month": "Monthly", "year": "Yearly"}[elt], "value": elt} for elt in value]
+            for key, value in dynamic_select_options.items()
+        }
+    }
+    edge_usage_pattern_input_values = deepcopy(EdgeUsagePatternFromForm.default_values)
+    edge_usage_pattern_input_values["initial_edge_usage_journey_volume"] = None
+    http_response = render(
+        request, "model_builder/side_panels/usage_pattern/usage_pattern_add.html", {
+            "form_fields": form_sections[1]["fields"],
+            "usage_pattern_input_values": edge_usage_pattern_input_values,
+            "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
+            "header_name": "Add new edge usage pattern",
+            "obj_type": "Edge usage pattern",
+            "obj_label": FORM_TYPE_OBJECT["EdgeUsagePatternFromForm"]["label"],
+            "object_type": "EdgeUsagePatternFromForm",
+            "pattern_attributes_header": "Edge usage pattern attributes",
+            "timeseries_header": "Build my edge usage volume projection",
+            "volume_field_name": "initial_edge_usage_journey_volume",
+            "volume_field_label": "Initial number of edge usage journeys",
+            "volume_field_value": edge_usage_pattern_input_values["initial_edge_usage_journey_volume"],
+            "timespan_field_name": "initial_edge_usage_journey_volume_timespan",
+            "timespan_field_value": edge_usage_pattern_input_values["initial_edge_usage_journey_volume_timespan"],
+        })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
@@ -240,6 +292,11 @@ def generate_usage_pattern_add_panel_http_response(request, model_web: ModelWeb)
             "header_name": "Add new usage pattern",
             "obj_type": "Usage pattern",
             "obj_label": FORM_TYPE_OBJECT["UsagePatternFromForm"]["label"],
+            "volume_field_name": "initial_usage_journey_volume",
+            "volume_field_label": "Initial number of usage journeys",
+            "volume_field_value": usage_pattern_input_values["initial_usage_journey_volume"],
+            "timespan_field_name": "initial_usage_journey_volume_timespan",
+            "timespan_field_value": usage_pattern_input_values["initial_usage_journey_volume_timespan"],
         })
 
     http_response["HX-Trigger-After-Swap"] = "initDynamicForm"

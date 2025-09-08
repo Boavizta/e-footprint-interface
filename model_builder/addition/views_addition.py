@@ -11,7 +11,8 @@ from model_builder.addition.add_object_http_response_generators import add_new_o
 from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
     generate_object_with_storage_add_panel_http_response, generate_service_add_panel_http_response, \
     generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
-    generate_external_api_add_panel_http_response, generate_edge_usage_journey_add_panel_http_response
+    generate_external_api_add_panel_http_response, generate_edge_usage_journey_add_panel_http_response, \
+    generate_edge_usage_pattern_add_panel_http_response
 from model_builder.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error, render_exception_modal
 
@@ -32,6 +33,8 @@ def open_create_object_panel(request, object_type):
         http_response = generate_job_add_panel_http_response(request, model_web)
     elif object_type == "UsagePatternFromForm":
         http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
+    elif object_type == "EdgeUsagePatternFromForm":
+        http_response = generate_edge_usage_pattern_add_panel_http_response(request, model_web)
     elif object_type == "ExternalApi":
         http_response = generate_external_api_add_panel_http_response(request, model_web)
     elif object_type == "EdgeUsageJourney":

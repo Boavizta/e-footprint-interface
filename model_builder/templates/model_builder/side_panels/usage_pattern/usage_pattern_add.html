@@ -2,17 +2,17 @@
 
 {% block add_form %}
     <form id="sidePanelForm" class="my-3"
-            hx-post="{% url 'add-new-object' 'UsagePatternFromForm' %}"
+            hx-post="{% url 'add-new-object' object_type|default:'UsagePatternFromForm' %}"
             hx-target="#up-list"
             hx-swap="beforeend"
             hx-disabled-elt="button"
             hx-on::after-request="closeAndEmptySidePanel()"
     >
-        <div class="accordion" id="accordionFormUsagePattern">
+        <div class="accordion" id="accordionForm{{ object_type|default:'UsagePattern' }}">
             <div class="accordion-item">
                 <h2 class="accordion-header accordion-header-panel">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-attribute-link-to-other-objet" aria-expanded="true" aria-controls="collapse-attribute-link-to-other-objet">
-                        Usage pattern attributes
+                        {{ pattern_attributes_header|default:"Usage pattern attributes" }}
                     </button>
                 </h2>
                 <div id="collapse-attribute-link-to-other-objet" class="accordion-collapse collapse show">
@@ -26,7 +26,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header accordion-header-panel">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-attribute-timeseries-attributes" aria-expanded="true" aria-controls="collapse-attribute-timeseries-attributes">
-                        Build my usage volume projection
+                        {{ timeseries_header|default:"Build my usage volume projection" }}
                     </button>
                 </h2>
                 <div id="collapse-attribute-timeseries-attributes" class="accordion-collapse collapse show">

@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from model_builder.class_structure import generate_object_edition_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
+from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
 from model_builder.model_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.modeling_objects_web import ModelingObjectWeb
 
@@ -39,7 +40,57 @@ def generate_usage_pattern_edit_panel_http_response(
             "object_to_edit_type": 'UsagePattern',
             "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
             "object_belongs_to_computable_system": object_belongs_to_computable_system,
-            "header_name": f"Edit {obj_to_edit.name}"
+            "header_name": f"Edit {obj_to_edit.name}",
+            "volume_field_name": "initial_usage_journey_volume",
+            "volume_field_label": "Initial number of usage journeys",
+            "volume_field_value": getattr(obj_to_edit, "initial_usage_journey_volume", None),
+            "timespan_field_name": "initial_usage_journey_volume_timespan",
+            "timespan_field_value": getattr(obj_to_edit, "initial_usage_journey_volume_timespan", None),
+        }
+    )
+
+    return http_response
+
+
+def generate_edge_usage_pattern_edit_panel_http_response(
+    request, obj_to_edit: ModelingObjectWeb, form_fields: dict, form_fields_advanced: dict,
+    object_belongs_to_computable_system: bool):
+    attributes_to_skip = [
+            "start_date", "modeling_duration_value", "modeling_duration_unit", "initial_edge_usage_journey_volume",
+            "initial_edge_usage_journey_volume_timespan", "net_growth_rate_in_percentage", "net_growth_rate_timespan"]
+    filtered_form_fields = [field for field in form_fields if field["attr_name"] not in attributes_to_skip]
+    filtered_form_fields_advanced = [field for field in form_fields_advanced if field["attr_name"] not in
+                                 attributes_to_skip]
+
+    dynamic_select_options = {
+        str(conditional_value): [str(possible_value) for possible_value in possible_values]
+        for conditional_value, possible_values in
+        EdgeUsagePatternFromForm.conditional_list_values["net_growth_rate_timespan"]["conditional_list_values"].items()
+    }
+    dynamic_select = {
+        "input_id": "net_growth_rate_timespan",
+        "filter_by": "initial_edge_usage_journey_volume_timespan",
+        "list_value": {
+            key: [{"label": {"day": "Daily", "month": "Monthly", "year": "Yearly"}[elt], "value": elt} for elt in value]
+            for key, value in dynamic_select_options.items()
+        }
+    }
+
+    http_response = render(
+        request, "model_builder/side_panels/usage_pattern/usage_pattern_edit.html",
+        {
+            "object_to_edit": obj_to_edit,
+            "form_fields": filtered_form_fields,
+            "form_fields_advanced": filtered_form_fields_advanced,
+            "object_to_edit_type": 'EdgeUsagePattern',
+            "dynamic_form_data": {"dynamic_selects": [dynamic_select]},
+            "object_belongs_to_computable_system": object_belongs_to_computable_system,
+            "header_name": f"Edit {obj_to_edit.name}",
+            "volume_field_name": "initial_edge_usage_journey_volume",
+            "volume_field_label": "Initial number of edge usage journeys",
+            "volume_field_value": getattr(obj_to_edit, "initial_edge_usage_journey_volume", None),
+            "timespan_field_name": "initial_edge_usage_journey_volume_timespan",
+            "timespan_field_value": getattr(obj_to_edit, "initial_edge_usage_journey_volume_timespan", None),
         }
     )
 
