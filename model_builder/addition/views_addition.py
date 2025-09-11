@@ -1,41 +1,18 @@
 from django.template.loader import render_to_string
-from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
-from efootprint.core.hardware.edge_device import EdgeDevice
-from efootprint.core.hardware.edge_storage import EdgeStorage
-from efootprint.core.hardware.gpu_server import GPUServer
-from efootprint.core.hardware.server import Server
-from efootprint.core.hardware.storage import Storage
 
 from model_builder.addition.add_object_http_response_generators import add_new_object, \
     add_new_object_with_storage, add_new_service, add_new_external_api
-from model_builder.addition.add_panel_http_response_generators import generate_generic_add_panel_http_response, \
-    generate_object_with_storage_add_panel_http_response, generate_service_add_panel_http_response, \
-    generate_job_add_panel_http_response, generate_usage_pattern_add_panel_http_response, \
-    generate_external_api_add_panel_http_response, generate_edge_usage_journey_add_panel_http_response
+from model_builder.addition.add_panel_http_response_generators import (generate_generic_add_panel_http_response,
+    generate_external_api_add_panel_http_response)
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
 
+@render_exception_modal_if_error
 def open_create_object_panel(request, object_type):
     model_web = ModelWeb(request.session)
-    if object_type == "ServerBase":
-        http_response = generate_object_with_storage_add_panel_http_response(
-            request, model_web, object_type, [GPUServer, BoaviztaCloudServer, Server],
-            "Storage", [Storage])
-    elif object_type == "EdgeDevice":
-        http_response = generate_object_with_storage_add_panel_http_response(
-            request, model_web, object_type, [EdgeDevice],
-            "EdgeStorage", [EdgeStorage])
-    elif object_type == "Service":
-        http_response = generate_service_add_panel_http_response(request, model_web)
-    elif object_type == "Job":
-        http_response = generate_job_add_panel_http_response(request, model_web)
-    elif object_type == "UsagePatternFromForm":
-        http_response = generate_usage_pattern_add_panel_http_response(request, model_web)
-    elif object_type == "ExternalApi":
+    if object_type == "ExternalApi":
         http_response = generate_external_api_add_panel_http_response(request, model_web)
-    elif object_type == "EdgeUsageJourney":
-        http_response = generate_edge_usage_journey_add_panel_http_response(request, model_web)
     else:
         http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
 

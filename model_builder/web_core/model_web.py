@@ -10,17 +10,13 @@ from efootprint.abstract_modeling_classes.explainable_hourly_quantities import E
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
-from efootprint.core.all_classes_in_order import SERVICE_CLASSES, ALL_EFOOTPRINT_CLASSES
-from efootprint.core.hardware.server_base import ServerBase
+from efootprint.core.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.usage.edge_usage_pattern import EdgeUsagePattern
-from efootprint.core.usage.job import JobBase
 from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
-from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
-from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
+from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.web_core.model_web_utils import (determine_global_time_bounds, to_rounded_daily_values,
                                                     get_reindexed_array_from_dict)
@@ -28,19 +24,7 @@ from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
 from utils import EFOOTPRINT_COUNTRIES
 
 
-_extension_classes = [UsagePatternFromForm, RecurrentEdgeProcessFromForm, EdgeUsagePatternFromForm]
-MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
-                                for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}
-
 model_builder_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-ABSTRACT_EFOOTPRINT_MODELING_CLASSES = {"JobBase": JobBase, "ServerBase": ServerBase}
-
-with open(os.path.join(model_builder_root, "reference_data", "form_fields_reference.json"), "r") as f:
-    FORM_FIELD_REFERENCES = json.load(f)
-
-with open(os.path.join(model_builder_root, "reference_data", "form_type_object.json"), "r") as f:
-    FORM_TYPE_OBJECT = json.load(f)
-
 
 def default_networks():
     with open(os.path.join(model_builder_root, "reference_data", "default_networks.json"), "r") as f:
@@ -56,8 +40,6 @@ def default_countries():
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {
     "Network": default_networks, "Device": default_devices, "Country": default_countries}
-ATTRIBUTES_TO_SKIP_IN_FORMS = [
-    "gpu_latency_alpha", "gpu_latency_beta", "fixed_nb_of_instances", "storage", "service", "server"]
 
 
 class ModelWeb:

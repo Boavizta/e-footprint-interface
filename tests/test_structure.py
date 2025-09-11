@@ -24,9 +24,11 @@ from model_builder.efootprint_extensions.edge_usage_pattern_from_form import Edg
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from model_builder.class_structure import generate_object_creation_structure, MODELING_OBJECT_CLASSES_DICT, \
+from model_builder.class_structure import generate_object_creation_structure, \
     FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
-from model_builder.web_core.model_web import model_builder_root, ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_core.model_web import model_builder_root
+from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm

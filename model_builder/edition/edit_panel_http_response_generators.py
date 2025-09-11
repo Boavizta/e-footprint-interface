@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from model_builder.class_structure import generate_object_edition_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.web_core.model_web import ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
 
 

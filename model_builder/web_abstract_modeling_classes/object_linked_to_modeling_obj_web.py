@@ -1,7 +1,13 @@
+from typing import TYPE_CHECKING
+
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 
+from model_builder.form_references import FORM_FIELD_REFERENCES
 from utils import camel_to_snake
+
+if TYPE_CHECKING:
+    from model_builder.web_core.model_web import ModelWeb
 
 
 class ObjectLinkedToModelingObjWeb:
@@ -39,7 +45,6 @@ class ObjectLinkedToModelingObjWeb:
 
     @property
     def attr_name_web(self):
-        from model_builder.web_core.model_web import FORM_FIELD_REFERENCES
         if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
             return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
         else:

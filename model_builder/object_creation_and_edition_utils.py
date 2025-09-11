@@ -17,7 +17,7 @@ from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
 from model_builder.web_core.model_web import ModelWeb
-from model_builder.class_structure import MODELING_OBJECT_CLASSES_DICT
+from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
 
 def create_efootprint_obj_from_post_data(

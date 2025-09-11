@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Server": ServerWeb,
+    "ServerBase": ServerWeb,
     "GPUServer": ServerWeb,
     "BoaviztaCloudServer": ServerWeb,
     "UsageJourneyStep": UsageJourneyStepWeb,
@@ -33,6 +34,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
     "WebApplicationJob": JobWeb,
+    "Service": ServiceWeb,
     "GenAIModel": ServiceWeb,
     "VideoStreaming": ServiceWeb,
     "WebApplication": ServiceWeb,

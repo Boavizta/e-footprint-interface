@@ -1,17 +1,29 @@
 import re
+from typing import TYPE_CHECKING
 
-from efootprint.logger import logger
-from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.logger import logger
 
+from model_builder.class_structure import generate_dynamic_form, generate_object_creation_context
+from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableQuantityWeb, \
     ExplainableObjectWeb, ExplainableObjectDictWeb
 from model_builder.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
+from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+
+if TYPE_CHECKING:
+    from model_builder.web_core.model_web import ModelWeb
+
+ATTRIBUTES_TO_SKIP_IN_FORMS = [
+    "gpu_latency_alpha", "gpu_latency_beta", "fixed_nb_of_instances", "storage", "service", "server"]
 
 
 class ModelingObjectWeb:
+    add_template = "add_panel__generic.html"
+
     def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb"):
         self._modeling_obj = modeling_obj
         self.model_web = model_web
@@ -99,7 +111,6 @@ class ModelingObjectWeb:
 
     @property
     def class_label(self):
-        from model_builder.web_core.model_web import FORM_TYPE_OBJECT
         return FORM_TYPE_OBJECT[self.class_as_simple_str]["label"]
 
     @property
@@ -172,3 +183,24 @@ class ModelingObjectWeb:
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
+
+    @classmethod
+    def generate_dynamic_form(cls, default_values: dict, attributes_to_skip: list, model_web: "ModelWeb"):
+        structure_fields, structure_fields_advanced, dynamic_lists = generate_dynamic_form(
+            cls, default_values, attributes_to_skip, model_web)
+
+        return structure_fields, structure_fields_advanced, dynamic_lists
+
+    @classmethod
+    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+        corresponding_efootprint_class_str = cls.__name__.replace("Web", "")
+        corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[corresponding_efootprint_class_str]
+        return generate_object_creation_context(
+            corresponding_efootprint_class_str, [corresponding_efootprint_class],
+            ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
+
+    def generate_object_edition_structure(self, attributes_to_skip=None):
+        form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
+            self, self.modeling_obj.__dict__, attributes_to_skip, self.model_web)
+
+        return form_fields, form_fields_advanced, {"dynamic_lists": dynamic_lists}

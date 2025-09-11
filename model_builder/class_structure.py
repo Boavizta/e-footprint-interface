@@ -1,6 +1,6 @@
 from copy import deepcopy
 from inspect import _empty as empty_annotation
-from typing import get_origin, List, get_args
+from typing import get_origin, List, get_args, TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
@@ -9,12 +9,15 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.web_core.model_web import MODELING_OBJECT_CLASSES_DICT, FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT, ModelWeb
+from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.form_references import FORM_TYPE_OBJECT, FORM_FIELD_REFERENCES
+
+if TYPE_CHECKING:
+    from model_builder.web_core.model_web import ModelWeb
 
 
 def generate_object_creation_structure(
-    available_efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip, model_web: ModelWeb):
-
+    efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip: List[str], model_web: "ModelWeb"):
     dynamic_form_dict = {
         "switch_item": "type_object_available",
         "switch_values": [available_class.__name__ for available_class in available_efootprint_classes],
@@ -22,11 +25,11 @@ def generate_object_creation_structure(
 
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
-        "header": f"{FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]} selection",
+        "header": f"{FORM_TYPE_OBJECT[efootprint_class_str]["label"]} selection",
         "fields": [{
             "input_type": "select-object",
             "web_id": "type_object_available",
-            "label": FORM_TYPE_OBJECT[available_efootprint_class_str]["type_object_available"],
+            "label": FORM_TYPE_OBJECT[efootprint_class_str]["type_object_available"],
             "options": [
                 {"label": FORM_TYPE_OBJECT[available_class.__name__].get(
                     "more_descriptive_label_for_select_inputs", FORM_TYPE_OBJECT[available_class.__name__]["label"]),
@@ -60,6 +63,19 @@ def generate_object_creation_structure(
     return form_sections, dynamic_form_dict
 
 
+def generate_object_creation_context(
+    efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip: List[str], model_web: "ModelWeb"):
+    form_sections, dynamic_form_data = generate_object_creation_structure(
+        efootprint_class_str, available_efootprint_classes, attributes_to_skip, model_web)
+
+    context_data = {"form_sections": form_sections,
+                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
+                    "object_type": efootprint_class_str,
+                    "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]}
+
+    return context_data
+
+
 def generate_object_edition_structure(web_object, attributes_to_skip=None):
     if attributes_to_skip is None:
         attributes_to_skip = []
@@ -71,18 +87,18 @@ def generate_object_edition_structure(web_object, attributes_to_skip=None):
 
 
 def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web: ModelWeb):
+    efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web: "ModelWeb"):
     structure_fields = []
     structure_fields_advanced = []
     dynamic_lists = []
+    efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
 
-    efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
-    list_values = efootprint_obj_class.list_values
-    conditional_list_values = efootprint_obj_class.conditional_list_values
+    list_values = efootprint_class.list_values
+    conditional_list_values = efootprint_class.conditional_list_values
     id_prefix = efootprint_class_str
-    init_sig_params = get_init_signature_params(efootprint_obj_class)
+    init_sig_params = get_init_signature_params(efootprint_class)
 
-    attributes_that_can_have_negative_values = efootprint_obj_class.attributes_that_can_have_negative_values()
+    attributes_that_can_have_negative_values = efootprint_class.attributes_that_can_have_negative_values()
 
     for attr_name in init_sig_params.keys():
         if attr_name in attributes_to_skip + ["self"]:

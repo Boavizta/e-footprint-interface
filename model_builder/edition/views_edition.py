@@ -13,7 +13,8 @@ from model_builder.edition.edit_object_http_response_generator import compute_ed
 from model_builder.edition.edit_panel_http_response_generators import generate_usage_pattern_edit_panel_http_response, \
     generate_server_edit_panel_http_response, generate_generic_edit_panel_http_response
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.web_core.model_web import ModelWeb, ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_core.model_web import ModelWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
 
 @time_it
