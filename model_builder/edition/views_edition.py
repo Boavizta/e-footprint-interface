@@ -7,14 +7,12 @@ from efootprint.core.hardware.edge_device import EdgeDevice
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.utils.tools import time_it
 
-from model_builder.class_structure import generate_object_edition_structure
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 from model_builder.edition.edit_panel_http_response_generators import generate_usage_pattern_edit_panel_http_response, \
-    generate_server_edit_panel_http_response, generate_generic_edit_panel_http_response
+    generate_server_edit_panel_http_response
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.web_core.model_web import ModelWeb
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
 
 @time_it
@@ -22,24 +20,20 @@ def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
-    form_fields, form_fields_advanced, dynamic_form_data = generate_object_edition_structure(
-        obj_to_edit, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS)
+    context_data = obj_to_edit.generate_object_edition_structure()
 
     object_belongs_to_computable_system = False
-    if (len(model_web.system.servers) > 0) and (len(obj_to_edit.systems) > 0):
+    if (len(model_web.system.servers) > 0 or len(model_web.edge_devices) > 0) and (len(obj_to_edit.systems) > 0):
         object_belongs_to_computable_system = True
+    context_data['object_belongs_to_computable_system'] = object_belongs_to_computable_system
 
-    if issubclass(obj_to_edit.efootprint_class, UsagePatternFromForm):
-        http_response = generate_usage_pattern_edit_panel_http_response(
-            request, obj_to_edit, form_fields, form_fields_advanced, object_belongs_to_computable_system)
     elif issubclass(obj_to_edit.efootprint_class, ServerBase) or issubclass(obj_to_edit.efootprint_class, EdgeDevice):
         http_response = generate_server_edit_panel_http_response(
             request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
             dynamic_form_data)
-    else:
-        http_response = generate_generic_edit_panel_http_response(
-            request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
-            dynamic_form_data)
+
+    http_response = render(
+        request, f"model_builder/side_panels/edit/{obj_to_edit.edit_template}.html", context=context_data)
 
     http_response["HX-Trigger-After-Swap"] = json.dumps({
         "initDynamicForm" : "",

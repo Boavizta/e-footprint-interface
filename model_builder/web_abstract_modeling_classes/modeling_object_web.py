@@ -23,6 +23,8 @@ ATTRIBUTES_TO_SKIP_IN_FORMS = [
 
 class ModelingObjectWeb:
     add_template = "add_panel__generic.html"
+    edit_template = "edit_panel__generic.html"
+    attributes_to_skip_in_forms = ATTRIBUTES_TO_SKIP_IN_FORMS
 
     def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb"):
         self._modeling_obj = modeling_obj
@@ -185,13 +187,6 @@ class ModelingObjectWeb:
             mod_obj.self_delete()
 
     @classmethod
-    def generate_dynamic_form(cls, default_values: dict, attributes_to_skip: list, model_web: "ModelWeb"):
-        structure_fields, structure_fields_advanced, dynamic_lists = generate_dynamic_form(
-            cls, default_values, attributes_to_skip, model_web)
-
-        return structure_fields, structure_fields_advanced, dynamic_lists
-
-    @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
         corresponding_efootprint_class_str = cls.__name__.replace("Web", "")
         corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[corresponding_efootprint_class_str]
@@ -199,8 +194,16 @@ class ModelingObjectWeb:
             corresponding_efootprint_class_str, [corresponding_efootprint_class],
             ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
 
-    def generate_object_edition_structure(self, attributes_to_skip=None):
+    def generate_object_edition_context(self, attributes_to_skip=None):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-            self, self.modeling_obj.__dict__, attributes_to_skip, self.model_web)
+            self, self.modeling_obj.__dict__, self.attributes_to_skip_in_forms, self.model_web)
 
-        return form_fields, form_fields_advanced, {"dynamic_lists": dynamic_lists}
+        context_data = {
+            "object_to_edit": self,
+            "form_fields": form_fields,
+            "form_fields_advanced": form_fields_advanced,
+            "dynamic_form_data": {"dynamic_lists": dynamic_lists},
+            "header_name": f"Edit {self.name}"
+        }
+
+        return context_data

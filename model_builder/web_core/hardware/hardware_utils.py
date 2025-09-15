@@ -35,3 +35,38 @@ def generate_object_with_storage_creation_context(
     }
 
     return context_data
+
+
+def generate_object_with_storage_edition_context(obj_to_edit):
+    storage_to_edit = obj_to_edit.storage
+
+    form_fields, form_fields_advanced, dynamic_form_data = generate_object_creation_structure(
+        type(obj_to_edit.modeling_obj).__name__,
+        available_efootprint_classes=[type(obj_to_edit._modeling_obj)],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=obj_to_edit.model_web,
+        obj_to_edit=obj_to_edit._modeling_obj
+    )
+
+    storage_form_fields, storage_form_fields_advanced, storage_dynamic_form_data = generate_object_creation_structure(
+        type(storage_to_edit.modeling_obj).__name__,
+        available_efootprint_classes=[type(storage_to_edit._modeling_obj)],
+        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
+        model_web=storage_to_edit.model_web,
+        obj_to_edit=storage_to_edit._modeling_obj
+    )
+
+    context_data = {
+        "object_to_edit": obj_to_edit,
+        "form_fields": form_fields,
+        "form_fields_advanced": form_fields_advanced,
+        "dynamic_form_data": dynamic_form_data,
+        "storage_to_edit": storage_to_edit,
+        "storage_form_fields": storage_form_fields,
+        "storage_form_fields_advanced": storage_form_fields_advanced,
+        "storage_dynamic_form_data": storage_dynamic_form_data,
+        "object_belongs_to_computable_system": object_belongs_to_computable_system,
+        "header_name": f"Edit {obj_to_edit.name}"
+    }
+
+    return context_data

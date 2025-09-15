@@ -76,16 +76,6 @@ def generate_object_creation_context(
     return context_data
 
 
-def generate_object_edition_structure(web_object, attributes_to_skip=None):
-    if attributes_to_skip is None:
-        attributes_to_skip = []
-
-    form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-        web_object.class_as_simple_str, web_object.modeling_obj.__dict__, attributes_to_skip, web_object.model_web)
-
-    return form_fields, form_fields_advanced, {"dynamic_lists": dynamic_lists}
-
-
 def generate_dynamic_form(
     efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web: "ModelWeb"):
     structure_fields = []
