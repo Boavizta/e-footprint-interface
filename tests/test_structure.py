@@ -7,6 +7,7 @@ import sys
 from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
+from efootprint.constants.countries import Countries
 from efootprint.core.hardware.edge_device import EdgeDevice
 from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
@@ -33,7 +34,6 @@ from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 
-from utils import EFOOTPRINT_COUNTRIES
 
 obj_creation_structure_dict = {
     "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
@@ -114,6 +114,10 @@ class TestsClassStructure(TestCase):
     def test_default_objects(self):
         default_efootprint_networks = [network_archetype() for network_archetype in Network.archetypes()]
         default_efootprint_hardwares = [Device.laptop(), Device.smartphone()]
+        efootprint_countries = []
+        for attr_value in vars(Countries).values():
+            if callable(attr_value):
+                efootprint_countries.append(attr_value())
 
         def create_object_dict_while_normalizing_ids(object_list: list):
             output_dict = {}
@@ -125,7 +129,7 @@ class TestsClassStructure(TestCase):
 
         network_archetypes = create_object_dict_while_normalizing_ids(default_efootprint_networks)
         hardware_archetypes = create_object_dict_while_normalizing_ids(default_efootprint_hardwares)
-        countries = create_object_dict_while_normalizing_ids(EFOOTPRINT_COUNTRIES)
+        countries = create_object_dict_while_normalizing_ids(efootprint_countries)
 
         with open(os.path.join(model_builder_root, "reference_data", "default_networks.json"), "r") as f:
             default_networks = json.load(f)

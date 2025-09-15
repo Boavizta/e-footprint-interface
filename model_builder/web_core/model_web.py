@@ -21,7 +21,6 @@ from model_builder.web_abstract_modeling_classes.explainable_objects_web import 
 from model_builder.web_core.model_web_utils import (determine_global_time_bounds, to_rounded_daily_values,
                                                     get_reindexed_array_from_dict)
 from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
-from utils import EFOOTPRINT_COUNTRIES
 
 
 model_builder_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
@@ -219,10 +218,6 @@ class ModelWeb:
     @property
     def countries(self):
         return self.get_web_objects_from_efootprint_type("Country")
-
-    @property
-    def available_countries(self):
-        return EFOOTPRINT_COUNTRIES
 
     @property
     def hardware(self):

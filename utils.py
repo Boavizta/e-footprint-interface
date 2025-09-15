@@ -55,9 +55,3 @@ def htmx_render(request, html_file_path: str, context=None):
         response = render(request, "base.html", context)
 
         return response
-
-
-EFOOTPRINT_COUNTRIES = []
-for attr_value in vars(Countries).values():
-    if callable(attr_value):
-        EFOOTPRINT_COUNTRIES.append(attr_value())
