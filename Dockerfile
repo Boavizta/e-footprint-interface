@@ -28,6 +28,9 @@ RUN pip3 install supervisor poetry
 # Prepare some stuff
 RUN mkdir -p /var/log/supervisor
 
+# Install node
+RUN apt-get install nodejs npm -y
+
 # Set workdir
 WORKDIR /app
 
