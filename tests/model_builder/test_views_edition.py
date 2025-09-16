@@ -17,7 +17,6 @@ from efootprint.logger import logger
 from efootprint.constants.units import u
 
 from model_builder.addition.views_addition import add_object
-from model_builder.class_structure import generate_object_edition_structure
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
@@ -58,12 +57,11 @@ class TestViewsEdition(TestModelingBase):
         model_web = ModelWeb(job_request.session)
         job = model_web.get_web_object_from_efootprint_id(new_job_id)
 
-        job_edition_fields, job_edition_fields_advanced, dynamic_form_data = generate_object_edition_structure(
-            job, attributes_to_skip=["service"])
+        edition_context = job.generate_object_edition_context()
 
         ref_dynamic_form_data = {"dynamic_lists": []}
 
-        self.assertDictEqual(dynamic_form_data, ref_dynamic_form_data)
+        self.assertDictEqual(edition_context["dynamic_form_data"], ref_dynamic_form_data)
         self.assertEqual(job_request.session["system_data"]["WebApplicationJob"][new_job_id]["name"], "New job")
 
     def test_edit_genai_model_provider_with_recompute_true(self):

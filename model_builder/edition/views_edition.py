@@ -9,9 +9,6 @@ from efootprint.utils.tools import time_it
 
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
-from model_builder.edition.edit_panel_http_response_generators import generate_usage_pattern_edit_panel_http_response, \
-    generate_server_edit_panel_http_response
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
 
@@ -20,20 +17,14 @@ def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
-    context_data = obj_to_edit.generate_object_edition_structure()
+    context_data = obj_to_edit.generate_object_edition_context()
 
-    object_belongs_to_computable_system = False
-    if (len(model_web.system.servers) > 0 or len(model_web.edge_devices) > 0) and (len(obj_to_edit.systems) > 0):
-        object_belongs_to_computable_system = True
+    object_belongs_to_computable_system = (
+        (len(model_web.system.servers) > 0 or len(model_web.edge_devices) > 0) and (len(obj_to_edit.systems) > 0))
     context_data['object_belongs_to_computable_system'] = object_belongs_to_computable_system
 
-    elif issubclass(obj_to_edit.efootprint_class, ServerBase) or issubclass(obj_to_edit.efootprint_class, EdgeDevice):
-        http_response = generate_server_edit_panel_http_response(
-            request, form_fields, form_fields_advanced, obj_to_edit, object_belongs_to_computable_system,
-            dynamic_form_data)
-
     http_response = render(
-        request, f"model_builder/side_panels/edit/{obj_to_edit.edit_template}.html", context=context_data)
+        request, f"model_builder/side_panels/edit/{obj_to_edit.edit_template}", context=context_data)
 
     http_response["HX-Trigger-After-Swap"] = json.dumps({
         "initDynamicForm" : "",

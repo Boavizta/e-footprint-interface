@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class UsagePatternWeb(ModelingObjectWeb):
     add_template = "../usage_pattern/usage_pattern_add.html"
+    edit_template = "../usage_pattern/usage_pattern_edit.html"
     attributes_to_skip_in_forms = [
         "start_date", "modeling_duration_value", "modeling_duration_unit", "initial_usage_journey_volume",
         "initial_usage_journey_volume_timespan", "net_growth_rate_in_percentage"]
@@ -57,6 +58,7 @@ class UsagePatternWeb(ModelingObjectWeb):
 
         usage_pattern_input_values = deepcopy(UsagePatternFromForm.default_values)
         usage_pattern_input_values["initial_usage_journey_volume"] = None
+
         context_data = {
                 "form_fields": form_sections[1]["fields"],
                 "usage_pattern_input_values": usage_pattern_input_values,

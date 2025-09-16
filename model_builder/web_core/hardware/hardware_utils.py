@@ -1,6 +1,6 @@
 from typing import List, TYPE_CHECKING
 
-from model_builder.class_structure import generate_object_creation_structure
+from model_builder.class_structure import generate_object_creation_structure, generate_dynamic_form
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 
@@ -40,33 +40,27 @@ def generate_object_with_storage_creation_context(
 def generate_object_with_storage_edition_context(obj_to_edit):
     storage_to_edit = obj_to_edit.storage
 
-    form_fields, form_fields_advanced, dynamic_form_data = generate_object_creation_structure(
-        type(obj_to_edit.modeling_obj).__name__,
-        available_efootprint_classes=[type(obj_to_edit._modeling_obj)],
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
-        model_web=obj_to_edit.model_web,
-        obj_to_edit=obj_to_edit._modeling_obj
-    )
-
-    storage_form_fields, storage_form_fields_advanced, storage_dynamic_form_data = generate_object_creation_structure(
-        type(storage_to_edit.modeling_obj).__name__,
-        available_efootprint_classes=[type(storage_to_edit._modeling_obj)],
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
-        model_web=storage_to_edit.model_web,
-        obj_to_edit=storage_to_edit._modeling_obj
-    )
+    form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
+        obj_to_edit.class_as_simple_str, obj_to_edit.modeling_obj.__dict__, obj_to_edit.attributes_to_skip_in_forms,
+        obj_to_edit.model_web)
 
     context_data = {
         "object_to_edit": obj_to_edit,
         "form_fields": form_fields,
         "form_fields_advanced": form_fields_advanced,
-        "dynamic_form_data": dynamic_form_data,
+        "dynamic_form_data": {"dynamic_lists": dynamic_lists},
+        "header_name": f"Edit {obj_to_edit.name}"
+    }
+
+    storage_form_fields, storage_form_fields_advanced, storage_dynamic_lists = generate_dynamic_form(
+        storage_to_edit.class_as_simple_str, storage_to_edit.modeling_obj.__dict__,
+        storage_to_edit.attributes_to_skip_in_forms, storage_to_edit.model_web)
+
+    context_data.update({
         "storage_to_edit": storage_to_edit,
         "storage_form_fields": storage_form_fields,
         "storage_form_fields_advanced": storage_form_fields_advanced,
-        "storage_dynamic_form_data": storage_dynamic_form_data,
-        "object_belongs_to_computable_system": object_belongs_to_computable_system,
-        "header_name": f"Edit {obj_to_edit.name}"
-    }
+        "storage_dynamic_form_data": {"dynamic_lists": storage_dynamic_lists},
+    })
 
     return context_data

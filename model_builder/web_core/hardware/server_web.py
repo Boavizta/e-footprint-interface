@@ -6,7 +6,8 @@ from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
 
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.web_core.hardware.hardware_utils import generate_object_with_storage_creation_context
+from model_builder.web_core.hardware.hardware_utils import generate_object_with_storage_creation_context, \
+    generate_object_with_storage_edition_context
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 class ServerWeb(ModelingObjectWeb):
     add_template = "add_object_with_storage.html"
+    edit_template = "../server/server_edit.html"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,3 +34,6 @@ class ServerWeb(ModelingObjectWeb):
         return generate_object_with_storage_creation_context(
             model_web, "ServerBase", [GPUServer, BoaviztaCloudServer, Server],
             "Storage", [Storage])
+
+    def generate_object_edition_context(self):
+        return generate_object_with_storage_edition_context(self)

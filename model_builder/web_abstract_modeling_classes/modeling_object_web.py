@@ -194,9 +194,9 @@ class ModelingObjectWeb:
             corresponding_efootprint_class_str, [corresponding_efootprint_class],
             ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
 
-    def generate_object_edition_context(self, attributes_to_skip=None):
+    def generate_object_edition_context(self):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-            self, self.modeling_obj.__dict__, self.attributes_to_skip_in_forms, self.model_web)
+            self.class_as_simple_str, self.modeling_obj.__dict__, self.attributes_to_skip_in_forms, self.model_web)
 
         context_data = {
             "object_to_edit": self,
