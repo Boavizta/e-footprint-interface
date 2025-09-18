@@ -33,7 +33,7 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "default": 4,
+                "default": 6,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
