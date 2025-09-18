@@ -1,14 +1,17 @@
 import json
 from copy import copy
+from typing import TYPE_CHECKING
 
 from django.http import QueryDict, HttpResponse
 from django.template.loader import render_to_string
 
-from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
 from model_builder.object_creation_and_edition_utils import edit_object_in_system
 
+if TYPE_CHECKING:
+    from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
 
-def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_to_edit: ModelingObjectWeb):
+
+def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_to_edit: "ModelingObjectWeb"):
     accordion_children_before_edit = {}
     for mirrored_card in obj_to_edit.mirrored_cards:
         accordion_children_before_edit[mirrored_card] = copy(mirrored_card.accordion_children)

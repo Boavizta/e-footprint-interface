@@ -1,8 +1,6 @@
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
-from model_builder.addition.add_object_http_response_generators import add_new_object, \
-    add_new_object_with_storage, add_new_service, add_new_external_api
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
@@ -27,20 +25,12 @@ def open_create_object_panel(request, object_type):
 
 @render_exception_modal_if_error
 def add_object(request, object_type):
-    recompute_modeling = request.POST.get("recomputation", False)
     model_web = ModelWeb(request.session)
 
-    if object_type == "ServerBase":
-        http_response = add_new_object_with_storage(request, model_web, storage_type="Storage")
-    elif object_type == "EdgeDevice":
-        http_response = add_new_object_with_storage(request, model_web, storage_type="EdgeStorage")
-    elif object_type == "Service":
-        http_response =  add_new_service(request, model_web)
-    elif object_type == "ExternalApi":
-        http_response =  add_new_external_api(request, model_web)
-    else:
-        http_response =  add_new_object(request, model_web, object_type)
+    object_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
+    http_response =  object_web_class.add_new_object_and_return_html_response(request, model_web, object_type)
 
+    recompute_modeling = request.POST.get("recomputation", False)
     if recompute_modeling:
         refresh_content_response = render_to_string(
             "model_builder/result/result_panel.html", context={"model_web": model_web})

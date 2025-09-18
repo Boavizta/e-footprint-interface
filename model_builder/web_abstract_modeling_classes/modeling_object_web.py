@@ -1,14 +1,21 @@
+import json
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_origin, List, get_args
 
+from django.http import QueryDict
+from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
+from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.class_structure import generate_dynamic_form, generate_object_creation_context
+from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
+    generate_http_response_from_edit_html_and_events
 from model_builder.form_references import FORM_TYPE_OBJECT
+from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableQuantityWeb, \
     ExplainableObjectWeb, ExplainableObjectDictWeb
 from model_builder.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
@@ -207,3 +214,52 @@ class ModelingObjectWeb:
         }
 
         return context_data
+
+    @classmethod
+    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
+        object_creation_type = request.POST.get("type_object_available", object_type)
+        new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_creation_type)
+        added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+
+        object_to_link_to_id = request.POST.get("efootprint_id_of_parent_to_link_to", None)
+
+        if object_to_link_to_id is None:
+            response = render(
+                request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
+                {added_obj.template_name: added_obj})
+
+            response["HX-Trigger-After-Swap"] = json.dumps({
+                "resetLeaderLines": "",
+                "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
+                "displayToastAndHighlightObjects": {
+                    "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
+            })
+        else:
+            web_object_to_link_to = model_web.get_web_object_from_efootprint_id(object_to_link_to_id)
+            efootprint_object_to_link_to = web_object_to_link_to.modeling_obj
+            # Find the attr name for the list of objects to append the added object to in the efootprint_object_to_link_to
+            init_sig_params = get_init_signature_params(type(efootprint_object_to_link_to))
+            list_attr_name = None
+            for attr_name in init_sig_params:
+                annotation = init_sig_params[attr_name].annotation
+                if (get_origin(annotation) and get_origin(annotation) in (list, List)
+                    and isinstance(new_efootprint_obj, get_args(annotation)[0])):
+                    list_attr_name = attr_name
+                    break
+            assert list_attr_name is not None, f"A list attr name should always be found"
+
+            mutable_post = QueryDict(mutable=True)
+            existing_element_ids = [elt.id for elt in getattr(efootprint_object_to_link_to, list_attr_name)]
+            existing_element_ids.append(added_obj.efootprint_id)
+            mutable_post[list_attr_name] = ";".join(existing_element_ids)
+
+            response_html = compute_edit_object_html_and_event_response(mutable_post, web_object_to_link_to)
+
+            toast_and_highlight_data = {
+                "ids": [mirrored_card.web_id for mirrored_card in added_obj.mirrored_cards], "name": added_obj.name,
+                "action_type": "add_new_object"
+            }
+
+            response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
+
+        return response

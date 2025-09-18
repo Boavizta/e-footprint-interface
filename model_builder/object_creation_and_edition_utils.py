@@ -1,7 +1,7 @@
 import json
 import os
 from inspect import _empty as empty_annotation
-from typing import List, get_origin, get_args
+from typing import List, get_origin, get_args, TYPE_CHECKING
 
 from django.http import QueryDict
 from django.shortcuts import render
@@ -15,13 +15,15 @@ from efootprint.logger import logger
 from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
-from model_builder.web_core.model_web import ModelWeb
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+
+if TYPE_CHECKING:
+    from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
+    from model_builder.web_core.model_web import ModelWeb
 
 
 def create_efootprint_obj_from_post_data(
-    create_form_data: QueryDict, model_web: ModelWeb, object_type: str) -> ModelingObject:
+    create_form_data: QueryDict, model_web: "ModelWeb", object_type: str) -> ModelingObject:
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
     init_sig_params = get_init_signature_params(new_efootprint_obj_class)
     default_values = new_efootprint_obj_class.default_values
@@ -74,7 +76,7 @@ def create_efootprint_obj_from_post_data(
     return new_efootprint_obj
 
 
-def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: ModelingObjectWeb):
+def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjectWeb"):
     model_web = obj_to_edit.model_web
     object_type = obj_to_edit.class_as_simple_str
 
