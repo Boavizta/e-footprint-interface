@@ -65,4 +65,5 @@ class ServiceWeb(ModelingObjectWeb):
             "displayToastAndHighlightObjects": {
                 "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
         })
+
         return response

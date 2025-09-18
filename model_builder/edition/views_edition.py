@@ -3,12 +3,9 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from efootprint.core.hardware.edge_device import EdgeDevice
-from efootprint.core.hardware.server_base import ServerBase
 from efootprint.utils.tools import time_it
 
-from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
-    generate_http_response_from_edit_html_and_events
+from model_builder.edition.edit_object_http_response_generator import generate_http_response_from_edit_html_and_events
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
 
@@ -40,12 +37,7 @@ def edit_object(request, object_id, trigger_result_display=False):
     recompute_modeling = request.POST.get("recomputation", False)
     model_web = ModelWeb(request.session)
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
-    if issubclass(obj_to_edit.efootprint_class, ServerBase) or issubclass(obj_to_edit.efootprint_class, EdgeDevice):
-        storage_data = json.loads(request.POST.get("storage_form_data"))
-        storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
-        edit_object_in_system(storage_data, storage)
-
-    response_html = compute_edit_object_html_and_event_response(request.POST, obj_to_edit)
+    response_html = obj_to_edit.edit_object_and_return_html_response(request.POST)
 
     if recompute_modeling:
         refresh_content_response = render_to_string(

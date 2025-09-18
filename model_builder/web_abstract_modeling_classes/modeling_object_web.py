@@ -201,20 +201,6 @@ class ModelingObjectWeb:
             corresponding_efootprint_class_str, [corresponding_efootprint_class],
             ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
 
-    def generate_object_edition_context(self):
-        form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-            self.class_as_simple_str, self.modeling_obj.__dict__, self.attributes_to_skip_in_forms, self.model_web)
-
-        context_data = {
-            "object_to_edit": self,
-            "form_fields": form_fields,
-            "form_fields_advanced": form_fields_advanced,
-            "dynamic_form_data": {"dynamic_lists": dynamic_lists},
-            "header_name": f"Edit {self.name}"
-        }
-
-        return context_data
-
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
         object_creation_type = request.POST.get("type_object_available", object_type)
@@ -263,3 +249,20 @@ class ModelingObjectWeb:
             response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
 
         return response
+
+    def generate_object_edition_context(self):
+        form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
+            self.class_as_simple_str, self.modeling_obj.__dict__, self.attributes_to_skip_in_forms, self.model_web)
+
+        context_data = {
+            "object_to_edit": self,
+            "form_fields": form_fields,
+            "form_fields_advanced": form_fields_advanced,
+            "dynamic_form_data": {"dynamic_lists": dynamic_lists},
+            "header_name": f"Edit {self.name}"
+        }
+
+        return context_data
+
+    def edit_object_and_return_html_response(self, edit_form_data: QueryDict):
+        return compute_edit_object_html_and_event_response(edit_form_data, self)
