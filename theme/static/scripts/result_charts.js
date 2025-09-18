@@ -47,25 +47,33 @@ let resultChartJSOptions = {
 }
 
 window.baseChartConfigByHardwareType = {
-    'Servers_and_storage_energy': {
+    "Servers_and_storage_energy": {
         label: "Servers and storage usage",
         backgroundColor: "#C6FFF9",
     },
-    'Devices_energy': {
+    "Edge_devices_and_storage_energy": {
+        label: "Edge devices and storage usage",
+        backgroundColor: "#7FFDF4",
+    },
+    "Devices_energy": {
         label: "Devices usage",
         backgroundColor: "#44E0D9",
     },
-    'Network_energy': {
+    "Network_energy": {
         label: "Network usage",
         backgroundColor: "#00A3A1",
     },
-    'Servers_and_storage_fabrication': {
+    "Servers_and_storage_fabrication": {
         label: "Servers and storage fabrication",
         backgroundColor: "#DEECF8",
     },
-    'Devices_fabrication': {
-        label: "Devices fabrication",
+    "Edge_devices_and_storage_fabrication": {
+        label: "Edge devices and storage fabrication",
         backgroundColor: "#A3CDED",
+    },
+    "Devices_fabrication": {
+        label: "Devices fabrication",
+        backgroundColor: "#7FB3E6",
     }
 }
 

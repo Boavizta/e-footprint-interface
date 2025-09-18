@@ -1,12 +1,15 @@
 import os
 from unittest.mock import patch
 
+import numpy as np
 from django.http import QueryDict
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.constants.units import u
 from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
 from model_builder.views import result_chart
-from model_builder.web_core.model_web import default_networks, default_devices, default_countries, ModelWeb
+from model_builder.web_core.model_web import ModelWeb
 from model_builder.views_deletion import delete_object
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
@@ -15,91 +18,91 @@ from tests.model_builder.base_modeling_integration_test_class import TestModelin
 class IntegrationTest(TestModelingBase):
     @classmethod
     def setUpClass(cls):
-        cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
+        cls.system_data_path = os.path.join(
+            root_test_dir, "..", "model_builder", "reference_data", "default_system_data.json")
 
-    def test_partial_integration(self):
-        logger.info(f"Creating usage pattern")
-        post_data = QueryDict(mutable=True)
-        post_data.update({
-            'csrfmiddlewaretoken': ['ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv'],
-            'UsagePatternFromForm_devices': [list(default_devices().keys())[0]],
-            'UsagePatternFromForm_network': [list(default_networks().keys())[0]],
-            'UsagePatternFromForm_country': [list(default_countries().keys())[0]],
-            'UsagePatternFromForm_usage_journey': ['uuid-Daily-video-usage'],
-            'UsagePatternFromForm_start_date': ['2025-02-01'],
-            'UsagePatternFromForm_modeling_duration_value': ["5"],
-            "UsagePatternFromForm_modeling_duration_unit": ["month"],
-            "UsagePatternFromForm_net_growth_rate_in_percentage": ["10"],
-            "UsagePatternFromForm_net_growth_rate_timespan": ["year"],
-            "UsagePatternFromForm_initial_usage_journey_volume": ["1000"],
-            "UsagePatternFromForm_initial_usage_journey_volume_timespan": ["year"],
-            'UsagePatternFromForm_name': ['2New usage pattern'],
-        })
-
-        up_request = self.factory.post('/add-object/UsagePatternFromForm', data=post_data)
-        self._add_session_to_request(up_request, self.system_data)  # Attach a valid session
-        len_system_up = len(up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"])
-        initial_model_web = ModelWeb(up_request.session)
-        initial_total_footprint = initial_model_web.system.total_footprint
-
-        response = add_object(up_request, "UsagePatternFromForm")
-        new_up_id = up_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"][-1]
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 3)
-
-        logger.info(f"Creating service")
-        post_data = QueryDict(mutable=True)
-        post_data.update({'WebApplication_name': ['New service'],
-                          'efootprint_id_of_parent_to_link_to': ['uuid-Server-1'],
-                          'type_object_available': ['WebApplication'],
-                          'WebApplication_technology': ['php-symfony'], 'WebApplication_base_ram_consumption': ['2'],
-                          'WebApplication_bits_per_pixel': ['0.1'], 'WebApplication_static_delivery_cpu_cost': ['4.0'],
-                          'WebApplication_ram_buffer_per_user': ['50']}
-        )
-
-        service_request = self.factory.post('/add-object/Service', data=post_data)
-        self._add_session_to_request(service_request, up_request.session["system_data"])
-        response = add_object(service_request, "Service")
-        service_id = next(iter(service_request.session["system_data"]["WebApplication"].keys()))
+    def test_integration(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        logger.info(f"Creating server")
+        post_data = self.create_post_data_from_class_default_values(
+            "Server", "Server", server_type="autoscaling", fixed_nb_of_instances=None)
+        post_data["storage_form_data"] = str(self.create_post_data_from_class_default_values(
+            "Storage", "Storage", fixed_nb_of_instances=None)).replace("'", '"')
+        server_request = self.create_post_request("/add-object/ServerBase", post_data)
+        response = add_object(server_request, "Server")
+        server_id = self.get_object_id_from_session(server_request, "Server")
         self.assertEqual(response.status_code, 200)
 
         logger.info(f"Creating job")
-        post_data = QueryDict(mutable=True)
-        post_data.update(
-        {'WebApplicationJob_name': ['New job'], 'WebApplicationJob_server': ['uuid-Server-1'],
-         'efootprint_id_of_parent_to_link_to': ['uuid-20-min-streaming-on-Youtube'],
-         'WebApplicationJob_service': [service_id],
-         'type_object_available': ['WebApplicationJob'],
-         'WebApplicationJob_implementation_details': ['aggregation-code-side'],
-         'WebApplicationJob_data_transferred': ['150'], 'WebApplicationJob_data_stored': ['100']}
-        )
-
-        job_request = self.factory.post('/model_builder/Job/', data=post_data)
-        self._add_session_to_request(job_request, service_request.session["system_data"])
+        post_data = self.create_post_data_from_class_default_values(
+            "Job", "Job", efootprint_id_of_parent_to_link_to="uid-my-first-usage-journey-step-1",
+            server=server_id, data_transferred=SourceValue(10 * u.MB))
+        job_request = self.create_post_request(
+            "/model_builder/Job/", post_data, system_data=server_request.session["system_data"])
         response = add_object(job_request, "Job")
         self.assertEqual(response.status_code, 200)
-        new_job_id = next(iter(job_request.session["system_data"]["WebApplicationJob"].keys()))
+        new_job_id = self.get_object_id_from_session(job_request, "Job")
+
+        logger.info(f"Creating usage pattern")
+        post_data = self.create_usage_pattern_data(
+            "New usage pattern", usage_journey_id="uid-my-first-usage-journey-1")
+        up_request = self.create_post_request(
+            "/add-object/UsagePatternFromForm", post_data, system_data=job_request.session["system_data"])
+        initial_model_web = ModelWeb(up_request.session)
+        initial_total_footprint = initial_model_web.system.total_footprint
+        response = add_object(up_request, "UsagePatternFromForm")
+        new_up_id = self.get_object_id_from_session(up_request, "UsagePatternFromForm")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 1)
+
+        logger.info(f"Creating edge device")
+        edge_device_data = self.create_edge_device_data("Test Edge Device")
+        edge_device_request = self.create_post_request(
+            "/add-object/EdgeDevice", edge_device_data, up_request.session["system_data"])
+        add_object(edge_device_request, "EdgeDevice")
+        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
+
+        logger.info(f"Creating edge usage journey")
+        euj_data = self.create_edge_usage_journey_data(
+            name="Test Edge Usage Journey", edge_device=edge_device_id, usage_span="6")
+        euj_request = self.create_post_request(
+            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
+        add_object(euj_request, "EdgeUsageJourney")
+        edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
+
+        logger.info(f"Creating edge usage pattern")
+        eup_data = self.create_edge_usage_pattern_data(
+            name="Test Edge Usage Pattern", edge_usage_journey_id=edge_usage_journey_id)
+        eup_request = self.create_post_request(
+            "/add-object/EdgeUsagePatternFromForm", eup_data, euj_request.session["system_data"])
+        response = add_object(eup_request, "EdgeUsagePatternFromForm")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(eup_request.session["system_data"]["EdgeUsagePatternFromForm"]), 1)
+
+        computed_model_web = ModelWeb(eup_request.session)
+        for footprint_key, footprint_value in computed_model_web.system_emissions["values"].items():
+            self.assertGreater(len(footprint_value), 0, f"No footprint values computed for {footprint_key}")
+            self.assertGreater(np.max(np.abs(footprint_value)), 0, f"Footprint values are all zero for {footprint_key}")
 
         logger.info(f"Manually deleting usage pattern")
-        delete_object(job_request, new_up_id)
-        self.assertEqual(2, len(job_request.session["system_data"]["UsagePatternFromForm"]))
+        delete_object(up_request, new_up_id)
+        self.assertIsNone(up_request.session["system_data"].get("UsagePatternFromForm", None))
         logger.info(f"Manually deleting job")
-        delete_object(job_request, new_job_id)
-        logger.info(f"Manually deleting service")
-        delete_object(job_request, service_id)
+        delete_object(up_request, new_job_id)
+        logger.info(f"Manually deleting server")
+        delete_object(up_request, server_id)
 
         self.maxDiff = None
-        self.assertEqual(set(job_request.session["system_data"].keys()), set(self.system_data.keys()))
+        self.assertEqual(set(up_request.session["system_data"].keys()), set(self.system_data.keys()))
         for efootprint_class in self.system_data:
             if efootprint_class == "efootprint_version":
                 continue
             self.assertEqual(
-                set(job_request.session["system_data"][efootprint_class].keys()),
+                set(up_request.session["system_data"][efootprint_class].keys()),
                 set(self.system_data[efootprint_class].keys()),
                 f"Mismatch in {efootprint_class} data")
         self.assertEqual(initial_total_footprint.efootprint_object,
-                         ModelWeb(job_request.session).system.total_footprint.efootprint_object)
+                         ModelWeb(up_request.session).system.total_footprint.efootprint_object)
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_raise_error_if_users_tries_to_see_results_with_incomplete_modeling(self, mock_exception_modal):
@@ -107,7 +110,7 @@ class IntegrationTest(TestModelingBase):
         post_data = QueryDict(mutable=True)
         post_data.update({"name": "First user journey", "uj_steps": []})
 
-        result_request = self.factory.post('/result-chart/', data=post_data)
+        result_request = self.factory.post("/result-chart/", data=post_data)
         self._add_session_to_request(result_request, {
             "efootprint_version": "9.1.4",
             "System": {

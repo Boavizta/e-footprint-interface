@@ -54,7 +54,7 @@ function openOrCloseTimeseriesChartAndTriggerUpdate() {
     let element = document.getElementById("chartTimeseries");
     let startDate = document.getElementById("start_date").value;
     let modelingDurationValue = document.getElementById("modeling_duration_value").value;
-    let initialUsageJourneyVolume = document.getElementById("initial_usage_journey_volume").value;
+    let initialUsageJourneyVolume = document.getElementById("initial_volume").value;
     let netGrowthRateInPercentage = document.getElementById("net_growth_rate_in_percentage").value;
     if(
         startDate !==""
@@ -115,8 +115,8 @@ function createOrUpdateTimeSeriesChart(){
     let modelingDurationUnit = document.getElementById('modeling_duration_unit').value;
     let netGrowRateInPercentage = parseInt(document.getElementById('net_growth_rate_in_percentage').value);
     let netGrowthRateTimespan = document.getElementById('net_growth_rate_timespan').value;
-    let initialUsageJourneyVolume = parseInt(document.getElementById('initial_usage_journey_volume').value);
-    let initialUsageJourneyVolumeTimespan = document.getElementById('initial_usage_journey_volume_timespan').value;
+    let initialUsageJourneyVolume = parseInt(document.getElementById('initial_volume').value);
+    let initialUsageJourneyVolumeTimespan = document.getElementById('initial_volume_timespan').value;
 
     let dailyUsageJourneyVolume = computeUsageJourneyVolume(
         startDate, modelingDurationValue, modelingDurationUnit, netGrowRateInPercentage, netGrowthRateTimespan,

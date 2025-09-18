@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "11.1.0",
+    "efootprint_version": "11.2.1",
     "System": {
         "uuid-system-1": {
             "name": "My system",
@@ -28,7 +28,7 @@
                     "link": null
                 },
                 "direct_ancestors_with_id": [],
-                "direct_children_with_id": [],
+                "direct_children_with_id": ["('uid-my-first-usage-journey-1', 'duration', None)"],
                 "explain_nested_tuples": []
             },
             "jobs": []
@@ -42,11 +42,12 @@
                 "uid-my-first-usage-journey-step-1"
             ],
             "duration": {
-                "value": null,
-                "label": "no value",
-                "direct_ancestors_with_id": [],
+                "label": "Duration of My first usage journey",
+                "value": 1.0,
+                "unit": "minute",
+                "direct_ancestors_with_id": ["('uid-my-first-usage-journey-step-1', 'user_time_spent', None)"],
                 "direct_children_with_id": [],
-                "explain_nested_tuples": []
+                "explain_nested_tuples": ["('uid-my-first-usage-journey-step-1', 'user_time_spent', None)", "+", {"label": "no value", "value": null}]
             }
         }
     }

@@ -1,5 +1,4 @@
 import os
-from unittest.mock import patch
 
 from efootprint.logger import logger
 

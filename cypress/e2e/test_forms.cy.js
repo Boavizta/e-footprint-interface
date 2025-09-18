@@ -108,7 +108,7 @@ describe("Test - Forms panel", () => {
         cy.get("#modeling_duration_value").should("be.visible").should("be.enabled").clear().type("2");
         cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: e-footprint hypothesis");
         cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
-        cy.get("#initial_usage_journey_volume").should('be.visible').type("1000");
+        cy.get("#initial_volume").should('be.visible').type("1000");
         cy.get("#btn-submit-form").should("be.visible").click();
         cy.get("#sidePanelForm").should("not.exist");
         cy.contains("div", "Usage pattern 1").find("button[id^='button']").should("exist").click();

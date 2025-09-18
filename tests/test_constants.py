@@ -25,9 +25,20 @@ USAGE_PATTERN_FORM_DATA = {
     "UsagePatternFromForm_modeling_duration_value": "5",
     "UsagePatternFromForm_modeling_duration_unit": "month",
     "UsagePatternFromForm_net_growth_rate_in_percentage": "10",
-    "UsagePatternFromForm_net_growth_rate_timespan": "year",
-    "UsagePatternFromForm_initial_usage_journey_volume": "1000",
-    "UsagePatternFromForm_initial_usage_journey_volume_timespan": "year",
+    "UsagePatternFromForm_net_growth_rate_timespan": "month",
+    "UsagePatternFromForm_initial_usage_journey_volume": "10000",
+    "UsagePatternFromForm_initial_usage_journey_volume_timespan": "month",
+}
+
+EDGE_USAGE_PATTERN_FORM_DATA = {
+    "csrfmiddlewaretoken": "test_token",
+    "EdgeUsagePatternFromForm_start_date": "2025-02-01",
+    "EdgeUsagePatternFromForm_modeling_duration_value": "5",
+    "EdgeUsagePatternFromForm_modeling_duration_unit": "month",
+    "EdgeUsagePatternFromForm_net_growth_rate_in_percentage": "10",
+    "EdgeUsagePatternFromForm_net_growth_rate_timespan": "month",
+    "EdgeUsagePatternFromForm_initial_usage_journey_volume": "10000",
+    "EdgeUsagePatternFromForm_initial_usage_journey_volume_timespan": "month",
 }
 
 WEB_APPLICATION_FORM_DATA = {

@@ -58,37 +58,37 @@
     <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
 </div>
 <div class="mb-3">
-    <label for="initial_usage_journey_volume" class="form-label w-100">Initial number of usage journeys</label>
+    <label for="initial_volume" class="form-label w-100">Initial number of {{ object_type_in_volume_label }}s</label>
     <div class="input-group">
         <input type="number" class="form-control input_with_add_on"
-               name="initial_usage_journey_volume"
-               id="initial_usage_journey_volume"
+               name="initial_{{ object_type_in_volume }}_volume"
+               id="initial_volume"
                min="0"
-               value="{{ usage_pattern_input_values.initial_usage_journey_volume.magnitude|floatformat }}"
+               value="{{ initial_volume.magnitude|floatformat }}"
                placeholder="Input a number"
                _="on input openOrCloseTimeseriesChartAndTriggerUpdate()
                then updateSource(@id)"
                aria-describedby="basic-addon3 basic-addon4"
                required
-               data-default-value="{{ usage_pattern_input_values.initial_usage_journey_volume.value }}"
-               data-default-name="{{ usage_pattern_input_values.initial_usage_journey_volume.source.name }}"
-               data-source-url="{{ usage_pattern_input_values.initial_usage_journey_volume.source.link }}"
-               data-associated-unit-id="initial_usage_journey_volume_timespan"
+               data-default-value="{{ initial_volume.value }}"
+               data-default-name="{{ initial_volume.source.name }}"
+               data-source-url="{{ initial_volume.source.link }}"
+               data-associated-unit-id="initial_volume_timespan"
         >
         <select class="input-group-text"
-                name="initial_usage_journey_volume_timespan"
-                id="initial_usage_journey_volume_timespan"
+                name="initial_{{ object_type_in_volume }}_volume_timespan"
+                id="initial_volume_timespan"
                 _="on change openOrCloseTimeseriesChartAndTriggerUpdate()
-                then updateSource(initial_usage_journey_volume)"
-                data-default-value="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.value }}"
-               data-default-name="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.source.name }}"
-               data-source-url="{{ usage_pattern_input_values.initial_usage_journey_volume_timespan.source.link }}"
+                then updateSource(initial_volume)"
+                data-default-value="{{ initial_volume_timespan.value }}"
+               data-default-name="{{ initial_volume_timespan.source.name }}"
+               data-source-url="{{ initial_volume_timespan.source.link }}"
         >
-            <option value="month" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "month" %}selected{% endif %}>Monthly</option>
-            <option value="year" {% if usage_pattern_input_values.initial_usage_journey_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
+            <option value="month" {% if initial_volume_timespan.value == "month" %}selected{% endif %}>Monthly</option>
+            <option value="year" {% if initial_volume_timespan.value == "year" %}selected{% endif %}>Yearly</option>
         </select>
     </div>
-    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id="initial_usage_journey_volume" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id="initial_volume" %}
 </div>
 <div class="mb-3">
     <label for="net_growth_rate_in_percentage" class="form-label w-100">Net growth rate (%)</label>

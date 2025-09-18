@@ -85,10 +85,10 @@ class ModelWeb:
         self.session["system_data"] = self.to_json(save_calculated_attributes=True)
 
     def raise_incomplete_modeling_errors(self):
-        if len(self.system.servers) == 0:
+        if len(self.system.usage_patterns) + len(self.system.edge_usage_patterns) == 0:
             raise ValueError(
                 "No impact could be computed because the modeling is incomplete. Please make sure you have at least "
-                "one usage pattern linked to a usage journey with at least one step making a request to a server.")
+                "one usage pattern or one edge usage pattern.")
         else:
             usage_journeys_linked_to_usage_pattern_and_without_uj_steps = []
             for usage_journey in self.usage_journeys:
@@ -159,11 +159,6 @@ class ModelWeb:
         self.response_objs[object_type][efootprint_object.id] = efootprint_object
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
 
-        if isinstance(efootprint_object, UsagePattern):
-            self.system.modeling_obj.usage_patterns.append(efootprint_object)
-        elif isinstance(efootprint_object, EdgeUsagePattern):
-            self.system.modeling_obj.edge_usage_patterns.append(efootprint_object)
-
         self.update_system_data_with_up_to_date_calculated_attributes()
 
         return wrap_efootprint_object(efootprint_object, self)
@@ -232,6 +227,10 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("UsagePattern")
 
     @property
+    def edge_usage_patterns(self):
+        return self.get_web_objects_from_efootprint_type("EdgeUsagePattern")
+
+    @property
     def edge_usage_journeys(self):
         return self.get_web_objects_from_efootprint_type("EdgeUsageJourney")
 
@@ -257,6 +256,10 @@ class ModelWeb:
                     get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
                 ),
+                "Edge_devices_and_storage_energy": to_rounded_daily_values(
+                    get_reindexed_array_from_dict("EdgeDevices", energy, global_start, total_hours)
+                    + get_reindexed_array_from_dict("EdgeStorage", energy, global_start, total_hours)
+                ),
                 "Devices_energy": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Devices", energy, global_start, total_hours)
                 ),
@@ -266,6 +269,10 @@ class ModelWeb:
                 "Servers_and_storage_fabrication": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
+                ),
+                "Edge_devices_and_storage_fabrication": to_rounded_daily_values(
+                    get_reindexed_array_from_dict("EdgeDevices", fab, global_start, total_hours)
+                    + get_reindexed_array_from_dict("EdgeStorage", fab, global_start, total_hours)
                 ),
                 "Devices_fabrication": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Devices", fab, global_start, total_hours)
