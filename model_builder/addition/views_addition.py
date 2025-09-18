@@ -1,9 +1,9 @@
+from django.shortcuts import render
 from django.template.loader import render_to_string
 
 from model_builder.addition.add_object_http_response_generators import add_new_object, \
     add_new_object_with_storage, add_new_service, add_new_external_api
-from model_builder.addition.add_panel_http_response_generators import (generate_generic_add_panel_http_response,
-    generate_external_api_add_panel_http_response)
+from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
@@ -11,10 +11,16 @@ from model_builder.object_creation_and_edition_utils import render_exception_mod
 @render_exception_modal_if_error
 def open_create_object_panel(request, object_type):
     model_web = ModelWeb(request.session)
-    if object_type == "ExternalApi":
-        http_response = generate_external_api_add_panel_http_response(request, model_web)
-    else:
-        http_response = generate_generic_add_panel_http_response(request, object_type, model_web)
+    efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
+    efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
+    context_data = efootprint_class_web.generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
+    if efootprint_id_of_parent_to_link_to:
+        context_data["efootprint_id_of_parent_to_link_to"] = efootprint_id_of_parent_to_link_to
+
+    http_response = render(
+        request, f"model_builder/side_panels/add/{efootprint_class_web.add_template}", context=context_data)
+
+    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
 
     return http_response
 

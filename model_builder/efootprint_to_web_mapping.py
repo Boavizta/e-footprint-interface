@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_builders.services.external_api_web import ExternalApiWeb
 from model_builder.web_builders.services.service_web import ServiceWeb
 from model_builder.web_core.hardware.edge_device_web import EdgeDeviceWeb
 from model_builder.web_core.hardware.server_web import ServerWeb
@@ -34,6 +35,8 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
     "WebApplicationJob": JobWeb,
+    # Is not an efootprint class but rather a builder that creates efootprint objects
+    "ExternalApi": ExternalApiWeb,
     "Service": ServiceWeb,
     "GenAIModel": ServiceWeb,
     "VideoStreaming": ServiceWeb,

@@ -6,8 +6,6 @@ from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sou
 from efootprint.core.country import Country
 from efootprint.core.usage.edge_usage_pattern import EdgeUsagePattern
 from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
-from efootprint.core.hardware.device import Device
-from efootprint.core.hardware.network import Network
 from efootprint.constants.units import u
 from pint import Quantity
 
