@@ -232,6 +232,10 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("UsagePattern")
 
     @property
+    def edge_usage_patterns(self):
+        return self.get_web_objects_from_efootprint_type("EdgeUsagePattern")
+
+    @property
     def edge_usage_journeys(self):
         return self.get_web_objects_from_efootprint_type("EdgeUsageJourney")
 

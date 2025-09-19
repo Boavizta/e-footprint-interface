@@ -40,7 +40,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
         cy.get('#net_growth_rate_timespan').select('year');
-        cy.get('#initial_usage_journey_volume').click().type('1000');
+        cy.get('#initial_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
 
         cy.get('#sidePanelForm').should('not.exist');
@@ -56,7 +56,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '15').trigger('change');
         cy.get('#net_growth_rate_timespan').select('month');
-        cy.get('#initial_usage_journey_volume').click().type('1000');
+        cy.get('#initial_volume').click().type('1000');
         cy.get('#timeSeriesChart').then(($canvas) => {
             let canvas = $canvas[0]
             let ctx = canvas.getContext('2d');
@@ -176,7 +176,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#modeling_duration_unit').select('month');
         cy.get('#modeling_duration_value').invoke('val', '15').trigger('input');
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
-        cy.get('#initial_usage_journey_volume').click().type('1000');
+        cy.get('#initial_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
         cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upNameOne).should('be.visible').click();
         cy.get('#modeling_duration_value').invoke('val', '25').trigger('input');
@@ -193,7 +193,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
 
         cy.get('button').contains('Add usage pattern').should('be.visible').click();
-        cy.get('#initial_usage_journey_volume').click().type('1000');
+        cy.get('#initial_volume').click().type('1000');
 
         cy.get('@openOrCloseTimeseriesChartAndTriggerUpdate').should('have.been.called');
         cy.get('#timeSeriesChart').should('exist').should('not.contain.html');
@@ -208,7 +208,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
 
         cy.get('button').contains('Add usage pattern').should('be.visible').click();
-        cy.get('#initial_usage_journey_volume').click().type('1000');
+        cy.get('#initial_volume').click().type('1000');
 
         cy.get('@openOrCloseTimeseriesChartAndTriggerUpdate').should('have.been.called');
         cy.get('#timeSeriesChart').should('exist').should('not.contain.html');

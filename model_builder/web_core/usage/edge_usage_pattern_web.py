@@ -4,9 +4,9 @@ from model_builder.web_core.usage.usage_pattern_web_base_class import (UsagePatt
 
 
 class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
-    object_type_for_volume = "edge_usage_journey"
+    object_type_in_volume = "edge_usage_journey"
     associated_efootprint_class = EdgeUsagePatternFromForm
-    attributes_to_skip_in_forms = generate_attributes_to_skip_in_forms(object_type_for_volume)
+    attributes_to_skip_in_forms = generate_attributes_to_skip_in_forms(object_type_in_volume)
 
     @property
     def links_to(self):

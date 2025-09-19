@@ -13,7 +13,7 @@ def generate_attributes_to_skip_in_forms(object_type_in_volume: str):
     return [
         "start_date", "modeling_duration_value", "modeling_duration_unit",
         f"initial_{object_type_in_volume}_volume", f"initial_{object_type_in_volume}_volume_timespan",
-        "net_growth_rate_in_percentage"]
+        "net_growth_rate_in_percentage", "net_growth_rate_timespan"]
 
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
@@ -36,15 +36,20 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         return "usage_pattern"
 
     @classmethod
-    def turn_net_growth_rate_timespan_dynamic_list_into_dynamic_select(cls, dynamic_form_data: dict):
-        dynamic_list_options = dynamic_form_data["dynamic_lists"][0]["list_value"]
+    def generate_net_growth_rate_timespan_dynamic_select_dict(cls):
+        dynamic_select_options = {
+            str(conditional_value): [str(possible_value) for possible_value in possible_values]
+            for conditional_value, possible_values in
+            cls.associated_efootprint_class.conditional_list_values[
+                "net_growth_rate_timespan"]["conditional_list_values"].items()
+        }
         dynamic_select = {
             "input_id": "net_growth_rate_timespan",
-            "filter_by": f"initial_{cls.object_type_in_volume}_volume_timespan",
+            "filter_by": "initial_usage_journey_volume_timespan",
             "list_value": {
                 key: [{"label": {"day": "Daily", "month": "Monthly", "year": "Yearly"}[elt], "value": elt} for elt in
                       value]
-                for key, value in dynamic_list_options.items()
+                for key, value in dynamic_select_options.items()
             }
         }
 
@@ -64,20 +69,18 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         )
 
         usage_pattern_input_values = deepcopy(cls.associated_efootprint_class.default_values)
-        # Normalize initial volume and timespan keys
-        del usage_pattern_input_values[f"initial_{cls.object_type_in_volume}_volume"]
-        usage_pattern_input_values["initial_volume"] = None
-        usage_pattern_input_values["initial_volume_timespan"] = usage_pattern_input_values.pop(
-            f"initial_{cls.object_type_in_volume}_volume_timespan")
 
         context_data = {
                 "form_fields": form_sections[1]["fields"],
                 "usage_pattern_input_values": usage_pattern_input_values,
-                "dynamic_form_data": cls.turn_net_growth_rate_timespan_dynamic_list_into_dynamic_select(
-                    dynamic_form_data),
+                "dynamic_form_data": cls.generate_net_growth_rate_timespan_dynamic_select_dict(),
                 "header_name": f"Add new {FORM_TYPE_OBJECT[efootprint_object_type]["label"].lower()}",
                 "object_type": efootprint_object_type,
+                "object_type_in_volume": cls.object_type_in_volume,
+                "object_type_in_volume_label": cls.object_type_in_volume.replace("_", " "),
                 "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_object_type],
+                "initial_volume": None,
+                "initial_volume_timespan": usage_pattern_input_values[f"initial_{cls.object_type_in_volume}_volume"],
             }
 
         return context_data
@@ -85,7 +88,9 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     def generate_object_edition_context(self):
         context_data = super().generate_object_edition_context()
 
-        context_data["dynamic_form_data"] = self.turn_net_growth_rate_timespan_dynamic_list_into_dynamic_select(
-            context_data["dynamic_form_data"])
+        context_data["dynamic_form_data"] = self.generate_net_growth_rate_timespan_dynamic_select_dict()
+        context_data["object_type_in_volume_label"] = self.object_type_in_volume.replace("_", " ")
+        context_data["initial_volume"] = getattr(self, f"initial_{self.object_type_in_volume}_volume")
+        context_data["initial_volume_timespan"] = getattr(self, f"initial_{self.object_type_in_volume}_volume_timespan")
 
         return context_data
