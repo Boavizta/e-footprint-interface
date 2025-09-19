@@ -3,6 +3,8 @@ from unittest.mock import patch
 
 import numpy as np
 from django.http import QueryDict
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.constants.units import u
 from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
@@ -21,26 +23,29 @@ class IntegrationTest(TestModelingBase):
 
     def test_integration(self):
         os.environ["RAISE_EXCEPTIONS"] = "True"
-        logger.info(f"Creating external API")
-        post_data = self.create_external_api_data()
-        external_api_request = self.create_post_request("/add-object/ExternalApi", post_data)
-        response = add_object(external_api_request, "ExternalApi")
-        service_id = self.get_object_id_from_session(external_api_request, "GenAIModel")
+        logger.info(f"Creating server")
+        post_data = self.create_post_data_from_class_default_values(
+            "Server", "Server", server_type="autoscaling", fixed_nb_of_instances=None)
+        post_data["storage_form_data"] = str(self.create_post_data_from_class_default_values(
+            "Storage", "Storage", fixed_nb_of_instances=None)).replace("'", '"')
+        server_request = self.create_post_request("/add-object/ServerBase", post_data)
+        response = add_object(server_request, "Server")
+        server_id = self.get_object_id_from_session(server_request, "Server")
         self.assertEqual(response.status_code, 200)
 
         logger.info(f"Creating job")
-        server_id = self.get_object_id_from_session(external_api_request, "GPUServer")
-        post_data = self.create_genai_job_data(
-            "New job", parent_id="uid-my-first-usage-journey-step-1", server_id=server_id, service_id=service_id)
+        post_data = self.create_post_data_from_class_default_values(
+            "Job", "Job", efootprint_id_of_parent_to_link_to="uid-my-first-usage-journey-step-1",
+            server=server_id, data_transferred=SourceValue(10 * u.MB))
         job_request = self.create_post_request(
-            "/model_builder/Job/", post_data, system_data=external_api_request.session["system_data"])
+            "/model_builder/Job/", post_data, system_data=server_request.session["system_data"])
         response = add_object(job_request, "Job")
         self.assertEqual(response.status_code, 200)
-        new_job_id = self.get_object_id_from_session(job_request, "GenAIJob")
+        new_job_id = self.get_object_id_from_session(job_request, "Job")
 
         logger.info(f"Creating usage pattern")
         post_data = self.create_usage_pattern_data(
-            "2New usage pattern", usage_journey_id="uid-my-first-usage-journey-1")
+            "New usage pattern", usage_journey_id="uid-my-first-usage-journey-1")
         up_request = self.create_post_request(
             "/add-object/UsagePatternFromForm", post_data, system_data=job_request.session["system_data"])
         initial_model_web = ModelWeb(up_request.session)
@@ -60,21 +65,21 @@ class IntegrationTest(TestModelingBase):
         logger.info(f"Creating edge usage journey")
         euj_data = self.create_edge_usage_journey_data(
             name="Test Edge Usage Journey", edge_device=edge_device_id, usage_span="6")
-        add_request = self.create_post_request(
+        euj_request = self.create_post_request(
             "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
-        add_object(add_request, "EdgeUsageJourney")
-        edge_usage_journey_id = self.get_object_id_from_session(add_request, "EdgeUsageJourney")
+        add_object(euj_request, "EdgeUsageJourney")
+        edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
 
         logger.info(f"Creating edge usage pattern")
         eup_data = self.create_edge_usage_pattern_data(
             name="Test Edge Usage Pattern", edge_usage_journey_id=edge_usage_journey_id)
         eup_request = self.create_post_request(
-            "/add-object/EdgeUsagePatternFromForm", eup_data, add_request.session["system_data"])
+            "/add-object/EdgeUsagePatternFromForm", eup_data, euj_request.session["system_data"])
         response = add_object(eup_request, "EdgeUsagePatternFromForm")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(eup_request.session["system_data"]["EdgeUsagePatternFromForm"]), 1)
 
-        computed_model_web = ModelWeb(up_request.session)
+        computed_model_web = ModelWeb(eup_request.session)
         for footprint_key, footprint_value in computed_model_web.system_emissions["values"].items():
             self.assertGreater(len(footprint_value), 0, f"No footprint values computed for {footprint_key}")
             self.assertGreater(np.max(np.abs(footprint_value)), 0, f"Footprint values are all zero for {footprint_key}")
@@ -84,8 +89,6 @@ class IntegrationTest(TestModelingBase):
         self.assertIsNone(up_request.session["system_data"].get("UsagePatternFromForm", None))
         logger.info(f"Manually deleting job")
         delete_object(up_request, new_job_id)
-        logger.info(f"Manually deleting service")
-        delete_object(up_request, service_id)
         logger.info(f"Manually deleting server")
         delete_object(up_request, server_id)
 

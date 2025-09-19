@@ -8,6 +8,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import QueryDict
 from django.test import TestCase, RequestFactory
 from django import setup
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 
@@ -88,6 +89,35 @@ class TestModelingBase(TestCase):
         request = self.factory.get(url)
         self._add_session_to_request(request, system_data or self.system_data)
         return request
+
+    @staticmethod
+    def create_post_data_from_class_default_values(
+        name: str, efootprint_class_name: str, **overrides) -> Dict[str, Any]:
+        """Create form data based on the default values of the specified efootprint class."""
+        if efootprint_class_name not in MODELING_OBJECT_CLASSES_DICT:
+            raise ValueError(f"Class {efootprint_class_name} not found in MODELING_OBJECT_CLASSES_DICT")
+
+        efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_name]
+        data = {"csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
+                "type_object_available": efootprint_class_name,
+                f"{efootprint_class_name}_name": name}
+
+        for attr_name, default_value in efootprint_class.default_values.items():
+            if attr_name in overrides:
+                continue
+            data[f"{efootprint_class_name}_{attr_name}"] = str(default_value.magnitude)
+            data[f"{efootprint_class_name}_{attr_name}_unit"] = str(default_value.unit)
+
+        for key, value in overrides.items():
+            if value is None:
+                continue
+            if isinstance(value, ExplainableQuantity):
+                data[f"{efootprint_class_name}_{key}"] = str(value.magnitude)
+                data[f"{efootprint_class_name}_{key}_unit"] = str(value.unit)
+            else:
+                data[key] = value
+
+        return data
 
     @staticmethod
     def create_usage_pattern_data(name: str = "Test Usage Pattern",
