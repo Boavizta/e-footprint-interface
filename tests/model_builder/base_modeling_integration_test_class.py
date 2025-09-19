@@ -15,7 +15,7 @@ from model_builder.web_core.model_web import default_networks, default_devices, 
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from tests.test_constants import (
     USAGE_PATTERN_FORM_DATA, WEB_APPLICATION_FORM_DATA, WEB_APPLICATION_JOB_FORM_DATA,
-    GPU_SERVER_FORM_DATA, HTTP_OK, HTTP_NO_CONTENT, EDGE_DEVICE_FORM_DATA
+    GPU_SERVER_FORM_DATA, HTTP_OK, HTTP_NO_CONTENT, EDGE_DEVICE_FORM_DATA, EDGE_USAGE_PATTERN_FORM_DATA
 )
 
 setup()
@@ -91,7 +91,7 @@ class TestModelingBase(TestCase):
 
     @staticmethod
     def create_usage_pattern_data(name: str = "Test Usage Pattern",
-                                usage_journey_id: Optional[str] = None, **overrides) -> Dict[str, Any]:
+                                usage_journey_id: str = None, **overrides) -> Dict[str, Any]:
         """Create usage pattern form data with sensible defaults."""
         data = deepcopy(USAGE_PATTERN_FORM_DATA)
         data["UsagePatternFromForm_name"] = name
@@ -112,8 +112,23 @@ class TestModelingBase(TestCase):
             if countries:
                 data["UsagePatternFromForm_country"] = countries[0]
 
-        if usage_journey_id:
-            data["UsagePatternFromForm_usage_journey"] = usage_journey_id
+        data["UsagePatternFromForm_usage_journey"] = usage_journey_id
+
+        data.update(overrides)
+        return data
+
+    @staticmethod
+    def create_edge_usage_pattern_data(
+        name: str = "Test Edge Usage Pattern", edge_usage_journey_id: str = None, **overrides) -> Dict[str, Any]:
+        """Create edge usage pattern form data with sensible defaults."""
+        data = deepcopy(EDGE_USAGE_PATTERN_FORM_DATA)
+        data["EdgeUsagePatternFromForm_name"] = name
+        data["EdgeUsagePatternFromForm_edge_usage_journey"] = edge_usage_journey_id
+
+        if not overrides.get("UsagePatternFromForm_country"):
+            countries = list(default_countries().keys())
+            if countries:
+                data["EdgeUsagePatternFromForm_country"] = countries[0]
 
         data.update(overrides)
         return data

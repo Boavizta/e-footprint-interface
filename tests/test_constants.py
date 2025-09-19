@@ -30,6 +30,17 @@ USAGE_PATTERN_FORM_DATA = {
     "UsagePatternFromForm_initial_usage_journey_volume_timespan": "year",
 }
 
+EDGE_USAGE_PATTERN_FORM_DATA = {
+    "csrfmiddlewaretoken": "test_token",
+    "EdgeUsagePatternFromForm_start_date": "2025-02-01",
+    "EdgeUsagePatternFromForm_modeling_duration_value": "5",
+    "EdgeUsagePatternFromForm_modeling_duration_unit": "month",
+    "EdgeUsagePatternFromForm_net_growth_rate_in_percentage": "10",
+    "EdgeUsagePatternFromForm_net_growth_rate_timespan": "year",
+    "EdgeUsagePatternFromForm_initial_usage_journey_volume": "1000",
+    "EdgeUsagePatternFromForm_initial_usage_journey_volume_timespan": "year",
+}
+
 WEB_APPLICATION_FORM_DATA = {
     "type_object_available": "WebApplication",
     "WebApplication_technology": "php-symfony",

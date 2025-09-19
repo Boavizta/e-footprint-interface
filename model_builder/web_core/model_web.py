@@ -85,10 +85,10 @@ class ModelWeb:
         self.session["system_data"] = self.to_json(save_calculated_attributes=True)
 
     def raise_incomplete_modeling_errors(self):
-        if len(self.system.servers) == 0:
+        if len(self.system.usage_patterns) + len(self.system.edge_usage_patterns) == 0:
             raise ValueError(
                 "No impact could be computed because the modeling is incomplete. Please make sure you have at least "
-                "one usage pattern linked to a usage journey with at least one step making a request to a server.")
+                "one usage pattern or one edge usage pattern.")
         else:
             usage_journeys_linked_to_usage_pattern_and_without_uj_steps = []
             for usage_journey in self.usage_journeys:
@@ -261,6 +261,10 @@ class ModelWeb:
                     get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
                 ),
+                "Edge_devices_and_storage_energy": to_rounded_daily_values(
+                    get_reindexed_array_from_dict("EdgeDevices", energy, global_start, total_hours)
+                    + get_reindexed_array_from_dict("EdgeStorage", energy, global_start, total_hours)
+                ),
                 "Devices_energy": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Devices", energy, global_start, total_hours)
                 ),
@@ -270,6 +274,10 @@ class ModelWeb:
                 "Servers_and_storage_fabrication": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
+                ),
+                "Edge_devices_and_storage_fabrication": to_rounded_daily_values(
+                    get_reindexed_array_from_dict("EdgeDevices", fab, global_start, total_hours)
+                    + get_reindexed_array_from_dict("EdgeStorage", fab, global_start, total_hours)
                 ),
                 "Devices_fabrication": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Devices", fab, global_start, total_hours)

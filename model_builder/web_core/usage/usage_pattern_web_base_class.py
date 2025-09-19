@@ -1,8 +1,12 @@
+import json
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
+from django.shortcuts import render
+
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
+from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -19,8 +23,9 @@ def generate_attributes_to_skip_in_forms(object_type_in_volume: str):
 class UsagePatternWebBaseClass(ModelingObjectWeb):
     add_template = "../usage_pattern/usage_pattern_add.html"
     edit_template = "../usage_pattern/usage_pattern_edit.html"
-    object_type_in_volume = ""
     associated_efootprint_class = None
+    attr_name_in_system = "value to override in subclass"
+    object_type_in_volume = ""
     attributes_to_skip_in_forms = generate_attributes_to_skip_in_forms(object_type_in_volume)
 
     @property
@@ -85,7 +90,27 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
 
         return context_data
 
-    def generate_object_edition_context(self):
+    @classmethod
+    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
+        new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_type)
+        getattr(model_web.system.modeling_obj, cls.attr_name_in_system).append(new_efootprint_obj)
+        added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+
+        response = render(
+            request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
+            {added_obj.template_name: added_obj})
+
+        response["HX-Trigger-After-Swap"] = json.dumps({
+            "resetLeaderLines": "",
+            "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
+            "displayToastAndHighlightObjects": {
+                "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
+        })
+
+        return response
+
+
+def generate_object_edition_context(self):
         context_data = super().generate_object_edition_context()
 
         context_data["dynamic_form_data"] = self.generate_net_growth_rate_timespan_dynamic_select_dict()
