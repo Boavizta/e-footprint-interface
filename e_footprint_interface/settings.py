@@ -222,11 +222,9 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
             }
         }
     }
-
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     SESSION_CACHE_ALIAS = 'default'
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
-    DATABASES = {"default": env.db()}
 
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
