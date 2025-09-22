@@ -47,5 +47,6 @@ ADD pyproject.toml /app
 RUN poetry install
 
 # Entrypoint & CMD
+EXPOSE 8080
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf", "-n"]
