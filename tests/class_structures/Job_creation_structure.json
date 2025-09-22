@@ -4,7 +4,7 @@
         "header": "Job selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available job types",
                 "options": [
@@ -166,7 +166,7 @@
                 "attr_name": "implementation_details",
                 "label": "implementation details",
                 "tooltip": false,
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "default",
                 "default": "default",
                 "source": {
@@ -220,7 +220,7 @@
                 "attr_name": "resolution",
                 "label": "resolution",
                 "tooltip": false,
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "1080p (1920 x 1080)",
                 "default": "1080p (1920 x 1080)",
                 "source": {

@@ -4,7 +4,7 @@
         "header": "Edge usage journey selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available edge usage journeys",
                 "options": [
@@ -33,7 +33,7 @@
                 "attr_name": "edge_processes",
                 "label": "edge processes",
                 "tooltip": false,
-                "input_type": "select-multiple",
+                "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [
                     {
@@ -51,7 +51,7 @@
                 "attr_name": "edge_device",
                 "label": "edge device",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
                     {

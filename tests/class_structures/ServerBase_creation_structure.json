@@ -4,7 +4,7 @@
         "header": "Server selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available server types",
                 "options": [
@@ -46,7 +46,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "autoscaling",
                 "options": [
                     {
@@ -254,7 +254,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "serverless",
                 "options": [
                     {
@@ -477,7 +477,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "scaleway",
                 "options": [
                     {
@@ -522,7 +522,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "autoscaling",
                 "options": [
                     {

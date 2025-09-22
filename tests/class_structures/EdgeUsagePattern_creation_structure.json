@@ -4,7 +4,7 @@
         "header": "Edge usage pattern selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available edge usage patterns",
                 "options": [
@@ -33,7 +33,7 @@
                 "attr_name": "edge_usage_journey",
                 "label": "edge usage journey",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -51,7 +51,7 @@
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -101,7 +101,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "year",
                 "options": [
                     {
@@ -139,7 +139,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "month",
                 "options": [
                     {

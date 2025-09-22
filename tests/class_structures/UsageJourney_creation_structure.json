@@ -4,7 +4,7 @@
         "header": "Usage journey selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available usage journeys",
                 "options": [
@@ -33,7 +33,7 @@
                 "attr_name": "uj_steps",
                 "label": "Usage journey steps in this usage journey",
                 "tooltip": false,
-                "input_type": "select-multiple",
+                "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [
                     {

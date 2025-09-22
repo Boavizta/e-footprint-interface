@@ -52,7 +52,7 @@ class JobWeb(ModelingObjectWeb):
             "header": "Job creation helper",
             "fields": [
                 {
-                    "input_type": "select-object",
+                    "input_type": "select_object",
                     "web_id": "server",
                     "name": "Server",
                     "options": [
@@ -60,7 +60,7 @@ class JobWeb(ModelingObjectWeb):
                     "label": "Choose a server",
                 },
                 {
-                    "input_type": "select-object",
+                    "input_type": "select_object",
                     "web_id": "service",
                     "name": "Service used",
                     "options": None,

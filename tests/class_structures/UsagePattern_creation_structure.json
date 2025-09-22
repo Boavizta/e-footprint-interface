@@ -4,7 +4,7 @@
         "header": "Usage pattern selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available usage patterns",
                 "options": [
@@ -33,7 +33,7 @@
                 "attr_name": "usage_journey",
                 "label": "usage journey",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -51,7 +51,7 @@
                 "attr_name": "devices",
                 "label": "devices",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "options": [
                     {
                         "value": "efootprint_id1",
@@ -69,7 +69,7 @@
                 "attr_name": "network",
                 "label": "network",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -87,7 +87,7 @@
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
                     {
@@ -132,7 +132,7 @@
                 "attr_name": "modeling_duration_unit",
                 "label": "modeling duration unit",
                 "tooltip": false,
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "year",
                 "default": "year",
                 "source": {
@@ -170,7 +170,7 @@
                 "attr_name": "initial_usage_journey_volume_timespan",
                 "label": "initial usage journey volume timespan",
                 "tooltip": false,
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "month",
                 "default": "month",
                 "source": {

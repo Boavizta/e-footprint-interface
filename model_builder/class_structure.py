@@ -27,7 +27,7 @@ def generate_object_creation_structure(
         "category": "efootprint_classes_available",
         "header": f"{FORM_TYPE_OBJECT[efootprint_class_str]["label"]} selection",
         "fields": [{
-            "input_type": "select-object",
+            "input_type": "select_object",
             "web_id": "type_object_available",
             "label": FORM_TYPE_OBJECT[efootprint_class_str]["type_object_available"],
             "options": [
@@ -119,13 +119,13 @@ def generate_dynamic_form(
                 # Special case for UsagePatternFromForm’s devices, to remove possibility for user to select multiple
                 # devices for now.
                 structure_field.update({
-                    "input_type": "select-object",
+                    "input_type": "select_object",
                     "options": selected + unselected,
                     "selected": selected[0]["value"] if len(selected) > 0 else unselected[0]["value"]
                 })
             else:
                 structure_field.update({
-                    "input_type": "select-multiple",
+                    "input_type": "select_multiple",
                     "selected": selected,
                     "unselected": unselected
                 })
@@ -142,7 +142,7 @@ def generate_dynamic_form(
             else:
                 selected = selection_options[0]
             structure_field.update({
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "selected": selected.id,
                 "options": [
                     {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
@@ -166,11 +166,11 @@ def generate_dynamic_form(
                     "step": step
                 })
             elif issubclass(annotation, ExplainableHourlyQuantities):
-                structure_field.update({"input_type": "timeseries-input"})
+                structure_field.update({"input_type": "timeseries_input"})
             elif issubclass(annotation, ExplainableObject):
                 if attr_name in list_values.keys():
                     structure_field.update({
-                        "input_type": "select-str-input",
+                        "input_type": "select_str_input",
                         "selected": default_values[attr_name].value,
                         "options": [
                             {"label": str(attr_value), "value": str(attr_value)}

@@ -1,22 +1,6 @@
 <div id="field-group-{{ field.web_id }}" class="mb-3">
     {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
-    {% if field.input_type == "select-str-input" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/select_str_input.html" %}
-    {% elif field.input_type == "select-multiple" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/select_multiple.html" %}
-    {% elif field.input_type == "select-object" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/select_object.html" %}
-    {% elif field.input_type == "datalist" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/datalist.html" %}
-    {% elif field.input_type == "str" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/str.html" %}
-    {% elif field.input_type == "input" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/input.html" %}
-    {% elif field.input_type == "timeseries-input" %}
-        {% include "model_builder/side_panels/dynamic_form_fields/timeseries-input.html" %}
-    {% else %}
-        <p>Unexpected dynamic form field input type: {{ field.input_type }}</p>
-    {% endif %}
+    {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
     {% if field.source %}
         {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id=field.web_id %}
     {% endif %}

@@ -4,7 +4,7 @@
         "header": "Service selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available services for this server",
                 "options": [
@@ -41,7 +41,7 @@
                 "attr_name": "technology",
                 "label": "technology",
                 "tooltip": false,
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "php-symfony",
                 "default": "php-symfony",
                 "source": {
@@ -167,7 +167,7 @@
                 "attr_name": "provider",
                 "label": "provider",
                 "tooltip": false,
-                "input_type": "select-str-input",
+                "input_type": "select_str_input",
                 "selected": "mistralai",
                 "default": "mistralai",
                 "source": {

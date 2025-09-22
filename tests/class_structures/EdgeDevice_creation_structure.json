@@ -4,7 +4,7 @@
         "header": "Edge device selection",
         "fields": [
             {
-                "input_type": "select-object",
+                "input_type": "select_object",
                 "web_id": "type_object_available",
                 "label": "Available edge devices",
                 "options": [
