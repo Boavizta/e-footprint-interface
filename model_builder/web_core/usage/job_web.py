@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.core.all_classes_in_order import SERVICE_CLASSES
+from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.usage.job import Job, GPUJob
 

@@ -12,7 +12,7 @@ from efootprint.core.hardware.edge_device import EdgeDevice
 from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
-from efootprint.core.all_classes_in_order import SERVICE_CLASSES, SERVER_CLASSES, SERVICE_JOB_CLASSES, \
+from efootprint.all_classes_in_order import SERVICE_CLASSES, SERVER_CLASSES, SERVICE_JOB_CLASSES, \
     SERVER_BUILDER_CLASSES
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network

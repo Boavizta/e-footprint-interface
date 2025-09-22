@@ -1,4 +1,4 @@
-from efootprint.core.all_classes_in_order import ALL_EFOOTPRINT_CLASSES
+from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.usage.job import JobBase
 

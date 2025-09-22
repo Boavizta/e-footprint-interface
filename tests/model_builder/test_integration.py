@@ -8,6 +8,7 @@ from efootprint.constants.units import u
 from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
+from model_builder.edition.views_edition import edit_object
 from model_builder.views import result_chart
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.views_deletion import delete_object
@@ -55,10 +56,26 @@ class IntegrationTest(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 1)
 
+        computed_model_web = ModelWeb(up_request.session)
+        logger.info("Updating job data transferred to 20 MB")
+        previous_network_energy_footprint = computed_model_web.system.usage_patterns[0].network.energy_footprint.sum()
+        logger.info(f"Previous network energy footprint: {previous_network_energy_footprint}")
+        job = computed_model_web.get_efootprint_object_from_efootprint_id(new_job_id, "Job")
+        edit_data = self.create_edit_object_post_data(job, "data_transferred", SourceValue(20 * u.MB))
+        edit_request = self.create_post_request(
+            f"/edit-object/{job.id}", edit_data, up_request.session["system_data"])
+        response = edit_object(edit_request, job.id)
+        self.assertEqual(response.status_code, 200)
+        updated_model_web = ModelWeb(edit_request.session)
+        updated_network_energy_footprint = updated_model_web.system.usage_patterns[0].network.energy_footprint.sum()
+        logger.info(f"Updated network energy footprint: {updated_network_energy_footprint}")
+        self.assertGreater(updated_network_energy_footprint, previous_network_energy_footprint,
+                           "Network energy footprint did not increase after increasing job data transferred")
+
         logger.info(f"Creating edge device")
         edge_device_data = self.create_edge_device_data("Test Edge Device")
         edge_device_request = self.create_post_request(
-            "/add-object/EdgeDevice", edge_device_data, up_request.session["system_data"])
+            "/add-object/EdgeDevice", edge_device_data, edit_request.session["system_data"])
         add_object(edge_device_request, "EdgeDevice")
         edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
 

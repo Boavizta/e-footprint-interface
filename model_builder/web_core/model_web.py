@@ -10,7 +10,7 @@ from efootprint.abstract_modeling_classes.explainable_hourly_quantities import E
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
-from efootprint.core.all_classes_in_order import SERVICE_CLASSES
+from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.usage.edge_usage_pattern import EdgeUsagePattern
 from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger

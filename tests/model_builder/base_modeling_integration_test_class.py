@@ -9,6 +9,7 @@ from django.http import QueryDict
 from django.test import TestCase, RequestFactory
 from django import setup
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 
@@ -118,6 +119,19 @@ class TestModelingBase(TestCase):
                 data[key] = value
 
         return data
+
+    @staticmethod
+    def create_edit_object_post_data(
+        obj_to_edit: ModelingObject, attr_name: str, new_value: ExplainableQuantity) -> Dict[str, Any]:
+        """Create form data for editing an object's attribute."""
+        efootprint_class_name = obj_to_edit.class_as_simple_str
+        output_data = {
+            "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
+            f"{efootprint_class_name}_{attr_name}": str(new_value.magnitude),
+            f"{efootprint_class_name}_{attr_name}_unit": str(new_value.unit)
+        }
+        return output_data
+
 
     @staticmethod
     def create_usage_pattern_data(name: str = "Test Usage Pattern",
