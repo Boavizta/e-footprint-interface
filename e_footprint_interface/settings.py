@@ -210,5 +210,23 @@ if os.getenv('DJANGO_DOCKER') == 'True':
     CSRF_TRUSTED_ORIGINS = ["https://*.sapient.dev"]
 
 
+# Production & Dev Clever Cloud
+if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
+    ALLOWED_HOSTS = ["dev.efootprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
+    #CACHES = {
+    #    'default': {
+    #        'BACKEND': 'django_redis.cache.RedisCache',
+    #        'LOCATION': 'redis://redis:6379/0',
+    #        'OPTIONS': {
+    #            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+    #        }
+    #    }
+    #}
+    #SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    #SESSION_CACHE_ALIAS = 'default' # cache alias name
+    CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
+    DATABASES = {"default": env.db()}
+
+
 X_FRAME_OPTIONS = "SAMEORIGIN"
 CSP_FRAME_ANCESTORS = ["'self'"]
