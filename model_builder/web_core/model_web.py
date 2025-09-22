@@ -11,8 +11,6 @@ from efootprint.abstract_modeling_classes.explainable_quantity import Explainabl
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.all_classes_in_order import SERVICE_CLASSES
-from efootprint.core.usage.edge_usage_pattern import EdgeUsagePattern
-from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 

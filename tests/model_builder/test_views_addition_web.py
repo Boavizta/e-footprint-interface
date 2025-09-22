@@ -145,22 +145,20 @@ class TestViewsAdditionWeb(TestModelingBase):
         os.environ["RAISE_EXCEPTIONS"] = "True"
         self.change_system_data(os.path.join(root_test_dir, "..", "model_builder", "reference_data", "default_system_data.json"))
 
-        # Delete usage journey step
+        logger.info("Deleting usage journey step")
         uj_step_id = next(iter(self.system_data["UsageJourneyStep"].keys()))
         delete_request = self.create_post_request(f"/delete-object/{uj_step_id}", {})
         nb_uj_steps = len(delete_request.session["system_data"]["UsageJourneyStep"])
         self.assertEqual(1, nb_uj_steps)
-
-        logger.info("Deleting usage journey step")
         response = delete_object(delete_request, uj_step_id)
         self.assert_response_ok(response)
         self.assertNotIn("UsageJourneyStep", delete_request.session["system_data"])
 
-        # Link usage pattern to usage journey without step
+        logger.info("Link usage pattern to usage journey without step")
         uj_id = next(iter(delete_request.session["system_data"]["UsageJourney"].keys()))
-        logger.info("Linking usage pattern to usage journey without uj step")
-        up_data = self.create_usage_pattern_data(name="2New usage pattern", usage_journey_id=uj_id)
-        add_request = self.create_post_request("/add-object/UsagePatternFromForm", up_data, self.system_data)
+        up_data = self.create_usage_pattern_data(name="New usage pattern", usage_journey_id=uj_id)
+        add_request = self.create_post_request(
+            "/add-object/UsagePatternFromForm", up_data, delete_request.session["system_data"])
         response = add_object(add_request, "UsagePatternFromForm")
         self.assert_response_ok(response)
 
@@ -169,7 +167,7 @@ class TestViewsAdditionWeb(TestModelingBase):
         logger.info("Requesting result chart after adding usage pattern to usage journey without uj step")
         with self.assertRaises(ValueError) as context:
             response = result_chart(result_request)
-        self.assertIn("No impact could be computed because the modeling is incomplete", str(context.exception))
+        self.assertIn("The following usage journey(s) have no usage journey step:", str(context.exception))
 
     def test_add_server_then_ai_model_then_job(self):
         os.environ["RAISE_EXCEPTIONS"] = "True"

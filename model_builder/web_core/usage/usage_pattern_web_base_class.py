@@ -63,8 +63,10 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
 
     @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
-        if len(model_web.usage_journeys) == 0:
-            raise PermissionError("You need to have created at least one usage journey to create a usage pattern.")
+        if len(getattr(model_web, cls.object_type_in_volume + "s")) == 0:
+            raise PermissionError(
+                f"You need to have created at least one {cls.object_type_in_volume.replace("_", " ")} "
+                f"to create a usage pattern.")
         efootprint_object_type = cls.associated_efootprint_class.__name__
         form_sections, dynamic_form_data = generate_object_creation_structure(
             efootprint_object_type,
