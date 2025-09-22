@@ -35,8 +35,8 @@ RUN apt-get install nodejs npm -y
 WORKDIR /app
 
 # Configure nginx
-ADD ./docker/conf-prod/nginx.conf /etc/nginx/nginx.conf
-ADD ./docker/conf-prod/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD ./docker/conf/nginx.conf /etc/nginx/nginx.conf
+ADD ./docker/conf/supervisord-prod.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy the full app
 ADD . /app
