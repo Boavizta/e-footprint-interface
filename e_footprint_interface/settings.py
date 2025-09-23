@@ -212,8 +212,22 @@ if os.getenv('DJANGO_DOCKER') == 'True':
 
 # Production & Dev Clever Cloud
 if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
+    # Misc
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_PRELOAD = True
+    SECRET_KEY = env("SECRET_KEY")
+
+    # SECURITY WARNING: don't run with debug turned on in production!
+    # Change this to "False" when you are ready for production
     DEBUG = False
+
+    # Hosts config
     ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
+
+    # Cache config
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
@@ -226,7 +240,6 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     SESSION_CACHE_ALIAS = 'default'
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
-
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 CSP_FRAME_ANCESTORS = ["'self'"]
