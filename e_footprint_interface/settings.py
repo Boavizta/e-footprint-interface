@@ -218,7 +218,7 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_PRELOAD = True
-    SECRET_KEY = env("SECRET_KEY")
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
     # SECURITY WARNING: don't run with debug turned on in production!
     # Change this to "False" when you are ready for production
