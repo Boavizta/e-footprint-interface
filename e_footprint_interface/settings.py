@@ -212,6 +212,7 @@ if os.getenv('DJANGO_DOCKER') == 'True':
 
 # Production & Dev Clever Cloud
 if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
+    DEBUG = False
     ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
     CACHES = {
         'default': {
