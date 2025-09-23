@@ -225,7 +225,7 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
     DEBUG = False
 
     # Hosts config
-    ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
+    ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
 
     # Cache config
     CACHES = {
