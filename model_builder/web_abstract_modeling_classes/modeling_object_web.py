@@ -271,7 +271,7 @@ class ModelingObjectWeb:
         msg = (f"This {self.class_as_simple_str} is referenced by "
                f"{", ".join([obj.name for obj in self.modeling_obj_containers])}. "
                f"To delete it, first delete or reorient these "
-               f"{self.modeling_obj_containers[0].class_as_simple_str}s.")
+               f"{FORM_TYPE_OBJECT[self.modeling_obj_containers[0].class_as_simple_str]["label"].lower()}s.")
 
         return msg
 

@@ -24,7 +24,7 @@ Upstream domain logic (carbon/energy modeling) is provided by the e-footprint Py
 Flow in short:
 1) User interacts with pages (HTMX requests, forms, buttons) → Django views
 2) Views (mostly in `model_builder/views*.py`) mutate/serialize a modeling saved as a dictionary in the user’s session data, under the "system_data" key.
-3) `ModelWeb` wraps the domain model and exposes web-friendly accessors. Web-entry code avoids heavy computations; all modeling logic is delegated to `efootprint` domain classes.
+3) `ModelWeb` wraps the domain model and exposes web-friendly `ModelingObjectWeb` accessors. Web-entry code avoids heavy computations; all modeling logic is delegated to `efootprint` domain classes.
 4) Templates render partials/sidenav/forms/charts; JS augments UX where needed
 
 
@@ -53,7 +53,7 @@ Flow in short:
 Most of the web-facing orchestration lives in `model_builder/`.
 
 Key files:
-- `model_builder/model_web.py`
+- `model_builder/web_core/model_web.py`
   - `ModelWeb` is the central web wrapper around the e-footprint domain model. It:
     - Deserializes session `system_data` via `efootprint.api_utils.json_to_system`
     - Wraps the resulting domain `System` into web objects (`wrap_efootprint_object`)
@@ -62,16 +62,14 @@ Key files:
     - Maintains a flat index of objects (`flat_efootprint_objs_dict`) for quick lookups
     - Provides convenience getters by type or ID and can inject default objects on demand
     - Computes daily emissions timeseries aggregating energy and fabrication impacts (`system_emissions`)
-  - Important constants and helpers:
-    - `MODELING_OBJECT_CLASSES_DICT` merges e-footprint classes + local extensions
-    - `DEFAULT_OBJECTS_CLASS_MAPPING` to seed networks/devices/countries
-    - `ATTRIBUTES_TO_SKIP_IN_FORMS` to filter technical attributes out of forms
-- `model_builder/modeling_objects_web.py`
-  - Web wrappers (`wrap_efootprint_object`, `ExplainableObjectWeb`) that adapt e-footprint domain objects to template-friendly shapes and provide computed properties for display. The `EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING` constant maps e-footprint class names to their web object counterparts, for transparent wrapping.
-- `model_builder/model_builder_utils.py`
-  - Utilities for timeseries alignment, rounding, and date-window computations used by charts and summaries
+- `model_builder/all_efootprint_classes.py`
+  - `MODELING_OBJECT_CLASSES_DICT` merges e-footprint classes + local extensions
+- `model_builder/efootprint_to_web_mapping.py`
+  - Web wrappers (associated by the `wrap_efootprint_object` function) adapt e-footprint domain objects to template-friendly shapes and provide computed properties for display. The `EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING` constant maps e-footprint class names to their web object counterparts, for transparent wrapping.
+- `model_builder/web_core`
+  - package of web wrappers around e-footprint domain classes (e.g., `ServerWeb`, `JobWeb`, `UsagePatternWeb`, etc.)
 - Views and CRUD layers:
-  - `model_builder/addition/...`, `model_builder/edition/...`, `model_builder/views_deletion.py`, and `model_builder/views.py` implement the flows to create/edit/delete objects and sections. They return full pages or HTMX partials.
+  - `model_builder/addition/...`, `model_builder/edition/...`, `model_builder/views_deletion.py`, and `model_builder/views.py` implement the flows to create/edit/delete objects and sections. They return full pages or HTMX partials. The creation/edition/deletion logic calls generic methods in the views, and object specific logic is done with ModelingObjectWeb (and children classes defined in `model_builder/web_core`) methods.
 - Extensions:
   - The `model_builder/efootprint_extensions` package allows for the creation of modeling classes that extend e-footprint logic, like for example the `UsagePatternFromForm` class found in the `model_builder/efootprint_extensions/usage_pattern_from_form` module. Extension classes need to be added to the `MODELING_OBJECT_CLASSES_DICT` constant.
 

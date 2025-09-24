@@ -29,14 +29,14 @@ files = [
 
 [[package]]
 name = "anyio"
-version = "4.10.0"
+version = "4.11.0"
 description = "High-level concurrency and networking framework on top of asyncio or Trio"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "anyio-4.10.0-py3-none-any.whl", hash = "sha256:60e474ac86736bbfd6f210f7a61218939c318f43f9972497381f1c5e930ed3d1"},
-    {file = "anyio-4.10.0.tar.gz", hash = "sha256:3f3fae35c96039744587aa5b8371e7e8e603c0702999535961dd336026973ba6"},
+    {file = "anyio-4.11.0-py3-none-any.whl", hash = "sha256:0287e96f4d26d4149305414d4e3bc32f0dcd0862365a4bddea19d7a1ec38c4fc"},
+    {file = "anyio-4.11.0.tar.gz", hash = "sha256:82a8d0b81e318cc5ce71a5f1f8b5c4e63619620b63141ef8c995fa0db95a57c4"},
 ]
 
 [package.dependencies]
@@ -45,18 +45,18 @@ sniffio = ">=1.1"
 typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
-trio = ["trio (>=0.26.1)"]
+trio = ["trio (>=0.31.0)"]
 
 [[package]]
 name = "asgiref"
-version = "3.9.1"
+version = "3.9.2"
 description = "ASGI specs, helper code, and adapters"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "asgiref-3.9.1-py3-none-any.whl", hash = "sha256:f3bba7092a48005b5f5bacd747d36ee4a5a61f4a269a6df590b43144355ebd2c"},
-    {file = "asgiref-3.9.1.tar.gz", hash = "sha256:a5ab6582236218e5ef1648f242fd9f10626cfd4de8dc377db215d5d5098e3142"},
+    {file = "asgiref-3.9.2-py3-none-any.whl", hash = "sha256:0b61526596219d70396548fc003635056856dba5d0d086f86476f10b33c75960"},
+    {file = "asgiref-3.9.2.tar.gz", hash = "sha256:a0249afacb66688ef258ffe503528360443e2b9a8d8c4581b6ebefa58c841ef1"},
 ]
 
 [package.extras]
@@ -799,14 +799,14 @@ jinja = ["Jinja2 (>=3.0,<4)"]
 
 [[package]]
 name = "django-browser-reload"
-version = "1.20.0"
-description = "Automatically reload your browser in development."
+version = "1.21.0"
+description = "Automatically refresh your browser on changes to Python code, templates, or static files."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "django_browser_reload-1.20.0-py3-none-any.whl", hash = "sha256:e1e2a7b8835b6a367b4dcb0e6560b0dd1c027bd9e3b4f77a4ba4df27d6a8a676"},
-    {file = "django_browser_reload-1.20.0.tar.gz", hash = "sha256:a5e23fc4d0ab67d594edf220fb1e3fd8b35fad4c36b9a03b590bf84f58549735"},
+    {file = "django_browser_reload-1.21.0-py3-none-any.whl", hash = "sha256:0b2a86ab460774fa9bb142a121c70e75a72f18109f51a4f6de409cd633d3a70d"},
+    {file = "django_browser_reload-1.21.0.tar.gz", hash = "sha256:3335ad3d107eb657f623d1a8e680dfbcab8a83ae1f94df1895e069dddf5604ba"},
 ]
 
 [package.dependencies]
@@ -3444,14 +3444,14 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.5.0)
 
 [[package]]
 name = "wcwidth"
-version = "0.2.13"
+version = "0.2.14"
 description = "Measures the displayed width of unicode strings in a terminal"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "wcwidth-0.2.13-py2.py3-none-any.whl", hash = "sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859"},
-    {file = "wcwidth-0.2.13.tar.gz", hash = "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"},
+    {file = "wcwidth-0.2.14-py2.py3-none-any.whl", hash = "sha256:a7bb560c8aee30f9957e5f9895805edd20602f2d7f720186dfd906e82b4982e1"},
+    {file = "wcwidth-0.2.14.tar.gz", hash = "sha256:4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"},
 ]
 
 [[package]]

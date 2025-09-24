@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.0] - 2025-09-24
+
+### Added
+- Edge objects: edge devices with storage, edge usage journeys, recurrent edge processes and edge usage patterns.
+
+### Fixed
+- Memory leak caused by keeping file open when updloading json.
+- Recomputation issues: see e-footprint 11.2.3 upgrade and calculus graph update in default_system_data.json.
+- Stop displaying form sections with only one object type in choices.
+
+### Changed
+- Major refactoring: web objects now have their own modules in model_builder/web_abstract_modeling_classes, model_builder/web_builders and model_builder/web_core for better maintenability and reflecting e-footprint structure.
+
 ## [0.8.18] - 2025-08-01
 
 ### Fixed
