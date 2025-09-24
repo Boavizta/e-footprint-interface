@@ -4,9 +4,9 @@
         <div class="col-12 col-xl-8 p-2 p-xl-5 home-page">
             <div class="row h-100">
                 <div class="col-10 offset-1 text-start rounded-2 p-4">
-                    <div class="d-flex px-4 py-5">
-                        <img src="{% static 'images/e-footprint-logo-Hori-full.svg' %}" alt="e-footprint-logo" />
-                    </div>
+                    <p class="fs-1">
+                        <b>e</b>-footprint
+                    </p>
                     <p class="h1 mt-5 mb-4"><b>Do you know the carbon footprint<br>of your digital service ?</b></p>
                     <button id="btn-start-modeling-my-service" class="btn bg-radiant rounded-pill mt-3 h3 py-3 px-4 text-white no-loader"
                             hx-get="{% url 'model-builder' %}"

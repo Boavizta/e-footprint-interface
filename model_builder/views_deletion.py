@@ -6,7 +6,8 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 from efootprint.logger import logger
 
 from model_builder.web_core.model_web import ModelWeb
-from model_builder.efootprint_to_web_mapping import JobWeb, UsageJourneyStepWeb, UsagePatternWeb, UsageJourneyWeb, ServerWeb
+from model_builder.efootprint_to_web_mapping import (JobWeb, UsageJourneyStepWeb, UsagePatternWeb, UsageJourneyWeb,
+                                                     ServerWeb)
 from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
     generate_http_response_from_edit_html_and_events
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
