@@ -2,19 +2,15 @@ from typing import TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
+    ModelingObjectWebThatCanBeMirrored
 from model_builder.web_core.usage.job_web import MirroredJobWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.usage.usage_journey_web import UsageJourneyWeb
 
 
-class UsageJourneyStepWeb(ModelingObjectWeb):
-    @property
-    def web_id(self):
-        raise PermissionError(f"UsageJourneyStepWeb objects don’t have a web_id attribute because their html "
-                             f"representation should be managed by the MirroredUsageJourneyStepWeb object")
-
+class UsageJourneyStepWeb(ModelingObjectWebThatCanBeMirrored):
     @property
     def mirrored_cards(self):
         mirrored_cards = []

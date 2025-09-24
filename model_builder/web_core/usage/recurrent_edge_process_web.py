@@ -2,29 +2,30 @@ from typing import TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
+from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
+    ModelingObjectWebThatCanBeMirrored
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.usage.edge_usage_journey_web import EdgeUsageJourneyWeb
 
 
-class RecurrentEdgeProcessFromFormWeb(ModelingObjectWeb):
-    @property
-    def web_id(self):
-        raise PermissionError(
-            f"RecurrentEdgeProcessFromFormWeb objects don’t have a web_id attribute because their html "
-            f"representation should be managed by the MirroredRecurrentEdgeProcessFromFormWeb object")
-
+class RecurrentEdgeProcessWeb(ModelingObjectWebThatCanBeMirrored):
     @property
     def mirrored_cards(self):
         mirrored_cards = []
         for edge_usage_journey in self.edge_usage_journeys:
-            mirrored_cards.append(MirroredRecurrentEdgeProcessFromFormWeb(self._modeling_obj, edge_usage_journey))
+            mirrored_cards.append(MirroredRecurrentEdgeProcessWeb(self._modeling_obj, edge_usage_journey))
 
         return mirrored_cards
 
 
-class MirroredRecurrentEdgeProcessFromFormWeb(ModelingObjectWeb):
+class RecurrentEdgeProcessWebFromFormWeb(RecurrentEdgeProcessWeb):
+    # This class exists because the default generate_object_creation_context method uses the class name
+    pass
+
+
+class MirroredRecurrentEdgeProcessWeb(ModelingObjectWeb):
     def __init__(self, modeling_obj: ModelingObject, euj: "EdgeUsageJourneyWeb"):
         super().__init__(modeling_obj, euj.model_web)
         self.edge_usage_journey = euj

@@ -2,7 +2,7 @@ import json
 import re
 from typing import TYPE_CHECKING, get_origin, List, get_args
 
-from django.http import QueryDict
+from django.http import QueryDict, HttpResponse
 from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
@@ -266,3 +266,56 @@ class ModelingObjectWeb:
 
     def edit_object_and_return_html_response(self, edit_form_data: QueryDict):
         return compute_edit_object_html_and_event_response(edit_form_data, self)
+
+    def generate_cant_delete_modal_message(self):
+        msg = (f"This {self.class_as_simple_str} is referenced by "
+               f"{", ".join([obj.name for obj in self.modeling_obj_containers])}. "
+               f"To delete it, first delete or reorient these "
+               f"{self.modeling_obj_containers[0].class_as_simple_str}s.")
+
+        return msg
+
+    def generate_ask_delete_modal_context(self):
+        accordion_children = self.accordion_children
+        if len(accordion_children) > 0:
+            class_label = self.class_label.lower()
+            child_class_label = accordion_children[0].class_label.lower()
+            message = (f"This {class_label} is associated with {len(accordion_children)} {child_class_label}. "
+                       f"This action will delete them all")
+            sub_message = f"{child_class_label.capitalize()} used in other {class_label}s will remain in those."
+        else:
+            message = f"Are you sure you want to delete this {self.class_as_simple_str} ?"
+            sub_message = ""
+
+        return {"obj": self, "message": message, "sub_message": sub_message, "remove_card_with_hyperscript": True}
+
+    def generate_ask_delete_http_response(self, request):
+        if self.modeling_obj_containers:
+            cant_delete_modal_message = self.generate_cant_delete_modal_message()
+            cant_delete_modal_context = {
+                "modal_id": "model-builder-modal", "message": cant_delete_modal_message}
+
+            http_response = render(request, "model_builder/modals/cant_delete_modal.html",
+                                   context=cant_delete_modal_context)
+        else:
+            delete_modal_context = self.generate_ask_delete_modal_context()
+            delete_modal_context["modal_id"] = "model-builder-modal"
+
+            http_response = render(
+                request, "model_builder/modals/delete_card_modal.html",
+                context=delete_modal_context)
+
+        return http_response
+
+    def generate_delete_http_response(self, request):
+        self.self_delete()
+        self.model_web.update_system_data_with_up_to_date_calculated_attributes()
+
+        http_response = HttpResponse(status=204)
+        toast_and_highlight_data = {"ids": [], "name": self.name, "action_type": "delete_object"}
+        http_response["HX-Trigger"] = json.dumps({
+            "resetLeaderLines": "",
+            "displayToastAndHighlightObjects": toast_and_highlight_data
+        })
+
+        return http_response

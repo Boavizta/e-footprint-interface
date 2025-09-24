@@ -7,6 +7,8 @@ from efootprint.core.usage.job import Job, GPUJob
 
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
+from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
+    ModelingObjectWebThatCanBeMirrored
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb, \
     ATTRIBUTES_TO_SKIP_IN_FORMS
 
@@ -15,12 +17,7 @@ if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class JobWeb(ModelingObjectWeb):
-    @property
-    def web_id(self):
-        raise PermissionError(f"JobWeb objects don’t have a web_id attribute because their html "
-                             f"representation should be managed by the MirroredJobWeb object")
-
+class JobWeb(ModelingObjectWebThatCanBeMirrored):
     @property
     def mirrored_cards(self):
         mirrored_cards = []

@@ -51,3 +51,10 @@ class ServerWeb(ModelingObjectWeb):
         edit_object_in_system(storage_data, storage)
 
         return super().edit_object_and_return_html_response(edit_form_data)
+
+    def generate_cant_delete_modal_message(self):
+        if self.jobs:
+            msg = (f"This server is requested by {", ".join([obj.name for obj in self.jobs])}. "
+                   f"To delete it, first delete or reorient these jobs making requests to it.")
+            return msg
+        return super().generate_cant_delete_modal_message()

@@ -6,7 +6,7 @@ from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb, \
     ATTRIBUTES_TO_SKIP_IN_FORMS
-from model_builder.web_core.usage.recurrent_edge_process_web import MirroredRecurrentEdgeProcessFromFormWeb
+from model_builder.web_core.usage.recurrent_edge_process_web import MirroredRecurrentEdgeProcessWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -29,7 +29,7 @@ class EdgeUsageJourneyWeb(ModelingObjectWeb):
     def edge_processes(self):
         web_edge_processes = []
         for edge_process in self._modeling_obj.edge_processes:
-            web_edge_processes.append(MirroredRecurrentEdgeProcessFromFormWeb(edge_process, self))
+            web_edge_processes.append(MirroredRecurrentEdgeProcessWeb(edge_process, self))
 
         return web_edge_processes
 

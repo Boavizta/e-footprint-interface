@@ -21,6 +21,8 @@ def generate_attributes_to_skip_in_forms(object_type_in_volume: str):
 
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
+    attr_name_in_system = "value to override in subclass"
+
     @property
     def links_to(self):
         raise NotImplementedError("Subclasses must implement the links_to property.")
@@ -32,6 +34,23 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     @property
     def template_name(self):
         return "usage_pattern"
+
+    def generate_ask_delete_http_response(self, request):
+        delete_modal_context = self.generate_ask_delete_modal_context()
+        delete_modal_context["modal_id"] = "model-builder-modal"
+
+        http_response = render(
+            request, "model_builder/modals/delete_card_modal.html",
+            context=delete_modal_context)
+
+        return http_response
+
+    def generate_delete_http_response(self, request):
+        system = self.model_web.system
+        new_up_list = [up for up in system.get_efootprint_value(self.attr_name_in_system) if up.id != self.efootprint_id]
+        system.set_efootprint_value(self.attr_name_in_system, new_up_list)
+
+        return super().generate_delete_http_response(request)
 
 
 class UsagePatternFromFormWebBaseClass(UsagePatternWebBaseClass):

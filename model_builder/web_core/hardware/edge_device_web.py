@@ -18,6 +18,10 @@ class EdgeDeviceWeb(ModelingObjectWeb):
     add_template = "add_object_with_storage.html"
     edit_template = "../server/server_edit.html"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+
     @property
     def class_title_style(self):
         return "h6"
