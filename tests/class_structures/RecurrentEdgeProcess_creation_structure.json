@@ -63,7 +63,7 @@
                 "attr_name": "constant_storage_needed",
                 "label": "constant storage needed",
                 "tooltip": false,
-                "default": 100,
+                "default": 1,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null

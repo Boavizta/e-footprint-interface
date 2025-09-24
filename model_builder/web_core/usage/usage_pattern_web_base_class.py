@@ -21,13 +21,6 @@ def generate_attributes_to_skip_in_forms(object_type_in_volume: str):
 
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
-    add_template = "../usage_pattern/usage_pattern_add.html"
-    edit_template = "../usage_pattern/usage_pattern_edit.html"
-    associated_efootprint_class = None
-    attr_name_in_system = "value to override in subclass"
-    object_type_in_volume = ""
-    attributes_to_skip_in_forms = generate_attributes_to_skip_in_forms(object_type_in_volume)
-
     @property
     def links_to(self):
         raise NotImplementedError("Subclasses must implement the links_to property.")
@@ -39,6 +32,15 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     @property
     def template_name(self):
         return "usage_pattern"
+
+
+class UsagePatternFromFormWebBaseClass(UsagePatternWebBaseClass):
+    add_template = "../usage_pattern/usage_pattern_add.html"
+    edit_template = "../usage_pattern/usage_pattern_edit.html"
+    associated_efootprint_class = None
+    attr_name_in_system = "value to override in subclass"
+    object_type_in_volume = ""
+    attributes_to_skip_in_forms = generate_attributes_to_skip_in_forms(object_type_in_volume)
 
     @classmethod
     def generate_net_growth_rate_timespan_dynamic_select_dict(cls):

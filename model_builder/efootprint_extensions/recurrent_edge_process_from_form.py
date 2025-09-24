@@ -11,7 +11,7 @@ class RecurrentEdgeProcessFromForm(RecurrentEdgeProcess):
     default_values = {
         "constant_compute_needed": SourceValue(1 * u.cpu_core),
         "constant_ram_needed": SourceValue(1 * u.GB),
-        "constant_storage_needed": SourceValue(100 * u.GB)
+        "constant_storage_needed": SourceValue(1 * u.GB)
     }
     def __init__(
         self, name:str, constant_compute_needed: ExplainableQuantity, constant_ram_needed: ExplainableQuantity,

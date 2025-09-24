@@ -5,6 +5,7 @@ from typing import get_origin, List, get_args, TYPE_CHECKING
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
@@ -166,7 +167,9 @@ def generate_dynamic_form(
                     "step": step
                 })
             elif issubclass(annotation, ExplainableHourlyQuantities):
-                structure_field.update({"input_type": "timeseries_input"})
+                structure_field.update({"input_type": "timeseries_input", "default": str(default)})
+            elif issubclass(annotation, ExplainableRecurrentQuantities):
+                structure_field.update({"input_type": "recurrent_timeseries_input", "default": str(default)})
             elif issubclass(annotation, ExplainableObject):
                 if attr_name in list_values.keys():
                     structure_field.update({
