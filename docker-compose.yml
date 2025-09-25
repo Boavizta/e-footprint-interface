@@ -64,7 +64,7 @@ services:
         target: /etc/supervisor/conf.d/supervisord.conf
     labels:
       - traefik.enable=true
-      - traefik.http.routers.efootprint.rule=Host(`efootprint.sapient.dev`)
+      - traefik.http.routers.efootprint.rule=Host(`efootprint.boavizta.dev`)
       - traefik.http.routers.efootprint.tls=true
       - traefik.http.services.efootprint.loadbalancer.server.port=8000
       - traefik.http.services.efootprint.loadbalancer.passhostheader=true

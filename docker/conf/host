@@ -1,7 +1,7 @@
 # Host config
-127.0.0.1	sapient.dev
-127.0.0.1	traefik.sapient.dev
-127.0.0.1	efootprint.sapient.dev
+127.0.0.1	boavizta.dev
+127.0.0.1	traefik.boavizta.dev
+127.0.0.1	efootprint.boavizta.dev
 
 # Docker Local Config
 127.0.0.1	redis

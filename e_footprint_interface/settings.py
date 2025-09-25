@@ -195,7 +195,7 @@ if os.getenv('DJANGO_PROD') == 'True':
 
 # Local Docker
 if os.getenv('DJANGO_DOCKER') == 'True':
-    ALLOWED_HOSTS = ["efootprint.sapient.dev", "*.sapient.dev"]
+    ALLOWED_HOSTS = ["efootprint.boavizta.dev", "*.boavizta.dev"]
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
@@ -207,7 +207,7 @@ if os.getenv('DJANGO_DOCKER') == 'True':
     }
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     SESSION_CACHE_ALIAS = 'default' # cache alias name
-    CSRF_TRUSTED_ORIGINS = ["https://*.sapient.dev"]
+    CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.dev"]
 
 
 # Production & Dev Clever Cloud

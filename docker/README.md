@@ -32,11 +32,11 @@ Source: [https://github.com/FiloSottile/mkcert](https://github.com/FiloSottile/m
 mkcert -install
 ```
 
-### Create self-signed certificates for sapient.dev domain & sub-domains
+### Create self-signed certificates for boavizta.dev domain & sub-domains
 
 ```console
 # At the root directory of the repository
-mkcert -cert-file docker/conf/ssl/local-cert.pem -key-file docker/conf/ssl/local-key.pem "*.services.sapient.dev" "*.sapient.dev" "services.sapient.dev" "sapient.dev" "traefik"
+mkcert -cert-file docker/conf/ssl/local-cert.pem -key-file docker/conf/ssl/local-key.pem "*.services.boavizta.dev" "*.boavizta.dev" "services.boavizta.dev" "boavizta.dev" "traefik"
 ```
 
 Don't forget to restart your Chrome or Firefox.
@@ -65,5 +65,5 @@ docker compose --profile dev up -d
 
 | Service Name | Service URL                               |
 |--------------|-------------------------------------------|
-| Web App      | https://efootprint.sapient.dev/     |
-| Traefik      | https://traefik.sapient.dev/              |
+| Web App      | https://efootprint.boavizta.dev/          |
+| Traefik      | https://traefik.boavizta.dev/             |

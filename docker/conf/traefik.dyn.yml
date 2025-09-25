@@ -1,16 +1,16 @@
 http:
   routers:
     traefik:
-      rule: "Host(`traefik.sapient.dev`) || Host(`traefik`)"
+      rule: "Host(`traefik.boavizta.dev`) || Host(`traefik`)"
       service: "api@internal"
       tls:
         domains:
-          - main: "sapient.dev"
+          - main: "boavizta.dev"
             sans:
-              - "*.sapient.dev"
-          - main: "services.sapient.dev"
+              - "*.boavizta.dev"
+          - main: "services.boavizta.dev"
             sans:
-              - "*.services.sapient.dev"
+              - "*.services.boavizta.dev"
 
 tls:
   stores:
