@@ -1,0 +1,87 @@
+name: "efootprint"
+
+# Services
+services:
+  traefik:
+    hostname: traefik
+    restart: unless-stopped
+    image: traefik:latest
+    container_name: etraefik
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 10s
+    ports:
+      - 127.0.0.1:80:80
+      - 127.0.0.1:443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/conf/ssl:/etc/certs:ro
+      - ./docker/conf/traefik.dyn.yml:/etc/traefik/dyn.yml:ro
+      - ./docker/conf/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./docker/conf/acme.json:/acme.json
+    profiles:
+      - dev
+  redis:
+    hostname: redis
+    restart: on-failure
+    image: redis:latest
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      timeout: 20s
+      retries: 10
+    labels:
+      - traefik.enable=true
+    ports:
+      - 127.0.0.1:6379:6379
+    networks:
+      - traefik
+    volumes:
+      - redis01:/data
+    depends_on:
+      - traefik
+    profiles:
+      - dev
+  web:
+    hostname: web
+    restart: on-failure
+    build:
+      dockerfile: Dockerfile-dev
+      context: ${EF_APP_PATH}
+    ports:
+      - 80
+    env_file: ${EF_APP_PATH}/.env
+    command: /usr/local/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
+    volumes:
+      - ${EF_APP_PATH}:/app:cached
+      - type: bind
+        source: ${EF_APP_PATH}/docker/conf/supervisord.conf
+        target: /etc/supervisor/conf.d/supervisord.conf
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.efootprint.rule=Host(`efootprint.boavizta.dev`)
+      - traefik.http.routers.efootprint.tls=true
+      - traefik.http.services.efootprint.loadbalancer.server.port=8000
+      - traefik.http.services.efootprint.loadbalancer.passhostheader=true
+    networks:
+      - traefik
+    depends_on:
+      - traefik
+      - redis
+    profiles:
+      - dev
+
+# Volumes
+volumes:
+  redis01:
+    driver: local
+
+# Nets
+networks:
+  traefik:
+    external: false
