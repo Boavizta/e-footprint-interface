@@ -205,8 +205,8 @@ if os.getenv('DJANGO_DOCKER') == 'True':
             }
         }
     }
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default' # cache alias name
+    #SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    #SESSION_CACHE_ALIAS = 'default' # cache alias name
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.dev"]
 
 
@@ -228,6 +228,7 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
     ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
 
     # Cache config
+    DATABASES = {"default": env.db()}
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
@@ -237,8 +238,10 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
             }
         }
     }
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default'
+
+    # Remove Session Temporary
+    # SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    # SESSION_CACHE_ALIAS = 'default'
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
