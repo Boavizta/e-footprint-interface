@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install components, upgrade machine & add supervisor
 RUN apt-get update
-RUN apt-get install -y procps git curl wget nano gettext gettext-base unzip libpq-dev default-libmysqlclient-dev mysql-common pkg-config gcc micro
+RUN apt-get install -y procps git curl wget nano gettext gettext-base unzip libpq-dev default-libmysqlclient-dev mysql-common pkg-config gcc micro htop
 RUN pip3 install --upgrade pip
 RUN pip3 install supervisor poetry
 RUN mkdir -p /var/log/supervisor
@@ -22,3 +22,6 @@ RUN apt-get install nodejs npm -y
 ADD poetry.lock /app
 ADD pyproject.toml /app
 RUN poetry install
+
+# Entrypoint (migrate)
+ENTRYPOINT ["./entrypoint-dev.sh"]

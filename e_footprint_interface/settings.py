@@ -196,17 +196,18 @@ if os.getenv('DJANGO_PROD') == 'True':
 # Local Docker
 if os.getenv('DJANGO_DOCKER') == 'True':
     ALLOWED_HOSTS = ["efootprint.boavizta.dev", "*.boavizta.dev"]
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': 'redis://redis:6379/0',
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            }
-        }
-    }
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default' # cache alias name
+    #CACHES = {
+    #    'default': {
+    #        'BACKEND': 'django_redis.cache.RedisCache',
+    #        'LOCATION': 'redis://redis:6379/0',
+    #        'OPTIONS': {
+    #            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+    #        }
+    #    }
+    #}
+    #SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    #SESSION_CACHE_ALIAS = 'default' # cache alias name
+    DATABASES = {"default": env.db()}
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.dev"]
 
 
@@ -228,17 +229,20 @@ if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
     ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
 
     # Cache config
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': os.getenv('CACHE_URL'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            }
-        }
-    }
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default'
+    DATABASES = {"default": env.db()}
+    #CACHES = {
+    #    'default': {
+    #        'BACKEND': 'django_redis.cache.RedisCache',
+    #        'LOCATION': os.getenv('CACHE_URL'),
+    #        'OPTIONS': {
+    #            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+    #        }
+    #    }
+    #}
+
+    # Remove Session Temporary
+    # SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    # SESSION_CACHE_ALIAS = 'default'
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
