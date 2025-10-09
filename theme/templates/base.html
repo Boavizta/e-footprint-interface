@@ -2,11 +2,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
         <meta charset="UTF-8"/>
         <title>e-footprint</title>
         <link rel="stylesheet" href="{% static 'css/bs_main.css' %}"/>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         <link rel="icon" type="image/x-icon" href="/static/icons/sidenav/e-footprint-logo.svg"/>
         <link rel="stylesheet" href="{% static 'css/flatpickr.min.css' %}"/>
         <script src="{% static 'scripts/external_librairies/bootstrap.bundle.min.js' %}"></script>
@@ -21,50 +21,51 @@
         <script src="{% static 'scripts/external_librairies/chart_js_plugin_zoom.min.js' %}"></script>
         <script src="{% static 'scripts/external_librairies/flatpickr.min.js' %}"></script>
         <script src="{% static 'scripts/usage_pattern_timeseries.js' %}"></script>
-</head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    <!-- Main Content -->
-    {% include 'navbar.html' %}
-    <div id="loading-bar" class="bg-body-tertiary overflow-hidden z-2">
-        <div class="progress-bar"></div>
-    </div>
-    <main id="main-content-block" class="text-center w-100 position-relative">
-        {% if home %}
-        {% include "home.html" %}
-        {% elif modelBuilderMain %}
-        {% include "model_builder/model_builder_main.html" %}
-        {% endif %}
-    </main>
-    <script src="{% static 'scripts/leaderline_utils.js' %}"></script>
-    <script src="{% static 'scripts/hammer_utils.js' %}"></script>
-    <script src="{% static 'scripts/dynamic_forms.js' %}"></script>
-    <script src="{% static 'scripts/select_multiple.js' %}"></script>
-    <script src="{% static 'scripts/loading_bar.js' %}"></script>
-    <script src="{% static 'scripts/modal_utils.js' %}"></script>
-    <script src="{% static 'scripts/side_panel_utils.js' %}"></script>
-    <script src="{% static 'scripts/result_charts.js' %}"></script>
-    <script src="{% static 'scripts/model_builder_main.js' %}"></script>
-    <script src="{% static 'scripts/timeseries_utils.js' %}"></script>
-    <script src="{% static 'scripts/calculated_attributes_timeseries.js' %}"></script>
-    <script>
-        window.initModelBuilderMain = initModelBuilderMain;
-        window.removeAllLines = removeAllLines;
+    </head>
 
-        document.body.addEventListener('initModelBuilderMain', function (event) {
-           window.initModelBuilderMain();
-        });
+    <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <!-- Main Content -->
+        {% include 'navbar.html' %}
+        <div id="loading-bar" class="bg-body-tertiary overflow-hidden z-2">
+            <div class="progress-bar"></div>
+        </div>
+        <main id="main-content-block" class="text-center w-100 position-relative">
+                {% if home %}
+                {% include "home.html" %}
+                {% elif modelBuilderMain %}
+                {% include "model_builder/model_builder_main.html" %}
+                {% endif %}
+        </main>
+        <script src="{% static 'scripts/leaderline_utils.js' %}"></script>
+        <script src="{% static 'scripts/hammer_utils.js' %}"></script>
+        <script src="{% static 'scripts/dynamic_forms.js' %}"></script>
+        <script src="{% static 'scripts/select_multiple.js' %}"></script>
+        <script src="{% static 'scripts/loading_bar.js' %}"></script>
+        <script src="{% static 'scripts/modal_utils.js' %}"></script>
+        <script src="{% static 'scripts/side_panel_utils.js' %}"></script>
+        <script src="{% static 'scripts/result_charts.js' %}"></script>
+        <script src="{% static 'scripts/model_builder_main.js' %}"></script>
+        <script src="{% static 'scripts/timeseries_utils.js' %}"></script>
+        <script src="{% static 'scripts/calculated_attributes_timeseries.js' %}"></script>
+        <script>
+            window.initModelBuilderMain = initModelBuilderMain;
+            window.removeAllLines = removeAllLines;
 
-        document.body.addEventListener('removeAllLines', function (event) {
-           window.removeAllLines();
-        });
-
-        window.addEventListener("load", function () {
-            if (window.location.pathname === "/model_builder/") {
+            document.body.addEventListener('initModelBuilderMain', function (event) {
                 window.initModelBuilderMain();
-            }
-        });
+            });
 
-        hideLoadingBar();
-    </script>
+            document.body.addEventListener('removeAllLines', function (event) {
+                window.removeAllLines();
+            });
+
+            window.addEventListener("load", function () {
+                if (window.location.pathname === "/model_builder/") {
+                    window.initModelBuilderMain();
+                }
+            });
+
+            hideLoadingBar();
+        </script>
     </body>
 </html>

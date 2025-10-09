@@ -1,35 +1,79 @@
 {% load static %}
-<div class="container-fluid justify-content-center overflow-y-auto overflow-x-hidden" id="home-page-container">
-    <div class="row m-0 p-0 align-items-center">
-        <div class="col-12 col-xl-8 p-2 p-xl-5 home-page">
-            <div class="row h-100">
-                <div class="col-10 offset-1 text-start rounded-2 p-4">
-                    <div class="d-flex px-4 py-5">
-                        <img width="400" height="200" src="{% static 'images/e-footprint-logo-horizontal-full.svg' %}" alt="e-footprint-logo" />
-                    </div>
-                    <p class="h1 mt-5 mb-4"><b>Do you know the carbon footprint<br>of your digital service ?</b></p>
-                    <button id="btn-start-modeling-my-service" class="btn bg-radiant rounded-pill mt-3 h3 py-3 px-4 text-white no-loader"
-                            hx-get="{% url 'model-builder' %}"
-                            hx-target="#main-content-block" hx-swap="innerHTML"
-                            hx-push-url="{% url 'model-builder' %}"
-                    >Start modeling my service
-                    </button>
-                </div>
+<div class="home-page" id="home-page-container">
+    <!-- Hero Section -->
+    <section class="home-page-section-container" style="padding-top: 124px; padding-bottom: 80px">
+        <div class="d-flex flex-column gap-4">
+            <div class="d-flex flex-column gap-1">
+                <h1 class="display-4 fs-1 fw-bold text-start">Do you know the carbon footprint of your digital service?</h1>
+                <p class="lead fs-6 text-muted text-start">Gain insights into the environmental impact of your digital services and take action to minimize it.</p>
+            </div>
+            <div class="d-flex flex-column flex-sm-row gap-3">
+                <button id="btn-start-modeling-my-service" class="btn btn-primary btn-sm rounded-pill px-3 py-2" hx-get="{% url 'model-builder' %}" hx-target="#main-content-block" hx-swap="innerHTML" hx-push-url="{% url 'model-builder' %}">Start modeling yourself →</button>
             </div>
         </div>
-         <div class="col-12 col-xl-4 bg-body-tertiary d-flex flex-column justify-content-center align-items-center home-page ">
-            <div>
-                <img src="{% static 'images/understand.svg' %}" class="img-fluid home-img" alt="understand" />
-                <p><b>Understand</b><br>our approach</p>
-            </div>
-            <div>
-                <img src="{% static 'images/analyze.svg' %}" class="img-fluid home-img" alt="analyze" />
-                <p><b>Analyze</b><br>model your service to calculate its impact</p>
-            </div>
-            <div>
-                <img src="{% static 'images/identify.svg' %}" class="img-fluid home-img" alt="identify" />
-                <p><b>Identify</b><br>the most impactful parts of your service</p>
-            </div>
+    </section>
+
+    <!-- What is e-footprint & Who is this for Section -->
+    <div class="text-start w-100 position-relative">
+        <div class="d-flex flex-column flex-lg-row position-absolute top-0 h-100 w-100" style="z-index: -10">
+            <div class="w-100 h-100" style="background: #f9fafb"></div>
+            <div class="w-100 h-100" style="background: #f3f4f6"></div>
+        </div>
+
+        <div class="d-flex flex-column flex-lg-row home-page-section-container z-1">
+            <section class="py-5 pe-lg-5 w-100">
+                <h2 class="h3 fw-bold text-start">What is e-footprint?</h2>
+                <p>e-footprint is an open-source tool for measuring, analyzing, and optimizing the carbon footprint of digital services, helping teams make data-driven sustainability decisions.</p>
+            </section>
+
+            <section class="py-5 ps-lg-5 w-100">
+                <div class="">
+                    <h2 class="h3 fw-bold">Who is this for?</h2>
+                    <p>Designed for digital teams—product owners, architects, and designers—to integrate sustainability into design and development, benefiting both businesses and the environment. A team would take 30 minutes in average to model a service.</p>
+                </div>
+            </section>
         </div>
     </div>
+
+    <!-- How does it work Section -->
+    <section class="home-page-section-container d-flex flex-column gap-4">
+        <h2 class="h3 fw-bold text-start">How does it work?</h2>
+
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
+            <div class="text-center d-flex flex-column align-items-center gap-1 w-100" style="height: 260px">
+                <div class="d-flex flex-column justify-content-between align-items-center" style="min-height: 204px">
+                    <img src="{% static 'images/understand.svg' %}" class="img-fluid" style="max-width: 150px" alt="Define your digital services" />
+                    <p class="fw-bold">Define your digital services</p>
+                </div>
+                <p class="">Input data on your digital journey, infrastructure, usage patterns, etc.</p>
+            </div>
+
+            <div class="text-center d-flex flex-column align-items-center gap-1 w-100" style="height: 260px">
+                <div class="d-flex flex-column justify-content-between align-items-center" style="min-height: 204px">
+                    <img src="{% static 'images/analyze.svg' %}" class="img-fluid" style="max-width: 150px" alt="Define your digital services" />
+                    <p class="fw-bold">Analyze environmental impact</p>
+                </div>
+                <p class="">Get a breakdown of the emissions.</p>
+            </div>
+
+            <div class="text-center d-flex flex-column align-items-center gap-1 w-100">
+                <div class="d-flex flex-column justify-content-between align-items-center" style="min-height: 204px">
+                    <img src="{% static 'images/identify.svg' %}" class="img-fluid" style="max-width: 150px" alt="Define your digital services" />
+                    <p class="fw-bold">Optimize & reduce</p>
+                </div>
+                <p class="">Identify high-impact areas and make informed sustainability decisions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About us Section -->
+    <section class="home-page-section-container text-start d-flex flex-column gap-4 pb-5">
+        <h2 class="h3 fw-bold">About us</h2>
+        <div class="d-flex flex-column gap-1">
+            <p>e-footprint is a Publicis Sapient initiative and is now part of the Green IT association Boavizta's ecosystem of open-source tools. It is a community-driven initiative dedicated to improving digital sustainability through transparent and effective carbon footprint measurement.</p>
+            <p>👉 Learn more in the <a href="https://boavizta.github.io/e-footprint/" target="_blank" rel="noopener noreferrer" class="text-decoration-none">e-footprint Documentation</a></p>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
 </div>

@@ -359,15 +359,50 @@ input:disabled{
 }
 
 #home-page-container{
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+    overflow: auto;
     height: var(--home-page-height);
+}
+
+.home-page-section-container {
+    box-sizing: border-box;
+    width: 100%;
+    /* default responsive padding: clamp(min, preferred, max) */
+    --hp-padding: clamp(1rem, 3vw, 2rem);
+    --hp-max-width: 870px;
+    --hp-gap: 1.5rem;
+
+    padding-left: var(--hp-padding);
+    padding-right: var(--hp-padding);
+    margin-left: auto;
+    margin-right: auto;
+    max-width: var(--hp-max-width);
+}
+
+.placeholder-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Home page hero buttons: smaller font and custom background */
+#btn-start-modeling-my-service {
+    background-color: #007E7E !important;
+    border-color: #007E7E !important;
+    font-size: 0.9rem !important; /* slightly smaller */
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+#btn-start-modeling-my-service:hover {
+    background-color: #036b6b !important;
+    border-color: #036b6b !important;
 }
 
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
-
-#btn-start-modeling-my-service{
-    font-size: 16px;
-}
 
 .home-img{
     width: 175px;
@@ -832,4 +867,32 @@ input:disabled{
   --bs-tooltip-bg: var(--new-primary);
   --bs-tooltip-color: var(--bs-white);
   --bs-tooltip-opacity: 1;
+}
+
+/* GitHub Button */
+.custom-github-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--dark-blue);
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--gray-100);
+    border-color: var(--gray-350);
+    color: var(--dark-blue);
+  }
+  
+  &:active {
+    background-color: var(--gray-200);
+    border-color: var(--gray-400);
+  }
 }
