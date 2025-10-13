@@ -84,7 +84,7 @@ $breakpoints: (
   sm: 576px,
   md: 768px,
   lg: 992px,
-  xl: 1200px,a
+  xl: 1200px,
   xxl: 1400px
 );
 
@@ -358,47 +358,50 @@ input:disabled{
     max-width: 75vw;
 }
 
-#home-page-container{
-    display: flex;
-    flex-direction: column;
-    gap: 72px;
-    overflow: auto;
-    height: var(--home-page-height);
-}
-
-.home-page-section-container {
-    box-sizing: border-box;
-    width: 100%;
-    /* default responsive padding: clamp(min, preferred, max) */
-    --hp-padding: clamp(1rem, 3vw, 2rem);
-    --hp-max-width: 870px;
-    --hp-gap: 1.5rem;
-
-    padding-left: var(--hp-padding);
-    padding-right: var(--hp-padding);
+/* Home page semantic utilities */
+.home-section {
+    max-width: 870px;
     margin-left: auto;
     margin-right: auto;
-    max-width: var(--hp-max-width);
 }
 
-.placeholder-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.home-hero {
+    padding-top: 7.75rem;
+    padding-bottom: 5rem;
 }
 
-/* Home page hero buttons: smaller font and custom background */
-#btn-start-modeling-my-service {
-    background-color: #007E7E !important;
-    border-color: #007E7E !important;
-    font-size: 0.9rem !important; /* slightly smaller */
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
+.home-page-gap {
+    gap: 4.5rem;
 }
 
-#btn-start-modeling-my-service:hover {
-    background-color: #036b6b !important;
-    border-color: #036b6b !important;
+.home-feature-card {
+    height: 260px;
+}
+
+.home-feature-card-inner {
+    min-height: 204px;
+}
+
+.home-feature-img {
+    max-width: 150px;
+}
+
+.btn-cta-green {
+    background-color: var(--gadrient-color-3);
+    border-color: var(--gadrient-color-3);
+    color: white;
+
+    &:hover {
+        background-color: var(--gadrient-color-2);
+        border-color: var(--gadrient-color-2);
+        color: white;
+    }
+
+    &:active, &:focus {
+        background-color: var(--gadrient-color-2);
+        border-color: var(--gadrient-color-2);
+        color: white;
+    }
 }
 
 /* CSS Custom rules for model-builder page*/
