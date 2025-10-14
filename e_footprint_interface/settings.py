@@ -1,51 +1,46 @@
-import io
+"""
+Django settings for e_footprint_interface project.
+"""
 import os
 from pathlib import Path
-from urllib.parse import urlparse
-
-from django.contrib import staticfiles
-from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials
-
 import environ
-from google.cloud import secretmanager
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ============================================================================
+# BASE CONFIGURATION
+# ============================================================================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure--3#!ddceds#0n$a6(r$8=j*%-r05rm5x!en1wqhg@^2cjnvg4r"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATIC_URL = '/static/'
-
+# Environment variables
 env = environ.Env(DEBUG=(bool, False))
-# Check for .env.local first (for local PyCharm development), then fall back to .env
+
+# Load environment file (.env.local takes precedence for local development)
 env_file_local = os.path.join(BASE_DIR, ".env.local")
 env_file = os.path.join(BASE_DIR, ".env")
+
 if os.path.isfile(env_file_local):
     env.read_env(env_file_local)
 elif os.path.isfile(env_file):
     env.read_env(env_file)
-elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    client = secretmanager.SecretManagerServiceClient()
-    settings_name = os.environ.get("SETTINGS_NAME", "django_settings")
-    name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
-    payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
-    env.read_env(io.StringIO(payload))
 elif os.getenv('DJANGO_CLEVER_CLOUD') != 'True':
-    raise Exception("No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.")
+    raise Exception("No local .env or .env.local file found. Please create one.")
 
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+
+# Default insecure key for development (override in production via env var)
+SECRET_KEY = "django-insecure--3#!ddceds#0n$a6(r$8=j*%-r05rm5x!en1wqhg@^2cjnvg4r"
+DEBUG = True
 ALLOWED_HOSTS = []
 
-# Application definition
+# Security headers
+X_FRAME_OPTIONS = "SAMEORIGIN"
+CSP_FRAME_ANCESTORS = ["'self'"]
+
+# ============================================================================
+# APPLICATION DEFINITION
+# ============================================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -57,11 +52,7 @@ INSTALLED_APPS = [
     "model_builder",
     "theme",
     "django_browser_reload",
-    'django_bootstrap5',
-]
-
-INTERNAL_IPS = [
-    "127.0.0.1",
+    "django_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -75,10 +66,16 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
+# Add latency middleware for non-production environments
 if os.getenv('DJANGO_PROD') != 'True':
     MIDDLEWARE.append('e_footprint_interface.latency_middleware.NetworkLatencyMiddleware')
 
 ROOT_URLCONF = "e_footprint_interface.urls"
+WSGI_APPLICATION = "e_footprint_interface.wsgi.application"
+
+# ============================================================================
+# TEMPLATES
+# ============================================================================
 
 TEMPLATES = [
     {
@@ -96,12 +93,11 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "e_footprint_interface.wsgi.application"
+# ============================================================================
+# DATABASE
+# ============================================================================
 
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+# Default to SQLite (will be overridden by environment-specific config below)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -109,149 +105,80 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+# ============================================================================
+# AUTHENTICATION & PASSWORD VALIDATION
+# ============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
+# ============================================================================
+# INTERNATIONALIZATION
+# ============================================================================
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+# ============================================================================
+# STATIC FILES
+# ============================================================================
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+# ============================================================================
+# DJANGO BROWSER RELOAD
+# ============================================================================
+
+INTERNAL_IPS = ["127.0.0.1"]
+
+# ============================================================================
+# DEFAULT SETTINGS
+# ============================================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-if os.getenv('DJANGO_PROD') == 'True':
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_PRELOAD = True
-    SECRET_KEY = env("SECRET_KEY")
-
-    # SECURITY WARNING: don't run with debug turned on in production!
-    # Change this to "False" when you are ready for production
-    DEBUG = False
-
-    APPENGINE_URL = env("APPENGINE_URL", default=None)
-    if APPENGINE_URL:
-        # Ensure a scheme is present in the URL before it's processed.
-        if not urlparse(APPENGINE_URL).scheme:
-            APPENGINE_URL = f"https://{APPENGINE_URL}"
-
-        main_url_netloc = urlparse(APPENGINE_URL).netloc
-        ALLOWED_HOSTS = [main_url_netloc]
-
-        # Get app engine versions to allow their URLs
-        credentials = GoogleCredentials.get_application_default()
-        service = discovery.build('appengine', 'v1', credentials=credentials)
-        versions = service.apps().services().versions().list(
-            appsId='e-footprint-interface', servicesId="default").execute()['versions']
-        for version in versions:
-            ALLOWED_HOSTS.append(f"{version['id']}-dot-{main_url_netloc}")
-
-        CSRF_TRUSTED_ORIGINS = [APPENGINE_URL]
-        SECURE_SSL_REDIRECT = True
-    else:
-        ALLOWED_HOSTS = ["*"]
-    # [END gaestd_py_django_csrf]
-
-    DATABASES = {"default": env.db()}
-
-    # If the flag as been set, configure to use proxy
-    if os.getenv("USE_CLOUD_SQL_AUTH_PROXY", None):
-        DATABASES["default"]["HOST"] = "127.0.0.1"
-        DATABASES["default"]["PORT"] = 5432
-
-    # [END gaestd_py_django_database_config]
-    # [END db_setup]
+# ============================================================================
+# ENVIRONMENT-SPECIFIC CONFIGURATION
+# ============================================================================
 
 # Local development with PyCharm (using .env.local)
 if os.getenv('DJANGO_DOCKER') == 'False' and os.path.isfile(env_file_local):
     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
     DATABASES = {"default": env.db()}
 
-# Local Docker
+# Local Docker environment
 elif os.getenv('DJANGO_DOCKER') == 'True':
     ALLOWED_HOSTS = ["efootprint.boavizta.dev", "*.boavizta.dev"]
-    #CACHES = {
-    #    'default': {
-    #        'BACKEND': 'django_redis.cache.RedisCache',
-    #        'LOCATION': 'redis://redis:6379/0',
-    #        'OPTIONS': {
-    #            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-    #        }
-    #    }
-    #}
-    #SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    #SESSION_CACHE_ALIAS = 'default' # cache alias name
     DATABASES = {"default": env.db()}
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.dev"]
 
-
-# Production & Dev Clever Cloud
-if os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
-    # Misc
+# Clever Cloud production/staging
+elif os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
+    # Security settings
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_PRELOAD = True
     SECRET_KEY = os.getenv("SECRET_KEY")
-
-    # SECURITY WARNING: don't run with debug turned on in production!
-    # Change this to "False" when you are ready for production
     DEBUG = False
 
-    # Hosts config
-    ALLOWED_HOSTS = ["dev.e-footprint.boavizta.org", "e-footprint.boavizta.org", "*.boavizta.org", "*.*.boavizta.org", "*.cleverapps.io"]
-
-    # Cache config
-    DATABASES = {"default": env.db()}
-    #CACHES = {
-    #    'default': {
-    #        'BACKEND': 'django_redis.cache.RedisCache',
-    #        'LOCATION': os.getenv('CACHE_URL'),
-    #        'OPTIONS': {
-    #            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-    #        }
-    #    }
-    #}
-
-    # Remove Session Temporary
-    # SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    # SESSION_CACHE_ALIAS = 'default'
+    # Hosts configuration
+    ALLOWED_HOSTS = [
+        "dev.e-footprint.boavizta.org",
+        "e-footprint.boavizta.org",
+        "*.boavizta.org",
+        "*.*.boavizta.org",
+        "*.cleverapps.io"
+    ]
     CSRF_TRUSTED_ORIGINS = ["https://*.boavizta.org", "https://*.cleverapps.io"]
 
-X_FRAME_OPTIONS = "SAMEORIGIN"
-CSP_FRAME_ANCESTORS = ["'self'"]
+    # Database configuration
+    DATABASES = {"default": env.db()}

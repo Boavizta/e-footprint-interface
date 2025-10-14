@@ -28,26 +28,6 @@ services:
     profiles:
       - dev
       - alpha
-  redis:
-    hostname: redis
-    restart: no
-    image: redis:latest
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      timeout: 20s
-      retries: 10
-    labels:
-      - traefik.enable=true
-    ports:
-      - 127.0.0.1:6379:6379
-    networks:
-      - traefik
-    volumes:
-      - redis01:/data
-    depends_on:
-      - traefik
-    profiles:
-      - alpha
   web:
     hostname: web
     restart: on-failure
@@ -110,8 +90,6 @@ services:
 
 # Volumes
 volumes:
-  redis01:
-    driver: local
   pgdata01:
     driver: local
 

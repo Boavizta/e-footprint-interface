@@ -1,82 +1,178 @@
-This project is hosted on GCP App Engine and follows the instructions from the following article: https://cloud.google.com/python/django/appengine
+# Deployment to Production
 
-# Set environment variables
-In the [.env file](../.env) set 
+This project is deployed to **Clever Cloud** for both PreProd (staging) and Production environments.
 
-```
-DJANGO_PROD=True
-```
+## Prerequisites
 
-# Run locally with connection to Gcloud database
-## Activate the local proxy to Gcloud database
-Make sure your .env file has **DATABASE_URL**, **GS_BUCKET_NAME**=e-footprint-interface-bucket and **SECRET_KEY**.
+### 1. SSH Key Registration
+Register your SSH public key in Clever Cloud:
+1. Go to https://console.clever-cloud.com/
+2. Navigate to your profile → SSH Keys
+3. Add your public key from `~/.ssh/id_rsa.pub`
 
-In *another* terminal 
-```
-./cloud-sql-proxy e-footprint-interface:europe-west2:e-footprint-interface
-```
+### 2. Git Remotes Setup
+Add Clever Cloud git remotes to your repository (only needed once):
 
-## Setup env variables 
+```shell
+# PreProd (staging)
+git remote add clever git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_60266226-9ce3-4b53-9b14-57e1628d0ac5.git
 
-In the initial terminal (where you will run the django server) 
-
-```
-export GOOGLE_CLOUD_PROJECT=e-footprint-interface
-export USE_CLOUD_SQL_AUTH_PROXY=true
+# Production
+git remote add clever-prod git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_d801760c-ba09-49e8-8c87-7ca6b2afa377.git
 ```
 
-## Initialization of the database
-In your terminal, if necessary
-```
-python3 manage.py makemigrations
-python3 manage.py migrate
-python3 manage.py collectstatic
+Verify remotes are configured:
+```shell
+git remote -v
 ```
 
-## Only first time: create super user 
+## Pre-deployment Checklist
 
-In the terminal 
-```
-python3 manage.py createsuperuser
-```
+### 1. Ensure dependencies are up to date
+Clever Cloud uses Docker deployment, which runs `poetry install` from your `Dockerfile`. Ensure `poetry.lock` is up to date:
 
-## Run server
-In your terminal 
-```
-python3 manage.py check --deploy    
-```
-then
-```
-python3 manage.py runserver 8080 --insecure
+```shell
+poetry update
 ```
 
-Make sure that the application works.
+**Note**: Docker deployment installs dependencies from `poetry.lock` and `pyproject.toml`, not from `requirements.txt`.
 
-# Deploy on App Engine
-Check out [official Gcloud documentation](https://cloud.google.com/python/django/appengine?hl=fr&_ga=2.133171918.-1308282934.1706020941#run-locally)
-
-IMPORTANT: We use poetry to manage python dependencies but app engine expects a requirements.txt file. Update the requirements.txt file with the following command:
-
-    poetry export -f requirements.txt --output requirements.txt
-
-
-To first create a new version but not redirect all traffic to it to first make sure that it doesn’t break anything:
-
-```
-gcloud app deploy --no-promote
-```
-then browse the url with
-```
-gcloud app browse
+### 2. Run deployment checks
+```shell
+poetry run python manage.py check --deploy
 ```
 
-If you find a bug and want to deploy a version with DEBUG=True, set DEBUG=True line 157 in [the settings module](e_footprint_interface/settings.py) AND THEN DON’T FORGET TO SET IT BACK TO FALSE WHEN DEPLOYING A NEW VERSION FOR PRODUCTION.
+## Deployment Commands
 
- 
-### Bonus: Connect to google cloud sql instance 
+### Deploy to PreProd (Staging)
+```shell
+# Push your local branch to Clever Cloud's master branch
+git push clever <local-branch>:master
 
-In the google cloud shell console
-
+# Example: deploy from main branch
+git push clever main:master
 ```
-gcloud sql connect e-footprint-interface-sql --database=e-footprint-interface-db --user=e-footprint-interface-db-superuser
+
+PreProd URL: https://dev.e-footprint.boavizta.org
+
+### Deploy to Production
+```shell
+# Push your local branch to Production's master branch
+git push clever-prod <local-branch>:master
+
+# Example: deploy from main branch
+git push clever-prod main:master
 ```
+
+Production URL: https://e-footprint.boavizta.org
+
+**Important Notes**:
+- Always push to `master` as the remote branch name: `git push clever <local-branch>:master`
+- The deployment is automatic after the push
+- Clever Cloud builds the Docker image using your `Dockerfile`, which runs `poetry install` to install dependencies
+
+## Post-deployment Verification
+
+1. **Check deployment logs** in Clever Cloud console:
+   - Go to your application → Logs
+   - Verify there are no errors during build and deployment
+
+2. **Test the deployed application**:
+   - Visit the deployed URL
+   - Test critical functionality
+   - Check for any errors in browser console
+
+3. **Monitor application logs**:
+   - Watch for any runtime errors
+   - Verify database connections are working
+
+## Environment Configuration
+
+### Clever Cloud Environment Variables
+The following environment variables should be configured in Clever Cloud console:
+
+**Required**:
+- `DJANGO_CLEVER_CLOUD=True` - Activates production settings
+- `DATABASE_URL` - PostgreSQL connection string (auto-configured by Clever Cloud)
+- `SECRET_KEY` - Django secret key (generate a secure random string)
+
+**Optional**:
+- `DEBUG=False` - Should always be False in production
+- Custom settings as needed
+
+### Settings Configuration
+The application automatically detects Clever Cloud environment and applies production settings (see `e_footprint_interface/settings.py:163-184`):
+- HTTPS enforcement (HSTS)
+- Secure cookies
+- Allowed hosts configuration
+- CSRF trusted origins
+
+## Database Management
+
+### Run migrations on Clever Cloud
+Migrations run automatically during deployment. If you need to run them manually:
+
+```shell
+# Via Clever Cloud console terminal or CLI
+clever ssh
+python manage.py migrate
+```
+
+### Access database directly
+Install Clever Cloud CLI and connect:
+```shell
+# Install Clever Cloud CLI
+npm install -g clever-cloud
+
+# Login
+clever login
+
+# Link to your application
+clever link <app-id>
+
+# Connect to PostgreSQL
+clever psql
+```
+
+Or use a PostgreSQL client with the `DATABASE_URL` from Clever Cloud environment variables.
+
+## Troubleshooting
+
+### Deployment fails
+1. Check Clever Cloud logs for build errors
+2. Verify `poetry.lock` and `pyproject.toml` are committed
+3. Ensure all environment variables are set correctly in Clever Cloud console
+
+### Application doesn't start
+1. Check application logs in Clever Cloud console
+2. Verify database connection string is correct
+3. Run `python manage.py check --deploy` locally to catch configuration issues
+
+### Database migration issues
+1. Check migration files are committed to git
+2. Manually run migrations via Clever Cloud SSH
+3. Check database connectivity
+
+## Rolling Back
+
+If a deployment introduces issues:
+
+1. **Revert to previous version**:
+```shell
+# Get the commit hash of the last working version
+git log
+
+# Force push the old version
+git push clever <commit-hash>:master --force
+```
+
+2. **Monitor the rollback**:
+- Check Clever Cloud logs
+- Verify the application is working
+
+3. **Fix the issue** in a new branch before redeploying
+
+## Additional Resources
+
+- [Clever Cloud Documentation](https://www.clever-cloud.com/doc/)
+- [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)

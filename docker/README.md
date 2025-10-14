@@ -61,6 +61,40 @@ docker network create traefik
 docker compose --profile dev up -d
 ```
 
+### Switching between development and production environments
+
+When switching between different Docker environments (e.g., from `--profile dev` to `--profile prod` or vice versa), always stop and remove the current containers first to avoid port conflicts:
+
+```console
+# Stop all running containers for this project
+docker compose --profile dev down
+
+# Or stop all containers regardless of profile
+docker compose down
+
+# Then start the desired profile
+docker compose --profile prod up -d
+```
+
+**Useful commands for managing containers:**
+
+```console
+# View all running containers
+docker compose ps
+
+# View logs from all services
+docker compose logs -f
+
+# Stop containers without removing them
+docker compose stop
+
+# Stop and remove containers, networks, and volumes
+docker compose down -v
+
+# Clean up orphaned containers from old configurations
+docker compose --profile dev up -d --remove-orphans
+```
+
 ### List of local services
 
 | Service Name | Service URL                               |
