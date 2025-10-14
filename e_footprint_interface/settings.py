@@ -26,8 +26,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = '/static/'
 
 env = environ.Env(DEBUG=(bool, False))
+# Check for .env.local first (for local PyCharm development), then fall back to .env
+env_file_local = os.path.join(BASE_DIR, ".env.local")
 env_file = os.path.join(BASE_DIR, ".env")
-if os.path.isfile(env_file):
+if os.path.isfile(env_file_local):
+    env.read_env(env_file_local)
+elif os.path.isfile(env_file):
     env.read_env(env_file)
 elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
@@ -54,7 +58,6 @@ INSTALLED_APPS = [
     "theme",
     "django_browser_reload",
     'django_bootstrap5',
-    "django_redis",
 ]
 
 INTERNAL_IPS = [
@@ -193,8 +196,13 @@ if os.getenv('DJANGO_PROD') == 'True':
     # [END gaestd_py_django_database_config]
     # [END db_setup]
 
+# Local development with PyCharm (using .env.local)
+if os.getenv('DJANGO_DOCKER') == 'False' and os.path.isfile(env_file_local):
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+    DATABASES = {"default": env.db()}
+
 # Local Docker
-if os.getenv('DJANGO_DOCKER') == 'True':
+elif os.getenv('DJANGO_DOCKER') == 'True':
     ALLOWED_HOSTS = ["efootprint.boavizta.dev", "*.boavizta.dev"]
     #CACHES = {
     #    'default': {

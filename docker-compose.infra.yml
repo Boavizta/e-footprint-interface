@@ -1,0 +1,28 @@
+name: "efootprint-infra"
+
+# Services - Infrastructure only (for local Django development)
+ # This simplified version only includes Postgres - Traefik is not needed for local development
+services:
+  postgres:
+    image: postgres:latest
+    restart: "on-failure"
+    container_name: efootprint-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U root -d efootprint'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: kakoukakou
+      POSTGRES_DB: efootprint
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata01:/var/lib/postgresql/data
+      - ./conf/postgresql/init.sql:/docker-entrypoint-initdb.d/dump.sql
+
+# Volumes
+volumes:
+  pgdata01:
+    driver: local
