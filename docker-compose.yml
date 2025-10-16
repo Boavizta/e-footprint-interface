@@ -1,0 +1,99 @@
+name: "efootprint"
+
+# Services
+services:
+  traefik:
+    hostname: traefik
+    restart: unless-stopped
+    image: traefik:latest
+    container_name: etraefik
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 10s
+    ports:
+      - 127.0.0.1:80:80
+      - 127.0.0.1:443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/conf/ssl:/etc/certs:ro
+      - ./docker/conf/traefik.dyn.yml:/etc/traefik/dyn.yml:ro
+      - ./docker/conf/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./docker/conf/acme.json:/acme.json
+    profiles:
+      - dev
+      - alpha
+  web:
+    hostname: web
+    restart: on-failure
+    build:
+      dockerfile: Dockerfile-dev
+      context: ${EF_APP_PATH}
+    ports:
+      - 80
+    env_file: ${EF_APP_PATH}/.env
+    command: /usr/local/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
+    volumes:
+      - ${EF_APP_PATH}:/app:cached
+      - type: bind
+        source: ${EF_APP_PATH}/docker/conf/supervisord.conf
+        target: /etc/supervisor/conf.d/supervisord.conf
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.efootprint.rule=Host(`efootprint.boavizta.dev`)
+      - traefik.http.routers.efootprint.tls=true
+      - traefik.http.services.efootprint.loadbalancer.server.port=8000
+      - traefik.http.services.efootprint.loadbalancer.passhostheader=true
+    networks:
+      - traefik
+    depends_on:
+      - traefik
+      - postgres
+    profiles:
+      - dev
+      - alpha
+  postgres:
+    image: postgres:latest
+    restart: "on-failure"
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U root -d efootprint'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: kakoukakou
+      POSTGRES_DB: efootprint
+    ports:
+      - "5432:5432"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres.entrypoints=postgres"
+      - "traefik.tcp.routers.postgres.tls=false"
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+    networks:
+      - traefik
+    volumes:
+      - pgdata01:/var/lib/postgresql/data
+      - ./conf/postgresql/init.sql:/docker-entrypoint-initdb.d/dump.sql
+    depends_on:
+      - traefik
+    profiles:
+      - dev
+      - alpha
+
+# Volumes
+volumes:
+  pgdata01:
+    driver: local
+
+# Nets
+networks:
+  traefik:
+    external: false
