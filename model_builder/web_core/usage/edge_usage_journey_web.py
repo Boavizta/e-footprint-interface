@@ -1,14 +1,4 @@
-from typing import TYPE_CHECKING
-
-from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
-
-from model_builder.class_structure import generate_object_creation_structure
-from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb, \
-    ATTRIBUTES_TO_SKIP_IN_FORMS
-
-if TYPE_CHECKING:
-    from model_builder.web_core.model_web import ModelWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 
 class EdgeUsageJourneyWeb(ModelingObjectWeb):
