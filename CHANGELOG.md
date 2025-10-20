@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.1] - 2025-10-20
+
+### Changed
+- Use Boavizta logo.
+- Deploy to Clever-Cloud with Docker instead of to GCP with App Engine.
+
 ## [0.9.0] - 2025-09-24
 
 ### Added

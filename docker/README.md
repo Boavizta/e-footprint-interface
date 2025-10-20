@@ -43,11 +43,14 @@ Don't forget to restart your Chrome or Firefox.
 
 ### Run the stack
 
-**The first step is to create your .env file. Simply copy the [.env.dist](.env.dist) and set the project  repositories' path on your system.**
+**The first step is to create your .env file. Simply copy the `.env.dist` and update the `EF_APP_PATH` to your project location.**
 
 ```console
 cp .env.dist .env
+# Edit .env and set EF_APP_PATH to your actual project path
 ```
+
+**Note**: The `.env` file only needs `EF_APP_PATH` and `DATABASE_URL`. The `DJANGO_DOCKER` setting is automatically configured by `docker-compose.yml` and doesn't need to be in your `.env` file.
 
 **Before the first launch, run this command to create the required network (one-time)**
 

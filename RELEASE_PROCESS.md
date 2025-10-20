@@ -48,7 +48,8 @@ Run test suites:
 poetry run python manage.py test tests
 
 # E2E tests (Cypress)
-npm run test:e2e
+# See docker/README.md for Docker setup instructions
+npm run test:e2e:docker
 
 # JavaScript unit tests
 jest

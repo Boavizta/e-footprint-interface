@@ -6,10 +6,14 @@
         "start": "poetry run python manage.py runserver",
         "test": "poetry run python manage.py test",
         "watch": "npx sass --watch theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss",
-        "test:e2e": "npm run cy:run",
-        "cy:open": "cypress open",
+        "test:e2e:local": "npm run cy:local",
+        "test:e2e:docker": "npm run cy:docker",
         "cy:run": "cypress run",
         "cy:verify": "cypress verify",
+        "cy:local": "cypress run --e2e --config baseUrl=http://localhost:8000",
+        "cy:docker": "cypress run --e2e --config baseUrl=https://efootprint.boavizta.dev",
+        "cy:open:local": "cypress open --config baseUrl=http://localhost:8000",
+        "cy:open:docker": "cypress open --config baseUrl=https://efootprint.boavizta.dev",
         "jest": "jest"
     },
     "devDependencies": {

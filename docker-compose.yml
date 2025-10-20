@@ -37,6 +37,8 @@ services:
     ports:
       - 80
     env_file: ${EF_APP_PATH}/.env
+    environment:
+      - DJANGO_DOCKER=True
     command: /usr/local/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
     volumes:
       - ${EF_APP_PATH}:/app:cached
