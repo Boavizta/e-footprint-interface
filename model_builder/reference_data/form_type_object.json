@@ -3,9 +3,17 @@
         "label": "Server",
         "type_object_available": "Available server types"
     },
-    "EdgeComputer": {
+    "EdgeDeviceBase": {
         "label": "Edge device",
-        "type_object_available": "Available edge devices"
+        "type_object_available": "Available edge device types"
+    },
+    "EdgeComputer": {
+        "label": "Edge computer",
+        "more_descriptive_label_for_select_inputs": "Edge computer (with storage and compute resources)"
+    },
+    "EdgeAppliance": {
+        "label": "Edge appliance",
+        "more_descriptive_label_for_select_inputs": "Edge appliance (simple workload-based device)"
     },
     "Job": {
         "label": "Job",

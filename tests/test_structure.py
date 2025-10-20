@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.constants.countries import Countries
+from efootprint.core.hardware.edge_appliance import EdgeAppliance
 from efootprint.core.hardware.edge_computer import EdgeComputer
 from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
@@ -39,7 +40,7 @@ obj_creation_structure_dict = {
     "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
     "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
-    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeComputer": [EdgeComputer],
+    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeDeviceBase": [EdgeComputer, EdgeAppliance],
     "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -152,7 +153,7 @@ class TestsClassStructure(TestCase):
         objects_extra_fields_to_check = ['Server','Service']
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
-            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi"]:
+            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase"]:
                 continue
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
             init_sig_params = get_init_signature_params(efootprint_obj_class)

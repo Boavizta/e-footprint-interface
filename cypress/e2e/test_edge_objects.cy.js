@@ -18,6 +18,7 @@ describe('Test edge objects', () => {
         // Add edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#type_object_available').select('EdgeComputer');
         cy.get('#EdgeComputer_name').type(edgeDeviceName);
         cy.get('#EdgeComputer_ram').clear().type(originalRam);
         cy.get('#EdgeComputer_compute').clear().type(originalCompute);
@@ -61,6 +62,7 @@ describe('Test edge objects', () => {
         // Add edge device with advanced options
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#type_object_available').select('EdgeComputer');
         cy.get('#EdgeComputer_name').type(edgeDeviceName);
 
         // Open advanced options
@@ -120,6 +122,7 @@ describe('Test edge objects', () => {
         // Step 1: Add edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
+        cy.get('#type_object_available').select('EdgeComputer');
         cy.get('#EdgeComputer_name').type(edgeDeviceName);
         cy.get('#EdgeComputer_ram').clear().type(edgeRam);
         cy.get('#EdgeComputer_compute').clear().type(edgeCompute);

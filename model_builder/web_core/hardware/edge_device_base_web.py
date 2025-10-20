@@ -1,8 +1,19 @@
+from typing import TYPE_CHECKING
+
+from efootprint.core.hardware.edge_appliance import EdgeAppliance
+from efootprint.core.hardware.edge_computer import EdgeComputer
+from efootprint.core.hardware.edge_storage import EdgeStorage
+
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_core.hardware.hardware_utils import generate_object_with_storage_creation_context
+
+if TYPE_CHECKING:
+    from model_builder.web_core.model_web import ModelWeb
 
 
 class EdgeDeviceBaseWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeDeviceBase and its subclasses (EdgeComputer, EdgeAppliance)."""
+    add_template = "add_edge_device.html"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,3 +26,9 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     @property
     def class_title_style(self):
         return "h6"
+
+    @classmethod
+    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+        return generate_object_with_storage_creation_context(
+            model_web, "EdgeDeviceBase", [EdgeComputer, EdgeAppliance],
+            "EdgeStorage", [EdgeStorage])

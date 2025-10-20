@@ -1,7 +1,8 @@
 {
     "switch_item": "type_object_available",
     "switch_values": [
-        "EdgeComputer"
+        "EdgeComputer",
+        "EdgeAppliance"
     ],
     "dynamic_lists": []
 }
