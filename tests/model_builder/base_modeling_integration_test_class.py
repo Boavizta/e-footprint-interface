@@ -217,7 +217,7 @@ class TestModelingBase(TestCase):
     def create_edge_device_data(name: str = "Test Edge Device", **overrides) -> Dict[str, Any]:
         """Create edge device form data with sensible defaults."""
         data = deepcopy(EDGE_DEVICE_FORM_DATA)
-        data["EdgeDevice_name"] = name
+        data["EdgeComputer_name"] = name
         data.update(overrides)
         return data
 

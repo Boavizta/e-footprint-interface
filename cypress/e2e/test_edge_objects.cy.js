@@ -18,35 +18,35 @@ describe('Test edge objects', () => {
         // Add edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(edgeDeviceName);
-        cy.get('#EdgeDevice_ram').clear().type(originalRam);
-        cy.get('#EdgeDevice_compute').clear().type(originalCompute);
+        cy.get('#EdgeComputer_name').type(edgeDeviceName);
+        cy.get('#EdgeComputer_ram').clear().type(originalRam);
+        cy.get('#EdgeComputer_compute').clear().type(originalCompute);
 
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).should('have.class', 'list-group-item');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", edgeDeviceName).should('have.class', 'list-group-item');
 
         // Edit the edge device
-        cy.getObjectButtonFromObjectTypeAndName("EdgeDevice", edgeDeviceName).click();
+        cy.getObjectButtonFromObjectTypeAndName("EdgeComputer", edgeDeviceName).click();
         cy.get('#sidePanel').should('be.visible');
 
         // Verify current values
-        cy.get('#EdgeDevice_ram').should('have.value', originalRam);
-        cy.get('#EdgeDevice_compute').should('have.value', originalCompute);
+        cy.get('#EdgeComputer_ram').should('have.value', originalRam);
+        cy.get('#EdgeComputer_compute').should('have.value', originalCompute);
 
         // Make changes
-        cy.get('#EdgeDevice_ram').clear().type(updatedRam);
-        cy.get('#EdgeDevice_compute').clear().type(updatedCompute);
+        cy.get('#EdgeComputer_ram').clear().type(updatedRam);
+        cy.get('#EdgeComputer_compute').clear().type(updatedCompute);
 
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify changes were saved
-        cy.getObjectButtonFromObjectTypeAndName("EdgeDevice", edgeDeviceName).click();
-        cy.get('#EdgeDevice_ram').should('have.value', updatedRam);
-        cy.get('#EdgeDevice_compute').should('have.value', updatedCompute);
+        cy.getObjectButtonFromObjectTypeAndName("EdgeComputer", edgeDeviceName).click();
+        cy.get('#EdgeComputer_ram').should('have.value', updatedRam);
+        cy.get('#EdgeComputer_compute').should('have.value', updatedCompute);
     });
 
     it('Add edge device with advanced parameters', () => {
@@ -61,28 +61,28 @@ describe('Test edge objects', () => {
         // Add edge device with advanced options
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(edgeDeviceName);
+        cy.get('#EdgeComputer_name').type(edgeDeviceName);
 
         // Open advanced options
-        cy.get('#display-advanced-EdgeDevice').click();
-        cy.get('#advanced-EdgeDevice').should('be.visible');
+        cy.get('#display-advanced-EdgeComputer').click();
+        cy.get('#advanced-EdgeComputer').should('be.visible');
 
         // Set advanced parameters
-        cy.get('#EdgeDevice_lifespan').clear().type(customLifespan);
-        cy.get('#EdgeDevice_carbon_footprint_fabrication').clear().type(customCarbonFootprint);
+        cy.get('#EdgeComputer_lifespan').clear().type(customLifespan);
+        cy.get('#EdgeComputer_carbon_footprint_fabrication').clear().type(customCarbonFootprint);
 
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", edgeDeviceName).should('exist');
 
         // Verify advanced parameters were saved
-        cy.getObjectButtonFromObjectTypeAndName("EdgeDevice", edgeDeviceName).click();
-        cy.get('#display-advanced-EdgeDevice').click();
-        cy.get('#advanced-EdgeDevice').should('be.visible');
-        cy.get('#EdgeDevice_lifespan').should('have.value', customLifespan);
-        cy.get('#EdgeDevice_carbon_footprint_fabrication').should('have.value', customCarbonFootprint);
+        cy.getObjectButtonFromObjectTypeAndName("EdgeComputer", edgeDeviceName).click();
+        cy.get('#display-advanced-EdgeComputer').click();
+        cy.get('#advanced-EdgeComputer').should('be.visible');
+        cy.get('#EdgeComputer_lifespan').should('have.value', customLifespan);
+        cy.get('#EdgeComputer_carbon_footprint_fabrication').should('have.value', customCarbonFootprint);
     });
 
     it('Add edge device, edge usage journey, and recurrent edge processes with verification and editing', () => {
@@ -117,15 +117,15 @@ describe('Test edge objects', () => {
         // Step 1: Add edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(edgeDeviceName);
-        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
-        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
-        cy.get("#EdgeDevice_lifespan").clear().type(lifespan);
+        cy.get('#EdgeComputer_name').type(edgeDeviceName);
+        cy.get('#EdgeComputer_ram').clear().type(edgeRam);
+        cy.get('#EdgeComputer_compute').clear().type(edgeCompute);
+        cy.get("#EdgeComputer_lifespan").clear().type(lifespan);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", edgeDeviceName).should('exist');
 
         // Step 2: Add edge usage journey
         cy.get('#btn-add-edge-usage-journey').click();
@@ -199,8 +199,8 @@ describe('Test edge objects', () => {
     });
 
     it('Enforce single edge usage journey to edge device constraint', () => {
-        let firstEdgeDeviceName = "First Edge Device";
-        let secondEdgeDeviceName = "Second Edge Device";
+        let firstEdgeComputerName = "First Edge Device";
+        let secondEdgeComputerName = "Second Edge Device";
         let firstJourneyName = "First Edge Usage Journey";
         let secondJourneyName = "Second Edge Usage Journey";
         let edgeRam = "16";
@@ -221,20 +221,20 @@ describe('Test edge objects', () => {
         // Step 2: Create first edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(firstEdgeDeviceName);
-        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
-        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#EdgeComputer_name').type(firstEdgeComputerName);
+        cy.get('#EdgeComputer_ram').clear().type(edgeRam);
+        cy.get('#EdgeComputer_compute').clear().type(edgeCompute);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify first edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", firstEdgeDeviceName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", firstEdgeComputerName).should('exist');
 
         // Step 3: Create first edge usage journey - should work now
         cy.get('#btn-add-edge-usage-journey').click();
         cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
         cy.get('#EdgeUsageJourney_name').type(firstJourneyName);
-        cy.get('#EdgeUsageJourney_edge_device').select(firstEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_edge_device').select(firstEdgeComputerName);
         cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
@@ -252,14 +252,14 @@ describe('Test edge objects', () => {
         // Step 5: Create second edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(secondEdgeDeviceName);
-        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
-        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#EdgeComputer_name').type(secondEdgeComputerName);
+        cy.get('#EdgeComputer_ram').clear().type(edgeRam);
+        cy.get('#EdgeComputer_compute').clear().type(edgeCompute);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify second edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", secondEdgeDeviceName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", secondEdgeComputerName).should('exist');
 
         // Step 6: Create second edge usage journey - should work and only show second edge device in select
         cy.get('#btn-add-edge-usage-journey').click();
@@ -268,10 +268,10 @@ describe('Test edge objects', () => {
 
         // Verify that only the second edge device is available in the select
         cy.get('#EdgeUsageJourney_edge_device option').should('have.length', 1);
-        cy.get('#EdgeUsageJourney_edge_device option').contains(firstEdgeDeviceName).should('not.exist');
-        cy.get('#EdgeUsageJourney_edge_device option').contains(secondEdgeDeviceName).should('exist');
+        cy.get('#EdgeUsageJourney_edge_device option').contains(firstEdgeComputerName).should('not.exist');
+        cy.get('#EdgeUsageJourney_edge_device option').contains(secondEdgeComputerName).should('exist');
 
-        cy.get('#EdgeUsageJourney_edge_device').select(secondEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_edge_device').select(secondEdgeComputerName);
         cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
@@ -281,8 +281,8 @@ describe('Test edge objects', () => {
     });
 
     it('Verify recurrent edge process mirroring logic works correctly', () => {
-        let firstEdgeDeviceName = "First Mirror Edge Device";
-        let secondEdgeDeviceName = "Second Mirror Edge Device";
+        let firstEdgeComputerName = "First Mirror Edge Device";
+        let secondEdgeComputerName = "Second Mirror Edge Device";
         let firstJourneyName = "First Mirror Edge Usage Journey";
         let secondJourneyName = "Second Mirror Edge Usage Journey";
         let recurrentProcessName = "Mirrored Recurrent Process";
@@ -302,20 +302,20 @@ describe('Test edge objects', () => {
         // Step 1: Create first edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(firstEdgeDeviceName);
-        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
-        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#EdgeComputer_name').type(firstEdgeComputerName);
+        cy.get('#EdgeComputer_ram').clear().type(edgeRam);
+        cy.get('#EdgeComputer_compute').clear().type(edgeCompute);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify first edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", firstEdgeDeviceName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", firstEdgeComputerName).should('exist');
 
         // Step 2: Create first edge usage journey
         cy.get('#btn-add-edge-usage-journey').click();
         cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
         cy.get('#EdgeUsageJourney_name').type(firstJourneyName);
-        cy.get('#EdgeUsageJourney_edge_device').select(firstEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_edge_device').select(firstEdgeComputerName);
         cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
@@ -339,20 +339,20 @@ describe('Test edge objects', () => {
         // Step 4: Create second edge device
         cy.get('#btn-add-edge-device').click();
         cy.get('#sidePanel').contains('div', 'Add new edge device').should('exist');
-        cy.get('#EdgeDevice_name').type(secondEdgeDeviceName);
-        cy.get('#EdgeDevice_ram').clear().type(edgeRam);
-        cy.get('#EdgeDevice_compute').clear().type(edgeCompute);
+        cy.get('#EdgeComputer_name').type(secondEdgeComputerName);
+        cy.get('#EdgeComputer_ram').clear().type(edgeRam);
+        cy.get('#EdgeComputer_compute').clear().type(edgeCompute);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify second edge device was created
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", secondEdgeDeviceName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("EdgeComputer", secondEdgeComputerName).should('exist');
 
         // Step 5: Create second edge usage journey linked to the first recurrent edge process
         cy.get('#btn-add-edge-usage-journey').click();
         cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
         cy.get('#EdgeUsageJourney_name').type(secondJourneyName);
-        cy.get('#EdgeUsageJourney_edge_device').select(secondEdgeDeviceName);
+        cy.get('#EdgeUsageJourney_edge_device').select(secondEdgeComputerName);
         cy.get('#EdgeUsageJourney_usage_span').clear().type(usageSpan);
         // Link to the existing recurrent edge process using select_multiple
         cy.get('#select-new-object-EdgeUsageJourney_edge_processes').select(recurrentProcessName);

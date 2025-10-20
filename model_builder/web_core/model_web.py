@@ -181,7 +181,16 @@ class ModelWeb:
 
     @property
     def edge_devices(self):
-        return self.get_web_objects_from_efootprint_type("EdgeDevice")
+        """Returns all edge devices (EdgeComputer and EdgeAppliance instances)."""
+        return self.get_web_objects_from_efootprint_type("EdgeDeviceBase")
+
+    @property
+    def edge_computers(self):
+        return self.get_web_objects_from_efootprint_type("EdgeComputer")
+
+    @property
+    def edge_appliances(self):
+        return self.get_web_objects_from_efootprint_type("EdgeAppliance")
 
     @property
     def services(self):
@@ -231,6 +240,23 @@ class ModelWeb:
     @property
     def edge_usage_journeys(self):
         return self.get_web_objects_from_efootprint_type("EdgeUsageJourney")
+
+    @property
+    def edge_functions(self):
+        return self.get_web_objects_from_efootprint_type("EdgeFunction")
+
+    @property
+    def recurrent_edge_resource_needs(self):
+        """Returns all RecurrentEdgeResourceNeed instances (processes and workloads)."""
+        return self.get_web_objects_from_efootprint_type("RecurrentEdgeResourceNeed")
+
+    @property
+    def recurrent_edge_processes(self):
+        return self.get_web_objects_from_efootprint_type("RecurrentEdgeProcess")
+
+    @property
+    def recurrent_edge_workloads(self):
+        return self.get_web_objects_from_efootprint_type("RecurrentEdgeWorkload")
 
     @property
     def system_emissions(self):

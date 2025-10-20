@@ -112,7 +112,7 @@
                     <div class="w-50 d-flex flex-row gap-1">
                         <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
                                 id="btn-add-edge-device"
-                                hx-get="/model_builder/open-create-object-panel/EdgeDevice/"
+                                hx-get="/model_builder/open-create-object-panel/EdgeComputer/"
                                 hx-target="#sidePanel"
                                 hx-trigger="click"
                                 hx-swap="innerHTML"
@@ -196,6 +196,6 @@ flex-column align-items-start overflow-y-auto overflow-x-hidden"></div>
 
 {% include "model_builder/modals/warn_before_side_panel_closing_modal.html" with message="The currently opened side panel has pending changes. Would you like to continue and lose them ?" modal_id="unsavedModal" %}
 
-<!-- 
+<!--
 <div id="leaderlines-layer" class="position-absolute top-0 start-0 w-100 h-100"></div>
 -->

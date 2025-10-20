@@ -19,9 +19,9 @@ class TestViewsAdditionEdge(TestModelingBase):
 
         # Create an edge device first to link to
         edge_device_data = self.create_edge_device_data("Test Edge Device")
-        edge_device_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)
-        add_object(edge_device_request, "EdgeDevice")
-        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
+        edge_device_request = self.create_post_request("/add-object/EdgeComputer", edge_device_data)
+        add_object(edge_device_request, "EdgeComputer")
+        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
 
         # Now create edge usage journey
         euj_data = self.create_edge_usage_journey_data(
@@ -54,9 +54,9 @@ class TestViewsAdditionEdge(TestModelingBase):
 
         # Create an edge device first
         edge_device_data = self.create_edge_device_data("Test Edge Device")
-        edge_device_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)
-        add_object(edge_device_request, "EdgeDevice")
-        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
+        edge_device_request = self.create_post_request("/add-object/EdgeComputer", edge_device_data)
+        add_object(edge_device_request, "EdgeComputer")
+        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
 
         # Create edge usage journey
         euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device=edge_device_id)
@@ -102,9 +102,9 @@ class TestViewsAdditionEdge(TestModelingBase):
         from model_builder.web_core.model_web import ModelWeb
 
         edge_device_data = self.create_edge_device_data("Test Edge Device")
-        edge_device_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)
-        add_object(edge_device_request, "EdgeDevice")
-        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
+        edge_device_request = self.create_post_request("/add-object/EdgeComputer", edge_device_data)
+        add_object(edge_device_request, "EdgeComputer")
+        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
 
         # Create edge usage journey
         euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device=edge_device_id)

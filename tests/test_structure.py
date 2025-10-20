@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.constants.countries import Countries
-from efootprint.core.hardware.edge_device import EdgeDevice
+from efootprint.core.hardware.edge_device import EdgeComputer
 from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
@@ -39,7 +39,7 @@ obj_creation_structure_dict = {
     "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
     "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
-    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeDevice": [EdgeDevice],
+    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeComputer": [EdgeComputer],
     "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 

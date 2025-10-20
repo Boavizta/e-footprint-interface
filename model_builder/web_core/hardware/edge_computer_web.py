@@ -2,7 +2,7 @@ import json
 from typing import TYPE_CHECKING
 
 from django.http import QueryDict
-from efootprint.core.hardware.edge_device import EdgeDevice
+from efootprint.core.hardware.edge_computer import EdgeComputer
 from efootprint.core.hardware.edge_storage import EdgeStorage
 
 from model_builder.object_creation_and_edition_utils import edit_object_in_system
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class EdgeDeviceWeb(ModelingObjectWeb):
+class EdgeComputerWeb(ModelingObjectWeb):
     add_template = "add_object_with_storage.html"
     edit_template = "../server/server_edit.html"
 
@@ -29,7 +29,7 @@ class EdgeDeviceWeb(ModelingObjectWeb):
     @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
         return generate_object_with_storage_creation_context(
-            model_web, "EdgeDevice", [EdgeDevice],
+            model_web, "EdgeComputer", [EdgeComputer],
             "EdgeStorage", [EdgeStorage])
 
     @classmethod
