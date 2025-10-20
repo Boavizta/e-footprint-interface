@@ -1,7 +1,6 @@
 import re
 import unicodedata
 
-from efootprint.constants.countries import Countries
 from django.shortcuts import render
 
 
