@@ -45,6 +45,21 @@ class ModelingObjectWeb:
     def __getattr__(self, name):
         from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
 
+        # Check if the attribute is defined in the class hierarchy (as a property, method, etc.)
+        # If it is, we need to manually call it and let any error propagate
+        for cls in type(self).__mro__:
+            if name in cls.__dict__:
+                attr_descriptor = cls.__dict__[name]
+                # If it's a property, call its getter
+                if isinstance(attr_descriptor, property):
+                    return attr_descriptor.fget(self)
+                # If it's another descriptor (like a method), get it normally
+                elif hasattr(attr_descriptor, '__get__'):
+                    return attr_descriptor.__get__(self, type(self))
+                # Otherwise just return it
+                else:
+                    return attr_descriptor
+
         attr = getattr(self._modeling_obj, name)
 
         if name == "id":

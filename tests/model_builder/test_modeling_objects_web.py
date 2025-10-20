@@ -2,8 +2,11 @@ import unittest
 from unittest.mock import patch, MagicMock, Mock
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import ModelingObjectWebThatCanBeMirrored
 
 
 class TestExplainableObjectWebTestCase(unittest.TestCase):
@@ -56,3 +59,54 @@ class TestExplainableObjectWebTestCase(unittest.TestCase):
             self.assertEqual(token_expected_ancestor["symbol"], token_ancestor["symbol"], ancestors_error_msg)
             self.assertEqual(token_expected_ancestor["explainable_object"],
                              token_ancestor["explainable_object_web"].efootprint_object, ancestors_error_msg)
+
+
+class TestModelingObjectWebGetAttrTestCase(unittest.TestCase):
+    def test_getattr_preserves_property_error_instead_of_falling_back_to_modeling_obj(self):
+        """
+        Test that when a property in a subclass raises an error, __getattr__ preserves that error
+        instead of falling back to _modeling_obj and raising a different AttributeError.
+
+        This specifically tests the case where ModelingObjectWebThatCanBeMirrored.web_id raises
+        a PermissionError, which should be preserved rather than replaced by an AttributeError
+        saying that _modeling_obj doesn't have the 'web_id' attribute.
+        """
+        # Arrange: create a mock modeling object and model_web
+        mock_modeling_obj = Mock(spec=ModelingObject)
+        mock_modeling_obj.id = "test_id"
+        mock_model_web = MagicMock()
+
+        # Create an instance of ModelingObjectWebThatCanBeMirrored
+        # We need to mock the mirrored_cards property since it's abstract
+        class ConcreteModelingObjectWebThatCanBeMirrored(ModelingObjectWebThatCanBeMirrored):
+            @property
+            def mirrored_cards(self):
+                return [self]
+
+        obj = ConcreteModelingObjectWebThatCanBeMirrored(mock_modeling_obj, mock_model_web)
+
+        # Act & Assert: accessing web_id should raise PermissionError, not AttributeError
+        with self.assertRaises(PermissionError) as context:
+            _ = obj.web_id
+
+        # Verify it's the expected PermissionError with the correct message
+        self.assertIn("don't have a web_id attribute", str(context.exception))
+        self.assertIn("ConcreteModelingObjectWebThatCanBeMirrored", str(context.exception))
+
+    def test_getattr_falls_back_to_modeling_obj_when_attribute_not_in_class(self):
+        """
+        Test that __getattr__ still properly falls back to _modeling_obj when the attribute
+        doesn't exist in the web class hierarchy.
+        """
+        # Arrange
+        mock_modeling_obj = Mock(spec=ModelingObject)
+        mock_modeling_obj.some_domain_attribute = "domain_value"
+        mock_model_web = MagicMock()
+
+        obj = ModelingObjectWeb(mock_modeling_obj, mock_model_web)
+
+        # Act
+        result = obj.some_domain_attribute
+
+        # Assert
+        self.assertEqual(result, "domain_value")

@@ -9,8 +9,8 @@ from model_builder.web_abstract_modeling_classes.modeling_object_web import Mode
 class ModelingObjectWebThatCanBeMirrored(ModelingObjectWeb):
     @property
     def web_id(self):
-        raise PermissionError(f"{type(self).__name__} objects don’t have a web_id attribute because their html "
-                             f"representation should be managed by the Mirrored{type(self.__name__)} object")
+        raise PermissionError(f"{type(self).__name__} objects don't have a web_id attribute because their html "
+                             f"representation should be managed by the Mirrored{type(self).__name__} object")
 
     @property
     @abstractmethod
