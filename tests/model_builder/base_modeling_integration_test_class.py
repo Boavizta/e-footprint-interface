@@ -352,7 +352,7 @@ class TestModelingBase(TestCase):
                                           edge_device_id: str = "",
                                           constant_compute_needed: str = "1",
                                           constant_ram_needed: str = "1",
-                                          constant_storage_needed: str = "100", **overrides):
+                                          constant_storage_needed: str = "0", **overrides):
         """Create recurrent edge process form data with sensible defaults."""
         data = {
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",

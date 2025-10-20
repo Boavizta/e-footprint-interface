@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.constants.countries import Countries
-from efootprint.core.hardware.edge_device import EdgeComputer
+from efootprint.core.hardware.edge_computer import EdgeComputer
 from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
@@ -172,6 +172,13 @@ if __name__ == "__main__":
     from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 
     reformatted_form_fields = deepcopy(FORM_FIELD_REFERENCES)
+    # Reinitialize modeling_obj_containers key for all init sig param
+    for efootprint_class in MODELING_OBJECT_CLASSES_DICT.values():
+        init_sig_params = get_init_signature_params(efootprint_class)
+        for attr_name in init_sig_params.keys():
+            if attr_name in reformatted_form_fields:
+                reformatted_form_fields[attr_name]["modeling_obj_containers"] = []
+
     for efootprint_class in MODELING_OBJECT_CLASSES_DICT.values():
         init_sig_params = get_init_signature_params(efootprint_class)
         for attr_name in init_sig_params.keys():
@@ -188,5 +195,5 @@ if __name__ == "__main__":
             if efootprint_class.__name__ not in reformatted_form_fields[attr_name]["modeling_obj_containers"]:
                 reformatted_form_fields[attr_name]["modeling_obj_containers"].append(efootprint_class.__name__)
 
-    with open(os.path.join(model_builder_root, "form_fields_reference.json"), "w") as f:
+    with open(os.path.join(model_builder_root, "reference_data", "form_fields_reference.json"), "w") as f:
         json.dump(reformatted_form_fields, f, indent=4)

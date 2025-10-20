@@ -22,7 +22,7 @@ class TestModelWeb(unittest.TestCase):
             "Storage": {"value": [300, 400], "start_date": "2023-01-01 00:00"},
             "Devices": {"value": [500, 600], "start_date": "2023-01-02 00:00"},
             "Network": {"value": [700, 800], "start_date": "2023-01-01 00:00"},
-            "EdgeComputers": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
+            "EdgeDevices": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
             "EdgeStorage": {"value": [50, 60], "start_date": "2023-01-01 00:00"}
         }
         self.model_web.system.total_fabrication_footprints = {
@@ -30,7 +30,7 @@ class TestModelWeb(unittest.TestCase):
             "Storage": {"value": [1100, 1200], "start_date": "2023-01-01 00:00"},
             "Devices": {"value": [1300, 1400], "start_date": "2023-01-02 00:00"},
             "Network": EmptyExplainableObject(),
-            "EdgeComputers": {"value": [1500, 1600], "start_date": "2023-01-01 00:00"},
+            "EdgeDevices": {"value": [1500, 1600], "start_date": "2023-01-01 00:00"},
             "EdgeStorage": {"value": [1700, 1800], "start_date": "2023-01-01 00:00"}
         }
 

@@ -79,35 +79,34 @@ class IntegrationTest(TestModelingBase):
         add_object(edge_device_request, "EdgeComputer")
         edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
 
-        logger.info(f"Creating recurrent edge process")
-        rep_data = self.create_recurrent_edge_process_data(
-            name="Test Process", edge_device_id=edge_device_id)
-        rep_request = self.create_post_request(
-            "/add-object/RecurrentEdgeProcessFromForm", rep_data, edge_device_request.session["system_data"])
-        add_object(rep_request, "RecurrentEdgeProcessFromForm")
-        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcessFromForm")
+        logger.info(f"Creating edge usage journey")
+        euj_data = self.create_edge_usage_journey_data(
+            name="Test Edge Usage Journey", edge_functions="", usage_span="6")
+        euj_request = self.create_post_request(
+            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
+        add_object(euj_request, "EdgeUsageJourney")
+        edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
 
         logger.info(f"Creating edge function")
         ef_data = self.create_edge_function_data(
-            name="Test Edge Function", recurrent_edge_resource_needs=rep_id)
+            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_resource_needs="")
         ef_request = self.create_post_request(
-            "/add-object/EdgeFunction", ef_data, rep_request.session["system_data"])
+            "/add-object/EdgeFunction", ef_data, euj_request.session["system_data"])
         add_object(ef_request, "EdgeFunction")
         edge_function_id = self.get_object_id_from_session(ef_request, "EdgeFunction")
 
-        logger.info(f"Creating edge usage journey")
-        euj_data = self.create_edge_usage_journey_data(
-            name="Test Edge Usage Journey", edge_functions=edge_function_id, usage_span="6")
-        euj_request = self.create_post_request(
-            "/add-object/EdgeUsageJourney", euj_data, ef_request.session["system_data"])
-        add_object(euj_request, "EdgeUsageJourney")
-        edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
+        logger.info(f"Creating recurrent edge process")
+        rep_data = self.create_recurrent_edge_process_data(
+            name="Test Process", parent_id=edge_function_id, edge_device_id=edge_device_id)
+        rep_request = self.create_post_request(
+            "/add-object/RecurrentEdgeProcessFromForm", rep_data, ef_request.session["system_data"])
+        add_object(rep_request, "RecurrentEdgeProcessFromForm")
 
         logger.info(f"Creating edge usage pattern")
         eup_data = self.create_edge_usage_pattern_data(
             name="Test Edge Usage Pattern", edge_usage_journey_id=edge_usage_journey_id)
         eup_request = self.create_post_request(
-            "/add-object/EdgeUsagePatternFromForm", eup_data, euj_request.session["system_data"])
+            "/add-object/EdgeUsagePatternFromForm", eup_data, rep_request.session["system_data"])
         response = add_object(eup_request, "EdgeUsagePatternFromForm")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(eup_request.session["system_data"]["EdgeUsagePatternFromForm"]), 1)

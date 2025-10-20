@@ -29,9 +29,9 @@
                 "default": "Edge usage journey 1"
             },
             {
-                "web_id": "EdgeUsageJourney_edge_processes",
-                "attr_name": "edge_processes",
-                "label": "edge processes",
+                "web_id": "EdgeUsageJourney_edge_functions",
+                "attr_name": "edge_functions",
+                "label": "edge functions",
                 "tooltip": false,
                 "input_type": "select_multiple",
                 "selected": [],
@@ -43,24 +43,6 @@
                     {
                         "value": "efootprint_id2",
                         "label": "option2"
-                    }
-                ]
-            },
-            {
-                "web_id": "EdgeUsageJourney_edge_device",
-                "attr_name": "edge_device",
-                "label": "edge device",
-                "tooltip": false,
-                "input_type": "select_object",
-                "selected": "efootprint_id1",
-                "options": [
-                    {
-                        "label": "option1",
-                        "value": "efootprint_id1"
-                    },
-                    {
-                        "label": "option2",
-                        "value": "efootprint_id2"
                     }
                 ]
             },

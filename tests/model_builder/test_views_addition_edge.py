@@ -52,42 +52,42 @@ class TestViewsAdditionEdge(TestModelingBase):
         add_object(edge_device_request, "EdgeComputer")
         edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
 
-        # Step 2: Create recurrent edge process with edge_device reference
-        rep_data = self.create_recurrent_edge_process_data(
-            name="Test Process", edge_device_id=edge_device_id,
-            constant_compute_needed="2", constant_ram_needed="1.5", constant_storage_needed="200")
-        rep_request = self.create_post_request(
-            "/add-object/RecurrentEdgeProcessFromForm", rep_data, edge_device_request.session["system_data"])
-        add_object(rep_request, "RecurrentEdgeProcessFromForm")
-        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcessFromForm")
-
-        # Step 3: Create edge function with the recurrent edge process
-        ef_data = self.create_edge_function_data(
-            name="Test Edge Function", recurrent_edge_resource_needs=rep_id)
-        ef_request = self.create_post_request(
-            "/add-object/EdgeFunction", ef_data, rep_request.session["system_data"])
-        add_object(ef_request, "EdgeFunction")
-        edge_function_id = self.get_object_id_from_session(ef_request, "EdgeFunction")
-
-        # Step 4: Create edge usage journey with the edge function
+        # Step 2: Create edge usage journey
         euj_data = self.create_edge_usage_journey_data(
-            name="Test Edge Usage Journey", edge_functions=edge_function_id, usage_span="6")
+            name="Test Edge Usage Journey", edge_functions="", usage_span="6")
         euj_request = self.create_post_request(
-            "/add-object/EdgeUsageJourney", euj_data, ef_request.session["system_data"])
+            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
         add_object(euj_request, "EdgeUsageJourney")
         edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
 
+        # Step 3: Create edge function linked to the edge usage journey
+        ef_data = self.create_edge_function_data(
+            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_resource_needs="")
+        ef_request = self.create_post_request(
+            "/add-object/EdgeFunction", ef_data, euj_request.session["system_data"])
+        add_object(ef_request, "EdgeFunction")
+        edge_function_id = self.get_object_id_from_session(ef_request, "EdgeFunction")
+
+        # Step 4: Create recurrent edge process linked to the edge function
+        rep_data = self.create_recurrent_edge_process_data(
+            name="Test Process", parent_id=edge_function_id, edge_device_id=edge_device_id,
+            constant_compute_needed="2", constant_ram_needed="1.5", constant_storage_needed="200")
+        rep_request = self.create_post_request(
+            "/add-object/RecurrentEdgeProcessFromForm", rep_data, ef_request.session["system_data"])
+        add_object(rep_request, "RecurrentEdgeProcessFromForm")
+        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcessFromForm")
+
         # Verify the structure
-        recurrent_process = euj_request.session["system_data"]["RecurrentEdgeProcessFromForm"][rep_id]
+        recurrent_process = rep_request.session["system_data"]["RecurrentEdgeProcessFromForm"][rep_id]
         self.assertEqual(recurrent_process["name"], "Test Process")
         self.assertEqual(recurrent_process["edge_device"], edge_device_id)
         self.assertEqual(recurrent_process["constant_compute_needed"]["value"], 2.0)
 
-        edge_function = euj_request.session["system_data"]["EdgeFunction"][edge_function_id]
+        edge_function = rep_request.session["system_data"]["EdgeFunction"][edge_function_id]
         self.assertEqual(edge_function["name"], "Test Edge Function")
         self.assertIn(rep_id, edge_function["recurrent_edge_resource_needs"])
 
-        edge_usage_journey = euj_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
+        edge_usage_journey = rep_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
         self.assertEqual(edge_usage_journey["name"], "Test Edge Usage Journey")
         self.assertIn(edge_function_id, edge_usage_journey["edge_functions"])
 

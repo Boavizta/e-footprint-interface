@@ -1,31 +1,34 @@
 {
     "name": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
-            "BoaviztaCloudServer",
             "UsageJourneyStep",
             "UsageJourney",
-            "UsagePattern",
-            "UsagePatternFromForm",
-            "Job",
-            "GenAIJob",
-            "VideoStreamingJob",
-            "WebApplicationJob",
-            "GenAIModel",
-            "VideoStreaming",
-            "WebApplication",
-            "Storage",
             "Device",
             "Country",
+            "UsagePattern",
             "EdgeUsageJourney",
+            "EdgeFunction",
             "EdgeUsagePattern",
+            "EdgeAppliance",
             "EdgeComputer",
             "EdgeStorage",
+            "WebApplication",
+            "VideoStreaming",
+            "GenAIModel",
+            "BoaviztaCloudServer",
+            "Job",
             "GPUJob",
             "RecurrentEdgeProcess",
+            "RecurrentEdgeWorkload",
+            "WebApplicationJob",
+            "VideoStreamingJob",
+            "GenAIJob",
             "Network",
+            "Server",
+            "GPUServer",
+            "Storage",
             "System",
+            "UsagePatternFromForm",
             "RecurrentEdgeProcessFromForm",
             "EdgeUsagePatternFromForm"
         ],
@@ -33,17 +36,18 @@
     },
     "server_type": {
         "modeling_obj_containers": [
+            "BoaviztaCloudServer",
             "Server",
-            "GPUServer",
-            "BoaviztaCloudServer"
+            "GPUServer"
         ],
         "label": "infrastructure type"
     },
     "carbon_footprint_fabrication": {
         "modeling_obj_containers": [
-            "Server",
             "Device",
-            "EdgeComputer"
+            "EdgeAppliance",
+            "EdgeComputer",
+            "Server"
         ],
         "label": "carbon footprint fabrication",
         "is_advanced_parameter": true,
@@ -51,9 +55,10 @@
     },
     "power": {
         "modeling_obj_containers": [
-            "Server",
             "Device",
-            "EdgeComputer"
+            "EdgeAppliance",
+            "EdgeComputer",
+            "Server"
         ],
         "label": "power",
         "is_advanced_parameter": true,
@@ -61,24 +66,26 @@
     },
     "lifespan": {
         "modeling_obj_containers": [
+            "Device",
+            "EdgeAppliance",
+            "EdgeComputer",
+            "EdgeStorage",
+            "BoaviztaCloudServer",
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer",
-            "Storage",
-            "Device",
-            "EdgeComputer",
-            "EdgeStorage"
+            "Storage"
         ],
         "label": "lifespan",
         "step": 1
     },
     "idle_power": {
         "modeling_obj_containers": [
-            "Server",
-            "BoaviztaCloudServer",
-            "Storage",
+            "EdgeAppliance",
             "EdgeComputer",
-            "EdgeStorage"
+            "EdgeStorage",
+            "BoaviztaCloudServer",
+            "Server",
+            "Storage"
         ],
         "label": "idle power",
         "is_advanced_parameter": true,
@@ -86,58 +93,58 @@
     },
     "ram": {
         "modeling_obj_containers": [
-            "Server",
-            "EdgeComputer"
+            "EdgeComputer",
+            "Server"
         ],
         "label": "RAM",
         "step": 1
     },
     "compute": {
         "modeling_obj_containers": [
+            "EdgeComputer",
             "Server",
-            "GPUServer",
-            "EdgeComputer"
+            "GPUServer"
         ],
         "label": "compute",
         "step": 1
     },
     "power_usage_effectiveness": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
+            "EdgeComputer",
             "BoaviztaCloudServer",
-            "EdgeComputer"
+            "Server",
+            "GPUServer"
         ],
         "label": "power usage effectiveness",
         "is_advanced_parameter": true
     },
     "average_carbon_intensity": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
+            "Country",
             "BoaviztaCloudServer",
-            "Country"
+            "Server",
+            "GPUServer"
         ],
         "label": "average carbon intensity of electricity",
         "step": 1
     },
     "utilization_rate": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
+            "EdgeComputer",
             "BoaviztaCloudServer",
-            "EdgeComputer"
+            "Server",
+            "GPUServer"
         ],
         "label": "server utilization rate",
         "is_advanced_parameter": true
     },
     "base_ram_consumption": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
-            "BoaviztaCloudServer",
+            "EdgeComputer",
             "VideoStreaming",
-            "EdgeComputer"
+            "BoaviztaCloudServer",
+            "Server",
+            "GPUServer"
         ],
         "label": "base RAM consumption",
         "is_advanced_parameter": true,
@@ -145,28 +152,28 @@
     },
     "base_compute_consumption": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
+            "EdgeComputer",
             "BoaviztaCloudServer",
-            "EdgeComputer"
+            "Server",
+            "GPUServer"
         ],
         "label": "base compute consumption",
         "is_advanced_parameter": true
     },
     "storage": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
+            "EdgeComputer",
             "BoaviztaCloudServer",
-            "EdgeComputer"
+            "Server",
+            "GPUServer"
         ],
         "label": "storage"
     },
     "fixed_nb_of_instances": {
         "modeling_obj_containers": [
+            "BoaviztaCloudServer",
             "Server",
             "GPUServer",
-            "BoaviztaCloudServer",
             "Storage"
         ],
         "label": "fixed nb of instances",
@@ -174,10 +181,6 @@
     },
     "fraction_of_usage_time": {
         "modeling_obj_containers": [
-            "Server",
-            "GPUServer",
-            "BoaviztaCloudServer",
-            "Storage",
             "Device"
         ],
         "label": "fraction of usage time",
@@ -243,8 +246,8 @@
     },
     "provider": {
         "modeling_obj_containers": [
-            "BoaviztaCloudServer",
-            "GenAIModel"
+            "GenAIModel",
+            "BoaviztaCloudServer"
         ],
         "label": "provider"
     },
@@ -296,16 +299,15 @@
     "country": {
         "modeling_obj_containers": [
             "UsagePattern",
-            "UsagePatternFromForm",
             "EdgeUsagePattern",
+            "UsagePatternFromForm",
             "EdgeUsagePatternFromForm"
         ],
         "label": "country"
     },
     "hourly_usage_journey_starts": {
         "modeling_obj_containers": [
-            "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePattern"
         ],
         "label": "hourly number of usage journey starts local time"
     },
@@ -378,10 +380,10 @@
     },
     "server": {
         "modeling_obj_containers": [
-            "Job",
-            "GenAIModel",
-            "VideoStreaming",
             "WebApplication",
+            "VideoStreaming",
+            "GenAIModel",
+            "Job",
             "GPUJob"
         ],
         "label": "server"
@@ -389,8 +391,8 @@
     "data_transferred": {
         "modeling_obj_containers": [
             "Job",
-            "WebApplicationJob",
-            "GPUJob"
+            "GPUJob",
+            "WebApplicationJob"
         ],
         "label": "data transferred",
         "step": 1
@@ -398,9 +400,9 @@
     "data_stored": {
         "modeling_obj_containers": [
             "Job",
-            "VideoStreamingJob",
+            "GPUJob",
             "WebApplicationJob",
-            "GPUJob"
+            "VideoStreamingJob"
         ],
         "label": "data stored",
         "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
@@ -432,9 +434,9 @@
     },
     "service": {
         "modeling_obj_containers": [
-            "GenAIJob",
+            "WebApplicationJob",
             "VideoStreamingJob",
-            "WebApplicationJob"
+            "GenAIJob"
         ],
         "label": "service"
     },
@@ -562,8 +564,8 @@
     },
     "carbon_footprint_fabrication_per_storage_capacity": {
         "modeling_obj_containers": [
-            "Storage",
-            "EdgeStorage"
+            "EdgeStorage",
+            "Storage"
         ],
         "label": "carbon footprint fabrication per storage capacity",
         "is_advanced_parameter": true,
@@ -571,8 +573,8 @@
     },
     "power_per_storage_capacity": {
         "modeling_obj_containers": [
-            "Storage",
-            "EdgeStorage"
+            "EdgeStorage",
+            "Storage"
         ],
         "label": "power per storage capacity",
         "is_advanced_parameter": true,
@@ -580,8 +582,8 @@
     },
     "storage_capacity": {
         "modeling_obj_containers": [
-            "Storage",
-            "EdgeStorage"
+            "EdgeStorage",
+            "Storage"
         ],
         "label": "storage capacity",
         "step": 1
@@ -600,8 +602,8 @@
     },
     "base_storage_need": {
         "modeling_obj_containers": [
-            "Storage",
-            "EdgeStorage"
+            "EdgeStorage",
+            "Storage"
         ],
         "label": "base storage need",
         "is_advanced_parameter": true
@@ -647,7 +649,9 @@
     },
     "edge_device": {
         "modeling_obj_containers": [
-            "EdgeUsageJourney"
+            "RecurrentEdgeProcess",
+            "RecurrentEdgeWorkload",
+            "RecurrentEdgeProcessFromForm"
         ],
         "label": "edge device"
     },
@@ -727,5 +731,23 @@
             "EdgeUsagePatternFromForm"
         ],
         "label": "initial edge usage journey volume timespan"
+    },
+    "edge_functions": {
+        "modeling_obj_containers": [
+            "EdgeUsageJourney"
+        ],
+        "label": "edge functions"
+    },
+    "recurrent_edge_resource_needs": {
+        "modeling_obj_containers": [
+            "EdgeFunction"
+        ],
+        "label": "recurrent edge resource needs"
+    },
+    "recurrent_workload": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeWorkload"
+        ],
+        "label": "recurrent workload"
     }
 }
