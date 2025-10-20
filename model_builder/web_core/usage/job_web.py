@@ -119,7 +119,7 @@ class MirroredJobWeb(ModelingObjectWeb):
 
     @property
     def template_name(self):
-        return "job"
+        return "resource_need"
 
     @property
     def web_id(self):

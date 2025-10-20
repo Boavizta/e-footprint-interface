@@ -30,6 +30,22 @@ class MirroredUsageJourneyStepWeb(UsageJourneyStepWeb):
         return super().settable_attributes + ["usage_journey"]
 
     @property
+    def child_object_type_str(self):
+        return "Job"
+
+    @property
+    def child_template_name(self):
+        return "resource_need"
+
+    @property
+    def add_child_label(self):
+        return "Add new job"
+
+    @property
+    def children_property_name(self):
+        return "jobs"
+
+    @property
     def web_id(self):
         return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.usage_journey.web_id}"
 
@@ -61,7 +77,7 @@ class MirroredUsageJourneyStepWeb(UsageJourneyStepWeb):
         if index < len(usage_journey_steps) - 1:
             link_to = f"icon-{usage_journey_steps[index+1].web_id}"
         else:
-            link_to = f'add-usage-pattern-{self.usage_journey.web_id}'
+            link_to = f'add-journey-step-{self.usage_journey.web_id}'
 
         return link_to
 

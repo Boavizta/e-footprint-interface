@@ -8,6 +8,22 @@ class UsageJourneyWeb(ModelingObjectWeb):
         self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     @property
+    def child_object_type_str(self):
+        return "UsageJourneyStep"
+
+    @property
+    def child_template_name(self):
+        return "journey_step"
+
+    @property
+    def add_child_label(self):
+        return "Add usage journey step"
+
+    @property
+    def children_property_name(self):
+        return "uj_steps"
+
+    @property
     def links_to(self):
         linked_server_ids = set()
         for uj_step in self.uj_steps:

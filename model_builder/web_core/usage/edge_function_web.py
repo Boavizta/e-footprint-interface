@@ -34,6 +34,22 @@ class MirroredEdgeFunctionWeb(EdgeFunctionWeb):
         return super().settable_attributes + ["edge_usage_journey"]
 
     @property
+    def child_object_type_str(self):
+        return "RecurrentEdgeResourceNeed"
+
+    @property
+    def child_template_name(self):
+        return "resource_need"
+
+    @property
+    def add_child_label(self):
+        return "Add recurrent edge resource need"
+
+    @property
+    def children_property_name(self):
+        return "recurrent_edge_resource_needs"
+
+    @property
     def web_id(self):
         return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.edge_usage_journey.web_id}"
 

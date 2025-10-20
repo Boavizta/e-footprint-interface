@@ -109,6 +109,10 @@ class MirroredRecurrentEdgeResourceNeedWeb(ModelingObjectWeb):
         return super().settable_attributes + ["edge_function"]
 
     @property
+    def template_name(self):
+        return "resource_need"
+
+    @property
     def web_id(self):
         return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.edge_function.web_id}"
 

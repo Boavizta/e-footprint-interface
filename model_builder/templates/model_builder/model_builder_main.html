@@ -69,13 +69,10 @@
                     </button>
                     <div id="uj-list" class="list-group w-100 ps-0">
                         {% for usage_journey in model_web.usage_journeys %}
-                        {% include 'model_builder/object_cards/usage_journey_card.html' %}
+                        {% include 'model_builder/object_cards/journey_card.html' with journey=usage_journey %}
                         {% endfor %}
                         {% for edge_usage_journey in model_web.edge_usage_journeys %}
-                        {% include 'model_builder/object_cards/edge_usage_journey_card.html' %}
-                        {% endfor %}
-                        {% for empty_usage_journey in model_web.empty_usage_journeys %}
-                        {% include 'model_builder/object_cards/usage_journey_empty.html' with usage_journey=empty_usage_journey %}
+                        {% include 'model_builder/object_cards/journey_card.html' with journey=edge_usage_journey %}
                         {% endfor %}
                     </div>
                 </div>
