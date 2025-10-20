@@ -54,19 +54,11 @@ class MirroredEdgeFunctionWeb(EdgeFunctionWeb):
     @property
     def recurrent_edge_resource_needs(self):
         """Returns web-wrapped recurrent edge resource needs with mirrored context."""
-        from model_builder.web_core.usage.recurrent_edge_process_web import MirroredRecurrentEdgeProcessWeb
-        from model_builder.web_core.usage.recurrent_edge_workload_web import MirroredRecurrentEdgeWorkloadWeb
+        from model_builder.web_core.usage.recurrent_edge_resource_need_web import MirroredRecurrentEdgeResourceNeedWeb
 
         web_resource_needs = []
         for rern in self._modeling_obj.recurrent_edge_resource_needs:
-            if rern.class_as_simple_str == "RecurrentEdgeProcess":
-                web_resource_needs.append(MirroredRecurrentEdgeProcessWeb(rern, self))
-            elif rern.class_as_simple_str == "RecurrentEdgeWorkload":
-                web_resource_needs.append(MirroredRecurrentEdgeWorkloadWeb(rern, self))
-            else:
-                # Fallback for any other RecurrentEdgeResourceNeed subclasses
-                from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
-                web_resource_needs.append(wrap_efootprint_object(rern, self.model_web))
+            web_resource_needs.append(MirroredRecurrentEdgeResourceNeedWeb(rern, self))
 
         return web_resource_needs
 
