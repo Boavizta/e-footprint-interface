@@ -318,24 +318,38 @@ class TestModelingBase(TestCase):
 
     @staticmethod
     def create_edge_usage_journey_data(name: str = "Test Edge Usage Journey",
-                                      edge_device: str = "",
                                       usage_span: str = "6",
-                                      edge_processes: str = "", **overrides):
+                                      edge_functions: str = "", **overrides):
         """Create edge usage journey form data with sensible defaults."""
         data = {
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
             "EdgeUsageJourney_name": name,
-            "EdgeUsageJourney_edge_device": edge_device,
             "EdgeUsageJourney_usage_span": usage_span,
             "EdgeUsageJourney_usage_span_unit": "yr",
-            "EdgeUsageJourney_edge_processes": edge_processes,
+            "EdgeUsageJourney_edge_functions": edge_functions,
         }
+        data.update(overrides)
+        return data
+
+    @staticmethod
+    def create_edge_function_data(name: str = "Test Edge Function",
+                                 parent_id: str = "",
+                                 recurrent_edge_resource_needs: str = "", **overrides):
+        """Create edge function form data with sensible defaults."""
+        data = {
+            "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
+            "EdgeFunction_name": name,
+            "EdgeFunction_recurrent_edge_resource_needs": recurrent_edge_resource_needs,
+        }
+        if parent_id:
+            data["efootprint_id_of_parent_to_link_to"] = parent_id
         data.update(overrides)
         return data
 
     @staticmethod
     def create_recurrent_edge_process_data(name: str = "Test Recurrent Edge Process",
                                           parent_id: str = "",
+                                          edge_device_id: str = "",
                                           constant_compute_needed: str = "1",
                                           constant_ram_needed: str = "1",
                                           constant_storage_needed: str = "100", **overrides):
@@ -343,14 +357,16 @@ class TestModelingBase(TestCase):
         data = {
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
             "RecurrentEdgeProcessFromForm_name": name,
+            "RecurrentEdgeProcessFromForm_edge_device": edge_device_id,
             "RecurrentEdgeProcessFromForm_constant_compute_needed": constant_compute_needed,
             "RecurrentEdgeProcessFromForm_constant_compute_needed_unit": "cpu_core",
             "RecurrentEdgeProcessFromForm_constant_ram_needed": constant_ram_needed,
             "RecurrentEdgeProcessFromForm_constant_ram_needed_unit": "GB",
             "RecurrentEdgeProcessFromForm_constant_storage_needed": constant_storage_needed,
             "RecurrentEdgeProcessFromForm_constant_storage_needed_unit": "GB",
-            "efootprint_id_of_parent_to_link_to": parent_id,
         }
+        if parent_id:
+            data["efootprint_id_of_parent_to_link_to"] = parent_id
         data.update(overrides)
         return data
 

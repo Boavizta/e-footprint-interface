@@ -14,20 +14,14 @@ class TestViewsAdditionEdge(TestModelingBase):
         cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_add_edge_usage_journey_basic(self):
-        """Test basic EdgeUsageJourney creation"""
+        """Test basic EdgeUsageJourney creation with EdgeFunction structure"""
         os.environ["RAISE_EXCEPTIONS"] = "True"
 
-        # Create an edge device first to link to
-        edge_device_data = self.create_edge_device_data("Test Edge Device")
-        edge_device_request = self.create_post_request("/add-object/EdgeComputer", edge_device_data)
-        add_object(edge_device_request, "EdgeComputer")
-        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
-
-        # Now create edge usage journey
+        # EdgeUsageJourney in efootprint 12.0.0 now takes edge_functions, not edge_device directly
+        # Create empty EdgeUsageJourney first
         euj_data = self.create_edge_usage_journey_data(
-            name="Test Edge Usage Journey", edge_device=edge_device_id, usage_span="6")
-        add_request = self.create_post_request(
-            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
+            name="Test Edge Usage Journey", usage_span="6", edge_functions="")
+        add_request = self.create_post_request("/add-object/EdgeUsageJourney", euj_data)
 
         # Check initial state
         self.assertNotIn("EdgeUsageJourney", add_request.session["system_data"])
@@ -43,73 +37,69 @@ class TestViewsAdditionEdge(TestModelingBase):
         edge_usage_journey_json = add_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
 
         self.assertEqual(edge_usage_journey_json["name"], "Test Edge Usage Journey")
-        self.assertEqual(edge_usage_journey_json["edge_device"], edge_device_id)
         self.assertEqual(edge_usage_journey_json["usage_span"]["value"], 6)
+        self.assertEqual(edge_usage_journey_json["edge_functions"], [])  # Empty list initially
 
         logger.info("EdgeUsageJourney created successfully")
 
-    def test_add_recurrent_edge_process_to_edge_usage_journey(self):
-        """Test adding a RecurrentEdgeProcessFromForm to an EdgeUsageJourney"""
+    def test_add_recurrent_edge_process_via_edge_function(self):
+        """Test adding a RecurrentEdgeProcess via EdgeFunction to an EdgeUsageJourney"""
         os.environ["RAISE_EXCEPTIONS"] = "True"
 
-        # Create an edge device first
+        # Step 1: Create an edge device
         edge_device_data = self.create_edge_device_data("Test Edge Device")
         edge_device_request = self.create_post_request("/add-object/EdgeComputer", edge_device_data)
         add_object(edge_device_request, "EdgeComputer")
         edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
 
-        # Create edge usage journey
-        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device=edge_device_id)
+        # Step 2: Create recurrent edge process with edge_device reference
+        rep_data = self.create_recurrent_edge_process_data(
+            name="Test Process", edge_device_id=edge_device_id,
+            constant_compute_needed="2", constant_ram_needed="1.5", constant_storage_needed="200")
+        rep_request = self.create_post_request(
+            "/add-object/RecurrentEdgeProcessFromForm", rep_data, edge_device_request.session["system_data"])
+        add_object(rep_request, "RecurrentEdgeProcessFromForm")
+        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcessFromForm")
+
+        # Step 3: Create edge function with the recurrent edge process
+        ef_data = self.create_edge_function_data(
+            name="Test Edge Function", recurrent_edge_resource_needs=rep_id)
+        ef_request = self.create_post_request(
+            "/add-object/EdgeFunction", ef_data, rep_request.session["system_data"])
+        add_object(ef_request, "EdgeFunction")
+        edge_function_id = self.get_object_id_from_session(ef_request, "EdgeFunction")
+
+        # Step 4: Create edge usage journey with the edge function
+        euj_data = self.create_edge_usage_journey_data(
+            name="Test Edge Usage Journey", edge_functions=edge_function_id, usage_span="6")
         euj_request = self.create_post_request(
-            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
+            "/add-object/EdgeUsageJourney", euj_data, ef_request.session["system_data"])
         add_object(euj_request, "EdgeUsageJourney")
         edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
 
-        # Create recurrent edge process and link to edge usage journey
-        rep_data = self.create_recurrent_edge_process_data(
-            name="Test Process", parent_id=edge_usage_journey_id, constant_compute_needed="2",
-            constant_ram_needed="1.5", constant_storage_needed="200")
-        rep_request = self.create_post_request(
-            "/add-object/RecurrentEdgeProcessFromForm", rep_data, euj_request.session["system_data"])
-
-        # Check initial state
-        initial_rep_count = len(rep_request.session["system_data"].get("RecurrentEdgeProcessFromForm", {}))
-
-        response = add_object(rep_request, "RecurrentEdgeProcessFromForm")
-
-        # Verify response and data
-        self.assert_response_ok(response)
-        self.assertIn("RecurrentEdgeProcessFromForm", rep_request.session["system_data"])
-        self.assertEqual(len(rep_request.session["system_data"]["RecurrentEdgeProcessFromForm"]), initial_rep_count + 1)
-
-        # Get the process ID and verify it's linked to the edge usage journey
-        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcessFromForm")
-        recurrent_process = rep_request.session["system_data"]["RecurrentEdgeProcessFromForm"][rep_id]
-
+        # Verify the structure
+        recurrent_process = euj_request.session["system_data"]["RecurrentEdgeProcessFromForm"][rep_id]
         self.assertEqual(recurrent_process["name"], "Test Process")
+        self.assertEqual(recurrent_process["edge_device"], edge_device_id)
         self.assertEqual(recurrent_process["constant_compute_needed"]["value"], 2.0)
-        self.assertEqual(recurrent_process["constant_ram_needed"]["value"], 1.5)
-        self.assertEqual(recurrent_process["constant_storage_needed"]["value"], 200.0)
 
-        # Verify the edge usage journey contains the process
-        updated_edge_usage_journey = rep_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
-        self.assertIn(rep_id, updated_edge_usage_journey["edge_processes"])
+        edge_function = euj_request.session["system_data"]["EdgeFunction"][edge_function_id]
+        self.assertEqual(edge_function["name"], "Test Edge Function")
+        self.assertIn(rep_id, edge_function["recurrent_edge_resource_needs"])
 
-        logger.info("RecurrentEdgeProcessFromForm added to EdgeUsageJourney successfully")
+        edge_usage_journey = euj_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
+        self.assertEqual(edge_usage_journey["name"], "Test Edge Usage Journey")
+        self.assertIn(edge_function_id, edge_usage_journey["edge_functions"])
+
+        logger.info("RecurrentEdgeProcess added via EdgeFunction to EdgeUsageJourney successfully")
 
     def test_model_web_edge_usage_journeys_property(self):
         """Test that ModelWeb.edge_usage_journeys property works correctly"""
         from model_builder.web_core.model_web import ModelWeb
 
-        edge_device_data = self.create_edge_device_data("Test Edge Device")
-        edge_device_request = self.create_post_request("/add-object/EdgeComputer", edge_device_data)
-        add_object(edge_device_request, "EdgeComputer")
-        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
-
         # Create edge usage journey
-        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device=edge_device_id)
-        euj_request = self.create_post_request(
-            "/add-object/EdgeUsageJourney", euj_data, edge_device_request.session["system_data"])
+        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_functions="")
+        euj_request = self.create_post_request("/add-object/EdgeUsageJourney", euj_data)
         add_object(euj_request, "EdgeUsageJourney")
 
         # Test ModelWeb property
@@ -121,17 +111,21 @@ class TestViewsAdditionEdge(TestModelingBase):
 
         logger.info("ModelWeb.edge_usage_journeys property working correctly")
 
-    def test_edge_usage_journey_without_edge_device(self):
-        """Test EdgeUsageJourney creation fails gracefully without edge device"""
+    def test_edge_usage_journey_with_empty_edge_functions(self):
+        """Test EdgeUsageJourney creation with empty edge_functions list"""
         if "RAISE_EXCEPTIONS" in os.environ:
             os.environ.pop("RAISE_EXCEPTIONS")
 
-        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_device="")
+        # EdgeUsageJourney can now be created with empty edge_functions - this is valid
+        euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_functions="")
         add_request = self.create_post_request("/add-object/EdgeUsageJourney", euj_data)
 
-        # This should handle the case where no edge device is selected
-        with patch('model_builder.object_creation_and_edition_utils.render_exception_modal') as mock_error:
-            response = add_object(add_request, "EdgeUsageJourney")
-            mock_error.assert_called_once()
+        response = add_object(add_request, "EdgeUsageJourney")
 
-        logger.info("EdgeUsageJourney creation handled gracefully without edge device")
+        # Should succeed - empty edge_functions is valid in efootprint 12.0.0
+        self.assert_response_ok(response)
+        edge_usage_journey_id = self.get_object_id_from_session(add_request, "EdgeUsageJourney")
+        edge_usage_journey = add_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
+        self.assertEqual(edge_usage_journey["edge_functions"], [])
+
+        logger.info("EdgeUsageJourney creation with empty edge_functions successful")

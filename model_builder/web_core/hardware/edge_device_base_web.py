@@ -9,5 +9,9 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
         self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     @property
+    def template_name(self):
+        return "edge_device"
+
+    @property
     def class_title_style(self):
         return "h6"

@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 
 class RecurrentEdgeResourceNeedWeb(ModelingObjectWebThatCanBeMirrored):
     """Web wrapper for RecurrentEdgeResourceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
+    @property
+    def template_name(self):
+        return "resource_need"
 
     @property
     def mirrored_cards(self):

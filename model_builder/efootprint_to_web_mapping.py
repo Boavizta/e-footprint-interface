@@ -51,7 +51,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     # Edge usage classes
     "EdgeUsageJourney": EdgeUsageJourneyWeb,
     "EdgeFunction": EdgeFunctionWeb,
-    "RecurrentEdgeResourceNeed": RecurrentEdgeResourceNeedWeb,
+    "RecurrentEdgeProcessFromForm": RecurrentEdgeResourceNeedWeb,
     "RecurrentEdgeProcess": RecurrentEdgeResourceNeedWeb,
     "RecurrentEdgeWorkload": RecurrentEdgeResourceNeedWeb,
 }

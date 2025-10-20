@@ -1,5 +1,6 @@
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
+from efootprint.core.hardware.edge_computer import EdgeComputer
 from pint import Quantity
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.source_objects import SourceRecurrentValues, SourceValue
@@ -14,10 +15,11 @@ class RecurrentEdgeProcessFromForm(RecurrentEdgeProcess):
         "constant_storage_needed": SourceValue(1 * u.GB)
     }
     def __init__(
-        self, name:str, constant_compute_needed: ExplainableQuantity, constant_ram_needed: ExplainableQuantity,
-        constant_storage_needed: ExplainableQuantity):
+        self, name:str, edge_device: EdgeComputer, constant_compute_needed: ExplainableQuantity,
+        constant_ram_needed: ExplainableQuantity, constant_storage_needed: ExplainableQuantity):
         super().__init__(
             name,
+            edge_device,
             recurrent_compute_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.cpu_core)),
             recurrent_ram_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.GB)),
             recurrent_storage_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.GB))
