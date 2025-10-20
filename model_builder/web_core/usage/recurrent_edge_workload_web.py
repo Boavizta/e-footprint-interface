@@ -1,37 +1,48 @@
 from typing import TYPE_CHECKING
 
-from efootprint.core.usage.recurrent_edge_workload import RecurrentEdgeWorkload
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
+from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
+    ModelingObjectWebThatCanBeMirrored
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.web_core.usage.recurrent_edge_resource_need_web import RecurrentEdgeResourceNeedWeb
 
 if TYPE_CHECKING:
-    from model_builder.web_core.model_web import ModelWeb
+    from model_builder.web_core.usage.edge_function_web import EdgeFunctionWeb
 
 
-class RecurrentEdgeWorkloadWeb(RecurrentEdgeResourceNeedWeb):
+class RecurrentEdgeWorkloadWeb(RecurrentEdgeResourceNeedWeb, ModelingObjectWebThatCanBeMirrored):
     """Web wrapper for RecurrentEdgeWorkload (workload-based edge resource need for EdgeAppliance)."""
-    add_template = "add_object.html"
-    edit_template = "edit_object.html"
 
-    @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
-        from model_builder.class_structure import generate_object_creation_structure
-        from model_builder.form_references import FORM_TYPE_OBJECT
-        from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
+    @property
+    def mirrored_cards(self):
+        """Create mirrored cards for each edge function this workload is linked to."""
+        mirrored_cards = []
+        for edge_function in self.edge_functions:
+            mirrored_cards.append(MirroredRecurrentEdgeWorkloadWeb(self._modeling_obj, edge_function))
 
-        efootprint_class_str = "RecurrentEdgeWorkload"
-        form_sections, dynamic_form_data = generate_object_creation_structure(
-            efootprint_class_str,
-            available_efootprint_classes=[RecurrentEdgeWorkload],
-            attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
-            model_web=model_web
-        )
+        return mirrored_cards
 
-        context_data = {
-            "form_sections": form_sections,
-            "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
-            "object_type": efootprint_class_str,
-            "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]["label"]
-        }
 
-        return context_data
+class MirroredRecurrentEdgeWorkloadWeb(ModelingObjectWeb):
+    """Mirrored version of RecurrentEdgeWorkload shown within a specific EdgeFunction context."""
+
+    def __init__(self, modeling_obj: ModelingObject, edge_function: "EdgeFunctionWeb"):
+        super().__init__(modeling_obj, edge_function.model_web)
+        self.edge_function = edge_function
+
+    @property
+    def settable_attributes(self):
+        return super().settable_attributes + ["edge_function"]
+
+    @property
+    def web_id(self):
+        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.edge_function.web_id}"
+
+    @property
+    def accordion_parent(self):
+        return self.edge_function
+
+    @property
+    def class_title_style(self):
+        return "h8"

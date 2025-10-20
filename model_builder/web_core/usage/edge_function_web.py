@@ -1,62 +1,75 @@
 from typing import TYPE_CHECKING
 
-from efootprint.core.usage.edge_function import EdgeFunction
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
+    ModelingObjectWebThatCanBeMirrored
 
 if TYPE_CHECKING:
-    from model_builder.web_core.model_web import ModelWeb
+    from model_builder.web_core.usage.edge_usage_journey_web import EdgeUsageJourneyWeb
 
 
-class EdgeFunctionWeb(ModelingObjectWeb):
+class EdgeFunctionWeb(ModelingObjectWebThatCanBeMirrored):
     """Web wrapper for EdgeFunction (groups RecurrentEdgeResourceNeeds for an EdgeUsageJourney)."""
-    add_template = "add_object.html"
-    edit_template = "edit_object.html"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    @property
+    def mirrored_cards(self):
+        """Create mirrored cards for each edge usage journey this function is linked to."""
+        mirrored_cards = []
+        for edge_usage_journey in self.edge_usage_journeys:
+            mirrored_cards.append(MirroredEdgeFunctionWeb(self._modeling_obj, edge_usage_journey))
+
+        return mirrored_cards
+
+
+class MirroredEdgeFunctionWeb(EdgeFunctionWeb):
+    """Mirrored version of EdgeFunction shown within a specific EdgeUsageJourney context."""
+
+    def __init__(self, modeling_obj: ModelingObject, edge_usage_journey: "EdgeUsageJourneyWeb"):
+        super().__init__(modeling_obj, edge_usage_journey.model_web)
+        self.edge_usage_journey = edge_usage_journey
+
+    @property
+    def settable_attributes(self):
+        return super().settable_attributes + ["edge_usage_journey"]
+
+    @property
+    def web_id(self):
+        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.edge_usage_journey.web_id}"
+
+    @property
+    def links_to(self):
+        """Links to the edge devices used by this function's resource needs."""
+        linked_edge_device_ids = set([rern.edge_device.web_id for rern in self.recurrent_edge_resource_needs])
+        return "|".join(sorted(linked_edge_device_ids))
+
+    @property
+    def accordion_parent(self):
+        return self.edge_usage_journey
+
+    @property
+    def accordion_children(self):
+        return self.recurrent_edge_resource_needs
+
+    @property
+    def recurrent_edge_resource_needs(self):
+        """Returns web-wrapped recurrent edge resource needs with mirrored context."""
+        from model_builder.web_core.usage.recurrent_edge_process_web import MirroredRecurrentEdgeProcessWeb
+        from model_builder.web_core.usage.recurrent_edge_workload_web import MirroredRecurrentEdgeWorkloadWeb
+
+        web_resource_needs = []
+        for rern in self._modeling_obj.recurrent_edge_resource_needs:
+            if rern.class_as_simple_str == "RecurrentEdgeProcess":
+                web_resource_needs.append(MirroredRecurrentEdgeProcessWeb(rern, self))
+            elif rern.class_as_simple_str == "RecurrentEdgeWorkload":
+                web_resource_needs.append(MirroredRecurrentEdgeWorkloadWeb(rern, self))
+            else:
+                # Fallback for any other RecurrentEdgeResourceNeed subclasses
+                from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
+                web_resource_needs.append(wrap_efootprint_object(rern, self.model_web))
+
+        return web_resource_needs
 
     @property
     def class_title_style(self):
         return "h7"
-
-    @property
-    def recurrent_edge_resource_needs(self):
-        """Returns web-wrapped recurrent edge resource needs contained in this function."""
-        from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
-        return [wrap_efootprint_object(rern, self.model_web) for rern in self._modeling_obj.recurrent_edge_resource_needs]
-
-    @property
-    def edge_usage_journeys(self):
-        """Returns web-wrapped edge usage journeys that contain this function."""
-        from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
-        return [wrap_efootprint_object(euj, self.model_web) for euj in self._modeling_obj.edge_usage_journeys]
-
-    @property
-    def accordion_children(self):
-        """Show recurrent edge resource needs as accordion children."""
-        return self.recurrent_edge_resource_needs
-
-    @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
-        from model_builder.class_structure import generate_object_creation_structure
-        from model_builder.form_references import FORM_TYPE_OBJECT
-        from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
-
-        efootprint_class_str = "EdgeFunction"
-        form_sections, dynamic_form_data = generate_object_creation_structure(
-            efootprint_class_str,
-            available_efootprint_classes=[EdgeFunction],
-            attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
-            model_web=model_web
-        )
-
-        context_data = {
-            "form_sections": form_sections,
-            "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
-            "object_type": efootprint_class_str,
-            "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]["label"]
-        }
-
-        return context_data

@@ -30,5 +30,15 @@ class EdgeUsageJourneyWeb(ModelingObjectWeb):
         return self.edge_functions
 
     @property
+    def edge_functions(self):
+        """Returns mirrored edge functions for display in this usage journey context."""
+        from model_builder.web_core.usage.edge_function_web import MirroredEdgeFunctionWeb
+        web_edge_functions = []
+        for edge_function in self._modeling_obj.edge_functions:
+            web_edge_functions.append(MirroredEdgeFunctionWeb(edge_function, self))
+
+        return web_edge_functions
+
+    @property
     def class_title_style(self):
         return "h6"
