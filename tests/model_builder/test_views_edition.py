@@ -210,3 +210,36 @@ class TestViewsEdition(TestModelingBase):
         usage_journey = model_web.get_web_object_from_efootprint_id("uuid-Daily-video-usage")
         uj_steps_ids = [uj_step.efootprint_id for uj_step in usage_journey.uj_steps]
         self.assertEqual(new_uj_steps, ";".join(uj_steps_ids))
+
+    def test_edit_initial_usage_journey_volume_updates_total_footprint(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        logger.info("Getting initial total footprint")
+        initial_request = self.factory.get("/")
+        self._add_session_to_request(initial_request, self.system_data)
+        initial_model_web = ModelWeb(initial_request.session)
+        initial_emissions = initial_model_web.system_emissions
+        initial_total = sum(sum(values) for values in initial_emissions["values"].values())
+
+        logger.info("Editing usage pattern initial_usage_journey_volume")
+        usage_pattern_id = "uuid-Video-watching-in-France-in-the-morning"
+        post_data = QueryDict(mutable=True)
+        post_data.update({
+            "UsagePatternFromForm_name": ["Video watching in France in the morning"],
+            "UsagePatternFromForm_initial_usage_journey_volume": ["20000"],
+            "UsagePatternFromForm_initial_usage_journey_volume_unit": "dimensionless",
+            "recomputation": ["true"],
+        })
+
+        edit_request = self.factory.post(f"/edit-object/{usage_pattern_id}", data=post_data)
+        self._add_session_to_request(edit_request, self.system_data)
+        response = edit_object(edit_request, usage_pattern_id)
+        self.assertEqual(response.status_code, 200)
+
+        logger.info("Getting updated total footprint")
+        updated_model_web = ModelWeb(edit_request.session)
+        updated_emissions = updated_model_web.system_emissions
+        updated_total = sum(sum(values) for values in updated_emissions["values"].values())
+
+        logger.info(f"Initial total: {initial_total}, Updated total: {updated_total}")
+        self.assertNotEqual(initial_total, updated_total)
+        self.assertGreater(updated_total, initial_total)

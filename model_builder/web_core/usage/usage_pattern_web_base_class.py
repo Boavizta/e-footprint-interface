@@ -137,9 +137,10 @@ class UsagePatternFromFormWebBaseClass(UsagePatternWebBaseClass):
             context_data = super().generate_object_edition_context()
 
             context_data["dynamic_form_data"] = self.generate_net_growth_rate_timespan_dynamic_select_dict()
-            context_data["object_type_in_volume"] = self.object_type_in_volume,
+            context_data["object_type_in_volume"] = self.object_type_in_volume
             context_data["object_type_in_volume_label"] = self.object_type_in_volume.replace("_", " ")
             context_data["initial_volume"] = getattr(self, f"initial_{self.object_type_in_volume}_volume")
-            context_data["initial_volume_timespan"] = getattr(self, f"initial_{self.object_type_in_volume}_volume_timespan")
+            context_data["initial_volume_timespan"] = getattr(
+                self, f"initial_{self.object_type_in_volume}_volume_timespan")
 
             return context_data
