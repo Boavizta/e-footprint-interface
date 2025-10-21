@@ -4,10 +4,28 @@ document.addEventListener("initDynamicForm", function () {
      * 1) SWITCH ELEMENT LOGIC
      */
     function switchForms(switchValues, switchElement){
+        // Helper to get all actual form section IDs in the DOM
+        const getActualFormSectionIds = () => {
+            const formSections = document.querySelectorAll('[id^="item-"]');
+            return Array.from(formSections).map(el => el.id.replace('item-', ''));
+        };
+
         // Hide the other groups
         switchValues.forEach(function(switchValue) {
             if (switchValue !== switchElement.value) {
                 const itemToHide = document.getElementById("item-" + switchValue);
+                if (!itemToHide) {
+                    const actualSections = getActualFormSectionIds();
+                    throw new Error(
+                        `Dynamic form error: Cannot find element with id "item-${switchValue}".\n\n` +
+                        `Expected switch_values: [${switchValues.join(', ')}]\n` +
+                        `Actual form sections in DOM: [${actualSections.join(', ')}]\n\n` +
+                        `This mismatch means the switch_values in dynamic_form_data don't match the form sections rendered in the template.\n` +
+                        `Check that form_sections in the Python code contains a section with category="${switchValue}".\n` +
+                        `Common cause: using a different class name in dynamic_selects/dynamic_lists (e.g., "RecurrentEdgeProcess") ` +
+                        `than in available_efootprint_classes (e.g., "RecurrentEdgeProcessFromForm").`
+                    );
+                }
                 itemToHide.classList.add('d-none');
                 itemToHide.querySelectorAll('input, select').forEach(function(input) {
                     input.required = false;
@@ -18,6 +36,18 @@ document.addEventListener("initDynamicForm", function () {
 
         // Show the newly selected group
         const itemToShow = document.getElementById("item-" + switchElement.value);
+        if (!itemToShow) {
+            const actualSections = getActualFormSectionIds();
+            throw new Error(
+                `Dynamic form error: Cannot find element with id "item-${switchElement.value}".\n\n` +
+                `Switch element "${switchElement.id}" has value: "${switchElement.value}"\n` +
+                `Expected switch_values: [${switchValues.join(', ')}]\n` +
+                `Actual form sections in DOM: [${actualSections.join(', ')}]\n\n` +
+                `The selected value "${switchElement.value}" does not have a corresponding form section in the DOM.\n` +
+                `This often happens when dynamic_selects uses different class names than those used in generate_object_creation_structure().\n` +
+                `Example: dynamic_selects might use "RecurrentEdgeProcess" while available_efootprint_classes uses "RecurrentEdgeProcessFromForm".`
+            );
+        }
         itemToShow.classList.remove('d-none');
         itemToShow.querySelectorAll('input, select').forEach(function(input) {
             input.required = true;

@@ -68,7 +68,7 @@ class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
             device_class = edge_device.class_as_simple_str
             if device_class == "EdgeComputer":
                 possible_resource_need_types_per_device[edge_device.efootprint_id] = [
-                    {"label": FORM_TYPE_OBJECT["RecurrentEdgeProcess"]["label"], "value": "RecurrentEdgeProcess"}
+                    {"label": FORM_TYPE_OBJECT["RecurrentEdgeProcessFromForm"]["label"], "value": "RecurrentEdgeProcessFromForm"}
                 ]
             elif device_class == "EdgeAppliance":
                 possible_resource_need_types_per_device[edge_device.efootprint_id] = [

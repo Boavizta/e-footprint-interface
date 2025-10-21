@@ -55,10 +55,12 @@
         document.addEventListener('DOMContentLoaded', updateStorageFormVisibility);
 
         // Update visibility when device type changes
-        const deviceTypeSelect = document.getElementById('type_object_available');
-        if (deviceTypeSelect) {
-            deviceTypeSelect.addEventListener('change', updateStorageFormVisibility);
-        }
+        (function() {
+            const deviceTypeSelect = document.getElementById('type_object_available');
+            if (deviceTypeSelect) {
+                deviceTypeSelect.addEventListener('change', updateStorageFormVisibility);
+            }
+        })();
 
         // Trigger on dynamic form initialization
         document.addEventListener('initDynamicForm', updateStorageFormVisibility);

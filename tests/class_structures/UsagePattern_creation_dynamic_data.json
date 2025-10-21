@@ -3,23 +3,5 @@
     "switch_values": [
         "UsagePatternFromForm"
     ],
-    "dynamic_lists": [
-        {
-            "input_id": "UsagePatternFromForm_net_growth_rate_timespan",
-            "filter_by": "UsagePatternFromForm_initial_usage_journey_volume_timespan",
-            "list_value": {
-                "day": [
-                    "month",
-                    "year"
-                ],
-                "month": [
-                    "month",
-                    "year"
-                ],
-                "year": [
-                    "year"
-                ]
-            }
-        }
-    ]
+    "dynamic_lists": []
 }
