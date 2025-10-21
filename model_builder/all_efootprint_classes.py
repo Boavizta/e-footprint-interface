@@ -1,8 +1,4 @@
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES, CANONICAL_COMPUTATION_ORDER
-from efootprint.core.hardware.edge_device_base import EdgeDeviceBase
-from efootprint.core.hardware.server_base import ServerBase
-from efootprint.core.usage.job import JobBase
-from efootprint.core.usage.recurrent_edge_resource_needed import RecurrentEdgeResourceNeed
 
 from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
