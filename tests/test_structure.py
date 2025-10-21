@@ -30,7 +30,6 @@ from model_builder.class_structure import generate_object_creation_structure, \
     FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
 from model_builder.web_core.model_web import model_builder_root
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
@@ -106,7 +105,7 @@ class TestsClassStructure(TestCase):
             option2 = MockModelingObjectWeb(id="efootprint_id2", name="option2")
             model_web.get_efootprint_objects_from_efootprint_type.side_effect = lambda x: [option1, option2]
             structure, dynamic_data = generate_object_creation_structure(
-                class_category_name, class_list, attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS, model_web=model_web)
+                class_category_name, class_list, model_web=model_web)
             self._test_dict_equal_to_ref(structure, tmp_structure_filepath)
             tmp_dynamic_data_filepath = os.path.join(
                 root_dir, "class_structures", f"{class_category_name}_creation_dynamic_data_tmp.json")
@@ -153,7 +152,8 @@ class TestsClassStructure(TestCase):
         objects_extra_fields_to_check = ['Server','Service']
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
-            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase"]:
+            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase", "JobBase",
+                                        "RecurrentEdgeResourceNeed"]:
                 continue
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
             init_sig_params = get_init_signature_params(efootprint_obj_class)

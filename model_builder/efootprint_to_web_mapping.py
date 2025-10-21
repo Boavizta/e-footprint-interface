@@ -9,6 +9,7 @@ from model_builder.web_core.hardware.edge_appliance_web import EdgeApplianceWeb
 from model_builder.web_core.hardware.edge_computer_web import EdgeComputerWeb
 from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceBaseWeb
 from model_builder.web_core.hardware.server_web import ServerWeb
+from model_builder.web_core.hardware.storage_web import StorageWeb
 from model_builder.web_core.usage.edge_function_web import EdgeFunctionWeb
 from model_builder.web_core.usage.edge_usage_journey_web import EdgeUsageJourneyWeb
 from model_builder.web_core.usage.edge_usage_pattern_web import EdgeUsagePatternFromFormWeb, EdgeUsagePatternWeb
@@ -33,6 +34,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "UsagePatternFromForm": UsagePatternFromFormWeb,
     "EdgeUsagePattern": EdgeUsagePatternWeb,
     "EdgeUsagePatternFromForm": EdgeUsagePatternFromFormWeb,
+    "JobBase": JobWeb,
     "Job": JobWeb,
     "GPUJob": JobWeb,
     "GenAIJob": JobWeb,
@@ -44,7 +46,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GenAIModel": ServiceWeb,
     "VideoStreaming": ServiceWeb,
     "WebApplication": ServiceWeb,
-    "Storage": ModelingObjectWeb,
+    "Storage": StorageWeb,
     # Edge hardware classes
     "EdgeDeviceBase": EdgeDeviceBaseWeb,
     "EdgeComputer": EdgeComputerWeb,

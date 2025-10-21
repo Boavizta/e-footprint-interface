@@ -6,7 +6,6 @@ from django.shortcuts import render
 from model_builder.class_structure import generate_object_creation_structure, generate_dynamic_form
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -18,14 +17,12 @@ def generate_object_with_storage_creation_context(
     form_sections, dynamic_form_data = generate_object_creation_structure(
         object_type,
         available_efootprint_classes=available_efootprint_classes,
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
 
     storage_form_sections, storage_dynamic_form_data = generate_object_creation_structure(
         storage_type,
         available_efootprint_classes=available_storage_classes,
-        attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
         model_web=model_web,
     )
 
@@ -45,8 +42,7 @@ def generate_object_with_storage_edition_context(obj_to_edit):
     storage_to_edit = obj_to_edit.storage
 
     form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-        obj_to_edit.class_as_simple_str, obj_to_edit.modeling_obj.__dict__, obj_to_edit.attributes_to_skip_in_forms,
-        obj_to_edit.model_web)
+        obj_to_edit.class_as_simple_str, obj_to_edit.modeling_obj.__dict__, obj_to_edit.model_web)
 
     context_data = {
         "object_to_edit": obj_to_edit,
@@ -57,8 +53,7 @@ def generate_object_with_storage_edition_context(obj_to_edit):
     }
 
     storage_form_fields, storage_form_fields_advanced, storage_dynamic_lists = generate_dynamic_form(
-        storage_to_edit.class_as_simple_str, storage_to_edit.modeling_obj.__dict__,
-        storage_to_edit.attributes_to_skip_in_forms, storage_to_edit.model_web)
+        storage_to_edit.class_as_simple_str, storage_to_edit.modeling_obj.__dict__, storage_to_edit.model_web)
 
     context_data.update({
         "storage_to_edit": storage_to_edit,

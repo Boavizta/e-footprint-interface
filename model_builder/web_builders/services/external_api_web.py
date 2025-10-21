@@ -15,8 +15,7 @@ from efootprint.core.hardware.storage import Storage
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb, \
-    ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -28,7 +27,6 @@ class ExternalApiWeb(ModelingObjectWeb):
         services_dict, dynamic_form_data = generate_object_creation_structure(
             "Service",
             available_efootprint_classes=[GenAIModel],
-            attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
             model_web=model_web,
         )
 

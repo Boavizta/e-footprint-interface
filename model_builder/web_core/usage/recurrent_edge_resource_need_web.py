@@ -6,7 +6,6 @@ from model_builder.class_structure import generate_object_creation_structure
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb, MirroredResourceNeedBaseWeb
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -14,6 +13,8 @@ if TYPE_CHECKING:
 
 class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
     """Web wrapper for RecurrentEdgeResourceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
+    attributes_to_skip_in_forms = ["edge_device"]
+
     @property
     def template_name(self):
         return "resource_need"
@@ -41,7 +42,6 @@ class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
         form_sections, dynamic_form_data = generate_object_creation_structure(
             "RecurrentEdgeResourceNeed",
             available_efootprint_classes=available_resource_need_classes,
-            attributes_to_skip=ATTRIBUTES_TO_SKIP_IN_FORMS,
             model_web=model_web,
         )
 

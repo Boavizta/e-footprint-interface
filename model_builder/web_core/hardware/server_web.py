@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class ServerWeb(ModelingObjectWeb):
     add_template = "add_object_with_storage.html"
     edit_template = "../server/server_edit.html"
+    attributes_to_skip_in_forms = ["storage", "fixed_nb_of_instances"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -7,6 +7,7 @@ from efootprint.abstract_modeling_classes.explainable_object_base_class import E
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.all_classes_in_order import CANONICAL_COMPUTATION_ORDER
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def generate_object_creation_structure(
-    efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip: List[str], model_web: "ModelWeb"):
+    efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"):
     dynamic_form_dict = {
         "switch_item": "type_object_available",
         "switch_values": [available_class.__name__ for available_class in available_efootprint_classes],
@@ -50,7 +51,7 @@ def generate_object_creation_structure(
             f"{available_efootprint_class_label} "
             f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
         class_fields, class_fields_advanced, dynamic_lists = generate_dynamic_form(
-            available_efootprint_class_str, default_values, attributes_to_skip, model_web)
+            available_efootprint_class_str, default_values, model_web)
 
         dynamic_form_dict["dynamic_lists"] += dynamic_lists
 
@@ -65,9 +66,9 @@ def generate_object_creation_structure(
 
 
 def generate_object_creation_context(
-    efootprint_class_str: str, available_efootprint_classes: list, attributes_to_skip: List[str], model_web: "ModelWeb"):
+    efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"):
     form_sections, dynamic_form_data = generate_object_creation_structure(
-        efootprint_class_str, available_efootprint_classes, attributes_to_skip, model_web)
+        efootprint_class_str, available_efootprint_classes, model_web)
 
     context_data = {"form_sections": form_sections,
                     "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
@@ -78,11 +79,24 @@ def generate_object_creation_context(
 
 
 def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, attributes_to_skip: list, model_web: "ModelWeb"):
+    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb"):
+    from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
     structure_fields = []
     structure_fields_advanced = []
     dynamic_lists = []
     efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
+    if efootprint_class.__name__ in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING:
+        corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[efootprint_class.__name__]
+    else:
+        corresponding_canonical_class = None
+        for canonical_class in CANONICAL_COMPUTATION_ORDER:
+            if issubclass(efootprint_class, canonical_class):
+                corresponding_canonical_class = canonical_class
+                break
+        if corresponding_canonical_class is None:
+            raise ValueError(f"No corresponding canonical class found for {efootprint_class_str}.")
+        corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[corresponding_canonical_class.__name__]
+
 
     list_values = efootprint_class.list_values
     conditional_list_values = efootprint_class.conditional_list_values
@@ -92,7 +106,7 @@ def generate_dynamic_form(
     attributes_that_can_have_negative_values = efootprint_class.attributes_that_can_have_negative_values()
 
     for attr_name in init_sig_params.keys():
-        if attr_name in attributes_to_skip + ["self"]:
+        if attr_name in corresponding_web_class.attributes_to_skip_in_forms + ["self"]:
             continue
         annotation = init_sig_params[attr_name].annotation
         if annotation is empty_annotation:
@@ -141,7 +155,12 @@ def generate_dynamic_form(
             if attr_name in default_values.keys():
                 selected = default_values[attr_name]
             else:
-                selected = selection_options[0]
+                if selection_options:
+                    selected = selection_options[0]
+                else:
+                    raise ValueError(
+                        f"No default value for {attr_name} in {efootprint_class_str}. This attribute should maybe "
+                        f"be ignored through the attributes_to_skip_in_forms class attribute ?")
             structure_field.update({
                 "input_type": "select_object",
                 "selected": selected.id,

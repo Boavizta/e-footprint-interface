@@ -92,7 +92,6 @@ class UsagePatternFromFormWebBaseClass(UsagePatternWebBaseClass):
         form_sections, dynamic_form_data = generate_object_creation_structure(
             efootprint_object_type,
             available_efootprint_classes=[cls.associated_efootprint_class],
-            attributes_to_skip=cls.attributes_to_skip_in_forms,
             model_web=model_web
         )
 

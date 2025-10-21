@@ -24,14 +24,11 @@ from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
-ATTRIBUTES_TO_SKIP_IN_FORMS = [
-    "gpu_latency_alpha", "gpu_latency_beta", "fixed_nb_of_instances", "storage", "service", "server"]
-
 
 class ModelingObjectWeb:
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
-    attributes_to_skip_in_forms = ATTRIBUTES_TO_SKIP_IN_FORMS
+    attributes_to_skip_in_forms = []
 
     def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb"):
         self._modeling_obj = modeling_obj
@@ -213,8 +210,7 @@ class ModelingObjectWeb:
         corresponding_efootprint_class_str = cls.__name__.replace("Web", "")
         corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[corresponding_efootprint_class_str]
         return generate_object_creation_context(
-            corresponding_efootprint_class_str, [corresponding_efootprint_class],
-            ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
+            corresponding_efootprint_class_str, [corresponding_efootprint_class], model_web)
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
@@ -284,7 +280,7 @@ class ModelingObjectWeb:
 
     def generate_object_edition_context(self):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-            self.class_as_simple_str, self.modeling_obj.__dict__, self.attributes_to_skip_in_forms, self.model_web)
+            self.class_as_simple_str, self.modeling_obj.__dict__, self.model_web)
 
         context_data = {
             "object_to_edit": self,

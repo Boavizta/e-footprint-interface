@@ -155,7 +155,7 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).should('exist');
 
         // Step 4: Add first recurrent edge process to the edge function
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('div[id^="add-step-to"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeResourceNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeDeviceName);
         cy.get('#type_object_available').select('RecurrentEdgeProcess');
@@ -170,7 +170,7 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcess1Name).should('exist');
 
         // Step 5: Add second recurrent edge process
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('div[id^="add-step-to"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeResourceNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeDeviceName);
         cy.get('#type_object_available').select('RecurrentEdgeProcess');
@@ -346,7 +346,7 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).should('exist');
 
         // Step 4: Add recurrent edge process to edge function
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('div[id^="add-step-to"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeResourceNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeComputerName);
         cy.get('#type_object_available').select('RecurrentEdgeProcess');

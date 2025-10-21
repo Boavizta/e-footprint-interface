@@ -29,24 +29,6 @@
                 "default": "Recurrent edge process 1"
             },
             {
-                "web_id": "RecurrentEdgeProcessFromForm_edge_device",
-                "attr_name": "edge_device",
-                "label": "edge device",
-                "tooltip": false,
-                "input_type": "select_object",
-                "selected": "efootprint_id1",
-                "options": [
-                    {
-                        "label": "option1",
-                        "value": "efootprint_id1"
-                    },
-                    {
-                        "label": "option2",
-                        "value": "efootprint_id2"
-                    }
-                ]
-            },
-            {
                 "web_id": "RecurrentEdgeProcessFromForm_constant_compute_needed",
                 "attr_name": "constant_compute_needed",
                 "label": "constant compute needed",

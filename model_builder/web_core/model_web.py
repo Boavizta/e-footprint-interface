@@ -182,7 +182,10 @@ class ModelWeb:
     @property
     def edge_devices(self):
         """Returns all edge devices (EdgeComputer and EdgeAppliance instances)."""
-        return self.get_web_objects_from_efootprint_type("EdgeDeviceBase")
+        all_edge_devices = self.get_web_objects_from_efootprint_type("EdgeDeviceBase")
+        # Remove EdgeStorage instances if any
+        all_edge_devices = [ed for ed in all_edge_devices if ed.class_as_simple_str != "EdgeStorage"]
+        return all_edge_devices
 
     @property
     def edge_computers(self):

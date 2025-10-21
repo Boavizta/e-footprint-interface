@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 class EdgeDeviceBaseWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeDeviceBase and its subclasses (EdgeComputer, EdgeAppliance)."""
     add_template = "add_edge_device.html"
+    attributes_to_skip_in_forms = ["storage"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
