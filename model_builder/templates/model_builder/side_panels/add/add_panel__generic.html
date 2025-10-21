@@ -9,21 +9,15 @@
     {% block add_form %}
         <form id="sidePanelForm" class="my-3"
             hx-post="/model_builder/add-object/{{ object_type }}/"
-            {% if object_type == "UsageJourneyStep" or object_type == "Job" or object_type == "RecurrentEdgeProcessFromForm" %}
-              hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
-              hx-swap="none"
-            {% elif object_type == "UsageJourney" or object_type == "EdgeUsageJourney" %}
-              hx-target="#uj-list"
-              hx-swap="beforeend"
-            {% elif object_type == "Service" %}
-              hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ efootprint_id_of_parent_to_link_to }}"}'
-              hx-target="#add-service-to-{{ server.web_id }}"
-              hx-swap="beforebegin"
-            {% elif object_type == "ExternalApi" %}
-              hx-target="#server-list"
-              hx-swap="beforeend"
+            {% if htmx_config.hx_vals %}
+              hx-vals='{{ htmx_config.hx_vals|safe }}'
             {% endif %}
-
+            {% if htmx_config.hx_target %}
+              hx-target="{{ htmx_config.hx_target }}"
+            {% endif %}
+            {% if htmx_config.hx_swap %}
+              hx-swap="{{ htmx_config.hx_swap }}"
+            {% endif %}
             hx-disabled-elt="button"
             hx-on::after-request="closeAndEmptySidePanel()"
     >

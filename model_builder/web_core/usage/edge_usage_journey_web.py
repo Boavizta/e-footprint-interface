@@ -1,15 +1,7 @@
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_core.usage.journey_base_web import JourneyBaseWeb
 
 
-class EdgeUsageJourneyWeb(ModelingObjectWeb):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
-
-    @property
-    def template_name(self):
-        return "journey"
-
+class EdgeUsageJourneyWeb(JourneyBaseWeb):
     @property
     def child_object_type_str(self):
         return "EdgeFunction"
@@ -48,7 +40,3 @@ class EdgeUsageJourneyWeb(ModelingObjectWeb):
             web_edge_functions.append(MirroredEdgeFunctionWeb(edge_function, self))
 
         return web_edge_functions
-
-    @property
-    def class_title_style(self):
-        return "h6"

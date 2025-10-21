@@ -1,16 +1,8 @@
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_core.usage.journey_base_web import JourneyBaseWeb
 from model_builder.web_core.usage.usage_journey_step_web import MirroredUsageJourneyStepWeb
 
 
-class UsageJourneyWeb(ModelingObjectWeb):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
-
-    @property
-    def template_name(self):
-        return "journey"
-
+class UsageJourneyWeb(JourneyBaseWeb):
     @property
     def child_object_type_str(self):
         return "UsageJourneyStep"
@@ -37,10 +29,6 @@ class UsageJourneyWeb(ModelingObjectWeb):
         return "|".join(sorted(linked_server_ids))
 
     @property
-    def accordion_parent(self):
-        return None
-
-    @property
     def accordion_children(self):
         return self.uj_steps
 
@@ -51,7 +39,3 @@ class UsageJourneyWeb(ModelingObjectWeb):
             web_uj_steps.append(MirroredUsageJourneyStepWeb(uj_step, self))
 
         return web_uj_steps
-
-    @property
-    def class_title_style(self):
-        return "h6"

@@ -1,22 +1,18 @@
 from typing import TYPE_CHECKING
 
-from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.core.usage.recurrent_edge_process import RecurrentEdgeProcess
 from efootprint.core.usage.recurrent_edge_workload import RecurrentEdgeWorkload
 
 from model_builder.class_structure import generate_object_creation_structure
+from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
-    ModelingObjectWebThatCanBeMirrored
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb, \
-    ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb, MirroredResourceNeedBaseWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 
 if TYPE_CHECKING:
-    from model_builder.web_core.usage.edge_function_web import EdgeFunctionWeb
     from model_builder.web_core.model_web import ModelWeb
 
 
-class RecurrentEdgeResourceNeedWeb(ModelingObjectWebThatCanBeMirrored):
+class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
     """Web wrapper for RecurrentEdgeResourceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
     @property
     def template_name(self):
@@ -39,8 +35,8 @@ class RecurrentEdgeResourceNeedWeb(ModelingObjectWebThatCanBeMirrored):
         if len(edge_devices) == 0:
             raise ValueError("Please create an edge device before adding a recurrent edge resource need")
 
-        # RecurrentEdgeProcess works with EdgeComputer, RecurrentEdgeWorkload works with EdgeAppliance
-        available_resource_need_classes = [RecurrentEdgeProcess, RecurrentEdgeWorkload]
+        # RecurrentEdgeProcessFromForm works with EdgeComputer, RecurrentEdgeWorkload works with EdgeAppliance
+        available_resource_need_classes = [RecurrentEdgeProcessFromForm, RecurrentEdgeWorkload]
 
         form_sections, dynamic_form_data = generate_object_creation_structure(
             "RecurrentEdgeResourceNeed",
@@ -100,33 +96,9 @@ class RecurrentEdgeResourceNeedWeb(ModelingObjectWebThatCanBeMirrored):
         return context_data
 
 
-class MirroredRecurrentEdgeResourceNeedWeb(ModelingObjectWeb):
+class MirroredRecurrentEdgeResourceNeedWeb(MirroredResourceNeedBaseWeb):
     """Mirrored version of RecurrentEdgeResourceNeed shown within a specific EdgeFunction context."""
-
-    def __init__(self, modeling_obj: ModelingObject, edge_function: "EdgeFunctionWeb"):
-        super().__init__(modeling_obj, edge_function.model_web)
-        self.edge_function = edge_function
-
-    @property
-    def settable_attributes(self):
-        return super().settable_attributes + ["edge_function"]
-
-    @property
-    def template_name(self):
-        return "resource_need"
-
-    @property
-    def web_id(self):
-        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.edge_function.web_id}"
 
     @property
     def links_to(self):
         return self.edge_device.web_id
-
-    @property
-    def accordion_parent(self):
-        return self.edge_function
-
-    @property
-    def class_title_style(self):
-        return "h8"

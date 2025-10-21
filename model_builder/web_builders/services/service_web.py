@@ -50,6 +50,16 @@ class ServiceWeb(ModelingObjectWeb):
         return context_data
 
     @classmethod
+    def get_htmx_form_config(cls, context_data: dict) -> dict:
+        """HTMX configuration for service creation forms - link to parent server, swap beforebegin."""
+        server = context_data.get("server")
+        return {
+            "hx_vals": {"efootprint_id_of_parent_to_link_to": context_data.get("efootprint_id_of_parent_to_link_to")},
+            "hx_target": f"#add-service-to-{server.web_id}" if server else None,
+            "hx_swap": "beforebegin"
+        }
+
+    @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
         server_efootprint_id = request.POST.get("efootprint_id_of_parent_to_link_to")
         service_type = request.POST.get("type_object_available")

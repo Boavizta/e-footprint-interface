@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
@@ -14,6 +16,13 @@ def open_create_object_panel(request, object_type):
     context_data = efootprint_class_web.generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
     if efootprint_id_of_parent_to_link_to:
         context_data["efootprint_id_of_parent_to_link_to"] = efootprint_id_of_parent_to_link_to
+
+    # Add HTMX configuration from the class
+    htmx_config = efootprint_class_web.get_htmx_form_config(context_data)
+    # Convert hx_vals dict to JSON string for template
+    if "hx_vals" in htmx_config and htmx_config["hx_vals"]:
+        htmx_config["hx_vals"] = json.dumps(htmx_config["hx_vals"])
+    context_data["htmx_config"] = htmx_config
 
     http_response = render(
         request, f"model_builder/side_panels/add/{efootprint_class_web.add_template}", context=context_data)

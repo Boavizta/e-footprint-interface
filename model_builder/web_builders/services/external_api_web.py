@@ -45,6 +45,11 @@ class ExternalApiWeb(ModelingObjectWeb):
         return context_data
 
     @classmethod
+    def get_htmx_form_config(cls, context_data: dict) -> dict:
+        """HTMX configuration for external API creation forms - append to #server-list."""
+        return {"hx_target": "#server-list", "hx_swap": "beforeend"}
+
+    @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
         new_storage = Storage.ssd()
 

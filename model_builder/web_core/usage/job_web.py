@@ -1,23 +1,19 @@
 from typing import TYPE_CHECKING
 
-from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.usage.job import Job, GPUJob
 
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import \
-    ModelingObjectWebThatCanBeMirrored
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb, \
-    ATTRIBUTES_TO_SKIP_IN_FORMS
+from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb, MirroredResourceNeedBaseWeb
+from model_builder.web_abstract_modeling_classes.modeling_object_web import ATTRIBUTES_TO_SKIP_IN_FORMS
 
 if TYPE_CHECKING:
-    from model_builder.web_core.usage.usage_journey_step_web import UsageJourneyStepWeb
     from model_builder.web_core.model_web import ModelWeb
 
 
-class JobWeb(ModelingObjectWebThatCanBeMirrored):
+class JobWeb(ResourceNeedBaseWeb):
     @property
     def mirrored_cards(self):
         mirrored_cards = []
@@ -108,31 +104,7 @@ class JobWeb(ModelingObjectWebThatCanBeMirrored):
         return context_data
 
 
-class MirroredJobWeb(ModelingObjectWeb):
-    def __init__(self, modeling_obj: ModelingObject, uj_step: "UsageJourneyStepWeb"):
-        super().__init__(modeling_obj, uj_step.model_web)
-        self.usage_journey_step = uj_step
-
-    @property
-    def settable_attributes(self):
-        return super().settable_attributes + ["usage_journey_step"]
-
-    @property
-    def template_name(self):
-        return "resource_need"
-
-    @property
-    def web_id(self):
-        return f"{self.class_as_simple_str}-{self.efootprint_id}_in_{self.usage_journey_step.web_id}"
-
+class MirroredJobWeb(MirroredResourceNeedBaseWeb):
     @property
     def links_to(self):
         return self.server.web_id
-
-    @property
-    def accordion_parent(self):
-        return self.usage_journey_step
-
-    @property
-    def class_title_style(self):
-        return "h8"

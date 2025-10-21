@@ -217,6 +217,23 @@ class ModelingObjectWeb:
             ATTRIBUTES_TO_SKIP_IN_FORMS, model_web)
 
     @classmethod
+    def get_htmx_form_config(cls, context_data: dict) -> dict:
+        """
+        Returns HTMX configuration for the object creation form.
+        Override in subclasses to customize behavior for specific object types.
+
+        Args:
+            context_data: The context data dictionary passed to the template
+
+        Returns:
+            Dictionary with optional keys:
+            - hx_vals: dict of additional values to pass via hx-vals
+            - hx_target: CSS selector for target element
+            - hx_swap: HTMX swap strategy
+        """
+        return {}  # Default: no special HTMX configuration
+
+    @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
         object_creation_type = request.POST.get("type_object_available", object_type)
         new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_creation_type)
