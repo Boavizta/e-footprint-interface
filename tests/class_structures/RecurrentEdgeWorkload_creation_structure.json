@@ -1,0 +1,49 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Recurrent edge workload selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Recurrent edge workload",
+                "options": [
+                    {
+                        "label": "Recurrent edge workload",
+                        "value": "RecurrentEdgeWorkloadFromForm"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "RecurrentEdgeWorkloadFromForm",
+        "header": "Recurrent edge workload creation",
+        "fields": [
+            {
+                "web_id": "RecurrentEdgeWorkloadFromForm_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Recurrent edge workload 1"
+            },
+            {
+                "web_id": "RecurrentEdgeWorkloadFromForm_constant_workload",
+                "attr_name": "constant_workload",
+                "label": "constant workload",
+                "tooltip": false,
+                "default": 1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ],
+        "advanced_fields": []
+    }
+]

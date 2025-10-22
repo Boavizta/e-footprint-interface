@@ -40,6 +40,10 @@
         "label": "Recurrent edge workload",
         "type_object_available": "Recurrent edge workload"
     },
+    "RecurrentEdgeWorkloadFromForm": {
+        "label": "Recurrent edge workload",
+        "type_object_available": "Recurrent edge workload"
+    },
     "EdgeFunction": {
         "label": "Edge function",
         "type_object_available": "Available edge functions"

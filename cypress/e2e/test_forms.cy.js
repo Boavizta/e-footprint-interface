@@ -23,7 +23,7 @@ describe("Test - Forms panel", () => {
         cy.get("#btn-submit-form").should('exist').click();
         cy.get("#sidePanelForm").should('not.exist');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourney", uj).should('exist').click();
-        cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.not.enabled');
+        cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('not.be.enabled');
         cy.get('#btn-add-usage-journey').click();
         cy.get('#select-new-object-UsageJourney_uj_steps').should('exist').should('be.enabled');
     });
@@ -41,7 +41,7 @@ describe("Test - Forms panel", () => {
 
 
         cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').click();
-        cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('be.not.enabled');
+        cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('not.be.enabled');
         cy.getObjectCardFromObjectTypeAndName("UsageJourney", uj).find('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"]').click();
         cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('be.enabled');
     });
@@ -54,33 +54,33 @@ describe("Test - Forms panel", () => {
         cy.get("#type_object_available").should('be.visible').select('Server');
         cy.get("#Server_name").clear().type(serverOne);
         cy.get("#Server_average_carbon_intensity").clear().type('700');
-        cy.get("#advanced-Server").should('be.not.visible');
+        cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
         cy.get("#btn-add-server").should('be.enabled').click();
         cy.get("#sidePanelForm").should('be.visible');
         cy.get("#type_object_available").should('exist').select('Server');
-        cy.get("#advanced-Server").should('be.not.visible');
+        cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#Server_name").clear().type(serverTwo);
         cy.get("#Server_average_carbon_intensity").clear().type('800');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
         cy.get("#Server_power").clear().type('888');
         cy.get("#display-advanced-Server").click();
-        cy.get("#advanced-Server").should('be.not.visible');
+        cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 
         cy.getObjectButtonFromObjectTypeAndName("Server", serverOne).should('exist').click();
         cy.get("#Server_average_carbon_intensity").should('have.value', '700');
-        cy.get("#advanced-Server").should('be.not.visible');
+        cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
         cy.get("#Server_power").should('have.value', '300');
         cy.getObjectButtonFromObjectTypeAndName("Server", serverTwo).should('exist').click();
         cy.get("#Server_average_carbon_intensity").should('have.value', '800');
-        cy.get("#advanced-Server").should('be.not.visible');
+        cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#display-advanced-Server").click();
         cy.get("#advanced-Server").should('be.visible');
         cy.get("#Server_power").should('have.value', '888');

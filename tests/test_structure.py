@@ -33,14 +33,15 @@ from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
+from model_builder.efootprint_extensions.recurrent_edge_workload_from_form import RecurrentEdgeWorkloadFromForm
 
 
 obj_creation_structure_dict = {
     "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
     "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
-    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "EdgeDeviceBase": [EdgeComputer, EdgeAppliance],
-    "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
+    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "RecurrentEdgeWorkload": [RecurrentEdgeWorkloadFromForm],
+    "EdgeDeviceBase": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 

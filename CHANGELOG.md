@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.2] - 2025-10-22
+
+### Changed
+- Upgrade to e-footprint 12.0.0 introduces EdgeFunction objects that are analogous to UsageJourneyStep objects, and the choice to create either EdgeAppliances or EdgeComputers when creating EdgeDevices.
+
+### Added
+- New homepage design.
+
 ## [0.9.1] - 2025-10-20
 
 ### Changed

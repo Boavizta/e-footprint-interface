@@ -57,11 +57,7 @@ jest
 
 All tests must pass before proceeding.
 
-## 3. Local Testing with Production Database
-
-Before deploying, test that the application works with the production database connection. See [DEPLOY_TO_PROD.md](DEPLOY_TO_PROD.md) for instructions on connecting to the Clever Cloud database.
-
-## 4. Create Release Commit and PR
+## 3. Create Release Commit and PR
 
 ### Create version commit
 Create a commit with message starting with `[Vx.y.z]`:
@@ -76,7 +72,7 @@ git commit -m "[Vx.y.z] Release description"
 3. Wait for CI to pass
 4. Request review from team members
 
-## 5. Deploy to Clever Cloud
+## 4. Deploy to Clever Cloud
 
 Once the PR is approved and merged to `main`:
 
@@ -98,7 +94,7 @@ The production site will be available at: https://e-footprint.boavizta.org
 
 See [DEPLOY_TO_PROD.md](DEPLOY_TO_PROD.md) for detailed deployment instructions and troubleshooting.
 
-## 6. Post-deployment
+## 5. Post-deployment
 
 - Verify the application works on both PreProd and Production
 - Monitor Clever Cloud logs for any errors

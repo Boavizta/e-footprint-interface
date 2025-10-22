@@ -59,6 +59,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "RecurrentEdgeProcessFromForm": RecurrentEdgeResourceNeedWeb,
     "RecurrentEdgeProcess": RecurrentEdgeResourceNeedWeb,
     "RecurrentEdgeWorkload": RecurrentEdgeResourceNeedWeb,
+    "RecurrentEdgeWorkloadFromForm": RecurrentEdgeResourceNeedWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):

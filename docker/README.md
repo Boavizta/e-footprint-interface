@@ -79,6 +79,53 @@ docker compose down
 docker compose --profile prod up -d
 ```
 
+### Rebuilding Docker images
+
+You need to rebuild your Docker images when:
+- Poetry dependencies have changed (`pyproject.toml` or `poetry.lock` modified)
+- Dockerfile has been updated
+- System dependencies or base image need updating
+- You encounter issues with stale cached layers
+
+**Quick rebuild (with profile):**
+
+```console
+# Rebuild and restart with the dev profile
+docker compose --profile dev up -d --build
+```
+
+**Manual rebuild steps:**
+
+```console
+# Stop running containers
+docker compose --profile dev down
+
+# Rebuild images
+docker compose build
+
+# Start containers with rebuilt images
+docker compose --profile dev up -d
+```
+
+**Force complete rebuild (no cache):**
+
+If you encounter caching issues or need a clean rebuild:
+
+```console
+docker compose build --no-cache
+docker compose --profile dev up -d
+```
+
+**Rebuild specific service:**
+
+```console
+# Only rebuild the Django app service
+docker compose build django
+docker compose --profile dev up -d
+```
+
+**Note**: Always ensure your `poetry.lock` file is up to date before rebuilding. Run `poetry lock` locally if you've modified `pyproject.toml`.
+
 **Useful commands for managing containers:**
 
 ```console

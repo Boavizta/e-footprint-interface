@@ -2,9 +2,10 @@ from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES, CANONICAL_CO
 
 from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
+from model_builder.efootprint_extensions.recurrent_edge_workload_from_form import RecurrentEdgeWorkloadFromForm
 from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
 
-_extension_classes = [UsagePatternFromForm, RecurrentEdgeProcessFromForm, EdgeUsagePatternFromForm]
+_extension_classes = [UsagePatternFromForm, RecurrentEdgeProcessFromForm, EdgeUsagePatternFromForm, RecurrentEdgeWorkloadFromForm]
 
 MODELING_OBJECT_CLASSES_DICT = {modeling_object_class.__name__: modeling_object_class
                                 for modeling_object_class in ALL_EFOOTPRINT_CLASSES + _extension_classes}

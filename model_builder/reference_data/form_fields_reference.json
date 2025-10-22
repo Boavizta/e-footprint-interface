@@ -30,7 +30,8 @@
             "System",
             "UsagePatternFromForm",
             "RecurrentEdgeProcessFromForm",
-            "EdgeUsagePatternFromForm"
+            "EdgeUsagePatternFromForm",
+            "RecurrentEdgeWorkloadFromForm"
         ],
         "label": "name"
     },
@@ -651,7 +652,8 @@
         "modeling_obj_containers": [
             "RecurrentEdgeProcess",
             "RecurrentEdgeWorkload",
-            "RecurrentEdgeProcessFromForm"
+            "RecurrentEdgeProcessFromForm",
+            "RecurrentEdgeWorkloadFromForm"
         ],
         "label": "edge device"
     },
@@ -749,5 +751,12 @@
             "RecurrentEdgeWorkload"
         ],
         "label": "recurrent workload"
+    },
+    "constant_workload": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeWorkloadFromForm"
+        ],
+        "label": "constant workload",
+        "step": 0.1
     }
 }
