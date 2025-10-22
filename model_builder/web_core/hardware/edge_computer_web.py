@@ -15,14 +15,7 @@ if TYPE_CHECKING:
 
 
 class EdgeComputerWeb(EdgeDeviceBaseWeb):
-    add_template = "add_object_with_storage.html"
     edit_template = "../server/server_edit.html"
-
-    @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
-        return generate_object_with_storage_creation_context(
-            model_web, "EdgeComputer", [EdgeComputer],
-            "EdgeStorage", [EdgeStorage])
 
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
