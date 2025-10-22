@@ -68,3 +68,36 @@ class MirroredJourneyStepBaseWeb(JourneyStepBaseWeb):
     def children_property_name(self) -> str:
         """Property name for accessing children (e.g., 'jobs', 'recurrent_edge_resource_needs')."""
         pass
+
+    @property
+    def icon_links_to(self):
+        """Returns the web_id of the icon this journey step's icon should link to (next step or add button)."""
+        journey_steps = self.journey.accordion_children
+        index = journey_steps.index(self)
+        if index < len(journey_steps) - 1:
+            link_to = f"icon-{journey_steps[index+1].web_id}"
+        else:
+            link_to = f"icon-add-step-to-{self.journey.web_id}"
+
+        return link_to
+
+    @property
+    def icon_leaderline_style(self):
+        """Returns the CSS class name for the leaderline style between journey step icons."""
+        journey_steps = self.journey.accordion_children
+        index = journey_steps.index(self)
+        if index < len(journey_steps) - 1:
+            class_name = "vertical-step-swimlane"
+        else:
+            class_name = "step-dot-line"
+
+        return class_name
+
+    @property
+    def data_attributes_as_list_of_dict(self):
+        """Returns list of data attributes for leaderline rendering, including icon leaderline."""
+        data_attribute_updates = super().data_attributes_as_list_of_dict
+        data_attribute_updates.append({"id": f"icon-{self.web_id}", "data-link-to": self.icon_links_to,
+                                       "data-line-opt": self.icon_leaderline_style})
+
+        return data_attribute_updates

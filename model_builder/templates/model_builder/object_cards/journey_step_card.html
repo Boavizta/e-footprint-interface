@@ -6,7 +6,6 @@
         <div class="accordion accordion-flush">
             <div class="accordion-item">
                 <div class="accordion-header p-0 d-flex align-self-start">
-                    {% if journey_step.icon_links_to %}
                     <img src="{% static 'images/step-circle.svg' %}"
                          data-link-to="{{ journey_step.icon_links_to }}"
                          data-line-opt="{{ journey_step.icon_leaderline_style }}"
@@ -14,7 +13,6 @@
                          width="16" height="16"
                          class="align-self-center leader-line-object mx-1"
                         alt="icon line step">
-                    {% endif %}
                     <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0"
                             data-bs-toggle="collapse"
                             data-bs-target="#flush-{{ journey_step.web_id }}"
