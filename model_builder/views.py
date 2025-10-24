@@ -270,6 +270,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
     dates = (start + np.arange(n_days)).astype(str).tolist()
     daily_data = to_rounded_daily_values(reindexed_values)
     data_dict = dict(zip(dates, daily_data))
+    aggregation_strategy = web_ehq.efootprint_object.plot_aggregation_strategy
     literal_formula, ancestors_mapped_to_symbols_list = (
         web_ehq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
 
@@ -278,6 +279,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
         "data_timeseries": data_dict,
         "literal_formula": literal_formula,
         "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
+        "aggregation_strategy": aggregation_strategy,
     }
 
     return render(

@@ -11,7 +11,7 @@ from efootprint.constants.units import u
 class RecurrentEdgeProcessFromForm(RecurrentEdgeProcess):
     default_values = {
         "constant_compute_needed": SourceValue(1 * u.cpu_core),
-        "constant_ram_needed": SourceValue(1 * u.GB),
+        "constant_ram_needed": SourceValue(1 * u.GB_ram),
         "constant_storage_needed": SourceValue(1 * u.GB)
     }
     def __init__(
@@ -21,7 +21,7 @@ class RecurrentEdgeProcessFromForm(RecurrentEdgeProcess):
             name,
             edge_device,
             recurrent_compute_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.cpu_core)),
-            recurrent_ram_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.GB)),
+            recurrent_ram_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.GB_ram)),
             recurrent_storage_needed=SourceRecurrentValues(Quantity(np.array([0] * 168, dtype=np.float32), u.GB))
         )
         self.constant_compute_needed = constant_compute_needed.set_label(f"{self.name} constant compute needed")

@@ -49,7 +49,7 @@ class UsagePatternFromForm(UsagePattern, TimeseriesForm):
                  net_growth_rate_in_percentage: SourceValue, net_growth_rate_timespan: SourceObject):
         super().__init__(
             name=name, usage_journey=usage_journey, devices=devices, network=network, country=country,
-            hourly_usage_journey_starts=SourceHourlyValues(Quantity(np.array([0], dtype=np.float32), u.dimensionless),
+            hourly_usage_journey_starts=SourceHourlyValues(Quantity(np.array([0], dtype=np.float32), u.occurrence),
             start_date=datetime.strptime(start_date.value, "%Y-%m-%d")))
 
         self.initial_usage_journey_volume = initial_usage_journey_volume.set_label(f"initial usage journey volume")

@@ -871,14 +871,14 @@ openai = ["openai (>=1.61.1,<2.0.0)"]
 
 [[package]]
 name = "efootprint"
-version = "12.0.0"
+version = "13.0.0"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-12.0.0-py3-none-any.whl", hash = "sha256:6a51e904957c9b21317cc55d39fc2dc54eb7f538fa94647dbf9c713abe257617"},
-    {file = "efootprint-12.0.0.tar.gz", hash = "sha256:337d67e81fe994310c38bf0b3041d40316570245103020e63360681a7975de5a"},
+    {file = "efootprint-13.0.0-py3-none-any.whl", hash = "sha256:9895f7259e22b0a81ca0bcd26eb13993d18c8970df3b7d9a55fcd084fcc8b7db"},
+    {file = "efootprint-13.0.0.tar.gz", hash = "sha256:2dd080137cee7339b0ad2ff68ce243ef85827ee5806b87a9e94ed51ce1170f22"},
 ]
 
 [package.dependencies]
@@ -1645,18 +1645,21 @@ dev = ["meson-python (>=0.13.1,<0.17.0)", "pybind11 (>=2.13.2,!=2.13.3)", "setup
 
 [[package]]
 name = "matplotlib-inline"
-version = "0.1.7"
+version = "0.2.1"
 description = "Inline Matplotlib backend for Jupyter"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "matplotlib_inline-0.1.7-py3-none-any.whl", hash = "sha256:df192d39a4ff8f21b1895d72e6a13f5fcc5099f00fa84384e0ea28c2cc0653ca"},
-    {file = "matplotlib_inline-0.1.7.tar.gz", hash = "sha256:8423b23ec666be3d16e16b60bdd8ac4e86e840ebd1dd11a30b9f117f2fa0ab90"},
+    {file = "matplotlib_inline-0.2.1-py3-none-any.whl", hash = "sha256:d56ce5156ba6085e00a9d54fead6ed29a9c47e215cd1bba2e976ef39f5710a76"},
+    {file = "matplotlib_inline-0.2.1.tar.gz", hash = "sha256:e1ee949c340d771fc39e241ea75683deb94762c8fa5f2927ec57c83c4dffa9fe"},
 ]
 
 [package.dependencies]
 traitlets = "*"
+
+[package.extras]
+test = ["flake8", "nbdime", "nbval", "notebook", "pytest"]
 
 [[package]]
 name = "mccabe"
@@ -3382,4 +3385,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f3219761d37ae127dcbaad4cc1bec5f6e44936549076463eee5e8ce957b6a65e"
+content-hash = "afc7c74cc5cd65d0971cce7a631ecd700a4356ef156cb989fa62ed90278a3ad2"

@@ -6,6 +6,7 @@ import numpy as np
 import pytz
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.aggregation_utils import get_plot_aggregation_strategy
 from efootprint.constants.units import u
 from efootprint.logger import logger
 
@@ -45,9 +46,35 @@ def get_reindexed_array_from_dict(
 
 
 def to_rounded_daily_values(quantity_arr: u.Quantity, rounding_depth: int = 5) -> List[float]:
+    """
+    Aggregate hourly values into daily values.
+
+    The aggregation strategy (sum or mean) is automatically determined from the unit:
+    - Energy, carbon, data transfer, events → sum
+    - CPU, RAM, instances, rates → mean
+
+    Args:
+        quantity_arr: Hourly quantity array to aggregate
+        rounding_depth: Number of decimal places to round to
+
+    Returns:
+        List of daily aggregated values
+    """
     hours = len(quantity_arr)
     day_idx = np.arange(hours) // 24
+    n_days = math.ceil(hours / 24)
     weights = quantity_arr.magnitude
-    daily = np.bincount(day_idx, weights=weights, minlength=math.ceil(hours / 24))
+
+    aggregation_strategy = get_plot_aggregation_strategy(quantity_arr.units)
+
+    if aggregation_strategy == "mean":
+        # For resource allocation metrics (instances, RAM, CPU) - compute mean via sum/count
+        # Using bincount for both operations is O(hours) vs O(n_days × hours) with boolean indexing
+        daily_sum = np.bincount(day_idx, weights=weights, minlength=n_days)
+        daily_count = np.bincount(day_idx, minlength=n_days)
+        daily = daily_sum / daily_count
+    else:
+        # For cumulative metrics (energy, events, data) - sum the values
+        daily = np.bincount(day_idx, weights=weights, minlength=n_days)
 
     return np.round(daily, rounding_depth).tolist()
