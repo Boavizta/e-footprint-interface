@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.3] - 2025-10-27
+
+### Fixed
+- Upgrade to e-footprint 13.0.0 to aggregate timeseries by sum or mean depending on unit. Fixed wrong aggregation by sum for concurrent resource use like number of server instances.
+
 ## [0.9.2] - 2025-10-22
 
 ### Changed

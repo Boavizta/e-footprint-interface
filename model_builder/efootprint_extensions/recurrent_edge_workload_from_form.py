@@ -15,7 +15,7 @@ class RecurrentEdgeWorkloadFromForm(RecurrentEdgeWorkload):
     def __init__(self, name: str, edge_device: EdgeAppliance, constant_workload: ExplainableQuantity):
         # Initialize with a labeled zero array for recurrent_workload
         initial_recurrent_workload = ExplainableRecurrentQuantities(
-            Quantity(np.array([0] * 168, dtype=np.float32), u.dimensionless),
+            Quantity(np.array([0] * 168, dtype=np.float32), u.concurrent),
             label="initial recurrent workload")
 
         super().__init__(

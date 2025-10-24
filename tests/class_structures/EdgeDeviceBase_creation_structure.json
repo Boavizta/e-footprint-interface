@@ -58,7 +58,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": 1
             },
@@ -165,7 +165,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": 1
             },

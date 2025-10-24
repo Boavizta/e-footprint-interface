@@ -116,7 +116,7 @@ class TimeseriesForm:
         hourly_values = np.repeat(daily_values / 24, 24).astype(np.float32)
 
         return ExplainableHourlyQuantities(
-            Quantity(hourly_values, u.dimensionless), start_date=self.local_timezone_start_date.value,
+            Quantity(hourly_values, u.occurrence), start_date=self.local_timezone_start_date.value,
             left_parent=self.first_daily_volume, right_parent=self.daily_growth_rate,
             operator="exponentially growing with daily rate"
         ).generate_explainable_object_with_logical_dependency(

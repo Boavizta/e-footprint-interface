@@ -89,7 +89,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": 1
             },
@@ -211,7 +211,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": 1
             },
@@ -359,7 +359,7 @@
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
                 "input_type": "input",
-                "unit": "GB/gpu",
+                "unit": "GB_ram/gpu",
                 "can_be_negative": false,
                 "step": 1
             },
@@ -449,7 +449,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": 1
             }
@@ -627,7 +627,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": 1
             },

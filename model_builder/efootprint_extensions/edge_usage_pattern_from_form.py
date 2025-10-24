@@ -17,7 +17,7 @@ class EdgeUsagePatternFromForm(EdgeUsagePattern, TimeseriesForm):
             "start_date": SourceObject("2025-01-01"),
             "modeling_duration_value": SourceValue(3 * u.dimensionless),
             "modeling_duration_unit": SourceObject("year"),
-            "initial_edge_usage_journey_volume": SourceValue(10000 * u.dimensionless),
+            "initial_edge_usage_journey_volume": SourceValue(10000 * u.occurrence),
             "initial_edge_usage_journey_volume_timespan": SourceObject("month"),
             "net_growth_rate_in_percentage": SourceValue(0 * u.dimensionless),
             "net_growth_rate_timespan": SourceObject("year")
@@ -48,7 +48,7 @@ class EdgeUsagePatternFromForm(EdgeUsagePattern, TimeseriesForm):
         super().__init__(
             name=name, edge_usage_journey=edge_usage_journey, country=country,
             hourly_edge_usage_journey_starts=SourceHourlyValues(
-                Quantity(np.array([0], dtype=np.float32), u.dimensionless),
+                Quantity(np.array([0], dtype=np.float32), u.occurrence),
             start_date=datetime.strptime(start_date.value, "%Y-%m-%d")))
 
         self.initial_edge_usage_journey_volume = initial_edge_usage_journey_volume.set_label(

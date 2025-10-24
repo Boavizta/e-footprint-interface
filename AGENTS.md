@@ -32,10 +32,20 @@ Flow in short:
 
 - AI agents
   - Favor making all edits on the same file at once rather than step-by-step changes.
+  - **Always propose computationally efficient solutions**, especially for data processing and numerical operations:
+    - Prefer vectorized NumPy operations over Python loops
+    - Use single-pass algorithms (e.g., `np.bincount`) over multiple iterations
+    - When presenting solutions, include complexity analysis (e.g., O(n) vs O(n²))
+    - Present trade-offs between readability and performance when relevant
+    - For critical paths, offer multiple implementation options with pros/cons:
+      - Most efficient (may be less readable)
+      - Balanced (good performance, maintainable)
+      - Most readable (acceptable performance for non-critical code)
 - Python
   - Formatter/lint: follow `.pylintrc`; prefer PEP 8; type hints where helpful
   - Keep functions small; raise explicit errors with actionable messages
   - Keep number of lines low; prefer to write long lines while respecting the 120 characters limit, rather than writing each parameter on a new line.
+  - **Performance**: For array/data operations, prioritize NumPy vectorization over list comprehensions or loops
 - Django
   - Views: thin controllers calling helpers in `model_builder/*_utils.py`
   - Templates: small, composable partials (see `model_builder/templates/model_builder/...`)
