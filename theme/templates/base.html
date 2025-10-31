@@ -2,13 +2,13 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
-        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+        <meta charset="UTF-8" />
         <title>e-footprint</title>
-        <link rel="stylesheet" href="{% static 'css/bs_main.css' %}"/>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-        <link rel="icon" type="image/x-icon" href="/static/icons/sidenav/e-footprint-logo.svg"/>
-        <link rel="stylesheet" href="{% static 'css/flatpickr.min.css' %}"/>
+        <link rel="stylesheet" href="{% static 'css/bs_main.css' %}" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link rel="icon" type="image/x-icon" href="/static/icons/sidenav/e-footprint-logo.svg" />
+        <link rel="stylesheet" href="{% static 'css/flatpickr.min.css' %}" />
         <script src="{% static 'scripts/external_librairies/bootstrap.bundle.min.js' %}"></script>
         <script src="{% static 'scripts/external_librairies/htmx.min.js' %}"></script>
         <script src="{% static 'scripts/external_librairies/_hyperscript.min.js' %}"></script>
@@ -43,7 +43,7 @@
         <script src="{% static 'scripts/loading_bar.js' %}"></script>
         <script src="{% static 'scripts/modal_utils.js' %}"></script>
         <script src="{% static 'scripts/side_panel_utils.js' %}"></script>
-        <script src="{% static 'scripts/result_charts.js' %}"></script>
+        <script type="module" src="{% static 'scripts/result_charts/index.js' %}"></script>
         <script src="{% static 'scripts/model_builder_main.js' %}"></script>
         <script src="{% static 'scripts/timeseries_utils.js' %}"></script>
         <script src="{% static 'scripts/calculated_attributes_timeseries.js' %}"></script>
@@ -51,11 +51,11 @@
             window.initModelBuilderMain = initModelBuilderMain;
             window.removeAllLines = removeAllLines;
 
-            document.body.addEventListener('initModelBuilderMain', function (event) {
+            document.body.addEventListener("initModelBuilderMain", function (event) {
                 window.initModelBuilderMain();
             });
 
-            document.body.addEventListener('removeAllLines', function (event) {
+            document.body.addEventListener("removeAllLines", function (event) {
                 window.removeAllLines();
             });
 

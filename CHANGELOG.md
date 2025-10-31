@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.4] - 2025-11-07
+
+### Added
+- Major improvements on result charts readibility and manipulation: add dynamic legend with element selection and improve tooltip structure and data.
+
 ## [0.9.3] - 2025-10-27
 
 ### Fixed
