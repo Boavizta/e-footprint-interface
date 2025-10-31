@@ -801,10 +801,6 @@ input:disabled{
     .result-width{
         width: 67vw;
     }
-
-    #barChart, #lineChart {
-       min-height: 500px;
-    }
 }
 
 @each $p in $percents {

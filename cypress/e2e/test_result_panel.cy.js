@@ -145,17 +145,23 @@ describe("Test - Result panel", () => {
         cy.wait("@openResults"); // wait for the result panel to be fully loaded
         cy.get('#barChartTitle').should('be.visible').should('contain.text', "Yearly CO2 emissions")
         cy.get('#panel-result-btn').should('have.class', 'result-width')
-        cy.window().then((win) => {
-            cy.spy(win, 'displayLoaderResult').as('displayLoaderResult');
+        
+        // Store initial chart data to verify it changes after recomputation
+        let initialChartData;
+        cy.window().its('charts').its('barChart').then((chart) => {
+            initialChartData = JSON.stringify(chart.data);
         });
-        cy.window().then((win) => {
-            cy.spy(win, 'drawBarResultChart').as('drawBarResultChart');
-        });
+        
         cy.intercept("POST", "/model_builder/edit-object/id-fb1308-Test-E2E-Server/").as("editServer")
         cy.get('#btn-submit-form').click();
-        cy.get('@displayLoaderResult').should('have.been.called');
-        cy.get('@drawBarResultChart').should('have.been.called');
         cy.wait("@editServer");
+        
+        // Verify the chart was redrawn with updated data
+        cy.window().its('charts').its('barChart').should('exist').then((chart) => {
+            const newChartData = JSON.stringify(chart.data);
+            expect(newChartData).to.not.equal(initialChartData);
+        });
+        
         cy.get('#panel-result-btn').should('not.have.class', 'result-width')
     });
 });
