@@ -1,19 +1,19 @@
-<div class="rounded-top-5 shadow-sm-up h-100 bg-white px-2 px-xl-4 py-4">
+<div class="rounded-top-5 shadow-sm-up h-100 bg-white px-2 px-xl-4 pt-4">
     <div class="row align-items-center">
         <div class="col-4 text-start px-4 py-0">
             <p class="h5 m-0"><b>Results</b></p>
         </div>
-        <div class="col-4 text-center text-secondary"
-            onclick="hidePanelResult()"
-        >
+        <div class="col-4 text-center text-secondary" onclick="hidePanelResult()">
             <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67"/>
+                <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67" />
             </svg>
         </div>
     </div>
-    <div class="d-flex flex-row mb-3" >
-        <button id="header-btn-result-chart" class="bg-transparent bg-transparent header-btn-result result-active p-2 fs-3xl me-2"
-                    _="on click
+    <div class="d-flex flex-row mb-3">
+        <button
+            id="header-btn-result-chart"
+            class="bg-transparent bg-transparent header-btn-result result-active p-2 fs-3xl me-2"
+            _="on click
                         repeat for button in .result-active
                             remove .result-active from button
                         end
@@ -22,11 +22,13 @@
                         remove .d-none from #graph-block
                         add .d-block to #graph-block
                         add .result-active to me"
-            >
+        >
             <b>Results</b>
         </button>
-        <button id="header-btn-result-sources" class="bg-transparent bg-transparent header-btn-result p-2 fs-3xl me-2"
-                    _="on click
+        <button
+            id="header-btn-result-sources"
+            class="bg-transparent bg-transparent header-btn-result p-2 fs-3xl me-2"
+            _="on click
                         repeat for button in .result-active
                             remove .result-active from button
                         end
@@ -39,12 +41,8 @@
             <b>Sources</b>
         </button>
     </div>
-    <div id="graph-block" class="col d-block overflow-y-auto w-100 vh-70 px-0 py-2">
-        {% include 'model_builder/result/result_graph.html' %}
-    </div>
-    <div id="source-block" class="col d-none overflow-auto w-100 vh-70 px-0 py-2">
-        {% include 'model_builder/result/source_table.html' %}
-    </div>
+    <div id="graph-block" class="col d-block overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">{% include 'model_builder/result/result_graph.html' %}</div>
+    <div id="source-block" class="col d-none overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">{% include 'model_builder/result/source_table.html' %}</div>
 </div>
 
 <script>
