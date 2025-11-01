@@ -24,10 +24,6 @@
         "label": "GPU job",
         "type_object_available": "Available job types"
     },
-    "RecurrentEdgeProcessFromForm": {
-        "label": "Recurrent edge process",
-        "type_object_available": "Recurrent edge process"
-    },
     "RecurrentEdgeProcess": {
         "label": "Recurrent edge process",
         "type_object_available": "Recurrent edge process"
@@ -37,10 +33,6 @@
         "type_object_available": "Available recurrent edge resource need types"
     },
     "RecurrentEdgeWorkload": {
-        "label": "Recurrent edge workload",
-        "type_object_available": "Recurrent edge workload"
-    },
-    "RecurrentEdgeWorkloadFromForm": {
         "label": "Recurrent edge workload",
         "type_object_available": "Recurrent edge workload"
     },
@@ -64,19 +56,11 @@
         "label": "Edge Storage",
         "type_object_available": "Available edge storage types"
     },
-    "UsagePatternFromForm": {
-        "label": "Usage pattern",
-        "type_object_available": "Available usage patterns"
-    },
     "UsagePattern": {
         "label": "Usage pattern",
         "type_object_available": "Available usage patterns"
     },
     "EdgeUsagePattern": {
-        "label": "Edge usage pattern",
-        "type_object_available": "Available edge usage patterns"
-    },
-    "EdgeUsagePatternFromForm": {
         "label": "Edge usage pattern",
         "type_object_available": "Available edge usage patterns"
     },

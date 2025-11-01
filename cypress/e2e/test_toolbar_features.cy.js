@@ -17,7 +17,7 @@ describe("Test - Toolbars import/export/reboot", () => {
     it("Import one JSON file when the model is empty and check that objects have been added", () => {
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePattern", upName).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourney", ujName).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", server).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').should('be.visible');
@@ -32,7 +32,7 @@ describe("Test - Toolbars import/export/reboot", () => {
         let fileTest = 'cypress/fixtures/efootprint-model-system-data.json'
         cy.loadEfootprintTestModel(fileTest);
 
-        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePattern", upName).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourney", ujName).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", server).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').should('be.visible');
@@ -54,7 +54,7 @@ describe("Test - Toolbars import/export/reboot", () => {
         cy.get('button[type="submit"]').click();
         cy.get('@initLeaderLines').should('have.been.called');
 
-        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePattern", upName).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourney", ujName).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("BoaviztaCloudServer", server).should('exist').should('be.visible');
         cy.getObjectButtonFromObjectTypeAndName("UsageJourneyStep", ujsOne).should('exist').should('be.visible');

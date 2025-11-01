@@ -73,15 +73,15 @@ class TestViewsAdditionEdge(TestModelingBase):
             name="Test Process", parent_id=edge_function_id, edge_device_id=edge_device_id,
             constant_compute_needed="2", constant_ram_needed="1.5", constant_storage_needed="200")
         rep_request = self.create_post_request(
-            "/add-object/RecurrentEdgeProcessFromForm", rep_data, edge_device_request.session["system_data"])
-        add_object(rep_request, "RecurrentEdgeProcessFromForm")
-        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcessFromForm")
+            "/add-object/RecurrentEdgeProcess", rep_data, edge_device_request.session["system_data"])
+        add_object(rep_request, "RecurrentEdgeProcess")
+        rep_id = self.get_object_id_from_session(rep_request, "RecurrentEdgeProcess")
 
         # Verify the structure
-        recurrent_process = rep_request.session["system_data"]["RecurrentEdgeProcessFromForm"][rep_id]
+        recurrent_process = rep_request.session["system_data"]["RecurrentEdgeProcess"][rep_id]
         self.assertEqual(recurrent_process["name"], "Test Process")
         self.assertEqual(recurrent_process["edge_device"], edge_device_id)
-        self.assertEqual(recurrent_process["constant_compute_needed"]["value"], 2.0)
+        self.assertEqual(recurrent_process["recurrent_compute_needed"]["constant_value"], 2.0)
 
         edge_function = rep_request.session["system_data"]["EdgeFunction"][edge_function_id]
         self.assertEqual(edge_function["name"], "Test Edge Function")

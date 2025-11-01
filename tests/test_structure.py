@@ -20,8 +20,10 @@ from efootprint.core.hardware.network import Network
 from efootprint.core.usage.job import Job
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
-
-from model_builder.efootprint_extensions.edge_usage_pattern_from_form import EdgeUsagePatternFromForm
+from efootprint.core.usage.usage_pattern import UsagePattern
+from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
+from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeProcess
+from efootprint.builders.usage.edge.recurrent_edge_workload import RecurrentEdgeWorkload
 
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -31,17 +33,14 @@ from model_builder.class_structure import generate_object_creation_structure, \
 from model_builder.web_core.model_web import model_builder_root
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
-from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
-from model_builder.efootprint_extensions.recurrent_edge_workload_from_form import RecurrentEdgeWorkloadFromForm
 
 
 obj_creation_structure_dict = {
     "Service": SERVICE_CLASSES, "ServerBase": SERVER_CLASSES + SERVER_BUILDER_CLASSES,
-    "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
+    "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePattern], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
-    "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "RecurrentEdgeWorkload": [RecurrentEdgeWorkloadFromForm],
-    "EdgeDevice": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
+    "RecurrentEdgeProcess": [RecurrentEdgeProcess], "RecurrentEdgeWorkload": [RecurrentEdgeWorkload],
+    "EdgeDevice": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePattern]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 

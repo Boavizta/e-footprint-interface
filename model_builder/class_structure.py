@@ -13,6 +13,8 @@ from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.form_references import FORM_TYPE_OBJECT, FORM_FIELD_REFERENCES
+from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
+from model_builder.efootprint_extensions.explainable_recurrent_quantities_from_constant import ExplainableRecurrentQuantitiesFromConstant
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -97,7 +99,7 @@ def generate_dynamic_form(
             raise ValueError(f"No corresponding canonical class found for {efootprint_class_str}.")
         corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[corresponding_canonical_class.__name__]
 
-
+    default_values.update(deepcopy(corresponding_web_class.default_values))
     list_values = efootprint_class.list_values
     conditional_list_values = efootprint_class.conditional_list_values
     id_prefix = efootprint_class_str
@@ -131,7 +133,7 @@ def generate_dynamic_form(
                 if option not in selected]
             selected = [{"value": elt.id, "label": elt.name} for elt in selected]
             if attr_name == "devices":
-                # Special case for UsagePatternFromForm’s devices, to remove possibility for user to select multiple
+                # Special case for UsagePattern’s devices, to remove possibility for user to select multiple
                 # devices for now.
                 structure_field.update({
                     "input_type": "select_object",
@@ -186,9 +188,27 @@ def generate_dynamic_form(
                     "step": step
                 })
             elif issubclass(annotation, ExplainableHourlyQuantities):
-                structure_field.update({"input_type": "timeseries_input", "default": str(default)})
+                # Check if this is a form-editable timeseries or a read-only one
+                if isinstance(default, ExplainableHourlyQuantitiesFromFormInputs):
+                    # Editable: extract form inputs
+                    structure_field.update({
+                        "input_type": "hourly_quantities_from_growth",
+                        "default": default.form_inputs
+                    })
+                else:
+                    # Read-only: base efootprint class
+                    structure_field.update({"input_type": "timeseries_input", "default": str(default)})
             elif issubclass(annotation, ExplainableRecurrentQuantities):
-                structure_field.update({"input_type": "recurrent_timeseries_input", "default": str(default)})
+                # Check if this is a form-editable timeseries or a read-only one
+                if isinstance(default, ExplainableRecurrentQuantitiesFromConstant):
+                    # Editable: extract constant value
+                    structure_field.update({
+                        "input_type": "recurrent_quantities_from_constant",
+                        "default": default.form_inputs
+                    })
+                else:
+                    # Read-only: base efootprint class
+                    structure_field.update({"input_type": "recurrent_timeseries_input", "default": str(default)})
             elif issubclass(annotation, ExplainableObject):
                 if attr_name in list_values.keys():
                     structure_field.update({
@@ -221,5 +241,17 @@ def generate_dynamic_form(
             structure_fields_advanced.append(structure_field)
         else:
             structure_fields.append(structure_field)
+
+    # Reorder fields so timeseries fields appear last (preserving order within each group)
+    timeseries_input_types = ["hourly_quantities_from_growth", "recurrent_quantities_from_constant",
+                               "timeseries_input", "recurrent_timeseries_input"]
+
+    non_timeseries_fields = [f for f in structure_fields if f["input_type"] not in timeseries_input_types]
+    timeseries_fields = [f for f in structure_fields if f["input_type"] in timeseries_input_types]
+    structure_fields = non_timeseries_fields + timeseries_fields
+
+    non_timeseries_fields_advanced = [f for f in structure_fields_advanced if f["input_type"] not in timeseries_input_types]
+    timeseries_fields_advanced = [f for f in structure_fields_advanced if f["input_type"] in timeseries_input_types]
+    structure_fields_advanced = non_timeseries_fields_advanced + timeseries_fields_advanced
 
     return structure_fields, structure_fields_advanced, dynamic_lists

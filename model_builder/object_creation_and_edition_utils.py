@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from inspect import _empty as empty_annotation
 from typing import List, get_origin, get_args, TYPE_CHECKING
 
@@ -8,6 +9,8 @@ from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_timezone import ExplainableTimezone
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
@@ -29,10 +32,25 @@ def create_efootprint_obj_from_post_data(
     default_values = new_efootprint_obj_class.default_values
 
     obj_creation_kwargs = {}
-    for attr_name_with_prefix in create_form_data.keys():
+    treated_form_inputs = []
+    for attr_name_with_prefix in create_form_data:
+        form_inputs = {}
         attr_name = attr_name_with_prefix.replace(object_type + "_", "")
-        if attr_name not in init_sig_params:
+        if "__" in attr_name:
+            # form inputs put __ before form fields
+            # Generate the form inputs
+            base_form_input_key = attr_name_with_prefix.split("__")[0]
+            for key in create_form_data:
+                if key.startswith(f"{base_form_input_key}__"):
+                    form_input_key = key.split("__")[1]
+                    form_inputs[form_input_key] = create_form_data[key]
+            attr_name = attr_name.split("__")[0]
+
+        if attr_name not in init_sig_params or attr_name in treated_form_inputs:
             continue
+
+        if form_inputs:
+            treated_form_inputs.append(attr_name)
 
         annotation = init_sig_params[attr_name].annotation
         if annotation is empty_annotation:
@@ -57,13 +75,16 @@ def create_efootprint_obj_from_post_data(
             unit = create_form_data.get(f"{attr_name_with_prefix}_unit", "dimensionless")
             obj_creation_kwargs[attr_name] = SourceValue(
                 float(create_form_data[attr_name_with_prefix]) * u(unit), source)
-        elif issubclass(annotation, ExplainableObject):
+        elif issubclass(annotation, ExplainableObject) and not form_inputs:
             if create_form_data[attr_name_with_prefix] != default_values.get(attr_name).value:
                 source = Sources.USER_DATA
             else :
                 source = default_values.get(attr_name).source
             obj_creation_kwargs[attr_name] = SourceObject(
                 create_form_data[attr_name_with_prefix], source=source)
+        elif form_inputs:
+            form_inputs["label"] = f"{attr_name} in {create_form_data[f"{object_type}_name"]}"
+            obj_creation_kwargs[attr_name] = ExplainableObject.from_json_dict(form_inputs)
         elif issubclass(annotation, ModelingObject):
             new_mod_obj_id = create_form_data[attr_name_with_prefix]
             mod_obj_attribute_object_type_str = annotation.__name__
@@ -83,10 +104,25 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
     init_sig_params = get_init_signature_params(obj_to_edit.modeling_obj)
 
     attr_name_new_value_check_input_validity_pairs = []
+    treated_form_inputs = []
     for attr_name_with_prefix in edit_form_data.keys():
+        form_inputs = {}
         attr_name = attr_name_with_prefix.replace(object_type + "_", "")
-        if attr_name not in init_sig_params:
+
+        # Check if this is a form input (contains __)
+        if "__" in attr_name:
+            base_form_input_key = attr_name_with_prefix.split("__")[0]
+            for key in edit_form_data:
+                if key.startswith(f"{base_form_input_key}__"):
+                    form_input_key = key.split("__")[1]
+                    form_inputs[form_input_key] = edit_form_data[key]
+            attr_name = attr_name.split("__")[0]
+
+        if attr_name not in init_sig_params or attr_name in treated_form_inputs:
             continue
+
+        if form_inputs:
+            treated_form_inputs.append(attr_name)
 
         annotation = init_sig_params[attr_name].annotation
         if annotation is empty_annotation:
@@ -144,7 +180,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
                     timezone(edit_form_data[attr_name_with_prefix]), label=current_value.label,
                     source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
-        elif issubclass(annotation, ExplainableObject):
+        elif issubclass(annotation, ExplainableObject) and not form_inputs:
             if attr_name in obj_to_edit.list_values:
                 new_value = SourceObject(edit_form_data[attr_name_with_prefix], source=Sources.USER_DATA)
                 if new_value.value != current_value.value:
@@ -166,6 +202,12 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
                 new_value = SourceObject(
                     edit_form_data[attr_name_with_prefix], label=current_value.label, source=Sources.USER_DATA)
+                attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
+        elif form_inputs:
+            form_inputs["label"] = current_value.label if hasattr(current_value, 'label') \
+                else f"{attr_name} in {obj_to_edit.name}"
+            new_value = ExplainableObject.from_json_dict(form_inputs)
+            if new_value != current_value:
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
 
 

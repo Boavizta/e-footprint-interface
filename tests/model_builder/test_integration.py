@@ -48,13 +48,13 @@ class IntegrationTest(TestModelingBase):
         post_data = self.create_usage_pattern_data(
             "New usage pattern", usage_journey_id="uid-my-first-usage-journey-1")
         up_request = self.create_post_request(
-            "/add-object/UsagePatternFromForm", post_data, system_data=job_request.session["system_data"])
+            "/add-object/UsagePattern", post_data, system_data=job_request.session["system_data"])
         initial_model_web = ModelWeb(up_request.session)
         initial_total_footprint = initial_model_web.system.total_footprint
-        response = add_object(up_request, "UsagePatternFromForm")
-        new_up_id = self.get_object_id_from_session(up_request, "UsagePatternFromForm")
+        response = add_object(up_request, "UsagePattern")
+        new_up_id = self.get_object_id_from_session(up_request, "UsagePattern")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(up_request.session["system_data"]["UsagePatternFromForm"]), 1)
+        self.assertEqual(len(up_request.session["system_data"]["UsagePattern"]), 1)
 
         computed_model_web = ModelWeb(up_request.session)
         logger.info("Updating job data transferred to 20 MB")
@@ -100,17 +100,17 @@ class IntegrationTest(TestModelingBase):
         rep_data = self.create_recurrent_edge_process_data(
             name="Test Process", parent_id=edge_function_id, edge_device_id=edge_device_id)
         rep_request = self.create_post_request(
-            "/add-object/RecurrentEdgeProcessFromForm", rep_data, ef_request.session["system_data"])
-        add_object(rep_request, "RecurrentEdgeProcessFromForm")
+            "/add-object/RecurrentEdgeProcess", rep_data, ef_request.session["system_data"])
+        add_object(rep_request, "RecurrentEdgeProcess")
 
         logger.info(f"Creating edge usage pattern")
         eup_data = self.create_edge_usage_pattern_data(
             name="Test Edge Usage Pattern", edge_usage_journey_id=edge_usage_journey_id)
         eup_request = self.create_post_request(
-            "/add-object/EdgeUsagePatternFromForm", eup_data, rep_request.session["system_data"])
-        response = add_object(eup_request, "EdgeUsagePatternFromForm")
+            "/add-object/EdgeUsagePattern", eup_data, rep_request.session["system_data"])
+        response = add_object(eup_request, "EdgeUsagePattern")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(eup_request.session["system_data"]["EdgeUsagePatternFromForm"]), 1)
+        self.assertEqual(len(eup_request.session["system_data"]["EdgeUsagePattern"]), 1)
 
         computed_model_web = ModelWeb(eup_request.session)
         for footprint_key, footprint_value in computed_model_web.system_emissions["values"].items():
@@ -119,7 +119,7 @@ class IntegrationTest(TestModelingBase):
 
         logger.info(f"Manually deleting usage pattern")
         delete_object(up_request, new_up_id)
-        self.assertIsNone(up_request.session["system_data"].get("UsagePatternFromForm", None))
+        self.assertIsNone(up_request.session["system_data"].get("UsagePattern", None))
         logger.info(f"Manually deleting job")
         delete_object(up_request, new_job_id)
         logger.info(f"Manually deleting server")

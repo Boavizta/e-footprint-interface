@@ -62,26 +62,98 @@ Flow in short:
 
 Most of the web-facing orchestration lives in `model_builder/`.
 
-Key files:
-- `model_builder/web_core/model_web.py`
-  - `ModelWeb` is the central web wrapper around the e-footprint domain model. It:
-    - Deserializes session `system_data` via `efootprint.api_utils.json_to_system`
-    - Wraps the resulting domain `System` into web objects (`wrap_efootprint_object`)
-    - Exposes typed accessors: `servers`, `services`, `jobs`, `usage_patterns`, `usage_journeys`, etc.
-    - Serializes back to JSON with or without calculated attributes via `to_json()`
-    - Maintains a flat index of objects (`flat_efootprint_objs_dict`) for quick lookups
-    - Provides convenience getters by type or ID and can inject default objects on demand
-    - Computes daily emissions timeseries aggregating energy and fabrication impacts (`system_emissions`)
-- `model_builder/all_efootprint_classes.py`
-  - `MODELING_OBJECT_CLASSES_DICT` merges e-footprint classes + local extensions
-- `model_builder/efootprint_to_web_mapping.py`
-  - Web wrappers (associated by the `wrap_efootprint_object` function) adapt e-footprint domain objects to template-friendly shapes and provide computed properties for display. The `EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING` constant maps e-footprint class names to their web object counterparts, for transparent wrapping.
-- `model_builder/web_core`
-  - package of web wrappers around e-footprint domain classes (e.g., `ServerWeb`, `JobWeb`, `UsagePatternWeb`, etc.)
-- Views and CRUD layers:
-  - `model_builder/addition/...`, `model_builder/edition/...`, `model_builder/views_deletion.py`, and `model_builder/views.py` implement the flows to create/edit/delete objects and sections. They return full pages or HTMX partials. The creation/edition/deletion logic calls generic methods in the views, and object specific logic is done with ModelingObjectWeb (and children classes defined in `model_builder/web_core`) methods.
-- Extensions:
-  - The `model_builder/efootprint_extensions` package allows for the creation of modeling classes that extend e-footprint logic, like for example the `UsagePatternFromForm` class found in the `model_builder/efootprint_extensions/usage_pattern_from_form` module. Extension classes need to be added to the `MODELING_OBJECT_CLASSES_DICT` constant.
+### Key files and their responsibilities
+
+#### ModelWeb - Central orchestrator (`model_builder/web_core/model_web.py`)
+`ModelWeb` is the central web wrapper around the e-footprint domain model. It:
+- Deserializes session `system_data` via `efootprint.api_utils.json_to_system`
+- Wraps the resulting domain `System` into web objects (`wrap_efootprint_object`)
+- Exposes typed accessors: `servers`, `services`, `jobs`, `usage_patterns`, `usage_journeys`, etc.
+- Serializes back to JSON with or without calculated attributes via `to_json()`
+- Maintains a flat index of objects (`flat_efootprint_objs_dict`) for quick lookups
+- Provides convenience getters by type or ID and can inject default objects on demand
+- Computes daily emissions timeseries aggregating energy and fabrication impacts (`system_emissions`)
+
+#### Class registries
+- `model_builder/all_efootprint_classes.py` - `MODELING_OBJECT_CLASSES_DICT` merges e-footprint classes (no extension classes needed anymore)
+- `model_builder/efootprint_to_web_mapping.py` - Maps e-footprint class names to web wrappers via `EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING`
+
+#### Web wrappers (`model_builder/web_core/`)
+Package of web wrappers around e-footprint domain classes:
+- `ServerWeb`, `JobWeb`, `UsagePatternWeb`, `EdgeUsagePatternWeb`
+- `RecurrentEdgeResourceNeedWeb` (handles `RecurrentEdgeProcess` and `RecurrentEdgeWorkload`)
+- Each web wrapper provides template-friendly properties and form generation logic
+
+#### Views and CRUD (`model_builder/`)
+- `addition/...` - Object creation flows
+- `edition/...` - Object editing flows
+- `views_deletion.py` - Object deletion logic
+- `views.py` - Main views and helpers
+- `object_creation_and_edition_utils.py` - Core CRUD utilities:
+  - `create_efootprint_obj_from_post_data()` - Handles form POST data → efootprint objects
+  - `edit_object_in_system()` - Handles object updates via `ModelingUpdate`
+
+#### Form generation system (`model_builder/class_structure.py`)
+- `generate_object_creation_structure()` - Creates form structure for object creation
+- `generate_dynamic_form()` - **Core form generation logic**:
+  - Introspects class `__init__` signatures to determine field types
+  - Detects timeseries types (see "Timeseries handling" section below)
+  - Generates appropriate form fields based on annotation types
+  - Preserves field order, with timeseries fields appearing last
+  - Returns form structure + dynamic data for JS interactions
+
+#### Extension mechanism (`model_builder/efootprint_extensions/`)
+The extension package allows creating specialized `ExplainableObject` subclasses that enhance e-footprint types:
+- **NOT for ModelingObject subclasses** - Use base efootprint classes directly (e.g., `UsagePattern`, `RecurrentEdgeProcess`)
+- **FOR ExplainableObject subclasses** - To provide alternative serialization/computation strategies
+
+**Current extensions:**
+- `ExplainableStartDate` - Date serialization for forms
+- `ExplainableHourlyQuantitiesFromFormInputs` - Timeseries from growth rate inputs (see below)
+- `ExplainableRecurrentQuantitiesFromConstant` - Recurrent timeseries from constant values (see below)
+
+### Timeseries handling (important!)
+
+**Old approach (DEPRECATED):** "FromForm" wrapper classes (`UsagePatternFromForm`, `RecurrentEdgeProcessFromForm`, etc.) that computed timeseries in `__init__`.
+
+**Current approach:** Timeseries generation is handled by `ExplainableObject` subclasses registered to the base timeseries types:
+
+#### ExplainableHourlyQuantitiesFromFormInputs
+- **Purpose:** Generate hourly timeseries from simple form inputs (start date, duration, initial volume, growth rate)
+- **Registration:** Matches JSON with `"form_inputs"` key containing `"type": "growth_based"`
+- **Storage:** Stores both form inputs (for editing) AND computed compressed timeseries
+- **Lazy evaluation:** Computes timeseries only when `.value` accessed; caches result
+- **Usage:** Automatically detected by `generate_dynamic_form()` when `default_values` contains this type
+
+#### ExplainableRecurrentQuantitiesFromConstant
+- **Purpose:** Generate 168-element recurrent array from single constant value
+- **Registration:** Matches JSON with `"constant_value"` and `"constant_unit"` keys
+- **Storage:** Stores constant value (for editing) AND computed recurring_values array
+- **Lazy evaluation:** Generates 168-element array when `.value` accessed; caches result
+- **Usage:** Automatically detected by `generate_dynamic_form()` when `default_values` contains this type
+
+#### How form generation detects timeseries types:
+```python
+# In generate_dynamic_form():
+if issubclass(annotation, ExplainableHourlyQuantities):
+    default = default_values[attr_name]
+    if isinstance(default, ExplainableHourlyQuantitiesFromFormInputs):
+        input_type = "hourly_quantities_from_growth"  # Editable compound form
+    else:
+        input_type = "timeseries_input"  # Read-only display
+
+elif issubclass(annotation, ExplainableRecurrentQuantities):
+    if isinstance(default, ExplainableRecurrentQuantitiesFromConstant):
+        input_type = "recurrent_quantities_from_constant"  # Editable single value
+    else:
+        input_type = "recurrent_timeseries_input"  # Read-only display
+```
+
+#### Form templates for timeseries:
+- `side_panels/dynamic_form_fields/hourly_quantities_from_growth.html` - Compound form (start date, duration, volume, growth rate)
+- `side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html` - Simple constant value input
+- `side_panels/dynamic_form_fields/timeseries_input.html` - Read-only display (base efootprint class)
+- `side_panels/dynamic_form_fields/recurrent_timeseries_input.html` - Read-only display (base efootprint class)
 
 
 ## Rendering in the web context
@@ -113,13 +185,35 @@ Key files:
 
 ## Development tips
 
-- Start the server: `python manage.py runserver` (see `INSTALL.md` for full setup)
-- Tests
-  - Python: `pytest` or `python -m pytest`
-  - Cypress: `npx cypress open` or `npx cypress run`
-- When creating a new e-footprint extension object, develop the extension in @model_builder/efootprint_extensions, extend `_extension_classes` in @model_builder/model_web with the newly created object, add the new object to @model_builder/form_type_object.json, then run @tests/tests_structure.py as a python script, after having made sure that the new class is in the obj_creation_structure_dict, to automatically add the new object parameters to @model_builder/form_fields_reference.json. You can then update the new object parameters in @model_builder/form_fields_reference.json to fine-tune their properties.
+### Starting the server
+- `python manage.py runserver` (see `INSTALL.md` for full setup)
+
+### Running tests
+- Python: `pytest` or `python -m pytest`
+- Cypress: `npx cypress open` or `npx cypress run`
+
+### Adding new ModelingObject classes
+**You should NOT need to create extension classes** - use base efootprint classes directly. The form generation system automatically handles timeseries and other complex types.
+
+If you need to add a base efootprint class to the web interface:
+1. Ensure it's in `efootprint.all_classes_in_order.ALL_EFOOTPRINT_CLASSES`
+2. Add entry to `model_builder/reference_data/form_type_object.json`
+3. Optionally create a web wrapper in `model_builder/web_core/` and add to `EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING`
+4. Run `tests/tests_structure.py` as a script to auto-generate form field entries in `form_fields_reference.json`
+
+### Adding new timeseries generation methods
+To add a new way to generate timeseries (e.g., from uploaded CSV):
+1. Create new `ExplainableHourlyQuantities` or `ExplainableRecurrentQuantities` subclass in `model_builder/efootprint_extensions/`
+2. Register with `@ExplainableHourlyQuantities.register_subclass(lambda d: ...)` using unique JSON key
+3. Implement `from_json_dict()`, `to_json()`, `__init__()`, and lazy `@property value`
+4. Create form template in `side_panels/dynamic_form_fields/`
+5. Update `generate_dynamic_form()` to detect your new type and set appropriate `input_type`
+6. Update `create_efootprint_obj_from_post_data()` to handle POST data for your type
+
+### Form development
 - Keep forms dynamic and DRY by using `side_panels/dynamic_form_fields/*` partials
 - For computed/calculated fields, prefer rendering through explainable objects templates so users can understand the provenance
+- Timeseries fields are automatically placed last in forms - don't manually reorder them
 
 
 ## Repository map (selected)

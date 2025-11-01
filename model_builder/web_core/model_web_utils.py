@@ -16,8 +16,8 @@ def determine_global_time_bounds(ehqs: List[ExplainableHourlyQuantities]) -> Tup
         assert ehq.start_date.tzinfo == pytz.utc, f"Wrong tzinfo for {ehq.label}: {ehq.start_date.tzinfo}"
         if ehq.start_date.hour != 0:
             logger.warning(
-                f"{ehq.label} start date doesn’t start at midnight: {ehq.start_date}. "
-                f"This shouldn’t happen if this times series has been created with a UsagePatternFromForm.")
+                f"{ehq.label} start date doesn't start at midnight: {ehq.start_date}. "
+                f"This shouldn't happen if this timeseries has been created with form inputs.")
 
     global_start = min(ehq.start_date for ehq in ehqs).replace(hour=0, minute=0, second=0, microsecond=0)
     global_end = max(ehq.start_date + timedelta(hours=len(ehq.magnitude) - 1) for ehq in ehqs)

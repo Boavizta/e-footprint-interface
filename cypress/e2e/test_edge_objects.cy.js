@@ -160,17 +160,17 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeResourceNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeDeviceName);
-        // When selecting an EdgeComputer, only RecurrentEdgeProcessFromForm is available and is auto-selected
+        // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
         // The type selection is hidden when there's only one option, so we don't need to select it
-        cy.get('#RecurrentEdgeProcessFromForm_name').type(recurrentProcess1Name);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').clear().type(compute1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').clear().type(ram1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').clear().type(storage1);
+        cy.get('#RecurrentEdgeProcess_name').type(recurrentProcess1Name);
+        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(compute1);
+        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(ram1);
+        cy.get('#RecurrentEdgeProcess_constant_storage_needed').clear().type(storage1);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify first recurrent edge process was created
-        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcess1Name).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcess1Name).should('exist');
 
         // Step 5: Add second recurrent edge process
         // The edge function card auto-collapses after adding the first child, so expand it again
@@ -178,17 +178,17 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeResourceNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeDeviceName);
-        // When selecting an EdgeComputer, only RecurrentEdgeProcessFromForm is available and is auto-selected
+        // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
         // The type selection is hidden when there's only one option, so we don't need to select it
-        cy.get('#RecurrentEdgeProcessFromForm_name').type(recurrentProcess2Name);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').clear().type(compute2);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').clear().type(ram2);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').clear().type(storage2);
+        cy.get('#RecurrentEdgeProcess_name').type(recurrentProcess2Name);
+        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(compute2);
+        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(ram2);
+        cy.get('#RecurrentEdgeProcess_constant_storage_needed').clear().type(storage2);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify second recurrent edge process was created
-        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcess2Name).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcess2Name).should('exist');
 
         // Step 6: Edit edge usage journey and verify changes
         cy.getObjectButtonFromObjectTypeAndName("EdgeUsageJourney", edgeUsageJourneyName).click();
@@ -205,24 +205,24 @@ describe('Test edge objects', () => {
         // Step 7: Edit first recurrent edge process and verify changes
         // First expand the edge function card to reveal the recurrent edge process button
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
-        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcess1Name).click();
-        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').should('have.value', compute1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').should('have.value', ram1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').should('have.value', storage1);
+        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcess1Name).click();
+        cy.get('#RecurrentEdgeProcess_constant_compute_needed').should('have.value', compute1);
+        cy.get('#RecurrentEdgeProcess_constant_ram_needed').should('have.value', ram1);
+        cy.get('#RecurrentEdgeProcess_constant_storage_needed').should('have.value', storage1);
 
         // Make edits
-        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').clear().type(updatedCompute1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').clear().type(updatedRam1);
+        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(updatedCompute1);
+        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(updatedRam1);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify recurrent edge process edits were saved
         // Expand the edge function card again to access the recurrent edge process
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
-        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcess1Name).click();
-        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').should('have.value', updatedCompute1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').should('have.value', updatedRam1);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').should('have.value', storage1);
+        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcess1Name).click();
+        cy.get('#RecurrentEdgeProcess_constant_compute_needed').should('have.value', updatedCompute1);
+        cy.get('#RecurrentEdgeProcess_constant_ram_needed').should('have.value', updatedRam1);
+        cy.get('#RecurrentEdgeProcess_constant_storage_needed').should('have.value', storage1);
     });
 
     it('Create multiple edge usage journeys with edge functions and verify they can share edge devices', () => {
@@ -361,17 +361,17 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeResourceNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeComputerName);
-        // When selecting an EdgeComputer, only RecurrentEdgeProcessFromForm is available and is auto-selected
+        // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
         // The type selection is hidden when there's only one option, so we don't need to select it
-        cy.get('#RecurrentEdgeProcessFromForm_name').type(recurrentProcessName);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_compute_needed').clear().type(processCompute);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_ram_needed').clear().type(processRam);
-        cy.get('#RecurrentEdgeProcessFromForm_constant_storage_needed').clear().type(processStorage);
+        cy.get('#RecurrentEdgeProcess_name').type(recurrentProcessName);
+        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(processCompute);
+        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(processRam);
+        cy.get('#RecurrentEdgeProcess_constant_storage_needed').clear().type(processStorage);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify recurrent edge process was created
-        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcessFromForm", recurrentProcessName).should('exist');
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcessName).should('exist');
 
         // Step 5: Create second edge usage journey
         cy.get('#btn-add-edge-usage-journey').click();

@@ -10,18 +10,18 @@
                 "options": [
                     {
                         "label": "Usage pattern",
-                        "value": "UsagePatternFromForm"
+                        "value": "UsagePattern"
                     }
                 ]
             }
         ]
     },
     {
-        "category": "UsagePatternFromForm",
+        "category": "UsagePattern",
         "header": "Usage pattern creation",
         "fields": [
             {
-                "web_id": "UsagePatternFromForm_name",
+                "web_id": "UsagePattern_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -29,7 +29,7 @@
                 "default": "Usage pattern 1"
             },
             {
-                "web_id": "UsagePatternFromForm_usage_journey",
+                "web_id": "UsagePattern_usage_journey",
                 "attr_name": "usage_journey",
                 "label": "usage journey",
                 "tooltip": false,
@@ -47,7 +47,7 @@
                 ]
             },
             {
-                "web_id": "UsagePatternFromForm_devices",
+                "web_id": "UsagePattern_devices",
                 "attr_name": "devices",
                 "label": "devices",
                 "tooltip": false,
@@ -65,7 +65,7 @@
                 "selected": "efootprint_id1"
             },
             {
-                "web_id": "UsagePatternFromForm_network",
+                "web_id": "UsagePattern_network",
                 "attr_name": "network",
                 "label": "network",
                 "tooltip": false,
@@ -83,7 +83,7 @@
                 ]
             },
             {
-                "web_id": "UsagePatternFromForm_country",
+                "web_id": "UsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
@@ -99,6 +99,23 @@
                         "value": "efootprint_id2"
                     }
                 ]
+            },
+            {
+                "web_id": "UsagePattern_hourly_usage_journey_starts",
+                "attr_name": "hourly_usage_journey_starts",
+                "label": "hourly number of usage journey starts",
+                "tooltip": false,
+                "default": {
+                    "start_date": "2025-01-01",
+                    "modeling_duration_value": 3,
+                    "modeling_duration_unit": "year",
+                    "net_growth_rate_in_percentage": 10,
+                    "net_growth_rate_timespan": "year",
+                    "initial_volume": 10000,
+                    "initial_volume_timespan": "month"
+                },
+                "source": null,
+                "input_type": "hourly_quantities_from_growth"
             }
         ],
         "advanced_fields": []

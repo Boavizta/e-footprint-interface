@@ -1,7 +1,7 @@
 {
     "switch_item": "type_object_available",
     "switch_values": [
-        "UsagePatternFromForm"
+        "UsagePattern"
     ],
     "dynamic_lists": []
 }

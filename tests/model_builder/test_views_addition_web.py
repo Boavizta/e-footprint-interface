@@ -21,16 +21,16 @@ class TestViewsAdditionWeb(TestModelingBase):
         os.environ["RAISE_EXCEPTIONS"] = "True"
 
         up_data = self.create_usage_pattern_data(name="2New usage pattern", usage_journey_id="uuid-Daily-video-usage")
-        add_request = self.create_post_request("/add-object/UsagePatternFromForm", up_data)
+        add_request = self.create_post_request("/add-object/UsagePattern", up_data)
         len_system_up = len(add_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"])
 
-        response = add_object(add_request, "UsagePatternFromForm")
+        response = add_object(add_request, "UsagePattern")
 
         self.assert_response_ok(response)
         self.assertEqual(len(add_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]),
                          len_system_up + 1)
-        self.assertEqual(3, len(add_request.session["system_data"]["UsagePatternFromForm"]))
-        up_id = self.get_object_id_from_session(add_request, "UsagePatternFromForm")
+        self.assertEqual(3, len(add_request.session["system_data"]["UsagePattern"]))
+        up_id = self.get_object_id_from_session(add_request, "UsagePattern")
 
         # Open edit panel
         logger.info("Open edit usage pattern panel")
@@ -42,9 +42,14 @@ class TestViewsAdditionWeb(TestModelingBase):
         # Edit usage pattern
         logger.info("Edit usage pattern")
         edit_data = {
-            "UsagePatternFromForm_name": "New up name",
-            "UsagePatternFromForm_modeling_duration_unit": "year",
-            "UsagePatternFromForm_start_date": "2025-02-02"
+            "UsagePattern_name": "New up name",
+            "UsagePattern_hourly_usage_journey_starts__start_date": "2025-02-02",
+            "UsagePattern_hourly_usage_journey_starts__modeling_duration_value": "5",
+            "UsagePattern_hourly_usage_journey_starts__modeling_duration_unit": "month",
+            "UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage": "10",
+            "UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan": "month",
+            "UsagePattern_hourly_usage_journey_starts__initial_volume": "10000",
+            "UsagePattern_hourly_usage_journey_starts__initial_volume_timespan": "month",
         }
         edit_request = self.create_post_request(
             f"/model_builder/edit-usage-pattern/{up_id}/", edit_data, open_edit_panel_request.session["system_data"])
@@ -52,8 +57,8 @@ class TestViewsAdditionWeb(TestModelingBase):
 
         self.assert_response_ok(response)
         self.assertEqual(
-            edit_request.session["system_data"]["UsagePatternFromForm"][up_id]["start_date"]["value"][:10],
-            "2025-02-02")
+            edit_request.session["system_data"]["UsagePattern"][up_id]["hourly_usage_journey_starts"]["start_date"]
+            [:10],"2025-02-02")
 
         # Reload page
         logger.info("Reloading page")
@@ -68,7 +73,7 @@ class TestViewsAdditionWeb(TestModelingBase):
         response = delete_object(delete_request, up_id)
 
         self.assert_response_no_content(response)
-        self.assertEqual(2, len(delete_request.session["system_data"]["UsagePatternFromForm"]))
+        self.assertEqual(2, len(delete_request.session["system_data"]["UsagePattern"]))
         self.assertEqual(
             len(delete_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]), len_system_up)
 
@@ -158,8 +163,8 @@ class TestViewsAdditionWeb(TestModelingBase):
         uj_id = next(iter(delete_request.session["system_data"]["UsageJourney"].keys()))
         up_data = self.create_usage_pattern_data(name="New usage pattern", usage_journey_id=uj_id)
         add_request = self.create_post_request(
-            "/add-object/UsagePatternFromForm", up_data, delete_request.session["system_data"])
-        response = add_object(add_request, "UsagePatternFromForm")
+            "/add-object/UsagePattern", up_data, delete_request.session["system_data"])
+        response = add_object(add_request, "UsagePattern")
         self.assert_response_ok(response)
 
         # Test result chart fails with incomplete modeling
@@ -206,13 +211,13 @@ class TestViewsAdditionWeb(TestModelingBase):
         # Create usage pattern
         logger.info("Linking usage pattern to usage journey without uj step")
         up_data = self.create_usage_pattern_data(name="New usage pattern", usage_journey_id=uj_id)
-        add_request = self.create_post_request("/add-object/UsagePatternFromForm", up_data)
-        response = add_object(add_request, "UsagePatternFromForm")
+        add_request = self.create_post_request("/add-object/UsagePattern", up_data)
+        response = add_object(add_request, "UsagePattern")
         self.assert_response_ok(response)
 
         # Delete usage pattern
         logger.info("Delete usage pattern")
-        up_id = self.get_object_id_from_session(add_request, "UsagePatternFromForm")
+        up_id = self.get_object_id_from_session(add_request, "UsagePattern")
         delete_request = self.create_post_request(f"/model_builder/delete-object/{up_id}/", {}, add_request.session["system_data"])
         response = delete_object(delete_request, up_id)
         self.assert_response_no_content(response)

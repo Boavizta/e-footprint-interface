@@ -68,7 +68,7 @@ describe("Test - Result panel", () => {
         let nbElementsYearlyGranularity;
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePattern", upName).should('exist').should('be.visible');
         cy.intercept("GET", "/model_builder/result-chart/").as("openResults")
         cy.get('#btn-open-panel-result')
         .realTouch('start', { x: 100, y: 300 })
@@ -102,7 +102,7 @@ describe("Test - Result panel", () => {
         let upName = "Test E2E Usage Pattern";
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-system-data.json');
 
-        cy.getObjectButtonFromObjectTypeAndName("UsagePatternFromForm", upName).should('exist').should('be.visible');
+        cy.getObjectButtonFromObjectTypeAndName("UsagePattern", upName).should('exist').should('be.visible');
         cy.get('#btn-open-panel-result').should("exist").click()
 
         //get button with text Sources

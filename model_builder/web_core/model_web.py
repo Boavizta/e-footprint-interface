@@ -45,6 +45,18 @@ class ModelWeb:
         self.session = session
         self.system_data = session["system_data"]
         logger.info(f"Session data loaded in {time() - start:.3f} seconds.")
+
+        # Apply interface-specific version upgrades before json_to_system
+        json_efootprint_version = self.system_data.get("efootprint_version")
+        if json_efootprint_version:
+            json_major_version = int(json_efootprint_version.split(".")[0])
+            from model_builder.version_upgrade_handlers import INTERFACE_VERSION_UPGRADE_HANDLERS
+            # Apply all interface upgrades for versions > json_major_version
+            for version in sorted(INTERFACE_VERSION_UPGRADE_HANDLERS.keys()):
+                if version > json_major_version:
+                    logger.info(f"Applying interface upgrade handler for version {version}")
+                    self.system_data = INTERFACE_VERSION_UPGRADE_HANDLERS[version](self.system_data)
+
         start = time()
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
             self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)

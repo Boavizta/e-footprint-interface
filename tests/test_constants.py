@@ -19,26 +19,27 @@ TEST_JOB_NAME = "Test Job"
 TEST_UP_NAME = "Test Usage Pattern"
 
 # Common form data templates
+# Note: These use the base class names (UsagePattern, EdgeUsagePattern) with compound timeseries fields
 USAGE_PATTERN_FORM_DATA = {
     "csrfmiddlewaretoken": "test_token",
-    "UsagePatternFromForm_start_date": "2025-02-01",
-    "UsagePatternFromForm_modeling_duration_value": "5",
-    "UsagePatternFromForm_modeling_duration_unit": "month",
-    "UsagePatternFromForm_net_growth_rate_in_percentage": "10",
-    "UsagePatternFromForm_net_growth_rate_timespan": "month",
-    "UsagePatternFromForm_initial_usage_journey_volume": "10000",
-    "UsagePatternFromForm_initial_usage_journey_volume_timespan": "month",
+    "UsagePattern_hourly_usage_journey_starts__start_date": "2025-02-01",
+    "UsagePattern_hourly_usage_journey_starts__modeling_duration_value": "5",
+    "UsagePattern_hourly_usage_journey_starts__modeling_duration_unit": "month",
+    "UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage": "10",
+    "UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan": "month",
+    "UsagePattern_hourly_usage_journey_starts__initial_volume": "10000",
+    "UsagePattern_hourly_usage_journey_starts__initial_volume_timespan": "month",
 }
 
 EDGE_USAGE_PATTERN_FORM_DATA = {
     "csrfmiddlewaretoken": "test_token",
-    "EdgeUsagePatternFromForm_start_date": "2025-02-01",
-    "EdgeUsagePatternFromForm_modeling_duration_value": "5",
-    "EdgeUsagePatternFromForm_modeling_duration_unit": "month",
-    "EdgeUsagePatternFromForm_net_growth_rate_in_percentage": "10",
-    "EdgeUsagePatternFromForm_net_growth_rate_timespan": "month",
-    "EdgeUsagePatternFromForm_initial_usage_journey_volume": "10000",
-    "EdgeUsagePatternFromForm_initial_usage_journey_volume_timespan": "month",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__start_date": "2025-02-01",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__modeling_duration_value": "5",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__modeling_duration_unit": "month",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_in_percentage": "10",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_timespan": "month",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__initial_volume": "10000",
+    "EdgeUsagePattern_hourly_edge_usage_journey_starts__initial_volume_timespan": "month",
 }
 
 WEB_APPLICATION_FORM_DATA = {

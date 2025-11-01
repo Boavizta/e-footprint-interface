@@ -9,15 +9,29 @@
             "EdgeUsageJourney",
             "EdgeFunction",
             "EdgeUsagePattern",
+            "RecurrentEdgeStorageNeed",
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent",
+            "EdgeStorage",
+            "EdgeComputerRAMComponent",
+            "EdgeComputerCPUComponent",
+            "EdgeApplianceComponent",
+            "EdgeDevice",
             "EdgeAppliance",
             "EdgeComputer",
-            "EdgeStorage",
             "WebApplication",
             "VideoStreaming",
             "GenAIModel",
             "BoaviztaCloudServer",
             "Job",
             "GPUJob",
+            "RecurrentEdgeDeviceNeed",
+            "RecurrentEdgeComponentNeed",
+            "RecurrentEdgeProcessRAMNeed",
+            "RecurrentEdgeProcessCPUNeed",
+            "RecurrentEdgeProcessStorageNeed",
+            "RecurrentEdgeWorkloadNeed",
             "RecurrentEdgeProcess",
             "RecurrentEdgeWorkload",
             "WebApplicationJob",
@@ -27,11 +41,7 @@
             "Server",
             "GPUServer",
             "Storage",
-            "System",
-            "UsagePatternFromForm",
-            "RecurrentEdgeProcessFromForm",
-            "EdgeUsagePatternFromForm",
-            "RecurrentEdgeWorkloadFromForm"
+            "System"
         ],
         "label": "name"
     },
@@ -46,6 +56,9 @@
     "carbon_footprint_fabrication": {
         "modeling_obj_containers": [
             "Device",
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent",
             "EdgeAppliance",
             "EdgeComputer",
             "Server"
@@ -57,6 +70,9 @@
     "power": {
         "modeling_obj_containers": [
             "Device",
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent",
             "EdgeAppliance",
             "EdgeComputer",
             "Server"
@@ -68,9 +84,13 @@
     "lifespan": {
         "modeling_obj_containers": [
             "Device",
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent",
+            "EdgeStorage",
+            "EdgeDevice",
             "EdgeAppliance",
             "EdgeComputer",
-            "EdgeStorage",
             "BoaviztaCloudServer",
             "Server",
             "GPUServer",
@@ -81,9 +101,12 @@
     },
     "idle_power": {
         "modeling_obj_containers": [
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent",
+            "EdgeStorage",
             "EdgeAppliance",
             "EdgeComputer",
-            "EdgeStorage",
             "BoaviztaCloudServer",
             "Server",
             "Storage"
@@ -94,6 +117,7 @@
     },
     "ram": {
         "modeling_obj_containers": [
+            "EdgeRAMComponent",
             "EdgeComputer",
             "Server"
         ],
@@ -102,6 +126,7 @@
     },
     "compute": {
         "modeling_obj_containers": [
+            "EdgeCPUComponent",
             "EdgeComputer",
             "Server",
             "GPUServer"
@@ -111,7 +136,6 @@
     },
     "power_usage_effectiveness": {
         "modeling_obj_containers": [
-            "EdgeComputer",
             "BoaviztaCloudServer",
             "Server",
             "GPUServer"
@@ -131,7 +155,6 @@
     },
     "utilization_rate": {
         "modeling_obj_containers": [
-            "EdgeComputer",
             "BoaviztaCloudServer",
             "Server",
             "GPUServer"
@@ -141,6 +164,7 @@
     },
     "base_ram_consumption": {
         "modeling_obj_containers": [
+            "EdgeRAMComponent",
             "EdgeComputer",
             "VideoStreaming",
             "BoaviztaCloudServer",
@@ -153,6 +177,7 @@
     },
     "base_compute_consumption": {
         "modeling_obj_containers": [
+            "EdgeCPUComponent",
             "EdgeComputer",
             "BoaviztaCloudServer",
             "Server",
@@ -278,31 +303,26 @@
     },
     "usage_journey": {
         "modeling_obj_containers": [
-            "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePattern"
         ],
         "label": "usage journey"
     },
     "devices": {
         "modeling_obj_containers": [
-            "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePattern"
         ],
         "label": "devices"
     },
     "network": {
         "modeling_obj_containers": [
-            "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePattern"
         ],
         "label": "network"
     },
     "country": {
         "modeling_obj_containers": [
             "UsagePattern",
-            "EdgeUsagePattern",
-            "UsagePatternFromForm",
-            "EdgeUsagePatternFromForm"
+            "EdgeUsagePattern"
         ],
         "label": "country"
     },
@@ -650,17 +670,15 @@
     },
     "edge_device": {
         "modeling_obj_containers": [
+            "RecurrentEdgeDeviceNeed",
             "RecurrentEdgeProcess",
-            "RecurrentEdgeWorkload",
-            "RecurrentEdgeProcessFromForm",
-            "RecurrentEdgeWorkloadFromForm"
+            "RecurrentEdgeWorkload"
         ],
         "label": "edge device"
     },
     "edge_usage_journey": {
         "modeling_obj_containers": [
-            "EdgeUsagePattern",
-            "EdgeUsagePatternFromForm"
+            "EdgeUsagePattern"
         ],
         "label": "edge usage journey"
     },
@@ -758,5 +776,43 @@
         ],
         "label": "constant workload",
         "step": 0.1
+    },
+    "edge_component": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeStorageNeed",
+            "RecurrentEdgeComponentNeed",
+            "RecurrentEdgeProcessRAMNeed",
+            "RecurrentEdgeProcessCPUNeed",
+            "RecurrentEdgeProcessStorageNeed",
+            "RecurrentEdgeWorkloadNeed"
+        ],
+        "label": "edge component"
+    },
+    "recurrent_need": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeStorageNeed",
+            "RecurrentEdgeComponentNeed"
+        ],
+        "label": "recurrent need"
+    },
+    "structure_carbon_footprint_fabrication": {
+        "modeling_obj_containers": [
+            "EdgeDevice"
+        ],
+        "label": "structure carbon footprint fabrication",
+        "is_advanced_parameter": true,
+        "step": 1
+    },
+    "components": {
+        "modeling_obj_containers": [
+            "EdgeDevice"
+        ],
+        "label": "components"
+    },
+    "recurrent_edge_component_needs": {
+        "modeling_obj_containers": [
+            "RecurrentEdgeDeviceNeed"
+        ],
+        "label": "recurrent edge component needs"
     }
 }

@@ -100,8 +100,8 @@ describe('Test de la page d\'accueil', () => {
         // Add usagePattern
         cy.get('#add_usage_pattern').click();
         cy.get('#sidePanel').should('be.visible');
-        cy.get('#UsagePatternFromForm_name').clear();
-        cy.get('#UsagePatternFromForm_name').type(upNameOne);
+        cy.get('#UsagePattern_name').clear();
+        cy.get('#UsagePattern_name').type(upNameOne);
 
         cy.get('#start_date').click();
         cy.get('input[class="numInput cur-year"]').type('2026');
@@ -115,7 +115,7 @@ describe('Test de la page d\'accueil', () => {
         cy.get('#net_growth_rate_in_percentage').click();
         cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
         cy.get('#net_growth_rate_timespan').select('year');
-        cy.get("#UsagePatternFromForm_usage_journey").select(ujNameOne);
+        cy.get("#UsagePattern_usage_journey").select(ujNameOne);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
         cy.contains("div", upNameOne).find('button[id^="button"]').should('be.visible');

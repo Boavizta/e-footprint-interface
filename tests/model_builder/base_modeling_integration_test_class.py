@@ -13,6 +13,7 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 
+from model_builder.version_upgrade_handlers import upgrade_interface_version_pre_14
 from model_builder.web_core.model_web import default_networks, default_devices, default_countries
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from tests.test_constants import (
@@ -38,8 +39,9 @@ class TestModelingBase(TestCase):
         # Load system data
         with open(self.system_data_path, "r") as f:
             system_data_without_calculated_attributes = json.load(f)
+        upgraded_system_data = upgrade_interface_version_pre_14(system_data_without_calculated_attributes)
         class_obj_dict, flat_obj_dict = json_to_system(
-            system_data_without_calculated_attributes, launch_system_computations=True,
+            upgraded_system_data, launch_system_computations=True,
             efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         system = class_obj_dict["System"]["uuid-system-1"]
         system_data_with_calculated_attributes = system_to_json(system, save_calculated_attributes=True)
@@ -138,25 +140,25 @@ class TestModelingBase(TestCase):
                                 usage_journey_id: str = None, **overrides) -> Dict[str, Any]:
         """Create usage pattern form data with sensible defaults."""
         data = deepcopy(USAGE_PATTERN_FORM_DATA)
-        data["UsagePatternFromForm_name"] = name
+        data["UsagePattern_name"] = name
 
         # Set default device, network, country if available
-        if not overrides.get("UsagePatternFromForm_devices"):
+        if not overrides.get("UsagePattern_devices"):
             devices = list(default_devices().keys())
             if devices:
-                data["UsagePatternFromForm_devices"] = devices[0]
+                data["UsagePattern_devices"] = devices[0]
 
-        if not overrides.get("UsagePatternFromForm_network"):
+        if not overrides.get("UsagePattern_network"):
             networks = list(default_networks().keys())
             if networks:
-                data["UsagePatternFromForm_network"] = networks[0]
+                data["UsagePattern_network"] = networks[0]
 
-        if not overrides.get("UsagePatternFromForm_country"):
+        if not overrides.get("UsagePattern_country"):
             countries = list(default_countries().keys())
             if countries:
-                data["UsagePatternFromForm_country"] = countries[0]
+                data["UsagePattern_country"] = countries[0]
 
-        data["UsagePatternFromForm_usage_journey"] = usage_journey_id
+        data["UsagePattern_usage_journey"] = usage_journey_id
 
         data.update(overrides)
         return data
@@ -166,13 +168,13 @@ class TestModelingBase(TestCase):
         name: str = "Test Edge Usage Pattern", edge_usage_journey_id: str = None, **overrides) -> Dict[str, Any]:
         """Create edge usage pattern form data with sensible defaults."""
         data = deepcopy(EDGE_USAGE_PATTERN_FORM_DATA)
-        data["EdgeUsagePatternFromForm_name"] = name
-        data["EdgeUsagePatternFromForm_edge_usage_journey"] = edge_usage_journey_id
+        data["EdgeUsagePattern_name"] = name
+        data["EdgeUsagePattern_edge_usage_journey"] = edge_usage_journey_id
 
-        if not overrides.get("UsagePatternFromForm_country"):
+        if not overrides.get("EdgeUsagePattern_country"):
             countries = list(default_countries().keys())
             if countries:
-                data["EdgeUsagePatternFromForm_country"] = countries[0]
+                data["EdgeUsagePattern_country"] = countries[0]
 
         data.update(overrides)
         return data
@@ -356,14 +358,14 @@ class TestModelingBase(TestCase):
         """Create recurrent edge process form data with sensible defaults."""
         data = {
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
-            "RecurrentEdgeProcessFromForm_name": name,
-            "RecurrentEdgeProcessFromForm_edge_device": edge_device_id,
-            "RecurrentEdgeProcessFromForm_constant_compute_needed": constant_compute_needed,
-            "RecurrentEdgeProcessFromForm_constant_compute_needed_unit": "cpu_core",
-            "RecurrentEdgeProcessFromForm_constant_ram_needed": constant_ram_needed,
-            "RecurrentEdgeProcessFromForm_constant_ram_needed_unit": "GB_ram",
-            "RecurrentEdgeProcessFromForm_constant_storage_needed": constant_storage_needed,
-            "RecurrentEdgeProcessFromForm_constant_storage_needed_unit": "GB",
+            "RecurrentEdgeProcess_name": name,
+            "RecurrentEdgeProcess_edge_device": edge_device_id,
+            "RecurrentEdgeProcess_recurrent_compute_needed__constant_value": constant_compute_needed,
+            "RecurrentEdgeProcess_recurrent_compute_needed__constant_unit": "cpu_core",
+            "RecurrentEdgeProcess_recurrent_ram_needed__constant_value": constant_ram_needed,
+            "RecurrentEdgeProcess_recurrent_ram_needed__constant_unit": "GB_ram",
+            "RecurrentEdgeProcess_recurrent_storage_needed__constant_value": constant_storage_needed,
+            "RecurrentEdgeProcess_recurrent_storage_needed__constant_unit": "GB",
         }
         if parent_id:
             data["efootprint_id_of_parent_to_link_to"] = parent_id

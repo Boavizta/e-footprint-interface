@@ -1,0 +1,24 @@
+default.<div class="mb-3">
+    {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
+
+    <div class="input-group">
+        <input type="number"
+               class="form-control input_with_add_on"
+               name="{{ field.web_id }}"
+               id="{{ field.web_id }}"
+               value="{{ field.default.constant_value }}"
+               step="0.1"
+               placeholder="Input a constant value"
+               aria-describedby="basic-addon3 basic-addon4"
+               required
+               data-default-value="{{ field.default.constant_value }}"
+        >
+        <span class="input-group-text" id="basic-addon3">{{ field.constant_unit }}</span>
+    </div>
+
+    <small class="form-text text-muted">
+        This constant value will be repeated over the entire canonical week (168 hours).
+    </small>
+
+    {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id=field.web_id %}
+</div>

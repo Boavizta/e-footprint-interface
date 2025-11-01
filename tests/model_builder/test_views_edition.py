@@ -15,9 +15,11 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.logger import logger
 from efootprint.constants.units import u
+from efootprint.core.usage.usage_pattern import UsagePattern
 
 from model_builder.addition.views_addition import add_object
-from model_builder.efootprint_extensions.usage_pattern_from_form import UsagePatternFromForm
+from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
+    ExplainableHourlyQuantitiesFromFormInputs
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
 from model_builder.views_deletion import delete_object
@@ -76,9 +78,14 @@ class TestViewsEdition(TestModelingBase):
         usage_journey = UsageJourney(
             "usage journey", uj_steps=[UsageJourneyStep("step", jobs=[genai_job],
                                                         user_time_spent=SourceValue(1 * u.min))])
-        usage_pattern = UsagePatternFromForm.from_defaults(
-            "usage pattern", usage_journey=usage_journey, devices=[Device.laptop()], network=Network.wifi_network(),
-            country=Countries.FRANCE())
+        default_hourly_starts = ExplainableHourlyQuantitiesFromFormInputs(
+            {"start_date": "2024-01-01", "modeling_duration_value": 1, "modeling_duration_unit": "year",
+             "net_growth_rate_in_percentage": 0, "net_growth_rate_timespan": "month",
+             "initial_volume": 1000, "initial_volume_timespan": "month"}
+        )
+        usage_pattern = UsagePattern.from_defaults(
+            "usage pattern", hourly_usage_journey_starts=default_hourly_starts, usage_journey=usage_journey,
+            devices=[Device.laptop()], network=Network.wifi_network(), country=Countries.FRANCE())
         system = System("Test system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
         logger.info(f"Created GenAI service with provider {first_provider} and model name {first_model_name}")
 
@@ -223,12 +230,20 @@ class TestViewsEdition(TestModelingBase):
         logger.info("Editing usage pattern initial_usage_journey_volume")
         usage_pattern_id = "uuid-Video-watching-in-France-in-the-morning"
         post_data = QueryDict(mutable=True)
-        post_data.update({
-            "UsagePatternFromForm_name": ["Video watching in France in the morning"],
-            "UsagePatternFromForm_initial_usage_journey_volume": ["20000"],
-            "UsagePatternFromForm_initial_usage_journey_volume_unit": "dimensionless",
-            "recomputation": ["true"],
-        })
+        post_data.update(
+            {
+                "UsagePattern_name": "New up name",
+                "UsagePattern_hourly_usage_journey_starts__start_date": "2025-02-02",
+                "UsagePattern_hourly_usage_journey_starts__modeling_duration_value": "5",
+                "UsagePattern_hourly_usage_journey_starts__modeling_duration_unit": "month",
+                "UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage": "10",
+                "UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan": "month",
+                # Changed initial volume to 20000
+                "UsagePattern_hourly_usage_journey_starts__initial_volume": "20000",
+                "UsagePattern_hourly_usage_journey_starts__initial_volume_timespan": "month",
+                "recomputation": "true",
+            }
+        )
 
         edit_request = self.factory.post(f"/edit-object/{usage_pattern_id}", data=post_data)
         self._add_session_to_request(edit_request, self.system_data)

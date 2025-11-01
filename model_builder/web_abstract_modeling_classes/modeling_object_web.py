@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 
 class ModelingObjectWeb:
+    default_values = {}
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
     attributes_to_skip_in_forms = []

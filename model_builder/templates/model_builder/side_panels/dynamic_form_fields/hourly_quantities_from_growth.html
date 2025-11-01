@@ -1,0 +1,108 @@
+<div class="mb-3">
+    {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
+
+    <!-- Start Date -->
+    <div class="mb-3">
+        <label for="{{ field.web_id }}__start_date" class="form-label">Start date</label>
+        <input type="text" class="form-control p-2"
+               name="{{ field.web_id }}__start_date"
+               id="{{ field.web_id }}__start_date"
+               value="{{ field.default.start_date }}"
+               data-default-value="{{ field.default.start_date }}"
+               required
+        >
+    </div>
+
+    <!-- Modeling Duration -->
+    <div class="mb-3">
+        <label for="{{ field.web_id }}__modeling_duration_value" class="form-label w-100">Modeling duration</label>
+        <div class="input-group">
+            <input type="number" class="form-control input_with_add_on"
+                   name="{{ field.web_id }}__modeling_duration_value"
+                   id="{{ field.web_id }}__modeling_duration_value"
+                   value="{{ field.default.modeling_duration_value }}"
+                   max="{% if field.default.modeling_duration_unit == 'year' %}10{% else %}120{% endif %}"
+                   aria-describedby="basic-addon3 basic-addon4"
+                   required
+                   data-default-value="{{ field.default.modeling_duration_value }}"
+                   data-associated-unit-id="{{ field.web_id }}__modeling_duration_unit"
+            >
+            <select class="input-group-text"
+                    name="{{ field.web_id }}__modeling_duration_unit"
+                    id="{{ field.web_id }}__modeling_duration_unit"
+                    _="
+                    on change
+                        if my value is 'year' then
+                            set {max:10} on #{{ field.web_id }}__modeling_duration_value
+                        else
+                            set {max:120} on #{{ field.web_id }}__modeling_duration_value
+                        end
+                    "
+                    data-default-value="{{ field.default.modeling_duration_unit }}"
+            >
+                <option value="month" {% if field.default.modeling_duration_unit == "month" %}selected{% endif %}>Months</option>
+                <option value="year" {% if field.default.modeling_duration_unit == "year" %}selected{% endif %}>Years</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Initial Volume -->
+    <div class="mb-3">
+        <label for="{{ field.web_id }}__initial_volume" class="form-label w-100">Initial volume</label>
+        <div class="input-group">
+            <input type="number" class="form-control input_with_add_on"
+                   name="{{ field.web_id }}__initial_volume"
+                   id="{{ field.web_id }}__initial_volume"
+                   min="0"
+                   value="{{ field.default.initial_volume }}"
+                   placeholder="Input a number"
+                   aria-describedby="basic-addon3 basic-addon4"
+                   required
+                   data-default-value="{{ field.default.initial_volume }}"
+                   data-associated-unit-id="{{ field.web_id }}__initial_volume_timespan"
+            >
+            <select class="input-group-text"
+                    name="{{ field.web_id }}__initial_volume_timespan"
+                    id="{{ field.web_id }}__initial_volume_timespan"
+                    data-default-value="{{ field.default.initial_volume_timespan }}"
+            >
+                <option value="day" {% if field.default.initial_volume_timespan == "day" %}selected{% endif %}>Daily</option>
+                <option value="month" {% if field.default.initial_volume_timespan == "month" %}selected{% endif %}>Monthly</option>
+                <option value="year" {% if field.default.initial_volume_timespan == "year" %}selected{% endif %}>Yearly</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Net Growth Rate -->
+    <div class="mb-3">
+        <label for="{{ field.web_id }}__net_growth_rate_in_percentage" class="form-label w-100">Net growth rate (%)</label>
+        <div class="input-group">
+            <input type="number"
+                   class="form-control input_with_add_on"
+                   name="{{ field.web_id }}__net_growth_rate_in_percentage"
+                   id="{{ field.web_id }}__net_growth_rate_in_percentage"
+                   min="0"
+                   value="{{ field.default.net_growth_rate_in_percentage }}"
+                   aria-describedby="basic-addon3 basic-addon4"
+                   required
+                   data-default-value="{{ field.default.net_growth_rate_in_percentage }}"
+                   data-associated-unit-id="{{ field.web_id }}__net_growth_rate_timespan"
+            >
+            <select class="input-group-text"
+                    name="{{ field.web_id }}__net_growth_rate_timespan"
+                    id="{{ field.web_id }}__net_growth_rate_timespan"
+                    data-default-value="{{ field.default.net_growth_rate_timespan }}"
+            >
+                <option value="month" {% if field.default.net_growth_rate_timespan == "month" %}selected{% endif %}>Monthly</option>
+                <option value="year" {% if field.default.net_growth_rate_timespan == "year" %}selected{% endif %}>Yearly</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<script>
+    flatpickr('#{{ field.web_id }}__start_date', {
+        enableTime: false,
+        dateFormat: "Y-m-d"
+    });
+</script>
