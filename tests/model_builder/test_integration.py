@@ -78,6 +78,7 @@ class IntegrationTest(TestModelingBase):
             "/add-object/EdgeComputer", edge_device_data, edit_request.session["system_data"])
         add_object(edge_device_request, "EdgeComputer")
         edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeComputer")
+        print(f"Edge device ID: {edge_device_id}")
 
         logger.info(f"Creating edge usage journey")
         euj_data = self.create_edge_usage_journey_data(
@@ -89,7 +90,7 @@ class IntegrationTest(TestModelingBase):
 
         logger.info(f"Creating edge function")
         ef_data = self.create_edge_function_data(
-            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_resource_needs="")
+            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_device_needs="")
         ef_request = self.create_post_request(
             "/add-object/EdgeFunction", ef_data, euj_request.session["system_data"])
         add_object(ef_request, "EdgeFunction")

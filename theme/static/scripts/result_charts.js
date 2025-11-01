@@ -51,7 +51,7 @@ window.baseChartConfigByHardwareType = {
         label: "Servers and storage usage",
         backgroundColor: "#C6FFF9",
     },
-    "Edge_devices_and_storage_energy": {
+    "Edge_devices_energy": {
         label: "Edge devices and storage usage",
         backgroundColor: "#7FFDF4",
     },
@@ -67,7 +67,7 @@ window.baseChartConfigByHardwareType = {
         label: "Servers and storage fabrication",
         backgroundColor: "#DEECF8",
     },
-    "Edge_devices_and_storage_fabrication": {
+    "Edge_devices_fabrication": {
         label: "Edge devices and storage fabrication",
         backgroundColor: "#A3CDED",
     },

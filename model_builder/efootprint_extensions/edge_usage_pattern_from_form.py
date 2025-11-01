@@ -4,8 +4,8 @@ from typing import List
 import numpy as np
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, SourceObject, SourceHourlyValues
 from efootprint.core.country import Country
-from efootprint.core.usage.edge_usage_pattern import EdgeUsagePattern
-from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
+from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
+from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from efootprint.constants.units import u
 from pint import Quantity
 

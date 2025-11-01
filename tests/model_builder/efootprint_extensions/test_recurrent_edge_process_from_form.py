@@ -6,7 +6,8 @@ import numpy as np
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
-from efootprint.core.hardware.edge_computer import EdgeComputer
+from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
+from efootprint.core.hardware.edge.edge_component import EdgeComponent
 
 from model_builder.efootprint_extensions.recurrent_edge_process_from_form import RecurrentEdgeProcessFromForm
 
@@ -18,6 +19,9 @@ class TestRecurrentEdgeProcessFromForm(unittest.TestCase):
         self.constant_storage = SourceValue(200 * u.GB, label="Test storage")
         self.edge_device = MagicMock(spec=EdgeComputer)
         self.edge_device.id = "edge-device-1"
+        self.edge_device.ram_component = MagicMock(spec=EdgeComponent)
+        self.edge_device.cpu_component = MagicMock(spec=EdgeComponent)
+        self.edge_device.storage = MagicMock(spec=EdgeComponent)
 
         self.edge_process = RecurrentEdgeProcessFromForm(
             name="test_edge_process",

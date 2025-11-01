@@ -1,10 +1,10 @@
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
-from efootprint.core.hardware.edge_computer import EdgeComputer
+from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from pint import Quantity
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.source_objects import SourceRecurrentValues, SourceValue
-from efootprint.core.usage.recurrent_edge_process import RecurrentEdgeProcess
+from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeProcess
 from efootprint.constants.units import u
 
 

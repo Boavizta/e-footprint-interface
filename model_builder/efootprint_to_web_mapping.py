@@ -7,7 +7,7 @@ from model_builder.web_builders.services.external_api_web import ExternalApiWeb
 from model_builder.web_builders.services.service_web import ServiceWeb
 from model_builder.web_core.hardware.edge_appliance_web import EdgeApplianceWeb
 from model_builder.web_core.hardware.edge_computer_web import EdgeComputerWeb
-from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceBaseWeb
+from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceWeb
 from model_builder.web_core.hardware.server_web import ServerWeb
 from model_builder.web_core.hardware.storage_web import StorageWeb
 from model_builder.web_core.usage.edge_function_web import EdgeFunctionWeb
@@ -48,7 +48,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "WebApplication": ServiceWeb,
     "Storage": StorageWeb,
     # Edge hardware classes
-    "EdgeDeviceBase": EdgeDeviceBaseWeb,
+    "EdgeDevice": EdgeDeviceWeb,
     "EdgeComputer": EdgeComputerWeb,
     "EdgeAppliance": EdgeApplianceWeb,
     "EdgeStorage": ModelingObjectWeb,

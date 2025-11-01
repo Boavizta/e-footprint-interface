@@ -8,9 +8,9 @@ from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.constants.countries import Countries
-from efootprint.core.hardware.edge_appliance import EdgeAppliance
-from efootprint.core.hardware.edge_computer import EdgeComputer
-from efootprint.core.usage.edge_usage_journey import EdgeUsageJourney
+from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
+from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
+from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.all_classes_in_order import SERVICE_CLASSES, SERVER_CLASSES, SERVICE_JOB_CLASSES, \
@@ -41,7 +41,7 @@ obj_creation_structure_dict = {
     "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePatternFromForm], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
     "RecurrentEdgeProcess": [RecurrentEdgeProcessFromForm], "RecurrentEdgeWorkload": [RecurrentEdgeWorkloadFromForm],
-    "EdgeDeviceBase": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
+    "EdgeDevice": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePatternFromForm]}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -153,7 +153,7 @@ class TestsClassStructure(TestCase):
         objects_extra_fields_to_check = ['Server','Service']
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
-            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase", "JobBase",
+            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDevice", "JobBase",
                                         "RecurrentEdgeResourceNeed"]:
                 continue
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]

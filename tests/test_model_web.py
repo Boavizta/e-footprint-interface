@@ -23,7 +23,6 @@ class TestModelWeb(unittest.TestCase):
             "Devices": {"value": [500, 600], "start_date": "2023-01-02 00:00"},
             "Network": {"value": [700, 800], "start_date": "2023-01-01 00:00"},
             "EdgeDevices": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
-            "EdgeStorage": {"value": [50, 60], "start_date": "2023-01-01 00:00"}
         }
         self.model_web.system.total_fabrication_footprints = {
             "Servers": {"value": [900, 1000], "start_date": "2023-01-01 00:00"},
@@ -31,7 +30,6 @@ class TestModelWeb(unittest.TestCase):
             "Devices": {"value": [1300, 1400], "start_date": "2023-01-02 00:00"},
             "Network": EmptyExplainableObject(),
             "EdgeDevices": {"value": [1500, 1600], "start_date": "2023-01-01 00:00"},
-            "EdgeStorage": {"value": [1700, 1800], "start_date": "2023-01-01 00:00"}
         }
 
         for footprint_dict in [
@@ -51,8 +49,8 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["values"]["Network_energy"], [1.5, 0])
         self.assertListEqual(emissions["values"]["Servers_and_storage_fabrication"], [4.2, 0])
         self.assertListEqual(emissions["values"]["Devices_fabrication"], [0, 2.7])
-        self.assertListEqual(emissions["values"]["Edge_devices_and_storage_energy"], [0.41, 0])
-        self.assertListEqual(emissions["values"]["Edge_devices_and_storage_fabrication"], [6.6, 0])
+        self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
+        self.assertListEqual(emissions["values"]["Edge_devices_fabrication"], [3.1, 0])
 
 if __name__ == '__main__':
     unittest.main()

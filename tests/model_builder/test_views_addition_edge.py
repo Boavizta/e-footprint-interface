@@ -56,7 +56,7 @@ class TestViewsAdditionEdge(TestModelingBase):
 
         # Step 2: Create edge function linked to the edge usage journey
         ef_data = self.create_edge_function_data(
-            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_resource_needs="")
+            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_device_needs="")
         ef_request = self.create_post_request(
             "/add-object/EdgeFunction", ef_data, euj_request.session["system_data"])
         add_object(ef_request, "EdgeFunction")
@@ -85,7 +85,7 @@ class TestViewsAdditionEdge(TestModelingBase):
 
         edge_function = rep_request.session["system_data"]["EdgeFunction"][edge_function_id]
         self.assertEqual(edge_function["name"], "Test Edge Function")
-        self.assertIn(rep_id, edge_function["recurrent_edge_resource_needs"])
+        self.assertIn(rep_id, edge_function["recurrent_edge_device_needs"])
 
         edge_usage_journey = rep_request.session["system_data"]["EdgeUsageJourney"][edge_usage_journey_id]
         self.assertEqual(edge_usage_journey["name"], "Test Edge Usage Journey")

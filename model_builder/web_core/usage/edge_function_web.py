@@ -31,25 +31,25 @@ class MirroredEdgeFunctionWeb(MirroredJourneyStepBaseWeb):
 
     @property
     def children_property_name(self):
-        return "recurrent_edge_resource_needs"
+        return "recurrent_edge_device_needs"
 
     @property
     def links_to(self):
         """Links to the edge devices used by this function's resource needs."""
-        linked_edge_device_ids = set([rern.edge_device.web_id for rern in self.recurrent_edge_resource_needs])
+        linked_edge_device_ids = set([rern.edge_device.web_id for rern in self.recurrent_edge_device_needs])
         return "|".join(sorted(linked_edge_device_ids))
 
     @property
     def accordion_children(self):
-        return self.recurrent_edge_resource_needs
+        return self.recurrent_edge_device_needs
 
     @property
-    def recurrent_edge_resource_needs(self):
+    def recurrent_edge_device_needs(self):
         """Returns web-wrapped recurrent edge resource needs with mirrored context."""
         from model_builder.web_core.usage.recurrent_edge_resource_need_web import MirroredRecurrentEdgeResourceNeedWeb
 
         web_resource_needs = []
-        for rern in self._modeling_obj.recurrent_edge_resource_needs:
+        for rern in self._modeling_obj.recurrent_edge_device_needs:
             web_resource_needs.append(MirroredRecurrentEdgeResourceNeedWeb(rern, self))
 
         return web_resource_needs
