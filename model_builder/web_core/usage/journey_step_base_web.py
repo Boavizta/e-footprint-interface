@@ -66,7 +66,7 @@ class MirroredJourneyStepBaseWeb(JourneyStepBaseWeb):
     @property
     @abstractmethod
     def children_property_name(self) -> str:
-        """Property name for accessing children (e.g., 'jobs', 'recurrent_edge_resource_needs')."""
+        """Property name for accessing children (e.g., 'jobs', 'recurrent_edge_device_needs')."""
         pass
 
     @property

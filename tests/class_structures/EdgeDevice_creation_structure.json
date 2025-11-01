@@ -125,36 +125,6 @@
                 "step": 1
             },
             {
-                "web_id": "EdgeComputer_power_usage_effectiveness",
-                "attr_name": "power_usage_effectiveness",
-                "label": "power usage effectiveness",
-                "tooltip": false,
-                "default": 1,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "",
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "web_id": "EdgeComputer_utilization_rate",
-                "attr_name": "utilization_rate",
-                "label": "server utilization rate",
-                "tooltip": false,
-                "default": 0.8,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "",
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
                 "web_id": "EdgeComputer_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
@@ -203,7 +173,7 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "default": 5,
+                "default": 6,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null

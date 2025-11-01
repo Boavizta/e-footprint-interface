@@ -2,19 +2,17 @@ import json
 from typing import TYPE_CHECKING
 
 from django.http import QueryDict
-from efootprint.core.hardware.edge_computer import EdgeComputer
-from efootprint.core.hardware.edge_storage import EdgeStorage
 
 from model_builder.object_creation_and_edition_utils import edit_object_in_system
-from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceBaseWeb
-from model_builder.web_core.hardware.hardware_utils import generate_object_with_storage_creation_context, \
-    generate_object_with_storage_edition_context, add_new_object_with_storage
+from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceWeb
+from model_builder.web_core.hardware.hardware_utils import (generate_object_with_storage_edition_context,
+                                                            add_new_object_with_storage)
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class EdgeComputerWeb(EdgeDeviceBaseWeb):
+class EdgeComputerWeb(EdgeDeviceWeb):
     edit_template = "../server/server_edit.html"
 
     @classmethod

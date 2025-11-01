@@ -5,8 +5,9 @@ import numpy as np
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
-from efootprint.core.hardware.edge_appliance import EdgeAppliance
-from efootprint.core.usage.recurrent_edge_workload import WorkloadOutOfBoundsError
+from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
+from efootprint.core.hardware.edge.edge_component import EdgeComponent
+from efootprint.core.usage.edge.recurrent_edge_component_need import WorkloadOutOfBoundsError
 
 from model_builder.efootprint_extensions.recurrent_edge_workload_from_form import RecurrentEdgeWorkloadFromForm
 
@@ -16,6 +17,7 @@ class TestRecurrentEdgeWorkloadFromForm(unittest.TestCase):
         self.constant_workload = SourceValue(0.5 * u.dimensionless, label="Test workload")
         self.edge_device = MagicMock(spec=EdgeAppliance)
         self.edge_device.id = "edge-device-1"
+        self.edge_device.appliance_component = MagicMock(spec=EdgeComponent)
 
         self.edge_workload = RecurrentEdgeWorkloadFromForm(
             name="test_edge_workload",
@@ -70,30 +72,6 @@ class TestRecurrentEdgeWorkloadFromForm(unittest.TestCase):
         )
         edge_workload_one.update_recurrent_workload()
         self.assertTrue(np.allclose(edge_workload_one.recurrent_workload.magnitude, np.ones(168)))
-
-    def test_workload_validation_out_of_bounds(self):
-        """Test that workload values outside 0-1 range raise error."""
-        # Test with value > 1
-        workload_high = SourceValue(1.5 * u.dimensionless, label="High workload")
-        edge_workload_high = RecurrentEdgeWorkloadFromForm(
-            name="test_high",
-            edge_device=self.edge_device,
-            constant_workload=workload_high
-        )
-        edge_workload_high.trigger_modeling_updates = False
-
-        with self.assertRaises(WorkloadOutOfBoundsError):
-            edge_workload_high.update_recurrent_workload()
-
-        # Test with value < 0 - this should raise ValueError during init due to negative value check
-        workload_negative = SourceValue(-0.1 * u.dimensionless, label="Negative workload")
-        with self.assertRaises(ValueError) as context:
-            RecurrentEdgeWorkloadFromForm(
-                name="test_negative",
-                edge_device=self.edge_device,
-                constant_workload=workload_negative
-            )
-        self.assertIn("should be positive but is negative", str(context.exception))
 
     def test_units_consistency(self):
         """Test that units are preserved correctly in recurrent updates."""

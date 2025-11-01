@@ -150,12 +150,20 @@ class ModelWeb:
 
         return efootprint_object
 
-    def add_new_efootprint_object_to_system(self, efootprint_object: ModelingObject):
+    def add_new_efootprint_object_to_object_dicts(self, efootprint_object: ModelingObject):
         object_type = efootprint_object.class_as_simple_str
         if object_type not in self.response_objs:
             self.response_objs[object_type] = {}
         self.response_objs[object_type][efootprint_object.id] = efootprint_object
         self.flat_efootprint_objs_dict[efootprint_object.id] = efootprint_object
+
+    def add_new_efootprint_object_to_system(self, efootprint_object: ModelingObject):
+        self.add_new_efootprint_object_to_object_dicts(efootprint_object)
+        for modeling_obj_attribute in efootprint_object.mod_obj_attributes:
+            if modeling_obj_attribute.id not in self.flat_efootprint_objs_dict:
+                logger.info(f"{modeling_obj_attribute.class_as_simple_str} {modeling_obj_attribute.name} has been "
+                            f"automatically created by {efootprint_object.name} and added to system data.")
+                self.add_new_efootprint_object_to_object_dicts(modeling_obj_attribute)
 
         self.update_system_data_with_up_to_date_calculated_attributes()
 
@@ -181,10 +189,8 @@ class ModelWeb:
 
     @property
     def edge_devices(self):
-        """Returns all edge devices (EdgeComputer and EdgeAppliance instances)."""
-        all_edge_devices = self.get_web_objects_from_efootprint_type("EdgeDeviceBase")
-        # Remove EdgeStorage instances if any
-        all_edge_devices = [ed for ed in all_edge_devices if ed.class_as_simple_str != "EdgeStorage"]
+        """Returns all edge devices."""
+        all_edge_devices = self.get_web_objects_from_efootprint_type("EdgeDevice")
         return all_edge_devices
 
     @property
@@ -249,7 +255,7 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("EdgeFunction")
 
     @property
-    def recurrent_edge_resource_needs(self):
+    def recurrent_edge_device_needs(self):
         """Returns all RecurrentEdgeResourceNeed instances (processes and workloads)."""
         return self.get_web_objects_from_efootprint_type("RecurrentEdgeResourceNeed")
 
@@ -283,9 +289,8 @@ class ModelWeb:
                     get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
                 ),
-                "Edge_devices_and_storage_energy": to_rounded_daily_values(
+                "Edge_devices_energy": to_rounded_daily_values(
                     get_reindexed_array_from_dict("EdgeDevices", energy, global_start, total_hours)
-                    + get_reindexed_array_from_dict("EdgeStorage", energy, global_start, total_hours)
                 ),
                 "Devices_energy": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Devices", energy, global_start, total_hours)
@@ -297,9 +302,8 @@ class ModelWeb:
                     get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
                 ),
-                "Edge_devices_and_storage_fabrication": to_rounded_daily_values(
+                "Edge_devices_fabrication": to_rounded_daily_values(
                     get_reindexed_array_from_dict("EdgeDevices", fab, global_start, total_hours)
-                    + get_reindexed_array_from_dict("EdgeStorage", fab, global_start, total_hours)
                 ),
                 "Devices_fabrication": to_rounded_daily_values(
                     get_reindexed_array_from_dict("Devices", fab, global_start, total_hours)

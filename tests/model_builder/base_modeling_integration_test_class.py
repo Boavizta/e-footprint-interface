@@ -334,12 +334,12 @@ class TestModelingBase(TestCase):
     @staticmethod
     def create_edge_function_data(name: str = "Test Edge Function",
                                  parent_id: str = "",
-                                 recurrent_edge_resource_needs: str = "", **overrides):
+                                 recurrent_edge_device_needs: str = "", **overrides):
         """Create edge function form data with sensible defaults."""
         data = {
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
             "EdgeFunction_name": name,
-            "EdgeFunction_recurrent_edge_resource_needs": recurrent_edge_resource_needs,
+            "EdgeFunction_recurrent_edge_device_needs": recurrent_edge_device_needs,
         }
         if parent_id:
             data["efootprint_id_of_parent_to_link_to"] = parent_id
@@ -361,7 +361,7 @@ class TestModelingBase(TestCase):
             "RecurrentEdgeProcessFromForm_constant_compute_needed": constant_compute_needed,
             "RecurrentEdgeProcessFromForm_constant_compute_needed_unit": "cpu_core",
             "RecurrentEdgeProcessFromForm_constant_ram_needed": constant_ram_needed,
-            "RecurrentEdgeProcessFromForm_constant_ram_needed_unit": "GB",
+            "RecurrentEdgeProcessFromForm_constant_ram_needed_unit": "GB_ram",
             "RecurrentEdgeProcessFromForm_constant_storage_needed": constant_storage_needed,
             "RecurrentEdgeProcessFromForm_constant_storage_needed_unit": "GB",
         }

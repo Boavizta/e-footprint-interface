@@ -740,7 +740,7 @@
         ],
         "label": "edge functions"
     },
-    "recurrent_edge_resource_needs": {
+    "recurrent_edge_device_needs": {
         "modeling_obj_containers": [
             "EdgeFunction"
         ],

@@ -111,8 +111,6 @@ EDGE_DEVICE_FORM_DATA = {
     "EdgeComputer_power_unit": "W",
     "EdgeComputer_lifespan": "6",
     "EdgeComputer_lifespan_unit": "yr",
-    "EdgeComputer_power_usage_effectiveness": "1.2",
-    "EdgeComputer_utilization_rate": "1",
     "storage_form_data": '{"type_object_available":"EdgeStorage","EdgeStorage_name":"EdgeStorage 1",'
                         '"EdgeStorage_storage_capacity":"1",'
                         '"EdgeStorage_storage_capacity_unit":"TB",'
