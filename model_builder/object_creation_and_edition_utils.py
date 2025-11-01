@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from inspect import _empty as empty_annotation
 from typing import List, get_origin, get_args, TYPE_CHECKING
 
@@ -8,6 +9,8 @@ from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_timezone import ExplainableTimezone
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
@@ -16,6 +19,8 @@ from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
+from model_builder.efootprint_extensions.explainable_recurrent_quantities_from_constant import ExplainableRecurrentQuantitiesFromConstant
 
 if TYPE_CHECKING:
     from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
@@ -70,6 +75,42 @@ def create_efootprint_obj_from_post_data(
             obj_to_add = model_web.get_efootprint_object_from_efootprint_id(
                 new_mod_obj_id, mod_obj_attribute_object_type_str)
             obj_creation_kwargs[attr_name] = obj_to_add
+        elif issubclass(annotation, ExplainableHourlyQuantities):
+            # Check if this is a compound form input for growth-based hourly quantities
+            start_date_key = f"{attr_name_with_prefix}_start_date"
+            if start_date_key in create_form_data:
+                # This is a growth-based hourly quantities form input
+                form_inputs = {
+                    "type": "growth_based",
+                    "start_date": create_form_data[start_date_key],
+                    "modeling_duration_value": float(create_form_data[f"{attr_name_with_prefix}_modeling_duration_value"]),
+                    "modeling_duration_unit": create_form_data[f"{attr_name_with_prefix}_modeling_duration_unit"],
+                    "initial_volume": float(create_form_data[f"{attr_name_with_prefix}_initial_volume"]),
+                    "initial_volume_unit": "occurrence",  # Default unit for volume
+                    "initial_volume_timespan": create_form_data[f"{attr_name_with_prefix}_initial_volume_timespan"],
+                    "net_growth_rate_in_percentage": float(create_form_data[f"{attr_name_with_prefix}_net_growth_rate_in_percentage"]),
+                    "net_growth_rate_timespan": create_form_data[f"{attr_name_with_prefix}_net_growth_rate_timespan"]
+                }
+                start_date = datetime.strptime(form_inputs["start_date"], "%Y-%m-%d")
+                obj_creation_kwargs[attr_name] = ExplainableHourlyQuantitiesFromFormInputs(
+                    form_inputs=form_inputs,
+                    start_date=start_date,
+                    label=f"{attr_name}",
+                    source=Sources.USER_DATA
+                )
+        elif issubclass(annotation, ExplainableRecurrentQuantities):
+            # Check if this is a constant-based recurrent quantities form input
+            # For constant-based, we expect just a single value (not compound)
+            if attr_name_with_prefix in create_form_data:
+                constant_value = float(create_form_data[attr_name_with_prefix])
+                # Get the unit from default values
+                default_unit = default_values.get(attr_name).unit if hasattr(default_values.get(attr_name), 'unit') else u.dimensionless
+                obj_creation_kwargs[attr_name] = ExplainableRecurrentQuantitiesFromConstant(
+                    constant_value=constant_value,
+                    constant_unit=default_unit,
+                    label=f"{attr_name}",
+                    source=Sources.USER_DATA
+                )
 
     new_efootprint_obj = new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
 
@@ -167,6 +208,49 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
                 new_value = SourceObject(
                     edit_form_data[attr_name_with_prefix], label=current_value.label, source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
+        elif issubclass(annotation, ExplainableHourlyQuantities):
+            # Check if this is a compound form input for growth-based hourly quantities
+            start_date_key = f"{attr_name_with_prefix}_start_date"
+            if start_date_key in edit_form_data:
+                # This is a growth-based hourly quantities form input
+                form_inputs = {
+                    "type": "growth_based",
+                    "start_date": edit_form_data[start_date_key],
+                    "modeling_duration_value": float(edit_form_data[f"{attr_name_with_prefix}_modeling_duration_value"]),
+                    "modeling_duration_unit": edit_form_data[f"{attr_name_with_prefix}_modeling_duration_unit"],
+                    "initial_volume": float(edit_form_data[f"{attr_name_with_prefix}_initial_volume"]),
+                    "initial_volume_unit": "occurrence",
+                    "initial_volume_timespan": edit_form_data[f"{attr_name_with_prefix}_initial_volume_timespan"],
+                    "net_growth_rate_in_percentage": float(edit_form_data[f"{attr_name_with_prefix}_net_growth_rate_in_percentage"]),
+                    "net_growth_rate_timespan": edit_form_data[f"{attr_name_with_prefix}_net_growth_rate_timespan"]
+                }
+
+                # Check if form_inputs have changed
+                if isinstance(current_value, ExplainableHourlyQuantitiesFromFormInputs):
+                    if current_value.form_inputs != form_inputs:
+                        logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
+                        start_date = datetime.strptime(form_inputs["start_date"], "%Y-%m-%d")
+                        new_value = ExplainableHourlyQuantitiesFromFormInputs(
+                            form_inputs=form_inputs,
+                            start_date=start_date,
+                            label=current_value.label,
+                            source=Sources.USER_DATA
+                        )
+                        attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
+        elif issubclass(annotation, ExplainableRecurrentQuantities):
+            # Check if this is a constant-based recurrent quantities form input
+            if attr_name_with_prefix in edit_form_data:
+                new_constant_value = float(edit_form_data[attr_name_with_prefix])
+                if isinstance(current_value, ExplainableRecurrentQuantitiesFromConstant):
+                    if current_value.constant_value != new_constant_value:
+                        logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
+                        new_value = ExplainableRecurrentQuantitiesFromConstant(
+                            constant_value=new_constant_value,
+                            constant_unit=current_value.constant_unit,
+                            label=current_value.label,
+                            source=Sources.USER_DATA
+                        )
+                        attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
 
 
     changes_list = [

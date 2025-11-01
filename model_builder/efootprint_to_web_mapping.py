@@ -12,12 +12,12 @@ from model_builder.web_core.hardware.server_web import ServerWeb
 from model_builder.web_core.hardware.storage_web import StorageWeb
 from model_builder.web_core.usage.edge_function_web import EdgeFunctionWeb
 from model_builder.web_core.usage.edge_usage_journey_web import EdgeUsageJourneyWeb
-from model_builder.web_core.usage.edge_usage_pattern_web import EdgeUsagePatternFromFormWeb, EdgeUsagePatternWeb
+from model_builder.web_core.usage.edge_usage_pattern_web import EdgeUsagePatternWeb
 from model_builder.web_core.usage.job_web import JobWeb
 from model_builder.web_core.usage.recurrent_edge_resource_need_web import RecurrentEdgeResourceNeedWeb
 from model_builder.web_core.usage.usage_journey_step_web import UsageJourneyStepWeb
 from model_builder.web_core.usage.usage_journey_web import UsageJourneyWeb
-from model_builder.web_core.usage.usage_pattern_web import UsagePatternFromFormWeb, UsagePatternWeb
+from model_builder.web_core.usage.usage_pattern_web import UsagePatternWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -31,9 +31,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "UsageJourneyStep": UsageJourneyStepWeb,
     "UsageJourney": UsageJourneyWeb,
     "UsagePattern": UsagePatternWeb,
-    "UsagePatternFromForm": UsagePatternFromFormWeb,
     "EdgeUsagePattern": EdgeUsagePatternWeb,
-    "EdgeUsagePatternFromForm": EdgeUsagePatternFromFormWeb,
     "JobBase": JobWeb,
     "Job": JobWeb,
     "GPUJob": JobWeb,
@@ -56,10 +54,8 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "EdgeUsageJourney": EdgeUsageJourneyWeb,
     "EdgeFunction": EdgeFunctionWeb,
     "RecurrentEdgeResourceNeed": RecurrentEdgeResourceNeedWeb,
-    "RecurrentEdgeProcessFromForm": RecurrentEdgeResourceNeedWeb,
     "RecurrentEdgeProcess": RecurrentEdgeResourceNeedWeb,
     "RecurrentEdgeWorkload": RecurrentEdgeResourceNeedWeb,
-    "RecurrentEdgeWorkloadFromForm": RecurrentEdgeResourceNeedWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):
