@@ -81,7 +81,7 @@ Most of the web-facing orchestration lives in `model_builder/`.
 #### Web wrappers (`model_builder/web_core/`)
 Package of web wrappers around e-footprint domain classes:
 - `ServerWeb`, `JobWeb`, `UsagePatternWeb`, `EdgeUsagePatternWeb`
-- `RecurrentEdgeResourceNeedWeb` (handles `RecurrentEdgeProcess` and `RecurrentEdgeWorkload`)
+- `RecurrentEdgeDeviceNeedWeb` (handles `RecurrentEdgeProcess` and `RecurrentEdgeWorkload`)
 - Each web wrapper provides template-friendly properties and form generation logic
 
 #### Views and CRUD (`model_builder/`)

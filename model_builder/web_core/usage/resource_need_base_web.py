@@ -1,4 +1,4 @@
-"""Base class for resource need-like objects (JobWeb, RecurrentEdgeResourceNeedWeb and their mirrored versions)."""
+"""Base class for resource need-like objects (JobWeb, RecurrentEdgeDeviceNeedWeb and their mirrored versions)."""
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 

@@ -330,7 +330,7 @@
         "modeling_obj_containers": [
             "UsagePattern"
         ],
-        "label": "hourly number of usage journey starts local time"
+        "label": "hourly number of usage journey starts"
     },
     "start_date": {
         "modeling_obj_containers": [

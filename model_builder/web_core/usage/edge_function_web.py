@@ -2,7 +2,7 @@ from model_builder.web_core.usage.journey_step_base_web import JourneyStepBaseWe
 
 
 class EdgeFunctionWeb(JourneyStepBaseWeb):
-    """Web wrapper for EdgeFunction (groups RecurrentEdgeResourceNeeds for an EdgeUsageJourney)."""
+    """Web wrapper for EdgeFunction (groups RecurrentEdgeDeviceNeeds for an EdgeUsageJourney)."""
 
     @property
     def mirrored_cards(self):
@@ -19,7 +19,7 @@ class MirroredEdgeFunctionWeb(MirroredJourneyStepBaseWeb):
 
     @property
     def child_object_type_str(self):
-        return "RecurrentEdgeResourceNeed"
+        return "RecurrentEdgeDeviceNeed"
 
     @property
     def child_template_name(self):
@@ -46,10 +46,10 @@ class MirroredEdgeFunctionWeb(MirroredJourneyStepBaseWeb):
     @property
     def recurrent_edge_device_needs(self):
         """Returns web-wrapped recurrent edge resource needs with mirrored context."""
-        from model_builder.web_core.usage.recurrent_edge_resource_need_web import MirroredRecurrentEdgeResourceNeedWeb
+        from model_builder.web_core.usage.recurrent_edge_device_need_web import MirroredRecurrentEdgeDeviceNeedWeb
 
         web_resource_needs = []
         for rern in self._modeling_obj.recurrent_edge_device_needs:
-            web_resource_needs.append(MirroredRecurrentEdgeResourceNeedWeb(rern, self))
+            web_resource_needs.append(MirroredRecurrentEdgeDeviceNeedWeb(rern, self))
 
         return web_resource_needs

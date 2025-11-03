@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
-    """Web wrapper for RecurrentEdgeResourceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
+class RecurrentEdgeDeviceNeedWeb(ResourceNeedBaseWeb):
+    """Web wrapper for RecurrentEdgeDeviceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
     attributes_to_skip_in_forms = ["edge_device"]
 
     @property
@@ -26,7 +26,7 @@ class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
         for edge_function in self.edge_functions:
             for mirrored_edge_function_card in edge_function.mirrored_cards:
                 mirrored_cards.append(
-                    MirroredRecurrentEdgeResourceNeedWeb(self._modeling_obj, mirrored_edge_function_card))
+                    MirroredRecurrentEdgeDeviceNeedWeb(self._modeling_obj, mirrored_edge_function_card))
 
         return mirrored_cards
 
@@ -40,7 +40,7 @@ class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
         available_resource_need_classes = [RecurrentEdgeProcess, RecurrentEdgeWorkload]
 
         form_sections, dynamic_form_data = generate_object_creation_structure(
-            "RecurrentEdgeResourceNeed",
+            "RecurrentEdgeDeviceNeed",
             available_efootprint_classes=available_resource_need_classes,
             model_web=model_web,
         )
@@ -88,16 +88,16 @@ class RecurrentEdgeResourceNeedWeb(ResourceNeedBaseWeb):
         context_data = {
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
-            "object_type": "RecurrentEdgeResourceNeed",
-            "obj_formatting_data": FORM_TYPE_OBJECT["RecurrentEdgeResourceNeed"],
-            "header_name": "Add new " + FORM_TYPE_OBJECT["RecurrentEdgeResourceNeed"]["label"].lower()
+            "object_type": "RecurrentEdgeDeviceNeed",
+            "obj_formatting_data": FORM_TYPE_OBJECT["RecurrentEdgeDeviceNeed"],
+            "header_name": "Add new " + FORM_TYPE_OBJECT["RecurrentEdgeDeviceNeed"]["label"].lower()
         }
 
         return context_data
 
 
-class MirroredRecurrentEdgeResourceNeedWeb(MirroredResourceNeedBaseWeb):
-    """Mirrored version of RecurrentEdgeResourceNeed shown within a specific EdgeFunction context."""
+class MirroredRecurrentEdgeDeviceNeedWeb(MirroredResourceNeedBaseWeb):
+    """Mirrored version of RecurrentEdgeDeviceNeed shown within a specific EdgeFunction context."""
 
     @property
     def links_to(self):

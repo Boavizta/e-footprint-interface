@@ -268,8 +268,8 @@ class ModelWeb:
 
     @property
     def recurrent_edge_device_needs(self):
-        """Returns all RecurrentEdgeResourceNeed instances (processes and workloads)."""
-        return self.get_web_objects_from_efootprint_type("RecurrentEdgeResourceNeed")
+        """Returns all RecurrentEdgeDeviceNeed instances (processes and workloads)."""
+        return self.get_web_objects_from_efootprint_type("RecurrentEdgeDeviceNeed")
 
     @property
     def recurrent_edge_processes(self):

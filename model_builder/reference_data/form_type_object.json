@@ -28,7 +28,7 @@
         "label": "Recurrent edge process",
         "type_object_available": "Recurrent edge process"
     },
-    "RecurrentEdgeResourceNeed": {
+    "RecurrentEdgeDeviceNeed": {
         "label": "Recurrent edge resource need",
         "type_object_available": "Available recurrent edge resource need types"
     },

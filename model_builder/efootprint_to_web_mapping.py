@@ -14,7 +14,7 @@ from model_builder.web_core.usage.edge_function_web import EdgeFunctionWeb
 from model_builder.web_core.usage.edge_usage_journey_web import EdgeUsageJourneyWeb
 from model_builder.web_core.usage.edge_usage_pattern_web import EdgeUsagePatternWeb
 from model_builder.web_core.usage.job_web import JobWeb
-from model_builder.web_core.usage.recurrent_edge_resource_need_web import RecurrentEdgeResourceNeedWeb
+from model_builder.web_core.usage.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedWeb
 from model_builder.web_core.usage.usage_journey_step_web import UsageJourneyStepWeb
 from model_builder.web_core.usage.usage_journey_web import UsageJourneyWeb
 from model_builder.web_core.usage.usage_pattern_web import UsagePatternWeb
@@ -53,9 +53,9 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     # Edge usage classes
     "EdgeUsageJourney": EdgeUsageJourneyWeb,
     "EdgeFunction": EdgeFunctionWeb,
-    "RecurrentEdgeResourceNeed": RecurrentEdgeResourceNeedWeb,
-    "RecurrentEdgeProcess": RecurrentEdgeResourceNeedWeb,
-    "RecurrentEdgeWorkload": RecurrentEdgeResourceNeedWeb,
+    "RecurrentEdgeDeviceNeed": RecurrentEdgeDeviceNeedWeb,
+    "RecurrentEdgeProcess": RecurrentEdgeDeviceNeedWeb,
+    "RecurrentEdgeWorkload": RecurrentEdgeDeviceNeedWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):

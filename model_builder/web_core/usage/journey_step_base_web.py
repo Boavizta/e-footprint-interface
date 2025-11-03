@@ -48,7 +48,7 @@ class MirroredJourneyStepBaseWeb(JourneyStepBaseWeb):
     @property
     @abstractmethod
     def child_object_type_str(self) -> str:
-        """Type string of child objects (e.g., 'Job', 'RecurrentEdgeResourceNeed')."""
+        """Type string of child objects (e.g., 'Job', 'RecurrentEdgeDeviceNeed')."""
         pass
 
     @property
