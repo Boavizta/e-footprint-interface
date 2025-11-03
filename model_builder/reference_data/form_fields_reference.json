@@ -334,68 +334,62 @@
     },
     "start_date": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm",
-            "EdgeUsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "start date"
     },
     "modeling_duration_value": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm",
-            "EdgeUsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "modeling duration value"
     },
     "modeling_duration_unit": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm",
-            "EdgeUsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "modeling duration unit"
     },
-    "initial_usage_journey_volume": {
+    "initial_volume": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "initial usage journey volume"
     },
-    "initial_usage_journey_volume_timespan": {
+    "initial_volume_timespan": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "initial usage journey volume timespan"
     },
     "net_growth_rate_in_percentage": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm",
-            "EdgeUsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "net growth rate in percentage"
     },
     "net_growth_rate_timespan": {
         "modeling_obj_containers": [
-            "UsagePatternFromForm",
-            "EdgeUsagePatternFromForm"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "net growth rate timespan"
     },
-    "first_daily_usage_journey_volume": {
-        "modeling_obj_containers": [
-            "UsagePatternFromForm"
-        ],
-        "label": "initial daily usage journey volume"
-    },
     "utc_hourly_usage_journey_starts": {
         "modeling_obj_containers": [
-            "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePattern"
         ],
         "label": "hourly number of usage journey starts UTC"
     },
     "nb_usage_journeys_in_parallel": {
         "modeling_obj_containers": [
-            "UsagePattern",
-            "UsagePatternFromForm"
+            "UsagePattern"
         ],
         "label": "number of usage journeys in parallel"
     },
@@ -720,37 +714,24 @@
     },
     "constant_compute_needed": {
         "modeling_obj_containers": [
-            "RecurrentEdgeProcessFromForm"
+            "RecurrentEdgeProcess"
         ],
         "label": "constant compute needed",
         "step": 0.1
     },
     "constant_ram_needed": {
         "modeling_obj_containers": [
-            "RecurrentEdgeProcessFromForm"
+            "RecurrentEdgeProcess"
         ],
         "label": "constant ram needed",
         "step": 0.1
     },
     "constant_storage_needed": {
         "modeling_obj_containers": [
-            "RecurrentEdgeProcessFromForm"
+            "RecurrentEdgeProcess"
         ],
         "label": "constant storage needed",
         "step": 1
-    },
-    "initial_edge_usage_journey_volume": {
-        "modeling_obj_containers": [
-            "EdgeUsagePatternFromForm"
-        ],
-        "label": "initial edge usage journey volume",
-        "step": 1
-    },
-    "initial_edge_usage_journey_volume_timespan": {
-        "modeling_obj_containers": [
-            "EdgeUsagePatternFromForm"
-        ],
-        "label": "initial edge usage journey volume timespan"
     },
     "edge_functions": {
         "modeling_obj_containers": [
@@ -772,7 +753,7 @@
     },
     "constant_workload": {
         "modeling_obj_containers": [
-            "RecurrentEdgeWorkloadFromForm"
+            "RecurrentEdgeWorkload"
         ],
         "label": "constant workload",
         "step": 0.1

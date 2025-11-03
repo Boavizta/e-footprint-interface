@@ -1,12 +1,14 @@
+from copy import deepcopy, copy
 from datetime import datetime
 import numpy as np
 from pint import Quantity
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source, ExplainableObject
-from efootprint.constants.units import get_unit, u
+from efootprint.constants.units import u
 
 
-@ExplainableObject.register_subclass(lambda d: "initial_volume" in d and "net_growth_rate_in_percentage" in d)
+@ExplainableObject.register_subclass(lambda d: "form_inputs" in d and "initial_volume" in d["form_inputs"]
+                                               and "net_growth_rate_in_percentage" in d["form_inputs"])
 class ExplainableHourlyQuantitiesFromFormInputs(ExplainableHourlyQuantities):
     """
     ExplainableHourlyQuantities generated from simple form inputs:
@@ -18,9 +20,11 @@ class ExplainableHourlyQuantitiesFromFormInputs(ExplainableHourlyQuantities):
 
     @classmethod
     def from_json_dict(cls, d):
-        return cls(form_inputs=d)
+        source = Source.from_json_dict(d.get("source")) if d.get("source") else None
 
-    def __init__(self, form_inputs: dict, label: str = None,
+        return cls(form_inputs=d["form_inputs"], label=d["label"], source=source)
+
+    def __init__(self, form_inputs: dict, label: str = "no label",
                  left_parent=None, right_parent=None, operator: str = None, source: Source = None):
         """
         Initialize with form inputs dict containing:
@@ -34,8 +38,7 @@ class ExplainableHourlyQuantitiesFromFormInputs(ExplainableHourlyQuantities):
         - net_growth_rate_timespan: str ("month" or "year")
         """
         self.form_inputs = form_inputs
-        source = source or (Source.from_json_dict(form_inputs.get("source")) if form_inputs.get("source") else None)
-        label = label or form_inputs.get("label", "no label")
+
         # Don't compute value yet - will be computed lazily
         # Initialize parent with None value, will be computed in property
         super().__init__(
@@ -104,8 +107,12 @@ class ExplainableHourlyQuantitiesFromFormInputs(ExplainableHourlyQuantities):
         return Quantity(hourly_values, volume_unit)
 
     def to_json(self, save_calculated_attributes=False):
-        output_dict = self.form_inputs
+        output_dict = {"form_inputs": self.form_inputs}
 
         output_dict.update(super(ExplainableHourlyQuantities, self).to_json(save_calculated_attributes))
 
         return output_dict
+
+    def __copy__(self):
+        return ExplainableHourlyQuantitiesFromFormInputs(
+            deepcopy(self.form_inputs), label=copy(self.label), source=copy(self.source))

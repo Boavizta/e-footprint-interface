@@ -1,6 +1,7 @@
-<div class="mb-3">
-    {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
-
+<div class="mb-3" id="{{ field.web_id }}"
+     data-static-source="true"
+     data-default-name="{{ field.source.name }}"
+     data-source-url="{{ field.source.link }}">
     <!-- Start Date -->
     <div class="mb-3">
         <label for="{{ field.web_id }}__start_date" class="form-label">Start date</label>
@@ -9,6 +10,7 @@
                id="{{ field.web_id }}__start_date"
                value="{{ field.default.start_date }}"
                data-default-value="{{ field.default.start_date }}"
+               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
                required
         >
     </div>
@@ -26,6 +28,10 @@
                    required
                    data-default-value="{{ field.default.modeling_duration_value }}"
                    data-associated-unit-id="{{ field.web_id }}__modeling_duration_unit"
+                   _="on input if my value is not empty applyMaxLimitOnModelingDurationValue()
+
+                    then openOrCloseTimeseriesChartAndTriggerUpdate()
+                    "
             >
             <select class="input-group-text"
                     name="{{ field.web_id }}__modeling_duration_unit"
@@ -37,6 +43,9 @@
                         else
                             set {max:120} on #{{ field.web_id }}__modeling_duration_value
                         end
+                        updateSource('#{{ field.web_id }}')
+                        then applyMaxLimitOnModelingDurationValue()
+                        then openOrCloseTimeseriesChartAndTriggerUpdate()
                     "
                     data-default-value="{{ field.default.modeling_duration_unit }}"
             >
@@ -44,6 +53,7 @@
                 <option value="year" {% if field.default.modeling_duration_unit == "year" %}selected{% endif %}>Years</option>
             </select>
         </div>
+        <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
     </div>
 
     <!-- Initial Volume -->
@@ -60,11 +70,13 @@
                    required
                    data-default-value="{{ field.default.initial_volume }}"
                    data-associated-unit-id="{{ field.web_id }}__initial_volume_timespan"
+                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate() then tagFormAsModified()"
             >
             <select class="input-group-text"
                     name="{{ field.web_id }}__initial_volume_timespan"
                     id="{{ field.web_id }}__initial_volume_timespan"
                     data-default-value="{{ field.default.initial_volume_timespan }}"
+                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
             >
                 <option value="day" {% if field.default.initial_volume_timespan == "day" %}selected{% endif %}>Daily</option>
                 <option value="month" {% if field.default.initial_volume_timespan == "month" %}selected{% endif %}>Monthly</option>
@@ -87,11 +99,13 @@
                    required
                    data-default-value="{{ field.default.net_growth_rate_in_percentage }}"
                    data-associated-unit-id="{{ field.web_id }}__net_growth_rate_timespan"
+                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
             >
             <select class="input-group-text"
                     name="{{ field.web_id }}__net_growth_rate_timespan"
                     id="{{ field.web_id }}__net_growth_rate_timespan"
                     data-default-value="{{ field.default.net_growth_rate_timespan }}"
+                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
             >
                 <option value="month" {% if field.default.net_growth_rate_timespan == "month" %}selected{% endif %}>Monthly</option>
                 <option value="year" {% if field.default.net_growth_rate_timespan == "year" %}selected{% endif %}>Yearly</option>
@@ -105,4 +119,5 @@
         enableTime: false,
         dateFormat: "Y-m-d"
     });
+    openOrCloseTimeseriesChartAndTriggerUpdate();
 </script>

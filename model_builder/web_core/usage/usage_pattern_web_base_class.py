@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
     attr_name_in_system = "value to override in subclass"
+    object_type_in_volume = "value to override in subclass"
 
     @property
     def links_to(self):
@@ -24,6 +25,18 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     @property
     def template_name(self):
         return "usage_pattern"
+
+    @classmethod
+    def get_htmx_form_config(cls, context_data: dict) -> dict:
+        return {"hx_target": "#up-list", "hx_swap": "beforeend"}
+
+    @classmethod
+    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+        if len(getattr(model_web, cls.object_type_in_volume + "s")) == 0:
+            raise PermissionError(
+                f"You need to have created at least one {cls.object_type_in_volume.replace("_", " ")} "
+                f"to create a usage pattern.")
+        return super().generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
 
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):

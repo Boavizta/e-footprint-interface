@@ -1,11 +1,9 @@
-default.<div class="mb-3">
-    {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
-
+<div class="mb-3" id="{{ field.web_id }}">
     <div class="input-group">
         <input type="number"
                class="form-control input_with_add_on"
-               name="{{ field.web_id }}"
-               id="{{ field.web_id }}"
+               name="{{ field.web_id }}__constant_value"
+               id="{{ field.web_id }}__constant_value"
                value="{{ field.default.constant_value }}"
                step="0.1"
                placeholder="Input a constant value"
@@ -13,7 +11,13 @@ default.<div class="mb-3">
                required
                data-default-value="{{ field.default.constant_value }}"
         >
-        <span class="input-group-text" id="basic-addon3">{{ field.constant_unit }}</span>
+        <input
+            class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
+            name="{{ field.web_id }}__constant_unit"
+            id="{{ field.web_id }}__constant_unit"
+            value="{{ field.default.constant_unit }}"
+            readonly
+        >
     </div>
 
     <small class="form-text text-muted">

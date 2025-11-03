@@ -105,24 +105,21 @@ describe("Test - Forms panel", () => {
         cy.visit("/model_builder/");
         cy.get("#add_usage_pattern").should("exist").click();
         cy.get("#sidePanelForm").should("be.visible");
-        cy.get("#modeling_duration_value").should("be.visible").should("be.enabled").clear().type("2");
-        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: e-footprint hypothesis");
-        cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
-        cy.get("#initial_volume").should('be.visible').type("1000");
+        cy.get("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").should("be.visible").should("be.enabled").clear().type("2");
+        cy.get("#source-UsagePattern_hourly_usage_journey_starts").should("contain.text","Source: user data");
+        cy.get("#UsagePattern_hourly_usage_journey_starts__initial_volume").should('be.visible').type("1000");
         cy.get("#btn-submit-form").should("be.visible").click();
         cy.get("#sidePanelForm").should("not.exist");
         cy.contains("div", "Usage pattern 1").find("button[id^='button']").should("exist").click();
         cy.get("#sidePanelForm").should("be.visible");
-        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: e-footprint hypothesis");
-        cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
-        cy.get("#net_growth_rate_in_percentage").clear().type("5");
-        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: user data");
+        cy.get("#source-UsagePattern_hourly_usage_journey_starts").should("contain.text","Source: user data");
+        cy.get("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").clear().type("5");
+        cy.get("#source-UsagePattern_hourly_usage_journey_starts").should("contain.text","Source: user data");
         cy.get("#btn-submit-form").should("be.visible").click();
         cy.get("#sidePanelForm").should("not.exist");
         cy.contains("div", "Usage pattern 1").find("button[id^='button']").should("exist").click();
         cy.get("#sidePanelForm").should("be.visible");
-        cy.get("#source-net_growth_rate_in_percentage").should("contain.text","Source: user data");
-        cy.get("#source-modeling_duration_value").should("contain.text","Source: user data");
+        cy.get("#source-UsagePattern_hourly_usage_journey_starts").should("contain.text","Source: user data");
     });
 
     it("Check if user is warned before close side panel without save current modifications", () => {

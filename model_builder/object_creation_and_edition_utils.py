@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from copy import copy, deepcopy
 from inspect import _empty as empty_annotation
 from typing import List, get_origin, get_args, TYPE_CHECKING
 
@@ -9,8 +9,6 @@ from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_timezone import ExplainableTimezone
-from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
-from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, Sources, SourceObject
@@ -19,6 +17,7 @@ from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.class_structure import get_corresponding_web_class
 
 if TYPE_CHECKING:
     from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
@@ -29,7 +28,10 @@ def create_efootprint_obj_from_post_data(
     create_form_data: QueryDict, model_web: "ModelWeb", object_type: str) -> ModelingObject:
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
     init_sig_params = get_init_signature_params(new_efootprint_obj_class)
-    default_values = new_efootprint_obj_class.default_values
+    corresponding_web_class = get_corresponding_web_class(new_efootprint_obj_class)
+    default_values = deepcopy(new_efootprint_obj_class.default_values)
+    for default_web_attr in corresponding_web_class.default_values:
+        default_values[default_web_attr] = copy(corresponding_web_class.default_values[default_web_attr])
 
     obj_creation_kwargs = {}
     treated_form_inputs = []
@@ -76,15 +78,21 @@ def create_efootprint_obj_from_post_data(
             obj_creation_kwargs[attr_name] = SourceValue(
                 float(create_form_data[attr_name_with_prefix]) * u(unit), source)
         elif issubclass(annotation, ExplainableObject) and not form_inputs:
-            if create_form_data[attr_name_with_prefix] != default_values.get(attr_name).value:
+            if create_form_data[attr_name_with_prefix] != default_values.get(attr_name):
                 source = Sources.USER_DATA
             else :
                 source = default_values.get(attr_name).source
             obj_creation_kwargs[attr_name] = SourceObject(
                 create_form_data[attr_name_with_prefix], source=source)
         elif form_inputs:
-            form_inputs["label"] = f"{attr_name} in {create_form_data[f"{object_type}_name"]}"
-            obj_creation_kwargs[attr_name] = ExplainableObject.from_json_dict(form_inputs)
+            if hasattr(default_values, attr_name) and form_inputs != default_values.get(attr_name).form_inputs:
+                source = Sources.USER_DATA
+            else:
+                source = default_values.get(attr_name).source
+            json_dict = {"form_inputs": form_inputs,
+                         "label": f"{attr_name} in {create_form_data[f"{object_type}_name"]}",
+                         "source": {"name": source.name, "link": source.link} if source else None}
+            obj_creation_kwargs[attr_name] = ExplainableObject.from_json_dict(json_dict)
         elif issubclass(annotation, ModelingObject):
             new_mod_obj_id = create_form_data[attr_name_with_prefix]
             mod_obj_attribute_object_type_str = annotation.__name__
@@ -204,9 +212,11 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
                     edit_form_data[attr_name_with_prefix], label=current_value.label, source=Sources.USER_DATA)
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
         elif form_inputs:
-            form_inputs["label"] = current_value.label if hasattr(current_value, 'label') \
+            label = current_value.label if hasattr(current_value, 'label') \
                 else f"{attr_name} in {obj_to_edit.name}"
-            new_value = ExplainableObject.from_json_dict(form_inputs)
+            json_dict = {"form_inputs": form_inputs, "label": label,
+                         "source": {"name": "user data", "link": None}}
+            new_value = ExplainableObject.from_json_dict(json_dict)
             if new_value != current_value:
                 attr_name_new_value_check_input_validity_pairs.append([attr_name, new_value, False])
 

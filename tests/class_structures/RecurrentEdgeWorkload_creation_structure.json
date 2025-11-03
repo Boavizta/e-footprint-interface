@@ -10,18 +10,18 @@
                 "options": [
                     {
                         "label": "Recurrent edge workload",
-                        "value": "RecurrentEdgeWorkloadFromForm"
+                        "value": "RecurrentEdgeWorkload"
                     }
                 ]
             }
         ]
     },
     {
-        "category": "RecurrentEdgeWorkloadFromForm",
+        "category": "RecurrentEdgeWorkload",
         "header": "Recurrent edge workload creation",
         "fields": [
             {
-                "web_id": "RecurrentEdgeWorkloadFromForm_name",
+                "web_id": "RecurrentEdgeWorkload_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -29,19 +29,19 @@
                 "default": "Recurrent edge workload 1"
             },
             {
-                "web_id": "RecurrentEdgeWorkloadFromForm_constant_workload",
-                "attr_name": "constant_workload",
-                "label": "constant workload",
+                "web_id": "RecurrentEdgeWorkload_recurrent_workload",
+                "attr_name": "recurrent_workload",
+                "label": "recurrent workload",
                 "tooltip": false,
-                "default": 1,
+                "default": {
+                    "constant_value": 1,
+                    "constant_unit": "concurrent"
+                },
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
-                "unit": "",
-                "can_be_negative": false,
-                "step": 0.1
+                "input_type": "recurrent_quantities_from_constant"
             }
         ],
         "advanced_fields": []

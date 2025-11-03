@@ -8,7 +8,7 @@
                     <h5><b>Usage patterns</b></h5>
                     <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
                             id="add_usage_pattern"
-                                hx-get="/model_builder/open-create-object-panel/UsagePatternFromForm/"
+                                hx-get="/model_builder/open-create-object-panel/UsagePattern/"
                                 hx-target="#sidePanel"
                                 hx-trigger="click"
                                 hx-swap="innerHTML"
@@ -20,7 +20,7 @@
                     </button>
                     <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
                             id="add_edge_usage_pattern"
-                                hx-get="/model_builder/open-create-object-panel/EdgeUsagePatternFromForm/"
+                                hx-get="/model_builder/open-create-object-panel/EdgeUsagePattern/"
                                 hx-target="#sidePanel"
                                 hx-trigger="click"
                                 hx-swap="innerHTML"
@@ -176,7 +176,7 @@
     </svg>
 </button>
 
-{% include 'model_builder/side_panels/usage_pattern/timeseries_chart.html' %}
+{% include 'model_builder/side_panels/timeseries_chart.html' %}
 <div id="chart-calculated-attribute" class="chart-calculated-attribute text-start shadow-custom z-3 d-none d-flex
 flex-column align-items-start overflow-y-auto overflow-x-hidden"></div>
 

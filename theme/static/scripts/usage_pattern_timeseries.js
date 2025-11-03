@@ -52,10 +52,11 @@ let timeSeriesChartJSOptions = {
 function openOrCloseTimeseriesChartAndTriggerUpdate() {
     if( window.innerWidth < 1200){return}
     let element = document.getElementById("chartTimeseries");
-    let startDate = document.getElementById("start_date").value;
-    let modelingDurationValue = document.getElementById("modeling_duration_value").value;
-    let initialUsageJourneyVolume = document.getElementById("initial_volume").value;
-    let netGrowthRateInPercentage = document.getElementById("net_growth_rate_in_percentage").value;
+    let sidePanel = document.getElementById("sidePanelContent");
+    let startDate = sidePanel.querySelector('[id$="start_date"]').value;
+    let modelingDurationValue = sidePanel.querySelector('[id$="modeling_duration_value"]').value;
+    let initialUsageJourneyVolume = sidePanel.querySelector('[id$="initial_volume"]').value;
+    let netGrowthRateInPercentage = sidePanel.querySelector('[id$="net_growth_rate_in_percentage"]').value;
     if(
         startDate !==""
         && (modelingDurationValue !== "" && modelingDurationValue > 0)
@@ -90,8 +91,9 @@ function closeTimeseriesChart() {
 }
 
 function applyMaxLimitOnModelingDurationValue() {
-    let inputValue = document.getElementById("modeling_duration_value");
-    let inputUnit = document.getElementById("modeling_duration_unit").value;
+    let sidePanel = document.getElementById("sidePanelContent");
+    let inputValue = sidePanel.querySelector('[id$="modeling_duration_value"]');
+    let inputUnit = sidePanel.querySelector('[id$="modeling_duration_unit"]').value;
     let currentValue = parseInt(inputValue.value);
     let maxValue = parseInt(inputValue.max);
     let errorElement = document.getElementById('modeling_duration_value_error_message');
@@ -110,16 +112,17 @@ function applyMaxLimitOnModelingDurationValue() {
 }
 
 function createOrUpdateTimeSeriesChart(){
-    let startDate = luxon.DateTime.fromISO(document.getElementById('start_date').value);
-    let modelingDurationValue = parseInt(document.getElementById('modeling_duration_value').value);
-    let modelingDurationUnit = document.getElementById('modeling_duration_unit').value;
-    let netGrowRateInPercentage = parseInt(document.getElementById('net_growth_rate_in_percentage').value);
-    let netGrowthRateTimespan = document.getElementById('net_growth_rate_timespan').value;
-    let initialUsageJourneyVolume = parseInt(document.getElementById('initial_volume').value);
-    let initialUsageJourneyVolumeTimespan = document.getElementById('initial_volume_timespan').value;
+    let sidePanel = document.getElementById("sidePanelContent");
+    let startDate = luxon.DateTime.fromISO(sidePanel.querySelector('[id$="start_date"]').value);
+    let modelingDurationValue = parseInt(sidePanel.querySelector('[id$="modeling_duration_value"]').value);
+    let modelingDurationUnit = sidePanel.querySelector('[id$="modeling_duration_unit"]').value;
+    let initialUsageJourneyVolume = parseInt(sidePanel.querySelector('[id$="initial_volume"]').value);
+    let initialUsageJourneyVolumeTimespan = sidePanel.querySelector('[id$="initial_volume_timespan"]').value;
+    let netGrowthRateInPercentage = parseInt(sidePanel.querySelector('[id$="net_growth_rate_in_percentage"]').value);
+    let netGrowthRateTimespan = sidePanel.querySelector('[id$="net_growth_rate_timespan"]').value;
 
     let dailyUsageJourneyVolume = computeUsageJourneyVolume(
-        startDate, modelingDurationValue, modelingDurationUnit, netGrowRateInPercentage, netGrowthRateTimespan,
+        startDate, modelingDurationValue, modelingDurationUnit, netGrowthRateInPercentage, netGrowthRateTimespan,
         initialUsageJourneyVolume, initialUsageJourneyVolumeTimespan);
 
     let displayGranularity = document.getElementById('display_granularity').value;
@@ -153,7 +156,7 @@ function createOrUpdateTimeSeriesChart(){
 }
 
 function computeUsageJourneyVolume(
-    startDate, modelingDurationValue, modelingDurationUnit, netGrowRateInPercentage, netGrowthRateTimespan,
+    startDate, modelingDurationValue, modelingDurationUnit, netGrowthRateInPercentage, netGrowthRateTimespan,
     initialUsageJourneyVolume, initialUsageJourneyVolumeTimespan) {
     let dailyUsageJourneyVolume = {};
 
@@ -166,7 +169,7 @@ function computeUsageJourneyVolume(
     let growthRateTimespanInDays = luxonNetGrowthRateTimespan.shiftTo('days')['days'];
     let initialUsageJourneyVolumeTimespanInDays = luxonInitialUsageJourneyVolumeTimespan.shiftTo('days')['days'];
 
-    let dailyGrowthRate = (1 + netGrowRateInPercentage/100) ** (1/growthRateTimespanInDays);
+    let dailyGrowthRate = (1 + netGrowthRateInPercentage/100) ** (1/growthRateTimespanInDays);
     let exponentialGrowthSumOverInitialUsageJourneyVolumeTimespan;
     if (dailyGrowthRate === 1) {
         exponentialGrowthSumOverInitialUsageJourneyVolumeTimespan = initialUsageJourneyVolumeTimespanInDays;

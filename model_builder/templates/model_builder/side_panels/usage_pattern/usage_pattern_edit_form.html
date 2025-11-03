@@ -1,9 +1,0 @@
-{% extends "model_builder/side_panels/edit/edit_generic_form.html" %}
-
-{% block edit_form_content %}
-    {% for field in form_fields %}
-        {%  include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
-    {% endfor %}
-    {% include "model_builder/side_panels/usage_pattern/timeseries_form.html" with usage_pattern_input_values=object_to_edit %}
-{% endblock %}
-

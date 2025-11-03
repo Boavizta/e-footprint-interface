@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import copy, deepcopy
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args, TYPE_CHECKING
 
@@ -18,6 +18,7 @@ from model_builder.efootprint_extensions.explainable_recurrent_quantities_from_c
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
+    from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 
 def generate_object_creation_structure(
@@ -52,6 +53,10 @@ def generate_object_creation_structure(
         default_values["name"] = (
             f"{available_efootprint_class_label} "
             f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
+        corresponding_web_class = get_corresponding_web_class(efootprint_class)
+        for default_web_attr in corresponding_web_class.default_values:
+            default_values[default_web_attr] = copy(corresponding_web_class.default_values[default_web_attr])
+
         class_fields, class_fields_advanced, dynamic_lists = generate_dynamic_form(
             available_efootprint_class_str, default_values, model_web)
 
@@ -80,13 +85,8 @@ def generate_object_creation_context(
     return context_data
 
 
-def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb"):
+def get_corresponding_web_class(efootprint_class: ModelingObject) -> "ModelingObjectWeb":
     from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
-    structure_fields = []
-    structure_fields_advanced = []
-    dynamic_lists = []
-    efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
     if efootprint_class.__name__ in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING:
         corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[efootprint_class.__name__]
     else:
@@ -96,17 +96,26 @@ def generate_dynamic_form(
                 corresponding_canonical_class = canonical_class
                 break
         if corresponding_canonical_class is None:
-            raise ValueError(f"No corresponding canonical class found for {efootprint_class_str}.")
+            raise ValueError(f"No corresponding canonical class found for {efootprint_class.__name__}.")
         corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[corresponding_canonical_class.__name__]
 
-    default_values.update(deepcopy(corresponding_web_class.default_values))
+    return corresponding_web_class
+
+
+def generate_dynamic_form(
+    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb"):
+    structure_fields = []
+    structure_fields_advanced = []
+    dynamic_lists = []
+    efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
+
     list_values = efootprint_class.list_values
     conditional_list_values = efootprint_class.conditional_list_values
     id_prefix = efootprint_class_str
     init_sig_params = get_init_signature_params(efootprint_class)
 
     attributes_that_can_have_negative_values = efootprint_class.attributes_that_can_have_negative_values()
-
+    corresponding_web_class = get_corresponding_web_class(efootprint_class)
     for attr_name in init_sig_params.keys():
         if attr_name in corresponding_web_class.attributes_to_skip_in_forms + ["self"]:
             continue
@@ -172,7 +181,7 @@ def generate_dynamic_form(
         else:
             default = default_values[attr_name]
             source_json = {"name":default.source.name, "link":default.source.link} if default.source else None
-            structure_field.update({"default": default.value, "source": source_json})
+            structure_field.update({"source": source_json})
             if issubclass(annotation, ExplainableQuantity):
                 default_value = float(round(default.magnitude, 2))
                 step = FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
@@ -210,6 +219,7 @@ def generate_dynamic_form(
                     # Read-only: base efootprint class
                     structure_field.update({"input_type": "recurrent_timeseries_input", "default": str(default)})
             elif issubclass(annotation, ExplainableObject):
+                structure_field.update({"default": default.value})
                 if attr_name in list_values.keys():
                     structure_field.update({
                         "input_type": "select_str_input",

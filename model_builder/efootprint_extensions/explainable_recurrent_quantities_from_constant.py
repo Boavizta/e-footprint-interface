@@ -1,11 +1,13 @@
+from copy import deepcopy, copy
+
 import numpy as np
 from pint import Quantity
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source, ExplainableObject
-from efootprint.constants.units import get_unit
 
 
-@ExplainableObject.register_subclass(lambda d: "constant_value" in d and "constant_unit" in d)
+@ExplainableObject.register_subclass(lambda d: "form_inputs" in d and "constant_value" in d["form_inputs"]
+                                               and "constant_unit" in d["form_inputs"])
 class ExplainableRecurrentQuantitiesFromConstant(ExplainableRecurrentQuantities):
     """
     ExplainableRecurrentQuantities generated from a single constant value repeated 168 times.
@@ -17,12 +19,10 @@ class ExplainableRecurrentQuantitiesFromConstant(ExplainableRecurrentQuantities)
     @classmethod
     def from_json_dict(cls, d):
         source = Source.from_json_dict(d.get("source")) if d.get("source") else None
-        constant_value = d["constant_value"]
-        constant_unit = get_unit(d["constant_unit"])
 
-        return cls(form_inputs=d)
+        return cls(form_inputs=d["form_inputs"], label=d["label"], source=source)
 
-    def __init__(self, form_inputs: dict, label: str = None,
+    def __init__(self, form_inputs: dict, label: str = "no label",
                  left_parent=None, right_parent=None, operator: str = None, source: Source = None):
         """
         Initialize with a constant value that will be repeated 168 times.
@@ -35,8 +35,7 @@ class ExplainableRecurrentQuantitiesFromConstant(ExplainableRecurrentQuantities)
             - source: Optional source information
         """
         self.form_inputs = form_inputs
-        source = source or (Source.from_json_dict(form_inputs.get("source")) if form_inputs.get("source") else None)
-        label = label or form_inputs.get("label", "no label")
+
         # Don't compute value yet - will be computed lazily
         # Initialize parent with empty dict value, will be computed in property
         super().__init__(
@@ -52,9 +51,13 @@ class ExplainableRecurrentQuantitiesFromConstant(ExplainableRecurrentQuantities)
 
     def to_json(self, save_calculated_attributes=False):
         """Save constant value to JSON (no need to save recurring_values since constant is already compressed)."""
-        output_dict = self.form_inputs
+        output_dict = {"form_inputs": self.form_inputs}
 
         # Add parent class metadata (label, source, etc.)
         output_dict.update(super(ExplainableRecurrentQuantities, self).to_json(save_calculated_attributes))
 
         return output_dict
+
+    def __copy__(self):
+        return ExplainableRecurrentQuantitiesFromConstant(
+            form_inputs=deepcopy(self.form_inputs), label=copy(self.label), source=copy(self.source))

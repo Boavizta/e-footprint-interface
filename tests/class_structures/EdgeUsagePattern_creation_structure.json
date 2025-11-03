@@ -10,18 +10,18 @@
                 "options": [
                     {
                         "label": "Edge usage pattern",
-                        "value": "EdgeUsagePatternFromForm"
+                        "value": "EdgeUsagePattern"
                     }
                 ]
             }
         ]
     },
     {
-        "category": "EdgeUsagePatternFromForm",
+        "category": "EdgeUsagePattern",
         "header": "Edge usage pattern creation",
         "fields": [
             {
-                "web_id": "EdgeUsagePatternFromForm_name",
+                "web_id": "EdgeUsagePattern_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
@@ -29,7 +29,7 @@
                 "default": "Edge usage pattern 1"
             },
             {
-                "web_id": "EdgeUsagePatternFromForm_edge_usage_journey",
+                "web_id": "EdgeUsagePattern_edge_usage_journey",
                 "attr_name": "edge_usage_journey",
                 "label": "edge usage journey",
                 "tooltip": false,
@@ -47,7 +47,7 @@
                 ]
             },
             {
-                "web_id": "EdgeUsagePatternFromForm_country",
+                "web_id": "EdgeUsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
                 "tooltip": false,
@@ -63,6 +63,26 @@
                         "value": "efootprint_id2"
                     }
                 ]
+            },
+            {
+                "web_id": "EdgeUsagePattern_hourly_edge_usage_journey_starts",
+                "attr_name": "hourly_edge_usage_journey_starts",
+                "label": "hourly edge usage journey starts",
+                "tooltip": false,
+                "source": {
+                    "name": "user data",
+                    "link": null
+                },
+                "input_type": "hourly_quantities_from_growth",
+                "default": {
+                    "start_date": "2025-01-01",
+                    "modeling_duration_value": 3,
+                    "modeling_duration_unit": "year",
+                    "net_growth_rate_in_percentage": 10,
+                    "net_growth_rate_timespan": "year",
+                    "initial_volume": null,
+                    "initial_volume_timespan": "month"
+                }
             }
         ],
         "advanced_fields": []

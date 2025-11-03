@@ -66,14 +66,17 @@ class TestVersionUpgradeHandlers(unittest.TestCase):
                     "name": "Test Usage Pattern",
                     "id": "uuid-test-pattern",
                     "hourly_usage_journey_starts": {
-                        "start_date": "2026-01-01",
-                        "modeling_duration_value": 3.0,
-                        "modeling_duration_unit": "year",
-                        "initial_volume": 3000.0,
-                        "initial_volume_timespan": "year",
-                        "net_growth_rate_in_percentage": 10.0,
-                        "net_growth_rate_timespan": "year",
-                        "label": "hourly_usage_journey_starts in Test Usage Pattern"
+                        "form_inputs": {
+                            "start_date": "2026-01-01",
+                            "modeling_duration_value": 3.0,
+                            "modeling_duration_unit": "year",
+                            "initial_volume": 3000.0,
+                            "initial_volume_timespan": "year",
+                            "net_growth_rate_in_percentage": 10.0,
+                            "net_growth_rate_timespan": "year",
+                        },
+                        "label": "hourly_usage_journey_starts in Test Usage Pattern",
+                        "source": {"name": "user data", "link": None}
                     },
                     "usage_journey": "uuid-journey",
                     "devices": ["uuid-device"],
@@ -146,14 +149,17 @@ class TestVersionUpgradeHandlers(unittest.TestCase):
                     "name": "Test Edge Usage Pattern",
                     "id": "uuid-edge-pattern",
                     "hourly_edge_usage_journey_starts": {
-                        "start_date": "2025-06-01",
-                        "modeling_duration_value": 6.0,
-                        "modeling_duration_unit": "month",
-                        "initial_volume": 5000.0,
-                        "initial_volume_timespan": "month",
-                        "net_growth_rate_in_percentage": 5.0,
-                        "net_growth_rate_timespan": "month",
-                        "label": "hourly_edge_usage_journey_starts in Test Edge Usage Pattern"
+                        "form_inputs": {
+                            "start_date": "2025-06-01",
+                            "modeling_duration_value": 6.0,
+                            "modeling_duration_unit": "month",
+                            "initial_volume": 5000.0,
+                            "initial_volume_timespan": "month",
+                            "net_growth_rate_in_percentage": 5.0,
+                            "net_growth_rate_timespan": "month",
+                        },
+                        "label": "hourly_edge_usage_journey_starts in Test Edge Usage Pattern",
+                        "source": {"name": "user data", "link": None}
                     },
                     "edge_usage_journey": "uuid-edge-journey"
                 }
@@ -203,19 +209,28 @@ class TestVersionUpgradeHandlers(unittest.TestCase):
                     "name": "Test Edge Process",
                     "id": "uuid-edge-process",
                     "recurrent_compute_needed": {
-                        "constant_value": 2.5,
-                        "constant_unit": "cpu_core",
-                        "label": "recurrent_compute_needed in Test Edge Process"
+                        "form_inputs": {
+                            "constant_value": 2.5,
+                            "constant_unit": "cpu_core",
+                        },
+                        "label": "constant compute needed",
+                        "source": {"name": "hypothesis", "link": None}
                     },
                     "recurrent_ram_needed": {
-                        "constant_value": 4.0,
-                        "constant_unit": "GB_ram",
-                        "label": "recurrent_ram_needed in Test Edge Process"
+                        "form_inputs": {
+                            "constant_value": 4.0,
+                            "constant_unit": "GB_ram",
+                        },
+                        "label": "constant ram needed",
+                        "source": {"name": "hypothesis", "link": None}
                     },
                     "recurrent_storage_needed": {
-                        "constant_value": 100.0,
-                        "constant_unit": "GB",
-                        "label": "recurrent_storage_needed in Test Edge Process"
+                        "form_inputs": {
+                            "constant_value": 100.0,
+                            "constant_unit": "GB",
+                        },
+                        "label": "constant storage needed",
+                        "source": {"name": "hypothesis", "link": None}
                     },
                     "edge_device": "uuid-edge-device"
                 }
@@ -253,9 +268,12 @@ class TestVersionUpgradeHandlers(unittest.TestCase):
                     "name": "Test Workload",
                     "id": "uuid-workload",
                     "recurrent_workload": {
-                        "constant_value": 1000.0,
-                        "constant_unit": "occurrence",
-                        "label": "recurrent_workload in Test Workload"
+                        "form_inputs": {
+                            "constant_value": 1000.0,
+                            "constant_unit": "occurrence",
+                        },
+                        "label": "constant workload",
+                        "source": {"name": "user data", "link": None},
                     },
                     "edge_device": "uuid-edge-device"
                 }

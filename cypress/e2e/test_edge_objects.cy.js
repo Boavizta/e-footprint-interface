@@ -163,9 +163,9 @@ describe('Test edge objects', () => {
         // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
         // The type selection is hidden when there's only one option, so we don't need to select it
         cy.get('#RecurrentEdgeProcess_name').type(recurrentProcess1Name);
-        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(compute1);
-        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(ram1);
-        cy.get('#RecurrentEdgeProcess_constant_storage_needed').clear().type(storage1);
+        cy.get('#RecurrentEdgeProcess_recurrent_compute_needed__constant_value').clear().type(compute1);
+        cy.get('#RecurrentEdgeProcess_recurrent_ram_needed__constant_value').clear().type(ram1);
+        cy.get('#RecurrentEdgeProcess_recurrent_storage_needed__constant_value').clear().type(storage1);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
@@ -181,9 +181,9 @@ describe('Test edge objects', () => {
         // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
         // The type selection is hidden when there's only one option, so we don't need to select it
         cy.get('#RecurrentEdgeProcess_name').type(recurrentProcess2Name);
-        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(compute2);
-        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(ram2);
-        cy.get('#RecurrentEdgeProcess_constant_storage_needed').clear().type(storage2);
+        cy.get('#RecurrentEdgeProcess_recurrent_compute_needed__constant_value').clear().type(compute2);
+        cy.get('#RecurrentEdgeProcess_recurrent_ram_needed__constant_value').clear().type(ram2);
+        cy.get('#RecurrentEdgeProcess_recurrent_storage_needed__constant_value').clear().type(storage2);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
@@ -206,13 +206,13 @@ describe('Test edge objects', () => {
         // First expand the edge function card to reveal the recurrent edge process button
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
         cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcess1Name).click();
-        cy.get('#RecurrentEdgeProcess_constant_compute_needed').should('have.value', compute1);
-        cy.get('#RecurrentEdgeProcess_constant_ram_needed').should('have.value', ram1);
-        cy.get('#RecurrentEdgeProcess_constant_storage_needed').should('have.value', storage1);
+        cy.get('#RecurrentEdgeProcess_recurrent_compute_needed__constant_value').should('have.value', compute1);
+        cy.get('#RecurrentEdgeProcess_recurrent_ram_needed__constant_value').should('have.value', ram1);
+        cy.get('#RecurrentEdgeProcess_recurrent_storage_needed__constant_value').should('have.value', storage1);
 
         // Make edits
-        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(updatedCompute1);
-        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(updatedRam1);
+        cy.get('#RecurrentEdgeProcess_recurrent_compute_needed__constant_value').clear().type(updatedCompute1);
+        cy.get('#RecurrentEdgeProcess_recurrent_ram_needed__constant_value').clear().type(updatedRam1);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 
@@ -220,9 +220,9 @@ describe('Test edge objects', () => {
         // Expand the edge function card again to access the recurrent edge process
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
         cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeProcess", recurrentProcess1Name).click();
-        cy.get('#RecurrentEdgeProcess_constant_compute_needed').should('have.value', updatedCompute1);
-        cy.get('#RecurrentEdgeProcess_constant_ram_needed').should('have.value', updatedRam1);
-        cy.get('#RecurrentEdgeProcess_constant_storage_needed').should('have.value', storage1);
+        cy.get('#RecurrentEdgeProcess_recurrent_compute_needed__constant_value').should('have.value', updatedCompute1);
+        cy.get('#RecurrentEdgeProcess_recurrent_ram_needed__constant_value').should('have.value', updatedRam1);
+        cy.get('#RecurrentEdgeProcess_recurrent_storage_needed__constant_value').should('have.value', storage1);
     });
 
     it('Create multiple edge usage journeys with edge functions and verify they can share edge devices', () => {
@@ -364,9 +364,9 @@ describe('Test edge objects', () => {
         // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
         // The type selection is hidden when there's only one option, so we don't need to select it
         cy.get('#RecurrentEdgeProcess_name').type(recurrentProcessName);
-        cy.get('#RecurrentEdgeProcess_constant_compute_needed').clear().type(processCompute);
-        cy.get('#RecurrentEdgeProcess_constant_ram_needed').clear().type(processRam);
-        cy.get('#RecurrentEdgeProcess_constant_storage_needed').clear().type(processStorage);
+        cy.get('#RecurrentEdgeProcess_recurrent_compute_needed__constant_value').clear().type(processCompute);
+        cy.get('#RecurrentEdgeProcess_recurrent_ram_needed__constant_value').clear().type(processRam);
+        cy.get('#RecurrentEdgeProcess_recurrent_storage_needed__constant_value').clear().type(processStorage);
         cy.get('#btn-submit-form').click();
         cy.get('#sidePanel').should('not.contain.html');
 

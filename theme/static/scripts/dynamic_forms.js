@@ -191,6 +191,15 @@ function updateSource(inputId) {
     }
 
     let sourceDiv = document.getElementById("source-" + input.id);
+    if (input.dataset.staticSource) {
+        if(input.dataset.sourceUrl && input.dataset.sourceUrl !== '' && input.dataset.sourceUrl !== 'None'){
+            sourceDiv.innerHTML = `Source: <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
+        }else{
+            sourceDiv.innerHTML = `Source: ${input.dataset.defaultName}`
+        }
+        return;
+    }
+
     if(input.dataset.defaultValue === '' && input.value === ''){
         sourceDiv.innerHTML = "";
         return;

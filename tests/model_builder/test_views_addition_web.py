@@ -57,8 +57,8 @@ class TestViewsAdditionWeb(TestModelingBase):
 
         self.assert_response_ok(response)
         self.assertEqual(
-            edit_request.session["system_data"]["UsagePattern"][up_id]["hourly_usage_journey_starts"]["start_date"]
-            [:10],"2025-02-02")
+            edit_request.session["system_data"]["UsagePattern"][up_id]["hourly_usage_journey_starts"]
+            ["form_inputs"]["start_date"][:10],"2025-02-02")
 
         # Reload page
         logger.info("Reloading page")

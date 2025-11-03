@@ -105,17 +105,20 @@
                 "attr_name": "hourly_usage_journey_starts",
                 "label": "hourly number of usage journey starts",
                 "tooltip": false,
+                "source": {
+                    "name": "user data",
+                    "link": null
+                },
+                "input_type": "hourly_quantities_from_growth",
                 "default": {
                     "start_date": "2025-01-01",
                     "modeling_duration_value": 3,
                     "modeling_duration_unit": "year",
                     "net_growth_rate_in_percentage": 10,
                     "net_growth_rate_timespan": "year",
-                    "initial_volume": 10000,
+                    "initial_volume": null,
                     "initial_volume_timespan": "month"
-                },
-                "source": null,
-                "input_type": "hourly_quantities_from_growth"
+                }
             }
         ],
         "advanced_fields": []

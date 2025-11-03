@@ -32,15 +32,15 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
         cy.get('#UsagePattern_name').type(upNameOne);
 
-        cy.get('#start_date').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__start_date').click();
         cy.get('input[class="numInput cur-year"]').type('2026');
         cy.get('span[aria-label="January 1, 2026"]').click()
-        cy.get('#modeling_duration_value').click();
-        cy.get('#modeling_duration_value').invoke('val', '2').trigger('change');
-        cy.get('#net_growth_rate_in_percentage').click();
-        cy.get('#net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
-        cy.get('#net_growth_rate_timespan').select('year');
-        cy.get('#initial_volume').click().type('1000');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '2').trigger('change');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage').invoke('val', '25').trigger('change');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan').select('year');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__initial_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
 
         cy.get('#sidePanelForm').should('not.exist');
@@ -48,15 +48,15 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#UsagePattern_name').type(upNameTwo);
-        cy.get('#start_date').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__start_date').click();
         cy.get('input[class="numInput cur-year"]').should('exist').type('2027');
         cy.get('span[aria-label="January 1, 2027"]').click()
-        cy.get('#modeling_duration_value').click();
-        cy.get('#modeling_duration_value').invoke('val', '5').trigger('change');
-        cy.get('#net_growth_rate_in_percentage').click();
-        cy.get('#net_growth_rate_in_percentage').invoke('val', '15').trigger('change');
-        cy.get('#net_growth_rate_timespan').select('month');
-        cy.get('#initial_volume').click().type('1000');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '5').trigger('change');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage').invoke('val', '15').trigger('change');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan').select('month');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__initial_volume').click().type('1000');
         cy.get('#timeSeriesChart').then(($canvas) => {
             let canvas = $canvas[0]
             let ctx = canvas.getContext('2d');
@@ -95,17 +95,17 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('#sidePanel').should('be.visible');
         cy.get('#UsagePattern_name').type(upNameOne);
 
-        cy.get('#start_date').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__start_date').click();
         cy.get('span[aria-label="January 1, 2025"]').click();
-        cy.get('#modeling_duration_value').click();
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').click();
 
-        cy.get('#modeling_duration_value').invoke('val', '2').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '2').trigger('input');
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
 
 
-        cy.get('#modeling_duration_value').invoke('val', '15').trigger('input');
-        cy.get('#modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
-            cy.get('#modeling_duration_value')
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '15').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
+            cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value')
             .invoke('val')
             .then((val) => {
                 intValue = parseInt(val, 10);
@@ -115,9 +115,9 @@ describe('Tests dedicated to the timeseries generation', () => {
                 'contain.text', `Modeling duration value must be less than or equal to ${maxValue}`);
         });
 
-        cy.get('#modeling_duration_value').invoke('val', '0').trigger('input');
-        cy.get('#modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
-            cy.get('#modeling_duration_value')
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '0').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
+            cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value')
             .invoke('val')
             .then((val) => {
                 intValue = parseInt(val, 10);
@@ -127,14 +127,14 @@ describe('Tests dedicated to the timeseries generation', () => {
                 'contain.text', `Modeling duration value must be greater than 0 and can't be empty`);
         });
 
-        cy.get('#modeling_duration_unit').select('month');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_unit').select('month');
 
-        cy.get('#modeling_duration_value').invoke('val', '12').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '12').trigger('input');
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
 
-        cy.get('#modeling_duration_value').invoke('val', '150').trigger('input');
-        cy.get('#modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
-            cy.get('#modeling_duration_value')
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '150').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
+            cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value')
             .invoke('val')
             .then((val) => {
                 intValue = parseInt(val, 10);
@@ -144,9 +144,9 @@ describe('Tests dedicated to the timeseries generation', () => {
                 'contain.text', `Modeling duration value must be less than or equal to ${maxValue}`);
         });
 
-        cy.get('#modeling_duration_value').invoke('val', '0').trigger('input');
-        cy.get('#modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
-            cy.get('#modeling_duration_value')
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '0').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('attr', 'max').then((maxValue) => {
+            cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value')
             .invoke('val')
             .then((val) => {
                 intValue = parseInt(val, 10);
@@ -156,8 +156,8 @@ describe('Tests dedicated to the timeseries generation', () => {
                 'contain.text', `Modeling duration value must be greater than 0 and can't be empty`);
         });
 
-        cy.get('#modeling_duration_value').invoke('val', '24').trigger('input');
-        cy.get('#modeling_duration_value').invoke('val', '12').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '24').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '12').trigger('input');
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
     });
 
@@ -173,13 +173,13 @@ describe('Tests dedicated to the timeseries generation', () => {
         cy.get('button').contains('Add usage pattern').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#UsagePattern_name').type(upNameOne);
-        cy.get('#modeling_duration_unit').select('month');
-        cy.get('#modeling_duration_value').invoke('val', '15').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_unit').select('month');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '15').trigger('input');
         cy.get('#modeling_duration_value_error_message').should('not.contain.html');
-        cy.get('#initial_volume').click().type('1000');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__initial_volume').click().type('1000');
         cy.get('#btn-submit-form').click();
         cy.getObjectButtonFromObjectTypeAndName("UsagePattern", upNameOne).should('be.visible').click();
-        cy.get('#modeling_duration_value').invoke('val', '25').trigger('input');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__modeling_duration_value').invoke('val', '25').trigger('input');
        cy.get('#modeling_duration_value_error_message').should('not.contain.text','Modeling duration value must be' +
            ' less than or equal to 10');
     });
@@ -193,7 +193,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
 
         cy.get('button').contains('Add usage pattern').should('be.visible').click();
-        cy.get('#initial_volume').click().type('1000');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__initial_volume').click().type('1000');
 
         cy.get('@openOrCloseTimeseriesChartAndTriggerUpdate').should('have.been.called');
         cy.get('#timeSeriesChart').should('exist').should('not.contain.html');
@@ -208,7 +208,7 @@ describe('Tests dedicated to the timeseries generation', () => {
         });
 
         cy.get('button').contains('Add usage pattern').should('be.visible').click();
-        cy.get('#initial_volume').click().type('1000');
+        cy.get('#UsagePattern_hourly_usage_journey_starts__initial_volume').click().type('1000');
 
         cy.get('@openOrCloseTimeseriesChartAndTriggerUpdate').should('have.been.called');
         cy.get('#timeSeriesChart').should('exist').should('not.contain.html');
