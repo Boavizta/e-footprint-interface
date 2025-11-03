@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from django.http import QueryDict
 
 from model_builder.object_creation_and_edition_utils import edit_object_in_system
-from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceWeb
+from model_builder.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 from model_builder.web_core.hardware.hardware_utils import (generate_object_with_storage_edition_context,
                                                             add_new_object_with_storage)
 

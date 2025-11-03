@@ -1,5 +1,5 @@
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.web_core.hardware.edge_device_base_web import EdgeDeviceWeb
+from model_builder.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 
 
 class EdgeApplianceWeb(EdgeDeviceWeb):

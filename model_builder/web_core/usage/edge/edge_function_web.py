@@ -46,7 +46,7 @@ class MirroredEdgeFunctionWeb(MirroredJourneyStepBaseWeb):
     @property
     def recurrent_edge_device_needs(self):
         """Returns web-wrapped recurrent edge resource needs with mirrored context."""
-        from model_builder.web_core.usage.recurrent_edge_device_need_web import MirroredRecurrentEdgeDeviceNeedWeb
+        from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import MirroredRecurrentEdgeDeviceNeedWeb
 
         web_resource_needs = []
         for rern in self._modeling_obj.recurrent_edge_device_needs:
