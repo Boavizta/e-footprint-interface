@@ -3,7 +3,7 @@
         "label": "Server",
         "type_object_available": "Available server types"
     },
-    "EdgeDevice": {
+    "EdgeDeviceBase": {
         "label": "Edge device",
         "type_object_available": "Available edge device types"
     },

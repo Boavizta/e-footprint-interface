@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class EdgeDeviceWeb(ModelingObjectWeb):
+class EdgeDeviceBaseWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeDevice and its subclasses (EdgeComputer, EdgeAppliance)."""
     add_template = "add_edge_device.html"
     attributes_to_skip_in_forms = ["storage"]
@@ -31,7 +31,7 @@ class EdgeDeviceWeb(ModelingObjectWeb):
     @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
         return generate_object_with_storage_creation_context(
-            model_web, "EdgeDevice", [EdgeComputer, EdgeAppliance],
+            model_web, "EdgeDeviceBase", [EdgeComputer, EdgeAppliance],
             "EdgeStorage", [EdgeStorage])
 
     @classmethod

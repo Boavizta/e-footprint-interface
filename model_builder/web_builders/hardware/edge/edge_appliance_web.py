@@ -1,8 +1,8 @@
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
+from model_builder.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
 
 
-class EdgeApplianceWeb(EdgeDeviceWeb):
+class EdgeApplianceWeb(EdgeDeviceBaseWeb):
     """Web wrapper for EdgeAppliance hardware (e.g., routers, IoT gateways with workload-based power)."""
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
