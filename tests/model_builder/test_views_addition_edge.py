@@ -1,9 +1,9 @@
 import os
-from unittest.mock import patch
 
 from efootprint.logger import logger
 
 from model_builder.addition.views_addition import add_object
+from model_builder.views_deletion import delete_object
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 
@@ -129,3 +129,70 @@ class TestViewsAdditionEdge(TestModelingBase):
         self.assertEqual(edge_usage_journey["edge_functions"], [])
 
         logger.info("EdgeUsageJourney creation with empty edge_functions successful")
+
+    def test_add_edge_device_basic(self):
+        """Test basic EdgeDevice creation with component addition and removal"""
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+
+        # Step 1: Create EdgeDevice
+        edge_device_data = self.create_post_data_from_class_default_values(
+            name="Test Edge Device", efootprint_class_name="EdgeDevice")
+        add_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)
+
+        # Check initial state
+        self.assertNotIn("EdgeDevice", add_request.session["system_data"])
+
+        response = add_object(add_request, "EdgeDevice")
+
+        # Verify response and data
+        self.assert_response_ok(response)
+        self.assertIn("EdgeDevice", add_request.session["system_data"])
+        self.assertEqual(len(add_request.session["system_data"]["EdgeDevice"]), 1)
+
+        edge_device_id = self.get_object_id_from_session(add_request, "EdgeDevice")
+        edge_device_json = add_request.session["system_data"]["EdgeDevice"][edge_device_id]
+
+        self.assertEqual(edge_device_json["name"], "Test Edge Device")
+        self.assertEqual(edge_device_json["components"], [])  # Initially empty
+        logger.info("EdgeDevice created successfully")
+
+        # Step 2: Add a CPU component to the edge device
+        cpu_component_data = self.create_post_data_from_class_default_values(
+            name="Test CPU Component", efootprint_class_name="EdgeCPUComponent",
+            efootprint_id_of_parent_to_link_to=edge_device_id)
+        cpu_add_request = self.create_post_request(
+            "/add-object/EdgeCPUComponent", cpu_component_data, add_request.session["system_data"])
+
+        # Check initial component state
+        self.assertNotIn("EdgeCPUComponent", cpu_add_request.session["system_data"])
+
+        response = add_object(cpu_add_request, "EdgeCPUComponent")
+
+        # Verify CPU component creation
+        self.assert_response_ok(response)
+        self.assertIn("EdgeCPUComponent", cpu_add_request.session["system_data"])
+        self.assertEqual(len(cpu_add_request.session["system_data"]["EdgeCPUComponent"]), 1)
+
+        cpu_component_id = self.get_object_id_from_session(cpu_add_request, "EdgeCPUComponent")
+        cpu_component_json = cpu_add_request.session["system_data"]["EdgeCPUComponent"][cpu_component_id]
+
+        self.assertEqual(cpu_component_json["name"], "Test CPU Component")
+
+        # Verify the component was added to the edge device
+        updated_edge_device = cpu_add_request.session["system_data"]["EdgeDevice"][edge_device_id]
+        self.assertIn(cpu_component_id, updated_edge_device["components"])
+        logger.info("CPU component added to EdgeDevice successfully")
+
+        # Step 3: Remove the CPU component
+        delete_request = self.create_post_request(
+            f"/model_builder/delete-object/{cpu_component_id}/", {}, cpu_add_request.session["system_data"])
+        response = delete_object(delete_request, cpu_component_id)
+
+        # Verify CPU component deletion
+        self.assert_response_no_content(response)
+        self.assertNotIn("EdgeCPUComponent", delete_request.session["system_data"])
+
+        # Verify the component was removed from the edge device
+        final_edge_device = delete_request.session["system_data"]["EdgeDevice"][edge_device_id]
+        self.assertEqual(final_edge_device["components"], [])
+        logger.info("CPU component removed from EdgeDevice successfully")

@@ -418,4 +418,48 @@ describe('Test edge objects', () => {
             cy.contains(edgeFunctionName).should('not.exist');
         });
     });
+
+    it("Create EdgeDevice, add CPU component, then remove component", () => {
+        let edgeDeviceName = "Test Edge Device";
+        let cpuComponentName = "Test CPU Component";
+
+        cy.visit("/model_builder/");
+
+        // Step 1: Create EdgeDevice
+        cy.get("#btn-add-edge-device").should("be.visible").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#type_object_available").select("EdgeDevice");
+        cy.get("#EdgeDevice_name").should("be.visible").type(edgeDeviceName);
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+
+        // Verify EdgeDevice was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).should("exist");
+
+        // Step 2: Add CPU component to the EdgeDevice
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponentBase/"]').click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#type_object_available").select("EdgeCPUComponent");
+        cy.get("#EdgeCPUComponent_name").should("be.visible").type(cpuComponentName);
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+
+        // Verify CPU component was created and is visible in the EdgeDevice card
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).within(() => {
+            cy.contains(cpuComponentName).should("exist");
+        });
+
+        // Step 3: Delete the CPU component
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('.chevron-btn').click();
+        cy.getObjectButtonFromObjectTypeAndName("EdgeCPUComponent", cpuComponentName).should("be.visible").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get('button[hx-get^="/model_builder/ask-delete-object/"]').should("be.visible").click();
+        cy.get('button').contains('Yes, delete').should("be.visible").should("be.enabled").click();
+        cy.get("#model-builder-modal").should("not.exist");
+
+        // Verify CPU component was removed from the EdgeDevice card
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).within(() => {
+            cy.contains(cpuComponentName).should("not.exist");
+        });
+    });
 });

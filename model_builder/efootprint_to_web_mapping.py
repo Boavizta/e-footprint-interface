@@ -9,7 +9,9 @@ from model_builder.web_builders.hardware.edge.edge_appliance_web import EdgeAppl
 from model_builder.web_builders.hardware.edge.edge_computer_web import EdgeComputerWeb
 from model_builder.web_builders.usage.edge.recurrent_edge_process_web import RecurrentEdgeProcessWeb
 from model_builder.web_builders.usage.edge.recurrent_edge_workload_web import RecurrentEdgeWorkloadWeb
+from model_builder.web_core.hardware.edge.edge_component_base_web import EdgeComponentBaseWeb
 from model_builder.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
+from model_builder.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 from model_builder.web_core.hardware.server_web import ServerWeb
 from model_builder.web_core.hardware.storage_web import StorageWeb
 from model_builder.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
@@ -49,9 +51,14 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "Storage": StorageWeb,
     # Edge hardware classes
     "EdgeDeviceBase": EdgeDeviceBaseWeb,
+    "EdgeDevice": EdgeDeviceWeb,
     "EdgeComputer": EdgeComputerWeb,
     "EdgeAppliance": EdgeApplianceWeb,
-    "EdgeStorage": ModelingObjectWeb,
+    "EdgeComponentBase": EdgeComponentBaseWeb,
+    "EdgeCPUComponent": EdgeComponentBaseWeb,
+    "EdgeRAMComponent": EdgeComponentBaseWeb,
+    "EdgeStorage": EdgeComponentBaseWeb,
+    "EdgeWorkloadComponent": EdgeComponentBaseWeb,
     # Edge usage classes
     "EdgeUsageJourney": EdgeUsageJourneyWeb,
     "EdgeFunction": EdgeFunctionWeb,

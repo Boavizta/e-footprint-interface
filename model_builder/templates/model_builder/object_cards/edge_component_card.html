@@ -1,0 +1,18 @@
+<div id="{{ component.web_id }}">
+    <button
+    id="button-{{ component.web_id }}"
+    class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2"
+    hx-get="/model_builder/open-edit-object-panel/{{ component.efootprint_id }}/"
+    hx-target="#sidePanel"
+    hx-trigger="click"
+    hx-swap="innerHTML"
+    hx-disabled-elt="button"
+    _="
+        on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened on me
+        on mouseover remove .d-none from #edit-icon-{{ component.web_id }}
+        on mouseout add .d-none to #edit-icon-{{ component.web_id }}
+    "
+    >
+        {% include 'model_builder/components/button_card_header.html' with object_card=component %}
+    </button>
+</div>

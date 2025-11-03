@@ -7,6 +7,10 @@
         "label": "Edge device",
         "type_object_available": "Available edge device types"
     },
+    "EdgeDevice": {
+        "label": "Edge device",
+        "more_descriptive_label_for_select_inputs": "Edge device (build from components)"
+    },
     "EdgeComputer": {
         "label": "Edge computer",
         "more_descriptive_label_for_select_inputs": "Edge computer (with storage and compute resources)"
@@ -14,6 +18,22 @@
     "EdgeAppliance": {
         "label": "Edge appliance",
         "more_descriptive_label_for_select_inputs": "Edge appliance (simple workload-based device)"
+    },
+    "EdgeComponentBase": {
+        "label": "Component",
+        "type_object_available": "Available component types"
+    },
+    "EdgeCPUComponent": {
+        "label": "CPU component",
+        "more_descriptive_label_for_select_inputs": "CPU component (compute cores)"
+    },
+    "EdgeRAMComponent": {
+        "label": "RAM component",
+        "more_descriptive_label_for_select_inputs": "RAM component (memory)"
+    },
+    "EdgeWorkloadComponent": {
+        "label": "Workload component",
+        "more_descriptive_label_for_select_inputs": "Workload component (generic workload-based)"
     },
     "Job": {
         "label": "Job",

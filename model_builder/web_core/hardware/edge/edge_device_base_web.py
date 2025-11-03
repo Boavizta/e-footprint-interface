@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
+from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
@@ -31,7 +32,7 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
         return generate_object_with_storage_creation_context(
-            model_web, "EdgeDeviceBase", [EdgeComputer, EdgeAppliance],
+            model_web, "EdgeDeviceBase", [EdgeComputer, EdgeAppliance, EdgeDevice],
             "EdgeStorage", [EdgeStorage])
 
     @classmethod
