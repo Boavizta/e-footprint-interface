@@ -1,0 +1,66 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+{% load static %}
+
+{% block panel_body %}
+    <form id="sidePanelForm"
+        hx-post="/model_builder/add-object/{{ object_type }}/"
+          {% if htmx_config.hx_vals %}
+          hx-vals='{{ htmx_config.hx_vals|safe }}'
+        {% endif %}
+        {% if htmx_config.hx_target %}
+          hx-target="{{ htmx_config.hx_target }}"
+        {% endif %}
+        {% if htmx_config.hx_swap %}
+          hx-swap="{{ htmx_config.hx_swap }}"
+        {% endif %}
+        hx-disabled-elt="button"
+        hx-on::after-request="closeAndEmptySidePanel()">
+    {% include "model_builder/side_panels/add/add_form_content.html" %}
+    </form>
+
+    <div class="mb-3">
+        <button
+                    id="btn-submit-form"
+                    class="btn btn-primary rounded-pill w-100"
+                    onclick="document.getElementById('sidePanelForm').requestSubmit()"
+            >
+                Save
+        </button>
+    </div>
+
+    <script>
+        // Component units mapping from backend
+        const componentUnitsMapping = JSON.parse(
+            document.getElementById('dynamic-form-data').textContent).component_units_mapping;
+
+        // Update the recurrent_need unit field when edge_component selection changes
+        function updateRecurrentNeedUnit() {
+            const componentSelect = document.getElementById('edge_component');
+            const unitInput = document.getElementById('RecurrentEdgeComponentNeed_recurrent_need__constant_unit');
+
+            if (componentSelect && unitInput && componentUnitsMapping) {
+                const selectedComponentId = componentSelect.value;
+                const compatibleUnit = componentUnitsMapping[selectedComponentId];
+
+                if (compatibleUnit) {
+                    unitInput.value = compatibleUnit;
+                    console.log(`Updated unit to: ${compatibleUnit} for component: ${selectedComponentId}`);
+                }
+            }
+        }
+
+        // Initial unit setup
+        document.addEventListener('DOMContentLoaded', updateRecurrentNeedUnit);
+
+        // Update unit when component selection changes
+        (function() {
+            const componentSelect = document.getElementById('edge_component');
+            if (componentSelect) {
+                componentSelect.addEventListener('change', updateRecurrentNeedUnit);
+            }
+        })();
+
+        // Trigger on dynamic form initialization
+        document.addEventListener('initDynamicForm', updateRecurrentNeedUnit);
+    </script>
+{% endblock %}

@@ -17,6 +17,7 @@ from model_builder.web_core.hardware.storage_web import StorageWeb
 from model_builder.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
 from model_builder.web_core.usage.edge.edge_usage_journey_web import EdgeUsageJourneyWeb
 from model_builder.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
+from model_builder.web_core.usage.edge.recurrent_edge_component_need_web import RecurrentEdgeComponentNeedWeb
 from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedWeb
 from model_builder.web_core.usage.job_web import JobWeb
 from model_builder.web_core.usage.edge.recurrent_edge_device_need_base_web import RecurrentEdgeDeviceNeedBaseWeb
@@ -67,6 +68,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "RecurrentEdgeProcess": RecurrentEdgeProcessWeb,
     "RecurrentEdgeWorkload": RecurrentEdgeWorkloadWeb,
     "RecurrentEdgeDeviceNeed": RecurrentEdgeDeviceNeedWeb,
+    "RecurrentEdgeComponentNeed": RecurrentEdgeComponentNeedWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):

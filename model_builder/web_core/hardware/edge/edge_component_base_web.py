@@ -48,12 +48,9 @@ class EdgeComponentBaseWeb(ModelingObjectWeb):
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
-        """HTMX configuration for component creation forms - link to parent edge device, swap beforebegin."""
-        edge_device = context_data.get("edge_device")
+        """HTMX configuration for component creation forms - link to parent edge device."""
         return {
             "hx_vals": {"efootprint_id_of_parent_to_link_to": context_data.get("efootprint_id_of_parent_to_link_to")},
-            "hx_target": f"#add-component-to-{edge_device.web_id}" if edge_device else None,
-            "hx_swap": "beforebegin"
         }
 
     def generate_ask_delete_http_response(self, request):

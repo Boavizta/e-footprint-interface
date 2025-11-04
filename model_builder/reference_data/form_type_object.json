@@ -60,6 +60,10 @@
         "label": "Recurrent edge workload",
         "type_object_available": "Recurrent edge workload"
     },
+    "RecurrentEdgeComponentNeed": {
+        "label": "Recurrent edge component need",
+        "type_object_available": "Recurrent edge component need"
+    },
     "EdgeFunction": {
         "label": "Edge function",
         "type_object_available": "Available edge functions"

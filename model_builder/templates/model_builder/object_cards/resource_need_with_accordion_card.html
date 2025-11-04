@@ -38,11 +38,9 @@
                  class="accordion-collapse collapse accordion-all {% if resource_need.recurrent_edge_component_needs|length == 0 %}show{% endif %}"
                  data-bs-parent="#{{ resource_need.web_id }}">
                 <div class="accordion-body text-start">
-                    <p class="h7">Recurrent edge component needs</p>
                     <div class="w-100 mx-0 my-0 align-items-center rounded-2 bg-white" id="{{ resource_need.web_id }}-recurrent-edge-component-needs">
                         {% for component_need in resource_need.recurrent_edge_component_needs %}
-                            {# TODO: include appropriate template for recurrent_edge_component_need #}
-                            {# {% include 'model_builder/object_cards/recurrent_edge_component_need_card.html' with component_need=component_need %} #}
+                            {% include 'model_builder/object_cards/recurrent_edge_component_need_card.html' with component_need=component_need %}
                         {% endfor %}
                         <button
                             id="add-component-need-to-{{ resource_need.web_id }}"
