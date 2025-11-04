@@ -2,10 +2,10 @@ from efootprint.constants.sources import Sources
 
 from model_builder.efootprint_extensions.explainable_recurrent_quantities_from_constant import \
     ExplainableRecurrentQuantitiesFromConstant
-from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedWeb
+from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedBaseWeb
 
 
-class RecurrentEdgeProcessWeb(RecurrentEdgeDeviceNeedWeb):
+class RecurrentEdgeProcessWeb(RecurrentEdgeDeviceNeedBaseWeb):
     default_values = {
         "recurrent_compute_needed": ExplainableRecurrentQuantitiesFromConstant(
             {"constant_value": 1, "constant_unit": "cpu_core"}, source=Sources.HYPOTHESIS

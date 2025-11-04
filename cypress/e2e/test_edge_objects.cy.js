@@ -157,7 +157,7 @@ describe('Test edge objects', () => {
         // Step 4: Add first recurrent edge process to the edge function
         // First expand the edge function card to reveal the add button
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeed/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeedBase/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeDeviceName);
         // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
@@ -175,7 +175,7 @@ describe('Test edge objects', () => {
         // Step 5: Add second recurrent edge process
         // The edge function card auto-collapses after adding the first child, so expand it again
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeed/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeedBase/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeDeviceName);
         // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected
@@ -358,7 +358,7 @@ describe('Test edge objects', () => {
         // Step 4: Add recurrent edge process to edge function
         // First expand the edge function card to reveal the add button
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeed/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeedBase/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_device').select(edgeComputerName);
         // When selecting an EdgeComputer, only RecurrentEdgeProcess is available and is auto-selected

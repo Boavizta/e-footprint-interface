@@ -40,7 +40,8 @@ obj_creation_structure_dict = {
     "Job": [Job] + SERVICE_JOB_CLASSES, "UsagePattern": [UsagePattern], "UsageJourney": [UsageJourney],
     "UsageJourneyStep": [UsageJourneyStep], "EdgeUsageJourney": [EdgeUsageJourney],
     "RecurrentEdgeProcess": [RecurrentEdgeProcess], "RecurrentEdgeWorkload": [RecurrentEdgeWorkload],
-    "EdgeDeviceBase": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePattern]}
+    "EdgeDeviceBase": [EdgeComputer, EdgeAppliance], "EdgeUsagePattern": [EdgeUsagePattern],
+}
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -153,7 +154,7 @@ class TestsClassStructure(TestCase):
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
             if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase", "JobBase",
-                                        "RecurrentEdgeDeviceNeed"]:
+                                        "RecurrentEdgeDeviceNeedBase", "EdgeComponentBase"]:
                 continue
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
             init_sig_params = get_init_signature_params(efootprint_obj_class)

@@ -18,7 +18,7 @@ from model_builder.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
 from model_builder.web_core.usage.edge.edge_usage_journey_web import EdgeUsageJourneyWeb
 from model_builder.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
 from model_builder.web_core.usage.job_web import JobWeb
-from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedWeb
+from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedBaseWeb
 from model_builder.web_core.usage.usage_journey_step_web import UsageJourneyStepWeb
 from model_builder.web_core.usage.usage_journey_web import UsageJourneyWeb
 from model_builder.web_core.usage.usage_pattern_web import UsagePatternWeb
@@ -62,7 +62,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     # Edge usage classes
     "EdgeUsageJourney": EdgeUsageJourneyWeb,
     "EdgeFunction": EdgeFunctionWeb,
-    "RecurrentEdgeDeviceNeed": RecurrentEdgeDeviceNeedWeb,
+    "RecurrentEdgeDeviceNeedBase": RecurrentEdgeDeviceNeedBaseWeb,
     "RecurrentEdgeProcess": RecurrentEdgeProcessWeb,
     "RecurrentEdgeWorkload": RecurrentEdgeWorkloadWeb,
 }

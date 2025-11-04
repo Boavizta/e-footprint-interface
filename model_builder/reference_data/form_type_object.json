@@ -48,9 +48,13 @@
         "label": "Recurrent edge process",
         "type_object_available": "Recurrent edge process"
     },
+    "RecurrentEdgeDeviceNeedBase": {
+        "label": "Recurrent edge device need",
+        "type_object_available": "Available recurrent edge device need types"
+    },
     "RecurrentEdgeDeviceNeed": {
-        "label": "Recurrent edge resource need",
-        "type_object_available": "Available recurrent edge resource need types"
+        "label": "Custom recurrent edge device need",
+        "type_object_available": "Available custom recurrent edge device need types"
     },
     "RecurrentEdgeWorkload": {
         "label": "Recurrent edge workload",

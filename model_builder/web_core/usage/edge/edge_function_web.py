@@ -19,7 +19,7 @@ class MirroredEdgeFunctionWeb(MirroredJourneyStepBaseWeb):
 
     @property
     def child_object_type_str(self):
-        return "RecurrentEdgeDeviceNeed"
+        return "RecurrentEdgeDeviceNeedBase"
 
     @property
     def child_template_name(self):

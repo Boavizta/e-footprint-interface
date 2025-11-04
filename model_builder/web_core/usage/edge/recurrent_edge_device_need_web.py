@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class RecurrentEdgeDeviceNeedWeb(ResourceNeedBaseWeb):
+class RecurrentEdgeDeviceNeedBaseWeb(ResourceNeedBaseWeb):
     """Web wrapper for RecurrentEdgeDeviceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
     attributes_to_skip_in_forms = ["edge_device"]
 
@@ -39,8 +39,10 @@ class RecurrentEdgeDeviceNeedWeb(ResourceNeedBaseWeb):
         # RecurrentEdgeProcess works with EdgeComputer, RecurrentEdgeWorkload works with EdgeAppliance
         available_resource_need_classes = [RecurrentEdgeProcess, RecurrentEdgeWorkload]
 
+        base_object_type = "RecurrentEdgeDeviceNeedBase"
+
         form_sections, dynamic_form_data = generate_object_creation_structure(
-            "RecurrentEdgeDeviceNeed",
+            base_object_type,
             available_efootprint_classes=available_resource_need_classes,
             model_web=model_web,
         )
@@ -88,9 +90,9 @@ class RecurrentEdgeDeviceNeedWeb(ResourceNeedBaseWeb):
         context_data = {
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
-            "object_type": "RecurrentEdgeDeviceNeed",
-            "obj_formatting_data": FORM_TYPE_OBJECT["RecurrentEdgeDeviceNeed"],
-            "header_name": "Add new " + FORM_TYPE_OBJECT["RecurrentEdgeDeviceNeed"]["label"].lower()
+            "object_type": base_object_type,
+            "obj_formatting_data": FORM_TYPE_OBJECT[base_object_type],
+            "header_name": "Add new " + FORM_TYPE_OBJECT[base_object_type]["label"].lower()
         }
 
         return context_data
