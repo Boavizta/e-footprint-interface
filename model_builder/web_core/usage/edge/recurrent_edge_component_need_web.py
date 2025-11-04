@@ -16,6 +16,7 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
     """Web wrapper for RecurrentEdgeComponentNeed."""
     attributes_to_skip_in_forms = ["edge_component"]
     add_template = "add_recurrent_edge_component_need.html"
+    edit_template = "edit_recurrent_edge_component_need.html"
     default_values = {
         "recurrent_need": ExplainableRecurrentQuantitiesFromConstant(
             form_inputs={"constant_value": 1.0, "constant_unit": "concurrent"},
