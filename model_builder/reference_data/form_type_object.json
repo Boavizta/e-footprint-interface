@@ -35,6 +35,10 @@
         "label": "Workload component",
         "more_descriptive_label_for_select_inputs": "Workload component (generic workload-based)"
     },
+    "EdgeApplianceComponent": {
+        "label": "Edge appliance component",
+        "more_descriptive_label_for_select_inputs": "Edge appliance component (generic workload-based)"
+    },
     "Job": {
         "label": "Job",
         "type_object_available": "Available job types",

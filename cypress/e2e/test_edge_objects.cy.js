@@ -419,6 +419,189 @@ describe('Test edge objects', () => {
         });
     });
 
+    it("Create EdgeDevice with CPU and RAM components, add RecurrentEdgeDeviceNeed with component needs", () => {
+        let edgeDeviceName = "Test Edge Device with Components";
+        let cpuComponentName = "Test CPU Component";
+        let ramComponentName = "Test RAM Component";
+        let edgeUsageJourneyName = "Test Edge Usage Journey";
+        let edgeFunctionName = "Test Edge Function";
+        let recurrentEdgeDeviceNeedName = "Test Recurrent Edge Device Need";
+        let cpuComponentNeedName = "CPU Need";
+        let ramComponentNeedName = "RAM Need";
+        let cpuNeedValue = "2.0";
+        let ramNeedValue = "4.0";
+        let updatedCpuNeedValue = "3.0";
+
+        cy.visit("/model_builder/");
+
+        // Step 1: Create EdgeDevice
+        cy.get("#btn-add-edge-device").should("be.visible").click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#type_object_available").select("EdgeDevice");
+        cy.get("#EdgeDevice_name").should("be.visible").type(edgeDeviceName);
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+
+        // Verify EdgeDevice was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).should("exist");
+
+        // Step 2: Add CPU component to the EdgeDevice
+        // First expand the EdgeDevice accordion to reveal the add button
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('.chevron-btn').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponentBase/"]').click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#type_object_available").select("EdgeCPUComponent");
+        cy.get("#EdgeCPUComponent_name").should("be.visible").type(cpuComponentName);
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+
+        // Verify CPU component was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).within(() => {
+            cy.contains(cpuComponentName).should("exist");
+        });
+
+        // Step 3: Add RAM component to the EdgeDevice
+        // The accordion auto-collapses after adding the first component, so expand it again
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('.chevron-btn').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponentBase/"]').click();
+        cy.get("#sidePanelForm").should("be.visible");
+        cy.get("#type_object_available").select("EdgeRAMComponent");
+        cy.get("#EdgeRAMComponent_name").should("be.visible").type(ramComponentName);
+        cy.get("#btn-submit-form").should("be.visible").click();
+        cy.get("#sidePanelForm").should("not.exist");
+
+        // Verify RAM component was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).within(() => {
+            cy.contains(ramComponentName).should("exist");
+        });
+
+        // Step 4: Create EdgeUsageJourney
+        cy.get('#btn-add-edge-usage-journey').click();
+        cy.get('#sidePanel').contains('div', 'Add new edge usage journey').should('exist');
+        cy.get('#EdgeUsageJourney_name').type(edgeUsageJourneyName);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify edge usage journey was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", edgeUsageJourneyName).should('exist');
+
+        // Step 5: Add EdgeFunction to the edge usage journey
+        cy.getObjectCardFromObjectTypeAndName("EdgeUsageJourney", edgeUsageJourneyName).find('div[id^="add-step-to"]').click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#EdgeFunction_name').type(edgeFunctionName);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify edge function was created
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).should('exist');
+
+        // Step 6: Add RecurrentEdgeDeviceNeed to the edge function
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('.chevron-btn').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeDeviceNeedBase/"]').click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#edge_device').select(edgeDeviceName);
+        // When selecting an EdgeDevice (not EdgeComputer/EdgeAppliance), only RecurrentEdgeDeviceNeed is available and is auto-selected
+        // The type selection is hidden when there's only one option, so we don't need to select it
+        cy.get('#RecurrentEdgeDeviceNeed_name').type(recurrentEdgeDeviceNeedName);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify RecurrentEdgeDeviceNeed was created
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).should('exist');
+
+        // Step 7: Add RecurrentEdgeComponentNeed for CPU
+        // First expand the EdgeFunction accordion to reveal the RecurrentEdgeDeviceNeed
+        // Use specific selector to get only the top-level chevron button (not nested children's chevrons)
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"]').click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#edge_component').select(cpuComponentName);
+        cy.get('#RecurrentEdgeComponentNeed_name').type(cpuComponentNeedName);
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_value').clear().type(cpuNeedValue);
+        // Verify the unit was automatically set to cpu_core
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_unit').should('have.value', 'cpu_core');
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify CPU component need was created
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).within(() => {
+            cy.contains(cpuComponentNeedName).should('exist');
+        });
+
+        // Step 8: Add RecurrentEdgeComponentNeed for RAM
+        // The accordion auto-collapses after adding the first component need, so expand EdgeFunction and RecurrentEdgeDeviceNeed again
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"]').click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#edge_component').select(ramComponentName);
+        cy.get('#RecurrentEdgeComponentNeed_name').type(ramComponentNeedName);
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_value').clear().type(ramNeedValue);
+        // Verify the unit was automatically set to GB_ram
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_unit').should('have.value', 'GB_ram');
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify RAM component need was created
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).within(() => {
+            cy.contains(ramComponentNeedName).should('exist');
+        });
+
+        // Step 9: Verify unit changes dynamically when switching components
+        // Expand EdgeFunction and RecurrentEdgeDeviceNeed again
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"]').click();
+        cy.get('#sidePanel').should('be.visible');
+
+        // Select CPU and verify unit is cpu_core
+        cy.get('#edge_component').select(cpuComponentName);
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_unit').should('have.value', 'cpu_core');
+
+        // Switch to RAM and verify unit changes to GB_ram
+        cy.get('#edge_component').select(ramComponentName);
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_unit').should('have.value', 'GB_ram');
+
+        // Close the side panel - this may trigger an unsaved changes modal
+        cy.get('#btn-close-side-panel').click();
+
+        // Wait a moment for modal to appear if it's going to
+        cy.wait(500);
+
+        // Check if modal is visible and click "Yes, Continue" if it is
+        cy.get('body').then($body => {
+            const modal = $body.find('#unsavedModal.show');
+            if (modal.length > 0) {
+                cy.wrap(modal).contains('button', 'Yes, Continue').click();
+            }
+        });
+
+        // Wait for side panel to be fully closed
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Step 10: Edit CPU component need and verify changes
+        // Expand EdgeFunction and RecurrentEdgeDeviceNeed to access the component needs
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeComponentNeed", cpuComponentNeedName).click();
+        cy.get('#sidePanel').should('be.visible');
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_value').should('have.value', cpuNeedValue);
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_value').clear().type(updatedCpuNeedValue);
+        cy.get('#btn-submit-form').click();
+        cy.get('#sidePanel').should('not.contain.html');
+
+        // Verify edit was saved
+        // Expand EdgeFunction and RecurrentEdgeDeviceNeed to verify the edit
+        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first()
+            .find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first()
+            .find('.accordion-header > .chevron-btn').first().click();
+        cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeComponentNeed", cpuComponentNeedName).click();
+        cy.get('#RecurrentEdgeComponentNeed_recurrent_need__constant_value')
+            .should('have.value', updatedCpuNeedValue);
+    });
+
     it("Create EdgeDevice, add CPU component, then remove component", () => {
         let edgeDeviceName = "Test Edge Device";
         let cpuComponentName = "Test CPU Component";

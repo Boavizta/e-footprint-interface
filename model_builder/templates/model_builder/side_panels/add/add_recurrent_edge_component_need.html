@@ -29,38 +29,39 @@
     </div>
 
     <script>
-        // Component units mapping from backend
-        const componentUnitsMapping = JSON.parse(
-            document.getElementById('dynamic-form-data').textContent).component_units_mapping;
+        // Wrap in IIFE to avoid variable redeclaration errors when HTMX reloads the panel
+        (function() {
+            // Component units mapping from backend
+            const componentUnitsMapping = JSON.parse(
+                document.getElementById('dynamic-form-data').textContent).component_units_mapping;
 
-        // Update the recurrent_need unit field when edge_component selection changes
-        function updateRecurrentNeedUnit() {
-            const componentSelect = document.getElementById('edge_component');
-            const unitInput = document.getElementById('RecurrentEdgeComponentNeed_recurrent_need__constant_unit');
+            // Update the recurrent_need unit field when edge_component selection changes
+            function updateRecurrentNeedUnit() {
+                const componentSelect = document.getElementById('edge_component');
+                const unitInput = document.getElementById('RecurrentEdgeComponentNeed_recurrent_need__constant_unit');
 
-            if (componentSelect && unitInput && componentUnitsMapping) {
-                const selectedComponentId = componentSelect.value;
-                const compatibleUnit = componentUnitsMapping[selectedComponentId];
+                if (componentSelect && unitInput && componentUnitsMapping) {
+                    const selectedComponentId = componentSelect.value;
+                    const compatibleUnit = componentUnitsMapping[selectedComponentId];
 
-                if (compatibleUnit) {
-                    unitInput.value = compatibleUnit;
-                    console.log(`Updated unit to: ${compatibleUnit} for component: ${selectedComponentId}`);
+                    if (compatibleUnit) {
+                        unitInput.value = compatibleUnit;
+                        console.log(`Updated unit to: ${compatibleUnit} for component: ${selectedComponentId}`);
+                    }
                 }
             }
-        }
 
-        // Initial unit setup
-        document.addEventListener('DOMContentLoaded', updateRecurrentNeedUnit);
+            // Initial unit setup
+            document.addEventListener('DOMContentLoaded', updateRecurrentNeedUnit);
 
-        // Update unit when component selection changes
-        (function() {
+            // Update unit when component selection changes
             const componentSelect = document.getElementById('edge_component');
             if (componentSelect) {
                 componentSelect.addEventListener('change', updateRecurrentNeedUnit);
             }
-        })();
 
-        // Trigger on dynamic form initialization
-        document.addEventListener('initDynamicForm', updateRecurrentNeedUnit);
+            // Trigger on dynamic form initialization
+            document.addEventListener('initDynamicForm', updateRecurrentNeedUnit);
+        })();
     </script>
 {% endblock %}

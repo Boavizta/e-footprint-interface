@@ -16,15 +16,28 @@
 
 {% block panel_body %}
     <div class="accordion my-3" id="accordionAllAttributes">
+        <div class="accordion-item">
+            <h2 class="accordion-header accordion-header-panel">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseEdgeComponent{{ object_to_edit.class_as_simple_str }}"
+                        aria-expanded="true" aria-controls="collapseEdgeComponent">
+                    Edge component
+                </button>
+            </h2>
+            <div id="collapseEdgeComponent{{ object_to_edit.class_as_simple_str }}"
+                 class="accordion-collapse collapse show" data-bs-parent="#accordionAllAttributes">
+                <div class="accordion-body">
+                    <p class="mb-0">Uses resources on <strong>{{ object_to_edit.edge_component.name }}</strong></p>
+                </div>
+            </div>
+        </div>
         {% block edit_form %}
             {% include "model_builder/side_panels/edit/edit_generic_form.html" %}
         {% endblock %}
-        <p>Uses processes on {{ object_to_edit.edge_component.name }}</p>
         {% block calculated_attributes %}
             {% include "model_builder/side_panels/edit/calculated_attributes_section.html" %}
         {% endblock %}
     </div>
-
     <div class="mb-3">
         <button
                 id="btn-submit-form"

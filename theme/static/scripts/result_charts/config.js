@@ -190,7 +190,7 @@ export const HARDWARE_TYPE_CONFIG = {
         label: "Servers and storage usage",
         backgroundColor: "#80E5DE",
     },
-    Edge_devices_and_storage_energy: {
+    Edge_devices_energy: {
         label: "Edge devices and storage usage",
         backgroundColor: "#2DC9BF",
     },
@@ -206,7 +206,7 @@ export const HARDWARE_TYPE_CONFIG = {
         label: "Servers and storage fabrication",
         backgroundColor: "#9DC4E6",
     },
-    Edge_devices_and_storage_fabrication: {
+    Edge_devices_fabrication: {
         label: "Edge devices and storage fabrication",
         backgroundColor: "#5B9BD5",
     },
