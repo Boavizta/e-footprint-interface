@@ -196,3 +196,127 @@ class TestViewsAdditionEdge(TestModelingBase):
         final_edge_device = delete_request.session["system_data"]["EdgeDevice"][edge_device_id]
         self.assertEqual(final_edge_device["components"], [])
         logger.info("CPU component removed from EdgeDevice successfully")
+
+    def test_add_recurrent_edge_device_need_with_component_needs(self):
+        """Test RecurrentEdgeDeviceNeed creation with RecurrentEdgeComponentNeeds linked to CPU and RAM components"""
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+
+        # Step 1: Create EdgeDevice
+        edge_device_data = self.create_post_data_from_class_default_values(
+            name="Test Edge Device", efootprint_class_name="EdgeDevice")
+        edge_device_request = self.create_post_request("/add-object/EdgeDevice", edge_device_data)
+        add_object(edge_device_request, "EdgeDevice")
+        edge_device_id = self.get_object_id_from_session(edge_device_request, "EdgeDevice")
+        logger.info("EdgeDevice created successfully")
+
+        # Step 2: Add a CPU component to the edge device
+        cpu_component_data = self.create_post_data_from_class_default_values(
+            name="Test CPU Component", efootprint_class_name="EdgeCPUComponent",
+            efootprint_id_of_parent_to_link_to=edge_device_id)
+        cpu_request = self.create_post_request(
+            "/add-object/EdgeCPUComponent", cpu_component_data, edge_device_request.session["system_data"])
+        add_object(cpu_request, "EdgeCPUComponent")
+        cpu_component_id = self.get_object_id_from_session(cpu_request, "EdgeCPUComponent")
+        logger.info("CPU component added to EdgeDevice")
+
+        # Step 3: Add a RAM component to the edge device
+        ram_component_data = self.create_post_data_from_class_default_values(
+            name="Test RAM Component", efootprint_class_name="EdgeRAMComponent",
+            efootprint_id_of_parent_to_link_to=edge_device_id)
+        ram_request = self.create_post_request(
+            "/add-object/EdgeRAMComponent", ram_component_data, cpu_request.session["system_data"])
+        add_object(ram_request, "EdgeRAMComponent")
+        ram_component_id = self.get_object_id_from_session(ram_request, "EdgeRAMComponent")
+        logger.info("RAM component added to EdgeDevice")
+
+        # Step 4: Create EdgeUsageJourney
+        euj_data = self.create_edge_usage_journey_data(
+            name="Test Edge Usage Journey", edge_functions="", usage_span="6")
+        euj_request = self.create_post_request(
+            "/add-object/EdgeUsageJourney", euj_data, ram_request.session["system_data"])
+        add_object(euj_request, "EdgeUsageJourney")
+        edge_usage_journey_id = self.get_object_id_from_session(euj_request, "EdgeUsageJourney")
+        logger.info("EdgeUsageJourney created")
+
+        # Step 5: Create EdgeFunction linked to the edge usage journey
+        ef_data = self.create_edge_function_data(
+            name="Test Edge Function", parent_id=edge_usage_journey_id, recurrent_edge_device_needs="")
+        ef_request = self.create_post_request(
+            "/add-object/EdgeFunction", ef_data, euj_request.session["system_data"])
+        add_object(ef_request, "EdgeFunction")
+        edge_function_id = self.get_object_id_from_session(ef_request, "EdgeFunction")
+        logger.info("EdgeFunction created")
+
+        # Step 6: Create RecurrentEdgeDeviceNeed linked to the edge function
+        redn_data = {
+            "csrfmiddlewaretoken": "test_token",
+            "type_object_available": "RecurrentEdgeDeviceNeed",
+            "RecurrentEdgeDeviceNeed_name": "Test Recurrent Edge Device Need",
+            "edge_device": edge_device_id,
+            "efootprint_id_of_parent_to_link_to": edge_function_id
+        }
+        redn_request = self.create_post_request(
+            "/add-object/RecurrentEdgeDeviceNeed", redn_data, ef_request.session["system_data"])
+        add_object(redn_request, "RecurrentEdgeDeviceNeed")
+        redn_id = self.get_object_id_from_session(redn_request, "RecurrentEdgeDeviceNeed")
+        logger.info("RecurrentEdgeDeviceNeed created")
+
+        # Verify RecurrentEdgeDeviceNeed was created correctly
+        redn_json = redn_request.session["system_data"]["RecurrentEdgeDeviceNeed"][redn_id]
+        self.assertEqual(redn_json["name"], "Test Recurrent Edge Device Need")
+        self.assertEqual(redn_json["edge_device"], edge_device_id)
+        self.assertEqual(redn_json["recurrent_edge_component_needs"], [])  # Initially empty
+
+        # Step 7: Add RecurrentEdgeComponentNeed for CPU
+        cpu_need_data = {
+            "csrfmiddlewaretoken": "test_token",
+            "type_object_available": "RecurrentEdgeComponentNeed",
+            "RecurrentEdgeComponentNeed_name": "CPU Need",
+            "RecurrentEdgeComponentNeed_edge_component": cpu_component_id,
+            "RecurrentEdgeComponentNeed_recurrent_need__constant_value": "2.0",
+            "RecurrentEdgeComponentNeed_recurrent_need__constant_unit": "cpu_core",
+            "efootprint_id_of_parent_to_link_to": redn_id
+        }
+        cpu_need_request = self.create_post_request(
+            "/add-object/RecurrentEdgeComponentNeed", cpu_need_data, redn_request.session["system_data"])
+        add_object(cpu_need_request, "RecurrentEdgeComponentNeed")
+        cpu_need_id = self.get_object_id_from_session(cpu_need_request, "RecurrentEdgeComponentNeed")
+        logger.info("RecurrentEdgeComponentNeed for CPU added")
+
+        # Verify CPU component need was created correctly
+        cpu_need_json = cpu_need_request.session["system_data"]["RecurrentEdgeComponentNeed"][cpu_need_id]
+        self.assertEqual(cpu_need_json["name"], "CPU Need")
+        self.assertEqual(cpu_need_json["edge_component"], cpu_component_id)
+        self.assertEqual(cpu_need_json["recurrent_need"]["form_inputs"]["constant_value"], "2.0")
+        self.assertEqual(cpu_need_json["recurrent_need"]["form_inputs"]["constant_unit"], "cpu_core")
+
+        # Step 8: Add RecurrentEdgeComponentNeed for RAM
+        ram_need_data = {
+            "csrfmiddlewaretoken": "test_token",
+            "type_object_available": "RecurrentEdgeComponentNeed",
+            "RecurrentEdgeComponentNeed_name": "RAM Need",
+            "RecurrentEdgeComponentNeed_edge_component": ram_component_id,
+            "RecurrentEdgeComponentNeed_recurrent_need__constant_value": "4.0",
+            "RecurrentEdgeComponentNeed_recurrent_need__constant_unit": "GB_ram",
+            "efootprint_id_of_parent_to_link_to": redn_id
+        }
+        ram_need_request = self.create_post_request(
+            "/add-object/RecurrentEdgeComponentNeed", ram_need_data, cpu_need_request.session["system_data"])
+        add_object(ram_need_request, "RecurrentEdgeComponentNeed")
+        ram_need_id = self.get_object_id_from_name(ram_need_request, "RecurrentEdgeComponentNeed", "RAM Need")
+        logger.info("RecurrentEdgeComponentNeed for RAM added")
+
+        # Verify RAM component need was created correctly
+        ram_need_json = ram_need_request.session["system_data"]["RecurrentEdgeComponentNeed"][ram_need_id]
+        self.assertEqual(ram_need_json["name"], "RAM Need")
+        self.assertEqual(ram_need_json["edge_component"], ram_component_id)
+        self.assertEqual(ram_need_json["recurrent_need"]["form_inputs"]["constant_value"], "4.0")
+        self.assertEqual(ram_need_json["recurrent_need"]["form_inputs"]["constant_unit"], "GB_ram")
+
+        # Verify both component needs are linked to RecurrentEdgeDeviceNeed
+        updated_redn = ram_need_request.session["system_data"]["RecurrentEdgeDeviceNeed"][redn_id]
+        self.assertEqual(len(updated_redn["recurrent_edge_component_needs"]), 2)
+        self.assertIn(cpu_need_id, updated_redn["recurrent_edge_component_needs"])
+        self.assertIn(ram_need_id, updated_redn["recurrent_edge_component_needs"])
+
+        logger.info("RecurrentEdgeDeviceNeed with 2 RecurrentEdgeComponentNeeds created successfully")

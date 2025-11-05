@@ -389,6 +389,14 @@ class TestModelingBase(TestCase):
             raise ValueError(f"No objects of type {object_type} found in session")
         return list(objects.keys())[index]
 
+    def get_object_id_from_name(self, request, object_type: str, name) -> str:
+        """Get an object ID from the session data by type and index."""
+        objects = request.session["system_data"].get(object_type, {})
+        for id, value in objects.items():
+            if objects[id]["name"] == name:
+                return id
+        raise ValueError(f"No objects of type {object_type} with name {name} found in session")
+
     @contextmanager
     def temp_environ(**env_vars):
         """Context manager for temporarily setting environment variables."""
