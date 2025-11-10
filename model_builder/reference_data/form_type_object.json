@@ -39,10 +39,14 @@
         "label": "Edge appliance component",
         "more_descriptive_label_for_select_inputs": "Edge appliance component (generic workload-based)"
     },
-    "Job": {
+    "JobBase": {
         "label": "Job",
         "type_object_available": "Available job types",
         "pre_addition_help": "To facilitate job creation, install services on servers."
+    },
+    "Job": {
+        "label": "Job",
+        "type_object_available": "Available job types"
     },
     "GPUJob": {
         "label": "GPU job",

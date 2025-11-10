@@ -6,7 +6,7 @@ from efootprint.core.usage.edge.recurrent_edge_device_need import RecurrentEdgeD
 
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb, MirroredResourceNeedBaseWeb
+from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -17,19 +17,8 @@ class RecurrentEdgeDeviceNeedBaseWeb(ResourceNeedBaseWeb):
     attributes_to_skip_in_forms = ["edge_device"]
 
     @property
-    def template_name(self):
-        return "resource_need"
-
-    @property
-    def mirrored_cards(self):
-        """Create mirrored cards for each edge function this resource need is linked to."""
-        mirrored_cards = []
-        for edge_function in self.edge_functions:
-            for mirrored_edge_function_card in edge_function.mirrored_cards:
-                mirrored_cards.append(
-                    MirroredRecurrentEdgeDeviceNeedWeb(self._modeling_obj, mirrored_edge_function_card))
-
-        return mirrored_cards
+    def links_to(self):
+        return self.edge_device.web_id
 
     @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
@@ -113,11 +102,3 @@ class RecurrentEdgeDeviceNeedBaseWeb(ResourceNeedBaseWeb):
             request, model_web, object_creation_type)
 
         return http_response
-
-
-class MirroredRecurrentEdgeDeviceNeedWeb(MirroredResourceNeedBaseWeb):
-    """Mirrored version of RecurrentEdgeDeviceNeed shown within a specific EdgeFunction context."""
-
-    @property
-    def links_to(self):
-        return self.edge_device.web_id

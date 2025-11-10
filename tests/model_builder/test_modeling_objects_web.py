@@ -6,7 +6,6 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.web_abstract_modeling_classes.modeling_object_that_can_be_mirrored import ModelingObjectWebThatCanBeMirrored
 
 
 class TestExplainableObjectWebTestCase(unittest.TestCase):
@@ -76,14 +75,7 @@ class TestModelingObjectWebGetAttrTestCase(unittest.TestCase):
         mock_modeling_obj.id = "test_id"
         mock_model_web = MagicMock()
 
-        # Create an instance of ModelingObjectWebThatCanBeMirrored
-        # We need to mock the mirrored_cards property since it's abstract
-        class ConcreteModelingObjectWebThatCanBeMirrored(ModelingObjectWebThatCanBeMirrored):
-            @property
-            def mirrored_cards(self):
-                return [self]
-
-        obj = ConcreteModelingObjectWebThatCanBeMirrored(mock_modeling_obj, mock_model_web)
+        obj = ModelingObjectWeb(mock_modeling_obj, mock_model_web)
 
         # Act & Assert: accessing web_id should raise PermissionError, not AttributeError
         with self.assertRaises(PermissionError) as context:

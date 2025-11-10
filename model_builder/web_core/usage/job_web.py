@@ -6,7 +6,7 @@ from efootprint.core.usage.job import Job, GPUJob
 
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb, MirroredResourceNeedBaseWeb
+from model_builder.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -16,13 +16,8 @@ class JobWeb(ResourceNeedBaseWeb):
     attributes_to_skip_in_forms = ["service", "server"]
 
     @property
-    def mirrored_cards(self):
-        mirrored_cards = []
-        for usage_journey_step in self.usage_journey_steps:
-            for mirrored_usage_journey_card in usage_journey_step.mirrored_cards:
-                mirrored_cards.append(MirroredJobWeb(self._modeling_obj, mirrored_usage_journey_card))
-
-        return mirrored_cards
+    def links_to(self):
+        return self.server.web_id
 
     @classmethod
     def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
@@ -102,9 +97,3 @@ class JobWeb(ResourceNeedBaseWeb):
         }
 
         return context_data
-
-
-class MirroredJobWeb(MirroredResourceNeedBaseWeb):
-    @property
-    def links_to(self):
-        return self.server.web_id

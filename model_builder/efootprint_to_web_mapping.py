@@ -71,8 +71,8 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "RecurrentEdgeComponentNeed": RecurrentEdgeComponentNeedWeb,
 }
 
-def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb"):
+def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None):
     if modeling_obj.class_as_simple_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING:
-        return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[modeling_obj.class_as_simple_str](modeling_obj, model_web)
+        return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[modeling_obj.class_as_simple_str](modeling_obj, model_web, list_container)
 
-    return ModelingObjectWeb(modeling_obj, model_web)
+    return ModelingObjectWeb(modeling_obj, model_web, list_container)

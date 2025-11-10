@@ -62,10 +62,3 @@ class EdgeComponentBaseWeb(ModelingObjectWeb):
             context=delete_modal_context)
 
         return http_response
-
-    def generate_delete_http_response(self, request):
-        new_component_list = [comp for comp in self.edge_device.get_efootprint_value("components")
-                              if comp.id != self.efootprint_id]
-        self.edge_device.set_efootprint_value("components", new_component_list)
-
-        return super().generate_delete_http_response(request)

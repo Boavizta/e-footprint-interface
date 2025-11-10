@@ -26,17 +26,3 @@ class EdgeUsageJourneyWeb(JourneyBaseWeb):
                 linked_edge_device_ids.add(recurrent_edge_resource_need.edge_device.web_id)
 
         return "|".join(sorted(linked_edge_device_ids))
-
-    @property
-    def accordion_children(self):
-        return self.edge_functions
-
-    @property
-    def edge_functions(self):
-        """Returns mirrored edge functions for display in this usage journey context."""
-        from model_builder.web_core.usage.edge.edge_function_web import MirroredEdgeFunctionWeb
-        web_edge_functions = []
-        for edge_function in self._modeling_obj.edge_functions:
-            web_edge_functions.append(MirroredEdgeFunctionWeb(edge_function, self))
-
-        return web_edge_functions

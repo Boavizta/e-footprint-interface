@@ -189,7 +189,7 @@ class TestViewsAdditionEdge(TestModelingBase):
         response = delete_object(delete_request, cpu_component_id)
 
         # Verify CPU component deletion
-        self.assert_response_no_content(response)
+        self.assert_response_ok(response)
         self.assertNotIn("EdgeCPUComponent", delete_request.session["system_data"])
 
         # Verify the component was removed from the edge device

@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Tuple, Optional
 
 from django.shortcuts import render
 
@@ -25,6 +25,20 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     @property
     def template_name(self):
         return "usage_pattern"
+
+    @property
+    def mirrored_cards(self):
+        # Usage patterns do not have mirrored cards because there container (the System) doesn’t appear in the interface
+        return [self]
+
+    @property
+    def accordion_parent(self):
+        return None
+
+    @property
+    def list_containers_and_attr_name_in_list_container(self) -> Tuple[List, Optional[str]]:
+        return [], None
+
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:

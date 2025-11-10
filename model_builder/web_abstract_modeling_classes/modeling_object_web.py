@@ -1,6 +1,6 @@
 import json
 import re
-from typing import TYPE_CHECKING, get_origin, List, get_args
+from typing import TYPE_CHECKING, get_origin, List, get_args, Tuple, Optional
 
 from django.http import QueryDict, HttpResponse
 from django.shortcuts import render
@@ -31,14 +31,15 @@ class ModelingObjectWeb:
     edit_template = "edit_panel__generic.html"
     attributes_to_skip_in_forms = []
 
-    def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb"):
+    def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None):
         self._modeling_obj = modeling_obj
         self.model_web = model_web
+        self.list_container = list_container
         self.gets_deleted_if_unique_mod_obj_container_gets_deleted = True
 
     @property
     def settable_attributes(self):
-        return ["_modeling_obj", "model_web", "gets_deleted_if_unique_mod_obj_container_gets_deleted"]
+        return ["_modeling_obj", "model_web", "list_container", "gets_deleted_if_unique_mod_obj_container_gets_deleted"]
 
     def __getattr__(self, name):
         from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
@@ -65,7 +66,7 @@ class ModelingObjectWeb:
                              "Use efootprint_id and web_id for clear disambiguation.")
 
         if isinstance(attr, list) and len(attr) > 0 and isinstance(attr[0], ModelingObject):
-            return [wrap_efootprint_object(item, self.model_web) for item in attr]
+            return [wrap_efootprint_object(item, self.model_web, self) for item in attr]
 
         if isinstance(attr, ModelingObject):
             return wrap_efootprint_object(attr, self.model_web)
@@ -137,11 +138,30 @@ class ModelingObjectWeb:
 
     @property
     def web_id(self):
+        if self.list_container is not None:
+            return f"{self.class_as_simple_str}-{self._modeling_obj.id}_in_{self.list_container.web_id}"
         return f"{self.class_as_simple_str}-{self._modeling_obj.id}"
 
     @property
+    def efootprint_contextual_modeling_obj_containers(self):
+        return self._modeling_obj.contextual_modeling_obj_containers
+
+    @property
     def mirrored_cards(self):
-        return [self]
+        """Recursively compute all mirrored instances of this object based on list containers."""
+        result = []
+
+        # Check if this object appears in any list attributes of container objects
+        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
+        for list_container in list_containers:
+            for container_mirror in list_container.mirrored_cards:
+                result.append(type(self)(self._modeling_obj, self.model_web, container_mirror))
+
+        # If no list containers found, return self (base case for recursion)
+        if not list_containers:
+            return [self]
+
+        return result
 
     @property
     def template_name(self):
@@ -161,16 +181,52 @@ class ModelingObjectWeb:
         return [{'id': f'{self.web_id}', 'data-link-to': self.links_to, 'data-line-opt': self.data_line_opt}]
 
     @property
+    def list_containers_and_attr_name_in_list_container(self) -> Tuple[List["ModelingObjectWeb"], Optional[str]]:
+        list_containers = []
+        attr_name_in_list_container = None
+        for contextual_container in self.efootprint_contextual_modeling_obj_containers:
+            attr_name = contextual_container.attr_name_in_mod_obj_container
+            container = contextual_container.modeling_obj_container
+            container_signature = get_init_signature_params(container.efootprint_class)
+            annotation = container_signature[attr_name].annotation
+            if get_origin(annotation) and get_origin(annotation) in (list, List):
+                list_containers.append(self.model_web.get_web_object_from_efootprint_id(container.id))
+                attr_name_in_list_container = attr_name
+            elif len(list_containers) > 0:
+                raise NotImplementedError(
+                    f"Modeling object {self} appears in both list and non-list attributes of its containers. "
+                    f"This is not supported behavior.")
+
+        return list_containers, attr_name_in_list_container
+
+    @property
     def accordion_parent(self):
-        return None
+        return self.list_container
 
     @property
     def class_title_style(self):
         return None
 
     @property
+    def list_attr_names(self):
+        init_signature = get_init_signature_params(self.efootprint_class)
+        list_attr_names = []
+        for attr_name, param_info in init_signature.items():
+            annotation = param_info.annotation
+            if get_origin(annotation) and get_origin(annotation) in (list, List):
+                list_attr_names.append(attr_name)
+        return list_attr_names
+
+    @property
     def accordion_children(self):
-        return []
+        """Automatically compute accordion children from list attributes."""
+        children = []
+        for attr_name in self.list_attr_names:
+            attr_value = getattr(self, attr_name, None)
+            if attr_value and isinstance(attr_value, list):
+                children.extend(attr_value)
+
+        return children
 
     @property
     def all_accordion_parents(self):
@@ -254,19 +310,19 @@ class ModelingObjectWeb:
             efootprint_object_to_link_to = web_object_to_link_to.modeling_obj
             # Find the attr name for the list of objects to append the added object to in the efootprint_object_to_link_to
             init_sig_params = get_init_signature_params(type(efootprint_object_to_link_to))
-            list_attr_name = None
+            attr_name_in_list_container = None
             for attr_name in init_sig_params:
                 annotation = init_sig_params[attr_name].annotation
                 if (get_origin(annotation) and get_origin(annotation) in (list, List)
                     and isinstance(new_efootprint_obj, get_args(annotation)[0])):
-                    list_attr_name = attr_name
+                    attr_name_in_list_container = attr_name
                     break
-            assert list_attr_name is not None, f"A list attr name should always be found"
+            assert attr_name_in_list_container is not None, f"A list attr name should always be found"
 
             mutable_post = QueryDict(mutable=True)
-            existing_element_ids = [elt.id for elt in getattr(efootprint_object_to_link_to, list_attr_name)]
+            existing_element_ids = [elt.id for elt in getattr(efootprint_object_to_link_to, attr_name_in_list_container)]
             existing_element_ids.append(added_obj.efootprint_id)
-            mutable_post[list_attr_name] = ";".join(existing_element_ids)
+            mutable_post[attr_name_in_list_container] = ";".join(existing_element_ids)
 
             response_html = compute_edit_object_html_and_event_response(mutable_post, web_object_to_link_to)
 
@@ -305,7 +361,9 @@ class ModelingObjectWeb:
         return msg
 
     def generate_ask_delete_modal_context(self):
+        context_data = {}
         accordion_children = self.accordion_children
+
         if len(accordion_children) > 0:
             class_label = self.class_label.lower()
             child_class_label = accordion_children[0].class_label.lower()
@@ -316,7 +374,21 @@ class ModelingObjectWeb:
             message = f"Are you sure you want to delete this {self.class_as_simple_str} ?"
             sub_message = ""
 
-        return {"obj": self, "message": message, "sub_message": sub_message, "remove_card_with_hyperscript": True}
+        context_data["obj"] = self
+        context_data["message"] = message
+        context_data["sub_message"] = sub_message
+        context_data["remove_card_with_hyperscript"] = True
+
+        # Override for mirrored objects (those with list_container or multiple mirrored_cards)
+        mirrored_cards = self.mirrored_cards
+        if len(mirrored_cards) > 1:
+            context_data["remove_card_with_hyperscript"] = False
+            context_data["message"] = (f"This {self.class_as_simple_str} is mirrored {len(mirrored_cards)} times, "
+                                       f"this action will delete all mirrored {self.class_as_simple_str}s.")
+            context_data["sub_message"] = (f"To delete only one {self.class_as_simple_str}, "
+                                           f"break the mirroring link first.")
+
+        return context_data
 
     def generate_ask_delete_http_response(self, request):
         if self.modeling_obj_containers:
@@ -337,14 +409,35 @@ class ModelingObjectWeb:
         return http_response
 
     def generate_delete_http_response(self, request):
-        self.self_delete()
-        self.model_web.update_system_data_with_up_to_date_calculated_attributes()
+        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
+        if list_containers:
+            toast_and_highlight_data = {"ids": [], "name": self.name, "action_type": "delete_object"}
+            response_html = ""
+            for list_container in list_containers:
+                mutable_post = request.POST.copy()
+                logger.info(f"Removing {self.name} from {list_container.name}")
+                mutable_post['name'] = list_container.name
+                new_list_attribute_ids = [
+                    list_attribute.efootprint_id
+                    for list_attribute in getattr(list_container, attr_name_in_list_container)
+                    if list_attribute.efootprint_id != self.efootprint_id]
+                mutable_post[attr_name_in_list_container] = ";".join(new_list_attribute_ids)
+                request.POST = mutable_post
 
-        http_response = HttpResponse(status=204)
-        toast_and_highlight_data = {"ids": [], "name": self.name, "action_type": "delete_object"}
-        http_response["HX-Trigger"] = json.dumps({
-            "resetLeaderLines": "",
-            "displayToastAndHighlightObjects": toast_and_highlight_data
-        })
+                partial_response_html = compute_edit_object_html_and_event_response(request.POST, list_container)
+                response_html += partial_response_html
+
+            http_response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
+        else:
+            # Non-list object: normal deletion
+            self.self_delete()
+            self.model_web.update_system_data_with_up_to_date_calculated_attributes()
+
+            http_response = HttpResponse(status=204)
+            toast_and_highlight_data = {"ids": [], "name": self.name, "action_type": "delete_object"}
+            http_response["HX-Trigger"] = json.dumps({
+                "resetLeaderLines": "",
+                "displayToastAndHighlightObjects": toast_and_highlight_data
+            })
 
         return http_response
