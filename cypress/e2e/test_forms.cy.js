@@ -35,7 +35,7 @@ describe("Test - Forms panel", () => {
         cy.get('#UsageJourneyStep_jobs').should('exist').should('not.be.visible');
         cy.getObjectCardFromObjectTypeAndName("UsageJourney", uj).find('div[hx-get="/model_builder/open-create-object-panel/UsageJourneyStep"]').click();
         cy.get('#select-new-object-UsageJourneyStep_jobs').should('exist').should('not.be.enabled');
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').click();
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
 

@@ -82,14 +82,14 @@ describe('Test de la page d\'accueil', () => {
         cy.contains('div', service).find('button[id^="button"]').should('be.visible');
 
         // Add jobs
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').click({force: true});
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').click({force: true});
         cy.get('#service').should('be.visible').select(service);
         cy.get('#WebApplicationJob_name').clear();
         cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();
         cy.contains('div', jobOne).find('button[id^="button"]').should('exist');
 
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsTwo).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsTwo).find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').click();
         cy.get('#service').should('be.visible').select("direct_server_call");
         cy.get('#sidePanel').should('be.visible');
         cy.get('#Job_name').clear();

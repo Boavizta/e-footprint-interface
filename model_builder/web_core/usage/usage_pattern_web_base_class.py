@@ -28,12 +28,8 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
 
     @property
     def mirrored_cards(self):
-        # Usage patterns do not have mirrored cards because there container (the System) doesn’t appear in the interface
+        # Usage patterns do not have mirrored cards because their container (the System) doesn’t appear in the interface
         return [self]
-
-    @property
-    def accordion_parent(self):
-        return None
 
     @property
     def list_containers_and_attr_name_in_list_container(self) -> Tuple[List, Optional[str]]:

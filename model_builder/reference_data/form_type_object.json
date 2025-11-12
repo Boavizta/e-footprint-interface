@@ -39,6 +39,14 @@
         "label": "Edge appliance component",
         "more_descriptive_label_for_select_inputs": "Edge appliance component (generic workload-based)"
     },
+    "EdgeComputerRAMComponent": {
+        "label": "Edge computer RAM component",
+        "more_descriptive_label_for_select_inputs": "Edge computer RAM component (memory)"
+    },
+    "EdgeComputerCPUComponent": {
+        "label": "Edge computer CPU component",
+        "more_descriptive_label_for_select_inputs": "Edge computer CPU component (CPU cores)"
+    },
     "JobBase": {
         "label": "Job",
         "type_object_available": "Available job types",

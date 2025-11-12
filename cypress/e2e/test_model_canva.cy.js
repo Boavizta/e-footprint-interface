@@ -12,7 +12,7 @@ describe("Test - Model Canva div", () => {
 
     it("Try to create a new job without servers in your model", () => {
         cy.visit("/model_builder/");
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", "My first usage journey step").find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').should("exist").click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", "My first usage journey step").find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').should("exist").click();
         cy.get("#exception-msg").should("exist")
             .should("include.text","Please go to the infrastructure section and create a server before adding a job")
     });
@@ -33,13 +33,13 @@ describe("Test - Model Canva div", () => {
         cy.get("#btn-submit-form").should("exist").click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').click();
         cy.get('#service').should("exist").select(service);
         cy.get('#WebApplicationJob_name').type(jobOne);
         cy.get('#btn-submit-form').click();
         cy.get("#sidePanelForm").should('not.exist');
 
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsTwo).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsTwo).find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#service').should("exist").select(service);
         cy.get('#WebApplicationJob_name').type(jobTwo);
@@ -47,12 +47,12 @@ describe("Test - Model Canva div", () => {
         cy.get("#sidePanelForm").should('not.exist');
 
         cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobOne).should('exist');
-        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/Job/"]').should('exist');
+        cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", ujsOne).find('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').should('exist');
 
         cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", "Test E2E UJ 1").find('button[data-bs-target^="#flush-"]').should('exist').click()
         cy.getObjectCardFromObjectTypeAndName("UsageJourneyStep", "Test E2E UJ 1").find('div[id^="flush-"]').within(() => {
             cy.getObjectButtonFromObjectTypeAndName("WebApplicationJob", jobOne).then(($firstButton) => {
-                cy.get('button[hx-get="/model_builder/open-create-object-panel/Job/"]').then(($secondButton) => {
+                cy.get('button[hx-get="/model_builder/open-create-object-panel/JobBase/"]').then(($secondButton) => {
                     const firstTop = $firstButton[0].getBoundingClientRect().top;
                     const secondTop = $secondButton[0].getBoundingClientRect().top;
                     expect(secondTop).to.be.greaterThan(firstTop);
