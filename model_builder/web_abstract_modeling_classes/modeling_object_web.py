@@ -125,6 +125,12 @@ class ModelingObjectWeb:
         return self._modeling_obj.id
 
     @property
+    def web_id(self):
+        if self.list_container is not None:
+            return f"{self.class_as_simple_str}-{self._modeling_obj.id}_in_{self.list_container.web_id}"
+        return f"{self.class_as_simple_str}-{self._modeling_obj.id}"
+
+    @property
     def value(self):
         return self.efootprint_id
 
@@ -137,36 +143,30 @@ class ModelingObjectWeb:
         return FORM_TYPE_OBJECT[self.class_as_simple_str]["label"]
 
     @property
-    def web_id(self):
-        if self.list_container is not None:
-            return f"{self.class_as_simple_str}-{self._modeling_obj.id}_in_{self.list_container.web_id}"
-        return f"{self.class_as_simple_str}-{self._modeling_obj.id}"
-
-    @property
-    def efootprint_contextual_modeling_obj_containers(self):
-        return self._modeling_obj.contextual_modeling_obj_containers
-
-    @property
-    def mirrored_cards(self):
-        """Recursively compute all mirrored instances of this object based on list containers."""
-        result = []
-
-        # Check if this object appears in any list attributes of container objects
-        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
-        for list_container in list_containers:
-            for container_mirror in list_container.mirrored_cards:
-                result.append(type(self)(self._modeling_obj, self.model_web, container_mirror))
-
-        # If no list containers found, return self (base case for recursion)
-        if not list_containers:
-            return [self]
-
-        return result
+    def class_title_style(self):
+        return None
 
     @property
     def template_name(self):
         snake_case_class_name = re.sub(r'(?<!^)(?=[A-Z])', '_', self.class_as_simple_str).lower()
         return f"{snake_case_class_name}"
+
+    @classmethod
+    def get_htmx_form_config(cls, context_data: dict) -> dict:
+        """
+        Returns HTMX configuration for the object creation form.
+        Override in subclasses to customize behavior for specific object types.
+
+        Args:
+            context_data: The context data dictionary passed to the template
+
+        Returns:
+            Dictionary with optional keys:
+            - hx_vals: dict of additional values to pass via hx-vals
+            - hx_target: CSS selector for target element
+            - hx_swap: HTMX swap strategy
+        """
+        return {}  # Default: no special HTMX configuration
 
     @property
     def links_to(self):
@@ -179,6 +179,10 @@ class ModelingObjectWeb:
     @property
     def data_attributes_as_list_of_dict(self):
         return [{'id': f'{self.web_id}', 'data-link-to': self.links_to, 'data-line-opt': self.data_line_opt}]
+
+    @property
+    def efootprint_contextual_modeling_obj_containers(self):
+        return self._modeling_obj.contextual_modeling_obj_containers
 
     @property
     def list_containers_and_attr_name_in_list_container(self) -> Tuple[List["ModelingObjectWeb"], Optional[str]]:
@@ -200,12 +204,42 @@ class ModelingObjectWeb:
         return list_containers, attr_name_in_list_container
 
     @property
+    def mirrored_cards(self):
+        """Recursively compute all mirrored instances of this object based on list containers."""
+        result = []
+
+        # Check if this object appears in any list attributes of container objects
+        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
+        for list_container in list_containers:
+            for container_mirror in list_container.mirrored_cards:
+                result.append(type(self)(self._modeling_obj, self.model_web, container_mirror))
+
+        # If no list containers found, return self (base case for recursion)
+        if not list_containers:
+            return [self]
+
+        return result
+
+    @property
     def accordion_parent(self):
         return self.list_container
 
     @property
-    def class_title_style(self):
-        return None
+    def all_accordion_parents(self):
+        list_parents = []
+        parent = self.accordion_parent
+        while parent:
+            list_parents.append(parent)
+            parent = parent.accordion_parent
+
+        return list_parents
+
+    @property
+    def top_parent(self):
+        if len(self.all_accordion_parents) == 0:
+            return self
+        else:
+            return self.all_accordion_parents[-1]
 
     @property
     def list_attr_names(self):
@@ -229,21 +263,26 @@ class ModelingObjectWeb:
         return children
 
     @property
-    def all_accordion_parents(self):
-        list_parents = []
-        parent = self.accordion_parent
-        while parent:
-            list_parents.append(parent)
-            parent = parent.accordion_parent
+    def children_property_name(self) -> str:
+        """Property name for accessing children (e.g., 'jobs', 'recurrent_edge_device_needs')."""
+        list_attr_names = self.list_attr_names
+        assert len(list_attr_names) == 1, (
+            f"{self} should have exactly one list attribute, found: {list_attr_names}.")
 
-        return list_parents
+        return list_attr_names[0]
 
     @property
-    def top_parent(self):
-        if len(self.all_accordion_parents) == 0:
-            return self
-        else:
-            return self.all_accordion_parents[-1]
+    def child_object_type_str(self) -> str:
+        """Type string of child objects (e.g., 'Job', 'RecurrentEdgeDeviceNeed')."""
+        init_signature = get_init_signature_params(self.efootprint_class)
+        child_object_type = init_signature[self.children_property_name].annotation.__args__[0].__name__
+
+        return child_object_type
+
+    @property
+    def add_child_label(self) -> str:
+        """Label for the 'add child' button (e.g., 'Add new job')."""
+        return f"Add {FORM_TYPE_OBJECT[self.child_object_type_str]["label"].lower()}"
 
     def self_delete(self):
         obj_type = self.class_as_simple_str
@@ -268,23 +307,6 @@ class ModelingObjectWeb:
         corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[corresponding_efootprint_class_str]
         return generate_object_creation_context(
             corresponding_efootprint_class_str, [corresponding_efootprint_class], model_web)
-
-    @classmethod
-    def get_htmx_form_config(cls, context_data: dict) -> dict:
-        """
-        Returns HTMX configuration for the object creation form.
-        Override in subclasses to customize behavior for specific object types.
-
-        Args:
-            context_data: The context data dictionary passed to the template
-
-        Returns:
-            Dictionary with optional keys:
-            - hx_vals: dict of additional values to pass via hx-vals
-            - hx_target: CSS selector for target element
-            - hx_swap: HTMX swap strategy
-        """
-        return {}  # Default: no special HTMX configuration
 
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):

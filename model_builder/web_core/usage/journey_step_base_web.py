@@ -1,41 +1,15 @@
-from efootprint.utils.tools import get_init_signature_params
-
-from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 
 class JourneyStepBaseWeb(ModelingObjectWeb):
     """Base class for journey step objects that can be mirrored in journey contexts."""
-
     @property
     def class_title_style(self):
         return "h7"
 
     @property
-    def child_object_type_str(self) -> str:
-        """Type string of child objects (e.g., 'Job', 'RecurrentEdgeDeviceNeed')."""
-        init_signature = get_init_signature_params(self.efootprint_class)
-        child_object_type = init_signature[self.children_property_name].annotation.__args__[0].__name__
-
-        return child_object_type
-
-    @property
     def child_template_name(self) -> str:
         return "resource_need"
-
-    @property
-    def add_child_label(self) -> str:
-        """Label for the 'add child' button (e.g., 'Add new job')."""
-        return f"Add {FORM_TYPE_OBJECT[self.child_object_type_str]}"
-
-    @property
-    def children_property_name(self) -> str:
-        """Property name for accessing children (e.g., 'jobs', 'recurrent_edge_device_needs')."""
-        list_attr_names = self.list_attr_names
-        assert len(list_attr_names) == 1, (
-            f"{self} should have exactly one list attribute, found: {list_attr_names}.")
-
-        return list_attr_names[0]
 
     @property
     def icon_links_to(self):
