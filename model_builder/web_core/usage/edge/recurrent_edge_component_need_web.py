@@ -32,7 +32,8 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
         return "h8"
 
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         """Generate creation context with edge components from parent RecurrentEdgeDeviceNeed."""
         recurrent_edge_device_need = model_web.get_web_object_from_efootprint_id(efootprint_id_of_parent_to_link_to)
         edge_device = recurrent_edge_device_need.edge_device

@@ -16,12 +16,9 @@ class RecurrentEdgeDeviceNeedBaseWeb(ResourceNeedBaseWeb):
     """Web wrapper for RecurrentEdgeDeviceNeed and its subclasses (RecurrentEdgeProcess, RecurrentEdgeWorkload)."""
     attributes_to_skip_in_forms = ["edge_device"]
 
-    @property
-    def links_to(self):
-        return self.edge_device.web_id
-
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         edge_devices = model_web.edge_devices
         if len(edge_devices) == 0:
             raise ValueError("Please create an edge device before adding a recurrent edge resource need")

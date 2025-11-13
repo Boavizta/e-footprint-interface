@@ -14,12 +14,6 @@ class ResourceNeedBaseWeb(ModelingObjectWeb):
     def class_title_style(self):
         return "h8"
 
-    @property
-    @abstractmethod
-    def links_to(self) -> str:
-        """Returns the web_id(s) of the hardware this resource need links to."""
-        pass
-
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
         """HTMX configuration for resource need creation forms - link to parent, swap none."""

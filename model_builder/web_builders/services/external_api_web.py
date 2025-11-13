@@ -23,7 +23,8 @@ if TYPE_CHECKING:
 
 class ExternalApiWeb(ModelingObjectWeb):
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         services_dict, dynamic_form_data = generate_object_creation_structure(
             "Service",
             available_efootprint_classes=[GenAIModel],

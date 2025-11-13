@@ -15,10 +15,6 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     object_type_in_volume = "value to override in subclass"
 
     @property
-    def links_to(self):
-        raise NotImplementedError("Subclasses must implement the links_to property.")
-
-    @property
     def class_title_style(self):
         return "h6"
 
@@ -41,7 +37,8 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         return {"hx_target": "#up-list", "hx_swap": "beforeend"}
 
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         if len(getattr(model_web, cls.object_type_in_volume + "s")) == 0:
             raise PermissionError(
                 f"You need to have created at least one {cls.object_type_in_volume.replace("_", " ")} "

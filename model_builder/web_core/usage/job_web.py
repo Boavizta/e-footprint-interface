@@ -20,7 +20,8 @@ class JobWeb(ResourceNeedBaseWeb):
         return self.server.web_id
 
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         servers = model_web.servers
         if len(servers) == 0:
             raise ValueError("Please go to the infrastructure section and create a server before adding a job")

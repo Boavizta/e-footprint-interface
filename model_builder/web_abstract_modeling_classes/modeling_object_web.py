@@ -7,7 +7,8 @@ from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.abstract_modeling_classes.list_linked_to_modeling_obj import ListLinkedToModelingObj
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject, get_instance_attributes
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
@@ -170,7 +171,19 @@ class ModelingObjectWeb:
 
     @property
     def links_to(self):
-        return ""
+        output = ""
+        direct_modeling_object_attributes = get_instance_attributes(self.modeling_obj, ModelingObject)
+        if len(direct_modeling_object_attributes) == 0:
+            list_modeling_object_attributes = get_instance_attributes(self.modeling_obj, ListLinkedToModelingObj)
+            for list_modeling_objects in list_modeling_object_attributes.values():
+                for list_modeling_object in list_modeling_objects:
+                    web_object = self.model_web.get_web_object_from_efootprint_id(list_modeling_object.id)
+                    output += f"|{web_object.links_to}"
+        else:
+            for modeling_object_attr in direct_modeling_object_attributes.values():
+                web_object = self.model_web.get_web_object_from_efootprint_id(modeling_object_attr.id)
+                output += f"|{web_object.web_id}"
+        return output
 
     @property
     def data_line_opt(self):
@@ -302,8 +315,12 @@ class ModelingObjectWeb:
             mod_obj.self_delete()
 
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
-        corresponding_efootprint_class_str = cls.__name__.replace("Web", "")
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
+        if object_type is None:
+            corresponding_efootprint_class_str = cls.__name__.replace("Web", "")
+        else:
+            corresponding_efootprint_class_str = object_type
         corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[corresponding_efootprint_class_str]
         return generate_object_creation_context(
             corresponding_efootprint_class_str, [corresponding_efootprint_class], model_web)

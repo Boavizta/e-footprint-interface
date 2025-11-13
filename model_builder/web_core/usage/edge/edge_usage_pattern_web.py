@@ -13,7 +13,3 @@ class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
     }
     attr_name_in_system = "edge_usage_patterns"
     object_type_in_volume = "edge_usage_journey"
-
-    @property
-    def links_to(self):
-        return self.edge_usage_journey.web_id

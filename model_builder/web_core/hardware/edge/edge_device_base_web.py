@@ -27,7 +27,8 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
         return "h6"
 
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         return generate_object_with_storage_creation_context(
             model_web, "EdgeDeviceBase", [EdgeComputer, EdgeAppliance, EdgeDevice],
             "EdgeStorage", [EdgeStorage])

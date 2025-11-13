@@ -15,14 +15,13 @@ from model_builder.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 from model_builder.web_core.hardware.server_web import ServerWeb
 from model_builder.web_core.hardware.storage_web import StorageWeb
 from model_builder.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
-from model_builder.web_core.usage.edge.edge_usage_journey_web import EdgeUsageJourneyWeb
 from model_builder.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
 from model_builder.web_core.usage.edge.recurrent_edge_component_need_web import RecurrentEdgeComponentNeedWeb
 from model_builder.web_core.usage.edge.recurrent_edge_device_need_web import RecurrentEdgeDeviceNeedWeb
 from model_builder.web_core.usage.job_web import JobWeb
 from model_builder.web_core.usage.edge.recurrent_edge_device_need_base_web import RecurrentEdgeDeviceNeedBaseWeb
-from model_builder.web_core.usage.usage_journey_step_web import UsageJourneyStepWeb
-from model_builder.web_core.usage.usage_journey_web import UsageJourneyWeb
+from model_builder.web_core.usage.journey_base_web import JourneyBaseWeb
+from model_builder.web_core.usage.journey_step_base_web import JourneyStepBaseWeb
 from model_builder.web_core.usage.usage_pattern_web import UsagePatternWeb
 
 if TYPE_CHECKING:
@@ -34,8 +33,8 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "ServerBase": ServerWeb,
     "GPUServer": ServerWeb,
     "BoaviztaCloudServer": ServerWeb,
-    "UsageJourneyStep": UsageJourneyStepWeb,
-    "UsageJourney": UsageJourneyWeb,
+    "UsageJourneyStep": JourneyStepBaseWeb,
+    "UsageJourney": JourneyBaseWeb,
     "UsagePattern": UsagePatternWeb,
     "EdgeUsagePattern": EdgeUsagePatternWeb,
     "JobBase": JobWeb,
@@ -62,7 +61,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "EdgeStorage": EdgeComponentBaseWeb,
     "EdgeWorkloadComponent": EdgeComponentBaseWeb,
     # Edge usage classes
-    "EdgeUsageJourney": EdgeUsageJourneyWeb,
+    "EdgeUsageJourney": JourneyBaseWeb,
     "EdgeFunction": EdgeFunctionWeb,
     "RecurrentEdgeDeviceNeedBase": RecurrentEdgeDeviceNeedBaseWeb,
     "RecurrentEdgeProcess": RecurrentEdgeProcessWeb,

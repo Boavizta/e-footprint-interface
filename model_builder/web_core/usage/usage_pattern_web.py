@@ -13,7 +13,3 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
     }
     attr_name_in_system = "usage_patterns"
     object_type_in_volume = "usage_journey"
-
-    @property
-    def links_to(self):
-        return self.usage_journey.web_id

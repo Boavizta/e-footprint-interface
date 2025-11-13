@@ -25,7 +25,8 @@ class EdgeComponentBaseWeb(ModelingObjectWeb):
         return "h8"
 
     @classmethod
-    def generate_object_creation_context(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None):
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
         edge_device = model_web.get_web_object_from_efootprint_id(efootprint_id_of_parent_to_link_to)
 
         available_component_types = [EdgeCPUComponent, EdgeRAMComponent, EdgeStorage, EdgeWorkloadComponent]

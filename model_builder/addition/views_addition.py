@@ -13,7 +13,8 @@ def open_create_object_panel(request, object_type):
     model_web = ModelWeb(request.session)
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
-    context_data = efootprint_class_web.generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
+    context_data = efootprint_class_web.generate_object_creation_context(
+        model_web, efootprint_id_of_parent_to_link_to, object_type)
     if efootprint_id_of_parent_to_link_to:
         context_data["efootprint_id_of_parent_to_link_to"] = efootprint_id_of_parent_to_link_to
 
