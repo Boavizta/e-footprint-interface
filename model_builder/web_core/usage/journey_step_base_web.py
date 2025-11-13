@@ -8,6 +8,10 @@ class JourneyStepBaseWeb(ModelingObjectWeb):
         return "h7"
 
     @property
+    def template_name(self):
+        return "journey_step"
+
+    @property
     def child_template_name(self) -> str:
         return "resource_need"
 
