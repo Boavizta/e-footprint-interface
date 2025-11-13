@@ -16,10 +16,7 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeDevice and its subclasses (EdgeComputer, EdgeAppliance)."""
     add_template = "add_edge_device.html"
     attributes_to_skip_in_forms = ["storage"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     @property
     def template_name(self):

@@ -20,10 +20,7 @@ class ServerWeb(ModelingObjectWeb):
     add_template = "add_object_with_storage.html"
     edit_template = "../server/server_edit.html"
     attributes_to_skip_in_forms = ["storage", "fixed_nb_of_instances"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     @property
     def template_name(self):

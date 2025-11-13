@@ -14,10 +14,7 @@ if TYPE_CHECKING:
 
 class ServiceWeb(ModelingObjectWeb):
     attributes_to_skip_in_forms = ["gpu_latency_alpha", "gpu_latency_beta", "server"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     @property
     def class_title_style(self):

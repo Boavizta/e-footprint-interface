@@ -30,16 +30,16 @@ class ModelingObjectWeb:
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
     attributes_to_skip_in_forms = []
+    gets_deleted_if_unique_mod_obj_container_gets_deleted = True
 
     def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None):
         self._modeling_obj = modeling_obj
         self.model_web = model_web
         self.list_container = list_container
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = True
 
     @property
     def settable_attributes(self):
-        return ["_modeling_obj", "model_web", "list_container", "gets_deleted_if_unique_mod_obj_container_gets_deleted"]
+        return ["_modeling_obj", "model_web", "list_container"]
 
     def __getattr__(self, name):
         from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
@@ -413,7 +413,8 @@ class ModelingObjectWeb:
         return context_data
 
     def generate_ask_delete_http_response(self, request):
-        if self.modeling_obj_containers:
+        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
+        if self.modeling_obj_containers and not list_containers:
             cant_delete_modal_message = self.generate_cant_delete_modal_message()
             cant_delete_modal_context = {
                 "modal_id": "model-builder-modal", "message": cant_delete_modal_message}

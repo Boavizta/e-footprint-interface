@@ -4,9 +4,7 @@ from model_builder.web_abstract_modeling_classes.modeling_object_web import Mode
 
 class JourneyBaseWeb(ModelingObjectWeb):
     """Base class for journey objects that contain journey steps and are displayed with journey_card.html."""
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     @property
     def template_name(self):
