@@ -50,16 +50,19 @@ describe("Test - Forms panel", () => {
         cy.loadEfootprintTestModel('cypress/fixtures/efootprint-model-no-job.json');
 
         cy.get("#btn-add-server").should('be.enabled').click();
-        cy.get("#sidePanelForm").should('be.visible');
-        cy.get("#type_object_available").should('be.visible').select('Server');
+        cy.wait(500); //wait for side panel animation
+        cy.get("#sidePanelForm").should('exist');
+        cy.get("#type_object_available").should('exist').select('Server');
         cy.get("#Server_name").clear().type(serverOne);
         cy.get("#Server_average_carbon_intensity").clear().type('700');
         cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#btn-submit-form").click();
         cy.get("#sidePanelForm").should('not.exist');
+        cy.getObjectCardFromObjectTypeAndName("Server", serverOne).should('exist');
 
         cy.get("#btn-add-server").should('be.enabled').click();
-        cy.get("#sidePanelForm").should('be.visible');
+        cy.wait(500); //wait for side panel animation
+        cy.get("#sidePanelForm").should('exist');
         cy.get("#type_object_available").should('exist').select('Server');
         cy.get("#advanced-Server").should('not.be.visible');
         cy.get("#Server_name").clear().type(serverTwo);
