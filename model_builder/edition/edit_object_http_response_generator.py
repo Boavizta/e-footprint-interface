@@ -37,12 +37,11 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
     if there_has_been_deletions:
         obj_to_edit.model_web.update_system_data_with_up_to_date_calculated_attributes()
 
-    for top_parent_card in list(set([mirrored_card.top_parent for mirrored_card in
-                               edited_obj.mirrored_cards])):
+    for mirrored_card in mirrored_cards:
         response_html += (
-            f"<div hx-swap-oob='outerHTML:#{top_parent_card.web_id}'>"
-            f"{render_to_string(f'model_builder/object_cards/{top_parent_card.template_name}_card.html',
-                                {"object": top_parent_card})}"
+            f"<div hx-swap-oob='outerHTML:#{mirrored_card.web_id}'>"
+            f"{render_to_string(f'model_builder/object_cards/{mirrored_card.template_name}_card.html',
+                                {"object": mirrored_card})}"
             f"</div>"
         )
 

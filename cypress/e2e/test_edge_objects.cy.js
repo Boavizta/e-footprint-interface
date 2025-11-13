@@ -513,7 +513,6 @@ describe('Test edge objects', () => {
         // First expand the EdgeFunction accordion to reveal the RecurrentEdgeDeviceNeed
         // Use specific selector to get only the top-level chevron button (not nested children's chevrons)
         cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
-        cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
         cy.get('#edge_component').select(cpuComponentName);
@@ -530,8 +529,7 @@ describe('Test edge objects', () => {
         });
 
         // Step 8: Add RecurrentEdgeComponentNeed for RAM
-        // The accordion auto-collapses after adding the first component need, so expand EdgeFunction and RecurrentEdgeDeviceNeed again
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        // The accordion auto-collapses after adding the first component need, so expand RecurrentEdgeDeviceNeed again
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
@@ -549,8 +547,7 @@ describe('Test edge objects', () => {
         });
 
         // Step 9: Verify unit changes dynamically when switching components
-        // Expand EdgeFunction and RecurrentEdgeDeviceNeed again
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        // Expand RecurrentEdgeDeviceNeed again
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('button[hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"]').click();
         cy.get('#sidePanel').should('be.visible');
@@ -581,8 +578,7 @@ describe('Test edge objects', () => {
         cy.get('#sidePanel').should('not.contain.html');
 
         // Step 10: Edit CPU component need and verify changes
-        // Expand EdgeFunction and RecurrentEdgeDeviceNeed to access the component needs
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first().find('.accordion-header > .chevron-btn').first().click();
+        // Expand RecurrentEdgeDeviceNeed to access the component needs
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first().find('.accordion-header > .chevron-btn').first().click();
         cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeComponentNeed", cpuComponentNeedName).click();
         cy.get('#sidePanel').should('be.visible');
@@ -592,9 +588,7 @@ describe('Test edge objects', () => {
         cy.get('#sidePanel').should('not.contain.html');
 
         // Verify edit was saved
-        // Expand EdgeFunction and RecurrentEdgeDeviceNeed to verify the edit
-        cy.getObjectCardFromObjectTypeAndName("EdgeFunction", edgeFunctionName).first()
-            .find('.accordion-header > .chevron-btn').first().click();
+        // Expand RecurrentEdgeDeviceNeed to verify the edit
         cy.getObjectCardFromObjectTypeAndName("RecurrentEdgeDeviceNeed", recurrentEdgeDeviceNeedName).first()
             .find('.accordion-header > .chevron-btn').first().click();
         cy.getObjectButtonFromObjectTypeAndName("RecurrentEdgeComponentNeed", cpuComponentNeedName).click();
