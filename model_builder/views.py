@@ -21,8 +21,9 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
-from model_builder.web_core.model_web_utils import to_rounded_daily_values, reindex_array
 from model_builder.web_core.model_web import ModelWeb
+from model_builder.web_core.explainable_timeseries_utils import (
+    prepare_timeseries_chart_context, prepare_hourly_quantity_data, prepare_recurrent_quantity_data)
 from model_builder.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
@@ -89,7 +90,7 @@ def upload_json(request):
     import_error_message = ""
     initial_session_data = request.session.get("system_data", None)
     data = None
-    
+
     if "import-json-input" in request.FILES:
         file = request.FILES["import-json-input"]
         try:
@@ -103,7 +104,7 @@ def upload_json(request):
         finally:
             if file:
                 file.close()
-        
+
         if data and not import_error_message:
             try:
                 if "efootprint_version" not in data.keys():
@@ -140,7 +141,7 @@ def upload_json(request):
     context = {"import_error_modal_id": "error-import-modal", "import_error_message": import_error_message}
     if model_web:
         context["model_web"] = model_web
-    
+
     http_response = render(request, "model_builder/model_builder_main.html", context=context)
     http_response["HX-Trigger-After-Swap"] = json.dumps({"openModalDialog": {"modal_id": "error-import-modal"}})
 
@@ -246,41 +247,11 @@ def download_sources(request):
 def get_explainable_hourly_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
     model_web = ModelWeb(request.session)
-    edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
-    web_attr = getattr(edited_web_obj, attr_name)
-    if id_of_key_in_dict is None:
-        web_ehq = web_attr
-    else:
-        web_ehq = ExplainableObjectWeb(
-            web_attr.efootprint_object[
-                model_web.get_efootprint_object_from_efootprint_id(
-                    id_of_key_in_dict,
-                    "object_type unnecessary because the usage pattern necessarily already belongs to the system")],
-            model_web)
+    context, _ = prepare_timeseries_chart_context(
+        model_web, efootprint_id, attr_name, prepare_hourly_quantity_data, id_of_key_in_dict)
 
-    if web_ehq.start_date.hour == 0:
-        reindexed_values = web_ehq.value
-        start_date_starting_at_midnight = web_ehq.start_date
-    else:
-        start_date_starting_at_midnight = web_ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        reindexed_values = reindex_array(
-            web_ehq, start_date_starting_at_midnight, len(web_ehq.value) + web_ehq.start_date.hour)
-    n_days = math.ceil(len(reindexed_values) / 24)
-    start = np.datetime64(start_date_starting_at_midnight, "D")
-    dates = (start + np.arange(n_days)).astype(str).tolist()
-    daily_data = to_rounded_daily_values(reindexed_values)
-    data_dict = dict(zip(dates, daily_data))
-    aggregation_strategy = web_ehq.efootprint_object.plot_aggregation_strategy
-    literal_formula, ancestors_mapped_to_symbols_list = (
-        web_ehq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
-
-    context = {
-        "web_ehq": web_ehq,
-        "data_timeseries": data_dict,
-        "literal_formula": literal_formula,
-        "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
-        "aggregation_strategy": aggregation_strategy,
-    }
+    # Rename for template compatibility
+    context["web_ehq"] = context.pop("web_explainable")
 
     return render(
         request,
@@ -291,27 +262,11 @@ def get_explainable_hourly_quantity_chart_and_explanation(
 def get_explainable_recurrent_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str):
     model_web = ModelWeb(request.session)
-    edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
-    web_erq = getattr(edited_web_obj, attr_name)
+    context, _ = prepare_timeseries_chart_context(
+        model_web, efootprint_id, attr_name, prepare_recurrent_quantity_data)
 
-    # For recurrent quantities, we have 168 values representing a canonical week (24h × 7 days)
-    recurrent_values = web_erq.value
-
-    # Create hour labels for the week (0-167)
-    hours = list(range(len(recurrent_values)))
-
-    # Create data dict mapping hour index to value
-    data_dict = {str(hour): float(val) for hour, val in zip(hours, recurrent_values.magnitude)}
-
-    literal_formula, ancestors_mapped_to_symbols_list = (
-        web_erq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
-
-    context = {
-        "web_erq": web_erq,
-        "data_timeseries": data_dict,
-        "literal_formula": literal_formula,
-        "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
-    }
+    # Rename for template compatibility
+    context["web_erq"] = context.pop("web_explainable")
 
     return render(
         request,

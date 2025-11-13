@@ -66,84 +66,26 @@ function closeCalculatedAttributesChart() {
     window.calculatedAttributesChart = null;
 }
 
-function createOrUpdateCalculatedAttributeChart() {
-    function resetCanvas(canva) {
-      // Remove inline styles that might affect size
-      canva.style.width = "";
-      canva.style.height = "";
-      canva.style.maxWidth = "";
-      canva.style.maxHeight = "";
+// ========== Common Chart Utilities ==========
 
-      // Set fixed size (essential for reset to work)
-      canva.width = canva.parentElement.clientWidth;
-      canva.height = 400;
+function resetCanvas(canva) {
+    // Remove inline styles that might affect size
+    canva.style.width = "";
+    canva.style.height = "";
+    canva.style.maxWidth = "";
+    canva.style.maxHeight = "";
 
-      // Clear drawing area to be safe
-      const ctx = canva.getContext("2d");
-      ctx.clearRect(0, 0, canva.width, canva.height);
-    }
-    let canva = document.getElementById("chart-render-calculated-attribute");
+    // Set fixed size (essential for reset to work)
+    canva.width = canva.parentElement.clientWidth;
+    canva.height = 400;
 
-    if (window.calculatedAttributesChart !== null) {
-        window.calculatedAttributesChart.destroy();
-        window.calculatedAttributesChart = null;
-        resetCanvas(canva);
-    }
-
-    let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
-    let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({
-        x: date,
-        y: value
-    }));
-    let labelUnit = document.getElementById("calculate-attribute-label");
-    let label = labelUnit.dataset.label;
-    let unit = labelUnit.dataset.unit || "";
-
-    window.calculatedAttributesChart = new Chart(canva.getContext("2d"), {
-        type: "line",
-        data: {
-            datasets: [{
-                label: label + (unit ? ` (${unit})` : ""),
-                data: timeSeries,
-                borderColor: "#007bff",
-                fill: false,
-                pointRadius: 2,
-                tension: 0.1
-            }]
-        },
-        options: {
-            ...calculatedAttributeChartJSOptions,
-            scales: {
-                ...calculatedAttributeChartJSOptions.scales,
-                y: {
-                    ...calculatedAttributeChartJSOptions.scales.y,
-                    title: {
-                        ...calculatedAttributeChartJSOptions.scales.y.title,
-                        text: label + (unit ? ` (${unit})` : "")
-                    }
-                }
-            }
-        }
-    });
+    // Clear drawing area to be safe
+    const ctx = canva.getContext("2d");
+    ctx.clearRect(0, 0, canva.width, canva.height);
 }
 
-function createOrUpdateRecurrentQuantityChart() {
-    function resetCanvas(canva) {
-      // Remove inline styles that might affect size
-      canva.style.width = "";
-      canva.style.height = "";
-      canva.style.maxWidth = "";
-      canva.style.maxHeight = "";
-
-      // Set fixed size (essential for reset to work)
-      canva.width = canva.parentElement.clientWidth;
-      canva.height = 400;
-
-      // Clear drawing area to be safe
-      const ctx = canva.getContext("2d");
-      ctx.clearRect(0, 0, canva.width, canva.height);
-    }
-    let canva = document.getElementById("chart-render-recurrent-attribute");
+function prepareChartCanvas(canvasId) {
+    let canva = document.getElementById(canvasId);
 
     if (window.calculatedAttributesChart !== null) {
         window.calculatedAttributesChart.destroy();
@@ -151,27 +93,17 @@ function createOrUpdateRecurrentQuantityChart() {
         resetCanvas(canva);
     }
 
-    let hourlyData = JSON.parse(document.getElementById('data_timeseries').textContent);
+    return canva;
+}
 
-    // Convert hour indices to day labels for the canonical week
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-    // Create time labels in format "Day HH:00"
-    let timeSeries = Object.entries(hourlyData).map(([hourStr, value]) => {
-        let hour = parseInt(hourStr);
-        let dayIndex = Math.floor(hour / 24);
-        let hourOfDay = hour % 24;
-        return {
-            x: hour,  // Use numeric hour for proper sorting/spacing
-            y: value,
-            label: `${dayNames[dayIndex]} ${hourOfDay.toString().padStart(2, '0')}:00`
-        };
-    });
-
+function extractLabelAndUnit() {
     let labelUnit = document.getElementById("calculate-attribute-label");
     let label = labelUnit.dataset.label;
     let unit = labelUnit.dataset.unit || "";
+    return { label, unit };
+}
 
+function createChart(canva, timeSeries, label, unit, chartConfig) {
     window.calculatedAttributesChart = new Chart(canva.getContext("2d"), {
         type: "line",
         data: {
@@ -180,7 +112,7 @@ function createOrUpdateRecurrentQuantityChart() {
                 data: timeSeries,
                 borderColor: "#007bff",
                 fill: false,
-                pointRadius: 1,
+                pointRadius: chartConfig.pointRadius || 2,
                 tension: 0.1
             }]
         },
@@ -189,35 +121,7 @@ function createOrUpdateRecurrentQuantityChart() {
             responsive: true,
             maintainAspectRatio: true,
             scales: {
-                x: {
-                    type: 'linear',
-                    title: {
-                        display: true,
-                        text: 'Hour of Week'
-                    },
-                    ticks: {
-                        // Show day boundaries (every 24 hours)
-                        callback: function(value, index, ticks) {
-                            if (value % 24 === 0) {
-                                let dayIndex = Math.floor(value / 24);
-                                return dayNames[dayIndex];
-                            }
-                            return '';
-                        },
-                        maxRotation: 45,
-                        minRotation: 45
-                    },
-                    grid: {
-                        display: true,
-                        // Highlight day boundaries
-                        color: function(context) {
-                            if (context.tick.value % 24 === 0) {
-                                return 'rgba(0, 0, 0, 0.2)';
-                            }
-                            return 'rgba(0, 0, 0, 0.05)';
-                        }
-                    }
-                },
+                x: chartConfig.xScale,
                 y: {
                     display: true,
                     title: {
@@ -227,29 +131,77 @@ function createOrUpdateRecurrentQuantityChart() {
                     beginAtZero: true
                 }
             },
-            plugins: {
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].raw.label;
-                        },
-                        label: function(context) {
-                            let value = context.parsed.y;
-                            if (value !== null && value !== undefined) {
-                                value = value.toFixed(1);
-                            }
-                            return `${label}: ${value}${unit ? ' ' + unit : ''}`;
-                        }
+            plugins: chartConfig.plugins || calculatedAttributeChartJSOptions.plugins
+        }
+    });
+}
+
+// ========== Specific Chart Creators ==========
+
+function createOrUpdateCalculatedAttributeChart() {
+    let canva = prepareChartCanvas("chart-render-calculated-attribute");
+    let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
+    let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({ x: date, y: value }));
+    let { label, unit } = extractLabelAndUnit();
+
+    createChart(canva, timeSeries, label, unit, {
+        xScale: calculatedAttributeChartJSOptions.scales.x,
+        pointRadius: 2
+    });
+}
+
+function createOrUpdateRecurrentQuantityChart() {
+    let canva = prepareChartCanvas("chart-render-recurrent-attribute");
+    let hourlyData = JSON.parse(document.getElementById('data_timeseries').textContent);
+
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    // Create time labels in format "Day HH:00"
+    let timeSeries = Object.entries(hourlyData).map(([hourStr, value]) => {
+        let hour = parseInt(hourStr);
+        let dayIndex = Math.floor(hour / 24);
+        let hourOfDay = hour % 24;
+        return {
+            x: hour,
+            y: value,
+            label: `${dayNames[dayIndex]} ${hourOfDay.toString().padStart(2, '0')}:00`
+        };
+    });
+
+    let { label, unit } = extractLabelAndUnit();
+
+    createChart(canva, timeSeries, label, unit, {
+        xScale: {
+            type: 'linear',
+            title: { display: true, text: 'Hour of Week' },
+            ticks: {
+                callback: function(value) {
+                    if (value % 24 === 0) {
+                        return dayNames[Math.floor(value / 24)];
                     }
+                    return '';
                 },
-                legend: { display: false },
-                zoom: {
-                    zoom: {
-                        drag: {enabled: true},
-                        pinch: {enabled: true},
-                        mode: 'x',
+                maxRotation: 45,
+                minRotation: 45
+            },
+            grid: {
+                display: true,
+                color: function(context) {
+                    return context.tick.value % 24 === 0 ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.05)';
+                }
+            }
+        },
+        pointRadius: 1,
+        plugins: {
+            ...calculatedAttributeChartJSOptions.plugins,
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    title: function(context) { return context[0].raw.label; },
+                    label: function(context) {
+                        let value = context.parsed.y?.toFixed(1);
+                        return `${label}: ${value}${unit ? ' ' + unit : ''}`;
                     }
                 }
             }
