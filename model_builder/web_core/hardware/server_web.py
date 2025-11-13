@@ -2,6 +2,7 @@ import json
 from typing import TYPE_CHECKING
 
 from django.http import QueryDict
+from django.shortcuts import render
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
@@ -50,9 +51,27 @@ class ServerWeb(ModelingObjectWeb):
 
         return super().edit_object_and_return_html_response(edit_form_data)
 
+    def generate_ask_delete_http_response(self, request):
+        if self.jobs:
+            return super().generate_ask_delete_http_response(request)
+        else:
+            delete_modal_context = self.generate_ask_delete_modal_context()
+            delete_modal_context["modal_id"] = "model-builder-modal"
+
+            http_response = render(
+                request, "model_builder/modals/delete_card_modal.html",
+                context=delete_modal_context)
+            return http_response
+
     def generate_cant_delete_modal_message(self):
         if self.jobs:
             msg = (f"This server is requested by {", ".join([obj.name for obj in self.jobs])}. "
                    f"To delete it, first delete or reorient these jobs making requests to it.")
             return msg
         return super().generate_cant_delete_modal_message()
+
+    def self_delete(self):
+        services = self.installed_services
+        for service in services:
+            service.self_delete()
+        super().self_delete()
