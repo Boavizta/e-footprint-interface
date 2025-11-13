@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
 
 
-class EdgeComponentBaseWeb(ModelingObjectWeb):
+class EdgeComponentWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeComponent and its subclasses."""
     @property
     def template_name(self):
@@ -31,7 +31,7 @@ class EdgeComponentBaseWeb(ModelingObjectWeb):
 
         available_component_types = [EdgeCPUComponent, EdgeRAMComponent, EdgeStorage, EdgeWorkloadComponent]
         components_dict, dynamic_form_data = generate_object_creation_structure(
-            "EdgeComponentBase",
+            "EdgeComponent",
             available_efootprint_classes=available_component_types,
             model_web=model_web,
         )
@@ -40,8 +40,8 @@ class EdgeComponentBaseWeb(ModelingObjectWeb):
             "edge_device": edge_device,
             "form_sections": components_dict,
             "dynamic_form_data": dynamic_form_data,
-            "object_type": "EdgeComponentBase",
-            "obj_formatting_data": FORM_TYPE_OBJECT["EdgeComponentBase"],
+            "object_type": "EdgeComponent",
+            "obj_formatting_data": FORM_TYPE_OBJECT["EdgeComponent"],
             "header_name": "Add new component"
         }
 

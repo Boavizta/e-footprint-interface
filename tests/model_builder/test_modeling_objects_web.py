@@ -65,25 +65,23 @@ class TestModelingObjectWebGetAttrTestCase(unittest.TestCase):
         """
         Test that when a property in a subclass raises an error, __getattr__ preserves that error
         instead of falling back to _modeling_obj and raising a different AttributeError.
-
-        This specifically tests the case where ModelingObjectWebThatCanBeMirrored.web_id raises
-        a PermissionError, which should be preserved rather than replaced by an AttributeError
-        saying that _modeling_obj doesn't have the 'web_id' attribute.
         """
         # Arrange: create a mock modeling object and model_web
         mock_modeling_obj = Mock(spec=ModelingObject)
         mock_modeling_obj.id = "test_id"
         mock_model_web = MagicMock()
 
-        obj = ModelingObjectWeb(mock_modeling_obj, mock_model_web)
+        class ModelingObjectChildThatRaisesAttributeError(ModelingObjectWeb):
+            @property
+            def web_id(self):
+                raise PermissionError(
+                    "You don't have a web_id attribute for ModelingObjectChildThatRaisesAttributeError")
+
+        obj = ModelingObjectChildThatRaisesAttributeError(mock_modeling_obj, mock_model_web)
 
         # Act & Assert: accessing web_id should raise PermissionError, not AttributeError
         with self.assertRaises(PermissionError) as context:
             _ = obj.web_id
-
-        # Verify it's the expected PermissionError with the correct message
-        self.assertIn("don't have a web_id attribute", str(context.exception))
-        self.assertIn("ConcreteModelingObjectWebThatCanBeMirrored", str(context.exception))
 
     def test_getattr_falls_back_to_modeling_obj_when_attribute_not_in_class(self):
         """

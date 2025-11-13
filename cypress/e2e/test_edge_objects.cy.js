@@ -448,7 +448,7 @@ describe('Test edge objects', () => {
         // Step 2: Add CPU component to the EdgeDevice
         // First expand the EdgeDevice accordion to reveal the add button
         cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('.chevron-btn').click();
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponentBase/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponent/"]').click();
         cy.get("#sidePanelForm").should("be.visible");
         cy.get("#type_object_available").select("EdgeCPUComponent");
         cy.get("#EdgeCPUComponent_name").should("be.visible").type(cpuComponentName);
@@ -463,7 +463,7 @@ describe('Test edge objects', () => {
         // Step 3: Add RAM component to the EdgeDevice
         // The accordion auto-collapses after adding the first component, so expand it again
         cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('.chevron-btn').click();
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponentBase/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponent/"]').click();
         cy.get("#sidePanelForm").should("be.visible");
         cy.get("#type_object_available").select("EdgeRAMComponent");
         cy.get("#EdgeRAMComponent_name").should("be.visible").type(ramComponentName);
@@ -614,7 +614,7 @@ describe('Test edge objects', () => {
         cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).should("exist");
 
         // Step 2: Add CPU component to the EdgeDevice
-        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponentBase/"]').click();
+        cy.getObjectCardFromObjectTypeAndName("EdgeDevice", edgeDeviceName).find('button[hx-get*="/model_builder/open-create-object-panel/EdgeComponent/"]').click();
         cy.get("#sidePanelForm").should("be.visible");
         cy.get("#type_object_available").select("EdgeCPUComponent");
         cy.get("#EdgeCPUComponent_name").should("be.visible").type(cpuComponentName);

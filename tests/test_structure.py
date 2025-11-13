@@ -154,7 +154,7 @@ class TestsClassStructure(TestCase):
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
             if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase", "JobBase",
-                                        "RecurrentEdgeDeviceNeedBase", "EdgeComponentBase"]:
+                                        "RecurrentEdgeDeviceNeedBase", "EdgeComponent"]:
                 continue
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
             init_sig_params = get_init_signature_params(efootprint_obj_class)

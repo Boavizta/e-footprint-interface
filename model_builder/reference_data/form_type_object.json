@@ -19,7 +19,7 @@
         "label": "Edge appliance",
         "more_descriptive_label_for_select_inputs": "Edge appliance (simple workload-based device)"
     },
-    "EdgeComponentBase": {
+    "EdgeComponent": {
         "label": "Component",
         "type_object_available": "Available component types"
     },
