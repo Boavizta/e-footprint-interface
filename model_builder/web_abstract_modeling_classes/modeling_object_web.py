@@ -319,7 +319,7 @@ class ModelingObjectWeb:
         if object_to_link_to_id is None:
             response = render(
                 request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
-                {added_obj.template_name: added_obj})
+                {"object": added_obj})
 
             response["HX-Trigger-After-Swap"] = json.dumps({
                 "resetLeaderLines": "",

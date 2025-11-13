@@ -70,7 +70,7 @@ class ServiceWeb(ModelingObjectWeb):
         added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
         response = render(request, "model_builder/object_cards/service_card.html",
-                          context={"service": added_obj})
+                          context={"object": added_obj})
         response["HX-Trigger-After-Swap"] = json.dumps({
             "displayToastAndHighlightObjects": {
                 "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}

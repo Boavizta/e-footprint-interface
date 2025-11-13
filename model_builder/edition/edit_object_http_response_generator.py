@@ -19,7 +19,8 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
     edited_obj = edit_object_in_system(edit_form_data, obj_to_edit)
 
     accordion_children_after_edit = {}
-    for mirrored_card in edited_obj.mirrored_cards:
+    mirrored_cards = edited_obj.mirrored_cards
+    for mirrored_card in mirrored_cards:
         accordion_children_after_edit[mirrored_card] = copy(mirrored_card.accordion_children)
     response_html = ""
 
@@ -41,7 +42,7 @@ def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_t
         response_html += (
             f"<div hx-swap-oob='outerHTML:#{top_parent_card.web_id}'>"
             f"{render_to_string(f'model_builder/object_cards/{top_parent_card.template_name}_card.html',
-                                {top_parent_card.template_name: top_parent_card})}"
+                                {"object": top_parent_card})}"
             f"</div>"
         )
 

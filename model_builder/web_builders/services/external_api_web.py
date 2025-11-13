@@ -77,7 +77,7 @@ class ExternalApiWeb(ModelingObjectWeb):
         model_web.add_new_efootprint_object_to_system(new_service)
 
         response = render(
-            request, "model_builder/object_cards/server_card.html", {"server": new_server_web})
+            request, "model_builder/object_cards/server_card.html", {"object": new_server_web})
         response["HX-Trigger-After-Swap"] = json.dumps({
             "displayToastAndHighlightObjects": {
                 "ids": [new_server_web.web_id], "name": new_server_web.name, "action_type": "add_new_object"}

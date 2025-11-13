@@ -1,20 +1,20 @@
-<div id="{{ usage_pattern.web_id }}"
+<div id="{{ object.web_id }}"
      class="leader-line-object list-group-item mb-3 py-2 ps-2 pe-0 rounded-3 model-builder-card grab"
-     data-link-to="{{ usage_pattern.links_to }}" data-line-opt="{{ usage_pattern.data_line_opt }}">
-    <button id="button-{{ usage_pattern.web_id }}"
+     data-link-to="{{ object.links_to }}" data-line-opt="{{ object.data_line_opt }}">
+    <button id="button-{{ object.web_id }}"
             class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center w-100"
             type="button"
-            hx-get="/model_builder/open-edit-object-panel/{{ usage_pattern.efootprint_id }}"
+            hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}"
             hx-target="#sidePanel"
             hx-trigger="click"
             hx-swap="innerHTML"
             hx-disabled-elt="button"
             _="
-                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ usage_pattern.web_id }}
-                on mouseout add .d-none to #edit-icon-{{ usage_pattern.web_id }}
-                on mouseover remove .d-none from #edit-icon-{{ usage_pattern.web_id }}
+                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ object.web_id }}
+                on mouseout add .d-none to #edit-icon-{{ object.web_id }}
+                on mouseover remove .d-none from #edit-icon-{{ object.web_id }}
             "
     >
-        {% include 'model_builder/components/button_card_header.html' with object_card=usage_pattern %}
+        {% include 'model_builder/components/button_card_header.html' with object_card=object %}
     </button>
 </div>

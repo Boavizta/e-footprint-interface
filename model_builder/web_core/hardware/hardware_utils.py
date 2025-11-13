@@ -80,7 +80,7 @@ def add_new_object_with_storage(request, model_web: "ModelWeb", storage_type: st
     added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
     response = render(
-        request, f"model_builder/object_cards/{added_obj.template_name}_card.html", {added_obj.template_name: added_obj})
+        request, f"model_builder/object_cards/{added_obj.template_name}_card.html", {"object": added_obj})
     response["HX-Trigger-After-Swap"] = json.dumps({
         "displayToastAndHighlightObjects": {
             "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}

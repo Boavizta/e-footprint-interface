@@ -1,59 +1,59 @@
 {% load static %}
-<div id="{{ edge_device_with_accordion.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab rounded-3">
+<div id="{{ object.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab rounded-3">
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <div class="accordion-header p-0 d-flex align-items-center">
                 <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0"
                         data-bs-toggle="collapse"
-                        data-bs-target="#flush-{{ edge_device_with_accordion.web_id }}"
-                        onclick="reverseIconAccordion('{{ edge_device_with_accordion.web_id }}')"
-                        aria-expanded="{% if edge_device_with_accordion.components|length == 0 %}true{% else %}false{% endif %}"
-                        aria-controls="flush-{{ edge_device_with_accordion.web_id }}">
-                        <svg id="icon_accordion_{{ edge_device_with_accordion.web_id }}" xmlns="http://www.w3.org/2000/svg"
+                        data-bs-target="#flush-{{ object.web_id }}"
+                        onclick="reverseIconAccordion('{{ object.web_id }}')"
+                        aria-expanded="{% if object.components|length == 0 %}true{% else %}false{% endif %}"
+                        aria-controls="flush-{{ object.web_id }}">
+                        <svg id="icon_accordion_{{ object.web_id }}" xmlns="http://www.w3.org/2000/svg"
                              width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
-                             class="bi bi-chevron-right {% if edge_device_with_accordion.components|length == 0 %}chevron-rotate{% endif %}"
+                             class="bi bi-chevron-right {% if object.components|length == 0 %}chevron-rotate{% endif %}"
                              viewBox="0 0 16 16">
                             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
                         </svg>
                 </button>
-                <button id="button-{{ edge_device_with_accordion.web_id }}"
+                <button id="button-{{ object.web_id }}"
                         class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between w-100 text-break position-relative"
                         type="button"
-                        hx-get="/model_builder/open-edit-object-panel/{{ edge_device_with_accordion.efootprint_id }}/"
+                        hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
                         hx-target="#sidePanel"
                         hx-trigger="click"
                         hx-swap="innerHTML"
                         hx-disabled-elt="button"
                         _="
-                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ edge_device_with_accordion.web_id }}
-                            on mouseover remove .d-none from #edit-icon-{{ edge_device_with_accordion.web_id }}
-                            on mouseout add .d-none to #edit-icon-{{ edge_device_with_accordion.web_id }}
+                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ object.web_id }}
+                            on mouseover remove .d-none from #edit-icon-{{ object.web_id }}
+                            on mouseout add .d-none to #edit-icon-{{ object.web_id }}
                         "
                 >
-                    {% include 'model_builder/components/button_card_header.html' with object_card=edge_device_with_accordion %}
+                    {% include 'model_builder/components/button_card_header.html' with object_card=object %}
                 </button>
             </div>
-            <div id="flush-{{ edge_device_with_accordion.web_id }}"
-                 class="accordion-collapse collapse accordion-all  {% if edge_device_with_accordion.components|length == 0 %}show{% endif %}"
-                 data-bs-parent="#{{ edge_device_with_accordion.web_id }}">
+            <div id="flush-{{ object.web_id }}"
+                 class="accordion-collapse collapse accordion-all  {% if object.components|length == 0 %}show{% endif %}"
+                 data-bs-parent="#{{ object.web_id }}">
                 <div class="accordion-body text-start">
                     <p class="h7">Components</p>
-                    <div class="w-100 mx-0 my-0 align-items-center rounded-2 bg-white" id="{{ edge_device_with_accordion.web_id }}-components">
-                        {% for component in edge_device_with_accordion.components %}
-                            {%  include 'model_builder/object_cards/edge_component_card.html' with component=component %}
+                    <div class="w-100 mx-0 my-0 align-items-center rounded-2 bg-white" id="{{ object.web_id }}-components">
+                        {% for component in object.components %}
+                            {%  include 'model_builder/object_cards/edge_component_card.html' with object=component %}
                         {% endfor %}
                         <button
-                            id="add-component-to-{{ edge_device_with_accordion.web_id }}"
+                            id="add-component-to-{{ object.web_id }}"
                             class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2"
                             hx-get="/model_builder/open-create-object-panel/EdgeComponentBase/"
                             hx-target="#sidePanel"
                             hx-trigger="click"
                             hx-swap="innerHTML"
                             hx-disabled-elt="button"
-                            hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ edge_device_with_accordion.efootprint_id }}"}'
+                            hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ object.efootprint_id }}"}'
                             _="on click removeAllOpenedObjectsHighlights()"
                             >
-                                <p class='h8 mb-0 text-break text-addition' id="name-{{ object_card.web_id }}">
+                                <p class='h8 mb-0 text-break text-addition'>
                                     Add component
                                 </p>
                         </button>
