@@ -287,6 +287,37 @@ def get_explainable_hourly_quantity_chart_and_explanation(
         "model_builder/side_panels/edit/calculated_attributes/calculated_attribute_chart.html", context=context)
 
 
+@time_it
+def get_explainable_recurrent_quantity_chart_and_explanation(
+    request, efootprint_id: str, attr_name: str):
+    model_web = ModelWeb(request.session)
+    edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
+    web_erq = getattr(edited_web_obj, attr_name)
+
+    # For recurrent quantities, we have 168 values representing a canonical week (24h × 7 days)
+    recurrent_values = web_erq.value
+
+    # Create hour labels for the week (0-167)
+    hours = list(range(len(recurrent_values)))
+
+    # Create data dict mapping hour index to value
+    data_dict = {str(hour): float(val) for hour, val in zip(hours, recurrent_values.magnitude)}
+
+    literal_formula, ancestors_mapped_to_symbols_list = (
+        web_erq.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
+
+    context = {
+        "web_erq": web_erq,
+        "data_timeseries": data_dict,
+        "literal_formula": literal_formula,
+        "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
+    }
+
+    return render(
+        request,
+        "model_builder/side_panels/edit/calculated_attributes/recurrent_attribute_chart.html", context=context)
+
+
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
     model_web = ModelWeb(request.session)
     explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)

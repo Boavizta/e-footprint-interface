@@ -1,1 +1,18 @@
-To implement
+{% load static %}
+
+<div class="row mb-3">
+    <p class="col-auto col-form-label">{{ item.attr_name_web|capfirst }}</p>
+    <div class="col-auto d-flex gap-1">
+        <button class="btn btn-light p-1"
+             hx-get="{% url 'get_explainable_recurrent_quantity_chart_and_explanation' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container %}"
+             hx-target="#chart-calculated-attribute"
+             hx-trigger="click"
+             hx-swap="innerHTML"
+             hx-disabled-elt="button"
+             _="on click openCalculatedAttributesChart()"
+        >
+            <img src="{% static 'icons/timeseries-chart.svg' %}" width="16" height="16" alt="calculus-graph-icon">
+        </button>
+        {% include "model_builder/side_panels/edit/calculated_attributes/components/calculus_graph_link.html" %}
+    </div>
+</div>

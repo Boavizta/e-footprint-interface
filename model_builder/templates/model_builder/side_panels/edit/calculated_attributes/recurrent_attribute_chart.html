@@ -1,0 +1,26 @@
+{% load static %}
+<div class="w-100 d-flex flex-row justify-content-between mb-3">
+    <h5 id="calculate-attribute-label"
+        data-label="{{ web_erq.attr_name_web }}"
+        data-unit="{{ web_erq.unit }}"
+    >{{ web_erq.attr_name_web|capfirst }} in <a
+                href="#"
+                hx-get="/model_builder/open-edit-object-panel/{{ web_erq.modeling_obj_container.efootprint_id }}/"
+                hx-target="#sidePanel"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                hx-disabled-elt="button"
+            >{{ web_erq.modeling_obj_container.name }}</a></h5>
+    <button type="button" class="btn btn-white" aria-label="Close" onclick="closeCalculatedAttributesChart()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+        </svg>
+    </button>
+</div>
+{{ data_timeseries|json_script:"data_timeseries" }}
+<canvas id="chart-render-recurrent-attribute" class="mb-3"
+    _="on load createOrUpdateRecurrentQuantityChart()"
+></canvas>
+<p class="text-muted small mb-3">This chart shows the values for a canonical week (168 hours = 7 days × 24 hours). The pattern repeats every week.</p>
+{% include "model_builder/side_panels/edit/calculated_attributes/components/ancestors_formula_and_children.html" with explained_obj=web_erq %}
+{% include "model_builder/side_panels/edit/calculated_attributes/components/calculus_graph_link.html" with calculus_graph_link_text="See the calculus graph" item=web_erq %}
