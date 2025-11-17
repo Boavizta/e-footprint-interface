@@ -174,7 +174,10 @@ function createOrUpdateRecurrentQuantityChart() {
         xScale: {
             type: 'linear',
             title: { display: true, text: 'Hour of Week' },
+            min: 0,
+            max: 167,
             ticks: {
+                stepSize: 24,
                 callback: function(value) {
                     if (value % 24 === 0) {
                         return dayNames[Math.floor(value / 24)];
