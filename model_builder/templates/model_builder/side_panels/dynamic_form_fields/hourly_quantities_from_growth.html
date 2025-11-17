@@ -2,114 +2,133 @@
      data-static-source="true"
      data-default-name="{{ field.source.name }}"
      data-source-url="{{ field.source.link }}">
-    <!-- Start Date -->
-    <div class="mb-3">
-        <label for="{{ field.web_id }}__start_date" class="form-label">Start date</label>
-        <input type="text" class="form-control p-2"
-               name="{{ field.web_id }}__start_date"
-               id="{{ field.web_id }}__start_date"
-               value="{{ field.default.start_date }}"
-               data-default-value="{{ field.default.start_date }}"
-               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
-               required
-        >
-    </div>
+    <div class="accordion accordion-panel" id="{{ field.web_id }}__usage_projection">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button fs-3xl" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{{ field.web_id }}__usage_projection_panel"
+                        aria-expanded="true"
+                        aria-controls="{{ field.web_id }}__usage_projection_panel">
+                    Build my usage volume projection
+                </button>
+            </h2>
+            <div id="{{ field.web_id }}__usage_projection_panel"
+                 class="accordion-collapse collapse show"
+                 data-bs-parent="#{{ field.web_id }}__usage_projection">
+                <div class="accordion-body">
+                    <!-- Start Date -->
+                    <div class="mb-3">
+                        <label for="{{ field.web_id }}__start_date" class="form-label">Start date</label>
+                        <input type="text" class="form-control p-2"
+                               name="{{ field.web_id }}__start_date"
+                               id="{{ field.web_id }}__start_date"
+                               value="{{ field.default.start_date }}"
+                               data-default-value="{{ field.default.start_date }}"
+                               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+                               required
+                        >
+                    </div>
 
-    <!-- Modeling Duration -->
-    <div class="mb-3">
-        <label for="{{ field.web_id }}__modeling_duration_value" class="form-label w-100">Modeling duration</label>
-        <div class="input-group">
-            <input type="number" class="form-control input_with_add_on"
-                   name="{{ field.web_id }}__modeling_duration_value"
-                   id="{{ field.web_id }}__modeling_duration_value"
-                   value="{{ field.default.modeling_duration_value }}"
-                   max="{% if field.default.modeling_duration_unit == 'year' %}10{% else %}120{% endif %}"
-                   aria-describedby="basic-addon3 basic-addon4"
-                   required
-                   data-default-value="{{ field.default.modeling_duration_value }}"
-                   data-associated-unit-id="{{ field.web_id }}__modeling_duration_unit"
-                   _="on input if my value is not empty applyMaxLimitOnModelingDurationValue()
+                    <!-- Modeling Duration -->
+                    <div class="mb-3">
+                        <label for="{{ field.web_id }}__modeling_duration_value" class="form-label w-100">Modeling duration</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control input_with_add_on"
+                                   name="{{ field.web_id }}__modeling_duration_value"
+                                   id="{{ field.web_id }}__modeling_duration_value"
+                                   value="{{ field.default.modeling_duration_value }}"
+                                   max="{% if field.default.modeling_duration_unit == 'year' %}10{% else %}120{% endif %}"
+                                   aria-describedby="basic-addon3 basic-addon4"
+                                   required
+                                   data-default-value="{{ field.default.modeling_duration_value }}"
+                                   data-associated-unit-id="{{ field.web_id }}__modeling_duration_unit"
+                                   _="on input if my value is not empty applyMaxLimitOnModelingDurationValue()
 
-                    then openOrCloseTimeseriesChartAndTriggerUpdate()
-                    "
-            >
-            <select class="input-group-text"
-                    name="{{ field.web_id }}__modeling_duration_unit"
-                    id="{{ field.web_id }}__modeling_duration_unit"
-                    _="
-                    on change
-                        if my value is 'year' then
-                            set {max:10} on #{{ field.web_id }}__modeling_duration_value
-                        else
-                            set {max:120} on #{{ field.web_id }}__modeling_duration_value
-                        end
-                        updateSource('#{{ field.web_id }}')
-                        then applyMaxLimitOnModelingDurationValue()
-                        then openOrCloseTimeseriesChartAndTriggerUpdate()
-                    "
-                    data-default-value="{{ field.default.modeling_duration_unit }}"
-            >
-                <option value="month" {% if field.default.modeling_duration_unit == "month" %}selected{% endif %}>Months</option>
-                <option value="year" {% if field.default.modeling_duration_unit == "year" %}selected{% endif %}>Years</option>
-            </select>
-        </div>
-        <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
-    </div>
+                                    then openOrCloseTimeseriesChartAndTriggerUpdate()
+                                    "
+                            >
+                            <select class="input-group-text"
+                                    name="{{ field.web_id }}__modeling_duration_unit"
+                                    id="{{ field.web_id }}__modeling_duration_unit"
+                                    _="
+                                    on change
+                                        if my value is 'year' then
+                                            set {max:10} on #{{ field.web_id }}__modeling_duration_value
+                                        else
+                                            set {max:120} on #{{ field.web_id }}__modeling_duration_value
+                                        end
+                                        updateSource('#{{ field.web_id }}')
+                                        then applyMaxLimitOnModelingDurationValue()
+                                        then openOrCloseTimeseriesChartAndTriggerUpdate()
+                                    "
+                                    data-default-value="{{ field.default.modeling_duration_unit }}"
+                            >
+                                <option value="month" {% if field.default.modeling_duration_unit == "month" %}selected{% endif %}>Months</option>
+                                <option value="year" {% if field.default.modeling_duration_unit == "year" %}selected{% endif %}>Years</option>
+                            </select>
+                        </div>
+                        <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
+                    </div>
 
-    <!-- Initial Volume -->
-    <div class="mb-3">
-        <label for="{{ field.web_id }}__initial_volume" class="form-label w-100">Initial volume</label>
-        <div class="input-group">
-            <input type="number" class="form-control input_with_add_on"
-                   name="{{ field.web_id }}__initial_volume"
-                   id="{{ field.web_id }}__initial_volume"
-                   min="0"
-                   value="{{ field.default.initial_volume }}"
-                   placeholder="Input a number"
-                   aria-describedby="basic-addon3 basic-addon4"
-                   required
-                   data-default-value="{{ field.default.initial_volume }}"
-                   data-associated-unit-id="{{ field.web_id }}__initial_volume_timespan"
-                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate() then tagFormAsModified()"
-            >
-            <select class="input-group-text"
-                    name="{{ field.web_id }}__initial_volume_timespan"
-                    id="{{ field.web_id }}__initial_volume_timespan"
-                    data-default-value="{{ field.default.initial_volume_timespan }}"
-                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
-            >
-                <option value="day" {% if field.default.initial_volume_timespan == "day" %}selected{% endif %}>Daily</option>
-                <option value="month" {% if field.default.initial_volume_timespan == "month" %}selected{% endif %}>Monthly</option>
-                <option value="year" {% if field.default.initial_volume_timespan == "year" %}selected{% endif %}>Yearly</option>
-            </select>
-        </div>
-    </div>
+                    <!-- Initial Volume -->
+                    <div class="mb-3">
+                        <label for="{{ field.web_id }}__initial_volume" class="form-label w-100">Initial volume</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control input_with_add_on"
+                                   name="{{ field.web_id }}__initial_volume"
+                                   id="{{ field.web_id }}__initial_volume"
+                                   min="0"
+                                   value="{{ field.default.initial_volume }}"
+                                   placeholder="Input a number"
+                                   aria-describedby="basic-addon3 basic-addon4"
+                                   required
+                                   data-default-value="{{ field.default.initial_volume }}"
+                                   data-associated-unit-id="{{ field.web_id }}__initial_volume_timespan"
+                                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate() then tagFormAsModified()"
+                            >
+                            <select class="input-group-text"
+                                    name="{{ field.web_id }}__initial_volume_timespan"
+                                    id="{{ field.web_id }}__initial_volume_timespan"
+                                    data-default-value="{{ field.default.initial_volume_timespan }}"
+                                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
+                            >
+                                <option value="day" {% if field.default.initial_volume_timespan == "day" %}selected{% endif %}>Daily</option>
+                                <option value="month" {% if field.default.initial_volume_timespan == "month" %}selected{% endif %}>Monthly</option>
+                                <option value="year" {% if field.default.initial_volume_timespan == "year" %}selected{% endif %}>Yearly</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <!-- Net Growth Rate -->
-    <div class="mb-3">
-        <label for="{{ field.web_id }}__net_growth_rate_in_percentage" class="form-label w-100">Net growth rate (%)</label>
-        <div class="input-group">
-            <input type="number"
-                   class="form-control input_with_add_on"
-                   name="{{ field.web_id }}__net_growth_rate_in_percentage"
-                   id="{{ field.web_id }}__net_growth_rate_in_percentage"
-                   min="0"
-                   value="{{ field.default.net_growth_rate_in_percentage }}"
-                   aria-describedby="basic-addon3 basic-addon4"
-                   required
-                   data-default-value="{{ field.default.net_growth_rate_in_percentage }}"
-                   data-associated-unit-id="{{ field.web_id }}__net_growth_rate_timespan"
-                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
-            >
-            <select class="input-group-text"
-                    name="{{ field.web_id }}__net_growth_rate_timespan"
-                    id="{{ field.web_id }}__net_growth_rate_timespan"
-                    data-default-value="{{ field.default.net_growth_rate_timespan }}"
-                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
-            >
-                <option value="month" {% if field.default.net_growth_rate_timespan == "month" %}selected{% endif %}>Monthly</option>
-                <option value="year" {% if field.default.net_growth_rate_timespan == "year" %}selected{% endif %}>Yearly</option>
-            </select>
+                    <!-- Net Growth Rate -->
+                    <div class="mb-3">
+                        <label for="{{ field.web_id }}__net_growth_rate_in_percentage" class="form-label w-100">Net growth rate (%)</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control input_with_add_on"
+                                   name="{{ field.web_id }}__net_growth_rate_in_percentage"
+                                   id="{{ field.web_id }}__net_growth_rate_in_percentage"
+                                   min="0"
+                                   value="{{ field.default.net_growth_rate_in_percentage }}"
+                                   aria-describedby="basic-addon3 basic-addon4"
+                                   required
+                                   data-default-value="{{ field.default.net_growth_rate_in_percentage }}"
+                                   data-associated-unit-id="{{ field.web_id }}__net_growth_rate_timespan"
+                                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+                            >
+                            <select class="input-group-text"
+                                    name="{{ field.web_id }}__net_growth_rate_timespan"
+                                    id="{{ field.web_id }}__net_growth_rate_timespan"
+                                    data-default-value="{{ field.default.net_growth_rate_timespan }}"
+                                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
+                            >
+                                <option value="month" {% if field.default.net_growth_rate_timespan == "month" %}selected{% endif %}>Monthly</option>
+                                <option value="year" {% if field.default.net_growth_rate_timespan == "year" %}selected{% endif %}>Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -120,4 +139,30 @@
         dateFormat: "Y-m-d"
     });
     openOrCloseTimeseriesChartAndTriggerUpdate();
+
+    (function attachAccordionSaveGuard() {
+        function ensureAccordionOpenBeforeSave() {
+            const accordionPanel = document.getElementById('{{ field.web_id }}__usage_projection_panel');
+            if (!accordionPanel || accordionPanel.classList.contains('show')) {
+                return;
+            }
+            const collapse = bootstrap.Collapse.getOrCreateInstance(accordionPanel, {toggle: false});
+            collapse.show();
+        }
+
+        function registerListener() {
+            const saveButton = document.getElementById('btn-submit-form');
+            if (!saveButton) {
+                return false;
+            }
+            saveButton.addEventListener('click', ensureAccordionOpenBeforeSave, true);
+            return true;
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', registerListener, {once: true});
+        } else if (!registerListener()) {
+            requestAnimationFrame(registerListener);
+        }
+    }());
 </script>
