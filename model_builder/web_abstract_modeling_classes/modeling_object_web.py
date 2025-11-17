@@ -209,10 +209,6 @@ class ModelingObjectWeb:
             if get_origin(annotation) and get_origin(annotation) in (list, List):
                 list_containers.append(self.model_web.get_web_object_from_efootprint_id(container.id))
                 attr_name_in_list_container = attr_name
-            elif len(list_containers) > 0:
-                raise NotImplementedError(
-                    f"Modeling object {self} appears in both list and non-list attributes of its containers. "
-                    f"This is not supported behavior.")
 
         return list_containers, attr_name_in_list_container
 
