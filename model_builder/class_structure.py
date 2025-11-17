@@ -206,7 +206,7 @@ def generate_dynamic_form(
                     })
                 else:
                     # Read-only: base efootprint class
-                    structure_field.update({"input_type": "timeseries_input", "default": str(default)})
+                    structure_field.update({"input_type": "timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableRecurrentQuantities):
                 # Check if this is a form-editable timeseries or a read-only one
                 if isinstance(default, ExplainableRecurrentQuantitiesFromConstant):
@@ -217,7 +217,7 @@ def generate_dynamic_form(
                     })
                 else:
                     # Read-only: base efootprint class
-                    structure_field.update({"input_type": "recurrent_timeseries_input", "default": str(default)})
+                    structure_field.update({"input_type": "recurrent_timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableObject):
                 structure_field.update({"default": default.value})
                 if attr_name in list_values.keys():

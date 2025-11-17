@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.0] - 2025-11-17
+
+### Added
+- Upgrade to e-footprint 14.0.0 introduces a new custom edge device object that is made up of components. The edge device needs linking to such objects can specify needs for each component.
+- Graph visualisation for timeseries generated with code.
+
+### Changed
+- Deleted all FromForm classes and replaced timeseries form creation with the introduction of ExplainableHourlyQuantitiesFromFormInputs and ExplainableRecurrentQuantitiesFromConstant. In this way, there is no need anymore to create a specific "FromForm" class for each object with timeseries attributes. This greatly simplifies the codebase and makes it more maintainable.
+- Deleted all Mirrored object classes and replaced them with an automatic mirroring logic directly in the ModelingObjectWeb class. This greatly simplifies the codebase and makes it more maintainable.
+
 ## [0.9.4] - 2025-11-07
 
 ### Added

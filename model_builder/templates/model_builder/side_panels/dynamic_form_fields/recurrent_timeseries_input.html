@@ -1,6 +1,27 @@
-<p class="form-control p-2 mb-3 disabled" id="{{ field.web_id }}" name="{{ field.web_id }}">
-    {{ field.default }}
-</p>
-<p>
-    This recurrent timeseries has been created with the e-footprint Python library and is not editable in the web interface yet.
-</p>
+<div id="{{ field.web_id }}" class="border rounded-3 bg-light-subtle p-3"
+    {% if field.source %}
+           data-default-value="{{ field.default }}"
+           data-default-name="{{ field.source.name }}"
+           data-source-url="{{ field.source.link }}"
+     {% endif %}>
+    <p class="mb-2 text-muted small">
+        This recurrent timeseries has been created with the e-footprint Python library and is not editable in the web interface yet.
+    </p>
+    <button
+         type="button"
+         class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2"
+         hx-get="{% url 'get_explainable_recurrent_quantity_chart_and_explanation' field.default.modeling_obj_container.id field.default.attr_name_in_mod_obj_container %}"
+         hx-target="#chart-calculated-attribute"
+         hx-trigger="click"
+         hx-swap="innerHTML"
+         hx-disabled-elt="button"
+         hx-on::after-request="event.stopPropagation()"
+         _="on click openCalculatedAttributesChart()"
+    >
+        <!-- hx-on::after-request prevents side panel from closing because it normally triggers closeAndEmptySidePanel on htmx after requests -->
+        <span class="fw-semibold">View weekly profile</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-graph-up">
+            <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0zm14.817 3.493a.5.5 0 0 1 .19.683l-3.5 6.5a.5.5 0 0 1-.857.05L8.21 7.626l-2.493 3.74a.5.5 0 0 1-.808.02L2.354 8.646a.5.5 0 1 1 .708-.708l2.139 2.139 2.604-3.91a.5.5 0 0 1 .821.02l2.47 3.953 3.132-5.817a.5.5 0 0 1 .683-.19z"/>
+        </svg>
+    </button>
+</div>

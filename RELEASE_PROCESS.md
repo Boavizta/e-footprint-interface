@@ -72,16 +72,16 @@ git commit -m "[Vx.y.z] Release description"
 3. Wait for CI to pass
 4. Request review from team members
 
-## 4. Deploy to Clever Cloud
-
-Once the PR is approved and merged to `main`:
-
 ### Deploy to PreProd (staging)
 ```shell
-git push clever main:master
+git push clever <feature-branch-name>:master
 ```
 
 Test the PreProd deployment at: https://dev.e-footprint.boavizta.org
+
+## 4. Deploy to Clever Cloud
+
+Once the PR is approved and merged to `main`:
 
 ### Deploy to Production
 ```shell
