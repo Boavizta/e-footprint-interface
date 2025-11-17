@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.1] - 2025-11-17
+
+### Fixed
+- Fixed RecurrentEdgeComponentNeedWeb deletion logic. It had a legacy custom generate_delete_http_response that is now obsolete because ModelingObjectWeb has a generic self_delete() method that works for all objects. This caused issues when deleting such objects from the interface.
+
 ## [0.10.0] - 2025-11-17
 
 ### Added

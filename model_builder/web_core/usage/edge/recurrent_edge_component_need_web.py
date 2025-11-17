@@ -102,20 +102,3 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
         return {
             "hx_vals": {"efootprint_id_of_parent_to_link_to": context_data.get("efootprint_id_of_parent_to_link_to")},
         }
-
-    def generate_delete_http_response(self, request):
-        """Handle deletion by removing from parent's recurrent_edge_component_needs list."""
-        # Find parent RecurrentEdgeDeviceNeed
-        parent_device_need = None
-        for device_need in self.model_web.get_web_objects_from_efootprint_type("RecurrentEdgeDeviceNeed"):
-            component_needs = device_need.get_efootprint_value("recurrent_edge_component_needs")
-            if any(cn.id == self.efootprint_id for cn in component_needs):
-                parent_device_need = device_need
-                break
-
-        if parent_device_need:
-            new_component_needs = [cn for cn in parent_device_need.get_efootprint_value("recurrent_edge_component_needs")
-                                    if cn.id != self.efootprint_id]
-            parent_device_need.set_efootprint_value("recurrent_edge_component_needs", new_component_needs)
-
-        return super().generate_delete_http_response(request)
