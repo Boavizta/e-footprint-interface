@@ -1,15 +1,21 @@
-<div class="mb-3" id="{{ field.web_id }}">
+<div class="mb-3">
     <div class="input-group">
         <input type="number"
                class="form-control input_with_add_on"
                name="{{ field.web_id }}__constant_value"
-               id="{{ field.web_id }}__constant_value"
+               id="{{ field.web_id }}"
                value="{{ field.default.constant_value }}"
                step="0.1"
                placeholder="Input a constant value"
                aria-describedby="basic-addon3 basic-addon4"
                required
                data-default-value="{{ field.default.constant_value }}"
+               {% if field.source %}
+               data-default-value="{{ field.default }}"
+               data-default-name="{{ field.source.name }}"
+               data-source-url="{{ field.source.link }}"
+               oninput="updateSource('{{ field.web_id }}');tagFormAsModified();"
+     {% endif %}
         >
         <input
             class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"

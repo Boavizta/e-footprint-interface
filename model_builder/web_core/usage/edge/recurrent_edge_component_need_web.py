@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from efootprint.constants.sources import Sources
 from efootprint.core.usage.edge.recurrent_edge_component_need import RecurrentEdgeComponentNeed
 
 from model_builder.class_structure import generate_object_creation_structure
@@ -20,7 +21,7 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
     default_values = {
         "recurrent_need": ExplainableRecurrentQuantitiesFromConstant(
             form_inputs={"constant_value": 1.0, "constant_unit": "concurrent"},
-            label="Default recurrent need")
+            label="Default recurrent need", source=Sources.HYPOTHESIS)
     }
 
     @property
