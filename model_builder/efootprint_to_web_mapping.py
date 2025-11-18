@@ -3,6 +3,9 @@ from typing import TYPE_CHECKING
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.web_builders.hardware.edge.edge_appliance_component import EdgeApplianceComponentWeb
+from model_builder.web_builders.hardware.edge.edge_computer_cpu_component import EdgeComputerCPUComponentWeb
+from model_builder.web_builders.hardware.edge.edge_computer_ram_component import EdgeComputerRAMComponentWeb
 from model_builder.web_builders.services.external_api_web import ExternalApiWeb
 from model_builder.web_builders.services.service_web import ServiceWeb
 from model_builder.web_builders.hardware.edge.edge_appliance_web import EdgeApplianceWeb
@@ -54,7 +57,10 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "EdgeDeviceBase": EdgeDeviceBaseWeb,
     "EdgeDevice": EdgeDeviceWeb,
     "EdgeComputer": EdgeComputerWeb,
+    "EdgeComputerCPUComponent": EdgeComputerCPUComponentWeb,
+    "EdgeComputerRAMComponent": EdgeComputerRAMComponentWeb,
     "EdgeAppliance": EdgeApplianceWeb,
+    "EdgeApplianceComponent": EdgeApplianceComponentWeb,
     "EdgeComponent": EdgeComponentWeb,
     "EdgeCPUComponent": EdgeComponentWeb,
     "EdgeRAMComponent": EdgeComponentWeb,

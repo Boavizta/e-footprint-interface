@@ -15,6 +15,11 @@ if TYPE_CHECKING:
 class EdgeComputerWeb(EdgeDeviceBaseWeb):
     edit_template = "../server/server_edit.html"
 
+    @property
+    def calculated_attributes_values(self):
+        return (self.cpu_component.calculated_attributes_values + self.ram_component.calculated_attributes_values
+                + super().calculated_attributes_values)
+
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
         return add_new_object_with_storage(request, model_web, storage_type="EdgeStorage")

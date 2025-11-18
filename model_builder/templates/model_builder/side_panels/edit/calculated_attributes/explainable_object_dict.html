@@ -4,9 +4,9 @@
     <button type="button"
             class="col-auto chevron-btn btn btn-link text-black ms-3 p-0"
             data-bs-toggle="collapse"
-            data-bs-target="#collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}"
+            data-bs-target="#collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}_{{ item.web_id }}"
             aria-expanded="false"
-            aria-controls="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}"
+            aria-controls="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}_{{ item.web_id }}"
             onclick="reverseIconAccordion('{{ item.web_id }}')">
         <svg id="icon_accordion_{{ item.web_id }}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3" class="bi bi-chevron-right" viewBox="0 0 16 16">
             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
@@ -17,7 +17,7 @@
     </label>
 </div>
 
-<div class="collapse" id="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}">
+<div class="collapse" id="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}_{{ item.web_id }}">
     <div class="card card-body mb-3 no-truncate">
         {% for sub_item in item.get_values_as_list %}
             {% include "model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.2] - 2025-11-18
+
+### Fixed
+- EdgeAppliance and EdgeComputer calculated attributes. Those objects have hidden components and the hidden components calculated attributes didn’t appear in the parent object calculated attributes list, even though they are important to understand the computation graph.
+
 ## [0.10.1] - 2025-11-17
 
 ### Fixed
