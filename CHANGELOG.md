@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.4] - 2025-11-20
+
+### Fixed
+- Delete object whose creation triggered an error so that it doesn’t exist without being shown to the user. When creating a RecurrentEdgeProcess that linked an EdgeDevice with lifespan inferior to the EdgeUsageJourney usage span, the RecurrentEdgeProcess wouldn’t be deleted but it wouldn’t be linked to the EdgeFunction either, hence being inaccessible from the user and triggering errors when trying to delete the EdgeDevice.
+
 ## [0.10.3] - 2025-11-20
 
 ### Fixed

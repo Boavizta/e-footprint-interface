@@ -303,7 +303,7 @@ class TestViewsAdditionEdge(TestModelingBase):
         ram_need_request = self.create_post_request(
             "/add-object/RecurrentEdgeComponentNeed", ram_need_data, cpu_need_request.session["system_data"])
         add_object(ram_need_request, "RecurrentEdgeComponentNeed")
-        ram_need_id = self.get_object_id_from_name(ram_need_request, "RecurrentEdgeComponentNeed", "RAM Need")
+        ram_need_id = self.get_object_id_from_name(ram_need_request.session["system_data"], "RecurrentEdgeComponentNeed", "RAM Need")
         logger.info("RecurrentEdgeComponentNeed for RAM added")
 
         # Verify RAM component need was created correctly
@@ -320,3 +320,20 @@ class TestViewsAdditionEdge(TestModelingBase):
         self.assertIn(ram_need_id, updated_redn["recurrent_edge_component_needs"])
 
         logger.info("RecurrentEdgeDeviceNeed with 2 RecurrentEdgeComponentNeeds created successfully")
+
+    def test_addition_that_raises_error_is_reversed(self):
+        self.change_system_data(os.path.join(root_test_dir, "model_builder", "edge_function_and_edge_computer.json"))
+        os.environ.pop("RAISE_EXCEPTIONS", None)
+        # Attempt to add an EdgeProcess that will raise an error (EdgeComputer lifespan is inferior to EdgeUsageJourney usage_span)
+        edge_function_id = self.get_object_id_from_name(self.system_data, "EdgeFunction", "Edge function 1")
+        edge_computer_id = self.get_object_id_from_name(self.system_data, "EdgeComputer", "Edge computer 1")
+        rep_data = self.create_recurrent_edge_process_data(
+            name="Faulty Process", parent_id=edge_function_id, edge_device_id=edge_computer_id,
+            constant_compute_needed="2", constant_ram_needed="1.5", constant_storage_needed="200")
+        rep_request = self.create_post_request(
+            "/add-object/RecurrentEdgeProcess", rep_data, self.system_data)
+        response = add_object(rep_request, "RecurrentEdgeProcess")
+        # Assert that response code is 200 (modal error returns 200 with error message)
+        self.assert_response_ok(response)
+        # Assert that there is no object created
+        self.assertEqual(set(self.system_data.keys()), set(rep_request.session["system_data"].keys()))

@@ -389,9 +389,9 @@ class TestModelingBase(TestCase):
             raise ValueError(f"No objects of type {object_type} found in session")
         return list(objects.keys())[index]
 
-    def get_object_id_from_name(self, request, object_type: str, name) -> str:
+    def get_object_id_from_name(self, system_data: dict, object_type: str, name) -> str:
         """Get an object ID from the session data by type and index."""
-        objects = request.session["system_data"].get(object_type, {})
+        objects = system_data.get(object_type, {})
         for id, value in objects.items():
             if objects[id]["name"] == name:
                 return id
