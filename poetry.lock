@@ -49,14 +49,14 @@ trio = ["trio (>=0.31.0)"]
 
 [[package]]
 name = "asgiref"
-version = "3.10.0"
+version = "3.11.0"
 description = "ASGI specs, helper code, and adapters"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "asgiref-3.10.0-py3-none-any.whl", hash = "sha256:aef8a81283a34d0ab31630c9b7dfe70c812c95eba78171367ca8745e88124734"},
-    {file = "asgiref-3.10.0.tar.gz", hash = "sha256:d89f2d8cd8b56dada7d52fa7dc8075baa08fb836560710d38c292a7a3f78c04e"},
+    {file = "asgiref-3.11.0-py3-none-any.whl", hash = "sha256:1db9021efadb0d9512ce8ffaf72fcef601c7b73a8807a1bb2ef143dc6b14846d"},
+    {file = "asgiref-3.11.0.tar.gz", hash = "sha256:13acff32519542a1736223fb79a715acdebe24286d98e8b164a73085f40da2c4"},
 ]
 
 [package.extras]
@@ -871,14 +871,14 @@ openai = ["openai (>=1.61.1,<2.0.0)"]
 
 [[package]]
 name = "efootprint"
-version = "14.0.2"
+version = "14.0.4"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-14.0.2-py3-none-any.whl", hash = "sha256:dab285a29efe0069b4167e0392202526538008194d74f7f6381a4f32a8be4aaf"},
-    {file = "efootprint-14.0.2.tar.gz", hash = "sha256:8e529b88a55cc27ab073e586dd2d058550d5c10aac680043af037f5357ffc925"},
+    {file = "efootprint-14.0.4-py3-none-any.whl", hash = "sha256:bc58aeecb9b60b7efcc2d087d31523af31da33e9800779e4170224e9ce581374"},
+    {file = "efootprint-14.0.4.tar.gz", hash = "sha256:d5ed88a4b81099faf2cdc9babfe1a114b99904800227cf493ced2be2ec4ec1bd"},
 ]
 
 [package.dependencies]
@@ -3390,4 +3390,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "5951ac8bf4b70795e6d0cc642978a1efacc598951940046faad43f5e1c37cc57"
+content-hash = "b88c227db515160bbc06d291de510c1222476ca76fed6682d904adbc2cddb41e"

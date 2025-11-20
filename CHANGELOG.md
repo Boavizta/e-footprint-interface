@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.3] - 2025-11-20
+
+### Fixed
+- Update to e-footprint 14.0.4 to fix EdgeAppliance and EdgeComputer deletion bugs.
+
 ## [0.10.2] - 2025-11-18
 
 ### Fixed
