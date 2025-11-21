@@ -8,3 +8,8 @@ class EdgeApplianceComponentWeb(ModelingObjectWeb):
     def list_containers_and_attr_name_in_list_container(self) -> Tuple[List["ModelingObjectWeb"], Optional[str]]:
         edge_appliance_web = self.edge_device
         return [edge_appliance_web], "components"
+
+    @property
+    def calculated_attributes(self):
+        return [elt for elt in self.modeling_obj.calculated_attributes
+                if elt not in ["lifespan", "power", "idle_power"]]

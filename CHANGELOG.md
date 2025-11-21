@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.5] - 2025-11-21
+
+### Changed
+- Removed lifespan, power and idle power from EdgeApplianceComponentWeb calculated attributes because they are just copies of the EdgeApplianceWeb ones.
+
 ## [0.10.4] - 2025-11-20
 
 ### Fixed
