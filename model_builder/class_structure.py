@@ -78,6 +78,7 @@ def generate_object_creation_context(
         efootprint_class_str, available_efootprint_classes, model_web)
 
     context_data = {"form_sections": form_sections,
+                    "dynamic_form_data": dynamic_form_data,
                     "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
                     "object_type": efootprint_class_str,
                     "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]}
@@ -141,20 +142,11 @@ def generate_dynamic_form(
                 for option in model_web.get_efootprint_objects_from_efootprint_type(list_attribute_object_type_str)
                 if option not in selected]
             selected = [{"value": elt.id, "label": elt.name} for elt in selected]
-            if attr_name == "devices":
-                # Special case for UsagePattern’s devices, to remove possibility for user to select multiple
-                # devices for now.
-                structure_field.update({
-                    "input_type": "select_object",
-                    "options": selected + unselected,
-                    "selected": selected[0]["value"] if len(selected) > 0 else unselected[0]["value"]
-                })
-            else:
-                structure_field.update({
-                    "input_type": "select_multiple",
-                    "selected": selected,
-                    "unselected": unselected
-                })
+            structure_field.update({
+                "input_type": "select_multiple",
+                "selected": selected,
+                "unselected": unselected
+            })
         elif issubclass(annotation, str):
             structure_field.update({
                 "input_type": "str",

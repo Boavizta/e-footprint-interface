@@ -1,323 +1,37 @@
 {
-    "id-f328ed-France": {
-        "name": "France",
-        "id": "id-f328ed-France",
-        "short_name": "FRA",
+    "326b66": {
+        "name": "Afghanistan",
+        "id": "326b66",
+        "short_name": "AFG",
         "average_carbon_intensity": {
-            "value": 85.0,
+            "value": 123.0,
             "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of France from Our world in data",
+            "label": "Average carbon intensity of Afghanistan from Our world in data (2023)",
             "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
             }
         },
         "timezone": {
-            "zone": "Europe/Paris",
-            "label": "France timezone from user data",
+            "zone": "Asia/Kabul",
+            "label": "Afghanistan timezone from user data",
             "source": {
                 "name": "user data",
                 "link": null
             }
         }
     },
-    "id-ab1865-Germany": {
-        "name": "Germany",
-        "id": "id-ab1865-Germany",
-        "short_name": "DEU",
-        "average_carbon_intensity": {
-            "value": 386.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Germany from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Berlin",
-            "label": "Germany timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-d1eec3-Finland": {
-        "name": "Finland",
-        "id": "id-d1eec3-Finland",
-        "short_name": "FIN",
-        "average_carbon_intensity": {
-            "value": 132.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Finland from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Helsinki",
-            "label": "Finland timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-3ea42c-Austria": {
-        "name": "Austria",
-        "id": "id-3ea42c-Austria",
-        "short_name": "AUT",
-        "average_carbon_intensity": {
-            "value": 158.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Austria from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Vienna",
-            "label": "Austria timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-c54559-Poland": {
-        "name": "Poland",
-        "id": "id-c54559-Poland",
-        "short_name": "POL",
-        "average_carbon_intensity": {
-            "value": 635.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Poland from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Warsaw",
-            "label": "Poland timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-199a08-Norway": {
-        "name": "Norway",
-        "id": "id-199a08-Norway",
-        "short_name": "NOR",
-        "average_carbon_intensity": {
-            "value": 26.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Norway from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Oslo",
-            "label": "Norway timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-28845e-Hungary": {
-        "name": "Hungary",
-        "id": "id-28845e-Hungary",
-        "short_name": "HUN",
-        "average_carbon_intensity": {
-            "value": 223.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Hungary from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Budapest",
-            "label": "Hungary timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-db3447-United-Kingdom": {
-        "name": "United Kingdom",
-        "id": "id-db3447-United-Kingdom",
-        "short_name": "GBR",
-        "average_carbon_intensity": {
-            "value": 268.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of United Kingdom from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/London",
-            "label": "United Kingdom timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-fbfa3d-Belgium": {
-        "name": "Belgium",
-        "id": "id-fbfa3d-Belgium",
-        "short_name": "BEL",
-        "average_carbon_intensity": {
-            "value": 165.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Belgium from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Brussels",
-            "label": "Belgium timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-1d7131-Italy": {
-        "name": "Italy",
-        "id": "id-1d7131-Italy",
-        "short_name": "IT",
-        "average_carbon_intensity": {
-            "value": 371.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Italy from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Rome",
-            "label": "Italy timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-635f1e-Romania": {
-        "name": "Romania",
-        "id": "id-635f1e-Romania",
-        "short_name": "RO",
-        "average_carbon_intensity": {
-            "value": 264.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Romania from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Europe/Bucharest",
-            "label": "Romania timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-e8b6c2-Malaysia": {
-        "name": "Malaysia",
-        "id": "id-e8b6c2-Malaysia",
-        "short_name": "MY",
-        "average_carbon_intensity": {
-            "value": 549.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Malaysia from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Asia/Kuala_Lumpur",
-            "label": "Malaysia timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-cdfe1f-Morocco": {
-        "name": "Morocco",
-        "id": "id-cdfe1f-Morocco",
-        "short_name": "MA",
-        "average_carbon_intensity": {
-            "value": 610.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Morocco from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Africa/Casablanca",
-            "label": "Morocco timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-e67336-Tunisia": {
-        "name": "Tunisia",
-        "id": "id-e67336-Tunisia",
-        "short_name": "TN",
-        "average_carbon_intensity": {
-            "value": 468.0,
-            "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Tunisia from Our world in data",
-            "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
-            }
-        },
-        "timezone": {
-            "zone": "Africa/Tunis",
-            "label": "Tunisia timezone from user data",
-            "source": {
-                "name": "user data",
-                "link": null
-            }
-        }
-    },
-    "id-919b32-Algeria": {
+    "a58fa2": {
         "name": "Algeria",
-        "id": "id-919b32-Algeria",
-        "short_name": "DZ",
+        "id": "a58fa2",
+        "short_name": "DZA",
         "average_carbon_intensity": {
-            "value": 488.0,
+            "value": 633.0,
             "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Algeria from Our world in data",
+            "label": "Average carbon intensity of Algeria from Our world in data (2023)",
             "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
             }
         },
         "timezone": {
@@ -329,22 +43,2728 @@
             }
         }
     },
-    "id-66d92f-Senegal": {
-        "name": "Senegal",
-        "id": "id-66d92f-Senegal",
-        "short_name": "SN",
+    "72d7af": {
+        "name": "Angola",
+        "id": "72d7af",
+        "short_name": "AGO",
         "average_carbon_intensity": {
-            "value": 503.0,
+            "value": 167.0,
             "unit": "gram / kilowatt_hour",
-            "label": "Average carbon intensity of Senegal from Our world in data",
+            "label": "Average carbon intensity of Angola from Our world in data (2023)",
             "source": {
-                "name": "Our world in data",
-                "link": "https://ourworldindata.org/energy#country-profiles"
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Luanda",
+            "label": "Angola timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "3897d1": {
+        "name": "Argentina",
+        "id": "3897d1",
+        "short_name": "ARG",
+        "average_carbon_intensity": {
+            "value": 358.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Argentina from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Argentina/Buenos_Aires",
+            "label": "Argentina timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2ca61e": {
+        "name": "Australia",
+        "id": "2ca61e",
+        "short_name": "AUS",
+        "average_carbon_intensity": {
+            "value": 551.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Australia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Australia/Sydney",
+            "label": "Australia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "d55724": {
+        "name": "Austria",
+        "id": "d55724",
+        "short_name": "AUT",
+        "average_carbon_intensity": {
+            "value": 102.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Austria from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Vienna",
+            "label": "Austria timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2d1bde": {
+        "name": "Azerbaijan",
+        "id": "2d1bde",
+        "short_name": "AZE",
+        "average_carbon_intensity": {
+            "value": 633.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Azerbaijan from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Baku",
+            "label": "Azerbaijan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "1a4071": {
+        "name": "Bangladesh",
+        "id": "1a4071",
+        "short_name": "BGD",
+        "average_carbon_intensity": {
+            "value": 694.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Bangladesh from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Dhaka",
+            "label": "Bangladesh timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "55bff4": {
+        "name": "Belarus",
+        "id": "55bff4",
+        "short_name": "BLR",
+        "average_carbon_intensity": {
+            "value": 313.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Belarus from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Minsk",
+            "label": "Belarus timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2bb156": {
+        "name": "Belgium",
+        "id": "2bb156",
+        "short_name": "BEL",
+        "average_carbon_intensity": {
+            "value": 117.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Belgium from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Brussels",
+            "label": "Belgium timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "5de898": {
+        "name": "Benin",
+        "id": "5de898",
+        "short_name": "BEN",
+        "average_carbon_intensity": {
+            "value": 590.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Benin from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Porto-Novo",
+            "label": "Benin timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "5a43c3": {
+        "name": "Bolivia",
+        "id": "5a43c3",
+        "short_name": "BOL",
+        "average_carbon_intensity": {
+            "value": 468.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Bolivia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/La_Paz",
+            "label": "Bolivia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "741f1a": {
+        "name": "Brazil",
+        "id": "741f1a",
+        "short_name": "BRA",
+        "average_carbon_intensity": {
+            "value": 103.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Brazil from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Sao_Paulo",
+            "label": "Brazil timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "ce2b45": {
+        "name": "Bulgaria",
+        "id": "ce2b45",
+        "short_name": "BGR",
+        "average_carbon_intensity": {
+            "value": 264.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Bulgaria from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Sofia",
+            "label": "Bulgaria timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e3bd78": {
+        "name": "Burkina Faso",
+        "id": "e3bd78",
+        "short_name": "BFA",
+        "average_carbon_intensity": {
+            "value": 554.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Burkina Faso from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Ouagadougou",
+            "label": "Burkina Faso timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "1fb07e": {
+        "name": "Burundi",
+        "id": "1fb07e",
+        "short_name": "BDI",
+        "average_carbon_intensity": {
+            "value": 230.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Burundi from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Bujumbura",
+            "label": "Burundi timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "4e6d4f": {
+        "name": "Cambodia",
+        "id": "4e6d4f",
+        "short_name": "KHM",
+        "average_carbon_intensity": {
+            "value": 497.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Cambodia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Phnom_Penh",
+            "label": "Cambodia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "b45253": {
+        "name": "Cameroon",
+        "id": "b45253",
+        "short_name": "CMR",
+        "average_carbon_intensity": {
+            "value": 285.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Cameroon from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Douala",
+            "label": "Cameroon timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "00ab0a": {
+        "name": "Canada",
+        "id": "00ab0a",
+        "short_name": "CAN",
+        "average_carbon_intensity": {
+            "value": 174.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Canada from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Toronto",
+            "label": "Canada timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "6b20d3": {
+        "name": "Central African Republic",
+        "id": "6b20d3",
+        "short_name": "CAF",
+        "average_carbon_intensity": {
+            "value": 0.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Central African Republic from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Bangui",
+            "label": "Central African Republic timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "86f262": {
+        "name": "Chad",
+        "id": "86f262",
+        "short_name": "TCD",
+        "average_carbon_intensity": {
+            "value": 615.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Chad from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Ndjamena",
+            "label": "Chad timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "6941af": {
+        "name": "Chile",
+        "id": "6941af",
+        "short_name": "CHL",
+        "average_carbon_intensity": {
+            "value": 265.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Chile from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Santiago",
+            "label": "Chile timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "9b2874": {
+        "name": "China",
+        "id": "9b2874",
+        "short_name": "CHN",
+        "average_carbon_intensity": {
+            "value": 559.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of China from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Shanghai",
+            "label": "China timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "3667ed": {
+        "name": "Colombia",
+        "id": "3667ed",
+        "short_name": "COL",
+        "average_carbon_intensity": {
+            "value": 285.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Colombia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Bogota",
+            "label": "Colombia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "3fd989": {
+        "name": "Congo",
+        "id": "3fd989",
+        "short_name": "COG",
+        "average_carbon_intensity": {
+            "value": 713.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Congo from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Brazzaville",
+            "label": "Congo timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2ecfa3": {
+        "name": "Costa Rica",
+        "id": "2ecfa3",
+        "short_name": "CRI",
+        "average_carbon_intensity": {
+            "value": 63.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Costa Rica from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Costa_Rica",
+            "label": "Costa Rica timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "3d9de9": {
+        "name": "Cote d'Ivoire",
+        "id": "3d9de9",
+        "short_name": "CIV",
+        "average_carbon_intensity": {
+            "value": 393.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Cote d'Ivoire from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Abidjan",
+            "label": "Cote d'Ivoire timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "fe4346": {
+        "name": "Cuba",
+        "id": "fe4346",
+        "short_name": "CUB",
+        "average_carbon_intensity": {
+            "value": 638.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Cuba from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Havana",
+            "label": "Cuba timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "3e68c8": {
+        "name": "Czechia",
+        "id": "3e68c8",
+        "short_name": "CZE",
+        "average_carbon_intensity": {
+            "value": 413.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Czechia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Prague",
+            "label": "Czechia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c9f550": {
+        "name": "Democratic Republic of Congo",
+        "id": "c9f550",
+        "short_name": "COD",
+        "average_carbon_intensity": {
+            "value": 27.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Democratic Republic of Congo from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Kinshasa",
+            "label": "Democratic Republic of Congo timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "df7ecb": {
+        "name": "Denmark",
+        "id": "df7ecb",
+        "short_name": "DNK",
+        "average_carbon_intensity": {
+            "value": 143.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Denmark from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Copenhagen",
+            "label": "Denmark timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e131e7": {
+        "name": "Dominican Republic",
+        "id": "e131e7",
+        "short_name": "DOM",
+        "average_carbon_intensity": {
+            "value": 566.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Dominican Republic from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Santo_Domingo",
+            "label": "Dominican Republic timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "782da7": {
+        "name": "Ecuador",
+        "id": "782da7",
+        "short_name": "ECU",
+        "average_carbon_intensity": {
+            "value": 209.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Ecuador from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Guayaquil",
+            "label": "Ecuador timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e2c8f3": {
+        "name": "Egypt",
+        "id": "e2c8f3",
+        "short_name": "EGY",
+        "average_carbon_intensity": {
+            "value": 571.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Egypt from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Cairo",
+            "label": "Egypt timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "b723e5": {
+        "name": "El Salvador",
+        "id": "b723e5",
+        "short_name": "SLV",
+        "average_carbon_intensity": {
+            "value": 101.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of El Salvador from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/El_Salvador",
+            "label": "El Salvador timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c1a0ae": {
+        "name": "Ethiopia",
+        "id": "c1a0ae",
+        "short_name": "ETH",
+        "average_carbon_intensity": {
+            "value": 23.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Ethiopia from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Addis_Ababa",
+            "label": "Ethiopia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "270171": {
+        "name": "Finland",
+        "id": "270171",
+        "short_name": "FIN",
+        "average_carbon_intensity": {
+            "value": 72.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Finland from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Helsinki",
+            "label": "Finland timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2dbfb7": {
+        "name": "France",
+        "id": "2dbfb7",
+        "short_name": "FRA",
+        "average_carbon_intensity": {
+            "value": 44.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of France from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Paris",
+            "label": "France timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "215a39": {
+        "name": "Germany",
+        "id": "215a39",
+        "short_name": "DEU",
+        "average_carbon_intensity": {
+            "value": 344.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Germany from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Berlin",
+            "label": "Germany timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "396248": {
+        "name": "Ghana",
+        "id": "396248",
+        "short_name": "GHA",
+        "average_carbon_intensity": {
+            "value": 452.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Ghana from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Accra",
+            "label": "Ghana timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "72d9b7": {
+        "name": "Greece",
+        "id": "72d9b7",
+        "short_name": "GRC",
+        "average_carbon_intensity": {
+            "value": 319.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Greece from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Athens",
+            "label": "Greece timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "7baef9": {
+        "name": "Guatemala",
+        "id": "7baef9",
+        "short_name": "GTM",
+        "average_carbon_intensity": {
+            "value": 272.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Guatemala from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Guatemala",
+            "label": "Guatemala timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "de5db3": {
+        "name": "Guinea",
+        "id": "de5db3",
+        "short_name": "GIN",
+        "average_carbon_intensity": {
+            "value": 182.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Guinea from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Conakry",
+            "label": "Guinea timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "d8e1ad": {
+        "name": "Haiti",
+        "id": "d8e1ad",
+        "short_name": "HTI",
+        "average_carbon_intensity": {
+            "value": 534.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Haiti from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Port-au-Prince",
+            "label": "Haiti timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "51e783": {
+        "name": "Honduras",
+        "id": "51e783",
+        "short_name": "HND",
+        "average_carbon_intensity": {
+            "value": 289.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Honduras from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Tegucigalpa",
+            "label": "Honduras timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "678164": {
+        "name": "Hong Kong",
+        "id": "678164",
+        "short_name": "HKG",
+        "average_carbon_intensity": {
+            "value": 681.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Hong Kong from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Hong_Kong",
+            "label": "Hong Kong timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "374128": {
+        "name": "Hungary",
+        "id": "374128",
+        "short_name": "HUN",
+        "average_carbon_intensity": {
+            "value": 182.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Hungary from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Budapest",
+            "label": "Hungary timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "518874": {
+        "name": "India",
+        "id": "518874",
+        "short_name": "IND",
+        "average_carbon_intensity": {
+            "value": 708.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of India from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Kolkata",
+            "label": "India timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "86b627": {
+        "name": "Indonesia",
+        "id": "86b627",
+        "short_name": "IDN",
+        "average_carbon_intensity": {
+            "value": 682.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Indonesia from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Jakarta",
+            "label": "Indonesia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "ed47fe": {
+        "name": "Iran",
+        "id": "ed47fe",
+        "short_name": "IRN",
+        "average_carbon_intensity": {
+            "value": 641.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Iran from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Tehran",
+            "label": "Iran timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c9389d": {
+        "name": "Iraq",
+        "id": "c9389d",
+        "short_name": "IRQ",
+        "average_carbon_intensity": {
+            "value": 689.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Iraq from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Baghdad",
+            "label": "Iraq timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "6c5cdd": {
+        "name": "Ireland",
+        "id": "6c5cdd",
+        "short_name": "IRL",
+        "average_carbon_intensity": {
+            "value": 279.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Ireland from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Dublin",
+            "label": "Ireland timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "607cd2": {
+        "name": "Israel",
+        "id": "607cd2",
+        "short_name": "ISR",
+        "average_carbon_intensity": {
+            "value": 567.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Israel from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Jerusalem",
+            "label": "Israel timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "f3ea8f": {
+        "name": "Italy",
+        "id": "f3ea8f",
+        "short_name": "ITA",
+        "average_carbon_intensity": {
+            "value": 287.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Italy from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Rome",
+            "label": "Italy timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2648cc": {
+        "name": "Japan",
+        "id": "2648cc",
+        "short_name": "JPN",
+        "average_carbon_intensity": {
+            "value": 482.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Japan from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Tokyo",
+            "label": "Japan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "1a28ca": {
+        "name": "Jordan",
+        "id": "1a28ca",
+        "short_name": "JOR",
+        "average_carbon_intensity": {
+            "value": 539.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Jordan from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Amman",
+            "label": "Jordan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a495ad": {
+        "name": "Kazakhstan",
+        "id": "a495ad",
+        "short_name": "KAZ",
+        "average_carbon_intensity": {
+            "value": 801.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Kazakhstan from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Almaty",
+            "label": "Kazakhstan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "ed03af": {
+        "name": "Kenya",
+        "id": "ed03af",
+        "short_name": "KEN",
+        "average_carbon_intensity": {
+            "value": 84.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Kenya from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Nairobi",
+            "label": "Kenya timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "8a654b": {
+        "name": "Kyrgyzstan",
+        "id": "8a654b",
+        "short_name": "KGZ",
+        "average_carbon_intensity": {
+            "value": 163.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Kyrgyzstan from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Bishkek",
+            "label": "Kyrgyzstan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a5c516": {
+        "name": "Laos",
+        "id": "a5c516",
+        "short_name": "LAO",
+        "average_carbon_intensity": {
+            "value": 232.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Laos from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Vientiane",
+            "label": "Laos timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "fde51b": {
+        "name": "Lebanon",
+        "id": "fde51b",
+        "short_name": "LBN",
+        "average_carbon_intensity": {
+            "value": 369.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Lebanon from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Beirut",
+            "label": "Lebanon timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "bbdf58": {
+        "name": "Liberia",
+        "id": "bbdf58",
+        "short_name": "LBR",
+        "average_carbon_intensity": {
+            "value": 435.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Liberia from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Monrovia",
+            "label": "Liberia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e447bd": {
+        "name": "Libya",
+        "id": "e447bd",
+        "short_name": "LBY",
+        "average_carbon_intensity": {
+            "value": 830.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Libya from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Tripoli",
+            "label": "Libya timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e01797": {
+        "name": "Madagascar",
+        "id": "e01797",
+        "short_name": "MDG",
+        "average_carbon_intensity": {
+            "value": 477.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Madagascar from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Indian/Antananarivo",
+            "label": "Madagascar timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a7f0d6": {
+        "name": "Malawi",
+        "id": "a7f0d6",
+        "short_name": "MWI",
+        "average_carbon_intensity": {
+            "value": 54.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Malawi from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Blantyre",
+            "label": "Malawi timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "4a0ed4": {
+        "name": "Malaysia",
+        "id": "4a0ed4",
+        "short_name": "MYS",
+        "average_carbon_intensity": {
+            "value": 604.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Malaysia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Kuala_Lumpur",
+            "label": "Malaysia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "72e906": {
+        "name": "Mali",
+        "id": "72e906",
+        "short_name": "MLI",
+        "average_carbon_intensity": {
+            "value": 394.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Mali from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Bamako",
+            "label": "Mali timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "ad0aa7": {
+        "name": "Mauritania",
+        "id": "ad0aa7",
+        "short_name": "MRT",
+        "average_carbon_intensity": {
+            "value": 481.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Mauritania from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Nouakchott",
+            "label": "Mauritania timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "7a2527": {
+        "name": "Mexico",
+        "id": "7a2527",
+        "short_name": "MEX",
+        "average_carbon_intensity": {
+            "value": 484.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Mexico from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Mexico_City",
+            "label": "Mexico timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "1f30a8": {
+        "name": "Morocco",
+        "id": "1f30a8",
+        "short_name": "MAR",
+        "average_carbon_intensity": {
+            "value": 577.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Morocco from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Casablanca",
+            "label": "Morocco timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e53654": {
+        "name": "Mozambique",
+        "id": "e53654",
+        "short_name": "MOZ",
+        "average_carbon_intensity": {
+            "value": 127.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Mozambique from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Maputo",
+            "label": "Mozambique timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "9d3142": {
+        "name": "Myanmar",
+        "id": "9d3142",
+        "short_name": "MMR",
+        "average_carbon_intensity": {
+            "value": 569.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Myanmar from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Yangon",
+            "label": "Myanmar timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "186559": {
+        "name": "Nepal",
+        "id": "186559",
+        "short_name": "NPL",
+        "average_carbon_intensity": {
+            "value": 23.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Nepal from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Kathmandu",
+            "label": "Nepal timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "889480": {
+        "name": "Netherlands",
+        "id": "889480",
+        "short_name": "NLD",
+        "average_carbon_intensity": {
+            "value": 253.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Netherlands from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Amsterdam",
+            "label": "Netherlands timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2cc84b": {
+        "name": "New Zealand",
+        "id": "2cc84b",
+        "short_name": "NZL",
+        "average_carbon_intensity": {
+            "value": 120.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of New Zealand from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Pacific/Auckland",
+            "label": "New Zealand timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c4a145": {
+        "name": "Nicaragua",
+        "id": "c4a145",
+        "short_name": "NIC",
+        "average_carbon_intensity": {
+            "value": 288.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Nicaragua from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Managua",
+            "label": "Nicaragua timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a90485": {
+        "name": "Niger",
+        "id": "a90485",
+        "short_name": "NER",
+        "average_carbon_intensity": {
+            "value": 687.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Niger from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Niamey",
+            "label": "Niger timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "ebf511": {
+        "name": "Nigeria",
+        "id": "ebf511",
+        "short_name": "NGA",
+        "average_carbon_intensity": {
+            "value": 507.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Nigeria from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Lagos",
+            "label": "Nigeria timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "272664": {
+        "name": "North Korea",
+        "id": "272664",
+        "short_name": "PRK",
+        "average_carbon_intensity": {
+            "value": 344.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of North Korea from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Pyongyang",
+            "label": "North Korea timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "78e054": {
+        "name": "Norway",
+        "id": "78e054",
+        "short_name": "NOR",
+        "average_carbon_intensity": {
+            "value": 30.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Norway from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Oslo",
+            "label": "Norway timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a11951": {
+        "name": "Oman",
+        "id": "a11951",
+        "short_name": "OMN",
+        "average_carbon_intensity": {
+            "value": 545.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Oman from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Muscat",
+            "label": "Oman timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "88d137": {
+        "name": "Pakistan",
+        "id": "88d137",
+        "short_name": "PAK",
+        "average_carbon_intensity": {
+            "value": 398.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Pakistan from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Karachi",
+            "label": "Pakistan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "217504": {
+        "name": "Palestine",
+        "id": "217504",
+        "short_name": "PSE",
+        "average_carbon_intensity": {
+            "value": 460.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Palestine from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Gaza",
+            "label": "Palestine timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a8db51": {
+        "name": "Papua New Guinea",
+        "id": "a8db51",
+        "short_name": "PNG",
+        "average_carbon_intensity": {
+            "value": 513.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Papua New Guinea from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Pacific/Port_Moresby",
+            "label": "Papua New Guinea timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "50a8d3": {
+        "name": "Paraguay",
+        "id": "50a8d3",
+        "short_name": "PRY",
+        "average_carbon_intensity": {
+            "value": 24.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Paraguay from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Asuncion",
+            "label": "Paraguay timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "44453a": {
+        "name": "Peru",
+        "id": "44453a",
+        "short_name": "PER",
+        "average_carbon_intensity": {
+            "value": 263.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Peru from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Lima",
+            "label": "Peru timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c038b4": {
+        "name": "Philippines",
+        "id": "c038b4",
+        "short_name": "PHL",
+        "average_carbon_intensity": {
+            "value": 613.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Philippines from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Manila",
+            "label": "Philippines timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "dab6f7": {
+        "name": "Poland",
+        "id": "dab6f7",
+        "short_name": "POL",
+        "average_carbon_intensity": {
+            "value": 614.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Poland from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Warsaw",
+            "label": "Poland timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "e28b44": {
+        "name": "Portugal",
+        "id": "e28b44",
+        "short_name": "PRT",
+        "average_carbon_intensity": {
+            "value": 112.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Portugal from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Lisbon",
+            "label": "Portugal timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c0d38c": {
+        "name": "Romania",
+        "id": "c0d38c",
+        "short_name": "ROU",
+        "average_carbon_intensity": {
+            "value": 245.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Romania from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Bucharest",
+            "label": "Romania timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "32d28c": {
+        "name": "Russia",
+        "id": "32d28c",
+        "short_name": "RUS",
+        "average_carbon_intensity": {
+            "value": 449.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Russia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Moscow",
+            "label": "Russia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "653770": {
+        "name": "Rwanda",
+        "id": "653770",
+        "short_name": "RWA",
+        "average_carbon_intensity": {
+            "value": 301.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Rwanda from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Kigali",
+            "label": "Rwanda timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "38b7b6": {
+        "name": "Saudi Arabia",
+        "id": "38b7b6",
+        "short_name": "SAU",
+        "average_carbon_intensity": {
+            "value": 696.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Saudi Arabia from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Riyadh",
+            "label": "Saudi Arabia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "495253": {
+        "name": "Senegal",
+        "id": "495253",
+        "short_name": "SEN",
+        "average_carbon_intensity": {
+            "value": 535.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Senegal from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
             }
         },
         "timezone": {
             "zone": "Africa/Dakar",
             "label": "Senegal timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "66fb02": {
+        "name": "Serbia",
+        "id": "66fb02",
+        "short_name": "SRB",
+        "average_carbon_intensity": {
+            "value": 670.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Serbia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Belgrade",
+            "label": "Serbia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "184749": {
+        "name": "Sierra Leone",
+        "id": "184749",
+        "short_name": "SLE",
+        "average_carbon_intensity": {
+            "value": 47.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Sierra Leone from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Freetown",
+            "label": "Sierra Leone timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "33ef77": {
+        "name": "Singapore",
+        "id": "33ef77",
+        "short_name": "SGP",
+        "average_carbon_intensity": {
+            "value": 498.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Singapore from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Singapore",
+            "label": "Singapore timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "f4b11c": {
+        "name": "Slovakia",
+        "id": "f4b11c",
+        "short_name": "SVK",
+        "average_carbon_intensity": {
+            "value": 96.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Slovakia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Bratislava",
+            "label": "Slovakia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c45d84": {
+        "name": "Somalia",
+        "id": "c45d84",
+        "short_name": "SOM",
+        "average_carbon_intensity": {
+            "value": 523.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Somalia from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Mogadishu",
+            "label": "Somalia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "55cbad": {
+        "name": "South Africa",
+        "id": "55cbad",
+        "short_name": "ZAF",
+        "average_carbon_intensity": {
+            "value": 708.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of South Africa from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Johannesburg",
+            "label": "South Africa timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "d4e061": {
+        "name": "South Korea",
+        "id": "d4e061",
+        "short_name": "KOR",
+        "average_carbon_intensity": {
+            "value": 414.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of South Korea from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Seoul",
+            "label": "South Korea timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "8d9e61": {
+        "name": "South Sudan",
+        "id": "8d9e61",
+        "short_name": "SSD",
+        "average_carbon_intensity": {
+            "value": 610.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of South Sudan from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Juba",
+            "label": "South Sudan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "d2f69a": {
+        "name": "Spain",
+        "id": "d2f69a",
+        "short_name": "ESP",
+        "average_carbon_intensity": {
+            "value": 146.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Spain from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Madrid",
+            "label": "Spain timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "dc693d": {
+        "name": "Sri Lanka",
+        "id": "dc693d",
+        "short_name": "LKA",
+        "average_carbon_intensity": {
+            "value": 509.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Sri Lanka from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Colombo",
+            "label": "Sri Lanka timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "9a5bfa": {
+        "name": "Sudan",
+        "id": "9a5bfa",
+        "short_name": "SDN",
+        "average_carbon_intensity": {
+            "value": 214.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Sudan from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Khartoum",
+            "label": "Sudan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "6da1d7": {
+        "name": "Sweden",
+        "id": "6da1d7",
+        "short_name": "SWE",
+        "average_carbon_intensity": {
+            "value": 35.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Sweden from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Stockholm",
+            "label": "Sweden timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "1dd6dd": {
+        "name": "Switzerland",
+        "id": "1dd6dd",
+        "short_name": "CHE",
+        "average_carbon_intensity": {
+            "value": 36.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Switzerland from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Zurich",
+            "label": "Switzerland timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "2e5dd0": {
+        "name": "Syria",
+        "id": "2e5dd0",
+        "short_name": "SYR",
+        "average_carbon_intensity": {
+            "value": 682.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Syria from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Damascus",
+            "label": "Syria timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "47fea2": {
+        "name": "Tajikistan",
+        "id": "47fea2",
+        "short_name": "TJK",
+        "average_carbon_intensity": {
+            "value": 115.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Tajikistan from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Dushanbe",
+            "label": "Tajikistan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "f660de": {
+        "name": "Tanzania",
+        "id": "f660de",
+        "short_name": "TZA",
+        "average_carbon_intensity": {
+            "value": 371.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Tanzania from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Dar_es_Salaam",
+            "label": "Tanzania timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c2cb0d": {
+        "name": "Thailand",
+        "id": "c2cb0d",
+        "short_name": "THA",
+        "average_carbon_intensity": {
+            "value": 554.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Thailand from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Bangkok",
+            "label": "Thailand timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "151a5d": {
+        "name": "Togo",
+        "id": "151a5d",
+        "short_name": "TGO",
+        "average_carbon_intensity": {
+            "value": 478.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Togo from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Lome",
+            "label": "Togo timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "c9322a": {
+        "name": "Tunisia",
+        "id": "c9322a",
+        "short_name": "TUN",
+        "average_carbon_intensity": {
+            "value": 560.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Tunisia from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Tunis",
+            "label": "Tunisia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "156e66": {
+        "name": "Turkey",
+        "id": "156e66",
+        "short_name": "TUR",
+        "average_carbon_intensity": {
+            "value": 469.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Turkey from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Istanbul",
+            "label": "Turkey timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "a10d1d": {
+        "name": "Turkmenistan",
+        "id": "a10d1d",
+        "short_name": "TKM",
+        "average_carbon_intensity": {
+            "value": 1306.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Turkmenistan from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Ashgabat",
+            "label": "Turkmenistan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "15db99": {
+        "name": "Uganda",
+        "id": "15db99",
+        "short_name": "UGA",
+        "average_carbon_intensity": {
+            "value": 57.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Uganda from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Kampala",
+            "label": "Uganda timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "7293fa": {
+        "name": "Ukraine",
+        "id": "7293fa",
+        "short_name": "UKR",
+        "average_carbon_intensity": {
+            "value": 256.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Ukraine from Our world in data (2022)",
+            "source": {
+                "name": "Our world in data (2022)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/Kyiv",
+            "label": "Ukraine timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "9dd8ec": {
+        "name": "United Arab Emirates",
+        "id": "9dd8ec",
+        "short_name": "ARE",
+        "average_carbon_intensity": {
+            "value": 492.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of United Arab Emirates from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Dubai",
+            "label": "United Arab Emirates timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "b4ac4e": {
+        "name": "United Kingdom",
+        "id": "b4ac4e",
+        "short_name": "GBR",
+        "average_carbon_intensity": {
+            "value": 210.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of United Kingdom from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Europe/London",
+            "label": "United Kingdom timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "7ecf86": {
+        "name": "United States",
+        "id": "7ecf86",
+        "short_name": "USA",
+        "average_carbon_intensity": {
+            "value": 383.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of United States from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/New_York",
+            "label": "United States timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "97eb0a": {
+        "name": "Uzbekistan",
+        "id": "97eb0a",
+        "short_name": "UZB",
+        "average_carbon_intensity": {
+            "value": 1121.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Uzbekistan from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Tashkent",
+            "label": "Uzbekistan timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "89b34f": {
+        "name": "Venezuela",
+        "id": "89b34f",
+        "short_name": "VEN",
+        "average_carbon_intensity": {
+            "value": 180.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Venezuela from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "America/Caracas",
+            "label": "Venezuela timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "1ce8d1": {
+        "name": "Vietnam",
+        "id": "1ce8d1",
+        "short_name": "VNM",
+        "average_carbon_intensity": {
+            "value": 471.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Vietnam from Our world in data (2024)",
+            "source": {
+                "name": "Our world in data (2024)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Ho_Chi_Minh",
+            "label": "Vietnam timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "114301": {
+        "name": "Yemen",
+        "id": "114301",
+        "short_name": "YEM",
+        "average_carbon_intensity": {
+            "value": 586.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Yemen from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Asia/Aden",
+            "label": "Yemen timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "4037a1": {
+        "name": "Zambia",
+        "id": "4037a1",
+        "short_name": "ZMB",
+        "average_carbon_intensity": {
+            "value": 110.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Zambia from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Lusaka",
+            "label": "Zambia timezone from user data",
+            "source": {
+                "name": "user data",
+                "link": null
+            }
+        }
+    },
+    "185a30": {
+        "name": "Zimbabwe",
+        "id": "185a30",
+        "short_name": "ZWE",
+        "average_carbon_intensity": {
+            "value": 298.0,
+            "unit": "gram / kilowatt_hour",
+            "label": "Average carbon intensity of Zimbabwe from Our world in data (2023)",
+            "source": {
+                "name": "Our world in data (2023)",
+                "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+            }
+        },
+        "timezone": {
+            "zone": "Africa/Harare",
+            "label": "Zimbabwe timezone from user data",
             "source": {
                 "name": "user data",
                 "link": null

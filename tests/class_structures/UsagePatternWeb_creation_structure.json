@@ -52,6 +52,7 @@
                 "label": "devices",
                 "tooltip": false,
                 "input_type": "select_object",
+                "selected": "efootprint_id1",
                 "options": [
                     {
                         "value": "efootprint_id1",
@@ -61,8 +62,7 @@
                         "value": "efootprint_id2",
                         "label": "option2"
                     }
-                ],
-                "selected": "efootprint_id1"
+                ]
             },
             {
                 "web_id": "UsagePattern_network",
