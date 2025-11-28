@@ -13,3 +13,22 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
     }
     attr_name_in_system = "usage_patterns"
     object_type_in_volume = "usage_journey"
+
+    @classmethod
+    def generate_object_creation_context(
+    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
+        creation_context = super().generate_object_creation_context(
+            model_web, efootprint_id_of_parent_to_link_to, object_type)
+
+        attributes_section = creation_context["form_sections"][1]
+        for structure_field in attributes_section["fields"]:
+            if structure_field["attr_name"] == "devices":
+                structure_field.update({
+                    "input_type": "select_object",
+                    "options": structure_field["unselected"],
+                    "selected": structure_field["unselected"][0]["value"]
+                })
+                structure_field.pop("unselected")
+
+        return creation_context
+

@@ -1,10 +1,9 @@
 {
     "switch_item": "type_object_available",
     "switch_values": [
-        "Job",
-        "WebApplicationJob",
-        "VideoStreamingJob",
-        "GenAIJob"
+        "EdgeComputer",
+        "EdgeAppliance",
+        "EdgeDevice"
     ],
     "dynamic_lists": []
 }

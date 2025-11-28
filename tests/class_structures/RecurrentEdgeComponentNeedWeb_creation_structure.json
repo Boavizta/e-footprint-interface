@@ -1,0 +1,67 @@
+[
+    {
+        "category": "component_need_creation_helper",
+        "header": "Component need creation helper",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "edge_component",
+                "name": "Edge Component",
+                "options": [
+                    {
+                        "label": "mock_edge_component",
+                        "value": "mock_edge_component_efootprint_id"
+                    }
+                ],
+                "label": "Choose an edge component"
+            }
+        ]
+    },
+    {
+        "category": "efootprint_classes_available",
+        "header": "Recurrent edge component need selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Recurrent edge component need",
+                "options": [
+                    {
+                        "label": "Recurrent edge component need",
+                        "value": "RecurrentEdgeComponentNeed"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "RecurrentEdgeComponentNeed",
+        "header": "Recurrent edge component need creation",
+        "fields": [
+            {
+                "web_id": "RecurrentEdgeComponentNeed_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Recurrent edge component need 1"
+            },
+            {
+                "web_id": "RecurrentEdgeComponentNeed_recurrent_need",
+                "attr_name": "recurrent_need",
+                "label": "recurrent need",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "recurrent_quantities_from_constant",
+                "default": {
+                    "constant_value": 1.0,
+                    "constant_unit": "concurrent"
+                }
+            }
+        ],
+        "advanced_fields": []
+    }
+]
