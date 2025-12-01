@@ -7,6 +7,7 @@ from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
 from efootprint.logger import logger
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.addition.views_addition import add_object
 from model_builder.edition.views_edition import edit_object
 from model_builder.views import result_chart
@@ -49,14 +50,14 @@ class IntegrationTest(TestModelingBase):
             "New usage pattern", usage_journey_id="uid-my-first-usage-journey-1")
         up_request = self.create_post_request(
             "/add-object/UsagePattern", post_data, system_data=job_request.session["system_data"])
-        initial_model_web = ModelWeb(up_request.session)
+        initial_model_web = ModelWeb(SessionSystemRepository(up_request.session))
         initial_total_footprint = initial_model_web.system.total_footprint
         response = add_object(up_request, "UsagePattern")
         new_up_id = self.get_object_id_from_session(up_request, "UsagePattern")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(up_request.session["system_data"]["UsagePattern"]), 1)
 
-        computed_model_web = ModelWeb(up_request.session)
+        computed_model_web = ModelWeb(SessionSystemRepository(up_request.session))
         logger.info("Updating job data transferred to 20 MB")
         previous_network_energy_footprint = computed_model_web.system.usage_patterns[0].network.energy_footprint.sum()
         logger.info(f"Previous network energy footprint: {previous_network_energy_footprint}")
@@ -66,7 +67,7 @@ class IntegrationTest(TestModelingBase):
             f"/edit-object/{job.id}", edit_data, up_request.session["system_data"])
         response = edit_object(edit_request, job.id)
         self.assertEqual(response.status_code, 200)
-        updated_model_web = ModelWeb(edit_request.session)
+        updated_model_web = ModelWeb(SessionSystemRepository(edit_request.session))
         updated_network_energy_footprint = updated_model_web.system.usage_patterns[0].network.energy_footprint.sum()
         logger.info(f"Updated network energy footprint: {updated_network_energy_footprint}")
         self.assertGreater(updated_network_energy_footprint, previous_network_energy_footprint,
@@ -112,7 +113,7 @@ class IntegrationTest(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(eup_request.session["system_data"]["EdgeUsagePattern"]), 1)
 
-        computed_model_web = ModelWeb(eup_request.session)
+        computed_model_web = ModelWeb(SessionSystemRepository(eup_request.session))
         for footprint_key, footprint_value in computed_model_web.system_emissions["values"].items():
             self.assertGreater(len(footprint_value), 0, f"No footprint values computed for {footprint_key}")
             self.assertGreater(np.max(np.abs(footprint_value)), 0, f"Footprint values are all zero for {footprint_key}")
@@ -135,7 +136,7 @@ class IntegrationTest(TestModelingBase):
                 set(self.system_data[efootprint_class].keys()),
                 f"Mismatch in {efootprint_class} data")
         self.assertEqual(initial_total_footprint.efootprint_object,
-                         ModelWeb(up_request.session).system.total_footprint.efootprint_object)
+                         ModelWeb(SessionSystemRepository(up_request.session)).system.total_footprint.efootprint_object)
 
     @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
     def test_raise_error_if_users_tries_to_see_results_with_incomplete_modeling(self, mock_exception_modal):

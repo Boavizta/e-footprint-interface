@@ -21,6 +21,7 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.web_core.explainable_timeseries_utils import (
     prepare_timeseries_chart_context, prepare_hourly_quantity_data, prepare_recurrent_quantity_data)
@@ -37,7 +38,7 @@ def model_builder_main(request, reboot=False):
         with open(os.path.join("model_builder", "reference_data", "default_system_data.json"), "r") as file:
             system_data = json.load(file)
         request.session["system_data"] = system_data
-        model_web = ModelWeb(request.session)
+        model_web = ModelWeb(SessionSystemRepository(request.session))
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         gc.collect()
 
@@ -49,7 +50,7 @@ def model_builder_main(request, reboot=False):
         request.session["system_data"]["efootprint_version"] = "9.1.4"
     system_data_efootprint_version = request.session["system_data"]["efootprint_version"]
 
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
 
     if efootprint_version != system_data_efootprint_version:
         logger.info(f"Upgrading system data from version {system_data_efootprint_version} to {efootprint_version}")
@@ -73,7 +74,7 @@ def open_import_json_panel(request):
               "header_name":"Import a model"})
 
 def download_json(request):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     system = model_web.system
     system_data_without_calculated_attributes = model_web.to_json(save_calculated_attributes=False)
     json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
@@ -110,7 +111,7 @@ def upload_json(request):
                 if "efootprint_version" not in data.keys():
                     data["efootprint_version"] = "9.1.4"
                 request.session["system_data"] = data
-                model_web = ModelWeb(request.session)
+                model_web = ModelWeb(SessionSystemRepository(request.session))
                 for uj in model_web.usage_journeys:
                     if len(uj.systems) == 0 and getattr(uj, "duration", None) is None:
                         # usage journey is not linked to any system and has no duration so it means it has been saved
@@ -133,7 +134,7 @@ def upload_json(request):
 
     request.session["system_data"] = initial_session_data
     if initial_session_data:
-        model_web = ModelWeb(request.session)
+        model_web = ModelWeb(SessionSystemRepository(request.session))
     else:
         request.session["system_data"] = {}
         model_web = None
@@ -150,7 +151,7 @@ def upload_json(request):
 @render_exception_modal_if_error
 @time_it
 def result_chart(request):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     model_web.raise_incomplete_modeling_errors()
 
     http_response = htmx_render(
@@ -166,7 +167,7 @@ def get_calculus_graph(request, cache_key):
     return HttpResponse(content_to_return, content_type="text/html")
 
 def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
     iframe_height = 95
     cache_key = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -194,7 +195,7 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
 
 
 def download_sources(request):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     sources = []
 
     for efootprint_object in model_web.flat_efootprint_objs_dict.values():
@@ -246,7 +247,7 @@ def download_sources(request):
 @time_it
 def get_explainable_hourly_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     context, _ = prepare_timeseries_chart_context(
         model_web, efootprint_id, attr_name, prepare_hourly_quantity_data, id_of_key_in_dict)
 
@@ -261,7 +262,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
 @time_it
 def get_explainable_recurrent_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     context, _ = prepare_timeseries_chart_context(
         model_web, efootprint_id, attr_name, prepare_recurrent_quantity_data)
 
@@ -274,7 +275,7 @@ def get_explainable_recurrent_quantity_chart_and_explanation(
 
 
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
     literal_formula, ancestors_mapped_to_symbols_list = (
         explained_obj.compute_literal_formula_and_ancestors_mapped_to_symbols_list())

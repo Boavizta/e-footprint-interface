@@ -3,9 +3,7 @@ import math
 import os
 from datetime import timedelta
 from time import time
-from typing import Union
 
-from django.contrib.sessions.backends.base import SessionBase
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
@@ -17,7 +15,6 @@ from efootprint import __version__ as efootprint_version
 
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
 from model_builder.domain.interfaces import ISystemRepository
-from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.web_core.model_web_utils import (determine_global_time_bounds, to_rounded_daily_values,
                                                     get_reindexed_array_from_dict)
@@ -43,21 +40,14 @@ DEFAULT_OBJECTS_CLASS_MAPPING = {
 
 
 class ModelWeb:
-    def __init__(self, repository_or_session: Union[ISystemRepository, SessionBase]):
-        """Initialize ModelWeb with a repository or session.
+    def __init__(self, repository: ISystemRepository):
+        """Initialize ModelWeb with a system repository.
 
         Args:
-            repository_or_session: Either an ISystemRepository implementation or a Django SessionBase.
-                                   If a SessionBase is provided, it will be wrapped in a SessionSystemRepository
-                                   for backwards compatibility during migration.
+            repository: An ISystemRepository implementation for loading and saving system data.
         """
         start = time()
-        # Support both new repository pattern and legacy session pattern for backwards compatibility
-        if isinstance(repository_or_session, SessionBase):
-            self.repository = SessionSystemRepository(repository_or_session)
-        else:
-            self.repository = repository_or_session
-
+        self.repository = repository
         self.system_data = self.repository.get_system_data()
         logger.info(f"System data loaded in {time() - start:.3f} seconds.")
 

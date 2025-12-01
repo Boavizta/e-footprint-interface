@@ -17,6 +17,7 @@ from efootprint.logger import logger
 from efootprint.constants.units import u
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.addition.views_addition import add_object
 from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
@@ -56,7 +57,7 @@ class TestViewsEdition(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         new_job_id = next(iter(job_request.session["system_data"]["WebApplicationJob"].keys()))
 
-        model_web = ModelWeb(job_request.session)
+        model_web = ModelWeb(SessionSystemRepository(job_request.session))
         job = model_web.get_web_object_from_efootprint_id(new_job_id)
 
         edition_context = job.generate_object_edition_context()
@@ -194,7 +195,7 @@ class TestViewsEdition(TestModelingBase):
         response = edit_object(edit_usage_journey_request, "uuid-Daily-video-usage")
         self.assertEqual(response.status_code, 200)
 
-        model_web = ModelWeb(edit_usage_journey_request.session)
+        model_web = ModelWeb(SessionSystemRepository(edit_usage_journey_request.session))
         usage_journey = model_web.get_web_object_from_efootprint_id("uuid-Daily-video-usage")
         uj_steps_ids = [uj_step.efootprint_id for uj_step in usage_journey.uj_steps]
         self.assertEqual(new_uj_steps, ";".join(uj_steps_ids))
@@ -213,7 +214,7 @@ class TestViewsEdition(TestModelingBase):
         response = edit_object(edit_usage_journey_request, "uuid-Daily-video-usage")
         self.assertEqual(response.status_code, 200)
 
-        model_web = ModelWeb(edit_usage_journey_request.session)
+        model_web = ModelWeb(SessionSystemRepository(edit_usage_journey_request.session))
         usage_journey = model_web.get_web_object_from_efootprint_id("uuid-Daily-video-usage")
         uj_steps_ids = [uj_step.efootprint_id for uj_step in usage_journey.uj_steps]
         self.assertEqual(new_uj_steps, ";".join(uj_steps_ids))
@@ -223,7 +224,7 @@ class TestViewsEdition(TestModelingBase):
         logger.info("Getting initial total footprint")
         initial_request = self.factory.get("/")
         self._add_session_to_request(initial_request, self.system_data)
-        initial_model_web = ModelWeb(initial_request.session)
+        initial_model_web = ModelWeb(SessionSystemRepository(initial_request.session))
         initial_emissions = initial_model_web.system_emissions
         initial_total = sum(sum(values) for values in initial_emissions["values"].values())
 
@@ -251,7 +252,7 @@ class TestViewsEdition(TestModelingBase):
         self.assertEqual(response.status_code, 200)
 
         logger.info("Getting updated total footprint")
-        updated_model_web = ModelWeb(edit_request.session)
+        updated_model_web = ModelWeb(SessionSystemRepository(edit_request.session))
         updated_emissions = updated_model_web.system_emissions
         updated_total = sum(sum(values) for values in updated_emissions["values"].values())
 

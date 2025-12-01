@@ -1,11 +1,12 @@
 import json
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
 
 
 def ask_delete_object(request, object_id):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     web_obj = model_web.get_web_object_from_efootprint_id(object_id)
 
     http_response = web_obj.generate_ask_delete_http_response(request)
@@ -16,7 +17,7 @@ def ask_delete_object(request, object_id):
 
 @render_exception_modal_if_error
 def delete_object(request, object_id):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     web_obj = model_web.get_web_object_from_efootprint_id(object_id)
 
     http_response = web_obj.generate_delete_http_response(request)

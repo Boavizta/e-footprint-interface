@@ -3,6 +3,7 @@ import os
 from django.http import QueryDict
 from efootprint.logger import logger
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.addition.views_addition import add_object
 from model_builder.web_core.model_web import ModelWeb
 from tests import root_test_dir
@@ -48,5 +49,5 @@ class TestModelWeb(TestModelingBase):
         self.assertEqual(response.status_code, 200)
         new_job_id = next(iter(job_request.session["system_data"]["WebApplicationJob"].keys()))
 
-        model_web = ModelWeb(job_request.session)
+        model_web = ModelWeb(SessionSystemRepository(job_request.session))
         all_jobs = model_web.get_efootprint_objects_from_efootprint_type("JobBase")

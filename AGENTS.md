@@ -178,7 +178,7 @@ elif issubclass(annotation, ExplainableRecurrentQuantities):
 ## Typical request lifecycle
 
 1) User action triggers GET/POST (often via HTMX) to a view in `model_builder/…views*.py`
-2) View instantiates `ModelWeb(request.session)`
+2) View instantiates `ModelWeb(SessionSystemRepository(request.session))`
 3) View reads/modifies objects through `ModelWeb`/wrappers and saves back to session using `update_system_data_with_up_to_date_calculated_attributes()`
 4) View returns a template (full page) or partial (for a DOM swap)
 

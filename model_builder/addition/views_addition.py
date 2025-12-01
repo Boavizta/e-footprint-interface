@@ -3,6 +3,7 @@ import json
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
@@ -10,7 +11,7 @@ from model_builder.object_creation_and_edition_utils import render_exception_mod
 
 @render_exception_modal_if_error
 def open_create_object_panel(request, object_type):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
     context_data = efootprint_class_web.generate_object_creation_context(
@@ -35,7 +36,7 @@ def open_create_object_panel(request, object_type):
 
 @render_exception_modal_if_error
 def add_object(request, object_type):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
 
     object_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     http_response =  object_web_class.add_new_object_and_return_html_response(request, model_web, object_type)

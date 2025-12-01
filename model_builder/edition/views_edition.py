@@ -5,13 +5,14 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from efootprint.utils.tools import time_it
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.edition.edit_object_http_response_generator import generate_http_response_from_edit_html_and_events
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
 
 @time_it
 def open_edit_object_panel(request, object_id):
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
     context_data = obj_to_edit.generate_object_edition_context()
@@ -35,7 +36,7 @@ def open_edit_object_panel(request, object_id):
 @render_exception_modal_if_error
 def edit_object(request, object_id, trigger_result_display=False):
     recompute_modeling = request.POST.get("recomputation", False)
-    model_web = ModelWeb(request.session)
+    model_web = ModelWeb(SessionSystemRepository(request.session))
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
     response_html = obj_to_edit.edit_object_and_return_html_response(request.POST)
 
@@ -64,5 +65,5 @@ def open_panel_system_name(request):
 
 
 def save_system_name(request):
-    edited_obj = edit_object_in_system(request.POST, ModelWeb(request.session).system)
+    edited_obj = edit_object_in_system(request.POST, ModelWeb(SessionSystemRepository(request.session)).system)
     return HttpResponse(edited_obj.name)

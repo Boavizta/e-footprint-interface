@@ -95,6 +95,7 @@ class TestViewsAdditionEdge(TestModelingBase):
 
     def test_model_web_edge_usage_journeys_property(self):
         """Test that ModelWeb.edge_usage_journeys property works correctly"""
+        from model_builder.adapters.repositories import SessionSystemRepository
         from model_builder.web_core.model_web import ModelWeb
 
         # Create edge usage journey
@@ -103,7 +104,7 @@ class TestViewsAdditionEdge(TestModelingBase):
         add_object(euj_request, "EdgeUsageJourney")
 
         # Test ModelWeb property
-        model_web = ModelWeb(euj_request.session)
+        model_web = ModelWeb(SessionSystemRepository(euj_request.session))
         edge_usage_journeys = model_web.edge_usage_journeys
 
         self.assertEqual(len(edge_usage_journeys), 1)
