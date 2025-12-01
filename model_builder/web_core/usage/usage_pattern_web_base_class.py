@@ -43,7 +43,18 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
             raise PermissionError(
                 f"You need to have created at least one {cls.object_type_in_volume.replace("_", " ")} "
                 f"to create a usage pattern.")
-        return super().generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
+        creation_context = super().generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
+
+        # Select France as default country
+        attributes_section = creation_context["form_sections"][1]
+        for structure_field in attributes_section["fields"]:
+            if structure_field["attr_name"] == "country":
+                for option in structure_field["options"]:
+                    if option["label"] == "France":
+                        structure_field["selected"] = option["value"]
+                        break
+
+        return creation_context
 
     @classmethod
     def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
