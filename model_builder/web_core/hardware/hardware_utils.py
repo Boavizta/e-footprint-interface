@@ -63,27 +63,3 @@ def generate_object_with_storage_edition_context(obj_to_edit):
     })
 
     return context_data
-
-
-def add_new_object_with_storage(request, model_web: "ModelWeb", storage_type: str):
-    storage_data = json.loads(request.POST.get("storage_form_data"))
-
-    storage = create_efootprint_obj_from_post_data(storage_data, model_web, storage_type)
-    added_storage = model_web.add_new_efootprint_object_to_system(storage)
-
-    mutable_post = request.POST.copy()
-    request.POST = mutable_post
-    server_type = request.POST.get("type_object_available")
-    mutable_post[server_type + "_" + "storage"] = added_storage.efootprint_id
-
-    new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, server_type)
-    added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-
-    response = render(
-        request, f"model_builder/object_cards/{added_obj.template_name}_card.html", {"object": added_obj})
-    response["HX-Trigger-After-Swap"] = json.dumps({
-        "displayToastAndHighlightObjects": {
-            "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
-    })
-
-    return response

@@ -1,9 +1,7 @@
-import json
 from typing import TYPE_CHECKING, List, Tuple, Optional
 
 from django.shortcuts import render
 
-from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -57,23 +55,16 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         return creation_context
 
     @classmethod
-    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
-        new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_type)
+    def pre_add_to_system(cls, new_efootprint_obj, model_web: "ModelWeb"):
+        """Link new usage pattern to the system before adding."""
         getattr(model_web.system.modeling_obj, cls.attr_name_in_system).append(new_efootprint_obj)
-        added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
 
-        response = render(
-            request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
-            {"object": added_obj})
-
-        response["HX-Trigger-After-Swap"] = json.dumps({
-            "resetLeaderLines": "",
-            "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
-            "displayToastAndHighlightObjects": {
-                "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
-        })
-
-        return response
+    @classmethod
+    def pre_delete(cls, web_obj, model_web: "ModelWeb"):
+        """Unlink usage pattern from system before deletion."""
+        system = model_web.system
+        new_up_list = [up for up in system.get_efootprint_value(cls.attr_name_in_system) if up.id != web_obj.efootprint_id]
+        system.set_efootprint_value(cls.attr_name_in_system, new_up_list)
 
     def generate_ask_delete_http_response(self, request):
         delete_modal_context = self.generate_ask_delete_modal_context()
@@ -84,10 +75,3 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
             context=delete_modal_context)
 
         return http_response
-
-    def generate_delete_http_response(self, request):
-        system = self.model_web.system
-        new_up_list = [up for up in system.get_efootprint_value(self.attr_name_in_system) if up.id != self.efootprint_id]
-        system.set_efootprint_value(self.attr_name_in_system, new_up_list)
-
-        return super().generate_delete_http_response(request)

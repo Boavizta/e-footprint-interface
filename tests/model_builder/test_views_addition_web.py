@@ -78,6 +78,7 @@ class TestViewsAdditionWeb(TestModelingBase):
             len(delete_request.session["system_data"]["System"]["uuid-system-1"]["usage_patterns"]), len_system_up)
 
     def test_add_web_service_then_web_job(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         service_data = self.create_web_application_data(name="New service",parent_id=TEST_SERVER_ID)
         add_service_request = self.create_post_request("/add-object/Service", service_data)
         response = add_object(add_service_request, "Service")

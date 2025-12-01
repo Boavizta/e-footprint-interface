@@ -1,11 +1,10 @@
 import json
 from typing import TYPE_CHECKING
 
-from django.shortcuts import render
+from django.http import QueryDict
 
 from model_builder.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -15,6 +14,7 @@ if TYPE_CHECKING:
 class ServiceWeb(ModelingObjectWeb):
     attributes_to_skip_in_forms = ["gpu_latency_alpha", "gpu_latency_beta", "server"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    skip_parent_linking = True  # Service links to server via 'server' field, not via parent list
 
     @property
     def class_title_style(self):
@@ -58,20 +58,15 @@ class ServiceWeb(ModelingObjectWeb):
         }
 
     @classmethod
-    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
-        server_efootprint_id = request.POST.get("efootprint_id_of_parent_to_link_to")
-        service_type = request.POST.get("type_object_available")
-        mutable_post = request.POST.copy()
-        mutable_post[f"{service_type}_server"] = server_efootprint_id
-        new_efootprint_obj = create_efootprint_obj_from_post_data(mutable_post, model_web, service_type)
+    def prepare_creation_input(cls, form_data):
+        """Map server ID from parent_to_link_to to service-specific server field."""
+        server_efootprint_id = form_data.get("efootprint_id_of_parent_to_link_to")
+        service_type = form_data.get("type_object_available")
 
-        added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
+        if isinstance(form_data, QueryDict):
+            form_data = form_data.copy()
+        else:
+            form_data = dict(form_data)
 
-        response = render(request, "model_builder/object_cards/service_card.html",
-                          context={"object": added_obj})
-        response["HX-Trigger-After-Swap"] = json.dumps({
-            "displayToastAndHighlightObjects": {
-                "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
-        })
-
-        return response
+        form_data[f"{service_type}_server"] = server_efootprint_id
+        return form_data

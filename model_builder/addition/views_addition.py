@@ -4,6 +4,8 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 
 from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.presenters import HtmxPresenter
+from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
 from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.web_core.model_web import ModelWeb
 from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
@@ -36,13 +38,27 @@ def open_create_object_panel(request, object_type):
 
 @render_exception_modal_if_error
 def add_object(request, object_type):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    repository = SessionSystemRepository(request.session)
 
-    object_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
-    http_response =  object_web_class.add_new_object_and_return_html_response(request, model_web, object_type)
+    # 1. Map request to use case input
+    input_data = CreateObjectInput(
+        object_type=object_type,
+        form_data=request.POST,
+        parent_id=request.POST.get("efootprint_id_of_parent_to_link_to")
+    )
 
+    # 2. Execute use case
+    use_case = CreateObjectUseCase(repository)
+    output = use_case.execute(input_data)
+
+    # 3. Present result
+    presenter = HtmxPresenter(request)
+    http_response = presenter.present_created_object(output)
+
+    # 4. Handle recomputation if requested
     recompute_modeling = request.POST.get("recomputation", False)
     if recompute_modeling:
+        model_web = ModelWeb(repository)
         refresh_content_response = render_to_string(
             "model_builder/result/result_panel.html", context={"model_web": model_web})
         http_response.content += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"

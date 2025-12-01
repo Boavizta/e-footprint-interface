@@ -45,10 +45,6 @@ EDGE_USAGE_PATTERN_FORM_DATA = {
 WEB_APPLICATION_FORM_DATA = {
     "type_object_available": "WebApplication",
     "WebApplication_technology": "php-symfony",
-    "WebApplication_base_ram_consumption": "2",
-    "WebApplication_bits_per_pixel": "0.1",
-    "WebApplication_static_delivery_cpu_cost": "4.0",
-    "WebApplication_ram_buffer_per_user": "50",
 }
 
 WEB_APPLICATION_JOB_FORM_DATA = {

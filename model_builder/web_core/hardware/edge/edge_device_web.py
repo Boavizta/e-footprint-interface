@@ -1,4 +1,3 @@
-from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
 
 
@@ -11,8 +10,12 @@ class EdgeDeviceWeb(EdgeDeviceBaseWeb):
         return "edge_device_with_accordion"
 
     @classmethod
-    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
-        mutable_post = request.POST.copy()
-        request.POST = mutable_post
-        request.POST["components"] = ""
-        return ModelingObjectWeb.add_new_object_and_return_html_response(request, model_web, object_type)
+    def prepare_creation_input(cls, form_data):
+        """Add empty components list for edge device creation."""
+        from django.http import QueryDict
+        if isinstance(form_data, QueryDict):
+            form_data = form_data.copy()
+        else:
+            form_data = dict(form_data)
+        form_data["components"] = ""
+        return form_data
