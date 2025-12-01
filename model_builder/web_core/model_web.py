@@ -3,6 +3,7 @@ import math
 import os
 from datetime import timedelta
 from time import time
+from typing import Union
 
 from django.contrib.sessions.backends.base import SessionBase
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
@@ -15,6 +16,8 @@ from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
+from model_builder.domain.interfaces import ISystemRepository
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.web_core.model_web_utils import (determine_global_time_bounds, to_rounded_daily_values,
                                                     get_reindexed_array_from_dict)
@@ -40,11 +43,23 @@ DEFAULT_OBJECTS_CLASS_MAPPING = {
 
 
 class ModelWeb:
-    def __init__(self, session: SessionBase):
+    def __init__(self, repository_or_session: Union[ISystemRepository, SessionBase]):
+        """Initialize ModelWeb with a repository or session.
+
+        Args:
+            repository_or_session: Either an ISystemRepository implementation or a Django SessionBase.
+                                   If a SessionBase is provided, it will be wrapped in a SessionSystemRepository
+                                   for backwards compatibility during migration.
+        """
         start = time()
-        self.session = session
-        self.system_data = session["system_data"]
-        logger.info(f"Session data loaded in {time() - start:.3f} seconds.")
+        # Support both new repository pattern and legacy session pattern for backwards compatibility
+        if isinstance(repository_or_session, SessionBase):
+            self.repository = SessionSystemRepository(repository_or_session)
+        else:
+            self.repository = repository_or_session
+
+        self.system_data = self.repository.get_system_data()
+        logger.info(f"System data loaded in {time() - start:.3f} seconds.")
 
         # Apply interface-specific version upgrades before json_to_system
         json_efootprint_version = self.system_data.get("efootprint_version")
@@ -87,12 +102,8 @@ class ModelWeb:
         return output_json
 
     def update_system_data_with_up_to_date_calculated_attributes(self):
-        """
-        Updates the session's system data with the calculated attributes data.
-        :param system_data: Dictionary containing the new system data.
-        """
-        self.session.modified = True
-        self.session["system_data"] = self.to_json(save_calculated_attributes=True)
+        """Updates the stored system data with the calculated attributes data."""
+        self.repository.save_system_data(self.to_json(save_calculated_attributes=True))
 
     def raise_incomplete_modeling_errors(self):
         if len(self.system.usage_patterns) + len(self.system.edge_usage_patterns) == 0:
