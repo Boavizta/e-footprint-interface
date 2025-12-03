@@ -64,6 +64,7 @@ class DeleteObjectUseCase:
             DeleteCheckResult with deletion context information.
         """
         from model_builder.web_core.model_web import ModelWeb
+        from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
         model_web = ModelWeb(self.repository)
         web_obj = model_web.get_web_object_from_efootprint_id(object_id)
@@ -72,11 +73,19 @@ class DeleteObjectUseCase:
 
         # Check for blocking containers (non-list references)
         if web_obj.modeling_obj_containers and not list_containers:
-            blocking_names = [obj.name for obj in web_obj.modeling_obj_containers]
-            return DeleteCheckResult(
-                can_delete=False,
-                blocking_containers=blocking_names,
-            )
+            # Check if class has custom blocking logic via can_delete hook
+            web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(web_obj.class_as_simple_str)
+            if web_class and hasattr(web_class, 'can_delete'):
+                can_delete, blocking_names = web_class.can_delete(web_obj)
+                if not can_delete:
+                    return DeleteCheckResult(can_delete=False, blocking_containers=blocking_names)
+            else:
+                # Default: block if has non-list containers
+                blocking_names = [obj.name for obj in web_obj.modeling_obj_containers]
+                return DeleteCheckResult(
+                    can_delete=False,
+                    blocking_containers=blocking_names,
+                )
 
         # Check for accordion children
         accordion_children = web_obj.accordion_children

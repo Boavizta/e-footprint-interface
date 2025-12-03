@@ -331,9 +331,6 @@ class ModelingObjectWeb:
 
         return context_data
 
-    def edit_object_and_return_html_response(self, edit_form_data: QueryDict):
-        return compute_edit_object_html_and_event_response(edit_form_data, self)
-
     def generate_cant_delete_modal_message(self):
         msg = (f"This {self.class_as_simple_str} is referenced by "
                f"{", ".join([obj.name for obj in self.modeling_obj_containers])}. "

@@ -18,14 +18,14 @@ This file documents remaining work to complete the Clean Architecture refactorin
 - `HtmxPresenter` - Formats use case outputs as HTTP responses
 - Hooks pattern implemented for class-specific logic:
   - **Creation**: `pre_create`, `prepare_creation_input`, `pre_add_to_system`, `handle_creation_error`, `post_create`
-  - **Deletion**: `pre_delete`
+  - **Deletion**: `pre_delete`, `can_delete`
   - **Edition**: `pre_edit`
 - `skip_parent_linking` class attribute for objects that link via field instead of list
 - HTML generation moved from use cases to presenter (Phase 2 cleanup done)
 
 **Classes using hooks:**
 - `EdgeDeviceWeb` - `prepare_creation_input` (empty components)
-- `ServerWeb` - `pre_create`, `pre_edit` (storage handling)
+- `ServerWeb` - `pre_create`, `pre_edit` (storage handling), `can_delete` (allows deletion with services, blocks with jobs)
 - `EdgeComputerWeb` - `pre_create`, `pre_edit` (storage handling)
 - `UsagePatternWebBaseClass` - `pre_add_to_system`, `pre_delete` (system list management)
 - `RecurrentEdgeDeviceNeedWeb` - `prepare_creation_input`
@@ -159,10 +159,8 @@ class EmissionsCalculationService:
 These have custom methods that could potentially use hooks instead:
 
 ### Delete Logic
-- `ServerWeb.self_delete` - Deletes services before server (may need `pre_delete` hook or is fine as-is)
-
-### Ask Delete Modal
-- `ServerWeb.generate_ask_delete_http_response` - Custom modal when server has jobs
+- `ServerWeb.self_delete` - Deletes services before server (fine as-is, cascade deletion)
+- `ServerWeb.can_delete` - ✅ Implemented: allows deletion with services (cascade), blocks with jobs
 
 ---
 

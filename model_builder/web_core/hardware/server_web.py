@@ -63,6 +63,19 @@ class ServerWeb(ModelingObjectWeb):
         storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
         edit_object_in_system(storage_data, storage)
 
+    @classmethod
+    def can_delete(cls, web_obj) -> tuple:
+        """Check if server can be deleted. Only blocked by jobs, not services.
+
+        Services installed on this server will be cascade-deleted via self_delete().
+
+        Returns:
+            Tuple of (can_delete: bool, blocking_names: List[str])
+        """
+        if web_obj.jobs:
+            return False, [obj.name for obj in web_obj.jobs]
+        return True, []
+
     def generate_cant_delete_modal_message(self):
         if self.jobs:
             msg = (f"This server is requested by {", ".join([obj.name for obj in self.jobs])}. "
