@@ -116,7 +116,7 @@ class DeleteObjectUseCase:
             DeleteObjectOutput with deletion results.
         """
         from model_builder.domain.entities.web_core.model_web import ModelWeb
-        from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response
+        from model_builder.adapters.views.edit_object_http_response_generator import compute_edit_object_html_and_event_response
         from efootprint.logger import logger
 
         model_web = ModelWeb(self.repository)

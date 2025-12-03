@@ -4,7 +4,7 @@ This module handles all HTTP/HTMX-specific response formatting, keeping
 the presentation concerns separate from business logic.
 """
 import json
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 
 from model_builder.application.use_cases import CreateObjectOutput, EditObjectOutput, DeleteObjectOutput
 from model_builder.application.use_cases.delete_object import DeleteCheckResult
-from model_builder.edition.edit_object_http_response_generator import generate_http_response_from_edit_html_and_events
+from model_builder.adapters.views.edit_object_http_response_generator import generate_http_response_from_edit_html_and_events
 
 if TYPE_CHECKING:
     from django.http import HttpRequest

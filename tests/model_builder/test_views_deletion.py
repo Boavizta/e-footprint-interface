@@ -2,7 +2,7 @@ import os
 
 from efootprint.logger import logger
 
-from model_builder.views_deletion import delete_object
+from model_builder.adapters.views.views_deletion import delete_object
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 

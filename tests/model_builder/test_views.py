@@ -3,7 +3,7 @@ import os
 
 from efootprint import __version__ as efootprint_version
 
-from model_builder.views import model_builder_main
+from model_builder.adapters.views.views import model_builder_main
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 

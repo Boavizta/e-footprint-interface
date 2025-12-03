@@ -3,10 +3,10 @@ from unittest.mock import patch
 
 from efootprint.logger import logger
 
-from model_builder.addition.views_addition import add_object
-from model_builder.views import model_builder_main, result_chart
-from model_builder.views_deletion import delete_object
-from model_builder.edition.views_edition import edit_object, open_edit_object_panel
+from model_builder.adapters.views.views_addition import add_object
+from model_builder.adapters.views.views import model_builder_main, result_chart
+from model_builder.adapters.views.views_deletion import delete_object
+from model_builder.adapters.views.views_edition import edit_object, open_edit_object_panel
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 from tests.test_constants import TEST_SERVER_ID, TEST_UJ_STEP_ID
