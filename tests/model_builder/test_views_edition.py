@@ -19,7 +19,7 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.views_addition import add_object
-from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
+from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.adapters.views.views_edition import edit_object

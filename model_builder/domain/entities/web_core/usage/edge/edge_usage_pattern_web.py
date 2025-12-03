@@ -1,6 +1,6 @@
 from efootprint.constants.sources import Sources
 
-from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
+from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import UsagePatternWebBaseClass
 

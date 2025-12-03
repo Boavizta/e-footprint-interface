@@ -87,7 +87,7 @@ Update `create_efootprint_obj_from_post_data()` to:
 
 ### 3.2 Handle Edition
 - When editing, form should display the `form_inputs` values stored in JSON
-- User edits inputs ’ new timeseries object created with updated form_inputs
+- User edits inputs ï¿½ new timeseries object created with updated form_inputs
 
 ## Phase 4: Remove FromForm Classes
 
@@ -107,7 +107,7 @@ Update `create_efootprint_obj_from_post_data()` to:
 - Keep base `UsagePatternWeb`, `EdgeUsagePatternWeb` (base classes remain usable via Python API)
 
 ### 4.3 Update Class Registries
-- Remove FromForm classes from `all_efootprint_classes.py` ’ `MODELING_OBJECT_CLASSES_DICT`
+- Remove FromForm classes from `all_efootprint_classes.py` ï¿½ `MODELING_OBJECT_CLASSES_DICT`
 - Remove FromForm mappings from `efootprint_to_web_mapping.py`
 - Add new extension classes to registries
 
@@ -137,9 +137,11 @@ Update `create_efootprint_obj_from_post_data()` to:
 ## Key Implementation Details
 
 ### Detection Strategy (Critical)
+
 ```python
 # In generate_dynamic_form, when annotation is ExplainableHourlyQuantities:
-from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
+from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import
+    ExplainableHourlyQuantitiesFromFormInputs
 
 if issubclass(annotation, ExplainableHourlyQuantities):
     default = default_values[attr_name]
@@ -149,7 +151,7 @@ if issubclass(annotation, ExplainableHourlyQuantities):
         input_type = "hourly_quantities_from_growth"
         # extract form_inputs dict from default
     else:
-        # Base class or other subclass ’ read-only
+        # Base class or other subclass ï¿½ read-only
         input_type = "timeseries_input"
 ```
 

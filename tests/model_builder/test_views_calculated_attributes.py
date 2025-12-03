@@ -6,7 +6,7 @@ from efootprint.logger import logger
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.api_utils.json_to_system import json_to_system
 
-from model_builder.efootprint_extensions.explainable_start_date import ExplainableStartDate
+from model_builder.domain.entities.efootprint_extensions.explainable_start_date import ExplainableStartDate
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.adapters.views.views import get_explainable_hourly_quantity_chart_and_explanation, \
     get_calculated_attribute_explanation
