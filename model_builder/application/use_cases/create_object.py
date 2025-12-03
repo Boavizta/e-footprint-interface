@@ -31,8 +31,6 @@ class CreateObjectOutput:
     linked_parent_id: Optional[str] = None
     linked_parent_web_id: Optional[str] = None
     linked_parent_mirrored_web_ids: List[str] = field(default_factory=list)
-    # HTML updates for parent card when parent was linked
-    html_updates: str = ""
     # For cases where a different object should be returned (e.g., ExternalApi returns server)
     override_object: Optional[Any] = None
 
@@ -132,14 +130,13 @@ class CreateObjectUseCase:
             linked_parent_id = None
             linked_parent_web_id = None
             linked_parent_mirrored_web_ids = []
-            html_updates = ""
 
             # Check if this class should skip parent linking (e.g., services link via 'server' field)
             skip_linking = (getattr(input_web_class, 'skip_parent_linking', False)
                             or getattr(web_class, 'skip_parent_linking', False))
 
             if input_data.parent_id and not skip_linking:
-                parent_was_linked, linked_parent_web_id, linked_parent_mirrored_web_ids, html_updates = self._link_to_parent(
+                parent_was_linked, linked_parent_web_id, linked_parent_mirrored_web_ids = self._link_to_parent(
                     model_web, added_obj, input_data.parent_id)
                 linked_parent_id = input_data.parent_id
 
@@ -157,7 +154,7 @@ class CreateObjectUseCase:
                 if post_create_result and post_create_result.get("return_server_instead"):
                     override_object = post_create_result.get("server_web")
 
-            # 8. Build output
+            # 10. Build output
             return CreateObjectOutput(
                 created_object_id=added_obj.efootprint_id,
                 created_object_name=added_obj.name,
@@ -169,7 +166,6 @@ class CreateObjectUseCase:
                 linked_parent_id=linked_parent_id,
                 linked_parent_web_id=linked_parent_web_id,
                 linked_parent_mirrored_web_ids=linked_parent_mirrored_web_ids,
-                html_updates=html_updates,
                 override_object=override_object,
             )
         except Exception as e:
@@ -185,9 +181,8 @@ class CreateObjectUseCase:
         """Link the created object to its parent.
 
         Returns:
-            Tuple of (parent_was_linked, parent_web_id, parent_mirrored_web_ids, html_updates)
+            Tuple of (parent_was_linked, parent_web_id, parent_mirrored_web_ids)
         """
-        from django.template.loader import render_to_string
         from model_builder.domain.services import ObjectLinkingService
         from model_builder.object_creation_and_edition_utils import edit_object_in_system
 
@@ -198,16 +193,6 @@ class CreateObjectUseCase:
         # Edit the parent to include the new object
         edit_object_in_system(link_result.edit_data, link_result.parent_web_obj)
 
-        # Generate HTML updates for all mirrored parent cards (presentation concern - Phase 2 cleanup)
-        html_updates = ""
-        mirrored_cards = link_result.parent_web_obj.mirrored_cards
-        for mirrored_card in mirrored_cards:
-            html_updates += (
-                f"<div hx-swap-oob='outerHTML:#{mirrored_card.web_id}'>"
-                f"{render_to_string(f'model_builder/object_cards/{mirrored_card.template_name}_card.html', {'object': mirrored_card})}"
-                f"</div>"
-            )
+        parent_mirrored_web_ids = [card.web_id for card in link_result.parent_web_obj.mirrored_cards]
 
-        parent_mirrored_web_ids = [card.web_id for card in mirrored_cards]
-
-        return True, link_result.parent_web_obj.web_id, parent_mirrored_web_ids, html_updates
+        return True, link_result.parent_web_obj.web_id, parent_mirrored_web_ids

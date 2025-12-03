@@ -41,20 +41,30 @@ class HtmxPresenter:
         Returns:
             HttpResponse with the rendered object card and HTMX triggers.
         """
+        from django.template.loader import render_to_string
         from model_builder.adapters.repositories import SessionSystemRepository
         from model_builder.web_core.model_web import ModelWeb
 
         if output.parent_was_linked:
-            # Parent was linked - return the parent's updated HTML
+            # Parent was linked - generate HTML for all mirrored parent cards
+            repository = SessionSystemRepository(self.request.session)
+            model_web = ModelWeb(repository)
+            parent_obj = model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
+
+            html_updates = ""
+            for mirrored_card in parent_obj.mirrored_cards:
+                html_updates += (
+                    f"<div hx-swap-oob='outerHTML:#{mirrored_card.web_id}'>"
+                    f"{render_to_string(f'model_builder/object_cards/{mirrored_card.template_name}_card.html', {'object': mirrored_card})}"
+                    f"</div>"
+                )
+
             toast_and_highlight_data = {
                 "ids": output.mirrored_web_ids,
                 "name": output.created_object_name,
                 "action_type": "add_new_object"
             }
-            return generate_http_response_from_edit_html_and_events(
-                output.html_updates if hasattr(output, 'html_updates') else "",
-                toast_and_highlight_data
-            )
+            return generate_http_response_from_edit_html_and_events(html_updates, toast_and_highlight_data)
 
         # Check if we should return a different object (e.g., ExternalApi returns server)
         if output.override_object:

@@ -9,10 +9,10 @@ This file documents remaining work to complete the Clean Architecture refactorin
 - `SessionSystemRepository` implementation
 - `ModelWeb` accepts repository instead of session directly
 
-### Phase 2: Use Cases ✅ MOSTLY COMPLETE (functional, minor cleanup remaining)
+### Phase 2: Use Cases ✅ COMPLETE
 
 **Completed:**
-- `CreateObjectUseCase` - Working with hooks pattern
+- `CreateObjectUseCase` - Working with hooks pattern, no Django imports
 - `EditObjectUseCase` - Working
 - `DeleteObjectUseCase` - Working
 - `HtmxPresenter` - Formats use case outputs as HTTP responses
@@ -21,6 +21,7 @@ This file documents remaining work to complete the Clean Architecture refactorin
   - **Deletion**: `pre_delete`
   - **Edition**: `pre_edit`
 - `skip_parent_linking` class attribute for objects that link via field instead of list
+- HTML generation moved from use cases to presenter (Phase 2 cleanup done)
 
 **Classes using hooks:**
 - `EdgeDeviceWeb` - `prepare_creation_input` (empty components)
@@ -31,10 +32,8 @@ This file documents remaining work to complete the Clean Architecture refactorin
 - `ExternalApiWeb` - `pre_create`, `handle_creation_error`, `post_create` (complex multi-object creation)
 - `ServiceWeb` - `prepare_creation_input`, `skip_parent_linking`
 
-**Remaining cleanup (non-blocking):**
-1. Use cases still import Django's `render_to_string` for HTML generation (e.g., `_link_to_parent`)
-2. Could move HTML generation entirely to presenter layer for purer separation
-3. QueryDict still passed to use cases (works but not ideal)
+**Remaining (low priority):**
+- QueryDict still passed to use cases (works, but not ideal - see Phase 6)
 
 ---
 
@@ -155,47 +154,6 @@ class EmissionsCalculationService:
 
 ---
 
-## Phase 2 Remaining Cleanup (can be done after Phase 3)
-
-### HTML Generation in Use Cases
-The `_link_to_parent` method imports `django.template.loader.render_to_string`:
-
-```python
-# Current (in CreateObjectUseCase._link_to_parent)
-from django.template.loader import render_to_string
-html_updates += f"<div hx-swap-oob='outerHTML:#{mirrored_card.web_id}'>"
-html_updates += render_to_string(f'model_builder/object_cards/{mirrored_card.template_name}_card.html', ...)
-```
-
-**Options:**
-1. **Accept it**: HTMX architecture blurs presentation/business boundaries
-2. **Return data, not HTML**: Use case returns list of objects to re-render, presenter generates HTML
-3. **Inject renderer**: Pass a renderer interface to use case
-
-### QueryDict in Use Cases
-Use cases accept `Dict[str, Any]` but views pass `request.POST` (QueryDict) directly:
-
-```python
-# Current
-input_data = CreateObjectInput(
-    object_type=object_type,
-    form_data=request.POST,  # QueryDict passed directly
-    ...
-)
-```
-
-**Ideal:**
-```python
-# Views should map to plain dict
-input_data = CreateObjectInput(
-    object_type=object_type,
-    form_data=RequestMapper.to_dict(request.POST),
-    ...
-)
-```
-
----
-
 ## Remaining Web Classes with Override Methods
 
 These have custom methods that could potentially use hooks instead:
@@ -224,3 +182,38 @@ Make views true thin adapters:
 - Return response
 
 Currently views are mostly there, but some still have logic in them.
+
+### Phase 6: Extract Form Handling Services
+Extract form parsing logic from `object_creation_and_edition_utils.py`:
+
+**Current state:**
+- `create_efootprint_obj_from_post_data()` mixes form parsing with object creation
+- `edit_object_in_system()` has similar mixed concerns
+- Both accept QueryDict but work with plain dict too
+
+**Target architecture:**
+```python
+# adapters/mappers/form_data_mapper.py
+class FormDataMapper:
+    """Maps raw form data to typed creation/edit inputs."""
+    def map_creation_data(self, form_data: dict, object_type: str) -> ObjectCreationInput:
+        """Converts form data to typed input for object creation."""
+        ...
+
+    def map_edit_data(self, form_data: dict, obj_to_edit) -> ObjectEditInput:
+        """Converts form data to typed input for object editing."""
+        ...
+
+# domain/services/object_factory.py
+class ObjectFactory:
+    """Creates efootprint objects from typed inputs."""
+    def create_object(self, input: ObjectCreationInput, model_web) -> ModelingObject:
+        """Creates efootprint object from typed input."""
+        ...
+```
+
+**Benefits:**
+1. Clear separation: form parsing (adapter) vs object creation (domain)
+2. Typed inputs make use cases more testable
+3. Form parsing can be unit tested independently
+4. Easier to add new input sources (API, CLI, etc.)
