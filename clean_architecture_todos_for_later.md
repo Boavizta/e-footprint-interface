@@ -166,27 +166,36 @@ These have custom methods that could potentially use hooks instead:
 
 ## Future Considerations
 
-### Phase 4: Split ModelingObjectWeb ✅ PARTIAL (cleanup done)
+### Phase 4: Split ModelingObjectWeb ✅ COMPLETE
 Removed deprecated HTTP methods from `ModelingObjectWeb`:
 - `add_new_object_and_return_html_response` (→ CreateObjectUseCase)
 - `generate_delete_http_response` (→ DeleteObjectUseCase)
 - `generate_ask_delete_http_response` (→ HtmxPresenter)
+- `edit_object_and_return_html_response` (removed, only delegated)
 
 **Result:** ModelingObjectWeb reduced from 486 to 373 lines (-23%)
 
-**Remaining (optional):**
-- `generate_object_creation_context` could move to a FormService
-- `generate_object_edition_context` could move to a FormService
-- `edit_object_and_return_html_response` could be removed (only delegates)
+**Not moved (by design):**
+- `generate_object_creation_context` - Heavily overridden by subclasses, domain-specific form config belongs on web classes
+- `generate_object_edition_context` - Similar pattern, natural home for form configuration
 
-### Phase 5: Clean Up Views
-Make views true thin adapters:
-- Map request to input
-- Call use case
-- Call presenter
-- Return response
+### Phase 5: Clean Up Views ✅ COMPLETE
+Views are now thin adapters following the pattern:
+1. Map request to input
+2. Call use case
+3. Call presenter
+4. Return response
 
-Currently views are mostly there, but some still have logic in them.
+**Changes made:**
+- Moved recomputation logic from views to `HtmxPresenter`
+- `present_created_object(output, recompute=False)` - handles result panel refresh
+- `present_edited_object(output, recompute=False, trigger_result_display=False)` - handles result panel refresh
+- Presenter has lazy `model_web` property - only created when needed (for recomputation)
+- Views simplified: `views_addition.py`, `views_edition.py` no longer duplicate recomputation logic
+
+**Not changed (by design):**
+- `save_system_name` - Simple rename that returns plain text, use case would add complexity without benefit
+- `views.py` main views - Already reasonably thin, complex logic is domain-specific (version upgrade, JSON import)
 
 ### Phase 6: Extract Form Handling Services
 Extract form parsing logic from `object_creation_and_edition_utils.py`:

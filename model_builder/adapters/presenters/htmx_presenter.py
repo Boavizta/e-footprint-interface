@@ -4,10 +4,11 @@ This module handles all HTTP/HTMX-specific response formatting, keeping
 the presentation concerns separate from business logic.
 """
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 
 from model_builder.application.use_cases import CreateObjectOutput, EditObjectOutput, DeleteObjectOutput
 from model_builder.application.use_cases.delete_object import DeleteCheckResult
@@ -15,6 +16,7 @@ from model_builder.edition.edit_object_http_response_generator import generate_h
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
+    from model_builder.web_core.model_web import ModelWeb
 
 
 class HtmxPresenter:
@@ -31,25 +33,46 @@ class HtmxPresenter:
             request: The Django HTTP request object.
         """
         self.request = request
+        self._model_web = None
 
-    def present_created_object(self, output: CreateObjectOutput) -> HttpResponse:
+    @property
+    def model_web(self) -> "ModelWeb":
+        """Lazy-load ModelWeb instance. Only created when needed (e.g., for recomputation)."""
+        if self._model_web is None:
+            from model_builder.adapters.repositories import SessionSystemRepository
+            from model_builder.web_core.model_web import ModelWeb
+            self._model_web = ModelWeb(SessionSystemRepository(self.request.session))
+        return self._model_web
+
+    def _append_recomputation_html(self, response: HttpResponse) -> HttpResponse:
+        """Append result panel recomputation HTML to response if needed.
+
+        Args:
+            response: The HTTP response to modify.
+
+        Returns:
+            The modified response with recomputation HTML appended.
+        """
+        refresh_content = render_to_string(
+            "model_builder/result/result_panel.html", context={"model_web": self.model_web})
+        html_update = (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
+                      f"{refresh_content}</div>")
+        response.content += html_update.encode('utf-8')
+        return response
+
+    def present_created_object(self, output: CreateObjectOutput, recompute: bool = False) -> HttpResponse:
         """Format a created object as an HTTP response.
 
         Args:
             output: The output from CreateObjectUseCase.
+            recompute: Whether to append result panel recomputation HTML.
 
         Returns:
             HttpResponse with the rendered object card and HTMX triggers.
         """
-        from django.template.loader import render_to_string
-        from model_builder.adapters.repositories import SessionSystemRepository
-        from model_builder.web_core.model_web import ModelWeb
-
         if output.parent_was_linked:
             # Parent was linked - generate HTML for all mirrored parent cards
-            repository = SessionSystemRepository(self.request.session)
-            model_web = ModelWeb(repository)
-            parent_obj = model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
+            parent_obj = self.model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
 
             html_updates = ""
             for mirrored_card in parent_obj.mirrored_cards:
@@ -64,7 +87,10 @@ class HtmxPresenter:
                 "name": output.created_object_name,
                 "action_type": "add_new_object"
             }
-            return generate_http_response_from_edit_html_and_events(html_updates, toast_and_highlight_data)
+            response = generate_http_response_from_edit_html_and_events(html_updates, toast_and_highlight_data)
+            if recompute:
+                self._append_recomputation_html(response)
+            return response
 
         # Check if we should return a different object (e.g., ExternalApi returns server)
         if output.override_object:
@@ -81,12 +107,12 @@ class HtmxPresenter:
                     "action_type": "add_new_object"
                 }
             })
+            if recompute:
+                self._append_recomputation_html(response)
             return response
 
         # Standalone object - render its card
-        repository = SessionSystemRepository(self.request.session)
-        model_web = ModelWeb(repository)
-        added_obj = model_web.get_web_object_from_efootprint_id(output.created_object_id)
+        added_obj = self.model_web.get_web_object_from_efootprint_id(output.created_object_id)
 
         response = render(
             self.request,
@@ -104,6 +130,8 @@ class HtmxPresenter:
             }
         })
 
+        if recompute:
+            self._append_recomputation_html(response)
         return response
 
     def present_created_object_with_parent_link(
@@ -125,23 +153,34 @@ class HtmxPresenter:
         }
         return generate_http_response_from_edit_html_and_events(parent_html_updates, toast_and_highlight_data)
 
-    def present_edited_object(self, output: EditObjectOutput, trigger_result_display: bool = False) -> HttpResponse:
+    def present_edited_object(
+        self, output: EditObjectOutput, recompute: bool = False, trigger_result_display: bool = False
+    ) -> HttpResponse:
         """Format an edited object as an HTTP response.
 
         Args:
             output: The output from EditObjectUseCase.
+            recompute: Whether to append result panel recomputation HTML.
             trigger_result_display: Whether to trigger result chart display.
 
         Returns:
             HttpResponse with the updated HTML and HTMX triggers.
         """
+        html_updates = output.html_updates
+        if recompute:
+            refresh_content = render_to_string(
+                "model_builder/result/result_panel.html", context={"model_web": self.model_web})
+            html_updates += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
+                            f"{refresh_content}</div>")
+            trigger_result_display = True
+
         toast_and_highlight_data = {
             "ids": output.mirrored_web_ids,
             "name": output.edited_object_name,
             "action_type": "edit_object"
         }
         return generate_http_response_from_edit_html_and_events(
-            output.html_updates, toast_and_highlight_data, trigger_result_display
+            html_updates, toast_and_highlight_data, trigger_result_display
         )
 
     def present_deleted_object(self, output: DeleteObjectOutput) -> HttpResponse:

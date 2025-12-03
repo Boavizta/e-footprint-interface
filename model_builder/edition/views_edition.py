@@ -2,7 +2,6 @@ import json
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.template.loader import render_to_string
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -37,7 +36,6 @@ def open_edit_object_panel(request, object_id):
 @render_exception_modal_if_error
 def edit_object(request, object_id, trigger_result_display=False):
     repository = SessionSystemRepository(request.session)
-    recompute_modeling = request.POST.get("recomputation", False)
 
     # 1. Map request to use case input
     input_data = EditObjectInput(
@@ -49,20 +47,10 @@ def edit_object(request, object_id, trigger_result_display=False):
     use_case = EditObjectUseCase(repository)
     output = use_case.execute(input_data)
 
-    # 3. Handle recomputation if requested
-    html_updates = output.html_updates
-    if recompute_modeling:
-        model_web = ModelWeb(repository)
-        refresh_content_response = render_to_string(
-            "model_builder/result/result_panel.html", context={"model_web": model_web})
-        html_updates += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
-                         f"{refresh_content_response}</div>")
-        trigger_result_display = True
-
-    # 4. Update output with modified HTML and present
-    output.html_updates = html_updates
+    # 3. Present result (with optional recomputation)
+    recompute = bool(request.POST.get("recomputation", False))
     presenter = HtmxPresenter(request)
-    return presenter.present_edited_object(output, trigger_result_display)
+    return presenter.present_edited_object(output, recompute=recompute, trigger_result_display=trigger_result_display)
 
 
 def open_panel_system_name(request):

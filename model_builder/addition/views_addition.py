@@ -1,7 +1,6 @@
 import json
 
 from django.shortcuts import render
-from django.template.loader import render_to_string
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
@@ -51,17 +50,7 @@ def add_object(request, object_type):
     use_case = CreateObjectUseCase(repository)
     output = use_case.execute(input_data)
 
-    # 3. Present result
+    # 3. Present result (with optional recomputation)
+    recompute = bool(request.POST.get("recomputation", False))
     presenter = HtmxPresenter(request)
-    http_response = presenter.present_created_object(output)
-
-    # 4. Handle recomputation if requested
-    recompute_modeling = request.POST.get("recomputation", False)
-    if recompute_modeling:
-        model_web = ModelWeb(repository)
-        refresh_content_response = render_to_string(
-            "model_builder/result/result_panel.html", context={"model_web": model_web})
-        http_response.content += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
-                         f"{refresh_content_response}</div>").encode('utf-8')
-
-    return http_response
+    return presenter.present_created_object(output, recompute=recompute)
