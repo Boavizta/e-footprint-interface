@@ -4,7 +4,7 @@ from datetime import datetime
 from efootprint.constants.units import u
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 
-from model_builder.web_core.model_web_utils import (
+from model_builder.domain.entities.web_core.model_web_utils import (
     to_rounded_daily_values,
     determine_global_time_bounds,
     reindex_array,

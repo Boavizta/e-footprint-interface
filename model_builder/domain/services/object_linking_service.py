@@ -10,8 +10,8 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.utils.tools import get_init_signature_params
 
 if TYPE_CHECKING:
-    from model_builder.web_core.model_web import ModelWeb
-    from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
+    from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
 
 
 @dataclass

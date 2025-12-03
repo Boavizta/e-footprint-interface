@@ -52,9 +52,9 @@ class EditObjectUseCase:
         Returns:
             EditObjectOutput with the edited object details.
         """
-        from model_builder.web_core.model_web import ModelWeb
+        from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response
-        from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
         # 1. Load system
         model_web = ModelWeb(self.repository)

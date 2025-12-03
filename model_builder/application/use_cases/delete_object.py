@@ -63,8 +63,8 @@ class DeleteObjectUseCase:
         Returns:
             DeleteCheckResult with deletion context information.
         """
-        from model_builder.web_core.model_web import ModelWeb
-        from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+        from model_builder.domain.entities.web_core.model_web import ModelWeb
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
         model_web = ModelWeb(self.repository)
         web_obj = model_web.get_web_object_from_efootprint_id(object_id)
@@ -115,7 +115,7 @@ class DeleteObjectUseCase:
         Returns:
             DeleteObjectOutput with deletion results.
         """
-        from model_builder.web_core.model_web import ModelWeb
+        from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response
         from efootprint.logger import logger
 
@@ -156,7 +156,7 @@ class DeleteObjectUseCase:
         else:
             # Normal deletion
             # Call pre_delete hook if defined (e.g., UsagePattern needs to unlink from system)
-            from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+            from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
             web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(object_type)
             if web_class and hasattr(web_class, 'pre_delete'):
                 web_class.pre_delete(web_obj, model_web)

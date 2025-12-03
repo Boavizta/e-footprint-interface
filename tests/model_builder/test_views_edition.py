@@ -21,7 +21,7 @@ from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.addition.views_addition import add_object
 from model_builder.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
-from model_builder.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.edition.views_edition import edit_object
 from model_builder.views_deletion import delete_object
 from tests import root_test_dir

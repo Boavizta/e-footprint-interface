@@ -1,5 +1,4 @@
 import os
-import re
 import json
 from dataclasses import dataclass
 from unittest import TestCase
@@ -7,7 +6,6 @@ import sys
 from unittest.mock import MagicMock
 from copy import deepcopy
 
-from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.constants.countries import Countries
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.constants.units import u
@@ -16,28 +14,27 @@ from efootprint.core.hardware.network import Network
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.web_builders.services.external_api_web import ExternalApiWeb
-from model_builder.web_builders.services.service_web import ServiceWeb
-from model_builder.web_core.hardware.edge.edge_component_base_web import EdgeComponentWeb
-from model_builder.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
-from model_builder.web_core.hardware.server_web import ServerWeb
-from model_builder.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
-from model_builder.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
-from model_builder.web_core.usage.edge.recurrent_edge_component_need_web import RecurrentEdgeComponentNeedWeb
-from model_builder.web_core.usage.edge.recurrent_edge_device_need_base_web import RecurrentEdgeDeviceNeedBaseWeb
-from model_builder.web_core.usage.job_web import JobWeb
-from model_builder.web_core.usage.journey_base_web import JourneyBaseWeb
-from model_builder.web_core.usage.journey_step_base_web import JourneyStepBaseWeb
-from model_builder.web_core.usage.usage_pattern_web import UsagePatternWeb
-from tests.test_web_efootprint_wrappers import StorageWeb
+from model_builder.domain.entities.web_builders.services.external_api_web import ExternalApiWeb
+from model_builder.domain.entities.web_builders.services.service_web import ServiceWeb
+from model_builder.domain.entities.web_core.hardware.edge.edge_component_base_web import EdgeComponentWeb
+from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
+from model_builder.domain.entities.web_core.hardware.server_web import ServerWeb
+from model_builder.domain.entities.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
+from model_builder.domain.entities.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
+from model_builder.domain.entities.web_core.usage.edge.recurrent_edge_component_need_web import RecurrentEdgeComponentNeedWeb
+from model_builder.domain.entities.web_core.usage.edge.recurrent_edge_device_need_base_web import RecurrentEdgeDeviceNeedBaseWeb
+from model_builder.domain.entities.web_core.usage.job_web import JobWeb
+from model_builder.domain.entities.web_core.usage.journey_base_web import JourneyBaseWeb
+from model_builder.domain.entities.web_core.usage.journey_step_base_web import JourneyStepBaseWeb
+from model_builder.domain.entities.web_core.usage.usage_pattern_web import UsagePatternWeb
 
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from model_builder.class_structure import FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
-from model_builder.web_core.model_web import model_builder_root
-from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+from model_builder.domain.entities.web_core.model_web import model_builder_root
+from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 

@@ -5,7 +5,7 @@ from efootprint.logger import logger
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.addition.views_addition import add_object
-from model_builder.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests import root_test_dir
 from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
 

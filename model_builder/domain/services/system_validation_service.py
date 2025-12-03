@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from model_builder.web_core.model_web import ModelWeb
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 @dataclass

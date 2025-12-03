@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from model_builder.object_creation_and_edition_utils import edit_object_in_system
 
 if TYPE_CHECKING:
-    from model_builder.efootprint_to_web_mapping import ModelingObjectWeb
+    from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
 
 
 def compute_edit_object_html_and_event_response(edit_form_data: QueryDict, obj_to_edit: "ModelingObjectWeb"):

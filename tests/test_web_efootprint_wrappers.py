@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from efootprint.all_classes_in_order import CANONICAL_COMPUTATION_ORDER
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.efootprint_to_web_mapping import ModelingObjectWeb, EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb, EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
 
 class StorageWeb(ModelingObjectWeb):

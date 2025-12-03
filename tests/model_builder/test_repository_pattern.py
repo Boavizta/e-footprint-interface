@@ -9,7 +9,7 @@ import unittest
 
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.interfaces import ISystemRepository
-from model_builder.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class TestInMemoryRepository(unittest.TestCase):

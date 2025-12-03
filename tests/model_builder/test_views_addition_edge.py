@@ -96,7 +96,7 @@ class TestViewsAdditionEdge(TestModelingBase):
     def test_model_web_edge_usage_journeys_property(self):
         """Test that ModelWeb.edge_usage_journeys property works correctly"""
         from model_builder.adapters.repositories import SessionSystemRepository
-        from model_builder.web_core.model_web import ModelWeb
+        from model_builder.domain.entities.web_core.model_web import ModelWeb
 
         # Create edge usage journey
         euj_data = self.create_edge_usage_journey_data(name="Test Edge Usage Journey", edge_functions="")

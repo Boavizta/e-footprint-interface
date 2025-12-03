@@ -2,5 +2,5 @@ import sys
 import os
 sys.path.append(os.path.join("..", ".."))
 
-from model_builder.efootprint_to_web_mapping import ObjectLinkedToModelingObjWeb
+from model_builder.domain.efootprint_to_web_mapping import ObjectLinkedToModelingObjWeb
 

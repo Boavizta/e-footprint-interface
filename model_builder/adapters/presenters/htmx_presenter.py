@@ -16,7 +16,7 @@ from model_builder.edition.edit_object_http_response_generator import generate_h
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
-    from model_builder.web_core.model_web import ModelWeb
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class HtmxPresenter:
@@ -40,7 +40,7 @@ class HtmxPresenter:
         """Lazy-load ModelWeb instance. Only created when needed (e.g., for recomputation)."""
         if self._model_web is None:
             from model_builder.adapters.repositories import SessionSystemRepository
-            from model_builder.web_core.model_web import ModelWeb
+            from model_builder.domain.entities.web_core.model_web import ModelWeb
             self._model_web = ModelWeb(SessionSystemRepository(self.request.session))
         return self._model_web
 

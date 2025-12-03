@@ -63,10 +63,10 @@ class CreateObjectUseCase:
         Raises:
             Exception: Re-raises any exception after cleaning up the created object.
         """
-        from model_builder.web_core.model_web import ModelWeb
+        from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
-        from model_builder.efootprint_to_web_mapping import (wrap_efootprint_object,
-                                                             EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING)
+        from model_builder.domain.efootprint_to_web_mapping import (wrap_efootprint_object,
+                                                                    EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING)
 
         # 1. Load system
         model_web = ModelWeb(self.repository)

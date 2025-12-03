@@ -9,7 +9,7 @@ from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyE
 from efootprint.constants.units import u
 from pint import Quantity
 
-from model_builder.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class TestModelWeb(unittest.TestCase):
