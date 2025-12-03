@@ -187,37 +187,20 @@ class CreateObjectUseCase:
         Returns:
             Tuple of (parent_was_linked, parent_web_id, parent_mirrored_web_ids, html_updates)
         """
-        from typing import List, get_origin, get_args
         from django.template.loader import render_to_string
-        from efootprint.utils.tools import get_init_signature_params
+        from model_builder.domain.services import ObjectLinkingService
         from model_builder.object_creation_and_edition_utils import edit_object_in_system
 
-        web_object_to_link_to = model_web.get_web_object_from_efootprint_id(parent_id)
-        efootprint_object_to_link_to = web_object_to_link_to.modeling_obj
-
-        # Find the attr name for the list of objects to append the added object to
-        init_sig_params = get_init_signature_params(type(efootprint_object_to_link_to))
-        attr_name_in_list_container = None
-        for attr_name in init_sig_params:
-            annotation = init_sig_params[attr_name].annotation
-            if (get_origin(annotation) and get_origin(annotation) in (list, List)
-                and isinstance(added_obj.modeling_obj, get_args(annotation)[0])):
-                attr_name_in_list_container = attr_name
-                break
-
-        assert attr_name_in_list_container is not None, "A list attr name should always be found"
-
-        # Build the edit data for the parent (plain dict works with edit_object_in_system)
-        existing_element_ids = [elt.id for elt in getattr(efootprint_object_to_link_to, attr_name_in_list_container)]
-        existing_element_ids.append(added_obj.efootprint_id)
-        edit_data = {attr_name_in_list_container: ";".join(existing_element_ids)}
+        # Use domain service to find attribute and build edit data
+        linking_service = ObjectLinkingService()
+        link_result = linking_service.link_child_to_parent(model_web, added_obj, parent_id)
 
         # Edit the parent to include the new object
-        edit_object_in_system(edit_data, web_object_to_link_to)
+        edit_object_in_system(link_result.edit_data, link_result.parent_web_obj)
 
-        # Generate HTML updates for all mirrored parent cards
+        # Generate HTML updates for all mirrored parent cards (presentation concern - Phase 2 cleanup)
         html_updates = ""
-        mirrored_cards = web_object_to_link_to.mirrored_cards
+        mirrored_cards = link_result.parent_web_obj.mirrored_cards
         for mirrored_card in mirrored_cards:
             html_updates += (
                 f"<div hx-swap-oob='outerHTML:#{mirrored_card.web_id}'>"
@@ -227,4 +210,4 @@ class CreateObjectUseCase:
 
         parent_mirrored_web_ids = [card.web_id for card in mirrored_cards]
 
-        return True, web_object_to_link_to.web_id, parent_mirrored_web_ids, html_updates
+        return True, link_result.parent_web_obj.web_id, parent_mirrored_web_ids, html_updates

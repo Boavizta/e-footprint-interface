@@ -38,11 +38,45 @@ This file documents remaining work to complete the Clean Architecture refactorin
 
 ---
 
-## Phase 3: Extract Domain Services (NEXT)
+## Phase 3: Extract Domain Services ✅ COMPLETE
 
 **Goal:** Extract domain logic from `ModelWeb` and utility functions into focused domain services that don't depend on Django.
 
-### Candidate Services to Extract
+### Implemented Services
+
+#### 1. ObjectLinkingService ✅
+Location: `model_builder/domain/services/object_linking_service.py`
+- `find_list_attribute_for_child()` - Finds which list attribute on parent accepts child type
+- `build_link_edit_data()` - Builds edit data dict with semicolon-separated IDs
+- `link_child_to_parent()` - Orchestrates above, returns `LinkResult` dataclass
+- Used by `CreateObjectUseCase._link_to_parent()`
+
+#### 2. SystemValidationService ✅
+Location: `model_builder/domain/services/system_validation_service.py`
+- `validate_for_computation()` - Returns `ValidationResult` with errors
+- `ValidationResult.raise_if_invalid()` - Raises ValueError if invalid
+- Checks: usage patterns exist, usage journeys have steps
+- Used by `ModelWeb.raise_incomplete_modeling_errors()`
+
+#### 3. EmissionsCalculationService ✅
+Location: `model_builder/domain/services/emissions_calculation_service.py`
+- `calculate_daily_emissions()` - Returns `EmissionsResult` with dates and values
+- `SystemWithFootprints` Protocol for flexible typing (works with mocks)
+- Aggregates energy and fabrication footprints by category
+- Used by `ModelWeb.system_emissions`
+
+### NOT Extracted (deferred)
+
+#### ObjectCreationService
+`create_efootprint_obj_from_post_data` in `object_creation_and_edition_utils.py` is complex:
+- Tightly coupled to form data parsing
+- Uses `model_web` for object lookups
+- Would require significant refactoring
+- Current implementation works well, defer to later phase
+
+---
+
+### Original Candidate Services (for reference)
 
 #### 1. ObjectLinkingService
 Handles parent-child linking logic currently in `CreateObjectUseCase._link_to_parent`:

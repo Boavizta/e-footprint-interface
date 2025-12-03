@@ -1,11 +1,8 @@
 import json
-import math
 import os
-from datetime import timedelta
 from time import time
 
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
-from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
@@ -16,8 +13,6 @@ from efootprint import __version__ as efootprint_version
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
-from model_builder.web_core.model_web_utils import (determine_global_time_bounds, to_rounded_daily_values,
-                                                    get_reindexed_array_from_dict)
 from model_builder.efootprint_to_web_mapping import wrap_efootprint_object
 
 
@@ -96,25 +91,11 @@ class ModelWeb:
         self.repository.save_system_data(self.to_json(save_calculated_attributes=True))
 
     def raise_incomplete_modeling_errors(self):
-        if len(self.system.usage_patterns) + len(self.system.edge_usage_patterns) == 0:
-            raise ValueError(
-                "No impact could be computed because the modeling is incomplete. Please make sure you have at least "
-                "one usage pattern or one edge usage pattern.")
-        else:
-            usage_journeys_linked_to_usage_pattern_and_without_uj_steps = []
-            for usage_journey in self.usage_journeys:
-                if len(usage_journey.usage_patterns) > 0 and len(usage_journey.uj_steps) == 0:
-                    usage_journeys_linked_to_usage_pattern_and_without_uj_steps.append(usage_journey)
-
-            if len(usage_journeys_linked_to_usage_pattern_and_without_uj_steps) > 0:
-                raise ValueError(
-                    f"The following usage journey(s) have no usage journey step:  "
-                    f"{[uj.name for uj in usage_journeys_linked_to_usage_pattern_and_without_uj_steps]}."
-                    f" Please add at least one step in each of the above usage journey(s), so that the model can be "
-                    f"computed.\n\n"
-                    "(Alternatively, if they are work in progress, you can delete the usage patterns pointing to them: "
-                    "in that way the usage journeys will be ignored in the computation.)"
-                )
+        """Validate system completeness and raise ValueError if incomplete."""
+        from model_builder.domain.services import SystemValidationService
+        validation_service = SystemValidationService()
+        result = validation_service.validate_for_computation(self)
+        result.raise_if_invalid()
 
     @staticmethod
     def _efootprint_object_from_json(json_input: dict, object_type: str):
@@ -282,46 +263,8 @@ class ModelWeb:
 
     @property
     def system_emissions(self):
-        energy = self.system.total_energy_footprints
-        fab = self.system.total_fabrication_footprints
-
-        ehqs = [q for q in list(energy.values()) + list(fab.values()) if isinstance(q, ExplainableHourlyQuantities)]
-
-        if not ehqs:
-            raise ValueError("No ExplainableHourlyQuantities found.")
-
-        global_start, total_hours = determine_global_time_bounds(ehqs)
-
-        emissions = {
-            "dates" : [
-                (global_start + timedelta(days=i)).strftime("%Y-%m-%d")
-                for i in range(math.ceil(total_hours / 24))
-            ],
-            "values" : {
-                "Servers_and_storage_energy": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
-                    + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
-                ),
-                "Edge_devices_energy": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("EdgeDevices", energy, global_start, total_hours)
-                ),
-                "Devices_energy": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("Devices", energy, global_start, total_hours)
-                ),
-                "Network_energy": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("Network", energy, global_start, total_hours)
-                ),
-                "Servers_and_storage_fabrication": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
-                    + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
-                ),
-                "Edge_devices_fabrication": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("EdgeDevices", fab, global_start, total_hours)
-                ),
-                "Devices_fabrication": to_rounded_daily_values(
-                    get_reindexed_array_from_dict("Devices", fab, global_start, total_hours)
-                ),
-            }
-        }
-
-        return emissions
+        """Calculate daily emissions timeseries for the system."""
+        from model_builder.domain.services import EmissionsCalculationService
+        service = EmissionsCalculationService()
+        result = service.calculate_daily_emissions(self.system)
+        return result.to_dict()
