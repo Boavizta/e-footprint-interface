@@ -2,7 +2,6 @@ import json
 from typing import TYPE_CHECKING
 
 from django.http import QueryDict
-from django.shortcuts import render
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
@@ -10,8 +9,8 @@ from efootprint.core.hardware.storage import Storage
 
 from model_builder.object_creation_and_edition_utils import edit_object_in_system, create_efootprint_obj_from_post_data
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.web_core.hardware.hardware_utils import generate_object_with_storage_creation_context, \
-    generate_object_with_storage_edition_context
+from model_builder.web_core.hardware.hardware_utils import (
+    generate_object_with_storage_creation_context, generate_object_with_storage_edition_context)
 
 if TYPE_CHECKING:
     from model_builder.web_core.model_web import ModelWeb
@@ -63,18 +62,6 @@ class ServerWeb(ModelingObjectWeb):
         storage_data = json.loads(form_data.get("storage_form_data"))
         storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
         edit_object_in_system(storage_data, storage)
-
-    def generate_ask_delete_http_response(self, request):
-        if self.jobs:
-            return super().generate_ask_delete_http_response(request)
-        else:
-            delete_modal_context = self.generate_ask_delete_modal_context()
-            delete_modal_context["modal_id"] = "model-builder-modal"
-
-            http_response = render(
-                request, "model_builder/modals/delete_card_modal.html",
-                context=delete_modal_context)
-            return http_response
 
     def generate_cant_delete_modal_message(self):
         if self.jobs:

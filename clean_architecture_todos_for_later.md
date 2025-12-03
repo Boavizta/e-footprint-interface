@@ -168,11 +168,18 @@ These have custom methods that could potentially use hooks instead:
 
 ## Future Considerations
 
-### Phase 4: Split ModelingObjectWeb
-After domain services are extracted, `ModelingObjectWeb` can be simplified:
-- Keep only wrapper/delegation logic
-- Move presentation to presenters
-- Move form generation to form services
+### Phase 4: Split ModelingObjectWeb ✅ PARTIAL (cleanup done)
+Removed deprecated HTTP methods from `ModelingObjectWeb`:
+- `add_new_object_and_return_html_response` (→ CreateObjectUseCase)
+- `generate_delete_http_response` (→ DeleteObjectUseCase)
+- `generate_ask_delete_http_response` (→ HtmxPresenter)
+
+**Result:** ModelingObjectWeb reduced from 486 to 373 lines (-23%)
+
+**Remaining (optional):**
+- `generate_object_creation_context` could move to a FormService
+- `generate_object_edition_context` could move to a FormService
+- `edit_object_and_return_html_response` could be removed (only delegates)
 
 ### Phase 5: Clean Up Views
 Make views true thin adapters:

@@ -32,14 +32,3 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
         return generate_object_with_storage_creation_context(
             model_web, "EdgeDeviceBase", [EdgeComputer, EdgeAppliance, EdgeDevice],
             "EdgeStorage", [EdgeStorage])
-
-    @classmethod
-    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
-        from model_builder.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
-
-        object_creation_type = request.POST.get("type_object_available", object_type)
-        child_object_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_creation_type]
-        http_response = child_object_web_class.add_new_object_and_return_html_response(
-            request, model_web, object_creation_type)
-
-        return http_response

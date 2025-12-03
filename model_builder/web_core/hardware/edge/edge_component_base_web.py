@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-from django.shortcuts import render
 from efootprint.core.hardware.edge.edge_cpu_component import EdgeCPUComponent
 from efootprint.core.hardware.edge.edge_ram_component import EdgeRAMComponent
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
@@ -53,13 +52,3 @@ class EdgeComponentWeb(ModelingObjectWeb):
         return {
             "hx_vals": {"efootprint_id_of_parent_to_link_to": context_data.get("efootprint_id_of_parent_to_link_to")},
         }
-
-    def generate_ask_delete_http_response(self, request):
-        delete_modal_context = self.generate_ask_delete_modal_context()
-        delete_modal_context["modal_id"] = "model-builder-modal"
-
-        http_response = render(
-            request, "model_builder/modals/delete_card_modal.html",
-            context=delete_modal_context)
-
-        return http_response

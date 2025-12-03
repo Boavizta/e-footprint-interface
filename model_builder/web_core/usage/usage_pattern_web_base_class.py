@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING, List, Tuple, Optional
 
-from django.shortcuts import render
-
 from model_builder.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -65,13 +63,3 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         system = model_web.system
         new_up_list = [up for up in system.get_efootprint_value(cls.attr_name_in_system) if up.id != web_obj.efootprint_id]
         system.set_efootprint_value(cls.attr_name_in_system, new_up_list)
-
-    def generate_ask_delete_http_response(self, request):
-        delete_modal_context = self.generate_ask_delete_modal_context()
-        delete_modal_context["modal_id"] = "model-builder-modal"
-
-        http_response = render(
-            request, "model_builder/modals/delete_card_modal.html",
-            context=delete_modal_context)
-
-        return http_response

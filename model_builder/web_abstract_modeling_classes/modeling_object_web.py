@@ -1,9 +1,7 @@
-import json
 import re
-from typing import TYPE_CHECKING, get_origin, List, get_args, Tuple, Optional
+from typing import TYPE_CHECKING, get_origin, List, Tuple, Optional
 
-from django.http import QueryDict, HttpResponse
-from django.shortcuts import render
+from django.http import QueryDict
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
@@ -13,12 +11,10 @@ from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.class_structure import generate_dynamic_form, generate_object_creation_context
-from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response, \
-    generate_http_response_from_edit_html_and_events
+from model_builder.edition.edit_object_http_response_generator import compute_edit_object_html_and_event_response
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
-from model_builder.web_abstract_modeling_classes.explainable_objects_web import ExplainableQuantityWeb, \
-    ExplainableObjectWeb, ExplainableObjectDictWeb
+from model_builder.web_abstract_modeling_classes.explainable_objects_web import (
+    ExplainableQuantityWeb, ExplainableObjectWeb, ExplainableObjectDictWeb)
 from model_builder.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 from model_builder.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
@@ -321,61 +317,6 @@ class ModelingObjectWeb:
         return generate_object_creation_context(
             corresponding_efootprint_class_str, [corresponding_efootprint_class], model_web)
 
-    @classmethod
-    def add_new_object_and_return_html_response(cls, request, model_web: "ModelWeb", object_type: str):
-        object_creation_type = request.POST.get("type_object_available", object_type)
-        new_efootprint_obj = create_efootprint_obj_from_post_data(request.POST, model_web, object_creation_type)
-        try:
-            added_obj = model_web.add_new_efootprint_object_to_system(new_efootprint_obj)
-
-            object_to_link_to_id = request.POST.get("efootprint_id_of_parent_to_link_to", None)
-
-            if object_to_link_to_id is None:
-                response = render(
-                    request, f"model_builder/object_cards/{added_obj.template_name}_card.html",
-                    {"object": added_obj})
-
-                response["HX-Trigger-After-Swap"] = json.dumps({
-                    "resetLeaderLines": "",
-                    "setAccordionListeners": {"accordionIds": [added_obj.web_id]},
-                    "displayToastAndHighlightObjects": {
-                        "ids": [added_obj.web_id], "name": added_obj.name, "action_type": "add_new_object"}
-                })
-            else:
-                web_object_to_link_to = model_web.get_web_object_from_efootprint_id(object_to_link_to_id)
-                efootprint_object_to_link_to = web_object_to_link_to.modeling_obj
-                # Find the attr name for the list of objects to append the added object to in the efootprint_object_to_link_to
-                init_sig_params = get_init_signature_params(type(efootprint_object_to_link_to))
-                attr_name_in_list_container = None
-                for attr_name in init_sig_params:
-                    annotation = init_sig_params[attr_name].annotation
-                    if (get_origin(annotation) and get_origin(annotation) in (list, List)
-                        and isinstance(new_efootprint_obj, get_args(annotation)[0])):
-                        attr_name_in_list_container = attr_name
-                        break
-                assert attr_name_in_list_container is not None, f"A list attr name should always be found"
-
-                mutable_post = QueryDict(mutable=True)
-                existing_element_ids = [elt.id for elt in getattr(efootprint_object_to_link_to, attr_name_in_list_container)]
-                existing_element_ids.append(added_obj.efootprint_id)
-                mutable_post[attr_name_in_list_container] = ";".join(existing_element_ids)
-
-                response_html = compute_edit_object_html_and_event_response(mutable_post, web_object_to_link_to)
-
-                toast_and_highlight_data = {
-                    "ids": [mirrored_card.web_id for mirrored_card in added_obj.mirrored_cards], "name": added_obj.name,
-                    "action_type": "add_new_object"
-                }
-
-                response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
-        except Exception as e:
-            logger.error("An error occurred during new object creation, deleting the created object.")
-            added_obj.self_delete()
-            model_web.update_system_data_with_up_to_date_calculated_attributes()
-            raise e
-
-        return response
-
     def generate_object_edition_context(self):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
             self.class_as_simple_str, self.modeling_obj.__dict__, self.model_web)
@@ -430,56 +371,3 @@ class ModelingObjectWeb:
                                            f"break the mirroring link first.")
 
         return context_data
-
-    def generate_ask_delete_http_response(self, request):
-        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
-        if self.modeling_obj_containers and not list_containers:
-            cant_delete_modal_message = self.generate_cant_delete_modal_message()
-            cant_delete_modal_context = {
-                "modal_id": "model-builder-modal", "message": cant_delete_modal_message}
-
-            http_response = render(request, "model_builder/modals/cant_delete_modal.html",
-                                   context=cant_delete_modal_context)
-        else:
-            delete_modal_context = self.generate_ask_delete_modal_context()
-            delete_modal_context["modal_id"] = "model-builder-modal"
-
-            http_response = render(
-                request, "model_builder/modals/delete_card_modal.html",
-                context=delete_modal_context)
-
-        return http_response
-
-    def generate_delete_http_response(self, request):
-        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
-        if list_containers:
-            toast_and_highlight_data = {"ids": [], "name": self.name, "action_type": "delete_object"}
-            response_html = ""
-            for list_container in list_containers:
-                mutable_post = request.POST.copy()
-                logger.info(f"Removing {self.name} from {list_container.name}")
-                mutable_post['name'] = list_container.name
-                new_list_attribute_ids = [
-                    list_attribute.efootprint_id
-                    for list_attribute in getattr(list_container, attr_name_in_list_container)
-                    if list_attribute.efootprint_id != self.efootprint_id]
-                mutable_post[attr_name_in_list_container] = ";".join(new_list_attribute_ids)
-                request.POST = mutable_post
-
-                partial_response_html = compute_edit_object_html_and_event_response(request.POST, list_container)
-                response_html += partial_response_html
-
-            http_response = generate_http_response_from_edit_html_and_events(response_html, toast_and_highlight_data)
-        else:
-            # Non-list object: normal deletion
-            self.self_delete()
-            self.model_web.update_system_data_with_up_to_date_calculated_attributes()
-
-            http_response = HttpResponse(status=204)
-            toast_and_highlight_data = {"ids": [], "name": self.name, "action_type": "delete_object"}
-            http_response["HX-Trigger"] = json.dumps({
-                "resetLeaderLines": "",
-                "displayToastAndHighlightObjects": toast_and_highlight_data
-            })
-
-        return http_response
