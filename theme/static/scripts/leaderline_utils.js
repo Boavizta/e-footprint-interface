@@ -1,4 +1,5 @@
 let resizeTimeout;
+let globalListenersInitialized = false;
 
 let dictLeaderLineOption = {
     'object-to-object': {
@@ -128,6 +129,12 @@ function updateOrCreateLines(element) {
 }
 
 function addAccordionListener(accordion){
+    // Prevent adding duplicate listeners
+    if (accordion.dataset.leaderLineListenerAdded === "true") {
+        return;
+    }
+    accordion.dataset.leaderLineListenerAdded = "true";
+
     accordion.addEventListener('shown.bs.collapse', function () {
         let closestLeaderlineObject = accordion.closest('.leader-line-object');
         if (closestLeaderlineObject) {
@@ -161,15 +168,28 @@ function initLeaderLines() {
     document.querySelectorAll('.accordion').forEach(accordion => {
         addAccordionListener(accordion);
     });
-    const scrollContainerScrollableArea = document.querySelector('#model-canva-scrollable-area');
-    scrollContainerScrollableArea.addEventListener('scroll', updateLines);
-    const scrollContainer = document.querySelector('#model-canva');
-    scrollContainer.addEventListener('scroll', updateLines);
+
+    // Only add global listeners once to prevent accumulation
+    if (!globalListenersInitialized) {
+        globalListenersInitialized = true;
+
+        const scrollContainerScrollableArea = document.querySelector('#model-canva-scrollable-area');
+        if (scrollContainerScrollableArea) {
+            scrollContainerScrollableArea.addEventListener('scroll', updateLines);
+        }
+        const scrollContainer = document.querySelector('#model-canva');
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', updateLines);
+        }
+
+        document.addEventListener("htmx:afterSettle", function() {
+            updateLines();
+        });
+
+        setLeaderLineListeners();
+    }
+
     updateLines();
-    document.addEventListener("htmx:afterSettle", function() {
-        updateLines();
-    });
-    setLeaderLineListeners();
 }
 
 function setLeaderLineListeners() {

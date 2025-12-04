@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.7] - 2025-12-04
+
+### Fixed
+- Stop multiplying event listeners every time initLeaderLines is called (which happens on every object addition/edit). This was causing performance issues and memory leaks when the model got bigger. Now event listeners are only added once thanks to the addition of listener addition tags.
+
 ## [0.10.6] - 2025-12-01
 
 ### Added
