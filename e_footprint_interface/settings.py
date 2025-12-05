@@ -133,6 +133,12 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+# Cache busting: appends content hash to filenames (e.g., app.js -> app.a1b2c3d4.js)
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
+}
+
 # ============================================================================
 # DJANGO BROWSER RELOAD
 # ============================================================================
@@ -183,9 +189,3 @@ elif os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
 
     # Database configuration
     DATABASES = {"default": env.db()}
-
-    # Static files with cache busting (appends content hash to filenames)
-    STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
-    }

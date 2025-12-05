@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.9] - 2025-12-05
+
+### Added
+- Static files cache busting for all environments: JS/CSS files now have content hashes in filenames, forcing browsers to fetch new versions on deployment.
+
+### Fixed
+- Remove sourcemap references from third-party libraries (chart.js, bootstrap) that were breaking collectstatic.
+
 ## [0.10.8] - 2025-12-05
 
 ### Fixed
