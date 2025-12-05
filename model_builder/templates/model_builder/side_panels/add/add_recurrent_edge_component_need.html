@@ -46,22 +46,16 @@
 
                     if (compatibleUnit) {
                         unitInput.value = compatibleUnit;
-                        console.log(`Updated unit to: ${compatibleUnit} for component: ${selectedComponentId}`);
                     }
                 }
             }
 
-            // Initial unit setup
-            document.addEventListener('DOMContentLoaded', updateRecurrentNeedUnit);
-
-            // Update unit when component selection changes
+            // Initial unit setup and change listener
             const componentSelect = document.getElementById('edge_component');
             if (componentSelect) {
                 componentSelect.addEventListener('change', updateRecurrentNeedUnit);
             }
-
-            // Trigger on dynamic form initialization
-            document.addEventListener('initDynamicForm', updateRecurrentNeedUnit);
+            updateRecurrentNeedUnit();
         })();
     </script>
 {% endblock %}
