@@ -183,3 +183,9 @@ elif os.getenv('DJANGO_CLEVER_CLOUD') == 'True':
 
     # Database configuration
     DATABASES = {"default": env.db()}
+
+    # Static files with cache busting (appends content hash to filenames)
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
+    }
