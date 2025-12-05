@@ -1,5 +1,7 @@
 let resizeTimeout;
 let globalListenersInitialized = false;
+let currentScrollableArea = null;
+let currentScrollContainer = null;
 
 let dictLeaderLineOption = {
     'object-to-object': {
@@ -169,18 +171,12 @@ function initLeaderLines() {
         addAccordionListener(accordion);
     });
 
+    // Attach scroll listeners to current DOM elements (they may be replaced on JSON upload)
+    attachScrollListeners();
+
     // Only add global listeners once to prevent accumulation
     if (!globalListenersInitialized) {
         globalListenersInitialized = true;
-
-        const scrollContainerScrollableArea = document.querySelector('#model-canva-scrollable-area');
-        if (scrollContainerScrollableArea) {
-            scrollContainerScrollableArea.addEventListener('scroll', updateLines);
-        }
-        const scrollContainer = document.querySelector('#model-canva');
-        if (scrollContainer) {
-            scrollContainer.addEventListener('scroll', updateLines);
-        }
 
         document.addEventListener("htmx:afterSettle", function() {
             updateLines();
@@ -190,6 +186,22 @@ function initLeaderLines() {
     }
 
     updateLines();
+}
+
+function attachScrollListeners() {
+    // Attach scroll listeners only if DOM elements have changed (e.g., after JSON upload)
+    // Old elements + their listeners are garbage collected when removed from DOM
+    const newScrollableArea = document.querySelector('#model-canva-scrollable-area');
+    const newScrollContainer = document.querySelector('#model-canva');
+
+    if (newScrollableArea && newScrollableArea !== currentScrollableArea) {
+        newScrollableArea.addEventListener('scroll', updateLines);
+        currentScrollableArea = newScrollableArea;
+    }
+    if (newScrollContainer && newScrollContainer !== currentScrollContainer) {
+        newScrollContainer.addEventListener('scroll', updateLines);
+        currentScrollContainer = newScrollContainer;
+    }
 }
 
 function setLeaderLineListeners() {
