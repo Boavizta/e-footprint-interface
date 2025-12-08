@@ -1,0 +1,90 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Edge usage pattern selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Available edge usage patterns",
+                "options": [
+                    {
+                        "label": "Edge usage pattern",
+                        "value": "EdgeUsagePattern"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "EdgeUsagePattern",
+        "header": "Edge usage pattern creation",
+        "fields": [
+            {
+                "web_id": "EdgeUsagePattern_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Edge usage pattern 1"
+            },
+            {
+                "web_id": "EdgeUsagePattern_edge_usage_journey",
+                "attr_name": "edge_usage_journey",
+                "label": "edge usage journey",
+                "tooltip": false,
+                "input_type": "select_object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsagePattern_country",
+                "attr_name": "country",
+                "label": "country",
+                "tooltip": false,
+                "input_type": "select_object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
+                "web_id": "EdgeUsagePattern_hourly_edge_usage_journey_starts",
+                "attr_name": "hourly_edge_usage_journey_starts",
+                "label": "hourly edge usage journey starts",
+                "tooltip": false,
+                "source": {
+                    "name": "user data",
+                    "link": null
+                },
+                "input_type": "hourly_quantities_from_growth",
+                "default": {
+                    "start_date": "2025-01-01",
+                    "modeling_duration_value": 3,
+                    "modeling_duration_unit": "year",
+                    "net_growth_rate_in_percentage": 10,
+                    "net_growth_rate_timespan": "year",
+                    "initial_volume": null,
+                    "initial_volume_timespan": "month"
+                }
+            }
+        ],
+        "advanced_fields": []
+    }
+]

@@ -1,0 +1,267 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Service selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Available services for this server",
+                "options": [
+                    {
+                        "label": "Web application",
+                        "value": "WebApplication"
+                    },
+                    {
+                        "label": "Video streaming application",
+                        "value": "VideoStreaming"
+                    },
+                    {
+                        "label": "Generative AI model",
+                        "value": "GenAIModel"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "WebApplication",
+        "header": "Web application creation",
+        "fields": [
+            {
+                "web_id": "WebApplication_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Web application 1"
+            },
+            {
+                "web_id": "WebApplication_technology",
+                "attr_name": "technology",
+                "label": "technology",
+                "tooltip": false,
+                "default": "php-symfony",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select_str_input",
+                "selected": "php-symfony",
+                "options": [
+                    {
+                        "label": "go-pgx",
+                        "value": "go-pgx"
+                    },
+                    {
+                        "label": "rust-actix-sqlx",
+                        "value": "rust-actix-sqlx"
+                    },
+                    {
+                        "label": "jvm-kotlin-spring",
+                        "value": "jvm-kotlin-spring"
+                    },
+                    {
+                        "label": "php-symfony",
+                        "value": "php-symfony"
+                    },
+                    {
+                        "label": "node-express-sequelize",
+                        "value": "node-express-sequelize"
+                    }
+                ]
+            }
+        ],
+        "advanced_fields": []
+    },
+    {
+        "category": "VideoStreaming",
+        "header": "Video streaming application creation",
+        "fields": [
+            {
+                "web_id": "VideoStreaming_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Video streaming application 1"
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "VideoStreaming_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "tooltip": false,
+                "default": 2,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB_ram",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "VideoStreaming_bits_per_pixel",
+                "attr_name": "bits_per_pixel",
+                "label": "bits per pixel",
+                "tooltip": false,
+                "default": 0.1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "VideoStreaming_static_delivery_cpu_cost",
+                "attr_name": "static_delivery_cpu_cost",
+                "label": "static delivery cpu cost",
+                "tooltip": false,
+                "default": 4,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core\u00b7s/GB",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "VideoStreaming_ram_buffer_per_user",
+                "attr_name": "ram_buffer_per_user",
+                "label": "RAM buffer per user",
+                "tooltip": false,
+                "default": 50,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "MB_ram",
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ]
+    },
+    {
+        "category": "GenAIModel",
+        "header": "Generative AI model creation",
+        "fields": [
+            {
+                "web_id": "GenAIModel_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Generative AI model 1"
+            },
+            {
+                "web_id": "GenAIModel_provider",
+                "attr_name": "provider",
+                "label": "provider",
+                "tooltip": false,
+                "default": "mistralai",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select_str_input",
+                "selected": "mistralai",
+                "options": [
+                    {
+                        "label": "anthropic",
+                        "value": "anthropic"
+                    },
+                    {
+                        "label": "cohere",
+                        "value": "cohere"
+                    },
+                    {
+                        "label": "google",
+                        "value": "google"
+                    },
+                    {
+                        "label": "huggingface_hub",
+                        "value": "huggingface_hub"
+                    },
+                    {
+                        "label": "mistralai",
+                        "value": "mistralai"
+                    },
+                    {
+                        "label": "openai",
+                        "value": "openai"
+                    }
+                ]
+            },
+            {
+                "web_id": "GenAIModel_model_name",
+                "attr_name": "model_name",
+                "label": "model name",
+                "tooltip": false,
+                "default": "open-mistral-7b",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "datalist",
+                "selected": "open-mistral-7b",
+                "options": null
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "GenAIModel_nb_of_bits_per_parameter",
+                "attr_name": "nb_of_bits_per_parameter",
+                "label": "nb of bits per parameter",
+                "tooltip": "Reduce this number if quantization techniques have been used.",
+                "default": 16,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GenAIModel_llm_memory_factor",
+                "attr_name": "llm_memory_factor",
+                "label": "LLM memory factor",
+                "tooltip": "Ratio between the GPU RAM needed and the model size.",
+                "default": 1.2,
+                "source": {
+                    "name": "Ecologits",
+                    "link": "https://github.com/genai-impact/ecologits"
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "GenAIModel_bits_per_token",
+                "attr_name": "bits_per_token",
+                "label": "bits per token",
+                "tooltip": false,
+                "default": 24,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ]
+    }
+]

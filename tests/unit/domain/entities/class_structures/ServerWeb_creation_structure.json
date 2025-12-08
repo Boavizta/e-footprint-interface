@@ -1,0 +1,651 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Server selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Available server types",
+                "options": [
+                    {
+                        "label": "Custom server (CPUs)",
+                        "value": "Server"
+                    },
+                    {
+                        "label": "Server for AI & GenAI services (GPUs)",
+                        "value": "GPUServer"
+                    },
+                    {
+                        "label": "Cloud server (CPUs, for webapps, streaming, etc.)",
+                        "value": "BoaviztaCloudServer"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Server",
+        "header": "Custom server creation",
+        "fields": [
+            {
+                "web_id": "Server_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Custom server 1"
+            },
+            {
+                "web_id": "Server_server_type",
+                "attr_name": "server_type",
+                "label": "infrastructure type",
+                "tooltip": false,
+                "default": "autoscaling",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select_str_input",
+                "selected": "autoscaling",
+                "options": [
+                    {
+                        "label": "autoscaling",
+                        "value": "autoscaling"
+                    },
+                    {
+                        "label": "on-premise",
+                        "value": "on-premise"
+                    },
+                    {
+                        "label": "serverless",
+                        "value": "serverless"
+                    }
+                ]
+            },
+            {
+                "web_id": "Server_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_ram",
+                "attr_name": "ram",
+                "label": "RAM",
+                "tooltip": false,
+                "default": 128,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB_ram",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_compute",
+                "attr_name": "compute",
+                "label": "compute",
+                "tooltip": false,
+                "default": 24,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_average_carbon_intensity",
+                "attr_name": "average_carbon_intensity",
+                "label": "average carbon intensity of electricity",
+                "tooltip": false,
+                "default": 400,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "g/kWh",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "Server_carbon_footprint_fabrication",
+                "attr_name": "carbon_footprint_fabrication",
+                "label": "carbon footprint fabrication",
+                "tooltip": false,
+                "default": 600,
+                "source": {
+                    "name": "Base ADEME_V19",
+                    "link": "https://data.ademe.fr/datasets/base-carbone(r)"
+                },
+                "input_type": "input",
+                "unit": "kg",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_power",
+                "attr_name": "power",
+                "label": "power",
+                "tooltip": false,
+                "default": 300,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "W",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_idle_power",
+                "attr_name": "idle_power",
+                "label": "idle power",
+                "tooltip": false,
+                "default": 50,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "W",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_power_usage_effectiveness",
+                "attr_name": "power_usage_effectiveness",
+                "label": "power usage effectiveness",
+                "tooltip": false,
+                "default": 1.2,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "Server_utilization_rate",
+                "attr_name": "utilization_rate",
+                "label": "server utilization rate",
+                "tooltip": false,
+                "default": 0.9,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "Server_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB_ram",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Server_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ]
+    },
+    {
+        "category": "GPUServer",
+        "header": "AI server creation",
+        "fields": [
+            {
+                "web_id": "GPUServer_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "AI server 1"
+            },
+            {
+                "web_id": "GPUServer_server_type",
+                "attr_name": "server_type",
+                "label": "infrastructure type",
+                "tooltip": false,
+                "default": "serverless",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select_str_input",
+                "selected": "serverless",
+                "options": [
+                    {
+                        "label": "autoscaling",
+                        "value": "autoscaling"
+                    },
+                    {
+                        "label": "on-premise",
+                        "value": "on-premise"
+                    },
+                    {
+                        "label": "serverless",
+                        "value": "serverless"
+                    }
+                ]
+            },
+            {
+                "web_id": "GPUServer_average_carbon_intensity",
+                "attr_name": "average_carbon_intensity",
+                "label": "average carbon intensity of electricity",
+                "tooltip": false,
+                "default": 400,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "g/kWh",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_compute",
+                "attr_name": "compute",
+                "label": "compute",
+                "tooltip": false,
+                "default": 4,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "gpu",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "GPUServer_gpu_power",
+                "attr_name": "gpu_power",
+                "label": "GPU power",
+                "tooltip": false,
+                "default": 400,
+                "source": {
+                    "name": "Estimating the Carbon Footprint of BLOOM",
+                    "link": "https://arxiv.org/abs/2211.05100"
+                },
+                "input_type": "input",
+                "unit": "W/gpu",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_gpu_idle_power",
+                "attr_name": "gpu_idle_power",
+                "label": "GPU idle power",
+                "tooltip": false,
+                "default": 50,
+                "source": {
+                    "name": "Estimating the Carbon Footprint of BLOOM",
+                    "link": "https://arxiv.org/abs/2211.05100"
+                },
+                "input_type": "input",
+                "unit": "W/gpu",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_ram_per_gpu",
+                "attr_name": "ram_per_gpu",
+                "label": "RAM per GPU",
+                "tooltip": false,
+                "default": 80,
+                "source": {
+                    "name": "Estimating the Carbon Footprint of BLOOM",
+                    "link": "https://arxiv.org/abs/2211.05100"
+                },
+                "input_type": "input",
+                "unit": "GB_ram/gpu",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_carbon_footprint_fabrication_per_gpu",
+                "attr_name": "carbon_footprint_fabrication_per_gpu",
+                "label": "carbon footprint fabrication per GPU",
+                "tooltip": false,
+                "default": 150,
+                "source": {
+                    "name": "Estimating the Carbon Footprint of BLOOM",
+                    "link": "https://arxiv.org/abs/2211.05100"
+                },
+                "input_type": "input",
+                "unit": "kg/gpu",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_carbon_footprint_fabrication_without_gpu",
+                "attr_name": "carbon_footprint_fabrication_without_gpu",
+                "label": "carbon footprint fabrication without GPU",
+                "tooltip": false,
+                "default": 2500,
+                "source": {
+                    "name": "Estimating the Carbon Footprint of BLOOM",
+                    "link": "https://arxiv.org/abs/2211.05100"
+                },
+                "input_type": "input",
+                "unit": "kg",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUServer_power_usage_effectiveness",
+                "attr_name": "power_usage_effectiveness",
+                "label": "power usage effectiveness",
+                "tooltip": false,
+                "default": 1.2,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "GPUServer_utilization_rate",
+                "attr_name": "utilization_rate",
+                "label": "server utilization rate",
+                "tooltip": false,
+                "default": 1,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "GPUServer_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "gpu",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "GPUServer_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB_ram",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ]
+    },
+    {
+        "category": "BoaviztaCloudServer",
+        "header": "Cloud server creation",
+        "fields": [
+            {
+                "web_id": "BoaviztaCloudServer_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Cloud server 1"
+            },
+            {
+                "web_id": "BoaviztaCloudServer_provider",
+                "attr_name": "provider",
+                "label": "provider",
+                "tooltip": false,
+                "default": "scaleway",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select_str_input",
+                "selected": "scaleway",
+                "options": [
+                    {
+                        "label": "aws",
+                        "value": "aws"
+                    },
+                    {
+                        "label": "azure",
+                        "value": "azure"
+                    },
+                    {
+                        "label": "scaleway",
+                        "value": "scaleway"
+                    },
+                    {
+                        "label": "gcp",
+                        "value": "gcp"
+                    }
+                ]
+            },
+            {
+                "web_id": "BoaviztaCloudServer_instance_type",
+                "attr_name": "instance_type",
+                "label": "instance type",
+                "tooltip": false,
+                "default": "ent1-s",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "datalist",
+                "selected": "ent1-s",
+                "options": null
+            },
+            {
+                "web_id": "BoaviztaCloudServer_server_type",
+                "attr_name": "server_type",
+                "label": "infrastructure type",
+                "tooltip": false,
+                "default": "autoscaling",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "select_str_input",
+                "selected": "autoscaling",
+                "options": [
+                    {
+                        "label": "autoscaling",
+                        "value": "autoscaling"
+                    },
+                    {
+                        "label": "on-premise",
+                        "value": "on-premise"
+                    },
+                    {
+                        "label": "serverless",
+                        "value": "serverless"
+                    }
+                ]
+            },
+            {
+                "web_id": "BoaviztaCloudServer_lifespan",
+                "attr_name": "lifespan",
+                "label": "lifespan",
+                "tooltip": false,
+                "default": 6,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "yr",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "BoaviztaCloudServer_average_carbon_intensity",
+                "attr_name": "average_carbon_intensity",
+                "label": "average carbon intensity of electricity",
+                "tooltip": false,
+                "default": 400,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "g/kWh",
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "BoaviztaCloudServer_idle_power",
+                "attr_name": "idle_power",
+                "label": "idle power",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "W",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "BoaviztaCloudServer_power_usage_effectiveness",
+                "attr_name": "power_usage_effectiveness",
+                "label": "power usage effectiveness",
+                "tooltip": false,
+                "default": 1.2,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "BoaviztaCloudServer_utilization_rate",
+                "attr_name": "utilization_rate",
+                "label": "server utilization rate",
+                "tooltip": false,
+                "default": 0.9,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "BoaviztaCloudServer_base_ram_consumption",
+                "attr_name": "base_ram_consumption",
+                "label": "base RAM consumption",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "GB_ram",
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "BoaviztaCloudServer_base_compute_consumption",
+                "attr_name": "base_compute_consumption",
+                "label": "base compute consumption",
+                "tooltip": false,
+                "default": 0,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ]
+    }
+]

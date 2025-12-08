@@ -1,0 +1,133 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Service selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Available services",
+                "options": [
+                    {
+                        "label": "Generative AI model",
+                        "value": "GenAIModel"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "GenAIModel",
+        "header": "Generative AI model creation",
+        "fields": [
+            {
+                "web_id": "GenAIModel_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Generative AI model 1"
+            },
+            {
+                "web_id": "GenAIModel_provider",
+                "attr_name": "provider",
+                "label": "provider",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "default": "mistralai",
+                "input_type": "select_str_input",
+                "selected": "mistralai",
+                "options": [
+                    {
+                        "label": "anthropic",
+                        "value": "anthropic"
+                    },
+                    {
+                        "label": "cohere",
+                        "value": "cohere"
+                    },
+                    {
+                        "label": "google",
+                        "value": "google"
+                    },
+                    {
+                        "label": "huggingface_hub",
+                        "value": "huggingface_hub"
+                    },
+                    {
+                        "label": "mistralai",
+                        "value": "mistralai"
+                    },
+                    {
+                        "label": "openai",
+                        "value": "openai"
+                    }
+                ]
+            },
+            {
+                "web_id": "GenAIModel_model_name",
+                "attr_name": "model_name",
+                "label": "model name",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "default": "open-mistral-7b",
+                "input_type": "datalist",
+                "selected": "open-mistral-7b",
+                "options": null
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "GenAIModel_nb_of_bits_per_parameter",
+                "attr_name": "nb_of_bits_per_parameter",
+                "label": "nb of bits per parameter",
+                "tooltip": "Reduce this number if quantization techniques have been used.",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "default": 16,
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GenAIModel_llm_memory_factor",
+                "attr_name": "llm_memory_factor",
+                "label": "LLM memory factor",
+                "tooltip": "Ratio between the GPU RAM needed and the model size.",
+                "source": {
+                    "name": "Ecologits",
+                    "link": "https://github.com/genai-impact/ecologits"
+                },
+                "input_type": "input",
+                "unit": "",
+                "default": 1.2,
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "GenAIModel_bits_per_token",
+                "attr_name": "bits_per_token",
+                "label": "bits per token",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "default": 24,
+                "can_be_negative": false,
+                "step": 1
+            }
+        ]
+    }
+]

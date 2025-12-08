@@ -1,0 +1,10 @@
+{
+    "switch_item": "type_object_available",
+    "switch_values": [
+        "EdgeCPUComponent",
+        "EdgeRAMComponent",
+        "EdgeStorage",
+        "EdgeWorkloadComponent"
+    ],
+    "dynamic_lists": []
+}

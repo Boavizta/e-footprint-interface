@@ -1,0 +1,47 @@
+{
+    "switch_item": "type_object_available",
+    "switch_values": [
+        "GenAIJob",
+        "GPUJob",
+        "WebApplicationJob",
+        "VideoStreamingJob",
+        "Job"
+    ],
+    "dynamic_lists": [],
+    "dynamic_selects": [
+        {
+            "input_id": "service",
+            "filter_by": "server",
+            "list_value": {
+                "server_efootprint_id": [
+                    {
+                        "label": "service",
+                        "value": "service_efootprint_id"
+                    },
+                    {
+                        "label": "direct call to server",
+                        "value": "direct_server_call"
+                    }
+                ]
+            }
+        },
+        {
+            "input_id": "type_object_available",
+            "filter_by": "service",
+            "list_value": {
+                "direct_server_call": [
+                    {
+                        "label": "Manually defined job",
+                        "value": "Job"
+                    }
+                ],
+                "direct_server_call_gpu": [
+                    {
+                        "label": "Manually defined GPU job",
+                        "value": "GPUJob"
+                    }
+                ]
+            }
+        }
+    ]
+}

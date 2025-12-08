@@ -1,0 +1,460 @@
+[
+    {
+        "category": "job_creation_helper",
+        "header": "Job creation helper",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "server",
+                "name": "Server",
+                "options": [
+                    {
+                        "label": "server",
+                        "value": "server_efootprint_id"
+                    }
+                ],
+                "label": "Choose a server"
+            },
+            {
+                "input_type": "select_object",
+                "web_id": "service",
+                "name": "Service used",
+                "options": null,
+                "label": "Service used"
+            }
+        ]
+    },
+    {
+        "category": "efootprint_classes_available",
+        "header": "Job selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Available job types",
+                "options": [
+                    {
+                        "label": "GPU job",
+                        "value": "GPUJob"
+                    },
+                    {
+                        "label": "Web application job",
+                        "value": "WebApplicationJob"
+                    },
+                    {
+                        "label": "Job",
+                        "value": "Job"
+                    },
+                    {
+                        "label": "Generative AI job",
+                        "value": "GenAIJob"
+                    },
+                    {
+                        "label": "Video streaming job",
+                        "value": "VideoStreamingJob"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "GPUJob",
+        "header": "GPU job creation",
+        "fields": [
+            {
+                "web_id": "GPUJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "GPU job 1"
+            },
+            {
+                "web_id": "GPUJob_data_transferred",
+                "attr_name": "data_transferred",
+                "label": "data transferred",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "kB",
+                "default": 150,
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "GPUJob_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "kB",
+                "default": 100,
+                "can_be_negative": true,
+                "step": 1
+            },
+            {
+                "web_id": "GPUJob_request_duration",
+                "attr_name": "request_duration",
+                "label": "request duration",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "s",
+                "default": 1,
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "GPUJob_compute_needed",
+                "attr_name": "compute_needed",
+                "label": "compute needed",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "gpu",
+                "default": 1,
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "GPUJob_ram_needed",
+                "attr_name": "ram_needed",
+                "label": "RAM needed",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "MB_ram",
+                "default": 50,
+                "can_be_negative": false,
+                "step": 1
+            }
+        ]
+    },
+    {
+        "category": "WebApplicationJob",
+        "header": "Web application job creation",
+        "fields": [
+            {
+                "web_id": "WebApplicationJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Web application job 1"
+            },
+            {
+                "web_id": "WebApplicationJob_data_transferred",
+                "attr_name": "data_transferred",
+                "label": "data transferred",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "MB",
+                "default": 2.2,
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "WebApplicationJob_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "kB",
+                "default": 100,
+                "can_be_negative": true,
+                "step": 1
+            },
+            {
+                "web_id": "WebApplicationJob_implementation_details",
+                "attr_name": "implementation_details",
+                "label": "implementation details",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "default": "default",
+                "input_type": "select_str_input",
+                "selected": "default",
+                "options": [
+                    {
+                        "label": "aggregation-code-side",
+                        "value": "aggregation-code-side"
+                    },
+                    {
+                        "label": "orm-loop",
+                        "value": "orm-loop"
+                    },
+                    {
+                        "label": "mysql",
+                        "value": "mysql"
+                    },
+                    {
+                        "label": "default",
+                        "value": "default"
+                    },
+                    {
+                        "label": "no-index",
+                        "value": "no-index"
+                    },
+                    {
+                        "label": "no-pagination",
+                        "value": "no-pagination"
+                    }
+                ]
+            }
+        ],
+        "advanced_fields": []
+    },
+    {
+        "category": "Job",
+        "header": "Job creation",
+        "fields": [
+            {
+                "web_id": "Job_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Job 1"
+            },
+            {
+                "web_id": "Job_data_transferred",
+                "attr_name": "data_transferred",
+                "label": "data transferred",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "kB",
+                "default": 150,
+                "can_be_negative": false,
+                "step": 1
+            },
+            {
+                "web_id": "Job_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "kB",
+                "default": 100,
+                "can_be_negative": true,
+                "step": 1
+            },
+            {
+                "web_id": "Job_request_duration",
+                "attr_name": "request_duration",
+                "label": "request duration",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "s",
+                "default": 1,
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "Job_compute_needed",
+                "attr_name": "compute_needed",
+                "label": "compute needed",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "cpu_core",
+                "default": 0.1,
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "Job_ram_needed",
+                "attr_name": "ram_needed",
+                "label": "RAM needed",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "MB_ram",
+                "default": 50,
+                "can_be_negative": false,
+                "step": 1
+            }
+        ]
+    },
+    {
+        "category": "GenAIJob",
+        "header": "Generative AI job creation",
+        "fields": [
+            {
+                "web_id": "GenAIJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Generative AI job 1"
+            },
+            {
+                "web_id": "GenAIJob_output_token_count",
+                "attr_name": "output_token_count",
+                "label": "output token count",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "",
+                "default": 1000,
+                "can_be_negative": false,
+                "step": 1
+            }
+        ],
+        "advanced_fields": []
+    },
+    {
+        "category": "VideoStreamingJob",
+        "header": "Video streaming job creation",
+        "fields": [
+            {
+                "web_id": "VideoStreamingJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Video streaming job 1"
+            },
+            {
+                "web_id": "VideoStreamingJob_resolution",
+                "attr_name": "resolution",
+                "label": "resolution",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "default": "1080p (1920 x 1080)",
+                "input_type": "select_str_input",
+                "selected": "1080p (1920 x 1080)",
+                "options": [
+                    {
+                        "label": "480p (640 x 480)",
+                        "value": "480p (640 x 480)"
+                    },
+                    {
+                        "label": "720p (1280 x 720)",
+                        "value": "720p (1280 x 720)"
+                    },
+                    {
+                        "label": "1080p (1920 x 1080)",
+                        "value": "1080p (1920 x 1080)"
+                    },
+                    {
+                        "label": "1440p (2560 x 1440)",
+                        "value": "1440p (2560 x 1440)"
+                    },
+                    {
+                        "label": "2K (2048 x 1080)",
+                        "value": "2K (2048 x 1080)"
+                    },
+                    {
+                        "label": "4K (3840 x 2160)",
+                        "value": "4K (3840 x 2160)"
+                    },
+                    {
+                        "label": "8K (7680 x 4320)",
+                        "value": "8K (7680 x 4320)"
+                    }
+                ]
+            },
+            {
+                "web_id": "VideoStreamingJob_video_duration",
+                "attr_name": "video_duration",
+                "label": "video duration",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "h",
+                "default": 1,
+                "can_be_negative": false,
+                "step": 0.1
+            },
+            {
+                "web_id": "VideoStreamingJob_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "MB",
+                "default": 0,
+                "can_be_negative": true,
+                "step": 1
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "VideoStreamingJob_refresh_rate",
+                "attr_name": "refresh_rate",
+                "label": "refresh rate",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "1/s",
+                "default": 30,
+                "can_be_negative": false,
+                "step": 0.1
+            }
+        ]
+    }
+]
