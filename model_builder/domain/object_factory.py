@@ -1,11 +1,9 @@
 import json
-import os
 from copy import copy, deepcopy
 from inspect import _empty as empty_annotation
 from typing import List, get_origin, get_args, TYPE_CHECKING
 
 from django.http import QueryDict
-from django.shortcuts import render
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_timezone import ExplainableTimezone
@@ -17,7 +15,7 @@ from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.class_structure import get_corresponding_web_class
+from model_builder.adapters.forms.class_structure import get_corresponding_web_class
 
 if TYPE_CHECKING:
     from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
@@ -196,7 +194,7 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
                     new_value.set_label(current_value.label)
                     check_input_validity = True
                     if attr_name in obj_to_edit.attributes_with_depending_values():
-                        logger.info(f"Won’t check input validity for {attr_name} "
+                        logger.info(f"Won't check input validity for {attr_name} "
                                     f"because it has depending values: "
                                     f"{obj_to_edit.attributes_with_depending_values()[attr_name]}")
                         check_input_validity = False
@@ -229,23 +227,3 @@ def edit_object_in_system(edit_form_data: QueryDict, obj_to_edit: "ModelingObjec
     model_web.update_system_data_with_up_to_date_calculated_attributes()
 
     return obj_to_edit
-
-
-def render_exception_modal(request, exception):
-    if os.environ.get("RAISE_EXCEPTIONS"):
-        raise exception
-    http_response = render(request, "model_builder/modals/exception_modal.html", {
-        "modal_id": "model-builder-modal", "message": exception})
-
-    http_response["HX-Trigger-After-Swap"] = json.dumps({"openModalDialog": {"modal_id": "model-builder-modal"}})
-
-    return http_response
-
-
-def render_exception_modal_if_error(func):
-    def wrapper(request, *args, **kwargs):
-        try:
-            return func(request, *args, **kwargs)
-        except Exception as e:
-            return render_exception_modal(request, e)
-    return wrapper

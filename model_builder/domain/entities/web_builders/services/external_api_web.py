@@ -11,7 +11,7 @@ from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.class_structure import generate_object_creation_structure
+from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 

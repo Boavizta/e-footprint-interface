@@ -7,7 +7,7 @@ from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.object_creation_and_edition_utils import edit_object_in_system, create_efootprint_obj_from_post_data
+from model_builder.domain.object_factory import edit_object_in_system, create_efootprint_obj_from_post_data
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.entities.web_core.hardware.hardware_utils import (
     generate_object_with_storage_creation_context, generate_object_with_storage_edition_context)

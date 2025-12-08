@@ -124,7 +124,7 @@ class TestViewsAdditionWeb(TestModelingBase):
         self.assert_response_ok(response)
         self.assertEqual(nb_uj_steps_before + 1, len(add_request.session["system_data"]["UsageJourneyStep"]))
 
-    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
+    @patch("model_builder.adapters.views.exception_handling.render_exception_modal")
     def test_add_usage_journey_step_to_usage_journey_unlinked_to_system_in_existing_computed_system(
         self, mock_render_exception_modal):
         self.change_system_data(os.path.join(root_test_dir, "model_builder", "system_with_mirrored_cards.json"))

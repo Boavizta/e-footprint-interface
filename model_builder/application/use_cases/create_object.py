@@ -64,7 +64,7 @@ class CreateObjectUseCase:
             Exception: Re-raises any exception after cleaning up the created object.
         """
         from model_builder.domain.entities.web_core.model_web import ModelWeb
-        from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
+        from model_builder.domain.object_factory import create_efootprint_obj_from_post_data
         from model_builder.domain.efootprint_to_web_mapping import (wrap_efootprint_object,
                                                                     EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING)
 
@@ -184,7 +184,7 @@ class CreateObjectUseCase:
             Tuple of (parent_was_linked, parent_web_id, parent_mirrored_web_ids)
         """
         from model_builder.domain.services import ObjectLinkingService
-        from model_builder.object_creation_and_edition_utils import edit_object_in_system
+        from model_builder.domain.object_factory import edit_object_in_system
 
         # Use domain service to find attribute and build edit data
         linking_service = ObjectLinkingService()

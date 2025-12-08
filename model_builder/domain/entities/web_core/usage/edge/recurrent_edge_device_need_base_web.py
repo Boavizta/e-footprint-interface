@@ -4,7 +4,7 @@ from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeP
 from efootprint.builders.usage.edge.recurrent_edge_workload import RecurrentEdgeWorkload
 from efootprint.core.usage.edge.recurrent_edge_device_need import RecurrentEdgeDeviceNeed
 
-from model_builder.class_structure import generate_object_creation_structure
+from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb
 

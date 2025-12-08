@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from django.http import QueryDict, HttpResponse
 from django.template.loader import render_to_string
 
-from model_builder.object_creation_and_edition_utils import edit_object_in_system
+from model_builder.domain.object_factory import edit_object_in_system
 
 if TYPE_CHECKING:
     from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb

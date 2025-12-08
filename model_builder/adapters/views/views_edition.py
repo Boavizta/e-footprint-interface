@@ -8,7 +8,8 @@ from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.object_creation_and_edition_utils import edit_object_in_system, render_exception_modal_if_error
+from model_builder.domain.object_factory import edit_object_in_system
+from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 
 @time_it
 def open_edit_object_panel(request, object_id):

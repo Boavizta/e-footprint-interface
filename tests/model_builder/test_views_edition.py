@@ -105,7 +105,7 @@ class TestViewsEdition(TestModelingBase):
 
         response = edit_object(edit_service_request, genai_service.id)
 
-    @patch("model_builder.object_creation_and_edition_utils.render_exception_modal")
+    @patch("model_builder.adapters.views.exception_handling.render_exception_modal")
     def test_edit_server_and_storage(self, mock_render_exception_modal):
         server_id = "uuid-Server-1"
         storage_id = "uuid-Default-SSD-storage-1"

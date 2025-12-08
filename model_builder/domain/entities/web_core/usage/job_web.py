@@ -4,7 +4,7 @@ from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.usage.job import Job, GPUJob
 
-from model_builder.class_structure import generate_object_creation_structure
+from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_core.usage.resource_need_base_web import ResourceNeedBaseWeb
 

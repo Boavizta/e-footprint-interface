@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from efootprint.constants.sources import Sources
 from efootprint.core.usage.edge.recurrent_edge_component_need import RecurrentEdgeComponentNeed
 
-from model_builder.class_structure import generate_object_creation_structure
+from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_quantities_from_constant import (
     ExplainableRecurrentQuantitiesFromConstant)
 from model_builder.form_references import FORM_TYPE_OBJECT

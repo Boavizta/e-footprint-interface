@@ -27,7 +27,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     prepare_timeseries_chart_context, prepare_hourly_quantity_data, prepare_recurrent_quantity_data)
 from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
-from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
+from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 

@@ -3,9 +3,9 @@ from typing import List, TYPE_CHECKING
 
 from django.shortcuts import render
 
-from model_builder.class_structure import generate_object_creation_structure, generate_dynamic_form
+from model_builder.adapters.forms.class_structure import generate_object_creation_structure, generate_dynamic_form
 from model_builder.form_references import FORM_TYPE_OBJECT
-from model_builder.object_creation_and_edition_utils import create_efootprint_obj_from_post_data
+from model_builder.domain.object_factory import create_efootprint_obj_from_post_data
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb

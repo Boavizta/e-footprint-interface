@@ -9,7 +9,7 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject,
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.class_structure import generate_dynamic_form, generate_object_creation_context
+from model_builder.adapters.forms.class_structure import generate_dynamic_form, generate_object_creation_context
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
     ExplainableQuantityWeb, ExplainableObjectWeb, ExplainableObjectDictWeb)

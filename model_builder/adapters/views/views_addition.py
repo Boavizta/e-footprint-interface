@@ -7,7 +7,7 @@ from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.object_creation_and_edition_utils import render_exception_modal_if_error
+from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 
 
 @render_exception_modal_if_error
