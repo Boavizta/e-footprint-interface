@@ -13,8 +13,8 @@ from model_builder.adapters.views.views_edition import edit_object
 from model_builder.adapters.views.views import result_chart
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.adapters.views.views_deletion import delete_object
-from tests import root_test_dir
-from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
+from tests__old import root_test_dir
+from tests__old.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class IntegrationTest(TestModelingBase):

@@ -4,8 +4,8 @@ import os
 from efootprint import __version__ as efootprint_version
 
 from model_builder.adapters.views.views import model_builder_main
-from tests import root_test_dir
-from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
+from tests__old import root_test_dir
+from tests__old.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class TestViews(TestModelingBase):

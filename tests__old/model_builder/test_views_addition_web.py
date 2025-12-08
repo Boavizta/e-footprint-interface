@@ -7,9 +7,9 @@ from model_builder.adapters.views.views_addition import add_object
 from model_builder.adapters.views.views import model_builder_main, result_chart
 from model_builder.adapters.views.views_deletion import delete_object
 from model_builder.adapters.views.views_edition import edit_object, open_edit_object_panel
-from tests import root_test_dir
-from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
-from tests.test_constants import TEST_SERVER_ID, TEST_UJ_STEP_ID
+from tests__old import root_test_dir
+from tests__old.model_builder.base_modeling_integration_test_class import TestModelingBase
+from tests__old.test_constants import TEST_SERVER_ID, TEST_UJ_STEP_ID
 
 
 class TestViewsAdditionWeb(TestModelingBase):
@@ -106,7 +106,7 @@ class TestViewsAdditionWeb(TestModelingBase):
 
     def test_add_usage_journey_with_no_uj_step(self):
         uj_data = self.create_usage_journey_data(name="New usage journey")
-        from tests.test_constants import MINIMAL_SYSTEM_DATA
+        from tests__old.test_constants import MINIMAL_SYSTEM_DATA
         add_request = self.create_post_request("/add-object/UsageJourney", uj_data, MINIMAL_SYSTEM_DATA)
 
         response = add_object(add_request, "UsageJourney")

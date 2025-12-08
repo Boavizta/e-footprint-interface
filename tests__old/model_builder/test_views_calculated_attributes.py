@@ -10,8 +10,8 @@ from model_builder.domain.entities.efootprint_extensions.explainable_start_date 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.adapters.views.views import get_explainable_hourly_quantity_chart_and_explanation, \
     get_calculated_attribute_explanation
-from tests import root_test_dir
-from tests.model_builder.base_modeling_integration_test_class import TestModelingBase
+from tests__old import root_test_dir
+from tests__old.model_builder.base_modeling_integration_test_class import TestModelingBase
 
 
 class TestViewsEdition(TestModelingBase):

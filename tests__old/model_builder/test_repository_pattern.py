@@ -1,6 +1,6 @@
 """Tests demonstrating the new repository pattern for ModelWeb.
 
-These tests show how to use the InMemorySystemRepository to test ModelWeb
+These tests__old show how to use the InMemorySystemRepository to test ModelWeb
 without requiring Django session infrastructure.
 """
 import json
@@ -64,7 +64,7 @@ class TestModelWebWithRepository(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Load test system data once for all tests."""
+        """Load test system data once for all tests__old."""
         test_data_path = os.path.join(
             os.path.dirname(__file__),
             "default_system_data_with_calculated_attributes.json"

@@ -16,7 +16,7 @@ from efootprint.api_utils.system_to_json import system_to_json
 from model_builder.version_upgrade_handlers import upgrade_interface_version_pre_14
 from model_builder.domain.entities.web_core.model_web import default_networks, default_devices, default_countries
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from tests.test_constants import (
+from tests__old.test_constants import (
     USAGE_PATTERN_FORM_DATA, WEB_APPLICATION_FORM_DATA, WEB_APPLICATION_JOB_FORM_DATA,
     GPU_SERVER_FORM_DATA, HTTP_OK, HTTP_NO_CONTENT, EDGE_DEVICE_FORM_DATA, EDGE_USAGE_PATTERN_FORM_DATA
 )

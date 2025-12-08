@@ -44,7 +44,7 @@ jobs:
 
             - name: E2E Tests
               uses: cypress-io/github-action@v6
-              id: e2e-tests
+              id: e2e-tests__old
               with:
                   browser: firefox
                   config-file: cypress-test.config.ts
@@ -52,7 +52,7 @@ jobs:
 
             - name: Generate test report
               id: generate-e2e-report
-              if: always() && steps.e2e-tests.outcome == 'failure'
+              if: always() && steps.e2e-tests__old.outcome == 'failure'
               run: |
                   mkdir cypress/screenshots || true
                   npx mochawesome-merge ./cypress/results/mochawesome-report/*.json > tests-report.json
