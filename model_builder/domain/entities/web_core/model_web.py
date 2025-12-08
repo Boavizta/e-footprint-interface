@@ -114,15 +114,13 @@ class ModelWeb:
             for json_input in DEFAULT_OBJECTS_CLASS_MAPPING[obj_type]().values():
                 output_list.append(self._efootprint_object_from_json(json_input, obj_type))
 
-            return output_list
-
         obj_type_class = MODELING_OBJECT_CLASSES_DICT.get(obj_type, None)
         if obj_type_class is None:
             obj_type_class = ABSTRACT_EFOOTPRINT_MODELING_CLASSES.get(obj_type, None)
-        assert obj_type_class is not None, f"Object type {obj_type} not found in efootprint classes."
         for existing_obj_type in self.response_objs.keys():
             if issubclass(MODELING_OBJECT_CLASSES_DICT[existing_obj_type], obj_type_class):
-                output_list += list(self.response_objs[existing_obj_type].values())
+                output_list += [obj for obj in list(self.response_objs[existing_obj_type].values())
+                                if obj not in output_list]
 
         return output_list
 

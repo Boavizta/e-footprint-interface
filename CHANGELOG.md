@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.10] - 2025-12-08
+
+### Fixed
+- When loading a model generated with e-footprint, append its specific objects that have defaults in the interface (for example, countries) to the object list, instead of just retrieving the default object list. In this way, if a particular country has been created in the model, it will be available in the interface instead of only the default countries.
+
 ## [0.10.9] - 2025-12-05
 
 ### Added
