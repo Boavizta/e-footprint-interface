@@ -1,13 +1,13 @@
 import json
 from typing import TYPE_CHECKING
 
-from django.http import QueryDict
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.domain.object_factory import edit_object_in_system, create_efootprint_obj_from_post_data
+from model_builder.domain.object_factory import (
+    edit_object_in_system, create_efootprint_obj_from_post_data, make_form_data_mutable)
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.entities.web_core.hardware.hardware_utils import (
     generate_object_with_storage_creation_context, generate_object_with_storage_edition_context)
@@ -45,10 +45,7 @@ class ServerWeb(ModelingObjectWeb):
         added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
         # Copy and modify form data to include storage reference
-        if isinstance(form_data, QueryDict):
-            form_data = form_data.copy()
-        else:
-            form_data = dict(form_data)
+        form_data = make_form_data_mutable(form_data)
         server_type = form_data.get("type_object_available")
         form_data[server_type + "_storage"] = added_storage.efootprint_id
         return form_data
