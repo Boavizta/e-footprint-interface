@@ -1,9 +1,8 @@
 import json
 from typing import TYPE_CHECKING
 
-from django.http import QueryDict
-
 from model_builder.adapters.forms.class_structure import generate_object_creation_structure
+from model_builder.domain.object_factory import make_form_data_mutable
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
@@ -63,10 +62,6 @@ class ServiceWeb(ModelingObjectWeb):
         server_efootprint_id = form_data.get("efootprint_id_of_parent_to_link_to")
         service_type = form_data.get("type_object_available")
 
-        if isinstance(form_data, QueryDict):
-            form_data = form_data.copy()
-        else:
-            form_data = dict(form_data)
-
+        form_data = make_form_data_mutable(form_data)
         form_data[f"{service_type}_server"] = server_efootprint_id
         return form_data

@@ -1,7 +1,6 @@
 import math
 from typing import TYPE_CHECKING
 
-from django.http import QueryDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.builders.services.generative_ai_ecologits import GenAIModel
@@ -12,6 +11,7 @@ from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 
 from model_builder.adapters.forms.class_structure import generate_object_creation_structure
+from model_builder.domain.object_factory import make_form_data_mutable
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
@@ -68,10 +68,7 @@ class ExternalApiWeb(ModelingObjectWeb):
         cls._created_server_web = model_web.add_new_efootprint_object_to_system(new_server)
 
         # Modify form data to reference the server
-        if isinstance(form_data, QueryDict):
-            form_data = form_data.copy()
-        else:
-            form_data = dict(form_data)
+        form_data = make_form_data_mutable(form_data)
         form_data["efootprint_id_of_parent_to_link_to"] = new_server.id
 
         return form_data

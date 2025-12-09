@@ -1,8 +1,6 @@
 import json
 from typing import List, TYPE_CHECKING
 
-from django.shortcuts import render
-
 from model_builder.adapters.forms.class_structure import generate_object_creation_structure, generate_dynamic_form
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.object_factory import create_efootprint_obj_from_post_data
