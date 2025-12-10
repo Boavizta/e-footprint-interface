@@ -2,12 +2,19 @@ import json
 
 from django.shortcuts import render
 
+from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+
+
+def _uses_default_creation_context(web_class) -> bool:
+    """Check if web class uses the default (base) generate_object_creation_context."""
+    return web_class.generate_object_creation_context is ModelingObjectWeb.generate_object_creation_context
 
 
 @render_exception_modal_if_error
@@ -15,8 +22,18 @@ def open_create_object_panel(request, object_type):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
-    context_data = efootprint_class_web.generate_object_creation_context(
-        model_web, efootprint_id_of_parent_to_link_to, object_type)
+
+    # Use FormContextBuilder for classes with default (simple) form generation
+    # Classes with custom generate_object_creation_context still use their own method
+    if _uses_default_creation_context(efootprint_class_web):
+        form_builder = FormContextBuilder(model_web)
+        context_data = form_builder.build_creation_context(
+            efootprint_class_web, object_type, efootprint_id_of_parent_to_link_to)
+    else:
+        # Fall back to custom implementation for complex cases (to be migrated later)
+        context_data = efootprint_class_web.generate_object_creation_context(
+            model_web, efootprint_id_of_parent_to_link_to, object_type)
+
     if efootprint_id_of_parent_to_link_to:
         context_data["efootprint_id_of_parent_to_link_to"] = efootprint_id_of_parent_to_link_to
 
