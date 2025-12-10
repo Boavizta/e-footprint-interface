@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, List, Type
 
 from model_builder.adapters.forms.class_structure import (
     generate_dynamic_form,
-    generate_object_creation_context as _generate_creation_context,
     generate_object_creation_structure,
 )
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
@@ -33,6 +32,9 @@ class FormContextBuilder:
     Supported strategies:
     - "simple": Basic single-class creation form (default)
     - "with_storage": Object + storage dual form (for Server, EdgeDevice, EdgeComputer)
+    - "child_of_parent": Child object with parent already known (for Service, EdgeComponent)
+    - "parent_selection": Complex parent selection with cascading dynamic selects (for Job, RecurrentEdgeDeviceNeed)
+    - "nested_parent_selection": Child with parent already known, but needs internal selection (RecurrentEdgeComponentNeed)
     """
 
     def __init__(self, model_web: "ModelWeb"):
@@ -73,16 +75,24 @@ class FormContextBuilder:
 
         if strategy == 'simple':
             available_classes = config.get('available_classes')
-            return self._build_simple_creation_context(object_type, available_classes)
+            return self._build_simple_creation_context(object_type, available_classes, web_class, config)
         elif strategy == 'with_storage':
             return self._build_with_storage_creation_context(config)
+        elif strategy == 'child_of_parent':
+            return self._build_child_of_parent_creation_context(config, efootprint_id_of_parent_to_link_to)
+        elif strategy == 'parent_selection':
+            return self._build_parent_selection_creation_context(web_class, config)
+        elif strategy == 'nested_parent_selection':
+            return self._build_nested_parent_selection_creation_context(
+                web_class, config, efootprint_id_of_parent_to_link_to)
         else:
             raise ValueError(f"Unknown form strategy: {strategy}")
 
     def _build_simple_creation_context(
         self,
         object_type: str,
-        available_classes: List = None
+        available_classes: List = None,
+        config: dict = None
     ) -> dict:
         """Build context for simple object creation (Pattern 1).
 
@@ -90,6 +100,7 @@ class FormContextBuilder:
             object_type: The efootprint class name string
             available_classes: Optional list of available classes. If None,
                               uses the single class matching object_type.
+            config: Optional full config dict for advanced options
 
         Returns:
             Form context dictionary
@@ -98,7 +109,25 @@ class FormContextBuilder:
             efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
             available_classes = [efootprint_class]
 
-        return _generate_creation_context(object_type, available_classes, self.model_web)
+        # Check if we should use a different object_type for form generation
+        form_object_type = object_type
+        if config and 'form_object_type' in config:
+            form_object_type = config['form_object_type']
+
+        # Generate base context
+        form_sections, dynamic_form_data = generate_object_creation_structure(
+            form_object_type,
+            available_efootprint_classes=available_classes,
+            model_web=self.model_web,
+        )
+
+        return {
+            "object_type": object_type,
+            "form_sections": form_sections,
+            "dynamic_form_data": dynamic_form_data,
+            "obj_formatting_data": FORM_TYPE_OBJECT[object_type],
+            "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
+        }
 
     def _build_with_storage_creation_context(self, config: dict) -> dict:
         """Build context for object with storage creation (Pattern 2).
@@ -142,6 +171,60 @@ class FormContextBuilder:
             "storage_dynamic_form_data": storage_dynamic_form_data,
             "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
         }
+
+    def _build_child_of_parent_creation_context(
+        self,
+        config: dict,
+        efootprint_id_of_parent_to_link_to: str
+    ) -> dict:
+        """Build context for child object creation with parent already known (Pattern 3).
+
+        Used by Service (child of Server) and EdgeComponent (child of EdgeDevice).
+
+        Args:
+            config: Configuration dict with:
+                - object_type: Child object type string (e.g., 'Service', 'EdgeComponent')
+                - available_classes: List of available classes, OR
+                - get_available_classes_from_parent: Method name to call on parent to get classes
+                - parent_context_key: Key to store parent in context (e.g., 'server', 'edge_device')
+                - header_name: Optional custom header name
+
+        Returns:
+            Form context dictionary with parent reference
+        """
+        object_type = config['object_type']
+        parent_context_key = config.get('parent_context_key')
+
+        # Get parent object
+        parent = self.model_web.get_web_object_from_efootprint_id(efootprint_id_of_parent_to_link_to)
+
+        # Get available classes - either static or dynamic from parent
+        if 'get_available_classes_from_parent' in config:
+            method_name = config['get_available_classes_from_parent']
+            available_classes = getattr(parent, method_name)()
+        else:
+            available_classes = config['available_classes']
+
+        # Generate form sections
+        form_sections, dynamic_form_data = generate_object_creation_structure(
+            object_type,
+            available_efootprint_classes=available_classes,
+            model_web=self.model_web,
+        )
+
+        context_data = {
+            "form_sections": form_sections,
+            "dynamic_form_data": dynamic_form_data,
+            "object_type": object_type,
+            "obj_formatting_data": FORM_TYPE_OBJECT[object_type],
+            "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}",
+        }
+
+        # Add parent to context with specified key
+        if parent_context_key:
+            context_data[parent_context_key] = parent
+
+        return context_data
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
         """Build form context for object edition.
@@ -233,5 +316,143 @@ class FormContextBuilder:
             "storage_form_fields_advanced": storage_form_fields_advanced,
             "storage_dynamic_form_data": {"dynamic_lists": storage_dynamic_lists},
         })
+
+        return context_data
+
+    def _build_parent_selection_creation_context(
+        self,
+        web_class: Type["ModelingObjectWeb"],
+        config: dict
+    ) -> dict:
+        """Build context for object creation with parent selection (Pattern 4).
+
+        Used by Job, RecurrentEdgeDeviceNeed where user must select a parent first,
+        and that selection drives which object types are available.
+
+        The web_class must provide these methods:
+        - get_form_creation_data(model_web) -> dict with:
+            - 'available_classes': List of efootprint classes
+            - 'helper_fields': List of field dicts for parent selection
+            - 'dynamic_selects': List of dynamic select configs
+            - 'extra_context': Optional dict of additional context data
+
+        Args:
+            web_class: The web wrapper class
+            config: Configuration dict with:
+                - object_type: The object type string (e.g., 'Job')
+
+        Returns:
+            Form context dictionary with parent selection fields and dynamic selects
+        """
+        object_type = config['object_type']
+
+        # Get form data from domain class method
+        form_data = web_class.get_form_creation_data(self.model_web)
+
+        available_classes = form_data['available_classes']
+        helper_fields = form_data['helper_fields']
+        dynamic_selects = form_data.get('dynamic_selects', [])
+        extra_context = form_data.get('extra_context', {})
+
+        # Generate form sections
+        form_sections, dynamic_form_data = generate_object_creation_structure(
+            object_type,
+            available_efootprint_classes=available_classes,
+            model_web=self.model_web,
+        )
+
+        # Prepend helper fields as first section
+        helper_section = {
+            "category": f"{object_type.lower()}_creation_helper",
+            "header": f"{FORM_TYPE_OBJECT[object_type]['label']} creation helper",
+            "fields": helper_fields
+        }
+        form_sections = [helper_section] + form_sections
+
+        # Add dynamic selects
+        if dynamic_selects:
+            dynamic_form_data["dynamic_selects"] = dynamic_selects
+
+        context_data = {
+            "form_sections": form_sections,
+            "dynamic_form_data": dynamic_form_data,
+            "object_type": object_type,
+            "obj_formatting_data": FORM_TYPE_OBJECT[object_type],
+            "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
+        }
+
+        # Merge any extra context from domain
+        context_data.update(extra_context)
+
+        return context_data
+
+    def _build_nested_parent_selection_creation_context(
+        self,
+        web_class: Type["ModelingObjectWeb"],
+        config: dict,
+        efootprint_id_of_parent_to_link_to: str
+    ) -> dict:
+        """Build context for child object with parent known but needing internal selection (Pattern 5).
+
+        Used by RecurrentEdgeComponentNeed where parent (RecurrentEdgeDeviceNeed) is known,
+        but user must still select an edge component from the parent's device.
+
+        The web_class must provide this method:
+        - get_form_creation_data(model_web, parent_id) -> dict with:
+            - 'available_classes': List of efootprint classes
+            - 'helper_fields': List of field dicts for component selection
+            - 'parent_context_key': Key for storing parent in context
+            - 'parent': The parent object to store
+            - 'extra_dynamic_data': Optional dict to merge into dynamic_form_data
+
+        Args:
+            web_class: The web wrapper class
+            config: Configuration dict with:
+                - object_type: The object type string (e.g., 'RecurrentEdgeComponentNeed')
+            efootprint_id_of_parent_to_link_to: Parent object ID
+
+        Returns:
+            Form context dictionary with parent and component selection
+        """
+        object_type = config['object_type']
+
+        # Get form data from domain class method
+        form_data = web_class.get_form_creation_data(self.model_web, efootprint_id_of_parent_to_link_to)
+
+        available_classes = form_data['available_classes']
+        helper_fields = form_data['helper_fields']
+        parent_context_key = form_data.get('parent_context_key')
+        parent = form_data.get('parent')
+        extra_dynamic_data = form_data.get('extra_dynamic_data', {})
+
+        # Generate form sections
+        form_sections, dynamic_form_data = generate_object_creation_structure(
+            object_type,
+            available_efootprint_classes=available_classes,
+            model_web=self.model_web,
+        )
+
+        # Prepend helper fields as first section
+        helper_section = {
+            "category": f"{object_type.lower()}_creation_helper",
+            "header": f"{FORM_TYPE_OBJECT.get(object_type, {'label': object_type})['label']} creation helper",
+            "fields": helper_fields
+        }
+        form_sections = [helper_section] + form_sections
+
+        # Merge extra dynamic data
+        dynamic_form_data.update(extra_dynamic_data)
+
+        context_data = {
+            "form_sections": form_sections,
+            "dynamic_form_data": dynamic_form_data,
+            "object_type": object_type,
+            "obj_formatting_data": FORM_TYPE_OBJECT.get(object_type, {"label": object_type}),
+            "header_name": f"Add new {FORM_TYPE_OBJECT.get(object_type, {'label': object_type})['label'].lower()}"
+        }
+
+        # Add parent to context with specified key
+        if parent_context_key and parent:
+            context_data[parent_context_key] = parent
 
         return context_data

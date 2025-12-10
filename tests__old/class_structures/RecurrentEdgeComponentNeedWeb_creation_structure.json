@@ -1,7 +1,7 @@
 [
     {
-        "category": "component_need_creation_helper",
-        "header": "Component need creation helper",
+        "category": "recurrentedgecomponentneed_creation_helper",
+        "header": "Recurrent edge component need creation helper",
         "fields": [
             {
                 "input_type": "select_object",

@@ -1,7 +1,7 @@
 [
     {
-        "category": "resource_need_creation_helper",
-        "header": "Resource need creation helper",
+        "category": "recurrentedgedeviceneedbase_creation_helper",
+        "header": "Recurrent edge device need creation helper",
         "fields": [
             {
                 "input_type": "select_object",

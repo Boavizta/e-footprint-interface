@@ -10,9 +10,7 @@ from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.domain.object_factory import make_form_data_mutable
-from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -23,26 +21,13 @@ class ExternalApiWeb(ModelingObjectWeb):
     # Store server reference for use after creation (needed for custom output)
     _created_server_web = None
 
-    @classmethod
-    def generate_object_creation_context(
-    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        services_dict, dynamic_form_data = generate_object_creation_structure(
-            "Service",
-            available_efootprint_classes=[GenAIModel],
-            model_web=model_web,
-        )
-
-        services_dict[0]["fields"][0]["label"] = "Available services"
-
-        context_data = {
-            "form_sections": services_dict,
-            "dynamic_form_data": dynamic_form_data,
-            "object_type": "ExternalApi",
-            "obj_formatting_data": FORM_TYPE_OBJECT["ExternalApi"],
-            "header_name": "Add new external API",
-        }
-
-        return context_data
+    # Declarative form configuration - used by FormContextBuilder in adapters layer
+    form_creation_config = {
+        'strategy': 'simple',
+        'object_type': 'ExternalApi',
+        'form_object_type': 'Service',  # Use Service form structure
+        'available_classes': [GenAIModel],
+    }
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:

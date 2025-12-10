@@ -61,6 +61,7 @@ model_builder/
   - Keep functions small; raise explicit errors with actionable messages
   - Keep number of lines low; prefer to write long lines while respecting the 120 characters limit
   - **Performance**: For array/data operations, prioritize NumPy vectorization over list comprehensions or loops
+  - Prefer using double quotes `"` for strings, over single quotes `'`
 - Django
   - Views: thin adapters that delegate to use cases and presenters
   - Templates: small, composable partials (see `model_builder/templates/model_builder/...`)

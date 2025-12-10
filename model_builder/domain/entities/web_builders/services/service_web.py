@@ -1,19 +1,19 @@
-import json
-from typing import TYPE_CHECKING
-
-from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.domain.object_factory import make_form_data_mutable
-from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-
-if TYPE_CHECKING:
-    from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class ServiceWeb(ModelingObjectWeb):
     attributes_to_skip_in_forms = ["gpu_latency_alpha", "gpu_latency_beta", "server"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
     skip_parent_linking = True  # Service links to server via 'server' field, not via parent list
+
+    # Declarative form configuration - used by FormContextBuilder in adapters layer
+    form_creation_config = {
+        'strategy': 'child_of_parent',
+        'object_type': 'Service',
+        'get_available_classes_from_parent': 'installable_services',  # Dynamic: calls server.installable_services()
+        'parent_context_key': 'server',
+    }
 
     @property
     def class_title_style(self):
@@ -22,29 +22,6 @@ class ServiceWeb(ModelingObjectWeb):
     @property
     def template_name(self):
         return "service"
-
-    @classmethod
-    def generate_object_creation_context(
-    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        server = model_web.get_web_object_from_efootprint_id(efootprint_id_of_parent_to_link_to)
-
-        installable_services = server.installable_services()
-        services_dict, dynamic_form_data = generate_object_creation_structure(
-            "Service",
-            available_efootprint_classes=installable_services,
-            model_web=model_web,
-        )
-
-        context_data = {
-            "server": server,
-            "form_sections": services_dict,
-            "dynamic_form_data": dynamic_form_data,
-            "object_type": "Service",
-            "obj_formatting_data": FORM_TYPE_OBJECT["Service"],
-            "header_name": "Add new service"
-        }
-
-        return context_data
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
