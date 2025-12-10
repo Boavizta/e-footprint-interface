@@ -32,3 +32,18 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
 
         return creation_context
 
+
+    def generate_object_edition_context(self):
+        edition_context = super().generate_object_edition_context()
+
+        for structure_field in edition_context["form_fields"]:
+            if structure_field["attr_name"] == "devices":
+                structure_field.update({
+                    "input_type": "select_object",
+                    "options": structure_field["selected"] + structure_field["unselected"],
+                    "selected": structure_field["selected"][0]["value"]
+                })
+                structure_field.pop("unselected")
+
+        return edition_context
+
