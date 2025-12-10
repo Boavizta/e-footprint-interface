@@ -4,19 +4,34 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from efootprint.utils.tools import time_it
 
+from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.object_factory import edit_object_in_system
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+
+
+def _uses_default_edition_context(obj_to_edit) -> bool:
+    """Check if object's class uses the default (base) generate_object_edition_context."""
+    return type(obj_to_edit).generate_object_edition_context is ModelingObjectWeb.generate_object_edition_context
+
 
 @time_it
 def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
-    context_data = obj_to_edit.generate_object_edition_context()
+    # Use FormContextBuilder for classes with default (simple) form generation
+    # Classes with custom generate_object_edition_context still use their own method
+    if _uses_default_edition_context(obj_to_edit):
+        form_builder = FormContextBuilder(model_web)
+        context_data = form_builder.build_edition_context(obj_to_edit)
+    else:
+        # Fall back to custom implementation for complex cases (to be migrated later)
+        context_data = obj_to_edit.generate_object_edition_context()
 
     object_belongs_to_computable_system = (
         (len(model_web.system.servers) > 0 or len(model_web.edge_devices) > 0) and (len(obj_to_edit.systems) > 0))
