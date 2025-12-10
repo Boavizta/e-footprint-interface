@@ -1,20 +1,22 @@
-from typing import TYPE_CHECKING
-
 from efootprint.core.hardware.edge.edge_cpu_component import EdgeCPUComponent
 from efootprint.core.hardware.edge.edge_ram_component import EdgeRAMComponent
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 from efootprint.core.hardware.edge.edge_workload_component import EdgeWorkloadComponent
 
-from model_builder.adapters.forms.class_structure import generate_object_creation_structure
-from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-
-if TYPE_CHECKING:
-    from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class EdgeComponentWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeComponent and its subclasses."""
+
+    # Declarative form configuration - used by FormContextBuilder in adapters layer
+    form_creation_config = {
+        'strategy': 'child_of_parent',
+        'object_type': 'EdgeComponent',
+        'available_classes': [EdgeCPUComponent, EdgeRAMComponent, EdgeStorage, EdgeWorkloadComponent],
+        'parent_context_key': 'edge_device',
+    }
+
     @property
     def template_name(self):
         return "edge_component"
@@ -22,29 +24,6 @@ class EdgeComponentWeb(ModelingObjectWeb):
     @property
     def class_title_style(self):
         return "h8"
-
-    @classmethod
-    def generate_object_creation_context(
-    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        edge_device = model_web.get_web_object_from_efootprint_id(efootprint_id_of_parent_to_link_to)
-
-        available_component_types = [EdgeCPUComponent, EdgeRAMComponent, EdgeStorage, EdgeWorkloadComponent]
-        components_dict, dynamic_form_data = generate_object_creation_structure(
-            "EdgeComponent",
-            available_efootprint_classes=available_component_types,
-            model_web=model_web,
-        )
-
-        context_data = {
-            "edge_device": edge_device,
-            "form_sections": components_dict,
-            "dynamic_form_data": dynamic_form_data,
-            "object_type": "EdgeComponent",
-            "obj_formatting_data": FORM_TYPE_OBJECT["EdgeComponent"],
-            "header_name": "Add new component"
-        }
-
-        return context_data
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:

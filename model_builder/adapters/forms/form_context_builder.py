@@ -33,6 +33,7 @@ class FormContextBuilder:
     Supported strategies:
     - "simple": Basic single-class creation form (default)
     - "with_storage": Object + storage dual form (for Server, EdgeDevice, EdgeComputer)
+    - "child_of_parent": Child object with parent already known (for Service, EdgeComponent)
     """
 
     def __init__(self, model_web: "ModelWeb"):
@@ -76,6 +77,8 @@ class FormContextBuilder:
             return self._build_simple_creation_context(object_type, available_classes)
         elif strategy == 'with_storage':
             return self._build_with_storage_creation_context(config)
+        elif strategy == 'child_of_parent':
+            return self._build_child_of_parent_creation_context(config, efootprint_id_of_parent_to_link_to)
         else:
             raise ValueError(f"Unknown form strategy: {strategy}")
 
@@ -142,6 +145,60 @@ class FormContextBuilder:
             "storage_dynamic_form_data": storage_dynamic_form_data,
             "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
         }
+
+    def _build_child_of_parent_creation_context(
+        self,
+        config: dict,
+        efootprint_id_of_parent_to_link_to: str
+    ) -> dict:
+        """Build context for child object creation with parent already known (Pattern 3).
+
+        Used by Service (child of Server) and EdgeComponent (child of EdgeDevice).
+
+        Args:
+            config: Configuration dict with:
+                - object_type: Child object type string (e.g., 'Service', 'EdgeComponent')
+                - available_classes: List of available classes, OR
+                - get_available_classes_from_parent: Method name to call on parent to get classes
+                - parent_context_key: Key to store parent in context (e.g., 'server', 'edge_device')
+                - header_name: Optional custom header name
+
+        Returns:
+            Form context dictionary with parent reference
+        """
+        object_type = config['object_type']
+        parent_context_key = config.get('parent_context_key')
+
+        # Get parent object
+        parent = self.model_web.get_web_object_from_efootprint_id(efootprint_id_of_parent_to_link_to)
+
+        # Get available classes - either static or dynamic from parent
+        if 'get_available_classes_from_parent' in config:
+            method_name = config['get_available_classes_from_parent']
+            available_classes = getattr(parent, method_name)()
+        else:
+            available_classes = config['available_classes']
+
+        # Generate form sections
+        form_sections, dynamic_form_data = generate_object_creation_structure(
+            object_type,
+            available_efootprint_classes=available_classes,
+            model_web=self.model_web,
+        )
+
+        context_data = {
+            "form_sections": form_sections,
+            "dynamic_form_data": dynamic_form_data,
+            "object_type": object_type,
+            "obj_formatting_data": FORM_TYPE_OBJECT[object_type],
+            "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}",
+        }
+
+        # Add parent to context with specified key
+        if parent_context_key:
+            context_data[parent_context_key] = parent
+
+        return context_data
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
         """Build form context for object edition.
