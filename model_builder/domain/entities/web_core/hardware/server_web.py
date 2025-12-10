@@ -9,8 +9,6 @@ from efootprint.core.hardware.storage import Storage
 from model_builder.domain.object_factory import (
     edit_object_in_system, create_efootprint_obj_from_post_data, make_form_data_mutable)
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.domain.entities.web_core.hardware.hardware_utils import (
-    generate_object_with_storage_creation_context, generate_object_with_storage_edition_context)
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -22,6 +20,18 @@ class ServerWeb(ModelingObjectWeb):
     attributes_to_skip_in_forms = ["storage", "fixed_nb_of_instances"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
+    # Declarative form configuration - used by FormContextBuilder in adapters layer
+    form_creation_config = {
+        'strategy': 'with_storage',
+        'object_type': 'ServerBase',
+        'available_classes': [GPUServer, BoaviztaCloudServer, Server],
+        'storage_type': 'Storage',
+        'storage_classes': [Storage],
+    }
+    form_edition_config = {
+        'strategy': 'with_storage',
+    }
+
     @property
     def template_name(self):
         return "server"
@@ -29,13 +39,6 @@ class ServerWeb(ModelingObjectWeb):
     @property
     def class_title_style(self):
         return "h6"
-
-    @classmethod
-    def generate_object_creation_context(
-    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        return generate_object_with_storage_creation_context(
-            model_web, "ServerBase", [GPUServer, BoaviztaCloudServer, Server],
-            "Storage", [Storage])
 
     @classmethod
     def pre_create(cls, form_data, model_web: "ModelWeb"):
@@ -49,9 +52,6 @@ class ServerWeb(ModelingObjectWeb):
         server_type = form_data.get("type_object_available")
         form_data[server_type + "_storage"] = added_storage.efootprint_id
         return form_data
-
-    def generate_object_edition_context(self):
-        return generate_object_with_storage_edition_context(self)
 
     @classmethod
     def pre_edit(cls, form_data, obj_to_edit, model_web):
