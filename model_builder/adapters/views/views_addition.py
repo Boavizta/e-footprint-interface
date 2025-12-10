@@ -12,9 +12,16 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 
 
-def _uses_default_creation_context(web_class) -> bool:
-    """Check if web class uses the default (base) generate_object_creation_context."""
-    return web_class.generate_object_creation_context is ModelingObjectWeb.generate_object_creation_context
+def _should_use_form_context_builder(web_class) -> bool:
+    """Check if web class should use FormContextBuilder for form generation.
+
+    Returns True if either:
+    - The class has a form_creation_config (new declarative approach)
+    - The class uses the default (base) generate_object_creation_context
+    """
+    has_form_config = hasattr(web_class, 'form_creation_config') and web_class.form_creation_config is not None
+    uses_default_method = web_class.generate_object_creation_context is ModelingObjectWeb.generate_object_creation_context
+    return has_form_config or uses_default_method
 
 
 @render_exception_modal_if_error
@@ -23,9 +30,9 @@ def open_create_object_panel(request, object_type):
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
 
-    # Use FormContextBuilder for classes with default (simple) form generation
+    # Use FormContextBuilder for classes with declarative config or default form generation
     # Classes with custom generate_object_creation_context still use their own method
-    if _uses_default_creation_context(efootprint_class_web):
+    if _should_use_form_context_builder(efootprint_class_web):
         form_builder = FormContextBuilder(model_web)
         context_data = form_builder.build_creation_context(
             efootprint_class_web, object_type, efootprint_id_of_parent_to_link_to)
