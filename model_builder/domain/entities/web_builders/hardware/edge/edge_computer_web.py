@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from model_builder.domain.object_factory import (
     edit_object_in_system, create_efootprint_obj_from_post_data, make_form_data_mutable)
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
-from model_builder.domain.entities.web_core.hardware.hardware_utils import generate_object_with_storage_edition_context
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -12,6 +11,11 @@ if TYPE_CHECKING:
 
 class EdgeComputerWeb(EdgeDeviceBaseWeb):
     edit_template = "../server/server_edit.html"
+
+    # Declarative form configuration for edition - used by FormContextBuilder in adapters layer
+    form_edition_config = {
+        'strategy': 'with_storage',
+    }
 
     @property
     def calculated_attributes_values(self):
@@ -30,9 +34,6 @@ class EdgeComputerWeb(EdgeDeviceBaseWeb):
         device_type = form_data.get("type_object_available")
         form_data[device_type + "_storage"] = added_storage.efootprint_id
         return form_data
-
-    def generate_object_edition_context(self):
-        return generate_object_with_storage_edition_context(self)
 
     @classmethod
     def pre_edit(cls, form_data, obj_to_edit, model_web):
