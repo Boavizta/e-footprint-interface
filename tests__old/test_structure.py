@@ -100,7 +100,7 @@ class TestsClassStructure(TestCase):
             UsagePatternWeb: "UsagePattern", EdgeUsagePatternWeb: "EdgeUsagePattern", JourneyBaseWeb: "UsageJourney",
             JourneyStepBaseWeb: "UsageJourneyStep", EdgeFunctionWeb: "EdgeFunction", JobWeb: "JobBase",
             RecurrentEdgeDeviceNeedBaseWeb: "RecurrentEdgeDeviceNeedBase",
-            RecurrentEdgeComponentNeedWeb: "RecurrentEdgeComponentNeedBase", EdgeDeviceBaseWeb: "EdgeDeviceBase",
+            RecurrentEdgeComponentNeedWeb: "RecurrentEdgeComponentNeed", EdgeDeviceBaseWeb: "EdgeDeviceBase",
             EdgeComponentWeb: "EdgeComponent", ServerWeb: "ServerBase", ExternalApiWeb: "ExternalApi",
             ServiceWeb: "Service"}
         basic_model_web = MagicMock()
@@ -192,8 +192,7 @@ class TestsClassStructure(TestCase):
             if _should_use_form_context_builder(web_class):
                 form_builder = FormContextBuilder(model_web)
                 creation_context = form_builder.build_creation_context(
-                    web_class, object_type=object_type_dict.get(web_class, None),
-                    efootprint_id_of_parent_to_link_to=None)
+                    web_class, object_type=object_type_dict[web_class], efootprint_id_of_parent_to_link_to=None)
             else:
                 # Fall back to custom implementation for complex cases (to be migrated later)
                 creation_context = web_class.generate_object_creation_context(

@@ -75,16 +75,16 @@ class FormContextBuilder:
 
         if strategy == 'simple':
             available_classes = config.get('available_classes')
-            return self._build_simple_creation_context(object_type, available_classes, web_class, config)
+            return self._build_simple_creation_context(object_type, available_classes, config)
         elif strategy == 'with_storage':
-            return self._build_with_storage_creation_context(config)
+            return self._build_with_storage_creation_context(object_type, config)
         elif strategy == 'child_of_parent':
-            return self._build_child_of_parent_creation_context(config, efootprint_id_of_parent_to_link_to)
+            return self._build_child_of_parent_creation_context(object_type, config, efootprint_id_of_parent_to_link_to)
         elif strategy == 'parent_selection':
-            return self._build_parent_selection_creation_context(web_class, config)
+            return self._build_parent_selection_creation_context(web_class, object_type)
         elif strategy == 'nested_parent_selection':
             return self._build_nested_parent_selection_creation_context(
-                web_class, config, efootprint_id_of_parent_to_link_to)
+                web_class, object_type, efootprint_id_of_parent_to_link_to)
         else:
             raise ValueError(f"Unknown form strategy: {strategy}")
 
@@ -129,14 +129,14 @@ class FormContextBuilder:
             "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
         }
 
-    def _build_with_storage_creation_context(self, config: dict) -> dict:
+    def _build_with_storage_creation_context(self, object_type: str, config: dict) -> dict:
         """Build context for object with storage creation (Pattern 2).
 
         Used by Server, EdgeDevice, EdgeComputer which create a storage alongside.
 
         Args:
+            object_type: Main object type string (e.g., 'ServerBase')
             config: Configuration dict with:
-                - object_type: Main object type string (e.g., 'ServerBase')
                 - available_classes: List of available main object classes
                 - storage_type: Storage type string (e.g., 'Storage')
                 - storage_classes: List of available storage classes
@@ -144,7 +144,6 @@ class FormContextBuilder:
         Returns:
             Form context dictionary with both object and storage form sections
         """
-        object_type = config['object_type']
         available_classes = config['available_classes']
         storage_type = config['storage_type']
         storage_classes = config['storage_classes']
@@ -174,6 +173,7 @@ class FormContextBuilder:
 
     def _build_child_of_parent_creation_context(
         self,
+        object_type: str,
         config: dict,
         efootprint_id_of_parent_to_link_to: str
     ) -> dict:
@@ -182,8 +182,8 @@ class FormContextBuilder:
         Used by Service (child of Server) and EdgeComponent (child of EdgeDevice).
 
         Args:
+            object_type: Child object type string (e.g., 'Service', 'EdgeComponent')
             config: Configuration dict with:
-                - object_type: Child object type string (e.g., 'Service', 'EdgeComponent')
                 - available_classes: List of available classes, OR
                 - get_available_classes_from_parent: Method name to call on parent to get classes
                 - parent_context_key: Key to store parent in context (e.g., 'server', 'edge_device')
@@ -192,7 +192,6 @@ class FormContextBuilder:
         Returns:
             Form context dictionary with parent reference
         """
-        object_type = config['object_type']
         parent_context_key = config.get('parent_context_key')
 
         # Get parent object
@@ -322,7 +321,7 @@ class FormContextBuilder:
     def _build_parent_selection_creation_context(
         self,
         web_class: Type["ModelingObjectWeb"],
-        config: dict
+        object_type: str
     ) -> dict:
         """Build context for object creation with parent selection (Pattern 4).
 
@@ -338,14 +337,11 @@ class FormContextBuilder:
 
         Args:
             web_class: The web wrapper class
-            config: Configuration dict with:
-                - object_type: The object type string (e.g., 'Job')
+            object_type: The object type string (e.g., 'Job')
 
         Returns:
             Form context dictionary with parent selection fields and dynamic selects
         """
-        object_type = config['object_type']
-
         # Get form data from domain class method
         form_data = web_class.get_form_creation_data(self.model_web)
 
@@ -389,7 +385,7 @@ class FormContextBuilder:
     def _build_nested_parent_selection_creation_context(
         self,
         web_class: Type["ModelingObjectWeb"],
-        config: dict,
+        object_type: str,
         efootprint_id_of_parent_to_link_to: str
     ) -> dict:
         """Build context for child object with parent known but needing internal selection (Pattern 5).
@@ -407,15 +403,12 @@ class FormContextBuilder:
 
         Args:
             web_class: The web wrapper class
-            config: Configuration dict with:
-                - object_type: The object type string (e.g., 'RecurrentEdgeComponentNeed')
+            object_type: The object type string (e.g., 'RecurrentEdgeComponentNeed')
             efootprint_id_of_parent_to_link_to: Parent object ID
 
         Returns:
             Form context dictionary with parent and component selection
         """
-        object_type = config['object_type']
-
         # Get form data from domain class method
         form_data = web_class.get_form_creation_data(self.model_web, efootprint_id_of_parent_to_link_to)
 

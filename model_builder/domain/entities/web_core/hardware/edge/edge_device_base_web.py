@@ -15,7 +15,6 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'with_storage',
-        'object_type': 'EdgeDeviceBase',
         'available_classes': [EdgeComputer, EdgeAppliance, EdgeDevice],
         'storage_type': 'EdgeStorage',
         'storage_classes': [EdgeStorage],

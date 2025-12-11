@@ -12,7 +12,6 @@ class EdgeComponentWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'child_of_parent',
-        'object_type': 'EdgeComponent',
         'available_classes': [EdgeCPUComponent, EdgeRAMComponent, EdgeStorage, EdgeWorkloadComponent],
         'parent_context_key': 'edge_device',
     }
