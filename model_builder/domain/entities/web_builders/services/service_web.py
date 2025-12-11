@@ -10,7 +10,6 @@ class ServiceWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'child_of_parent',
-        'object_type': 'Service',
         'get_available_classes_from_parent': 'installable_services',  # Dynamic: calls server.installable_services()
         'parent_context_key': 'server',
     }

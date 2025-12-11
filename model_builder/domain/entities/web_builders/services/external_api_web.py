@@ -24,7 +24,6 @@ class ExternalApiWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'simple',
-        'object_type': 'ExternalApi',
         'form_object_type': 'Service',  # Use Service form structure
         'available_classes': [GenAIModel],
     }

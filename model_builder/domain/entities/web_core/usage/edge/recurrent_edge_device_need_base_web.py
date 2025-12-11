@@ -18,7 +18,6 @@ class RecurrentEdgeDeviceNeedBaseWeb(ResourceNeedBaseWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'parent_selection',
-        'object_type': 'RecurrentEdgeDeviceNeedBase',
     }
 
     @classmethod

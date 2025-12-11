@@ -23,7 +23,6 @@ class ServerWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'with_storage',
-        'object_type': 'ServerBase',
         'available_classes': [GPUServer, BoaviztaCloudServer, Server],
         'storage_type': 'Storage',
         'storage_classes': [Storage],

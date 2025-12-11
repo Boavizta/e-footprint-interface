@@ -25,7 +25,6 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'nested_parent_selection',
-        'object_type': 'RecurrentEdgeComponentNeed',
     }
 
     @property
