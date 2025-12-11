@@ -14,7 +14,6 @@ from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 
 if TYPE_CHECKING:
     from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
@@ -35,6 +34,8 @@ def make_form_data_mutable(form_data: Mapping[str, Any]) -> Dict[str, Any]:
 
 def create_efootprint_obj_from_post_data(
     create_form_data: Mapping[str, Any], model_web: "ModelWeb", object_type: str) -> ModelingObject:
+    # Lazy import to avoid circular dependency
+    from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
     new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
     init_sig_params = get_init_signature_params(new_efootprint_obj_class)
     corresponding_web_class = get_corresponding_web_class(new_efootprint_obj_class)

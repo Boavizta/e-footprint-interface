@@ -69,13 +69,13 @@ class FormContextBuilder:
 
         if config is None:
             # Default: simple pattern with single class
-            return self._build_simple_creation_context(object_type)
+            return self._build_simple_creation_context(object_type, web_class=web_class)
 
         strategy = config.get('strategy', 'simple')
 
         if strategy == 'simple':
             available_classes = config.get('available_classes')
-            return self._build_simple_creation_context(object_type, available_classes, config)
+            return self._build_simple_creation_context(object_type, available_classes, config, web_class)
         elif strategy == 'with_storage':
             return self._build_with_storage_creation_context(object_type, config)
         elif strategy == 'child_of_parent':
@@ -92,7 +92,8 @@ class FormContextBuilder:
         self,
         object_type: str,
         available_classes: List = None,
-        config: dict = None
+        config: dict = None,
+        web_class: Type["ModelingObjectWeb"] = None
     ) -> dict:
         """Build context for simple object creation (Pattern 1).
 
@@ -101,10 +102,15 @@ class FormContextBuilder:
             available_classes: Optional list of available classes. If None,
                               uses the single class matching object_type.
             config: Optional full config dict for advanced options
+            web_class: Optional web class for calling get_creation_prerequisites
 
         Returns:
             Form context dictionary
         """
+        # Call get_creation_prerequisites if web_class provides it (for validation)
+        if web_class and hasattr(web_class, 'get_creation_prerequisites'):
+            web_class.get_creation_prerequisites(self.model_web)
+
         if available_classes is None:
             efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
             available_classes = [efootprint_class]
@@ -120,6 +126,14 @@ class FormContextBuilder:
             available_efootprint_classes=available_classes,
             model_web=self.model_web,
         )
+
+        # Apply field defaults if configured
+        if config and 'field_defaults' in config:
+            self._apply_field_defaults(form_sections, config['field_defaults'])
+
+        # Apply field transforms if configured
+        if config and 'field_transforms' in config:
+            self._apply_field_transforms(form_sections, config['field_transforms'])
 
         return {
             "object_type": object_type,
@@ -245,17 +259,18 @@ class FormContextBuilder:
         strategy = config.get('strategy', 'simple')
 
         if strategy == 'simple':
-            return self._build_simple_edition_context(obj_to_edit)
+            return self._build_simple_edition_context(obj_to_edit, config)
         elif strategy == 'with_storage':
             return self._build_with_storage_edition_context(obj_to_edit)
         else:
             raise ValueError(f"Unknown form edition strategy: {strategy}")
 
-    def _build_simple_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
+    def _build_simple_edition_context(self, obj_to_edit: "ModelingObjectWeb", config: dict = None) -> dict:
         """Build context for simple object edition.
 
         Args:
             obj_to_edit: The web wrapper of the object to edit
+            config: Optional form_edition_config for field transforms
 
         Returns:
             Form context dictionary
@@ -265,6 +280,11 @@ class FormContextBuilder:
             obj_to_edit.modeling_obj.__dict__,
             self.model_web
         )
+
+        # Apply field transforms if configured
+        if config and 'field_transforms' in config:
+            self._apply_field_transforms_to_fields(form_fields, config['field_transforms'])
+            self._apply_field_transforms_to_fields(form_fields_advanced, config['field_transforms'])
 
         return {
             "object_to_edit": obj_to_edit,
@@ -542,3 +562,76 @@ class FormContextBuilder:
             context_data[parent_context_key] = parent
 
         return context_data
+
+    def _apply_field_defaults(self, form_sections: list, field_defaults: dict) -> None:
+        """Apply field default values based on config.
+
+        Args:
+            form_sections: List of form sections to modify in place
+            field_defaults: Dict mapping field names to default config:
+                - 'default_by_label': Set selected value by matching option label
+        """
+        for section in form_sections:
+            for field in section.get('fields', []):
+                attr_name = field.get('attr_name')
+                if attr_name in field_defaults:
+                    default_config = field_defaults[attr_name]
+                    if 'default_by_label' in default_config:
+                        label_to_find = default_config['default_by_label']
+                        for option in field.get('options', []):
+                            if option.get('label') == label_to_find:
+                                field['selected'] = option['value']
+                                break
+
+    def _apply_field_transforms(self, form_sections: list, field_transforms: dict) -> None:
+        """Apply field transformations to form sections based on config.
+
+        Args:
+            form_sections: List of form sections to modify in place
+            field_transforms: Dict mapping field names to transform config:
+                - 'multiselect_to_single': Convert multiselect list to single select
+        """
+        for section in form_sections:
+            self._apply_field_transforms_to_fields(section.get('fields', []), field_transforms)
+
+    def _apply_field_transforms_to_fields(self, fields: list, field_transforms: dict) -> None:
+        """Apply field transformations to a list of fields.
+
+        Args:
+            fields: List of field dicts to modify in place
+            field_transforms: Dict mapping field names to transform config
+        """
+        for field in fields:
+            attr_name = field.get('attr_name')
+            if attr_name in field_transforms:
+                transform_config = field_transforms[attr_name]
+                if transform_config.get('multiselect_to_single'):
+                    self._convert_multiselect_to_single(field)
+
+    def _convert_multiselect_to_single(self, field: dict) -> None:
+        """Convert a multiselect field to a single select field.
+
+        Takes options from 'unselected' (for creation) or combines
+        'selected' + 'unselected' (for edition).
+        """
+        if 'unselected' in field:
+            # Creation context: use unselected options
+            options = field.get('unselected', [])
+            field.update({
+                'input_type': 'select_object',
+                'options': options,
+                'selected': options[0]['value'] if options else None
+            })
+            field.pop('unselected', None)
+            field.pop('selected_objs', None)  # Remove if present
+        elif 'selected' in field and isinstance(field.get('selected'), list):
+            # Edition context: combine selected + unselected
+            selected = field.get('selected', [])
+            unselected = field.get('unselected', [])
+            options = selected + unselected
+            field.update({
+                'input_type': 'select_object',
+                'options': options,
+                'selected': selected[0]['value'] if selected else (options[0]['value'] if options else None)
+            })
+            field.pop('unselected', None)

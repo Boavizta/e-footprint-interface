@@ -18,7 +18,6 @@ from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_q
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
-    from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 
 def generate_object_creation_structure(

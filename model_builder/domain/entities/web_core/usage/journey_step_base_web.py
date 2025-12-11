@@ -3,6 +3,12 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 
 class JourneyStepBaseWeb(ModelingObjectWeb):
     """Base class for journey step objects that can be mirrored in journey contexts."""
+
+    # Declarative form configuration
+    form_creation_config = {
+        'strategy': 'simple',
+    }
+
     @property
     def class_title_style(self):
         return "h7"

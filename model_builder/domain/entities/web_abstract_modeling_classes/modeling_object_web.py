@@ -9,12 +9,10 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject,
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.adapters.forms.class_structure import generate_dynamic_form, generate_object_creation_context
 from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
     ExplainableQuantityWeb, ExplainableObjectWeb, ExplainableObjectDictWeb)
 from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
-from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -306,24 +304,27 @@ class ModelingObjectWeb:
 
     @classmethod
     def generate_object_creation_context(
-    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
-        return generate_object_creation_context(
-            object_type, [corresponding_efootprint_class], model_web)
+            cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str = None):
+        """Generate form context for object creation.
+
+        NOTE: This method should not be called directly. Use FormContextBuilder instead.
+        This stub exists for backward compatibility detection in views.
+        """
+        raise NotImplementedError(
+            f"{cls.__name__}.generate_object_creation_context should not be called directly. "
+            "Use FormContextBuilder.build_creation_context() instead."
+        )
 
     def generate_object_edition_context(self):
-        form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
-            self.class_as_simple_str, self.modeling_obj.__dict__, self.model_web)
+        """Generate form context for object edition.
 
-        context_data = {
-            "object_to_edit": self,
-            "form_fields": form_fields,
-            "form_fields_advanced": form_fields_advanced,
-            "dynamic_form_data": {"dynamic_lists": dynamic_lists},
-            "header_name": f"Edit {self.name}"
-        }
-
-        return context_data
+        NOTE: This method should not be called directly. Use FormContextBuilder instead.
+        This stub exists for backward compatibility detection in views.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__}.generate_object_edition_context should not be called directly. "
+            "Use FormContextBuilder.build_edition_context() instead."
+        )
 
     def generate_cant_delete_modal_message(self):
         msg = (f"This {self.class_as_simple_str} is referenced by "

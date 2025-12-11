@@ -94,15 +94,18 @@ class TestServerWeb:
 
     def test_generate_object_creation_context_matches_snapshot(self, minimal_model_web):
         """Creation context form structure matches reference snapshot."""
-        assert_creation_context_matches_snapshot(ServerWeb, model_web=MagicMock())
+        # ServerBase is the object_type used in forms (not Server which is a concrete class)
+        assert_creation_context_matches_snapshot(ServerWeb, model_web=MagicMock(), object_type="ServerBase")
 
     # --- generate_object_edition_context ---
 
     def test_generate_object_edition_context_includes_storage(self, minimal_model_web):
         """Edition context includes both server and storage data."""
-        server_web = minimal_model_web.servers[0]
+        from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 
-        context = server_web.generate_object_edition_context()
+        server_web = minimal_model_web.servers[0]
+        form_builder = FormContextBuilder(minimal_model_web)
+        context = form_builder.build_edition_context(server_web)
 
         assert context["object_to_edit"] == server_web
         assert context["storage_to_edit"] == server_web.storage
