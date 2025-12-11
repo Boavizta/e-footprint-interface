@@ -21,7 +21,7 @@
                         "value": "mock_edge_device3_efootprint_id"
                     }
                 ],
-                "label": "Choose an edge device"
+                "label": "Choose a edge device"
             }
         ]
     },
