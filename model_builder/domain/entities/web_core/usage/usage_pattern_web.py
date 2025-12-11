@@ -14,36 +14,23 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
     attr_name_in_system = "usage_patterns"
     object_type_in_volume = "usage_journey"
 
-    @classmethod
-    def generate_object_creation_context(
-    cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        creation_context = super().generate_object_creation_context(
-            model_web, efootprint_id_of_parent_to_link_to, object_type)
+    # Declarative form configuration - extends parent's config
+    form_creation_config = {
+        'strategy': 'simple',
+        'field_defaults': {
+            'country': {'default_by_label': 'France'},
+        },
+        'field_transforms': {
+            # Convert devices from multiselect to single select
+            'devices': {'multiselect_to_single': True},
+        },
+    }
 
-        attributes_section = creation_context["form_sections"][1]
-        for structure_field in attributes_section["fields"]:
-            if structure_field["attr_name"] == "devices":
-                structure_field.update({
-                    "input_type": "select_object",
-                    "options": structure_field["unselected"],
-                    "selected": structure_field["unselected"][0]["value"]
-                })
-                structure_field.pop("unselected")
-
-        return creation_context
-
-
-    def generate_object_edition_context(self):
-        edition_context = super().generate_object_edition_context()
-
-        for structure_field in edition_context["form_fields"]:
-            if structure_field["attr_name"] == "devices":
-                structure_field.update({
-                    "input_type": "select_object",
-                    "options": structure_field["selected"] + structure_field["unselected"],
-                    "selected": structure_field["selected"][0]["value"]
-                })
-                structure_field.pop("unselected")
-
-        return edition_context
+    # Edition also needs the same transform
+    form_edition_config = {
+        'strategy': 'simple',
+        'field_transforms': {
+            'devices': {'multiselect_to_single': True},
+        },
+    }
 

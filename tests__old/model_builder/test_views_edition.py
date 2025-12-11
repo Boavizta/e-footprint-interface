@@ -17,6 +17,7 @@ from efootprint.logger import logger
 from efootprint.constants.units import u
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.views_addition import add_object
 from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
@@ -59,8 +60,8 @@ class TestViewsEdition(TestModelingBase):
 
         model_web = ModelWeb(SessionSystemRepository(job_request.session))
         job = model_web.get_web_object_from_efootprint_id(new_job_id)
-
-        edition_context = job.generate_object_edition_context()
+        form_builder = FormContextBuilder(model_web)
+        edition_context = form_builder.build_edition_context(job)
 
         ref_dynamic_form_data = {"dynamic_lists": []}
 

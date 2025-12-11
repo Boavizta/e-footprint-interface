@@ -95,12 +95,18 @@ def assert_creation_context_matches_snapshot(web_class, model_web, object_type: 
 
     Args:
         web_class: The web class (e.g., ServerWeb)
-        model_web: ModelWeb instance to pass to generate_object_creation_context
-        object_type: Optional object_type parameter for generate_object_creation_context
+        model_web: ModelWeb instance to pass to FormContextBuilder
+        object_type: Optional object_type parameter for build_creation_context
     """
-    web_class_name = web_class.__name__
+    from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 
-    context = web_class.generate_object_creation_context(model_web=model_web, object_type=object_type)
+    web_class_name = web_class.__name__
+    if object_type is None:
+        # Infer object_type from web_class name if not provided
+        object_type = web_class_name.replace("Web", "")
+
+    form_builder = FormContextBuilder(model_web)
+    context = form_builder.build_creation_context(web_class, object_type)
 
     form_sections = context["form_sections"]
     assert_structure_matches_snapshot(form_sections, f"{web_class_name}_creation_structure")
