@@ -166,7 +166,9 @@ class HtmxPresenter:
         Returns:
             HttpResponse with the updated HTML and HTMX triggers.
         """
-        html_updates = output.html_updates
+        # Generate HTML for all mirrored cards (moved from use case)
+        html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
+
         if recompute:
             refresh_content = render_to_string(
                 "model_builder/result/result_panel.html", context={"model_web": self.model_web})
@@ -182,6 +184,24 @@ class HtmxPresenter:
         return generate_http_response_from_edit_html_and_events(
             html_updates, toast_and_highlight_data, trigger_result_display
         )
+
+    def _generate_mirrored_cards_html(self, mirrored_cards) -> str:
+        """Generate OOB swap HTML for a list of mirrored cards.
+
+        Args:
+            mirrored_cards: List of web objects representing mirrored cards.
+
+        Returns:
+            HTML string with hx-swap-oob divs for each card.
+        """
+        html = ""
+        for card in mirrored_cards:
+            html += (
+                f"<div hx-swap-oob='outerHTML:#{card.web_id}'>"
+                f"{render_to_string(f'model_builder/object_cards/{card.template_name}_card.html', {'object': card})}"
+                f"</div>"
+            )
+        return html
 
     def present_deleted_object(self, output: DeleteObjectOutput) -> HttpResponse:
         """Format a deleted object as an HTTP response.
@@ -199,8 +219,12 @@ class HtmxPresenter:
         }
 
         if output.was_list_deletion:
+            # Generate HTML for all edited containers' mirrored cards
+            html_updates = ""
+            for edited_container in output.edited_containers:
+                html_updates += self._generate_mirrored_cards_html(edited_container.mirrored_cards)
             return generate_http_response_from_edit_html_and_events(
-                output.html_updates, toast_and_highlight_data
+                html_updates, toast_and_highlight_data
             )
         else:
             response = HttpResponse(status=204)
