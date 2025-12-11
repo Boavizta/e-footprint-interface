@@ -7,11 +7,11 @@ from efootprint.abstract_modeling_classes.explainable_object_base_class import E
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.all_classes_in_order import CANONICAL_COMPUTATION_ORDER
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 from model_builder.form_references import FORM_TYPE_OBJECT, FORM_FIELD_REFERENCES
 from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
 from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_quantities_from_constant import ExplainableRecurrentQuantitiesFromConstant
@@ -83,23 +83,6 @@ def generate_object_creation_context(
                     "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]}
 
     return context_data
-
-
-def get_corresponding_web_class(efootprint_class: ModelingObject) -> "ModelingObjectWeb":
-    from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
-    if efootprint_class.__name__ in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING:
-        corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[efootprint_class.__name__]
-    else:
-        corresponding_canonical_class = None
-        for canonical_class in CANONICAL_COMPUTATION_ORDER:
-            if issubclass(efootprint_class, canonical_class):
-                corresponding_canonical_class = canonical_class
-                break
-        if corresponding_canonical_class is None:
-            raise ValueError(f"No corresponding canonical class found for {efootprint_class.__name__}.")
-        corresponding_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[corresponding_canonical_class.__name__]
-
-    return corresponding_web_class
 
 
 def generate_dynamic_form(

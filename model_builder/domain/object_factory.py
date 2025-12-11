@@ -14,7 +14,7 @@ from efootprint.constants.units import u
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.adapters.forms.class_structure import get_corresponding_web_class
+from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 
 if TYPE_CHECKING:
     from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb

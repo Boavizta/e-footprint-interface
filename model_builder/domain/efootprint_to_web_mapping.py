@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.all_classes_in_order import CANONICAL_COMPUTATION_ORDER
 
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.entities.web_builders.hardware.edge.edge_appliance_component import EdgeApplianceComponentWeb
@@ -81,3 +82,25 @@ def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb", 
         return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[modeling_obj.class_as_simple_str](modeling_obj, model_web, list_container)
 
     return ModelingObjectWeb(modeling_obj, model_web, list_container)
+
+
+def get_corresponding_web_class(efootprint_class: Type[ModelingObject]) -> Type[ModelingObjectWeb]:
+    """Get the web wrapper class for an efootprint class.
+
+    Looks up the web class in the mapping, falling back to the canonical parent class
+    if no direct mapping exists.
+    """
+    if efootprint_class.__name__ in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING:
+        return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[efootprint_class.__name__]
+
+    # Find corresponding canonical class
+    corresponding_canonical_class = None
+    for canonical_class in CANONICAL_COMPUTATION_ORDER:
+        if issubclass(efootprint_class, canonical_class):
+            corresponding_canonical_class = canonical_class
+            break
+
+    if corresponding_canonical_class is None:
+        raise ValueError(f"No corresponding canonical class found for {efootprint_class.__name__}.")
+
+    return EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[corresponding_canonical_class.__name__]
