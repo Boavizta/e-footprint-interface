@@ -94,6 +94,13 @@ class TestsClassStructure(TestCase):
             EdgeDeviceBaseWeb, EdgeComponentWeb, ServerWeb,
             ExternalApiWeb, ServiceWeb
         ]
+        object_type_dict = {
+            UsagePatternWeb: "UsagePattern", EdgeUsagePatternWeb: "EdgeUsagePattern", JourneyBaseWeb: "UsageJourney",
+            JourneyStepBaseWeb: "UsageJourneyStep", EdgeFunctionWeb: "EdgeFunction", JobWeb: "JobBase",
+            RecurrentEdgeDeviceNeedBaseWeb: "RecurrentEdgeDeviceNeedBase",
+            RecurrentEdgeComponentNeedWeb: "RecurrentEdgeComponentNeedBase", EdgeDeviceBaseWeb: "EdgeDeviceBase",
+            EdgeComponentWeb: "EdgeComponent", ServerWeb: "ServerBase", ExternalApiWeb: "ExternalApi",
+            ServiceWeb: "Service"}
         basic_model_web = MagicMock()
         mock_obj = MagicMock()
         mock_obj.name = "option1"
@@ -158,7 +165,6 @@ class TestsClassStructure(TestCase):
             EdgeUsagePatternWeb: usage_pattern_model_web,
             RecurrentEdgeDeviceNeedBaseWeb: recurrent_edge_device_need_model_web,
             RecurrentEdgeComponentNeedWeb: recurrent_edge_component_need_model_web,}
-        object_type_dict = {JourneyBaseWeb: "UsageJourney", JourneyStepBaseWeb: "UsageJourneyStep",}
 
         for web_class in web_classes:
             web_class_name = web_class.__name__
@@ -181,7 +187,7 @@ class TestsClassStructure(TestCase):
             else:
                 model_web = basic_model_web
             creation_context = web_class.generate_object_creation_context(
-                model_web=model_web, object_type=object_type_dict.get(web_class, None))
+                model_web=model_web, object_type=object_type_dict[web_class])
 
             form_sections = creation_context["form_sections"]
             dynamic_data = creation_context.get("dynamic_form_data", None)

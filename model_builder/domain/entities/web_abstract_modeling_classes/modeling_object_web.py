@@ -307,13 +307,9 @@ class ModelingObjectWeb:
     @classmethod
     def generate_object_creation_context(
     cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str=None):
-        if object_type is None:
-            corresponding_efootprint_class_str = cls.__name__.replace("Web", "")
-        else:
-            corresponding_efootprint_class_str = object_type
-        corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[corresponding_efootprint_class_str]
+        corresponding_efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
         return generate_object_creation_context(
-            corresponding_efootprint_class_str, [corresponding_efootprint_class], model_web)
+            object_type, [corresponding_efootprint_class], model_web)
 
     def generate_object_edition_context(self):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(

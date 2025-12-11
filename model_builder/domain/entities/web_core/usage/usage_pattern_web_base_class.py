@@ -39,7 +39,8 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
             raise PermissionError(
                 f"You need to have created at least one {cls.object_type_in_volume.replace("_", " ")} "
                 f"to create a usage pattern.")
-        creation_context = super().generate_object_creation_context(model_web, efootprint_id_of_parent_to_link_to)
+        creation_context = super().generate_object_creation_context(
+            model_web, efootprint_id_of_parent_to_link_to, object_type)
 
         # Select France as default country
         attributes_section = creation_context["form_sections"][1]
