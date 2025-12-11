@@ -9,22 +9,8 @@ from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.object_factory import edit_object_in_system
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
-
-
-def _should_use_form_context_builder_for_edition(obj_to_edit) -> bool:
-    """Check if object's class should use FormContextBuilder for form generation.
-
-    Returns True if either:
-    - The class has a form_edition_config (new declarative approach)
-    - The class uses the default (base) generate_object_edition_context
-    """
-    web_class = type(obj_to_edit)
-    has_form_config = hasattr(web_class, 'form_edition_config') and web_class.form_edition_config is not None
-    uses_default_method = web_class.generate_object_edition_context is ModelingObjectWeb.generate_object_edition_context
-    return has_form_config or uses_default_method
 
 
 @time_it
@@ -32,14 +18,8 @@ def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
-    # Use FormContextBuilder for classes with declarative config or default form generation
-    # Classes with custom generate_object_edition_context still use their own method
-    if _should_use_form_context_builder_for_edition(obj_to_edit):
-        form_builder = FormContextBuilder(model_web)
-        context_data = form_builder.build_edition_context(obj_to_edit)
-    else:
-        # Fall back to custom implementation for complex cases (to be migrated later)
-        context_data = obj_to_edit.generate_object_edition_context()
+    form_builder = FormContextBuilder(model_web)
+    context_data = form_builder.build_edition_context(obj_to_edit)
 
     object_belongs_to_computable_system = (
         (len(model_web.system.servers) > 0 or len(model_web.edge_devices) > 0) and (len(obj_to_edit.systems) > 0))

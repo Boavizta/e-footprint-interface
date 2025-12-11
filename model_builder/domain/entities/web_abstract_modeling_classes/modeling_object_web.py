@@ -302,30 +302,6 @@ class ModelingObjectWeb:
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
 
-    @classmethod
-    def generate_object_creation_context(
-            cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to=None, object_type: str = None):
-        """Generate form context for object creation.
-
-        NOTE: This method should not be called directly. Use FormContextBuilder instead.
-        This stub exists for backward compatibility detection in views.
-        """
-        raise NotImplementedError(
-            f"{cls.__name__}.generate_object_creation_context should not be called directly. "
-            "Use FormContextBuilder.build_creation_context() instead."
-        )
-
-    def generate_object_edition_context(self):
-        """Generate form context for object edition.
-
-        NOTE: This method should not be called directly. Use FormContextBuilder instead.
-        This stub exists for backward compatibility detection in views.
-        """
-        raise NotImplementedError(
-            f"{type(self).__name__}.generate_object_edition_context should not be called directly. "
-            "Use FormContextBuilder.build_edition_context() instead."
-        )
-
     def generate_cant_delete_modal_message(self):
         msg = (f"This {self.class_as_simple_str} is referenced by "
                f"{", ".join([obj.name for obj in self.modeling_obj_containers])}. "

@@ -8,20 +8,7 @@ from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
-
-
-def _should_use_form_context_builder(web_class) -> bool:
-    """Check if web class should use FormContextBuilder for form generation.
-
-    Returns True if either:
-    - The class has a form_creation_config (new declarative approach)
-    - The class uses the default (base) generate_object_creation_context
-    """
-    has_form_config = hasattr(web_class, 'form_creation_config') and web_class.form_creation_config is not None
-    uses_default_method = web_class.generate_object_creation_context is ModelingObjectWeb.generate_object_creation_context
-    return has_form_config or uses_default_method
 
 
 @render_exception_modal_if_error
@@ -30,16 +17,9 @@ def open_create_object_panel(request, object_type):
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
 
-    # Use FormContextBuilder for classes with declarative config or default form generation
-    # Classes with custom generate_object_creation_context still use their own method
-    if _should_use_form_context_builder(efootprint_class_web):
-        form_builder = FormContextBuilder(model_web)
-        context_data = form_builder.build_creation_context(
-            efootprint_class_web, object_type, efootprint_id_of_parent_to_link_to)
-    else:
-        # Fall back to custom implementation for complex cases (to be migrated later)
-        context_data = efootprint_class_web.generate_object_creation_context(
-            model_web, efootprint_id_of_parent_to_link_to, object_type)
+    form_builder = FormContextBuilder(model_web)
+    context_data = form_builder.build_creation_context(
+        efootprint_class_web, object_type, efootprint_id_of_parent_to_link_to)
 
     if efootprint_id_of_parent_to_link_to:
         context_data["efootprint_id_of_parent_to_link_to"] = efootprint_id_of_parent_to_link_to
