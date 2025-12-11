@@ -4,7 +4,10 @@ This module contains the business logic for object deletion, separated from
 HTTP/presentation concerns.
 """
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
 
 from model_builder.domain.interfaces import ISystemRepository
 
@@ -35,8 +38,9 @@ class DeleteObjectOutput:
     deleted_object_name: str
     deleted_object_type: str
     was_list_deletion: bool = False
-    html_updates: str = ""  # Pre-rendered HTML for card updates (for list deletions)
     deleted_web_ids: List[str] = field(default_factory=list)
+    # For list deletions, we need the edited containers to generate HTML in presenter
+    edited_containers: List[Any] = field(default_factory=list)
 
 
 class DeleteObjectUseCase:
@@ -116,7 +120,7 @@ class DeleteObjectUseCase:
             DeleteObjectOutput with deletion results.
         """
         from model_builder.domain.entities.web_core.model_web import ModelWeb
-        from model_builder.adapters.views.edit_object_http_response_generator import compute_edit_object_html_and_event_response
+        from model_builder.domain.services import EditService
         from efootprint.logger import logger
 
         model_web = ModelWeb(self.repository)
@@ -128,30 +132,33 @@ class DeleteObjectUseCase:
         list_containers, attr_name_in_list_container = web_obj.list_containers_and_attr_name_in_list_container
 
         if list_containers:
-            # List deletion: remove from all list containers
-            html_updates = ""
+            # List deletion: remove from all list containers using domain service
+            edit_service = EditService()
+            edited_containers = []
+
             for list_container in list_containers:
                 logger.info(f"Removing {web_obj.name} from {list_container.name}")
 
-                # Build edit data to remove this object from the list (plain dict works)
+                # Build edit data to remove this object from the list
                 new_list_attribute_ids = [
                     list_attribute.efootprint_id
                     for list_attribute in getattr(list_container, attr_name_in_list_container)
                     if list_attribute.efootprint_id != web_obj.efootprint_id
                 ]
                 edit_data = {
-                    'name': list_container.name,
+                    "name": list_container.name,
                     attr_name_in_list_container: ";".join(new_list_attribute_ids)
                 }
 
-                partial_html = compute_edit_object_html_and_event_response(edit_data, list_container)
-                html_updates += partial_html
+                # Use domain service (no HTML generation)
+                edit_result = edit_service.edit_with_cascade_cleanup(list_container, edit_data)
+                edited_containers.append(edit_result.edited_object)
 
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
                 was_list_deletion=True,
-                html_updates=html_updates,
+                edited_containers=edited_containers,
             )
         else:
             # Normal deletion

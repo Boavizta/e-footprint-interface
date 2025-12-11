@@ -25,7 +25,7 @@ class EditObjectOutput:
     template_name: str
     web_id: str
     mirrored_web_ids: List[str] = field(default_factory=list)
-    html_updates: str = ""  # Pre-rendered HTML for card updates (temporary for migration)
+    mirrored_cards: List[Any] = field(default_factory=list)  # Web objects for HTML rendering
 
 
 class EditObjectUseCase:
@@ -53,8 +53,8 @@ class EditObjectUseCase:
             EditObjectOutput with the edited object details.
         """
         from model_builder.domain.entities.web_core.model_web import ModelWeb
-        from model_builder.adapters.views.edit_object_http_response_generator import compute_edit_object_html_and_event_response
         from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+        from model_builder.domain.services import EditService
 
         # 1. Load system
         model_web = ModelWeb(self.repository)
@@ -67,17 +67,18 @@ class EditObjectUseCase:
         if web_class and hasattr(web_class, 'pre_edit'):
             web_class.pre_edit(input_data.form_data, obj_to_edit, model_web)
 
-        # 4. Compute edit HTML (this also performs the edit via edit_object_in_system)
-        # Note: During migration, we still use the existing function which handles HTML generation
-        html_updates = compute_edit_object_html_and_event_response(input_data.form_data, obj_to_edit)
+        # 4. Perform the edit with cascade cleanup (domain service, no HTML)
+        edit_service = EditService()
+        edit_result = edit_service.edit_with_cascade_cleanup(obj_to_edit, input_data.form_data)
 
-        # 4. Build output
+        # 5. Build output with pure data (presenter will generate HTML)
+        edited_obj = edit_result.edited_object
         return EditObjectOutput(
-            edited_object_id=obj_to_edit.efootprint_id,
-            edited_object_name=obj_to_edit.name,
-            edited_object_type=obj_to_edit.class_as_simple_str,
-            template_name=obj_to_edit.template_name,
-            web_id=obj_to_edit.web_id,
-            mirrored_web_ids=[card.web_id for card in obj_to_edit.mirrored_cards],
-            html_updates=html_updates,
+            edited_object_id=edited_obj.efootprint_id,
+            edited_object_name=edited_obj.name,
+            edited_object_type=edited_obj.class_as_simple_str,
+            template_name=edited_obj.template_name,
+            web_id=edited_obj.web_id,
+            mirrored_web_ids=[card.web_id for card in edited_obj.mirrored_cards],
+            mirrored_cards=list(edited_obj.mirrored_cards),
         )
