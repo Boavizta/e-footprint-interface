@@ -15,7 +15,6 @@ from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
-from model_builder.adapters.views.views_addition import _should_use_form_context_builder
 from model_builder.domain.entities.web_builders.services.external_api_web import ExternalApiWeb
 from model_builder.domain.entities.web_builders.services.service_web import ServiceWeb
 from model_builder.domain.entities.web_core.hardware.edge.edge_component_base_web import EdgeComponentWeb
@@ -189,15 +188,9 @@ class TestsClassStructure(TestCase):
             else:
                 model_web = basic_model_web
 
-            if _should_use_form_context_builder(web_class):
-                form_builder = FormContextBuilder(model_web)
-                creation_context = form_builder.build_creation_context(
-                    web_class, object_type=object_type_dict[web_class], efootprint_id_of_parent_to_link_to=None)
-            else:
-                # Fall back to custom implementation for complex cases (to be migrated later)
-                creation_context = web_class.generate_object_creation_context(
-                    model_web, efootprint_id_of_parent_to_link_to=None,
-                    object_type=object_type_dict[web_class])
+            form_builder = FormContextBuilder(model_web)
+            creation_context = form_builder.build_creation_context(
+                web_class, object_type=object_type_dict[web_class], efootprint_id_of_parent_to_link_to=None)
 
             form_sections = creation_context["form_sections"]
             dynamic_data = creation_context.get("dynamic_form_data", None)
