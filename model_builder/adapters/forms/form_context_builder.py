@@ -333,8 +333,6 @@ class FormContextBuilder:
             - parent_attribute: Name of parent field (e.g., 'server', 'edge_device')
             - intermediate_attribute: Optional intermediate selection (e.g., 'service')
             - type_classes_by_parent_class: Optional mapping parent_class → child_classes
-            - direct_parent_call_job_class: Optional class for direct parent call
-            - direct_parent_call_gpu_job_class: Optional class for GPU direct call
         - get_creation_prerequisites(model_web) -> dict with:
             - parents: List of parent web objects
             - available_classes: List of all possible classes
@@ -368,7 +366,7 @@ class FormContextBuilder:
         if intermediate_attr:
             # With intermediate: parent → intermediate → type
             dynamic_selects.extend(self._build_intermediate_dynamic_selects(
-                config, prereqs, parent_attr, intermediate_attr))
+                prereqs, parent_attr, intermediate_attr))
         elif 'type_classes_by_parent_class' in config:
             # No intermediate: parent class determines type directly
             dynamic_selects.append(self._build_type_by_parent_class_select(
@@ -421,48 +419,46 @@ class FormContextBuilder:
         }
 
     def _build_intermediate_dynamic_selects(
-        self, config: dict, prereqs: dict, parent_attr: str, intermediate_attr: str
+        self, prereqs: dict, parent_attr: str, intermediate_attr: str
     ) -> list:
         """Build dynamic selects for intermediate pattern (parent → intermediate → type)."""
         intermediate_by_parent = prereqs['intermediate_by_parent']
-        type_classes_by_intermediate = prereqs['type_classes_by_intermediate']
-
-        direct_job_class = config.get('direct_parent_call_job_class')
-        direct_gpu_job_class = config.get('direct_parent_call_gpu_job_class')
+        type_classes_by_intermediate = prereqs.get('type_classes_by_intermediate', {})
 
         # First select: parent → intermediate options
         intermediate_options_by_parent = {}
-        for parent_id, data in intermediate_by_parent.items():
-            items = data['items']
-            is_gpu = data.get('is_gpu', False)
-            options = [{"label": item.name, "value": item.efootprint_id} for item in items]
-            # Add "direct call" option if configured
-            if direct_job_class:
-                direct_value = "direct_parent_call_gpu" if is_gpu else "direct_parent_call"
-                direct_label = f"direct call to{' GPU' if is_gpu else ''} {parent_attr.replace('_', ' ')}"
-                options.append({"label": direct_label, "value": direct_value})
-            intermediate_options_by_parent[parent_id] = options
-
         # Second select: intermediate → type options
         type_options_by_intermediate = {}
+
+        for parent_id, data in intermediate_by_parent.items():
+            items = data.get('items', [])
+            extra_options = data.get('extra_options', [])
+
+            # Build options from regular items
+            options = [{"label": item.name, "value": item.efootprint_id} for item in items]
+
+            # Add extra options (e.g., "direct call to server")
+            for extra in extra_options:
+                options.append({"label": extra['label'], "value": extra['id']})
+                # Also add type mapping for this extra option
+                type_options_by_intermediate[extra['id']] = [
+                    {"label": FORM_TYPE_OBJECT[cls.__name__]["label"], "value": cls.__name__}
+                    for cls in extra['type_classes']
+                ]
+
+            intermediate_options_by_parent[parent_id] = options
+
+        # Build type options for regular intermediate items
         for intermediate_id, classes in type_classes_by_intermediate.items():
             type_options_by_intermediate[intermediate_id] = [
                 {"label": FORM_TYPE_OBJECT[cls.__name__]["label"], "value": cls.__name__}
                 for cls in classes
             ]
-        # Add direct call type options
-        if direct_job_class:
-            type_options_by_intermediate["direct_parent_call"] = [
-                {"label": FORM_TYPE_OBJECT[direct_job_class.__name__]["label"], "value": direct_job_class.__name__}
-            ]
-        if direct_gpu_job_class:
-            type_options_by_intermediate["direct_parent_call_gpu"] = [
-                {"label": FORM_TYPE_OBJECT[direct_gpu_job_class.__name__]["label"], "value": direct_gpu_job_class.__name__}
-            ]
 
         return [
             {"input_id": intermediate_attr, "filter_by": parent_attr, "list_value": intermediate_options_by_parent},
-            {"input_id": "type_object_available", "filter_by": intermediate_attr, "list_value": type_options_by_intermediate},
+            {"input_id": "type_object_available", "filter_by": intermediate_attr,
+             "list_value": type_options_by_intermediate},
         ]
 
     def _build_type_by_parent_class_select(

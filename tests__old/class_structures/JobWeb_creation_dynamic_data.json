@@ -20,7 +20,7 @@
                     },
                     {
                         "label": "direct call to server",
-                        "value": "direct_parent_call"
+                        "value": "direct_server_call"
                     }
                 ]
             }
@@ -29,16 +29,10 @@
             "input_id": "type_object_available",
             "filter_by": "service",
             "list_value": {
-                "direct_parent_call": [
+                "direct_server_call": [
                     {
                         "label": "Job",
                         "value": "Job"
-                    }
-                ],
-                "direct_parent_call_gpu": [
-                    {
-                        "label": "GPU job",
-                        "value": "GPUJob"
                     }
                 ]
             }
