@@ -135,13 +135,19 @@ class FormContextBuilder:
         if config and 'field_transforms' in config:
             self._apply_field_transforms(form_sections, config['field_transforms'])
 
-        return {
+        context = {
             "object_type": object_type,
             "form_sections": form_sections,
-            "dynamic_form_data": dynamic_form_data,
             "obj_formatting_data": FORM_TYPE_OBJECT[object_type],
             "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
         }
+
+        # Only include dynamic_form_data if it has meaningful content
+        # (more than one switch value, or has dynamic_lists/dynamic_selects)
+        if self._has_meaningful_dynamic_data(dynamic_form_data):
+            context["dynamic_form_data"] = dynamic_form_data
+
+        return context
 
     def _build_with_storage_creation_context(self, object_type: str, config: dict) -> dict:
         """Build context for object with storage creation (Pattern 2).
@@ -635,3 +641,23 @@ class FormContextBuilder:
                 'selected': selected[0]['value'] if selected else (options[0]['value'] if options else None)
             })
             field.pop('unselected', None)
+
+    def _has_meaningful_dynamic_data(self, dynamic_form_data: dict) -> bool:
+        """Check if dynamic_form_data has meaningful content worth including.
+
+        Returns False for trivial cases like single-class forms with no dynamic lists/selects.
+        This avoids breaking forms where the JS expects meaningful switch data.
+        """
+        if not dynamic_form_data:
+            return False
+
+        switch_values = dynamic_form_data.get('switch_values', [])
+        dynamic_lists = dynamic_form_data.get('dynamic_lists', [])
+        dynamic_selects = dynamic_form_data.get('dynamic_selects', [])
+
+        # Meaningful if: multiple switch values, or has dynamic lists, or has dynamic selects
+        has_multiple_classes = len(switch_values) > 1
+        has_dynamic_lists = len(dynamic_lists) > 0
+        has_dynamic_selects = len(dynamic_selects) > 0
+
+        return has_multiple_classes or has_dynamic_lists or has_dynamic_selects
