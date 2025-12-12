@@ -12,7 +12,6 @@ from django.template.loader import render_to_string
 
 from model_builder.application.use_cases import CreateObjectOutput, EditObjectOutput, DeleteObjectOutput
 from model_builder.application.use_cases.delete_object import DeleteCheckResult
-from model_builder.adapters.views.edit_object_http_response_generator import generate_http_response_from_edit_html_and_events
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -87,7 +86,7 @@ class HtmxPresenter:
                 "name": output.created_object_name,
                 "action_type": "add_new_object"
             }
-            response = generate_http_response_from_edit_html_and_events(html_updates, toast_and_highlight_data)
+            response = self._build_oob_response(html_updates, toast_and_highlight_data)
             if recompute:
                 self._append_recomputation_html(response)
             return response
@@ -151,7 +150,7 @@ class HtmxPresenter:
             "name": output.created_object_name,
             "action_type": "add_new_object"
         }
-        return generate_http_response_from_edit_html_and_events(parent_html_updates, toast_and_highlight_data)
+        return self._build_oob_response(parent_html_updates, toast_and_highlight_data)
 
     def present_edited_object(
         self, output: EditObjectOutput, recompute: bool = False, trigger_result_display: bool = False
@@ -181,9 +180,7 @@ class HtmxPresenter:
             "name": output.edited_object_name,
             "action_type": "edit_object"
         }
-        return generate_http_response_from_edit_html_and_events(
-            html_updates, toast_and_highlight_data, trigger_result_display
-        )
+        return self._build_oob_response(html_updates, toast_and_highlight_data, trigger_result_display)
 
     def _generate_mirrored_cards_html(self, mirrored_cards) -> str:
         """Generate OOB swap HTML for a list of mirrored cards.
@@ -202,6 +199,27 @@ class HtmxPresenter:
                 f"</div>"
             )
         return html
+
+    def _build_oob_response(
+        self, html: str, toast_data: dict, trigger_result_display: bool = False
+    ) -> HttpResponse:
+        """Build an HTTP response with OOB swap HTML and HTMX triggers.
+
+        Args:
+            html: The HTML content with hx-swap-oob divs.
+            toast_data: Data for the toast notification (ids, name, action_type).
+            trigger_result_display: Whether to trigger result chart display.
+
+        Returns:
+            HttpResponse with appropriate HTMX headers.
+        """
+        response = HttpResponse(html)
+        response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
+        after_settle_trigger = {"displayToastAndHighlightObjects": toast_data}
+        if trigger_result_display:
+            after_settle_trigger["triggerResultRendering"] = ""
+        response["HX-Trigger-After-Settle"] = json.dumps(after_settle_trigger)
+        return response
 
     def present_deleted_object(self, output: DeleteObjectOutput) -> HttpResponse:
         """Format a deleted object as an HTTP response.
@@ -223,9 +241,7 @@ class HtmxPresenter:
             html_updates = ""
             for edited_container in output.edited_containers:
                 html_updates += self._generate_mirrored_cards_html(edited_container.mirrored_cards)
-            return generate_http_response_from_edit_html_and_events(
-                html_updates, toast_and_highlight_data
-            )
+            return self._build_oob_response(html_updates, toast_and_highlight_data)
         else:
             response = HttpResponse(status=204)
             response["HX-Trigger"] = json.dumps({
