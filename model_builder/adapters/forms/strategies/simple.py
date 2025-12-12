@@ -1,7 +1,7 @@
 """Simple form strategy for basic single-class creation forms."""
 from typing import TYPE_CHECKING, Type
 
-from model_builder.adapters.forms.class_structure import (
+from model_builder.adapters.forms.form_field_generator import (
     generate_dynamic_form,
     generate_object_creation_structure,
 )

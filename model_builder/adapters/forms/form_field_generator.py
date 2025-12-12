@@ -71,19 +71,6 @@ def generate_object_creation_structure(
     return form_sections, dynamic_form_dict
 
 
-def generate_object_creation_context(
-    efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"):
-    form_sections, dynamic_form_data = generate_object_creation_structure(
-        efootprint_class_str, available_efootprint_classes, model_web)
-
-    context_data = {"form_sections": form_sections,
-                    "header_name": "Add new " + ClassUIConfigProvider.get_label(efootprint_class_str).lower(),
-                    "object_type": efootprint_class_str,
-                    "obj_formatting_data": ClassUIConfigProvider.get_config(efootprint_class_str)}
-
-    return context_data
-
-
 def generate_dynamic_form(
     efootprint_class_str: str, default_values: dict, model_web: "ModelWeb"):
     structure_fields = []

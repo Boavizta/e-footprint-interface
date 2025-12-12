@@ -1,7 +1,7 @@
 """Nested parent selection form strategy for child objects needing internal selection."""
 from typing import TYPE_CHECKING, Type
 
-from model_builder.adapters.forms.class_structure import generate_object_creation_structure
+from model_builder.adapters.forms.form_field_generator import generate_object_creation_structure
 from model_builder.adapters.forms.strategies.base import FormStrategy
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 
