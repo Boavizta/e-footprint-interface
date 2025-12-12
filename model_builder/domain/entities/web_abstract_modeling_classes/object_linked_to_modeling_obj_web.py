@@ -54,14 +54,12 @@ class ObjectLinkedToModelingObjWeb:
 
     @property
     def attr_name_web(self):
+        """Return raw attribute name for display. Use |field_label filter in templates for formatting."""
         attr_name = self.attr_name_in_mod_obj_container
         # When modeling_obj_container is None, use the efootprint object's label
         if attr_name is None:
             return self.efootprint_object.label
-        label = self.model_web.label_resolver.get_field_label(attr_name)
-        if label != attr_name:
-            return label
-        return attr_name.replace("_", " ")
+        return attr_name
 
     @property
     def class_as_snake_str(self):
