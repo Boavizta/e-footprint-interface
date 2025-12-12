@@ -119,6 +119,7 @@ class CreateObjectUseCase:
             else:
                 raise e
 
+        added_obj = None
         try:
             # 7a. Pre-add hook: perform actions before adding to system (e.g., link to system lists)
             # Check both input_web_class and web_class
@@ -174,12 +175,12 @@ class CreateObjectUseCase:
                 override_object=override_object,
             )
         except Exception as e:
-            # Clean up on failure
-            from efootprint.logger import logger
-            logger.error("An error occurred during new object creation, deleting the created object.")
-            added_obj_wrapper = wrap_efootprint_object(new_efootprint_obj, model_web)
-            added_obj_wrapper.self_delete()
-            model_web.update_system_data_with_up_to_date_calculated_attributes()
+            # Clean up on failure - only if object was added to system
+            if added_obj is not None:
+                from efootprint.logger import logger
+                logger.error("An error occurred during new object creation, deleting the created object.")
+                added_obj.self_delete()
+                model_web.update_system_data_with_up_to_date_calculated_attributes()
             raise e
 
     def _link_to_parent(self, model_web, added_obj, parent_id: str):

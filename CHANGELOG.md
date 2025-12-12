@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.11] - 2025-12-15
+
+### Changed
+- Much clean architecture refactoring: improved code structure and separation of concerns for better maintainability and scalability, especially around presentation and form logic.
+
+### Fixed
+- Usage pattern edition context: devices should be converted to select_object field.
+- Set base_ram_consumption and storage_capacity steps to 0.1.
+- Only cleanup created object if it was actually added to system.
+
 ## [0.10.10] - 2025-12-08
 
 ### Fixed
