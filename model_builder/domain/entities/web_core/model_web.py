@@ -1,5 +1,4 @@
-import json
-import os
+from copy import deepcopy
 from time import time
 
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
@@ -16,22 +15,13 @@ from model_builder.domain.entities.web_abstract_modeling_classes.explainable_obj
 from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
 
-model_builder_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
-
-def default_networks():
-    with open(os.path.join(model_builder_root, "reference_data", "default_networks.json"), "r") as f:
-        return json.load(f)
-
-def default_devices():
-    with open(os.path.join(model_builder_root, "reference_data", "default_devices.json"), "r") as f:
-        return json.load(f)
-
-def default_countries():
-    with open(os.path.join(model_builder_root, "reference_data", "default_countries.json"), "r") as f:
-        return json.load(f)
+from model_builder.domain.reference_data import DEFAULT_NETWORKS, DEFAULT_DEVICES, DEFAULT_COUNTRIES
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {
-    "Network": default_networks, "Device": default_devices, "Country": default_countries}
+    "Network": lambda: deepcopy(DEFAULT_NETWORKS),
+    "Device": lambda: deepcopy(DEFAULT_DEVICES),
+    "Country": lambda: deepcopy(DEFAULT_COUNTRIES),
+}
 
 
 class ModelWeb:

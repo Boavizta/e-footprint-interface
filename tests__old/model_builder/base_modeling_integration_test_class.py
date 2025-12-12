@@ -14,7 +14,7 @@ from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 
 from model_builder.version_upgrade_handlers import upgrade_interface_version_pre_14
-from model_builder.domain.entities.web_core.model_web import default_networks, default_devices, default_countries
+from model_builder.domain.reference_data import DEFAULT_NETWORKS, DEFAULT_DEVICES, DEFAULT_COUNTRIES
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from tests__old.test_constants import (
     USAGE_PATTERN_FORM_DATA, WEB_APPLICATION_FORM_DATA, WEB_APPLICATION_JOB_FORM_DATA,
@@ -144,17 +144,17 @@ class TestModelingBase(TestCase):
 
         # Set default device, network, country if available
         if not overrides.get("UsagePattern_devices"):
-            devices = list(default_devices().keys())
+            devices = list(DEFAULT_DEVICES.keys())
             if devices:
                 data["UsagePattern_devices"] = devices[0]
 
         if not overrides.get("UsagePattern_network"):
-            networks = list(default_networks().keys())
+            networks = list(DEFAULT_NETWORKS.keys())
             if networks:
                 data["UsagePattern_network"] = networks[0]
 
         if not overrides.get("UsagePattern_country"):
-            countries = list(default_countries().keys())
+            countries = list(DEFAULT_COUNTRIES.keys())
             if countries:
                 data["UsagePattern_country"] = countries[0]
 
@@ -172,7 +172,7 @@ class TestModelingBase(TestCase):
         data["EdgeUsagePattern_edge_usage_journey"] = edge_usage_journey_id
 
         if not overrides.get("EdgeUsagePattern_country"):
-            countries = list(default_countries().keys())
+            countries = list(DEFAULT_COUNTRIES.keys())
             if countries:
                 data["EdgeUsagePattern_country"] = countries[0]
 

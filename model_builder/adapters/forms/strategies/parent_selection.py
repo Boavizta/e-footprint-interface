@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Type
 
 from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.adapters.forms.strategies.base import FormStrategy
-from model_builder.adapters.label_resolver import LabelResolver
+from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
@@ -80,7 +80,7 @@ class ParentSelectionFormStrategy(FormStrategy):
         # Prepend helper fields as first section
         helper_section = {
             "category": f"{object_type.lower()}_creation_helper",
-            "header": f"{LabelResolver.get_class_label(object_type)} creation helper",
+            "header": f"{ClassUIConfigProvider.get_label(object_type)} creation helper",
             "fields": helper_fields
         }
         form_sections = [helper_section] + form_sections
@@ -92,8 +92,8 @@ class ParentSelectionFormStrategy(FormStrategy):
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "object_type": object_type,
-            "obj_formatting_data": LabelResolver.get_class_config(object_type),
-            "header_name": f"Add new {LabelResolver.get_class_label(object_type).lower()}"
+            "obj_formatting_data": ClassUIConfigProvider.get_config(object_type),
+            "header_name": f"Add new {ClassUIConfigProvider.get_label(object_type).lower()}"
         }
 
     def _build_parent_select_field(self, parent_attr: str, parents: list) -> dict:
@@ -140,7 +140,7 @@ class ParentSelectionFormStrategy(FormStrategy):
                 options.append({"label": extra['label'], "value": extra['id']})
                 # Also add type mapping for this extra option
                 type_options_by_intermediate[extra['id']] = [
-                    {"label": LabelResolver.get_class_label(cls.__name__), "value": cls.__name__}
+                    {"label": ClassUIConfigProvider.get_label(cls.__name__), "value": cls.__name__}
                     for cls in extra['type_classes']
                 ]
 
@@ -149,7 +149,7 @@ class ParentSelectionFormStrategy(FormStrategy):
         # Build type options for regular intermediate items
         for intermediate_id, classes in type_classes_by_intermediate.items():
             type_options_by_intermediate[intermediate_id] = [
-                {"label": LabelResolver.get_class_label(cls.__name__), "value": cls.__name__}
+                {"label": ClassUIConfigProvider.get_label(cls.__name__), "value": cls.__name__}
                 for cls in classes
             ]
 
@@ -168,7 +168,7 @@ class ParentSelectionFormStrategy(FormStrategy):
             parent_class = parent.class_as_simple_str
             classes = type_classes_by_parent_class.get(parent_class, [])
             type_options_by_parent[parent.efootprint_id] = [
-                {"label": LabelResolver.get_class_label(cls.__name__), "value": cls.__name__}
+                {"label": ClassUIConfigProvider.get_label(cls.__name__), "value": cls.__name__}
                 for cls in classes
             ]
         return {"input_id": "type_object_available", "filter_by": parent_attr, "list_value": type_options_by_parent}

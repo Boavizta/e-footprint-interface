@@ -10,7 +10,8 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.adapters.label_resolver import LabelResolver
+from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
+from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
@@ -29,13 +30,13 @@ def generate_object_creation_structure(
 
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
-        "header": f"{LabelResolver.get_class_label(efootprint_class_str)} selection",
+        "header": f"{ClassUIConfigProvider.get_label(efootprint_class_str)} selection",
         "fields": [{
             "input_type": "select_object",
             "web_id": "type_object_available",
-            "label": LabelResolver.get_type_object_available_label(efootprint_class_str),
+            "label": ClassUIConfigProvider.get_type_object_available_label(efootprint_class_str),
             "options": [
-                {"label": LabelResolver.get_more_descriptive_label(available_class.__name__),
+                {"label": ClassUIConfigProvider.get_more_descriptive_label(available_class.__name__),
                     "value": available_class.__name__}
                 for available_class in available_efootprint_classes]
         }
@@ -47,7 +48,7 @@ def generate_object_creation_structure(
     for index, efootprint_class in enumerate(available_efootprint_classes):
         default_values = deepcopy(efootprint_class.default_values)
         available_efootprint_class_str = efootprint_class.__name__
-        available_efootprint_class_label = LabelResolver.get_class_label(available_efootprint_class_str)
+        available_efootprint_class_label = ClassUIConfigProvider.get_label(available_efootprint_class_str)
         default_values["name"] = (
             f"{available_efootprint_class_label} "
             f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
@@ -76,9 +77,9 @@ def generate_object_creation_context(
         efootprint_class_str, available_efootprint_classes, model_web)
 
     context_data = {"form_sections": form_sections,
-                    "header_name": "Add new " + LabelResolver.get_class_label(efootprint_class_str).lower(),
+                    "header_name": "Add new " + ClassUIConfigProvider.get_label(efootprint_class_str).lower(),
                     "object_type": efootprint_class_str,
-                    "obj_formatting_data": LabelResolver.get_class_config(efootprint_class_str)}
+                    "obj_formatting_data": ClassUIConfigProvider.get_config(efootprint_class_str)}
 
     return context_data
 
@@ -105,7 +106,7 @@ def generate_dynamic_form(
             logger.warning(
                 f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
             annotation = str
-        field_config = LabelResolver.get_field_config(attr_name)
+        field_config = FieldUIConfigProvider.get_config(attr_name)
         structure_field = {
             "web_id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
