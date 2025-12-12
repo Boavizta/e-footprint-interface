@@ -32,8 +32,8 @@ from model_builder.domain.entities.web_core.usage.usage_pattern_web import Usage
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from model_builder.form_references import FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
-from model_builder.domain.entities.web_core.model_web import model_builder_root
+from model_builder.adapters.ui_config import CLASS_UI_CONFIG, FIELD_UI_CONFIG
+from model_builder.domain.reference_data import DEFAULT_COUNTRIES, DEFAULT_DEVICES, DEFAULT_NETWORKS
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
@@ -219,12 +219,9 @@ class TestsClassStructure(TestCase):
         hardware_archetypes = create_object_dict(default_efootprint_hardwares)
         countries = create_object_dict(efootprint_countries)
 
-        with open(os.path.join(model_builder_root, "reference_data", "default_networks.json"), "r") as f:
-            default_networks = json.load(f)
-        with open(os.path.join(model_builder_root, "reference_data", "default_devices.json"), "r") as f:
-            default_devices = json.load(f)
-        with open(os.path.join(model_builder_root, "reference_data", "default_countries.json"), "r") as f:
-            default_countries = json.load(f)
+        default_networks = DEFAULT_NETWORKS
+        default_devices = DEFAULT_DEVICES
+        default_countries = DEFAULT_COUNTRIES
 
         def check_dict_equality_ignoring_ids(dict1, dict2):
             for subdict1, subdict2 in zip(list(dict1.values()), list(dict2.values())):
@@ -248,20 +245,25 @@ class TestsClassStructure(TestCase):
             for attr_name in init_sig_params.keys():
                 if attr_name == 'self':
                     continue
-                assert FORM_FIELD_REFERENCES[attr_name]["label"] is not None
+                assert FIELD_UI_CONFIG[attr_name]["label"] is not None
 
         for object_extra_fields_to_check in objects_extra_fields_to_check:
-                assert FORM_TYPE_OBJECT[object_extra_fields_to_check]["label"] is not None
+                assert CLASS_UI_CONFIG[object_extra_fields_to_check]["label"] is not None
 
 
 if __name__ == "__main__":
+    import os as script_os
     from copy import deepcopy
     from typing import get_origin
 
     from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 
-    def recompute_form_field_references():
-        reformatted_form_fields = deepcopy(FORM_FIELD_REFERENCES)
+    # Path to the ui_config and reference_data directories
+    ui_config_dir = script_os.path.join(script_os.path.dirname(__file__), "..", "model_builder", "adapters", "ui_config")
+    domain_ref_dir = script_os.path.join(script_os.path.dirname(__file__), "..", "model_builder", "domain", "reference_data")
+
+    def recompute_field_ui_config():
+        reformatted_form_fields = deepcopy(FIELD_UI_CONFIG)
         # Reinitialize modeling_obj_containers key for all init sig param
         for efootprint_class in MODELING_OBJECT_CLASSES_DICT.values():
             init_sig_params = get_init_signature_params(efootprint_class)
@@ -285,7 +287,7 @@ if __name__ == "__main__":
                 if efootprint_class.__name__ not in reformatted_form_fields[attr_name]["modeling_obj_containers"]:
                     reformatted_form_fields[attr_name]["modeling_obj_containers"].append(efootprint_class.__name__)
 
-        with open(os.path.join(model_builder_root, "reference_data", "form_fields_reference.json"), "w") as f:
+        with open(script_os.path.join(ui_config_dir, "field_ui_config.json"), "w") as f:
             json.dump(reformatted_form_fields, f, indent=4)
 
     def recompute_default_countries():
@@ -298,8 +300,8 @@ if __name__ == "__main__":
         for elt in efootprint_countries:
             json_dump[elt.id] = elt.to_json()
 
-        with open(os.path.join(model_builder_root, "reference_data", "default_countries.json"), "w") as f:
+        with open(script_os.path.join(domain_ref_dir, "default_countries.json"), "w") as f:
             json.dump(json_dump, f, indent=4)
 
-    # recompute_form_field_references()
+    # recompute_field_ui_config()
     recompute_default_countries()

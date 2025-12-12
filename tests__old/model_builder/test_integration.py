@@ -21,7 +21,7 @@ class IntegrationTest(TestModelingBase):
     @classmethod
     def setUpClass(cls):
         cls.system_data_path = os.path.join(
-            root_test_dir, "..", "model_builder", "reference_data", "default_system_data.json")
+            root_test_dir, "..", "model_builder", "domain", "reference_data", "default_system_data.json")
 
     def test_integration(self):
         os.environ["RAISE_EXCEPTIONS"] = "True"
