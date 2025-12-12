@@ -1,9 +1,10 @@
+{% load label_filters %}
 <div class="accordion-item">
     <h2 class="accordion-header accordion-header-panel">
     <button class="accordion-button" type="button" data-bs-toggle="collapse"
             data-bs-target="#collapseInputAttributes{{ object_to_edit.class_as_simple_str }}"
             aria-expanded="true" aria-controls="collapseInputAttributes">
-        {{ object_to_edit.class_label }} attributes
+        {{ object_to_edit.class_as_simple_str|class_label }} attributes
     </button>
     </h2>
     <div id="collapseInputAttributes{{ object_to_edit.class_as_simple_str }}"

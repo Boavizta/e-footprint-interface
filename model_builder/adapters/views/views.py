@@ -22,6 +22,7 @@ from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     prepare_timeseries_chart_context, prepare_hourly_quantity_data, prepare_recurrent_quantity_data)
@@ -207,9 +208,9 @@ def download_sources(request):
                 source = Source("Computed", "")
 
             sources.append([
-                web_attr_value.attr_name_web,
+                LabelResolver.get_field_label(web_attr_value.attr_name_web),
                 web_efootprint_object.name,
-                web_efootprint_object.class_label,
+                LabelResolver.get_class_label(web_efootprint_object.class_as_simple_str),
                 attr_value.value.magnitude,
                 str(attr_value.value.units),
                 source.name if source else "",

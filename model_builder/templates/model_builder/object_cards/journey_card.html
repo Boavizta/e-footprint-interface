@@ -1,4 +1,4 @@
-{% load static %}
+{% load static label_filters %}
 <div id="{{ object.web_id }}"
      class="leader-line-object card list-group-item mt-0 mb-3 py-2 px-0 rounded-3 model-builder-card grab"
      data-link-to="{{ object.links_to }}" data-line-opt="{{ object.data_line_opt }}">
@@ -47,7 +47,7 @@
                         <div class="mb-0 ms-2 ps-1 d-flex align-items-center cursor">
                             <img src="{% static 'icons/add-gray-icon.svg' %}"  width="16" height="16">
                             <div class="h8 mb-0 ms-2 ps-2 text-addition">
-                                {{ object.add_child_label }}
+                                {{ object.child_object_type_str|add_child_text }}
                             </div>
                         </div>
                     </div>

@@ -110,14 +110,3 @@ class TestServerWeb:
         assert context["object_to_edit"] == server_web
         assert context["storage_to_edit"] == server_web.storage
         assert "storage_form_fields" in context
-
-    # --- generate_cant_delete_modal_message ---
-
-    def test_generate_cant_delete_modal_message_mentions_jobs(self, minimal_model_web):
-        """Modal message mentions the blocking jobs by name."""
-        server_web = minimal_model_web.servers[0]
-
-        message = server_web.generate_cant_delete_modal_message()
-
-        for job in server_web.jobs:
-            assert job.name in message

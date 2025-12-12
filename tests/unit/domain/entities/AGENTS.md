@@ -17,7 +17,6 @@ Test only entity-specific behavior, not inherited behavior from parent classes:
 - `can_delete` hook logic
 - `self_delete` cascade behavior
 - `pre_create` / `pre_edit` hooks
-- `generate_cant_delete_modal_message` when customized
 - Form structure via snapshot tests
 
 ## Snapshot Testing

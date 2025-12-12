@@ -72,13 +72,6 @@ class ServerWeb(ModelingObjectWeb):
             return False, [obj.name for obj in web_obj.jobs]
         return True, []
 
-    def generate_cant_delete_modal_message(self):
-        if self.jobs:
-            msg = (f"This server is requested by {", ".join([obj.name for obj in self.jobs])}. "
-                   f"To delete it, first delete or reorient these jobs making requests to it.")
-            return msg
-        return super().generate_cant_delete_modal_message()
-
     def self_delete(self):
         services = self.installed_services
         for service in services:
