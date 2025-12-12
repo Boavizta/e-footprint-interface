@@ -1,3 +1,4 @@
+{% load label_filters %}
 <div class="col-12 my-5 mx-auto spinner-border spinner-result-chart d-none" role="status">
     <span class="visually-hidden">Loading...</span>
 </div>
@@ -26,7 +27,7 @@
                 <tr>
                     <th scope="row">{{ explainable_quantity.label|capfirst }}</th>
                     <td>{{ explainable_quantity.modeling_obj_container.name }}</td>
-                    <td>{{ explainable_quantity.modeling_obj_container.class_label }}</td>
+                    <td>{{ explainable_quantity.modeling_obj_container.class_as_simple_str|class_label }}</td>
                     <td>{{ explainable_quantity.value.magnitude }}</td>
                     <td>{{ explainable_quantity.value.units }}</td>
                     <td>

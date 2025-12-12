@@ -131,10 +131,6 @@ class ModelingObjectWeb:
         return self.name
 
     @property
-    def class_label(self):
-        return self.model_web.label_resolver.get_class_label(self.class_as_simple_str)
-
-    @property
     def class_title_style(self):
         return None
 
@@ -279,11 +275,6 @@ class ModelingObjectWeb:
 
         return child_object_type
 
-    @property
-    def add_child_label(self) -> str:
-        """Label for the 'add child' button (e.g., 'Add new job')."""
-        return f"Add {self.model_web.label_resolver.get_class_label(self.child_object_type_str).lower()}"
-
     def self_delete(self):
         obj_type = self.class_as_simple_str
         object_id = self.efootprint_id
@@ -300,41 +291,3 @@ class ModelingObjectWeb:
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
         for mod_obj in objects_to_delete_afterwards:
             mod_obj.self_delete()
-
-    def generate_cant_delete_modal_message(self):
-        container_label = self.model_web.label_resolver.get_class_label(
-            self.modeling_obj_containers[0].class_as_simple_str).lower()
-        msg = (f"This {self.class_as_simple_str} is referenced by "
-               f"{", ".join([obj.name for obj in self.modeling_obj_containers])}. "
-               f"To delete it, first delete or reorient these {container_label}s.")
-        return msg
-
-    def generate_ask_delete_modal_context(self):
-        context_data = {}
-        accordion_children = self.accordion_children
-
-        if len(accordion_children) > 0:
-            class_label = self.class_label.lower()
-            child_class_label = accordion_children[0].class_label.lower()
-            message = (f"This {class_label} is associated with {len(accordion_children)} {child_class_label}. "
-                       f"This action will delete them all")
-            sub_message = f"{child_class_label.capitalize()} used in other {class_label}s will remain in those."
-        else:
-            message = f"Are you sure you want to delete this {self.class_as_simple_str} ?"
-            sub_message = ""
-
-        context_data["obj"] = self
-        context_data["message"] = message
-        context_data["sub_message"] = sub_message
-        context_data["remove_card_with_hyperscript"] = True
-
-        # Override for mirrored objects (those with list_container or multiple mirrored_cards)
-        mirrored_cards = self.mirrored_cards
-        if len(mirrored_cards) > 1:
-            context_data["remove_card_with_hyperscript"] = False
-            context_data["message"] = (f"This {self.class_as_simple_str} is mirrored {len(mirrored_cards)} times, "
-                                       f"this action will delete all mirrored {self.class_as_simple_str}s.")
-            context_data["sub_message"] = (f"To delete only one {self.class_as_simple_str}, "
-                                           f"break the mirroring link first.")
-
-        return context_data

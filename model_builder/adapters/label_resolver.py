@@ -1,18 +1,17 @@
-"""Label resolution for domain objects.
+"""Label resolution for UI presentation.
 
-This module provides the concrete implementation of ILabelResolver,
-used by domain entities via dependency injection for label resolution.
+This module provides a unified interface for label resolution,
+delegating to specialized UI config providers.
 """
-from model_builder.domain.interfaces import ILabelResolver
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 
 
-class LabelResolver(ILabelResolver):
-    """Resolves UI labels for domain objects.
+class LabelResolver:
+    """Resolves UI labels for presentation.
 
-    This class provides a clean boundary between domain entities and
-    presentation concerns. It delegates to the specialized UI config providers.
+    This class provides a unified interface for label resolution,
+    delegating to the specialized UI config providers.
     """
 
     @staticmethod

@@ -45,3 +45,21 @@ def class_label(class_name: str) -> str:
     if class_name is None:
         return ""
     return LabelResolver.get_class_label(class_name)
+
+
+@register.filter
+def add_child_text(class_name: str) -> str:
+    """Generate 'Add {label}' text for a class name.
+
+    Usage: {{ child_object_type_str|add_child_text }}
+
+    Args:
+        class_name: The simple class name (e.g., 'Job', 'UsageJourneyStep')
+
+    Returns:
+        Formatted string like 'Add job' or 'Add usage journey step'
+    """
+    if class_name is None:
+        return ""
+    label = LabelResolver.get_class_label(class_name).lower()
+    return f"Add {label}"

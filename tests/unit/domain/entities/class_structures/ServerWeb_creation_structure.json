@@ -213,7 +213,7 @@
                 "input_type": "input",
                 "unit": "GB_ram",
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             },
             {
                 "web_id": "Server_base_compute_consumption",
@@ -451,7 +451,7 @@
                 "input_type": "input",
                 "unit": "GB_ram",
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             }
         ]
     },
@@ -629,7 +629,7 @@
                 "input_type": "input",
                 "unit": "GB_ram",
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             },
             {
                 "web_id": "BoaviztaCloudServer_base_compute_consumption",
