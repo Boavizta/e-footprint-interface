@@ -101,7 +101,7 @@
                 "input_type": "input",
                 "unit": "GB_ram",
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             },
             {
                 "web_id": "VideoStreaming_bits_per_pixel",

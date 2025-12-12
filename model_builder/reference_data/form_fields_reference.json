@@ -173,7 +173,7 @@
         ],
         "label": "base RAM consumption",
         "is_advanced_parameter": true,
-        "step": 1
+        "step": 0.1
     },
     "base_compute_consumption": {
         "modeling_obj_containers": [
@@ -601,7 +601,7 @@
             "Storage"
         ],
         "label": "storage capacity",
-        "step": 1
+        "step": 0.1
     },
     "data_replication_factor": {
         "modeling_obj_containers": [

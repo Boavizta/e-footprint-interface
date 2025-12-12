@@ -236,7 +236,7 @@
                 "unit": "GB_ram",
                 "default": 1,
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             }
         ]
     },
@@ -265,7 +265,7 @@
                 "unit": "TB",
                 "default": 1,
                 "can_be_negative": false,
-                "step": 1
+                "step": 0.1
             },
             {
                 "web_id": "EdgeStorage_lifespan",
