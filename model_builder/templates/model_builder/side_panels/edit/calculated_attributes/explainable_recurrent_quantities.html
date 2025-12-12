@@ -1,7 +1,8 @@
 {% load static %}
+{% load label_filters %}
 
 <div class="row mb-3">
-    <p class="col-auto col-form-label">{{ item.attr_name_web|capfirst }}</p>
+    <p class="col-auto col-form-label">{{ item.attr_name_web|field_label|capfirst }}</p>
     <div class="col-auto d-flex gap-1">
         <button class="btn btn-light p-1"
              hx-get="{% url 'get_explainable_recurrent_quantity_chart_and_explanation' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container %}"

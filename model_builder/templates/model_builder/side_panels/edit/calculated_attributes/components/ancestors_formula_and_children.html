@@ -1,3 +1,4 @@
+{% load label_filters %}
 <div id="ancestors-formula-and-children-{{ explained_obj.web_id }}" class="mb-3">
     <div class="explainable-ancestors">
       <h6>Input Variables</h6>
@@ -15,13 +16,13 @@
     <div class="explainable-formula mt-4">
       <h6>Formula</h6>
       <p style="font-family: monospace; font-size: 1.1em;">
-      {{ explained_obj.attr_name_web }} =
+      {{ explained_obj.attr_name_web|field_label }} =
         {% for token in literal_formula %}
           {% if token.symbol %}
             {% with ancestor=token.explainable_object_web %}
               <span
                 data-bs-toggle="tooltip"
-                title="{{ ancestor.attr_name_web }}{% if ancestor.unit %} in {{ ancestor.unit }}{% endif %}"
+                title="{{ ancestor.attr_name_web|field_label }}{% if ancestor.unit %} in {{ ancestor.unit }}{% endif %}"
                 class="text-decoration-dotted border-bottom border-dark border-opacity-50"
                 style="cursor: help;"
               >{{ token.symbol }}</span>

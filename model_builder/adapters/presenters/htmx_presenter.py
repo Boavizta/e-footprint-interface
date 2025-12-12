@@ -263,13 +263,13 @@ class HtmxPresenter:
         Returns:
             HttpResponse with the appropriate modal.
         """
-        from model_builder.form_references import FORM_TYPE_OBJECT
+        from model_builder.adapters.label_resolver import LabelResolver
 
         if not check_result.can_delete:
             # Can't delete - show blocking message
             blocking_names = ", ".join(check_result.blocking_containers)
             container_class = web_obj.modeling_obj_containers[0].class_as_simple_str
-            container_label = FORM_TYPE_OBJECT[container_class]["label"].lower()
+            container_label = LabelResolver.get_class_label(container_class).lower()
 
             message = (
                 f"This {web_obj.class_as_simple_str} is referenced by {blocking_names}. "
@@ -290,8 +290,8 @@ class HtmxPresenter:
         }
 
         if check_result.has_accordion_children:
-            class_label = web_obj.class_label.lower()
-            child_label = check_result.accordion_children_class_label
+            class_label = LabelResolver.get_class_label(web_obj.class_as_simple_str).lower()
+            child_label = LabelResolver.get_class_label(check_result.accordion_children_class_type).lower()
             context["message"] = (
                 f"This {class_label} is associated with {check_result.accordion_children_count} {child_label}. "
                 f"This action will delete them all"

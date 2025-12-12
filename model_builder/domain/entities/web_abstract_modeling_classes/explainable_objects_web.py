@@ -31,19 +31,18 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
             if isinstance(elt, ExplainableObject):
                 web_wrapper = ExplainableQuantityWeb if isinstance(elt, ExplainableQuantity) else ExplainableObjectWeb
                 if elt.modeling_obj_container is None:
-                    elt.attr_name_web = elt.label
                     literal_formula.append(
                         {"symbol": elt.label,
-                         "explainable_object_web": web_wrapper(elt, elt.modeling_obj_container)})
+                         "explainable_object_web": web_wrapper(elt, self.model_web)})
                 elif elt.id in ancestor_ids_to_symbols_mapping:
                     literal_formula.append(
                         {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
-                         "explainable_object_web": web_wrapper(elt, elt.modeling_obj_container)})
+                         "explainable_object_web": web_wrapper(elt, self.model_web)})
                 else:
                     ancestor_ids_to_symbols_mapping[elt.id] = get_symbol(current_symbol_index)
                     literal_formula.append(
                         {"symbol": ancestor_ids_to_symbols_mapping[elt.id],
-                         "explainable_object_web": web_wrapper(elt, elt.modeling_obj_container)})
+                         "explainable_object_web": web_wrapper(elt, self.model_web)})
                     current_symbol_index += 1
                     ids_to_ancestors_mapping[elt.id] = elt
             else:
@@ -56,7 +55,7 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
             web_wrapper = ExplainableQuantityWeb if isinstance(ancestor, ExplainableQuantity) else ExplainableObjectWeb
             ancestors_mapped_to_symbols_list.append(
                 {"symbol": ancestor_ids_to_symbols_mapping[ancestor_id],
-                 "explainable_object_web": web_wrapper(ancestor, ancestor.modeling_obj_container)})
+                 "explainable_object_web": web_wrapper(ancestor, self.model_web)})
 
         return literal_formula, ancestors_mapped_to_symbols_list
 

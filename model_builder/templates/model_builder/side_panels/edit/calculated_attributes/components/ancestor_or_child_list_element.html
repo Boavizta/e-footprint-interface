@@ -1,5 +1,6 @@
+{% load label_filters %}
 <li>
-    {{ label_prefix }} {{ elt.attr_name_web }} in
+    {{ label_prefix }} {{ elt.attr_name_web|field_label }} in
     {% if elt.modeling_obj_container.class_as_simple_str != "System" and elt.modeling_obj_container.class_as_simple_str != "Device" and elt.modeling_obj_container.class_as_simple_str != "Network" and elt.modeling_obj_container.class_as_simple_str != "Country" %}
         <a
             href="#"

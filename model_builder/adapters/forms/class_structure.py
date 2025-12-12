@@ -10,9 +10,9 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
+from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
-from model_builder.form_references import FORM_TYPE_OBJECT, FORM_FIELD_REFERENCES
 from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
 from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_quantities_from_constant import ExplainableRecurrentQuantitiesFromConstant
 
@@ -29,14 +29,13 @@ def generate_object_creation_structure(
 
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
-        "header": f"{FORM_TYPE_OBJECT[efootprint_class_str]["label"]} selection",
+        "header": f"{LabelResolver.get_class_label(efootprint_class_str)} selection",
         "fields": [{
             "input_type": "select_object",
             "web_id": "type_object_available",
-            "label": FORM_TYPE_OBJECT[efootprint_class_str]["type_object_available"],
+            "label": LabelResolver.get_type_object_available_label(efootprint_class_str),
             "options": [
-                {"label": FORM_TYPE_OBJECT[available_class.__name__].get(
-                    "more_descriptive_label_for_select_inputs", FORM_TYPE_OBJECT[available_class.__name__]["label"]),
+                {"label": LabelResolver.get_more_descriptive_label(available_class.__name__),
                     "value": available_class.__name__}
                 for available_class in available_efootprint_classes]
         }
@@ -48,7 +47,7 @@ def generate_object_creation_structure(
     for index, efootprint_class in enumerate(available_efootprint_classes):
         default_values = deepcopy(efootprint_class.default_values)
         available_efootprint_class_str = efootprint_class.__name__
-        available_efootprint_class_label = FORM_TYPE_OBJECT[available_efootprint_class_str]["label"]
+        available_efootprint_class_label = LabelResolver.get_class_label(available_efootprint_class_str)
         default_values["name"] = (
             f"{available_efootprint_class_label} "
             f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
@@ -77,9 +76,9 @@ def generate_object_creation_context(
         efootprint_class_str, available_efootprint_classes, model_web)
 
     context_data = {"form_sections": form_sections,
-                    "header_name": "Add new " + FORM_TYPE_OBJECT[efootprint_class_str]["label"].lower(),
+                    "header_name": "Add new " + LabelResolver.get_class_label(efootprint_class_str).lower(),
                     "object_type": efootprint_class_str,
-                    "obj_formatting_data": FORM_TYPE_OBJECT[efootprint_class_str]}
+                    "obj_formatting_data": LabelResolver.get_class_config(efootprint_class_str)}
 
     return context_data
 
@@ -106,11 +105,12 @@ def generate_dynamic_form(
             logger.warning(
                 f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
             annotation = str
+        field_config = LabelResolver.get_field_config(attr_name)
         structure_field = {
             "web_id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
-            "label": FORM_FIELD_REFERENCES[attr_name]["label"],
-            "tooltip": FORM_FIELD_REFERENCES[attr_name].get("tooltip", False)
+            "label": field_config.get("label", attr_name),
+            "tooltip": field_config.get("tooltip", False)
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
@@ -157,7 +157,7 @@ def generate_dynamic_form(
             structure_field.update({"source": source_json})
             if issubclass(annotation, ExplainableQuantity):
                 default_value = float(round(default.magnitude, 2))
-                step = FORM_FIELD_REFERENCES[attr_name].get("step", 0.1)
+                step = field_config.get("step", 0.1)
                 if default_value == int(default_value):
                     default_value = int(default_value)
                 else:
@@ -220,7 +220,7 @@ def generate_dynamic_form(
                 else:
                     structure_field.update({"input_type": "str"})
 
-        if FORM_FIELD_REFERENCES[attr_name].get("is_advanced_parameter", False):
+        if field_config.get("is_advanced_parameter", False):
             structure_fields_advanced.append(structure_field)
         else:
             structure_fields.append(structure_field)

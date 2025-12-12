@@ -1,4 +1,5 @@
 {% load static %}
+{% load label_filters %}
 
 <div class="row align-items-center mb-3">
     <button type="button"
@@ -13,7 +14,7 @@
         </svg>
     </button>
     <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
-        {{ item.attr_name_web|capfirst }}
+        {{ item.attr_name_web|field_label|capfirst }}
     </label>
 </div>
 

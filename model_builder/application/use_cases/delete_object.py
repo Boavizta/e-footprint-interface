@@ -27,7 +27,7 @@ class DeleteCheckResult:
     blocking_containers: List[str] = field(default_factory=list)
     has_accordion_children: bool = False
     accordion_children_count: int = 0
-    accordion_children_class_label: str = ""
+    accordion_children_class_type: str = ""  # Raw class type for presenter to resolve label
     is_mirrored: bool = False
     mirrored_count: int = 0
 
@@ -94,7 +94,7 @@ class DeleteObjectUseCase:
         # Check for accordion children
         accordion_children = web_obj.accordion_children
         has_children = len(accordion_children) > 0
-        children_label = accordion_children[0].class_label.lower() if has_children else ""
+        children_class_type = accordion_children[0].class_as_simple_str if has_children else ""
 
         # Check for mirroring
         mirrored_cards = web_obj.mirrored_cards
@@ -105,7 +105,7 @@ class DeleteObjectUseCase:
             is_list_deletion=bool(list_containers),
             has_accordion_children=has_children,
             accordion_children_count=len(accordion_children),
-            accordion_children_class_label=children_label,
+            accordion_children_class_type=children_class_type,
             is_mirrored=is_mirrored,
             mirrored_count=len(mirrored_cards),
         )

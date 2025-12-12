@@ -9,7 +9,6 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject,
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
-from model_builder.form_references import FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
     ExplainableQuantityWeb, ExplainableObjectWeb, ExplainableObjectDictWeb)
 from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
@@ -133,7 +132,7 @@ class ModelingObjectWeb:
 
     @property
     def class_label(self):
-        return FORM_TYPE_OBJECT[self.class_as_simple_str]["label"]
+        return self.model_web.label_resolver.get_class_label(self.class_as_simple_str)
 
     @property
     def class_title_style(self):
@@ -283,7 +282,7 @@ class ModelingObjectWeb:
     @property
     def add_child_label(self) -> str:
         """Label for the 'add child' button (e.g., 'Add new job')."""
-        return f"Add {FORM_TYPE_OBJECT[self.child_object_type_str]["label"].lower()}"
+        return f"Add {self.model_web.label_resolver.get_class_label(self.child_object_type_str).lower()}"
 
     def self_delete(self):
         obj_type = self.class_as_simple_str
@@ -303,11 +302,11 @@ class ModelingObjectWeb:
             mod_obj.self_delete()
 
     def generate_cant_delete_modal_message(self):
+        container_label = self.model_web.label_resolver.get_class_label(
+            self.modeling_obj_containers[0].class_as_simple_str).lower()
         msg = (f"This {self.class_as_simple_str} is referenced by "
                f"{", ".join([obj.name for obj in self.modeling_obj_containers])}. "
-               f"To delete it, first delete or reorient these "
-               f"{FORM_TYPE_OBJECT[self.modeling_obj_containers[0].class_as_simple_str]["label"].lower()}s.")
-
+               f"To delete it, first delete or reorient these {container_label}s.")
         return msg
 
     def generate_ask_delete_modal_context(self):

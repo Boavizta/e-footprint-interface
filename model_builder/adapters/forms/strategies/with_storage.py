@@ -6,7 +6,7 @@ from model_builder.adapters.forms.class_structure import (
     generate_object_creation_structure,
 )
 from model_builder.adapters.forms.strategies.base import FormStrategy
-from model_builder.form_references import FORM_TYPE_OBJECT
+from model_builder.adapters.label_resolver import LabelResolver
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
@@ -66,7 +66,7 @@ class WithStorageFormStrategy(FormStrategy):
             "dynamic_form_data": dynamic_form_data,
             "storage_form_sections": storage_form_sections,
             "storage_dynamic_form_data": storage_dynamic_form_data,
-            "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
+            "header_name": f"Add new {LabelResolver.get_class_label(object_type).lower()}"
         }
 
     def build_edition_context(

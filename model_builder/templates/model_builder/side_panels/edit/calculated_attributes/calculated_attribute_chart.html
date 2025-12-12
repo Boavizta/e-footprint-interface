@@ -1,9 +1,10 @@
 {% load static %}
+{% load label_filters %}
 <div class="w-100 d-flex flex-row justify-content-between mb-3">
     <h5 id="calculate-attribute-label"
-        data-label="{{ web_ehq.attr_name_web }}"
+        data-label="{{ web_ehq.attr_name_web|field_label }}"
         data-unit="{{ web_ehq.unit }}"
-    >{{ web_ehq.attr_name_web|capfirst }} in <a
+    >{{ web_ehq.attr_name_web|field_label|capfirst }} in <a
                 href="#"
                 hx-get="/model_builder/open-edit-object-panel/{{ web_ehq.modeling_obj_container.efootprint_id }}/"
                 hx-target="#sidePanel"

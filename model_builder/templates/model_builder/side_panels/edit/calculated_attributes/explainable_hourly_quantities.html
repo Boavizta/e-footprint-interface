@@ -1,10 +1,11 @@
 {% load static %}
+{% load label_filters %}
 
 <div class="row mb-3">
     {% if item.dict_container %}
         <p class="col-auto col-form-label">{{ sub_item.key_in_dict.name }}:</p>
     {% else %}
-        <p class="col-auto col-form-label">{{ item.attr_name_web|capfirst }}</p>
+        <p class="col-auto col-form-label">{{ item.attr_name_web|field_label|capfirst }}</p>
     {% endif %}
     <div class="col-auto d-flex gap-1">
         <button class="btn btn-light p-1"
