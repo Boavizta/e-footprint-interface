@@ -1,7 +1,7 @@
 """With-storage form strategy for objects that have an associated storage."""
 from typing import TYPE_CHECKING, Type
 
-from model_builder.adapters.forms.class_structure import (
+from model_builder.adapters.forms.form_field_generator import (
     generate_dynamic_form,
     generate_object_creation_structure,
 )

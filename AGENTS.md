@@ -35,7 +35,7 @@ model_builder/
 │   ├── views/                 # HTTP views (thin adapters)
 │   ├── presenters/            # HtmxPresenter (formats responses)
 │   ├── repositories/          # SessionSystemRepository
-│   └── forms/                 # Form generation (class_structure.py)
+│   └── forms/                 # Form generation (strategies + form_field_generator.py)
 ├── templates/                 # Django templates
 └── reference_data/            # JSON configs
 ```
@@ -107,7 +107,7 @@ Package of web wrappers around e-footprint domain classes. Each web wrapper prov
 - `adapters/views/` - HTTP views (thin adapters calling use cases)
 - `adapters/presenters/htmx_presenter.py` - Formats use case outputs as HTMX responses
 - `adapters/repositories/session_system_repository.py` - Loads/saves system from Django session
-- `adapters/forms/class_structure.py` - Form generation logic
+- `adapters/forms/form_field_generator.py` - Form field generation utilities
 
 #### Object factory (`domain/object_factory.py`)
 - `create_efootprint_obj_from_post_data()` - Creates efootprint objects from form data
