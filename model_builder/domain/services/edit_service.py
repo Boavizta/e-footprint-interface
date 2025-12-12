@@ -30,20 +30,21 @@ class EditService:
 
         Args:
             obj_to_edit: The web object to edit.
-            form_data: Dictionary of form data with new values.
+            form_data: Pre-parsed form data with clean attribute names (no prefixes).
+                      Should be parsed by adapter layer before calling this service.
 
         Returns:
             EditResult containing the edited object.
         """
-        from model_builder.domain.object_factory import edit_object_in_system
+        from model_builder.domain.object_factory import edit_object_from_parsed_data
 
         # Capture accordion children before edit (for each mirrored card)
         accordion_children_before = {}
         for mirrored_card in obj_to_edit.mirrored_cards:
             accordion_children_before[mirrored_card] = copy(mirrored_card.accordion_children)
 
-        # Perform the edit
-        edited_obj = edit_object_in_system(form_data, obj_to_edit)
+        # Perform the edit (form_data is already parsed by adapter)
+        edited_obj = edit_object_from_parsed_data(form_data, obj_to_edit)
 
         # Capture accordion children after edit
         accordion_children_after = {}

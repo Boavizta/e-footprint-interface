@@ -10,7 +10,6 @@ from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 
-from model_builder.domain.object_factory import make_form_data_mutable
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -45,14 +44,14 @@ class ExternalApiWeb(ModelingObjectWeb):
         model_web.add_new_efootprint_object_to_system(new_storage)
 
         # Create GPU server
-        service_name = form_data.get("GenAIModel_name")
+        service_name = form_data.get("name")
         new_server = GPUServer.from_defaults(
             name=f'{service_name} API servers', server_type=ServerTypes.serverless(),
             storage=new_storage, compute=SourceValue(1 * u.gpu))
         cls._created_server_web = model_web.add_new_efootprint_object_to_system(new_server)
 
-        # Modify form data to reference the server
-        form_data = make_form_data_mutable(form_data)
+        # Modify form data to reference the server (copy to avoid mutation)
+        form_data = dict(form_data)
         form_data["efootprint_id_of_parent_to_link_to"] = new_server.id
 
         return form_data

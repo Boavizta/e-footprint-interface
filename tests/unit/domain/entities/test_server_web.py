@@ -1,5 +1,4 @@
 """Unit tests for ServerWeb entity."""
-import json
 from unittest.mock import MagicMock
 
 from efootprint.core.hardware.storage import Storage
@@ -57,12 +56,17 @@ class TestServerWeb:
     # --- pre_create ---
 
     def test_pre_create_creates_storage_and_adds_reference_to_form_data(self, minimal_model_web):
-        """pre_create creates storage and adds its ID to form data with correct server type prefix."""
-        storage_form_data = {"name": "New Storage", "type_object_available": "Storage"}
+        """pre_create creates storage and adds its ID to form data with clean key.
+
+        Note: Hooks now receive pre-parsed form data (from adapter layer).
+        The _parsed_storage key contains already-parsed storage form data.
+        """
+        # Pre-parsed storage data (as would come from parse_form_data_with_nested)
+        parsed_storage = {"name": "New Storage", "type_object_available": "Storage"}
         form_data = {
             "name": "New Server",
             "type_object_available": "BoaviztaCloudServer",
-            "storage_form_data": json.dumps(storage_form_data),
+            "_parsed_storage": parsed_storage,
         }
         initial_storage_count = len(minimal_model_web.storages)
 
@@ -70,21 +74,26 @@ class TestServerWeb:
 
         # Storage created
         assert len(minimal_model_web.storages) == initial_storage_count + 1
-        # Form data modified with correct prefix
-        assert "BoaviztaCloudServer_storage" in result
+        # Form data modified with clean key (no prefix)
+        assert "storage" in result
         # Reference points to valid storage
-        assert result["BoaviztaCloudServer_storage"] in minimal_model_web.flat_efootprint_objs_dict
+        assert result["storage"] in minimal_model_web.flat_efootprint_objs_dict
 
     # --- pre_edit ---
 
     def test_pre_edit_updates_storage(self, minimal_model_web):
-        """pre_edit updates the server's storage object."""
+        """pre_edit updates the server's storage object.
+
+        Note: Hooks now receive pre-parsed form data (from adapter layer).
+        The _parsed_storage key contains already-parsed storage form data.
+        """
         server_web = minimal_model_web.servers[0]
         storage = server_web.storage
         new_name = "Updated Storage Name"
 
-        storage_edit_data = {"storage_id": storage.efootprint_id, "name": new_name}
-        form_data = {"storage_form_data": json.dumps(storage_edit_data)}
+        # Pre-parsed storage data (as would come from parse_form_data_with_nested)
+        parsed_storage = {"storage_id": storage.efootprint_id, "name": new_name}
+        form_data = {"_parsed_storage": parsed_storage}
 
         ServerWeb.pre_edit(form_data, server_web, minimal_model_web)
 

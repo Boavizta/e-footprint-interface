@@ -3,6 +3,7 @@ import json
 from django.shortcuts import render
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
+from model_builder.adapters.forms.form_data_parser import parse_form_data_with_nested
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
@@ -43,18 +44,21 @@ def open_create_object_panel(request, object_type):
 def add_object(request, object_type):
     repository = SessionSystemRepository(request.session)
 
-    # 1. Map request to use case input
+    # 1. Parse form data (adapter responsibility - before use case)
+    parsed_form_data = parse_form_data_with_nested(request.POST, object_type)
+
+    # 2. Map request to use case input (with parsed data)
     input_data = CreateObjectInput(
         object_type=object_type,
-        form_data=request.POST,
+        form_data=parsed_form_data,
         parent_id=request.POST.get("efootprint_id_of_parent_to_link_to")
     )
 
-    # 2. Execute use case
+    # 3. Execute use case
     use_case = CreateObjectUseCase(repository)
     output = use_case.execute(input_data)
 
-    # 3. Present result (with optional recomputation)
+    # 4. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))
     presenter = HtmxPresenter(request)
     return presenter.present_created_object(output, recompute=recompute)

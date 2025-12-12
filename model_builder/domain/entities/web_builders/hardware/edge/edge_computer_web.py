@@ -1,8 +1,6 @@
-import json
 from typing import TYPE_CHECKING
 
-from model_builder.domain.object_factory import (
-    edit_object_in_system, create_efootprint_obj_from_post_data, make_form_data_mutable)
+from model_builder.domain.object_factory import edit_object_from_parsed_data, create_efootprint_obj_from_parsed_data
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
 
 if TYPE_CHECKING:
@@ -24,20 +22,28 @@ class EdgeComputerWeb(EdgeDeviceBaseWeb):
 
     @classmethod
     def pre_create(cls, form_data, model_web: "ModelWeb"):
-        """Create edge storage object before creating edge computer."""
-        storage_data = json.loads(form_data.get("storage_form_data"))
-        storage = create_efootprint_obj_from_post_data(storage_data, model_web, "EdgeStorage")
+        """Create edge storage object before creating edge computer.
+
+        Note: form_data is pre-parsed by the adapter layer. Nested storage data
+        is available under _parsed_storage key.
+        """
+        parsed_storage = form_data.get("_parsed_storage")
+        storage = create_efootprint_obj_from_parsed_data(parsed_storage, model_web, "EdgeStorage")
         added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
-        # Copy and modify form data to include storage reference
-        form_data = make_form_data_mutable(form_data)
-        device_type = form_data.get("type_object_available")
-        form_data[device_type + "_storage"] = added_storage.efootprint_id
+        # Copy and modify form data to include storage reference (clean key, no prefix)
+        form_data = dict(form_data)
+        form_data["storage"] = added_storage.efootprint_id
         return form_data
 
     @classmethod
     def pre_edit(cls, form_data, obj_to_edit, model_web):
-        """Edit edge storage before editing edge computer."""
-        storage_data = json.loads(form_data.get("storage_form_data"))
-        storage = model_web.get_web_object_from_efootprint_id(storage_data["storage_id"])
-        edit_object_in_system(storage_data, storage)
+        """Edit edge storage before editing edge computer.
+
+        Note: form_data is pre-parsed by the adapter layer. Nested storage data
+        is available under _parsed_storage key.
+        """
+        parsed_storage = form_data.get("_parsed_storage")
+        storage_id = parsed_storage.get("storage_id")
+        storage = model_web.get_web_object_from_efootprint_id(storage_id)
+        edit_object_from_parsed_data(parsed_storage, storage)
