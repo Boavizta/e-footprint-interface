@@ -15,8 +15,18 @@ class ObjectLinkedToModelingObjWeb:
         self.model_web = model_web
 
     def __getattr__(self, name):
-        attr = getattr(self.efootprint_object, name)
+        # Check if the attribute is defined in the class hierarchy (as a property, method, etc.)
+        for cls in type(self).__mro__:
+            if name in cls.__dict__:
+                attr_descriptor = cls.__dict__[name]
+                if isinstance(attr_descriptor, property):
+                    return attr_descriptor.fget(self)
+                elif hasattr(attr_descriptor, '__get__'):
+                    return attr_descriptor.__get__(self, type(self))
+                else:
+                    return attr_descriptor
 
+        attr = getattr(self.efootprint_object, name)
         return attr
 
     @property
@@ -44,10 +54,14 @@ class ObjectLinkedToModelingObjWeb:
 
     @property
     def attr_name_web(self):
-        label = self.model_web.label_resolver.get_field_label(self.attr_name_in_mod_obj_container)
-        if label != self.attr_name_in_mod_obj_container:
+        attr_name = self.attr_name_in_mod_obj_container
+        # When modeling_obj_container is None, use the efootprint object's label
+        if attr_name is None:
+            return self.efootprint_object.label
+        label = self.model_web.label_resolver.get_field_label(attr_name)
+        if label != attr_name:
             return label
-        return self.attr_name_in_mod_obj_container.replace("_", " ")
+        return attr_name.replace("_", " ")
 
     @property
     def class_as_snake_str(self):

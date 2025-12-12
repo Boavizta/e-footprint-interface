@@ -32,7 +32,7 @@ from model_builder.domain.entities.web_core.usage.usage_pattern_web import Usage
 # Add project root to sys.path manually
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from model_builder.adapters.forms.class_structure import FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
+from model_builder.form_references import FORM_FIELD_REFERENCES, FORM_TYPE_OBJECT
 from model_builder.domain.entities.web_core.model_web import model_builder_root
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
