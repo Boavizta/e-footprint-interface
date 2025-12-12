@@ -12,8 +12,8 @@ from model_builder.adapters.forms.strategies.field_utils import (
     apply_field_transforms_to_fields,
     has_meaningful_dynamic_data,
 )
+from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.form_references import FORM_TYPE_OBJECT
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -83,8 +83,8 @@ class SimpleFormStrategy(FormStrategy):
         context = {
             "object_type": object_type,
             "form_sections": form_sections,
-            "obj_formatting_data": FORM_TYPE_OBJECT[object_type],
-            "header_name": f"Add new {FORM_TYPE_OBJECT[object_type]['label'].lower()}"
+            "obj_formatting_data": LabelResolver.get_class_config(object_type),
+            "header_name": f"Add new {LabelResolver.get_class_label(object_type).lower()}"
         }
 
         # Only include dynamic_form_data if it has meaningful content

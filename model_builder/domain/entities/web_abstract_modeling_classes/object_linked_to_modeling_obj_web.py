@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 
-from model_builder.form_references import FORM_FIELD_REFERENCES
 from utils import camel_to_snake
 
 if TYPE_CHECKING:
@@ -45,10 +44,10 @@ class ObjectLinkedToModelingObjWeb:
 
     @property
     def attr_name_web(self):
-        if self.attr_name_in_mod_obj_container in FORM_FIELD_REFERENCES.keys():
-            return FORM_FIELD_REFERENCES[self.attr_name_in_mod_obj_container]["label"]
-        else:
-            return self.attr_name_in_mod_obj_container.replace("_", " ")
+        label = self.model_web.label_resolver.get_field_label(self.attr_name_in_mod_obj_container)
+        if label != self.attr_name_in_mod_obj_container:
+            return label
+        return self.attr_name_in_mod_obj_container.replace("_", " ")
 
     @property
     def class_as_snake_str(self):

@@ -11,7 +11,7 @@ from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
-from model_builder.domain.interfaces import ISystemRepository
+from model_builder.domain.interfaces import ISystemRepository, ILabelResolver
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
@@ -35,14 +35,22 @@ DEFAULT_OBJECTS_CLASS_MAPPING = {
 
 
 class ModelWeb:
-    def __init__(self, repository: ISystemRepository):
+    def __init__(self, repository: ISystemRepository, label_resolver: ILabelResolver = None):
         """Initialize ModelWeb with a system repository.
 
         Args:
             repository: An ISystemRepository implementation for loading and saving system data.
+            label_resolver: An ILabelResolver implementation for resolving UI labels.
+                           If None, a default resolver will be created from adapters.
         """
         start = time()
         self.repository = repository
+        if label_resolver is None:
+            # Default to concrete implementation - this import is only for convenience
+            # when callers don't provide a resolver. Ideally callers should inject it.
+            from model_builder.adapters.label_resolver import LabelResolver
+            label_resolver = LabelResolver()
+        self.label_resolver = label_resolver
         self.system_data = self.repository.get_system_data()
         logger.info(f"System data loaded in {time() - start:.3f} seconds.")
 

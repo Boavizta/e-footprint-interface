@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Type
 
 from model_builder.adapters.forms.class_structure import generate_object_creation_structure
 from model_builder.adapters.forms.strategies.base import FormStrategy
-from model_builder.form_references import FORM_TYPE_OBJECT
+from model_builder.adapters.label_resolver import LabelResolver
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
@@ -61,7 +61,7 @@ class NestedParentSelectionFormStrategy(FormStrategy):
         # Prepend helper fields as first section
         helper_section = {
             "category": f"{object_type.lower()}_creation_helper",
-            "header": f"{FORM_TYPE_OBJECT.get(object_type, {'label': object_type})['label']} creation helper",
+            "header": f"{LabelResolver.get_class_label(object_type)} creation helper",
             "fields": helper_fields
         }
         form_sections = [helper_section] + form_sections
@@ -73,8 +73,8 @@ class NestedParentSelectionFormStrategy(FormStrategy):
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "object_type": object_type,
-            "obj_formatting_data": FORM_TYPE_OBJECT.get(object_type, {"label": object_type}),
-            "header_name": f"Add new {FORM_TYPE_OBJECT.get(object_type, {'label': object_type})['label'].lower()}"
+            "obj_formatting_data": LabelResolver.get_class_config(object_type),
+            "header_name": f"Add new {LabelResolver.get_class_label(object_type).lower()}"
         }
 
         # Add parent to context with specified key
