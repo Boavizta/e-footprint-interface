@@ -1,4 +1,3 @@
-from model_builder.domain.object_factory import make_form_data_mutable
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 
@@ -34,10 +33,12 @@ class ServiceWeb(ModelingObjectWeb):
 
     @classmethod
     def prepare_creation_input(cls, form_data):
-        """Map server ID from parent_to_link_to to service-specific server field."""
-        server_efootprint_id = form_data.get("efootprint_id_of_parent_to_link_to")
-        service_type = form_data.get("type_object_available")
+        """Map server ID from parent_to_link_to to service-specific server field.
 
-        form_data = make_form_data_mutable(form_data)
-        form_data[f"{service_type}_server"] = server_efootprint_id
+        Note: form_data is pre-parsed, so we set clean key 'server' instead of prefixed key.
+        """
+        server_efootprint_id = form_data.get("efootprint_id_of_parent_to_link_to")
+
+        form_data = dict(form_data)
+        form_data["server"] = server_efootprint_id
         return form_data

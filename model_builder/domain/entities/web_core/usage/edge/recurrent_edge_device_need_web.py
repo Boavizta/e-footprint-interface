@@ -1,5 +1,4 @@
 from model_builder.domain.entities.web_core.usage.edge.recurrent_edge_device_need_base_web import RecurrentEdgeDeviceNeedBaseWeb
-from model_builder.domain.object_factory import make_form_data_mutable
 
 
 class RecurrentEdgeDeviceNeedWeb(RecurrentEdgeDeviceNeedBaseWeb):
@@ -11,7 +10,10 @@ class RecurrentEdgeDeviceNeedWeb(RecurrentEdgeDeviceNeedBaseWeb):
 
     @classmethod
     def prepare_creation_input(cls, form_data):
-        """Add empty recurrent_edge_component_needs list."""
-        form_data = make_form_data_mutable(form_data)
+        """Add empty recurrent_edge_component_needs list.
+
+        Note: form_data is pre-parsed, so we set clean key directly.
+        """
+        form_data = dict(form_data)
         form_data["recurrent_edge_component_needs"] = ""
         return form_data

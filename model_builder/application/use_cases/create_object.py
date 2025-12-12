@@ -12,9 +12,14 @@ from model_builder.domain.interfaces import ISystemRepository
 
 @dataclass
 class CreateObjectInput:
-    """Input data for object creation."""
+    """Input data for object creation.
+
+    Note: form_data should be pre-parsed by the adapter layer using
+    parse_form_data_with_nested(). It should contain clean attribute names
+    (no prefixes), nested form data under _parsed_* keys, and units under _units key.
+    """
     object_type: str
-    form_data: Dict[str, Any]  # Dict-like object (QueryDict or plain dict)
+    form_data: Dict[str, Any]  # Pre-parsed form data (clean attribute names)
     parent_id: Optional[str] = None
 
 
@@ -64,7 +69,7 @@ class CreateObjectUseCase:
             Exception: Re-raises any exception after cleaning up the created object.
         """
         from model_builder.domain.entities.web_core.model_web import ModelWeb
-        from model_builder.domain.object_factory import create_efootprint_obj_from_post_data
+        from model_builder.domain.object_factory import create_efootprint_obj_from_parsed_data
         from model_builder.domain.efootprint_to_web_mapping import (wrap_efootprint_object,
                                                                     EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING)
 
@@ -97,9 +102,9 @@ class CreateObjectUseCase:
             if hasattr(web_class, 'prepare_creation_input'):
                 form_data = web_class.prepare_creation_input(form_data)
 
-        # 6. Create the efootprint object from form data
+        # 6. Create the efootprint object from form data (already parsed by adapter)
         try:
-            new_efootprint_obj = create_efootprint_obj_from_post_data(form_data, model_web, object_creation_type)
+            new_efootprint_obj = create_efootprint_obj_from_parsed_data(form_data, model_web, object_creation_type)
         except Exception as e:
             # 6a. Handle creation error hook (e.g., ExternalApi handles InsufficientCapacityError)
             # Check input_web_class first, then web_class
@@ -184,14 +189,14 @@ class CreateObjectUseCase:
             Tuple of (parent_was_linked, parent_web_id, parent_mirrored_web_ids)
         """
         from model_builder.domain.services import ObjectLinkingService
-        from model_builder.domain.object_factory import edit_object_in_system
+        from model_builder.domain.object_factory import edit_object_from_parsed_data
 
         # Use domain service to find attribute and build edit data
         linking_service = ObjectLinkingService()
         link_result = linking_service.link_child_to_parent(model_web, added_obj, parent_id)
 
-        # Edit the parent to include the new object
-        edit_object_in_system(link_result.edit_data, link_result.parent_web_obj)
+        # Edit the parent - edit_data is already in clean format (no prefixes)
+        edit_object_from_parsed_data(link_result.edit_data, link_result.parent_web_obj)
 
         parent_mirrored_web_ids = [card.web_id for card in link_result.parent_web_obj.mirrored_cards]
 

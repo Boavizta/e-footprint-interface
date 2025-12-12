@@ -11,9 +11,14 @@ from model_builder.domain.interfaces import ISystemRepository
 
 @dataclass
 class EditObjectInput:
-    """Input data for object editing."""
+    """Input data for object editing.
+
+    Note: form_data should be pre-parsed by the adapter layer using
+    parse_form_data_with_nested(). It should contain clean attribute names
+    (no prefixes), nested form data under _parsed_* keys, and units under _units key.
+    """
     object_id: str
-    form_data: Dict[str, Any]
+    form_data: Dict[str, Any]  # Pre-parsed form data (clean attribute names)
 
 
 @dataclass
