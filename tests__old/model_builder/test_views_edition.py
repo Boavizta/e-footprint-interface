@@ -35,6 +35,7 @@ class TestViewsEdition(TestModelingBase):
         cls.system_data_path = os.path.join(root_test_dir, "model_builder", "default_system_data.json")
 
     def test_edition(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         logger.info(f"Creating service")
         service_data = self.create_web_application_data(name="New service", parent_id="uuid-Server-1")
         post_data = QueryDict(mutable=True)
@@ -48,7 +49,7 @@ class TestViewsEdition(TestModelingBase):
 
         logger.info(f"Creating job")
         job_data = self.create_web_application_job_data(
-            name="New job", parent_id="uuid-20-min-streaming-on-Youtube", service_id=service_id, server="uuid-Server-1")
+            name="New job", parent_id="uuid-20-min-streaming-on-Youtube", service_id=service_id)
         post_data = QueryDict(mutable=True)
         post_data.update(job_data)
 
@@ -106,16 +107,16 @@ class TestViewsEdition(TestModelingBase):
 
         response = edit_object(edit_service_request, genai_service.id)
 
-    @patch("model_builder.adapters.views.exception_handling.render_exception_modal")
-    def test_edit_server_and_storage(self, mock_render_exception_modal):
+    def test_edit_server_and_storage(self):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         server_id = "uuid-Server-1"
         storage_id = "uuid-Default-SSD-storage-1"
 
         post_data = QueryDict(mutable=True)
         post_data.update(
             {"name": ["New server"], "carbon_footprint_fabrication": ["60"], "carbon_footprint_fabrication_unit": "kg",
-                "storage_form_data":
-                [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", '
+                "Storage_form_data":
+                [f'{{"Storage_id":"{storage_id}", "name":"server 1 default ssd", '
                  f'"carbon_footprint_fabrication_per_storage_capacity":"160.0",'
                  f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}']}
         )
@@ -124,7 +125,6 @@ class TestViewsEdition(TestModelingBase):
         self._add_session_to_request(edit_server_request, self.system_data)
         response = edit_object(edit_server_request, server_id)
 
-        mock_render_exception_modal.assert_not_called()
         self.assertEqual(response.status_code, 200)
 
         server = edit_server_request.session["system_data"]["Server"][server_id]
@@ -143,8 +143,8 @@ class TestViewsEdition(TestModelingBase):
         post_data = QueryDict(mutable=True)
         post_data.update(
             {"name": ["New server"], "carbon_footprint_fabrication": ["60"], "carbon_footprint_fabrication_unit": "kg",
-             "storage_form_data":
-                 [f'{{"storage_id":"{storage_id}", "name":"server 1 default ssd", '
+             "Storage_form_data":
+                 [f'{{"Storage_id":"{storage_id}", "name":"server 1 default ssd", '
                   f'"carbon_footprint_fabrication_per_storage_capacity":"170.0",'
                   f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}'],
              "recomputation": ["true"],}
@@ -171,8 +171,8 @@ class TestViewsEdition(TestModelingBase):
         post_data.update(
             {"name": ["New server"], "average_carbon_intensity": ["60"], "average_carbon_intensity_unit":
                 "gram / kilowatt_hour",
-             "storage_form_data":
-                 [f'{{"storage_id":"uuid-Default-SSD-storage-1", "name":"server 1 default ssd", '
+             "Storage_form_data":
+                 [f'{{"Storage_id":"uuid-Default-SSD-storage-1", "name":"server 1 default ssd", '
                   f'"carbon_footprint_fabrication_per_storage_capacity":"160.0",'
                   f'"carbon_footprint_fabrication_per_storage_capacity_unit":"kg/TB"}}'],
              "recomputation": ["true"],}

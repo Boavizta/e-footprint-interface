@@ -8,7 +8,7 @@
           hx-disabled-elt="button"
           hx-on::after-request="closeAndEmptySidePanel()"
           hx-vals="js:{
-                        storage_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
+                        {{ object_to_edit.storage.class_as_simple_str }}_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
                     }"
           id="sidePanelForm"
     >

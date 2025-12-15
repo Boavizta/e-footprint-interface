@@ -17,13 +17,12 @@ class TestModelWeb(TestModelingBase):
 
     def test_get_efootprint_objects_from_efootprint_type(self):
         logger.info(f"Creating service")
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         post_data = QueryDict(mutable=True)
         post_data.update({'WebApplication_name': ['New service'],
                             'efootprint_id_of_parent_to_link_to': ['uuid-Server-1'],
                           'type_object_available': ['WebApplication'],
-                          'WebApplication_technology': ['php-symfony'], 'WebApplication_base_ram_consumption': ['2'],
-                          'WebApplication_bits_per_pixel': ['0.1'], 'WebApplication_static_delivery_cpu_cost': ['4.0'],
-                          'WebApplication_ram_buffer_per_user': ['50']}
+                          'WebApplication_technology': ['php-symfony']}
                          )
 
         service_request = self.factory.post('/add-object/Service', data=post_data)
@@ -35,12 +34,13 @@ class TestModelWeb(TestModelingBase):
         logger.info(f"Creating job")
         post_data = QueryDict(mutable=True)
         post_data.update(
-            {'WebApplicationJob_name': ['New job'], 'WebApplicationJob_server': ['uuid-Server-1'],
+            {'WebApplicationJob_name': ['New job'],
                 'efootprint_id_of_parent_to_link_to': ['uuid-20-min-streaming-on-Youtube'],
              'WebApplicationJob_service': [service_id],
              'type_object_available': ['WebApplicationJob'],
              'WebApplicationJob_implementation_details': ['aggregation-code-side'],
-             'WebApplicationJob_data_transferred': ['150'], 'WebApplicationJob_data_stored': ['100']}
+             'WebApplicationJob_data_transferred': ['150'], 'WebApplicationJob_data_stored': ['100'],
+             'WebApplicationJob_data_transferred_unit': ['MB'], 'WebApplicationJob_data_stored_unit': ['MB']}
         )
 
         job_request = self.factory.post('/model_builder/add-object/Job', data=post_data)

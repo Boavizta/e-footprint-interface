@@ -28,7 +28,7 @@ class IntegrationTest(TestModelingBase):
         logger.info(f"Creating server")
         post_data = self.create_post_data_from_class_default_values(
             "Server", "Server", server_type="autoscaling", fixed_nb_of_instances=None)
-        post_data["storage_form_data"] = str(self.create_post_data_from_class_default_values(
+        post_data["Storage_form_data"] = str(self.create_post_data_from_class_default_values(
             "Storage", "Storage", fixed_nb_of_instances=None)).replace("'", '"')
         server_request = self.create_post_request("/add-object/ServerBase", post_data)
         response = add_object(server_request, "Server")

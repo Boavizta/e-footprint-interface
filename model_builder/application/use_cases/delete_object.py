@@ -147,7 +147,7 @@ class DeleteObjectUseCase:
                 ]
                 edit_data = {
                     "name": list_container.name,
-                    attr_name_in_list_container: ";".join(new_list_attribute_ids)
+                    attr_name_in_list_container: new_list_attribute_ids
                 }
 
                 # Use domain service (no HTML generation)

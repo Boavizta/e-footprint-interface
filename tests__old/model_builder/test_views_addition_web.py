@@ -91,12 +91,8 @@ class TestViewsAdditionWeb(TestModelingBase):
             name="New job",
             parent_id=TEST_UJ_STEP_ID,
             service_id=service_id,
-            server=TEST_SERVER_ID,
             WebApplicationJob_data_transferred=["2.2", "150"],
             WebApplicationJob_data_stored=["100", "100"],
-            WebApplicationJob_request_duration="1",
-            WebApplicationJob_compute_needed="0.1",
-            WebApplicationJob_ram_needed="50"
         )
         add_job_request = self.create_post_request(
             "/model_builder/add-object/Job", job_data, add_service_request.session["system_data"])
@@ -127,6 +123,7 @@ class TestViewsAdditionWeb(TestModelingBase):
     @patch("model_builder.adapters.views.exception_handling.render_exception_modal")
     def test_add_usage_journey_step_to_usage_journey_unlinked_to_system_in_existing_computed_system(
         self, mock_render_exception_modal):
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         self.change_system_data(os.path.join(root_test_dir, "model_builder", "system_with_mirrored_cards.json"))
 
         # Create usage journey
@@ -198,7 +195,7 @@ class TestViewsAdditionWeb(TestModelingBase):
         logger.info("Adding a new job for the genAI model")
         uj_step_id = next(iter(service_add_request.session["system_data"]["UsageJourneyStep"].keys()))
         genai_job_data = self.create_genai_job_data(
-            name='Generative AI job 1', parent_id=uj_step_id, service_id=gen_ai_model_id, server_id=server_id)
+            name='Generative AI job 1', parent_id=uj_step_id, service_id=gen_ai_model_id)
         job_request = self.create_post_request(
             "/model_builder/add-object/Job", genai_job_data, service_add_request.session["system_data"])
         response = add_object(job_request, "Job")

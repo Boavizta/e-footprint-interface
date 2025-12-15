@@ -33,6 +33,7 @@ USAGE_PATTERN_FORM_DATA = {
 
 EDGE_USAGE_PATTERN_FORM_DATA = {
     "csrfmiddlewaretoken": "test_token",
+    "type_object_available": "EdgeUsagePattern",
     "EdgeUsagePattern_hourly_edge_usage_journey_starts__start_date": "2025-02-01",
     "EdgeUsagePattern_hourly_edge_usage_journey_starts__modeling_duration_value": "5",
     "EdgeUsagePattern_hourly_edge_usage_journey_starts__modeling_duration_unit": "month",
@@ -52,6 +53,8 @@ WEB_APPLICATION_JOB_FORM_DATA = {
     "WebApplicationJob_implementation_details": "aggregation-code-side",
     "WebApplicationJob_data_transferred": "150",
     "WebApplicationJob_data_stored": "100",
+    "WebApplicationJob_data_transferred_unit": "MB",
+    "WebApplicationJob_data_stored_unit": "MB",
 }
 
 GPU_SERVER_FORM_DATA = {
@@ -75,12 +78,15 @@ GPU_SERVER_FORM_DATA = {
     "GPUServer_lifespan": "6",
     "GPUServer_lifespan_unit": "yr",
     "GPUServer_power_usage_effectiveness": "1.2",
+    "GPUServer_power_usage_effectiveness_unit": "dimensionless",
     "GPUServer_ram_per_gpu": "80",
     "GPUServer_ram_per_gpu_unit": "GB/gpu",
     "GPUServer_server_type": "serverless",
     "GPUServer_utilization_rate": "1",
-    "storage_form_data": '{"type_object_available":"Storage","Storage_name":"Storage 1",'
-                        '"Storage_data_replication_factor":"3","Storage_data_storage_duration":"5",'
+    "GPUServer_utilization_rate_unit": "dimensionless",
+    "Storage_form_data": '{"type_object_available":"Storage","Storage_name":"Storage 1",'
+                        '"Storage_data_replication_factor":"3","Storage_data_replication_factor_unit": "dimensionless",'
+                         '"Storage_data_storage_duration":"5",'
                         '"Storage_data_storage_duration_unit":"yr","Storage_storage_capacity":"1",'
                         '"Storage_storage_capacity_unit":"TB",'
                         '"Storage_carbon_footprint_fabrication_per_storage_capacity":"160",'
@@ -108,7 +114,7 @@ EDGE_DEVICE_FORM_DATA = {
     "EdgeComputer_power_unit": "W",
     "EdgeComputer_lifespan": "6",
     "EdgeComputer_lifespan_unit": "yr",
-    "storage_form_data": '{"type_object_available":"EdgeStorage","EdgeStorage_name":"EdgeStorage 1",'
+    "EdgeStorage_form_data": '{"type_object_available":"EdgeStorage","EdgeStorage_name":"EdgeStorage 1",'
                         '"EdgeStorage_storage_capacity":"1",'
                         '"EdgeStorage_storage_capacity_unit":"TB",'
                         '"EdgeStorage_carbon_footprint_fabrication_per_storage_capacity":"160",'

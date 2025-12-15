@@ -14,7 +14,7 @@ class EditObjectInput:
     """Input data for object editing.
 
     Note: form_data should be pre-parsed by the adapter layer using
-    parse_form_data_with_nested(). It should contain clean attribute names
+    parse_form_data(). It should contain clean attribute names
     (no prefixes), nested form data under _parsed_* keys, and units under _units key.
     """
     object_id: str
@@ -58,7 +58,6 @@ class EditObjectUseCase:
             EditObjectOutput with the edited object details.
         """
         from model_builder.domain.entities.web_core.model_web import ModelWeb
-        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
         from model_builder.domain.services import EditService
 
         # 1. Load system
@@ -68,9 +67,8 @@ class EditObjectUseCase:
         obj_to_edit = model_web.get_web_object_from_efootprint_id(input_data.object_id)
 
         # 3. Apply pre_edit hook if defined (e.g., ServerWeb edits storage first)
-        web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(obj_to_edit.class_as_simple_str)
-        if web_class and hasattr(web_class, 'pre_edit'):
-            web_class.pre_edit(input_data.form_data, obj_to_edit, model_web)
+        if hasattr(obj_to_edit, 'pre_edit'):
+            obj_to_edit.pre_edit(input_data.form_data)
 
         # 4. Perform the edit with cascade cleanup (domain service, no HTML)
         edit_service = EditService()

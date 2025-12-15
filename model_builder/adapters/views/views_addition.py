@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
-from model_builder.adapters.forms.form_data_parser import parse_form_data_with_nested
+from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
@@ -45,7 +45,7 @@ def add_object(request, object_type):
     repository = SessionSystemRepository(request.session)
 
     # 1. Parse form data (adapter responsibility - before use case)
-    parsed_form_data = parse_form_data_with_nested(request.POST, object_type)
+    parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
 
     # 2. Map request to use case input (with parsed data)
     input_data = CreateObjectInput(

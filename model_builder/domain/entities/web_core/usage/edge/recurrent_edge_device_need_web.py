@@ -15,5 +15,5 @@ class RecurrentEdgeDeviceNeedWeb(RecurrentEdgeDeviceNeedBaseWeb):
         Note: form_data is pre-parsed, so we set clean key directly.
         """
         form_data = dict(form_data)
-        form_data["recurrent_edge_component_needs"] = ""
+        form_data["recurrent_edge_component_needs"] = []
         return form_data

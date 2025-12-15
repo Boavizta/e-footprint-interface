@@ -7,6 +7,7 @@ from efootprint.abstract_modeling_classes.explainable_object_base_class import E
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.constants.units import u
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
@@ -152,7 +153,7 @@ def generate_dynamic_form(
                     step = 0.1
                 structure_field.update({
                     "input_type": "input",
-                    "unit": f"{default.value.units:~P}",
+                    "unit": "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}",
                     "default": default_value,
                     "can_be_negative": attr_name in attributes_that_can_have_negative_values,
                     "step": step

@@ -6,7 +6,14 @@ the HTTP-specific concerns (prefixed keys, nested field grouping)
 from domain construction logic.
 """
 import json
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, get_origin, List
+
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+from efootprint.logger import logger
+from efootprint.utils.tools import get_init_signature_params
+
+from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
 
 def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str, Any]:
@@ -32,12 +39,14 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
     Into:
         {
             "name": "My Server",
-            "cpu_cores": "4",
+            "cpu_cores": {
+                "value": 4.0,
+                "unit": "core"
+            }
             "hourly_usage": {
                 "start_date": "2024-01-01",
                 "duration": "365"
             },
-            "_units": {"cpu_cores": "core"}
         }
 
     Args:
@@ -49,38 +58,52 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
     """
     prefix = f"{object_type}_"
     parsed = {}
-    nested_fields = {}  # attr_name -> {field_name: value}
-    units = {}  # attr_name -> unit string
+
+    new_efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[object_type]
+    init_sig_params = get_init_signature_params(new_efootprint_obj_class)
 
     for key, value in form_data.items():
+        if key.startswith("select-new-object"):
+            continue
         # Remove prefix if present
         if key.startswith(prefix):
             attr_key = key[len(prefix):]
         else:
             attr_key = key
 
-        # Check for nested field pattern FIRST (attr__field)
-        # This must come before unit check to handle nested fields like
-        # "hourly_usage__modeling_duration_unit" correctly
+        annotation = None
+        if attr_key in init_sig_params:
+            annotation = init_sig_params[attr_key].annotation
         if "__" in attr_key:
             base_attr, field_name = attr_key.split("__", 1)
-            if base_attr not in nested_fields:
-                nested_fields[base_attr] = {}
-            nested_fields[base_attr][field_name] = value
+            if base_attr not in parsed:
+                parsed[base_attr] = {"form_inputs": {}, "label": "no label"}
+            parsed[base_attr]["form_inputs"][field_name] = value
         # Check for unit suffix (only for non-nested fields)
+        # For example, "hourly_usage__modeling_duration_unit" won’t match here.
         elif attr_key.endswith("_unit"):
             base_attr = attr_key[:-5]  # Remove "_unit"
-            units[base_attr] = value
-        else:
+            # value should already have been parsed
+            parsed[base_attr]["value"] = float(parsed[base_attr]["value"])
+            parsed[base_attr]["unit"] = value
+        elif key.endswith("_form_data") and isinstance(value, str):
+            parsed_key, parsed_form = _parse_inline_form_data(key, value)
+            parsed[parsed_key] = parsed_form
+        elif attr_key in ["name", "id", "type_object_available", "efootprint_id_of_parent_to_link_to",
+                          "csrfmiddlewaretoken", "recomputation"]:
             parsed[attr_key] = value
-
-    # Merge nested fields into parsed dict
-    for attr_name, fields in nested_fields.items():
-        parsed[attr_name] = fields
-
-    # Attach units as metadata
-    if units:
-        parsed["_units"] = units
+        elif get_origin(annotation) and get_origin(annotation) in (list, List):
+            # List attribute - split by semicolon
+            parsed[attr_key] = [v for v in str(value).split(";") if v]
+        elif annotation is None:
+            logger.warning(f"Unable to determine annotation for {attr_key} in {object_type} form data.")
+            continue
+        elif issubclass(annotation, ModelingObject):
+            parsed[attr_key] = value
+        elif issubclass(annotation, ExplainableObject):
+            parsed[attr_key] = {"value": value, "label": "no label"}
+        else:
+            raise ValueError(f"Unable to parse {attr_key} in {object_type} form data.")
 
     return parsed
 
@@ -88,51 +111,32 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
 def _infer_object_type_from_key(key: str) -> str:
     """Infer object type from a nested form data key.
 
-    Converts snake_case key to PascalCase object type.
-    E.g., 'storage_form_data' -> 'Storage', 'edge_storage_form_data' -> 'EdgeStorage'
+    E.g., 'Storage_form_data' -> 'Storage', 'EdgeStorage_form_data' -> 'EdgeStorage'
     """
     # Remove '_form_data' suffix
     base = key[:-10]  # len('_form_data') == 10
-    # Convert snake_case to PascalCase
-    return "".join(word.capitalize() for word in base.split("_"))
+    return base
 
 
-def parse_form_data_with_nested(form_data: Mapping[str, Any], object_type: str) -> Dict[str, Any]:
-    """Parse form data including any nested form data fields.
+def _parse_inline_form_data(key: str, value: str) -> Dict[str, Any]:
+    """Parse nested form data fields.
 
-    This function handles the full parsing of HTTP form data:
-    1. Parses the main form data with parse_form_data
-    2. Finds any *_form_data fields containing JSON-encoded nested form data
-    3. Parses those nested forms and stores them under _parsed_* keys
+    This function parses nested forms and stores them under _parsed_* keys
 
     The nested form data is parsed and stored so domain hooks can access
     already-parsed data without needing to import adapter code.
 
     Args:
-        form_data: Raw HTTP form data (QueryDict or dict)
-        object_type: The main object type (e.g., "Server")
+        key: Original key of the inline form data
+        value: Inline for data as string
 
     Returns:
-        Parsed form data with nested forms also parsed under _parsed_* keys
+        Parsed key and form data with nested forms also parsed
     """
-    # Use type_object_available if present (concrete type has the actual prefix)
-    actual_type = form_data.get("type_object_available", object_type)
+    nested_raw = json.loads(value)
+    nested_type = nested_raw.get("type_object_available") or _infer_object_type_from_key(key)
+    nested_parsed = parse_form_data(nested_raw, nested_type)
+    # Store parsed nested data with _parsed_ prefix
+    parsed_key = f"_parsed_{key[:-10]}"  # e.g., "_parsed_Storage"
 
-    # First parse the main form data
-    parsed = parse_form_data(form_data, actual_type)
-
-    # Find and parse any nested form data fields
-    # These are JSON strings in the original form_data (not in parsed)
-    for key, value in form_data.items():
-        if key.endswith("_form_data") and isinstance(value, str):
-            try:
-                nested_raw = json.loads(value)
-                nested_type = nested_raw.get("type_object_available") or _infer_object_type_from_key(key)
-                nested_parsed = parse_form_data(nested_raw, nested_type)
-                # Store parsed nested data with _parsed_ prefix
-                parsed_key = f"_parsed_{key[:-10]}"  # e.g., "_parsed_storage"
-                parsed[parsed_key] = nested_parsed
-            except (json.JSONDecodeError, TypeError):
-                pass  # Invalid JSON - skip this field
-
-    return parsed
+    return parsed_key, nested_parsed

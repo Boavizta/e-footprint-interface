@@ -16,5 +16,5 @@ class EdgeDeviceWeb(EdgeDeviceBaseWeb):
         Note: form_data is pre-parsed, so we set clean key directly.
         """
         form_data = dict(form_data)
-        form_data["components"] = ""
+        form_data["components"] = []
         return form_data

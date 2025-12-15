@@ -141,6 +141,7 @@ class TestModelingBase(TestCase):
         """Create usage pattern form data with sensible defaults."""
         data = deepcopy(USAGE_PATTERN_FORM_DATA)
         data["UsagePattern_name"] = name
+        data["type_object_available"] = "UsagePattern"
 
         # Set default device, network, country if available
         if not overrides.get("UsagePattern_devices"):
@@ -194,7 +195,7 @@ class TestModelingBase(TestCase):
     def create_web_application_job_data(name: str = "Test Job",
                                        parent_id: Optional[str] = None,
                                        service_id: Optional[str] = None,
-                                       server: Optional[str] = None, **overrides) -> Dict[str, Any]:
+                                       **overrides) -> Dict[str, Any]:
         """Create web application job form data with sensible defaults."""
         data = deepcopy(WEB_APPLICATION_JOB_FORM_DATA)
         data["WebApplicationJob_name"] = name
@@ -202,8 +203,6 @@ class TestModelingBase(TestCase):
             data["efootprint_id_of_parent_to_link_to"] = parent_id
         if service_id:
             data["WebApplicationJob_service"] = service_id
-        if server:
-            data["WebApplicationJob_server"] = server
         data.update(overrides)
         return data
 
@@ -230,7 +229,8 @@ class TestModelingBase(TestCase):
         data = {
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
             "UsageJourney_name": name,
-            "UsageJourney_uj_steps": uj_steps
+            "UsageJourney_uj_steps": uj_steps,
+            "type_object_available": "UsageJourney"
         }
         data.update(overrides)
         return data
@@ -247,7 +247,8 @@ class TestModelingBase(TestCase):
             "UsageJourneyStep_name": name,
             "UsageJourneyStep_user_time_spent": user_time_spent,
             "UsageJourneyStep_user_time_spent_unit": user_time_spent_unit,
-            "UsageJourneyStep_jobs": jobs
+            "UsageJourneyStep_jobs": jobs,
+            "type_object_available": "UsageJourneyStep"
         }
         if parent_id:
             data["efootprint_id_of_parent_to_link_to"] = parent_id
@@ -269,6 +270,9 @@ class TestModelingBase(TestCase):
             "GenAIModel_model_name": model_name,
             "GenAIModel_name": name,
             "GenAIModel_nb_of_bits_per_parameter": nb_of_bits_per_parameter,
+            "GenAIModel_nb_of_bits_per_parameter_unit": "dimensionless",
+            "GenAIModel_llm_memory_factor_unit": "dimensionless",
+            "GenAIModel_bits_per_token_unit": "dimensionless",
             "GenAIModel_provider": provider,
             "type_object_available": "GenAIModel"
         }
@@ -281,20 +285,18 @@ class TestModelingBase(TestCase):
     def create_genai_job_data(name: str = "Test GenAI Job",
                              parent_id: Optional[str] = None,
                              service_id: Optional[str] = None,
-                             server_id: Optional[str] = None,
                              output_token_count: str = "1000", **overrides) -> Dict[str, Any]:
         """Create GenAI job form data with sensible defaults."""
         data = {
             "GenAIJob_name": name,
             "GenAIJob_output_token_count": output_token_count,
+            "GenAIJob_output_token_count_unit": "dimensionless",
             "type_object_available": "GenAIJob"
         }
         if parent_id:
             data["efootprint_id_of_parent_to_link_to"] = parent_id
         if service_id:
             data["service"] = service_id
-        if server_id:
-            data["server"] = server_id
         data.update(overrides)
         return data
 
@@ -313,7 +315,10 @@ class TestModelingBase(TestCase):
             "GenAIModel_model_name": model_name,
             "GenAIModel_nb_of_bits_per_parameter": nb_of_bits_per_parameter,
             "GenAIModel_llm_memory_factor": llm_memory_factor,
-            "GenAIModel_bits_per_token": bits_per_token
+            "GenAIModel_bits_per_token": bits_per_token,
+            "GenAIModel_nb_of_bits_per_parameter_unit": "dimensionless",
+            "GenAIModel_llm_memory_factor_unit": "dimensionless",
+            "GenAIModel_bits_per_token_unit": "dimensionless"
         }
         data.update(overrides)
         return data
@@ -329,6 +334,7 @@ class TestModelingBase(TestCase):
             "EdgeUsageJourney_usage_span": usage_span,
             "EdgeUsageJourney_usage_span_unit": "yr",
             "EdgeUsageJourney_edge_functions": edge_functions,
+            "type_object_available": "EdgeUsageJourney"
         }
         data.update(overrides)
         return data
@@ -342,6 +348,7 @@ class TestModelingBase(TestCase):
             "csrfmiddlewaretoken": "ruwwTrYareoTugkh9MF7b5lhY3DF70xEwgHKAE6gHAYDvYZFDyr1YiXsV5VDJHKv",
             "EdgeFunction_name": name,
             "EdgeFunction_recurrent_edge_device_needs": recurrent_edge_device_needs,
+            "type_object_available": "EdgeFunction"
         }
         if parent_id:
             data["efootprint_id_of_parent_to_link_to"] = parent_id
@@ -366,6 +373,7 @@ class TestModelingBase(TestCase):
             "RecurrentEdgeProcess_recurrent_ram_needed__constant_unit": "GB_ram",
             "RecurrentEdgeProcess_recurrent_storage_needed__constant_value": constant_storage_needed,
             "RecurrentEdgeProcess_recurrent_storage_needed__constant_unit": "GB",
+            "type_object_available": "RecurrentEdgeProcess"
         }
         if parent_id:
             data["efootprint_id_of_parent_to_link_to"] = parent_id

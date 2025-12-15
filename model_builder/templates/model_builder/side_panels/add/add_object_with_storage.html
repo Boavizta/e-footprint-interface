@@ -9,12 +9,12 @@
         hx-disabled-elt="button"
         hx-on::after-request="closeAndEmptySidePanel()"
         hx-vals="js:{
-            storage_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
+            {{ storage_type }}_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
         }">
     {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>
     <form id="formStorage">
-        {% include "model_builder/side_panels/add/add_form_content.html" with obj_type=storage_obj_type form_sections=storage_form_sections dynamic_form_data=storage_dynamic_form_data %}
+        {% include "model_builder/side_panels/add/add_form_content.html" with form_sections=storage_form_sections dynamic_form_data=storage_dynamic_form_data %}
     </form>
 
     <div class="mb-3">

@@ -15,7 +15,7 @@ class CreateObjectInput:
     """Input data for object creation.
 
     Note: form_data should be pre-parsed by the adapter layer using
-    parse_form_data_with_nested(). It should contain clean attribute names
+    parse_form_data(). It should contain clean attribute names
     (no prefixes), nested form data under _parsed_* keys, and units under _units key.
     """
     object_type: str

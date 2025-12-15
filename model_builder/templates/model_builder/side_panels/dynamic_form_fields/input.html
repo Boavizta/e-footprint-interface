@@ -1,6 +1,7 @@
 <div class="input-group">
     <input type="number"
-           class="form-control input_with_add_on {% if field.unit != "" %} rounded-start-2 w-75{% else %} rounded-2 w-100 {% endif %} }"
+           class="form-control input_with_add_on
+           {% if field.unit != "dimensionless" %} rounded-start-2 w-75{% else %} rounded-2 w-100 {% endif %} }"
            id="{{ field.web_id }}"
            name="{{ field.web_id }}"
            value="{{ field.default }}"
@@ -17,13 +18,14 @@
            min="0"
         {% endif %}
     >
-    {% if field.unit != "" %}
-        <input
-            class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
-            name="{{ field.web_id }}_unit"
-            id="{{ field.web_id }}_unit"
-            value="{{ field.unit }}"
-            readonly
-        >
-    {% endif %}
+    <input
+        class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
+        name="{{ field.web_id }}_unit"
+        id="{{ field.web_id }}_unit"
+        value="{{ field.unit }}"
+        readonly
+        {% if field.unit == "dimensionless" %}
+            hidden
+        {% endif %}
+    >
 </div>

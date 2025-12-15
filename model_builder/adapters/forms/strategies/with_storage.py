@@ -62,6 +62,7 @@ class WithStorageFormStrategy(FormStrategy):
 
         return {
             "object_type": object_type,
+            "storage_type": storage_type,
             "form_sections": form_sections,
             "dynamic_form_data": dynamic_form_data,
             "storage_form_sections": storage_form_sections,

@@ -93,7 +93,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "",
+                "unit": "dimensionless",
                 "default": 16,
                 "can_be_negative": false,
                 "step": 1
@@ -108,7 +108,7 @@
                     "link": "https://github.com/genai-impact/ecologits"
                 },
                 "input_type": "input",
-                "unit": "",
+                "unit": "dimensionless",
                 "default": 1.2,
                 "can_be_negative": false,
                 "step": 0.1
@@ -123,7 +123,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "",
+                "unit": "dimensionless",
                 "default": 24,
                 "can_be_negative": false,
                 "step": 1

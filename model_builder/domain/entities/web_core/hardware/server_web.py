@@ -42,9 +42,9 @@ class ServerWeb(ModelingObjectWeb):
         """Create storage object before creating server.
 
         Note: form_data is pre-parsed by the adapter layer. Nested storage data
-        is available under _parsed_storage key.
+        is available under _parsed_Storage key.
         """
-        parsed_storage = form_data.get("_parsed_storage")
+        parsed_storage = form_data.get("_parsed_Storage")
         storage = create_efootprint_obj_from_parsed_data(parsed_storage, model_web, "Storage")
         added_storage = model_web.add_new_efootprint_object_to_system(storage)
 
@@ -53,17 +53,14 @@ class ServerWeb(ModelingObjectWeb):
         form_data["storage"] = added_storage.efootprint_id
         return form_data
 
-    @classmethod
-    def pre_edit(cls, form_data, obj_to_edit, model_web):
+    def pre_edit(self, form_data):
         """Edit storage before editing server.
 
         Note: form_data is pre-parsed by the adapter layer. Nested storage data
-        is available under _parsed_storage key.
+        is available under _parsed_Storage key.
         """
-        parsed_storage = form_data.get("_parsed_storage")
-        storage_id = parsed_storage.get("storage_id")
-        storage = model_web.get_web_object_from_efootprint_id(storage_id)
-        edit_object_from_parsed_data(parsed_storage, storage)
+        parsed_storage = form_data.get("_parsed_Storage")
+        edit_object_from_parsed_data(parsed_storage, self.storage)
 
     @classmethod
     def can_delete(cls, web_obj) -> tuple:

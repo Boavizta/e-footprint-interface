@@ -5,7 +5,7 @@ from django.shortcuts import render
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
-from model_builder.adapters.forms.form_data_parser import parse_form_data, parse_form_data_with_nested
+from model_builder.adapters.forms.form_data_parser import parse_form_data, parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput
@@ -48,7 +48,7 @@ def edit_object(request, object_id, trigger_result_display=False):
     object_type = obj_to_edit.class_as_simple_str
 
     # 2. Parse form data (adapter responsibility - before use case)
-    parsed_form_data = parse_form_data_with_nested(request.POST, object_type)
+    parsed_form_data = parse_form_data(request.POST, object_type)
 
     # 3. Map request to use case input (with parsed data)
     input_data = EditObjectInput(

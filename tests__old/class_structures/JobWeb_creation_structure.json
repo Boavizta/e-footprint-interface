@@ -345,7 +345,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "",
+                "unit": "dimensionless",
                 "default": 1000,
                 "can_be_negative": false,
                 "step": 1

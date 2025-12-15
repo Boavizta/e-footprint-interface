@@ -1,4 +1,5 @@
 """Unit tests for ServerWeb entity."""
+import os
 from unittest.mock import MagicMock
 
 from efootprint.core.hardware.storage import Storage
@@ -61,12 +62,12 @@ class TestServerWeb:
         Note: Hooks now receive pre-parsed form data (from adapter layer).
         The _parsed_storage key contains already-parsed storage form data.
         """
-        # Pre-parsed storage data (as would come from parse_form_data_with_nested)
+        # Pre-parsed storage data (as would come from parse_form_data)
         parsed_storage = {"name": "New Storage", "type_object_available": "Storage"}
         form_data = {
             "name": "New Server",
             "type_object_available": "BoaviztaCloudServer",
-            "_parsed_storage": parsed_storage,
+            "_parsed_Storage": parsed_storage,
         }
         initial_storage_count = len(minimal_model_web.storages)
 
@@ -85,17 +86,18 @@ class TestServerWeb:
         """pre_edit updates the server's storage object.
 
         Note: Hooks now receive pre-parsed form data (from adapter layer).
-        The _parsed_storage key contains already-parsed storage form data.
+        The _parsed_Storage key contains already-parsed storage form data.
         """
+        os.environ["RAISE_EXCEPTIONS"] = "True"
         server_web = minimal_model_web.servers[0]
         storage = server_web.storage
         new_name = "Updated Storage Name"
 
-        # Pre-parsed storage data (as would come from parse_form_data_with_nested)
-        parsed_storage = {"storage_id": storage.efootprint_id, "name": new_name}
-        form_data = {"_parsed_storage": parsed_storage}
+        # Pre-parsed storage data (as would come from parse_form_data)
+        parsed_storage = {"id": storage.efootprint_id, "name": new_name}
+        form_data = {"_parsed_Storage": parsed_storage}
 
-        ServerWeb.pre_edit(form_data, server_web, minimal_model_web)
+        server_web.pre_edit(form_data)
 
         assert storage.name == new_name
 

@@ -63,7 +63,7 @@ class ObjectLinkingService:
         existing_elements = getattr(parent_obj, attr_name)
         existing_ids = [elt.id for elt in existing_elements]
         existing_ids.append(child_id)
-        return {attr_name: ";".join(existing_ids)}
+        return {attr_name: existing_ids}
 
     def link_child_to_parent(self, model_web: "ModelWeb", child_web_obj: "ModelingObjectWeb", parent_id: str) -> LinkResult:
         """Link a child object to its parent.
