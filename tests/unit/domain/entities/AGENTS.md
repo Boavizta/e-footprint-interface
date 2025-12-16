@@ -13,6 +13,7 @@
 - When rebuilding snapshot contexts, mirror the lightweight mocks used in `tests__old/test_structure.py`
   (e.g., deterministic `servers`, `installed_services`, `response_objs`), so creation forms match stored snapshots
   without pulling real `ModelWeb` or hitting external APIs.
+- When instantiating explainable objects directly in tests, provide a `label` (ExplainableObject without parent requires one).
 
 ## What to Test
 
