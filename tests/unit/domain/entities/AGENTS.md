@@ -10,6 +10,9 @@
 
 - Use pytest fixtures from `conftest.py` with clear names: `minimal_repository`, `minimal_model_web`
 - For snapshot tests, use `MagicMock()` instead of real `model_web` (avoids data-dependent test failures)
+- When rebuilding snapshot contexts, mirror the lightweight mocks used in `tests__old/test_structure.py`
+  (e.g., deterministic `servers`, `installed_services`, `response_objs`), so creation forms match stored snapshots
+  without pulling real `ModelWeb` or hitting external APIs.
 
 ## What to Test
 
@@ -18,6 +21,7 @@ Test only entity-specific behavior, not inherited behavior from parent classes:
 - `self_delete` cascade behavior
 - `pre_create` / `pre_edit` hooks
 - Form structure via snapshot tests
+- No need to test obvious methods elements like attribute values.
 
 ## Snapshot Testing
 

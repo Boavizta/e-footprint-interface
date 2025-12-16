@@ -31,14 +31,8 @@
             "list_value": {
                 "direct_server_call": [
                     {
-                        "label": "Manually defined job",
+                        "label": "Job",
                         "value": "Job"
-                    }
-                ],
-                "direct_server_call_gpu": [
-                    {
-                        "label": "Manually defined GPU job",
-                        "value": "GPUJob"
                     }
                 ]
             }
