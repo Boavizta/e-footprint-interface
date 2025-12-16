@@ -55,3 +55,20 @@ flake8 = "^7.1.0"
 pytest = '*'
 pytest-cov = '*'
 memory-profiler = "^0"
+pytest-playwright = "^0.7.2"
+pytest-django = "^4.11.1"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Django settings
+DJANGO_SETTINGS_MODULE = "e_footprint_interface.settings"
+# Playwright E2E settings - base URL for the Django server
+base_url = "http://localhost:8000"
+# Markers for test categorization
+markers = [
+    "e2e: End-to-end tests requiring browser",
+    "slow: Tests that take longer to run",
+]

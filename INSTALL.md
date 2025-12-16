@@ -306,7 +306,55 @@ To switch to full local mode for testing:
 poetry run python manage.py test
 ```
 
-## E2E Tests (Cypress)
+## E2E Tests (Playwright)
+
+Playwright tests use Python and integrate with pytest. They can share fixtures with unit tests and create test models programmatically.
+
+**First-time setup** (after `poetry install`):
+```bash
+# Install Playwright browsers
+poetry run playwright install chromium
+```
+
+**Running E2E tests requires the Django server to be running:**
+
+```bash
+# Terminal 1: Start the Django server
+poetry run python manage.py runserver
+
+# Terminal 2: Run E2E tests
+poetry run pytest tests/e2e/
+```
+
+**Run tests with visible browser (headed mode):**
+```bash
+poetry run pytest tests/e2e/ --headed
+```
+
+**Run a specific test with debugger:**
+```bash
+poetry run pytest tests/e2e/test_forms.py::test_unsaved_changes -s --pdb
+```
+
+**Generate test code (record mode):**
+```bash
+poetry run playwright codegen http://localhost:8000/model_builder/
+```
+
+**Run with different browsers:**
+```bash
+poetry run pytest tests/e2e/ --browser firefox
+poetry run pytest tests/e2e/ --browser webkit
+```
+
+**Override the server URL (e.g., for Docker):**
+```bash
+poetry run pytest tests/e2e/ --base-url http://localhost:8080
+```
+
+## E2E Tests (Cypress) - Legacy
+
+> **Note**: Cypress tests are being migrated to Playwright. See `front_end_testing_refactoring.md` for migration status.
 
 **Run all E2E tests in headless mode:**
 ```bash
@@ -328,8 +376,6 @@ Then:
 1. Select **E2E Testing** in the Cypress window
 2. Choose your browser
 3. Click on the test file you want to run in the specs tab
-
-**Note**: Cypress tests run significantly faster with Option 1 (Full Local) compared to Option 2 (Hybrid with Docker).
 
 ## JavaScript Unit Tests
 
