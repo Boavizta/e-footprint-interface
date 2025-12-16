@@ -35,9 +35,10 @@ model_builder/
 │   ├── views/                 # HTTP views (thin adapters)
 │   ├── presenters/            # HtmxPresenter (formats responses)
 │   ├── repositories/          # SessionSystemRepository
-│   └── forms/                 # Form generation (strategies + form_field_generator.py)
+│   ├── forms/                 # Form parsing (form_data_parser.py) and generation (strategies)
+│   └── ui_config/             # UI configuration providers
 ├── templates/                 # Django templates
-└── reference_data/            # JSON configs
+└── domain/reference_data/     # JSON configs (default data)
 ```
 
 ### Flow
@@ -93,6 +94,7 @@ model_builder/
 
 #### Domain Services (`domain/services/`)
 - `ObjectLinkingService` - Parent-child linking logic
+- `EditService` - Handles object editing with cascade cleanup
 - `SystemValidationService` - Validates system completeness
 - `EmissionsCalculationService` - Calculates daily emissions timeseries
 
@@ -107,11 +109,13 @@ Package of web wrappers around e-footprint domain classes. Each web wrapper prov
 - `adapters/views/` - HTTP views (thin adapters calling use cases)
 - `adapters/presenters/htmx_presenter.py` - Formats use case outputs as HTMX responses
 - `adapters/repositories/session_system_repository.py` - Loads/saves system from Django session
+- `adapters/forms/form_data_parser.py` - Parses HTTP form data before passing to use cases
 - `adapters/forms/form_field_generator.py` - Form field generation utilities
+- `adapters/ui_config/` - Provides UI configuration (class labels, field metadata)
 
 #### Object factory (`domain/object_factory.py`)
-- `create_efootprint_obj_from_post_data()` - Creates efootprint objects from form data
-- `edit_object_in_system()` - Handles object updates via `ModelingUpdate`
+- `create_efootprint_obj_from_parsed_data()` - Creates efootprint objects from pre-parsed form data
+- `edit_object_from_parsed_data()` - Handles object updates via `ModelingUpdate`
 
 #### Extension mechanism (`domain/entities/efootprint_extensions/`)
 Specialized `ExplainableObject` subclasses that enhance e-footprint types:
