@@ -57,6 +57,7 @@ pytest-cov = '*'
 memory-profiler = "^0"
 pytest-playwright = "^0.7.2"
 pytest-django = "^4.11.1"
+pytest-xdist = "^3.8.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

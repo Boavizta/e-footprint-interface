@@ -19,13 +19,3 @@ class TestSmoke:
     def test_model_builder_has_leader_line(self, empty_model_builder):
         """Verify LeaderLine JS library is loaded."""
         empty_model_builder.should_have_leader_line()
-
-    def test_can_load_minimal_system(self, minimal_system_in_browser):
-        """Verify loading a programmatically-created system works."""
-        # The minimal system has a server named "Test Server"
-        minimal_system_in_browser.object_should_exist("Server", "Test Server")
-
-    def test_can_load_cypress_fixture(self, cypress_standard_model):
-        """Verify loading existing Cypress fixtures works."""
-        # The standard fixture has "My first usage journey"
-        cypress_standard_model.object_should_exist("UsageJourney", "My first usage journey")

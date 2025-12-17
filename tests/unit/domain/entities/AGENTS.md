@@ -14,6 +14,8 @@
   (e.g., deterministic `servers`, `installed_services`, `response_objs`), so creation forms match stored snapshots
   without pulling real `ModelWeb` or hitting external APIs.
 - When instantiating explainable objects directly in tests, provide a `label` (ExplainableObject without parent requires one).
+- Reuse shared helpers in `tests/unit/domain/entities/web_core/helpers.py` for dummy ModelWeb/web explainable objects
+  instead of re-defining small stubs in each test file.
 
 ## What to Test
 

@@ -3,6 +3,7 @@ from playwright.sync_api import Page, expect
 
 from tests.e2e.pages.side_panel_page import SidePanelPage
 from tests.e2e.pages.components.object_card import ObjectCard
+from tests.e2e.utils import click_and_wait_for_htmx
 
 
 class ModelBuilderPage:
@@ -67,28 +68,25 @@ class ModelBuilderPage:
     # --- Add object buttons ---
 
     def click_add_usage_journey(self):
-        """Click the 'Add Usage Journey' button."""
-        self.page.locator("#btn-add-usage-journey").click()
-        self.side_panel.should_be_visible()
+        """Click the 'Add Usage Journey' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-usage-journey"))
         return self.side_panel
 
     def click_add_server(self):
-        """Click the 'Add Server' button."""
-        self.page.locator("#btn-add-server").click()
-        self.side_panel.should_be_visible()
+        """Click the 'Add Server' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-server"))
         return self.side_panel
 
     def click_add_usage_pattern(self):
-        """Click the 'Add Usage Pattern' button."""
-        self.page.locator("#add_usage_pattern").click()
-        self.side_panel.should_be_visible()
+        """Click the 'Add Usage Pattern' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#add_usage_pattern"))
         return self.side_panel
 
     # --- Result panel ---
 
     def open_result_panel(self):
-        """Open the result panel."""
-        self.page.locator("#btn-open-panel-result").click()
+        """Open the result panel (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-open-panel-result"))
         self.page.locator("#lineChart").wait_for(state="visible")
         return self
 
@@ -107,6 +105,7 @@ class ModelBuilderPage:
     def open_import_panel(self):
         """Open the JSON import panel."""
         self.page.locator("button[hx-get*='open-import-json-panel']").click()
+        self.page.locator("input[type='file']").wait_for(state="attached")
         return self.side_panel
 
     def import_json_file(self, file_path: str):
@@ -117,17 +116,8 @@ class ModelBuilderPage:
         """
         self.open_import_panel()
         self.page.locator("input[type='file']").set_input_files(file_path)
+        # Here we don’t use click_and_wait_for_htmx because hx attributes are not on the button but on the form
         with self.page.expect_response(lambda r: "upload-json" in r.url):
             self.page.locator("button[type='submit']").click()
         self.side_panel.should_be_closed()
-        return self
-
-    # --- Utility methods ---
-
-    def wait_for_htmx_idle(self, timeout: int = 5000):
-        """Wait for all HTMX requests to complete."""
-        self.page.wait_for_function(
-            "document.querySelector('body').getAttribute('hx-request') === null",
-            timeout=timeout
-        )
         return self

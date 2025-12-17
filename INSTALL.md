@@ -336,6 +336,12 @@ poetry run pytest tests/e2e/ --headed
 poetry run pytest tests/e2e/test_forms.py::test_unsaved_changes -s --pdb
 ```
 
+**Run tests in parallel:**
+```bash
+# Run E2E tests in parallel (4 workers)
+ poetry run pytest tests/e2e/ -n 4 --base-url http://localhost:8000
+```
+
 **Generate test code (record mode):**
 ```bash
 poetry run playwright codegen http://localhost:8000/model_builder/

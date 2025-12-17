@@ -1,6 +1,8 @@
 """Object card component for interacting with modeling objects on the canvas."""
 from playwright.sync_api import Locator
 
+from tests.e2e.utils import click_and_wait_for_htmx
+
 
 class ObjectCard:
     """Represents an object card on the model builder canvas.
@@ -13,24 +15,24 @@ class ObjectCard:
         self.locator = locator
 
     def click_edit_button(self):
-        """Click the main edit button on the card."""
-        self.locator.locator("button[id^='button-']").first.click()
+        """Click the main edit button on the card (triggers HTMX)."""
+        click_and_wait_for_htmx(self.locator.page, self.locator.locator("button[id^='button-']").first)
 
     def click_delete_button(self):
-        """Click the delete button (available after opening edit panel)."""
-        self.locator.locator("button[hx-get*='ask-delete-object']").click()
+        """Click the delete button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.locator.page, self.locator.locator("button[hx-get*='ask-delete-object']"))
 
     def click_add_step_button(self):
-        """Click the 'add step' button (for UsageJourney cards)."""
-        self.locator.locator("div[id^='add-step-to']").click()
+        """Click the 'add step' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.locator.page, self.locator.locator("div[id^='add-step-to']"))
 
     def click_add_service_button(self):
-        """Click the 'add service' button (for Server cards)."""
-        self.locator.locator("button[id^='add-service-to']").click()
+        """Click the 'add service' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.locator.page, self.locator.locator("button[id^='add-service-to']"))
 
     def click_add_job_button(self):
-        """Click the 'add job' button (for UsageJourneyStep cards)."""
-        self.locator.locator("button[hx-get*='open-create-object-panel/JobBase']").click()
+        """Click the 'add job' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.locator.page, self.locator.locator("button[hx-get*='open-create-object-panel/JobBase']"))
 
     def has_class(self, class_name: str) -> bool:
         """Check if the card has a specific CSS class."""
@@ -44,5 +46,6 @@ class ObjectCard:
     def should_have_class(self, class_name: str):
         """Assert that the card has a specific CSS class."""
         from playwright.sync_api import expect
-        expect(self.locator).to_have_class(f".*{class_name}.*")
+        import re
+        expect(self.locator).to_have_class(re.compile(class_name))
         return self

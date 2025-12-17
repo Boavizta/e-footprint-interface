@@ -1,6 +1,8 @@
 """Side panel page object for form interactions."""
 from playwright.sync_api import Page, expect
 
+from tests.e2e.utils import click_and_wait_for_htmx
+
 
 class SidePanelPage:
     """Page object for the side panel that contains forms for creating/editing objects."""
@@ -51,31 +53,32 @@ class SidePanelPage:
         return self
 
     def submit(self):
-        """Click the submit button and wait for form to close."""
-        self.submit_button.click()
+        """Click the submit button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.submit_button)
         return self
 
     def submit_and_wait_for_close(self):
-        """Submit the form and wait for the panel to close."""
+        """Submit the form and wait for the panel to close (closed via client-side JS)."""
         self.submit_button.click()
-        self.form.wait_for(state="hidden", timeout=10000)
+        self.form.wait_for(state="hidden", timeout=500)
+        self.page.wait_for_timeout(timeout=50) # Small wait to ensure HTMX settles
         return self
 
     def click_delete_button(self):
-        """Click the delete button in the panel."""
-        self.panel.locator("button[hx-get*='ask-delete-object']").click()
+        """Click the delete button in the panel (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.panel.locator("button[hx-get*='ask-delete-object']"))
         return self
 
     def confirm_delete(self):
-        """Click the 'Yes, delete' confirmation button in the modal."""
-        self.page.get_by_role("button", name="Yes, delete").click()
-        # Wait for modal to close
+        """Click the 'Yes, delete' confirmation button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.get_by_role("button", name="Yes, delete"))
         self.page.locator("#model-builder-modal").wait_for(state="hidden", timeout=5000)
         return self
 
     def get_type_selector(self):
-        """Get the object type selector dropdown."""
-        return self.page.locator("#type_object_available")
+        """Get the object type selector dropdown (scoped to the visible form)."""
+        # Scope to sidePanelForm to avoid matching hidden storage form selector
+        return self.form.locator("#type_object_available").first
 
     def select_object_type(self, type_value: str):
         """Select the type of object to create."""
