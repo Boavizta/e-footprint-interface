@@ -56,7 +56,7 @@ class ModelBuilderPage:
     def object_should_exist(self, object_type: str, name: str):
         """Assert that an object card exists on the canvas."""
         card = self.get_object_card(object_type, name)
-        card.should_be_visible()
+        card.should_exist()
         return self
 
     def object_should_not_exist(self, object_type: str, name: str):

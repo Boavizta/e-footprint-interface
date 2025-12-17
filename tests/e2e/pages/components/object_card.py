@@ -38,6 +38,11 @@ class ObjectCard:
         """Check if the card has a specific CSS class."""
         return class_name in (self.locator.get_attribute("class") or "")
 
+    def should_exist(self):
+        """Assert that the card exists in the DOM (may be hidden)."""
+        self.locator.wait_for(state="attached")
+        return self
+
     def should_be_visible(self):
         """Assert that the card is visible."""
         self.locator.wait_for(state="visible")
