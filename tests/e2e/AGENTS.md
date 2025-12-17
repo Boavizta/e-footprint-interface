@@ -27,15 +27,45 @@ def system_dict_complete():
     return system_to_json(system, save_calculated_attributes=False)
 ```
 
-### Orphaned Objects Pattern
+### Building System Dicts from Individual Objects not linked to a System
 
-For objects that need to appear in the UI but aren't connected via the normal object graph (e.g., servers without jobs), add them directly to the system dict:
+Use `EMPTY_SYSTEM_DICT` as the base and `system_to_json()` on individual modeling objects (not the whole System). This lets you build complex test fixtures without constructing a complete System.
+
+Build the system data and load it into the browser in a single fixture - no need for a two-stage pattern:
 
 ```python
-system_dict = system_to_json(system, save_calculated_attributes=False)
-server = Server.from_defaults("Test Server", storage=storage)
-system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
+from copy import deepcopy
+from efootprint.api_utils.system_to_json import system_to_json
+from tests.e2e.conftest import load_system_dict_into_browser
+from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update
+
+@pytest.fixture
+def edge_system_in_browser(model_builder_page: ModelBuilderPage):
+    # Create objects using from_defaults() where available
+    edge_device = EdgeComputer.from_defaults("Shared Edge Device", storage=edge_storage)
+    process1 = RecurrentEdgeProcess.from_defaults("Process 1", edge_device=edge_device)
+    edge_function1 = EdgeFunction("Function 1", recurrent_edge_device_needs=[process1])
+    journey1 = EdgeUsageJourney.from_defaults(name="Journey 1", edge_functions=[edge_function1])
+
+    # Start with empty system dict (use deepcopy to avoid mutating the shared dict)
+    system_data = deepcopy(EMPTY_SYSTEM_DICT)
+
+    # system_to_json() on a single object serializes it AND all its dependencies
+    system_data.update(system_to_json(journey1, save_calculated_attributes=False))
+
+    # Use add_only_update() to merge additional object trees without overwriting shared objects
+    add_only_update(system_data, system_to_json(journey2, save_calculated_attributes=False))
+
+    # Load into browser and return the page object ready to use
+    return load_system_dict_into_browser(model_builder_page, system_data)
 ```
+
+**Key helpers:**
+- `EMPTY_SYSTEM_DICT` (from `tests/e2e/utils.py`) - Minimal valid system dict as starting point
+- `add_only_update(target, source)` (from `tests/e2e/utils.py`) - Recursively merges dicts, only adding missing keys (never overwrites)
+- `load_system_dict_into_browser(model_builder_page, system_data)` (from `tests/e2e/conftest.py`) - Loads system dict into browser session
+
+**Prefer `from_defaults()`:** Most efootprint classes have a `from_defaults()` class method that creates objects with sensible defaults, avoiding verbose ExplainableQuantity construction.
 
 
 ## Page Object Model
