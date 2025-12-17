@@ -42,7 +42,7 @@ def system_dict_with_server_service_no_jobs():
     )
 
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
-    system_dict = system_to_json(system, save_calculated_attributes=True)
+    system_dict = system_to_json(system, save_calculated_attributes=False)
 
     # Create orphaned server and service (not connected to system via jobs)
     storage = Storage.from_defaults("Test Storage")
@@ -50,9 +50,9 @@ def system_dict_with_server_service_no_jobs():
     service = WebApplication.from_defaults("Test Service", server=server)
 
     # Add orphaned objects to the system dict
-    system_dict["Storage"] = {storage.id: storage.to_json(save_calculated_attributes=True)}
-    system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=True)}
-    system_dict["WebApplication"] = {service.id: service.to_json(save_calculated_attributes=True)}
+    system_dict["Storage"] = {storage.id: storage.to_json(save_calculated_attributes=False)}
+    system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
+    system_dict["WebApplication"] = {service.id: service.to_json(save_calculated_attributes=False)}
 
     return system_dict
 

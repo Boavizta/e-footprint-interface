@@ -16,7 +16,7 @@ def minimal_system():
 @pytest.fixture
 def minimal_system_data(minimal_system):
     """System data dict (JSON-serializable) from minimal system."""
-    return system_to_json(minimal_system, save_calculated_attributes=True)
+    return system_to_json(minimal_system, save_calculated_attributes=False)
 
 
 @pytest.fixture

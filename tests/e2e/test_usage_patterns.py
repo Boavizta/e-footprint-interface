@@ -13,7 +13,7 @@ from tests.fixtures import build_minimal_system
 def system_dict_complete():
     """Create a complete system dict with all objects connected."""
     system = build_minimal_system("Test System")
-    return system_to_json(system, save_calculated_attributes=True)
+    return system_to_json(system, save_calculated_attributes=False)
 
 
 @pytest.fixture

@@ -32,7 +32,7 @@ def system_dict_with_usage_journey():
     )
 
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
-    return system_to_json(system, save_calculated_attributes=True)
+    return system_to_json(system, save_calculated_attributes=False)
 
 
 @pytest.fixture

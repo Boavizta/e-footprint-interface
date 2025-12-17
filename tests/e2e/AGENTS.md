@@ -24,7 +24,7 @@ from tests.fixtures import build_minimal_system, create_hourly_usage
 @pytest.fixture
 def system_dict_complete():
     system = build_minimal_system("Test System")
-    return system_to_json(system, save_calculated_attributes=True)
+    return system_to_json(system, save_calculated_attributes=False)
 ```
 
 ### Orphaned Objects Pattern
@@ -32,9 +32,9 @@ def system_dict_complete():
 For objects that need to appear in the UI but aren't connected via the normal object graph (e.g., servers without jobs), add them directly to the system dict:
 
 ```python
-system_dict = system_to_json(system, save_calculated_attributes=True)
+system_dict = system_to_json(system, save_calculated_attributes=False)
 server = Server.from_defaults("Test Server", storage=storage)
-system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=True)}
+system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
 ```
 
 

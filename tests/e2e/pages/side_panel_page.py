@@ -61,7 +61,7 @@ class SidePanelPage:
         """Submit the form and wait for the panel to close (closed via client-side JS)."""
         self.submit_button.click()
         self.form.wait_for(state="hidden", timeout=500)
-        self.page.wait_for_timeout(timeout=50) # Small wait to ensure HTMX settles
+        self.page.wait_for_timeout(timeout=150) # Small wait to ensure HTMX settles
         return self
 
     def click_delete_button(self):
