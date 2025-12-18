@@ -14,7 +14,7 @@ from efootprint.core.system import System
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
-from tests.fixtures import create_hourly_usage
+from tests.fixtures.system_builders import create_hourly_usage
 
 
 @pytest.fixture

@@ -105,7 +105,7 @@ class ModelBuilderPage:
 
     def open_import_panel(self):
         """Open the JSON import panel."""
-        self.page.locator("button[hx-get*='open-import-json-panel']").click()
+        click_and_wait_for_htmx(self.page, self.page.locator("button[hx-get*='open-import-json-panel']"))
         self.page.locator("input[type='file']").wait_for(state="attached")
         return self.side_panel
 

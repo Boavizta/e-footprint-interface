@@ -18,12 +18,12 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
-from tests.fixtures import create_hourly_usage
+from tests.fixtures.system_builders import create_hourly_usage
 
 
 @pytest.fixture
-def system_dict_with_server_service_no_jobs():
-    """Create a system dict with server, service, and UJ steps but no jobs.
+def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage, system_dict_with_server_service_no_jobs):
+    """Create a system with server, service, and UJ steps but no jobs.
 
     The server and service are added as orphaned objects (not connected via jobs)
     so they appear in the UI and can be selected when creating a job.
@@ -54,13 +54,7 @@ def system_dict_with_server_service_no_jobs():
     system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
     system_dict["WebApplication"] = {service.id: service.to_json(save_calculated_attributes=False)}
 
-    return system_dict
-
-
-@pytest.fixture
-def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage, system_dict_with_server_service_no_jobs):
-    """Load system dict with server and service but no jobs into browser."""
-    return load_system_dict_into_browser(model_builder_page, system_dict_with_server_service_no_jobs)
+    return load_system_dict_into_browser(model_builder_page, system_dict)
 
 
 @pytest.mark.e2e

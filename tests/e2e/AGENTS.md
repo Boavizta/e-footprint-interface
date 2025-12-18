@@ -18,13 +18,40 @@ Each test should cover a **distinct user workflow**. Avoid redundant tests that 
 Build test data using efootprint classes, not JSON files.
 
 ```python
-from efootprint.api_utils.system_to_json import system_to_json
-from tests.fixtures import build_minimal_system, create_hourly_usage
-
 @pytest.fixture
-def system_dict_complete():
-    system = build_minimal_system("Test System")
-    return system_to_json(system, save_calculated_attributes=False)
+def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage, system_dict_with_server_service_no_jobs):
+    """Create a system with server, service, and UJ steps but no jobs.
+
+    The server and service are added as orphaned objects (not connected via jobs)
+    so they appear in the UI and can be selected when creating a job.
+    """
+    # Create basic system with usage pattern, journey, and step (no jobs)
+    uj_step = UsageJourneyStep.from_defaults("Test Step", jobs=[])
+    uj = UsageJourney("Test Journey", uj_steps=[uj_step])
+
+    usage_pattern = UsagePattern(
+        "Test Usage Pattern",
+        usage_journey=uj,
+        devices=[Device.from_defaults("Test Device")],
+        network=Network.from_defaults("Test Network"),
+        country=country_generator("Test Country", "TST", SourceValue(100 * u.g / u.kWh), tz("Europe/Paris"))(),
+        hourly_usage_journey_starts=create_hourly_usage()
+    )
+
+    system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
+    system_dict = system_to_json(system, save_calculated_attributes=False)
+
+    # Create orphaned server and service (not connected to system via jobs)
+    storage = Storage.from_defaults("Test Storage")
+    server = Server.from_defaults("Test Server", storage=storage)
+    service = WebApplication.from_defaults("Test Service", server=server)
+
+    # Add orphaned objects to the system dict
+    system_dict["Storage"] = {storage.id: storage.to_json(save_calculated_attributes=False)}
+    system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
+    system_dict["WebApplication"] = {service.id: service.to_json(save_calculated_attributes=False)}
+    
+    return load_system_dict_into_browser(model_builder_page, system_dict)
 ```
 
 ### Building System Dicts from Individual Objects not linked to a System

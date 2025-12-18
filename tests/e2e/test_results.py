@@ -1,41 +1,23 @@
 """Tests for the results panel and emissions display."""
-import json
 import re
 from datetime import datetime
 
 import pytest
 from playwright.sync_api import expect
 
-from efootprint.api_utils.system_to_json import system_to_json
-
-from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
-from tests.fixtures import build_minimal_system
-
-
-@pytest.fixture
-def system_dict_complete():
-    """Create a complete system dict that can calculate results."""
-    system = build_minimal_system("Test System")
-    return system_to_json(system, save_calculated_attributes=False)
-
-
-@pytest.fixture
-def complete_system_in_browser(model_builder_page: ModelBuilderPage, system_dict_complete):
-    """Load complete system into browser."""
-    return load_system_dict_into_browser(model_builder_page, system_dict_complete)
 
 
 @pytest.mark.e2e
 class TestResultsPanel:
     """Tests for the results panel functionality."""
 
-    def test_open_and_close_result_panel(self, complete_system_in_browser: ModelBuilderPage):
+    def test_open_and_close_result_panel(self, minimal_complete_model_builder: ModelBuilderPage):
         """Test opening and closing the result panel.
 
         Uses complete system fixture which has a complete model ready for calculation.
         """
-        model_builder = complete_system_in_browser
+        model_builder = minimal_complete_model_builder
         page = model_builder.page
 
         # Open result panel
@@ -63,9 +45,9 @@ class TestResultsPanel:
         # Result panel should NOT be visible
         expect(page.locator("#lineChart")).not_to_be_visible()
 
-    def test_granularity_change_updates_chart_labels(self, complete_system_in_browser: ModelBuilderPage):
+    def test_granularity_change_updates_chart_labels(self, minimal_complete_model_builder: ModelBuilderPage):
         """Changing temporal granularity should update chart label count."""
-        model_builder = complete_system_in_browser
+        model_builder = minimal_complete_model_builder
         page = model_builder.page
 
         # Open result panel
@@ -99,9 +81,9 @@ class TestResultsPanel:
         assert yearly_label_count == initial_label_count, \
             f"Yearly labels ({yearly_label_count}) should match initial ({initial_label_count})"
 
-    def test_sources_tab_display_and_export(self, complete_system_in_browser: ModelBuilderPage):
+    def test_sources_tab_display_and_export(self, minimal_complete_model_builder: ModelBuilderPage):
         """Sources tab should toggle view and allow download with correct filename."""
-        model_builder = complete_system_in_browser
+        model_builder = minimal_complete_model_builder
         page = model_builder.page
 
         # Open result panel
@@ -133,9 +115,9 @@ class TestResultsPanel:
         expect(page.locator("#graph-block")).to_have_class(re.compile(r"d-block"))
         expect(page.locator("#source-block")).to_have_class(re.compile(r"d-none"))
 
-    def test_model_recomputation_with_result_panel_open(self, complete_system_in_browser: ModelBuilderPage):
+    def test_model_recomputation_with_result_panel_open(self, minimal_complete_model_builder: ModelBuilderPage):
         """Chart should update when editing object with result panel open."""
-        model_builder = complete_system_in_browser
+        model_builder = minimal_complete_model_builder
         page = model_builder.page
 
         # Open server for editing
