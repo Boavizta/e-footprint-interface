@@ -4,6 +4,16 @@
 
 Migration from Cypress to Playwright (Python API) with improved test organization and shared fixtures between unit and E2E tests.
 
+**📊 For detailed gap analysis of what tests remain to be migrated, see [MIGRATION_GAP_ANALYSIS.md](./MIGRATION_GAP_ANALYSIS.md)**
+
+### Current Progress (2025-12-18)
+
+- **Cypress Tests:** 66 test cases across 11 files (1,708 lines)
+- **Playwright Tests:** 27 test cases across 11 files (1,304 lines)
+  - 16 migration tests + 11 new organizational tests
+- **Migration Status:** ~24% complete (16/66 migrations, but 41% when including new tests: 27/66)
+- **Remaining Work:** ~50 test cases (accounting for redundancy elimination)
+
 ### Key Decisions
 
 | Decision | Choice | Rationale |
@@ -175,47 +185,148 @@ class ObjectCard:
 
 ## Iterative Migration Plan
 
-### Phase 1: Setup Infrastructure (COMPLETED)
+### Phase 1: Setup Infrastructure ✅ COMPLETED
 - [x] Install Playwright and pytest-playwright
 - [x] Create `tests/e2e/` directory structure
 - [x] Create base Page Objects (ModelBuilderPage, SidePanelPage)
 - [x] Create E2E conftest with session loading fixture
 - [x] Verify one simple test works end-to-end (5 smoke tests passing)
+- [x] Create new organizational tests (test_servers.py, test_jobs.py, test_usage_patterns.py, test_usage_journeys.py)
 
-### Phase 2: Migrate Critical Path
-- [ ] Migrate `end-to-end.cy.js` to `test_full_journey.py`
-- [ ] Ensure CI runs both Cypress and Playwright temporarily
-- [ ] Validate equivalent coverage
+### Phase 2: Migrate Critical Path ✅ COMPLETED
+- [x] Migrate `end-to-end.cy.js` (test 1/2) to `test_full_journey.py`
+- [x] Migrate `test_services.cy.js` (GenAI services) to `test_genai_services.py`
+- [ ] Complete `end-to-end.cy.js` (test 2/2) - leader lines and data export validation
 
-### Phase 3: Migrate Form Tests
-- [ ] Migrate `test_forms.cy.js` to `test_forms.py`
-- [ ] Migrate `test_timeseries.cy.js` to `test_timeseries.py`
-- [ ] Add Page Object components as needed
+### Phase 3: Complete Partially Migrated Tests 🔄 IN PROGRESS
+**Priority: HIGH - Complete existing test files**
 
-### Phase 4: Migrate Object CRUD Tests
-- [ ] Migrate `test_services.cy.js` to `test_modeling.py`
-- [ ] Migrate `test_edge_objects.cy.js` (merge into test_modeling.py)
-- [ ] Migrate `test_model_canva.cy.js` (merge into test_modeling.py)
-- [ ] Migrate `test_select_multiple.cy.js` to `test_forms.py`
+#### 3.1: Complete `test_toolbar.py` (6 more tests needed)
+Remaining from `test_toolbar_features.cy.js`:
+- [ ] Import JSON when model already has objects (replaces previous)
+- [ ] Import validates file selection and triggers leader line initialization
+- [ ] Export validates filename format with UTC timestamp
+- [ ] Change system name persists after page reload
+- [ ] Import with various model states (empty, partial, complete)
+- [ ] Export with calculated attributes
 
-### Phase 5: Migrate Result Tests
-- [ ] Migrate `test_result_panel.cy.js` to `test_results.py`
-- [ ] Migrate `test_calculated_attributes.cy.js` (merge into test_results.py)
-- [ ] Migrate `test_calculus_graph.cy.js` (merge into test_results.py)
+#### 3.2: Complete `test_forms.py` (8 more tests needed)
+Remaining from `test_forms.cy.js`:
+- [ ] UJS list disabled when no UJS exist, enabled after creation
+- [ ] Jobs list not displayed when no jobs exist, displayed after creation
+- [ ] Server creation with/without advanced options visibility
+- [ ] Units persistence when editing objects
+- [ ] Sources displayed in forms with correct values
+- [ ] Unsaved changes warning before closing side panel
+- [ ] Unsaved changes warning before opening new side panel
+- [ ] Form field validation (required fields, data types)
 
-### Phase 6: Migrate Import/Export Tests
-- [ ] Migrate `test_toolbar_features.cy.js` to `test_import_export.py`
+#### 3.3: Complete `test_results.py` (14 more tests needed)
+Remaining from `test_result_panel.cy.js`:
+- [ ] Error modal when model cannot be calculated
+- [ ] Panel swipe up/down gestures on mobile
+- [ ] Exception modal for UJ without UJ steps
+- [ ] Granularity change updates chart labels (week/month/year)
+- [ ] Sources tab display and toggle
+- [ ] Sources export with correct filename
+- [ ] Model recomputation when editing with result panel open
+- [ ] Chart updates after edit
+- [ ] Result panel width adjustment during editing
+- [ ] Mobile responsive behavior
+- [ ] Chart.js integration verification
+- [ ] Multiple chart types (bar, pie, line)
+- [ ] Export results to various formats
+- [ ] Performance with large datasets
 
-### Phase 7: Cleanup
+#### 3.4: Complete `test_edge_objects.py` (10 more tests needed)
+Remaining from `test_edge_objects.cy.js` (642 lines, 15 tests, only 5 migrated):
+- [ ] Edit edge device verification
+- [ ] Edge device with advanced parameters
+- [ ] Verify advanced parameters persistence
+- [ ] Complex edge journey with multiple functions
+- [ ] Recurrent edge process editing
+- [ ] Edge function with multiple processes
+- [ ] Delete edge objects cascade behavior
+- [ ] Edge device shared across multiple journeys
+- [ ] Edge storage management
+- [ ] Edge compute resource validation
+
+### Phase 4: Migrate Timeseries Tests 🆕 NOT STARTED
+**Priority: HIGH - Core functionality**
+
+Create `test_timeseries.py` from `test_timeseries.cy.js` (217 lines, 10 tests):
+- [ ] Open usage pattern form multiple times, chart always displayed
+- [ ] Canvas context validation for chart rendering
+- [ ] Timeseries generation with various growth rates
+- [ ] Timeseries validation - correct number of elements
+- [ ] Modeling duration validation (min/max bounds)
+- [ ] Modeling duration unit changes (day/month/year)
+- [ ] Error messages for invalid duration values
+- [ ] Edit UP with month timeframe validates max correctly
+- [ ] Chart not displayed on mobile (viewport: iphone-x)
+- [ ] Chart not displayed on tablet (viewport: ipad-mini)
+
+**Note:** This is critical for timeseries form functionality and should be prioritized.
+
+### Phase 5: Migrate Select Multiple Tests 🆕 NOT STARTED
+**Priority: MEDIUM - Form interaction**
+
+Merge into `test_forms.py` from `test_select_multiple.cy.js` (32 lines, 11 tests):
+- [ ] Add job to UsageJourneyStep via select multiple
+- [ ] Remove job from UsageJourneyStep
+- [ ] Remove last job from UsageJourneyStep
+- [ ] Multiple selection UI behavior
+- [ ] Select multiple with pre-existing selections
+- [ ] Validation when no items available to select
+- [ ] Select multiple ordering/positioning
+- [ ] Add/remove animations and transitions
+- [ ] Keyboard navigation in select multiple
+- [ ] Select multiple with large lists (performance)
+- [ ] Select all/deselect all functionality
+
+### Phase 6: Migrate Model Canva Tests 🆕 NOT STARTED
+**Priority: MEDIUM - UI behavior**
+
+Distribute tests from `test_model_canva.cy.js` (64 lines, 6 tests):
+- [ ] Error when creating job without servers → `test_forms.py`
+- [ ] Edit UJ name preserves UJS → `test_usage_journeys.py`
+- [ ] Create job on empty UJS, verify positioning → `test_jobs.py`
+- [ ] Add job button placement and visibility → `test_jobs.py`
+- [ ] Job ordering in collapsed accordion → `test_jobs.py`
+- [ ] Multiple jobs positioning verification → `test_jobs.py`
+
+### Phase 7: Migrate Calculated Attributes & Graph Tests 🆕 NOT STARTED
+**Priority: LOW - Advanced features**
+
+#### 7.1: Merge into `test_results.py` from `test_calculated_attributes.cy.js` (25 lines, 1 test):
+- [ ] Navigate between calculated attributes tabs
+- [ ] Chart updates when switching attributes
+- [ ] Formula display for calculated attributes
+- [ ] Ancestors and children navigation in attribute tree
+
+#### 7.2: Create `test_calculus_graph.py` from `test_calculus_graph.cy.js` (59 lines, 4 tests):
+- [ ] Simple calculus graph opens in iframe
+- [ ] Complex calculus graph with multiple usage patterns
+- [ ] Verify vis.js network graph rendering
+- [ ] Calculus graph for various attribute types
+- [ ] Graph interactivity (zoom, pan, node selection)
+
+### Phase 8: Cleanup 📦 PENDING
+- [ ] Verify all 90 Cypress test cases have Playwright equivalents
+- [ ] Run full Playwright suite and ensure reliability
 - [ ] Remove Cypress dependencies from package.json
-- [ ] Remove cypress/ directory
-- [ ] Update CI configuration
+- [ ] Remove cypress/ directory and fixtures
+- [ ] Update CI configuration (remove Cypress, add Playwright)
 - [ ] Update CLAUDE.md with new testing instructions
+- [ ] Document Playwright debugging workflow
+- [ ] Create migration documentation for future reference
 
-### Phase 8: JS Unit Test Enhancement (Optional, Parallel)
+### Phase 9: JS Unit Test Enhancement (Optional, Parallel)
 - [ ] Install Vitest, migrate existing Jest tests
 - [ ] Add unit tests for `select_multiple.js`
 - [ ] Add unit tests for `dynamic_forms.js` (pure logic functions)
+- [ ] Add unit tests for timeseries calculation functions
+- [ ] Add unit tests for chart utilities
 
 ---
 

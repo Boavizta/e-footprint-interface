@@ -1,8 +1,19 @@
 """Tests for form behavior - unsaved changes, advanced options, source labels."""
+from copy import deepcopy
+
 import pytest
+from efootprint.core.hardware.storage import Storage
 from playwright.sync_api import expect
 
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
+from efootprint.constants.units import u
+from efootprint.core.usage.usage_journey import UsageJourney
+
+from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.utils import EMPTY_SYSTEM_DICT
 
 
 @pytest.mark.e2e
@@ -126,3 +137,104 @@ class TestSourceLabels:
         # Modify and verify source still shows
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("5")
         expect(page.locator("#source-UsagePattern_hourly_usage_journey_starts")).to_contain_text("Source: user data")
+
+
+@pytest.fixture
+def system_with_uj_no_steps(model_builder_page: ModelBuilderPage):
+    """Create system with a UsageJourney but no UsageJourneySteps."""
+    # Create a standalone UsageJourney with no steps
+    uj = UsageJourney("Test E2E UJ", uj_steps=[])
+
+    system_data = deepcopy(EMPTY_SYSTEM_DICT)
+    system_data.update(system_to_json(uj, save_calculated_attributes=False))
+
+    return load_system_dict_into_browser(model_builder_page, system_data)
+
+
+@pytest.fixture
+def system_with_custom_storage_unit(model_builder_page: ModelBuilderPage):
+    """Create system with BoaviztaCloudServer with custom storage duration unit (month)."""
+    # Create server with custom storage unit
+    storage = Storage.ssd()
+    server = BoaviztaCloudServer.from_defaults("cloud server test", storage=storage)
+
+    # Set storage duration unit to 'month' (default is 'day')
+    server.storage.data_storage_duration = SourceValue(5 * u.month)
+
+    system_data = deepcopy(EMPTY_SYSTEM_DICT)
+    system_data.update(system_to_json(server, save_calculated_attributes=False))
+
+    return load_system_dict_into_browser(model_builder_page, system_data)
+
+
+@pytest.mark.e2e
+class TestFormFieldEnablement:
+    """Tests for form field enablement based on available objects."""
+
+    def test_ujs_list_disabled_when_no_ujs_available(self, system_with_uj_no_steps: ModelBuilderPage):
+        """UJS select should be disabled when no UJS exist, enabled when creating new UJ."""
+        model_builder = system_with_uj_no_steps
+        side_panel = model_builder.side_panel
+        page = model_builder.page
+
+        # Edit the existing UJ (which has no steps)
+        uj_card = model_builder.get_object_card("UsageJourney", "Test E2E UJ")
+        uj_card.click_edit_button()
+
+        # UJS select should be disabled (no UJS to select)
+        ujs_select = page.locator("#select-new-object-UsageJourney_uj_steps")
+        expect(ujs_select).to_be_attached()
+        expect(ujs_select).to_be_disabled()
+
+        # Submit without changes
+        side_panel.submit_and_wait_for_close()
+
+        # Create a UJS on this UJ
+        uj_card.click_add_step_button()
+        side_panel.submit_and_wait_for_close()
+
+        # Edit UJ again
+        uj_card.click_edit_button()
+
+        # Select should still be disabled (the created UJS belongs to this UJ)
+        expect(ujs_select).to_be_disabled()
+
+        # Now click "Add usage journey" button to create NEW UJ
+        page.locator("#btn-add-usage-journey").click()
+
+        # Now the select should be enabled (can select UJS from first UJ)
+        expect(ujs_select).to_be_enabled()
+
+
+@pytest.mark.e2e
+class TestUnitsPersistence:
+    """Tests that custom units persist when editing objects."""
+
+    def test_storage_duration_unit_persists_on_edit(self, system_with_custom_storage_unit: ModelBuilderPage):
+        """Storage duration unit should remain 'month' (not default 'day') after editing."""
+        model_builder = system_with_custom_storage_unit
+        side_panel = model_builder.side_panel
+        page = model_builder.page
+
+        # Open the server for editing
+        server_card = model_builder.get_object_card("BoaviztaCloudServer", "cloud server test")
+        server_card.click_edit_button()
+
+        # Verify unit is 'month' (custom, not default 'year')
+        storage_unit_select = page.locator("#Storage_data_storage_duration_unit")
+        expect(storage_unit_select).to_have_value("month")
+
+        # Change the value to 3
+        storage_duration_input = page.locator("#Storage_data_storage_duration")
+        storage_duration_input.clear()
+        storage_duration_input.fill("3")
+
+        # Submit
+        side_panel.submit_and_wait_for_close()
+
+        # Re-open the server
+        server_card.click_edit_button()
+
+        # Verify unit is still 'month' and value is '3'
+        expect(storage_unit_select).to_have_value("month")
+        expect(storage_duration_input).to_have_value("3")

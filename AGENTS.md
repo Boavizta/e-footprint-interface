@@ -193,3 +193,8 @@ To add a new way to generate timeseries (e.g., from uploaded CSV):
 
 - Session-only by default; no PII expected. Do not log sensitive info.
 - Validate inputs in views; trust computations to the domain engine but validate shape/types at boundaries.
+
+
+## Coding agents instructions
+
+Don’t run and debug tests proactively, unless explicitly asked. After creating a new test or making significant, already tested, refactoring, pause and let me run the tests.

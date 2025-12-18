@@ -88,6 +88,7 @@ class ModelBuilderPage:
         """Open the result panel (triggers HTMX)."""
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-open-panel-result"))
         self.page.locator("#lineChart").wait_for(state="visible")
+        self.page.wait_for_timeout(100)  # Wait for chart to render
         return self
 
     def close_result_panel(self):
