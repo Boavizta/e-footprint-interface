@@ -22,7 +22,7 @@ from tests.fixtures.system_builders import create_hourly_usage
 
 
 @pytest.fixture
-def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage, system_dict_with_server_service_no_jobs):
+def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage):
     """Create a system with server, service, and UJ steps but no jobs.
 
     The server and service are added as orphaned objects (not connected via jobs)
