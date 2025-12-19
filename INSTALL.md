@@ -6,12 +6,12 @@ This guide covers three different setup approaches for running the e-footprint-i
 
 ### Option 1: Full Local Development (Fastest - Recommended for Testing)
 
-**Best for**: Running Cypress tests quickly, rapid iteration, minimal setup
+**Best for**: Running front-end tests quickly, rapid iteration, minimal setup
 
 Runs everything locally (Django + SQLite) without Docker. This is the **fastest option** for E2E testing since there's no Docker overhead.
 
 **Pros**:
-- Fastest Cypress test execution
+- Fastest front-end test execution
 - Minimal dependencies
 - Quick startup/restart
 - No Docker required
@@ -37,7 +37,7 @@ Runs PostgreSQL in Docker while running Django locally. This gives you **IDE deb
 - Fast iteration cycle
 
 **Cons**:
-- Slower Cypress tests than full local (Docker overhead)
+- Slower front-end tests than full local (Docker overhead)
 - Requires Docker for PostgreSQL
 
 **Jump to**: [Hybrid Local Setup](#hybrid-local-development-option-2)
@@ -66,7 +66,7 @@ Runs all services (Django, PostgreSQL, Traefik) in Docker containers. See the **
 
 ## Full Local Development (Option 1)
 
-This setup runs Django with SQLite locally - no Docker required. Perfect for fast Cypress test execution.
+This setup runs Django with SQLite locally - no Docker required. Perfect for fast front-end test execution.
 
 ### Prerequisites
 
@@ -292,7 +292,7 @@ This approach is ideal for:
 
 ## Recommended Setup for Testing
 
-**For fastest Cypress test execution during development**, use **Option 1 (Full Local Development)** with SQLite. This eliminates Docker overhead and provides the quickest test runs. Then before deploying to prod, run tests in **Option 3 (Full Docker Environment)** to ensure compatibility with PostgreSQL.
+**For fastest front-end test execution during development**, use **Option 1 (Full Local Development)** with SQLite. This eliminates Docker overhead and provides the quickest test runs. Then before deploying to prod, run tests in **Option 3 (Full Docker Environment)** to ensure compatibility with PostgreSQL.
 
 To switch to full local mode for testing:
 1. Stop any running Docker containers: `docker compose -f docker-compose.infra.yml down`
@@ -357,31 +357,6 @@ poetry run pytest tests/e2e/ --browser webkit
 ```bash
 poetry run pytest tests/e2e/ --base-url http://localhost:8080
 ```
-
-## E2E Tests (Cypress) - Legacy
-
-> **Note**: Cypress tests are being migrated to Playwright. See `front_end_testing_refactoring.md` for migration status.
-
-**Run all E2E tests in headless mode:**
-```bash
-# For Option 1 (Full Local - best for local development)
-npm run test:e2e:local
-# For Option 3 (Full Docker - before deployment)
-npm run test:e2e:docker
-```
-
-**Run tests with interactive browser:**
-```bash
-# For Option 1 (Full Local - best for local development)
-npm run cy:open:local
-# For Option 3 (Full Docker - before deployment)
-npm run cy:open:docker
-```
-
-Then:
-1. Select **E2E Testing** in the Cypress window
-2. Choose your browser
-3. Click on the test file you want to run in the specs tab
 
 ## JavaScript Unit Tests
 

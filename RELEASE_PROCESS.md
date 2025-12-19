@@ -44,14 +44,12 @@ npm install jest --global
 
 Run test suites:
 ```shell
-# Python tests__old
+# Python tests__old (soon to be deprecated)
 poetry run python manage.py test tests__old
 
-# E2E tests__old (Cypress)
-# See docker/README.md for Docker setup instructions
-npm run test:e2e:docker
+poetry run pytest tests -n 4 --base-url http://localhost:8000
 
-# JavaScript unit tests__old
+# JavaScript unit tests
 jest
 ```
 

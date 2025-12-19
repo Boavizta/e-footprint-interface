@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.12] - 2025-12-19
+
+### Fixed
+- Timeseries from growth yearly and monthly limits logic. Updating unit didn’t trigger logic because of updateSource error.
+
+### Changed
+- Simplify object_factory.py by removing all its presenter concerns into the form data parser.
+- Migrated all Cypress tests to Playwright for better maintainability and performance.
+
 ## [0.10.11] - 2025-12-15
 
 ### Changed
