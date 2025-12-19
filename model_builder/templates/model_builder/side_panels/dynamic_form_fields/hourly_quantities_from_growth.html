@@ -58,7 +58,6 @@
                                         else
                                             set {max:120} on #{{ field.web_id }}__modeling_duration_value
                                         end
-                                        updateSource('#{{ field.web_id }}')
                                         then applyMaxLimitOnModelingDurationValue()
                                         then openOrCloseTimeseriesChartAndTriggerUpdate()
                                     "
