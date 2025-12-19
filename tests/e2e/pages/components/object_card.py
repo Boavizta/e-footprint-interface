@@ -34,6 +34,9 @@ class ObjectCard:
         """Click the 'add job' button (triggers HTMX)."""
         click_and_wait_for_htmx(self.locator.page, self.locator.locator("button[hx-get*='open-create-object-panel/JobBase']"))
 
+    def open_accordion(self):
+        self.locator.locator(".chevron-btn").click()
+
     def has_class(self, class_name: str) -> bool:
         """Check if the card has a specific CSS class."""
         return class_name in (self.locator.get_attribute("class") or "")

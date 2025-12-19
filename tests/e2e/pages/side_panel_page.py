@@ -12,6 +12,7 @@ class SidePanelPage:
         self.panel = page.locator("#sidePanel")
         self.form = page.locator("#sidePanelForm")
         self.submit_button = page.locator("#btn-submit-form")
+        self.close_button = page.locator("#btn-close-side-panel")
 
     def should_be_visible(self):
         """Assert that the side panel is visible."""
@@ -62,6 +63,13 @@ class SidePanelPage:
         self.submit_button.click()
         self.form.wait_for(state="hidden", timeout=500)
         self.page.wait_for_timeout(timeout=150) # Small wait to ensure HTMX settles
+        return self
+
+    def close(self):
+        """Click the close button to close the side panel."""
+        self.close_button.click()
+        self.form.wait_for(state="hidden", timeout=500)
+        self.page.wait_for_timeout(timeout=50)
         return self
 
     def click_delete_button(self):

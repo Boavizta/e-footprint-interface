@@ -109,7 +109,7 @@ class TestEdgeObjects:
         # Add recurrent edge process to edge function
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
         # Expand the card to reveal the add button
-        edge_function_card.locator.locator(".chevron-btn").click()
+        edge_function_card.open_accordion()
         edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeedBase']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
 
@@ -230,7 +230,7 @@ class TestEdgeObjects:
 
         # Step 2: Add CPU component to EdgeDevice
         edge_device_card = model_builder.get_object_card("EdgeDevice", edge_device_name)
-        edge_device_card.locator.locator(".chevron-btn").click()
+        edge_device_card.open_accordion()
         edge_device_card.locator.locator("button[hx-get*='EdgeComponent']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeCPUComponent")
@@ -240,7 +240,7 @@ class TestEdgeObjects:
         cpu_card.should_exist()
 
         # Step 3: Add RAM component to EdgeDevice
-        edge_device_card.locator.locator(".chevron-btn").click()
+        edge_device_card.open_accordion()
         edge_device_card.locator.locator("button[hx-get*='EdgeComponent']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeRAMComponent")
@@ -265,7 +265,7 @@ class TestEdgeObjects:
 
         # Step 6: Add RecurrentEdgeDeviceNeed to EdgeFunction
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
-        edge_function_card.locator.locator(".chevron-btn").click()
+        edge_function_card.open_accordion()
         edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeedBase']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_device", edge_device_name)
