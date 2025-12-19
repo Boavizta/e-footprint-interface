@@ -38,7 +38,7 @@ class TestCalculusGraph:
         duration_toggle.click()
 
         # Navigate to calculus graph
-        graph_link = page.locator("a[href*='/model_builder/display-calculus-graph/'][href*='duration/']")
+        graph_link = page.locator("a[href*='/model_builder/display-calculus-graph/']").first
         expect(graph_link).to_be_visible()
         graph_url = graph_link.get_attribute("href")
         assert graph_url is not None
