@@ -72,6 +72,8 @@ class ExternalApiWeb(ModelingObjectWeb):
             if server and hasattr(server, 'installed_services') and server.installed_services:
                 new_service = server.installed_services[0]
                 nb_of_gpus_required = math.ceil((error.requested_capacity / server.ram_per_gpu).to(u.gpu).magnitude)
+                if nb_of_gpus_required == (error.requested_capacity / server.ram_per_gpu).to(u.gpu).magnitude:
+                    nb_of_gpus_required += 1 # There should be some margin
                 server.compute = SourceValue(
                     nb_of_gpus_required * u.gpu, source=Source("Computed to match model size", link=None))
                 # Re-run after_init because it had been interrupted by the error
