@@ -55,7 +55,8 @@ def convert_multiselect_to_single(field: dict) -> None:
     Takes options from 'unselected' (for creation) or combines
     'selected' + 'unselected' (for edition).
     """
-    if 'unselected' in field:
+    selected = field.get('selected', [])
+    if len(selected) == 0:
         # Creation context: use unselected options
         options = field.get('unselected', [])
         field.update({
@@ -63,19 +64,17 @@ def convert_multiselect_to_single(field: dict) -> None:
             'options': options,
             'selected': options[0]['value'] if options else None
         })
-        field.pop('unselected', None)
-        field.pop('selected_objs', None)  # Remove if present
-    elif 'selected' in field and isinstance(field.get('selected'), list):
+    else:
         # Edition context: combine selected + unselected
-        selected = field.get('selected', [])
         unselected = field.get('unselected', [])
         options = selected + unselected
         field.update({
             'input_type': 'select_object',
             'options': options,
-            'selected': selected[0]['value'] if selected else (options[0]['value'] if options else None)
+            'selected': selected[0]['value']
         })
-        field.pop('unselected', None)
+
+    field.pop('unselected', None)
 
 
 def has_meaningful_dynamic_data(dynamic_form_data: dict) -> bool:
