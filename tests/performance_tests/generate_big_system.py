@@ -193,8 +193,112 @@ def timed_system_to_json(system, *args, **kwargs):
     return system_to_json(system, *args, **kwargs)
 
 
+def sample_parameter_combinations_and_measure_file_sizes(n_samples=100, output_csv="file_sizes_benchmark.csv"):
+    """
+    Sample n_samples parameter combinations for generate_big_system with values between 1 and 5,
+    run the function for each, and record parameters + resulting JSON file sizes in MB.
+    """
+    import pandas as pd
+
+    param_names = ["nb_of_servers_of_each_type", "nb_of_uj_per_each_server_type", "nb_of_uj_steps_per_uj",
+                   "nb_of_up_per_uj", "nb_of_edge_usage_patterns", "nb_of_edge_processes_per_edge_computer", "nb_years"]
+    results = []
+
+    rng = np.random.default_rng(seed=42)
+    param_samples = rng.integers(1, 6, size=(n_samples, len(param_names)))  # values 1-5 inclusive
+
+    for i, params in enumerate(param_samples):
+        param_dict = dict(zip(param_names, params.tolist()))
+        logger.info(f"Sample {i + 1}/{n_samples}: {param_dict}")
+
+        try:
+            system = generate_big_system(**param_dict)
+            big_system_path = os.path.join(root_dir, "big_system.json")
+            big_system_calc_attr_path = os.path.join(root_dir, "big_system_with_calc_attr.json")
+
+            size_big_system_mb = round(os.path.getsize(big_system_path) / (1024 * 1024), 2)
+            size_with_calc_attr_mb = round(os.path.getsize(big_system_calc_attr_path) / (1024 * 1024), 2)
+
+            jobs_x_up = 0
+            for up in system.usage_patterns:
+                jobs_x_up += len(up.jobs)
+
+            rec_edge_comp_need_x_edge_up = 0
+            for edge_up in system.edge_usage_patterns:
+                for recurrent_edge_device_need in edge_up.recurrent_edge_device_needs:
+                    rec_edge_comp_need_x_edge_up += len(recurrent_edge_device_need.recurrent_edge_component_needs)
+
+            up_dict = {"nb_usage_patterns": len(system.usage_patterns),
+                       "nb_edge_usage_patterns": len(system.edge_usage_patterns),
+                       "total_jobs_across_usage_patterns": jobs_x_up,
+                       "total_recurrent_edge_component_needs_across_edge_usage_patterns": rec_edge_comp_need_x_edge_up}
+
+            results.append({**param_dict, **up_dict, "big_system_size_mb": size_big_system_mb,
+                            "big_system_with_calc_attr_size_mb": size_with_calc_attr_mb})
+        except Exception as e:
+            logger.error(f"Failed for params {param_dict}: {e}")
+            results.append({**param_dict, "big_system_size_mb": None, "big_system_with_calc_attr_size_mb": None})
+
+    df = pd.DataFrame(results)
+    csv_path = os.path.join(root_dir, output_csv)
+    df.to_csv(csv_path, index=False)
+    logger.info(f"Saved results to {csv_path}")
+    return df
+
+
+def plot_file_sizes_from_csv(csv_path=None):
+    """
+    Read the benchmark CSV and plot big_system.json size vs big_system_with_calc_attr.json size as a scatter plot.
+    """
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    if csv_path is None:
+        csv_path = os.path.join(root_dir, "file_sizes_benchmark.csv")
+
+    df = pd.read_csv(csv_path)
+    df_valid = df.dropna(subset=["big_system_size_mb", "big_system_with_calc_attr_size_mb"])
+
+    plt.figure(figsize=(10, 8))
+    plt.scatter(df_valid["total_jobs_across_usage_patterns"] + df_valid["total_recurrent_edge_component_needs_across_edge_usage_patterns"], df_valid["big_system_with_calc_attr_size_mb"], alpha=0.6, edgecolors="k")
+    plt.xlabel("total computational elements (jobs + recurrent edge component needs) across all usage patterns")
+    plt.ylabel("big_system_with_calc_attr.json size (MB)")
+    plt.title("File Size Comparison: big_system vs big_system_with_calc_attr")
+
+    plt.legend()
+    plt.tight_layout()
+
+    plot_path = os.path.join(root_dir, "file_sizes_scatter.png")
+    plt.savefig(plot_path, dpi=150)
+    plt.show()
+    logger.info(f"Saved plot to {plot_path}")
+
+
 if __name__ == "__main__":
+    #plot_file_sizes_from_csv(csv_path="file_sizes_benchmark4.csv")
+    #sample_parameter_combinations_and_measure_file_sizes(n_samples=100, output_csv="file_sizes_benchmark4.csv")
     nb_years = 5
     system = generate_big_system(
         nb_of_servers_of_each_type=2, nb_of_uj_per_each_server_type=2, nb_of_uj_steps_per_uj=4, nb_of_up_per_uj=3,
         nb_of_edge_usage_patterns=3, nb_of_edge_processes_per_edge_computer=3, nb_years=nb_years)
+
+    from efootprint.abstract_modeling_classes.modeling_object import compute_times
+
+    total_time = 0
+    for data in compute_times.values():
+        total_time += data["total_duration"]
+    nb_update_functions = len(compute_times)
+    print(f"Total time in update functions: {round(total_time, 3)}s, nb_update_functions: {nb_update_functions}, "
+          f"avg %: {round(100 / nb_update_functions, 2)}")
+    cumulated_time = 0
+    i = 0
+    for update_function_name, update_function_dict in sorted(compute_times.items(),
+                                                             key=lambda x: -x[1]["total_duration"]):
+        i += 1
+        update_function_time = update_function_dict.get("total_duration")
+        cumulated_time += update_function_time
+        time_pct = round(100 * update_function_time / total_time, 2)
+        cum_time_pct = round(100 * cumulated_time / total_time, 2)
+        print(
+            f"{i}: {update_function_time:.3f}s ({time_pct}%, cum {cum_time_pct}%) for {update_function_dict["nb_calls"]} "
+            f"calls of {update_function_name}")
