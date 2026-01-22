@@ -26,10 +26,7 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
-                },
-                "direct_ancestors_with_id": [],
-                "direct_children_with_id": ["('uid-my-first-usage-journey-1', 'duration', None)"],
-                "explain_nested_tuples": []
+                }
             },
             "jobs": []
         }
@@ -40,15 +37,7 @@
             "id": "uid-my-first-usage-journey-1",
             "uj_steps": [
                 "uid-my-first-usage-journey-step-1"
-            ],
-            "duration": {
-                "label": "Duration of My first usage journey",
-                "value": 1.0,
-                "unit": "minute",
-                "direct_ancestors_with_id": ["('uid-my-first-usage-journey-step-1', 'user_time_spent', None)"],
-                "direct_children_with_id": [],
-                "explain_nested_tuples": ["('uid-my-first-usage-journey-step-1', 'user_time_spent', None)", "+", {"label": "no value", "value": null}]
-            }
+            ]
         }
     }
 }

@@ -38,7 +38,10 @@ def model_builder_main(request, reboot=False):
         raise ValueError("reboot must be False or 'reboot'")
     if reboot == "reboot":
         with open(os.path.join("model_builder", "domain", "reference_data", "default_system_data.json"), "r") as file:
-            system_data = json.load(file)
+            data = json.load(file)
+        system_data = SessionSystemRepository.upgrade_system_data(data)
+        import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+        result = import_service.import_system(system_data)
         repository.save_system_data(system_data)
         model_web = ModelWeb(repository)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
@@ -109,8 +112,6 @@ def upload_json(request):
 
         if data and not import_error_message:
             try:
-                if "efootprint_version" not in data.keys():
-                    data["efootprint_version"] = "9.1.4"
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
                 import_service.gradually_hydrate_system_and_raise_error_if_too_big(deepcopy(system_data))
