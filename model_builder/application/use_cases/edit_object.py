@@ -76,6 +76,8 @@ class EditObjectUseCase:
 
         # 5. Build output with pure data (presenter will generate HTML)
         edited_obj = edit_result.edited_object
+
+        model_web.update_system_data_with_up_to_date_calculated_attributes()
         return EditObjectOutput(
             edited_object_id=edited_obj.efootprint_id,
             edited_object_name=edited_obj.name,

@@ -154,6 +154,7 @@ class DeleteObjectUseCase:
                 edit_result = edit_service.edit_with_cascade_cleanup(list_container, edit_data)
                 edited_containers.append(edit_result.edited_object)
 
+            model_web.update_system_data_with_up_to_date_calculated_attributes()
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
@@ -169,8 +170,8 @@ class DeleteObjectUseCase:
                 web_class.pre_delete(web_obj, model_web)
 
             web_obj.self_delete()
-            model_web.update_system_data_with_up_to_date_calculated_attributes()
 
+            model_web.update_system_data_with_up_to_date_calculated_attributes()
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,

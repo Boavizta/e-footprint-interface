@@ -83,13 +83,15 @@ def create_efootprint_obj_from_parsed_data(
     return new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
 
 
-def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb"):
+def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb",
+                                 update_system_data=False):
     """Edit an efootprint object from parsed attribute data.
 
     Args:
         parsed_data: Dict with clean attribute names (no prefixes), nested fields as dicts,
                     and optional "_units" key for unit mappings
         obj_to_edit: The web wrapper of the object to edit
+        update_system_data: Whether to update system data after editing
 
     Returns:
         The edited object
@@ -140,6 +142,8 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                 changes_list.append([current_value, new_value])
 
     ModelingUpdate(changes_list, compute_previous_system_footprints=False)
-    model_web.update_system_data_with_up_to_date_calculated_attributes()
+
+    if update_system_data:
+        model_web.update_system_data_with_up_to_date_calculated_attributes()
 
     return obj_to_edit

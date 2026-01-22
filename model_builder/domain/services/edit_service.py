@@ -65,8 +65,4 @@ class EditService:
                 child.self_delete()
                 had_deletions = True
 
-        # Update system data if deletions occurred
-        if had_deletions:
-            obj_to_edit.model_web.update_system_data_with_up_to_date_calculated_attributes()
-
         return EditResult(edited_object=edited_obj)

@@ -76,5 +76,5 @@ def open_panel_system_name(request):
 def save_system_name(request):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     parsed_data = parse_form_data(request.POST, "System")
-    edited_obj = edit_object_from_parsed_data(parsed_data, model_web.system)
+    edited_obj = edit_object_from_parsed_data(parsed_data, model_web.system, update_system_data=True)
     return HttpResponse(edited_obj.name)

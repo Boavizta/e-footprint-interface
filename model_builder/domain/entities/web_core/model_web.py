@@ -128,8 +128,6 @@ class ModelWeb:
                             f"automatically created by {efootprint_object.name} and added to system data.")
                 self.add_new_efootprint_object_to_object_dicts(modeling_obj_attribute)
 
-        self.update_system_data_with_up_to_date_calculated_attributes()
-
         return wrap_efootprint_object(efootprint_object, self)
 
     @property

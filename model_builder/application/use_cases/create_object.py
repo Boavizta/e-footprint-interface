@@ -160,6 +160,8 @@ class CreateObjectUseCase:
                 if post_create_result and post_create_result.get("return_server_instead"):
                     override_object = post_create_result.get("server_web")
 
+            model_web.update_system_data_with_up_to_date_calculated_attributes()
+
             # 10. Build output
             return CreateObjectOutput(
                 created_object_id=added_obj.efootprint_id,
@@ -175,12 +177,9 @@ class CreateObjectUseCase:
                 override_object=override_object,
             )
         except Exception as e:
-            # Clean up on failure - only if object was added to system
             if added_obj is not None:
                 from efootprint.logger import logger
                 logger.error("An error occurred during new object creation, deleting the created object.")
-                added_obj.self_delete()
-                model_web.update_system_data_with_up_to_date_calculated_attributes()
             raise e
 
     def _link_to_parent(self, model_web, added_obj, parent_id: str):
