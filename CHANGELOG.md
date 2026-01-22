@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.0] - 2026-01-22
+
+### Fixed
+- If the number of gpu required for a GenAI model is strictly equal to the amount needed, add a gpu to have some margin (otherwise available ram will be 0 on the gpu server, which creates errors).
+
+### Added
+- Json payload size limit set to 30 MB to avoid memory issues on the server when uploading too big models, or editing a model to make it bigger than the limit.
+
+### Changed
+- Set number of workers to 2 in production environment to reduce memory footprint.
+- Use max_requests = 100 and max_requests_jitter = 5 to recycle workers more often and avoid memory leaks.
+- Preload app in gunicorn to reduce memory usage by sharing common libraries memory between workers.
+
 ## [0.10.12] - 2025-12-19
 
 ### Fixed
