@@ -48,6 +48,7 @@ django-bootstrap5 = "^24.3"
 openpyxl = "^3"
 gunicorn = "^23"
 psutil = "^6"
+redis = "^5.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"

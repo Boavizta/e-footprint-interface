@@ -59,7 +59,13 @@ class ModelWeb:
 
     def update_system_data_with_up_to_date_calculated_attributes(self):
         """Updates the stored system data with the calculated attributes data."""
-        self.repository.save_system_data(self.to_json(save_calculated_attributes=True))
+        logger.info(f"Updating system data with calculated attributes.")
+        data_with_calculated_attributes = self.to_json(save_calculated_attributes=True)
+        data_without_calculated_attributes = self.to_json(save_calculated_attributes=False)
+        self.repository.save_system_data(
+            data_with_calculated_attributes,
+            data_without_calculated_attributes=data_without_calculated_attributes
+        )
 
     def raise_incomplete_modeling_errors(self):
         """Validate system completeness and raise ValueError if incomplete."""

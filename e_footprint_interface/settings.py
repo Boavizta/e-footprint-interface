@@ -140,6 +140,33 @@ STORAGES = {
 }
 
 # ============================================================================
+# CACHES
+# ============================================================================
+
+REDIS_URL = os.getenv("REDIS_URL")
+if REDIS_URL:
+    redis_backend = "django.core.cache.backends.redis.RedisCache"
+    redis_location = REDIS_URL
+else:
+    redis_backend = "django.core.cache.backends.locmem.LocMemCache"
+    redis_location = "redis-cache"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "default-cache",
+    },
+    "redis": {
+        "BACKEND": redis_backend,
+        "LOCATION": redis_location,
+    },
+    "postgres": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+    },
+}
+
+# ============================================================================
 # DJANGO BROWSER RELOAD
 # ============================================================================
 

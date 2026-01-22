@@ -33,29 +33,35 @@ from utils import htmx_render, sanitize_filename, smart_truncate
 
 
 def model_builder_main(request, reboot=False):
+    repository = SessionSystemRepository(request.session)
     if reboot and reboot != "reboot":
         raise ValueError("reboot must be False or 'reboot'")
     if reboot == "reboot":
         with open(os.path.join("model_builder", "domain", "reference_data", "default_system_data.json"), "r") as file:
             system_data = json.load(file)
-        request.session["system_data"] = system_data
-        model_web = ModelWeb(SessionSystemRepository(request.session))
+        repository.save_system_data(system_data)
+        model_web = ModelWeb(repository)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         gc.collect()
 
         return redirect("model-builder")
-    if "system_data" not in request.session:
+    if not repository.has_system_data():
         return redirect("model-builder", reboot="reboot")
 
-    if "efootprint_version" not in request.session["system_data"]:
-        request.session["system_data"]["efootprint_version"] = "9.1.4"
-    system_data_efootprint_version = request.session["system_data"]["efootprint_version"]
+    system_data = repository.get_system_data()
+    if system_data is None:
+        return redirect("model-builder", reboot="reboot")
+    if "efootprint_version" not in system_data:
+        system_data["efootprint_version"] = "9.1.4"
+        repository.save_system_data(system_data)
+    system_data_efootprint_version = system_data["efootprint_version"]
 
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(repository)
 
     if efootprint_version != system_data_efootprint_version:
         logger.info(f"Upgrading system data from version {system_data_efootprint_version} to {efootprint_version}")
-        request.session["system_data"]["efootprint_version"] = efootprint_version
+        system_data["efootprint_version"] = efootprint_version
+        repository.save_system_data(system_data)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         logger.info("Upgrade successful")
 
@@ -88,9 +94,10 @@ def download_json(request):
     return response
 
 def upload_json(request):
+    repository = SessionSystemRepository(request.session)
     start = time()
     import_error_message = ""
-    initial_session_data = request.session.get("system_data", None)
+    initial_session_data = repository.get_system_data()
     data = None
 
     if "import-json-input" in request.FILES:
@@ -114,7 +121,8 @@ def upload_json(request):
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
                 import_service.gradually_hydrate_system_and_raise_error_if_too_big(deepcopy(system_data))
-                request.session["system_data"] = system_data
+                model_web = ModelWeb(repository, system_data)
+                model_web.update_system_data_with_up_to_date_calculated_attributes()
                 logger.info(f"Importing system from JSON took {round((time() - start), 3)} seconds")
                 return redirect("model-builder")
             except Exception as e:
@@ -126,11 +134,10 @@ def upload_json(request):
             finally:
                 gc.collect()
 
-    request.session["system_data"] = initial_session_data
     if initial_session_data:
-        model_web = ModelWeb(SessionSystemRepository(request.session))
+        model_web = ModelWeb(repository)
     else:
-        request.session["system_data"] = {}
+        repository.clear()
         model_web = None
 
     context = {"import_error_modal_id": "error-import-modal", "import_error_message": import_error_message}
@@ -227,7 +234,9 @@ def download_sources(request):
     wb.save(output)
     output.seek(0)
 
-    system_name = next(iter(request.session["system_data"]["System"].values()))["name"]
+    repository = SessionSystemRepository(request.session)
+    system_data = repository.get_system_data()
+    system_name = next(iter(system_data["System"].values()))["name"]
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     response = HttpResponse(

@@ -50,11 +50,17 @@ class InMemorySystemRepository(ISystemRepository):
         """
         return self._data
 
-    def save_system_data(self, data: Dict[str, Any]) -> None:
+    def save_system_data(
+        self,
+        data: Dict[str, Any],
+        data_without_calculated_attributes: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Store the system data in memory.
 
         Args:
             data: The system data dictionary to save.
+            data_without_calculated_attributes: Optional version without calculated attributes.
+                Ignored for the in-memory repository.
 
         Raises:
             PayloadSizeLimitExceeded: If max_payload_size_mb is set and data exceeds the limit.

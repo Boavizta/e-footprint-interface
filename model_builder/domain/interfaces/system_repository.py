@@ -55,11 +55,17 @@ class ISystemRepository(ABC):
         return data
 
     @abstractmethod
-    def save_system_data(self, data: Dict[str, Any]) -> None:
+    def save_system_data(
+        self,
+        data: Dict[str, Any],
+        data_without_calculated_attributes: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Persist the system data.
 
         Args:
             data: The system data dictionary to save.
+            data_without_calculated_attributes: Optional version without calculated attributes,
+                used for slower persistence layers (e.g., Postgres fallback cache).
         """
         pass
 

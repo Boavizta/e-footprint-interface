@@ -82,39 +82,79 @@ class TestSessionSystemRepositorySizeLimit:
     def test_save_within_limit_succeeds(self):
         """Should save data when within the size limit."""
         mock_session = MagicMock()
+        mock_session.session_key = "session-key"
+        mock_session.__contains__.return_value = False
         repository = SessionSystemRepository(mock_session)
+
+        redis_cache = MagicMock()
+        postgres_cache = MagicMock()
+
+        def get_cache(alias):
+            if alias == SessionSystemRepository.REDIS_CACHE_ALIAS:
+                return redis_cache
+            return postgres_cache
 
         with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 1.0):
             small_data = {"System": {"test": "small data"}}
-            repository.save_system_data(small_data)
+            with patch.object(SessionSystemRepository, "_get_cache", side_effect=get_cache):
+                repository.save_system_data(small_data)
 
-        mock_session.__setitem__.assert_called_once_with("system_data", small_data)
+        cache_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:{mock_session.session_key}"
+        redis_cache.set.assert_called_once_with(
+            cache_key, small_data, timeout=SessionSystemRepository.REDIS_CACHE_TIMEOUT_SECONDS
+        )
+        postgres_cache.set.assert_called_once_with(
+            cache_key, small_data, timeout=SessionSystemRepository.POSTGRES_CACHE_TIMEOUT_SECONDS
+        )
 
     def test_save_exceeding_limit_raises_exception(self):
         """Should raise PayloadSizeLimitExceeded when data exceeds limit."""
         mock_session = MagicMock()
+        mock_session.session_key = "session-key"
+        mock_session.__contains__.return_value = False
         repository = SessionSystemRepository(mock_session)
+        redis_cache = MagicMock()
+        postgres_cache = MagicMock()
+
+        def get_cache(alias):
+            if alias == SessionSystemRepository.REDIS_CACHE_ALIAS:
+                return redis_cache
+            return postgres_cache
 
         with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 0.001):
             large_data = {"System": {"data": "x" * 2000}}
 
             with pytest.raises(PayloadSizeLimitExceeded) as exc_info:
-                repository.save_system_data(large_data)
+                with patch.object(SessionSystemRepository, "_get_cache", side_effect=get_cache):
+                    repository.save_system_data(large_data)
 
             assert exc_info.value.limit_mb == 0.001
+            redis_cache.set.assert_not_called()
+            postgres_cache.set.assert_not_called()
 
-    def test_session_not_modified_when_limit_exceeded(self):
-        """Should not modify session when limit is exceeded."""
+    def test_cache_not_written_when_limit_exceeded(self):
+        """Should not write to caches when limit is exceeded."""
         mock_session = MagicMock()
+        mock_session.session_key = "session-key"
+        mock_session.__contains__.return_value = False
         repository = SessionSystemRepository(mock_session)
+        redis_cache = MagicMock()
+        postgres_cache = MagicMock()
+
+        def get_cache(alias):
+            if alias == SessionSystemRepository.REDIS_CACHE_ALIAS:
+                return redis_cache
+            return postgres_cache
 
         with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 0.001):
             large_data = {"System": {"data": "x" * 2000}}
 
             with pytest.raises(PayloadSizeLimitExceeded):
-                repository.save_system_data(large_data)
+                with patch.object(SessionSystemRepository, "_get_cache", side_effect=get_cache):
+                    repository.save_system_data(large_data)
 
-        mock_session.__setitem__.assert_not_called()
+        redis_cache.set.assert_not_called()
+        postgres_cache.set.assert_not_called()
 
     def test_limit_from_environment_variable(self):
         """Should use MAX_PAYLOAD_SIZE_MB class attribute (set from env)."""
