@@ -8,7 +8,6 @@ import json
 import os
 import gc
 
-import numpy as np
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -29,6 +28,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
 from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+from model_builder.domain.services import ProgressiveImportService
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
@@ -111,18 +111,11 @@ def upload_json(request):
             try:
                 if "efootprint_version" not in data.keys():
                     data["efootprint_version"] = "9.1.4"
-                request.session["system_data"] = data
-                model_web = ModelWeb(SessionSystemRepository(request.session))
-                for uj in model_web.usage_journeys:
-                    if len(uj.systems) == 0 and getattr(uj, "duration", None) is None:
-                        # usage journey is not linked to any system and has no duration so it means it has been saved
-                        # without its calculated attributes. This can create a bug in case a uj step is later added to it
-                        # before it is linked to a system.
-                        request.session["system_data"]["UsageJourney"][uj.id] = uj.to_json(
-                            save_calculated_attributes=True)
-                model_web.update_system_data_with_up_to_date_calculated_attributes()
+                system_data = SessionSystemRepository.upgrade_system_data(data)
+                import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+                result = import_service.import_system(system_data)
+                request.session["system_data"] = result.system_data
                 logger.info(f"Importing system from JSON took {round((time() - start), 3)} seconds")
-                del model_web
                 return redirect("model-builder")
             except Exception as e:
                 if os.environ.get("RAISE_EXCEPTIONS"):

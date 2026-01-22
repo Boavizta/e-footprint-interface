@@ -41,9 +41,11 @@ class ObjectCard:
         """Check if the card has a specific CSS class."""
         return class_name in (self.locator.get_attribute("class") or "")
 
-    def should_exist(self):
-        """Assert that the card exists in the DOM (may be hidden)."""
-        self.locator.wait_for(state="attached")
+    def should_exist(self, timeout: float = 5000):
+        """Assert that the card exists in the DOM with its expected content."""
+        from playwright.sync_api import expect
+        # expect().to_be_attached() retries the entire locator chain including filters
+        expect(self.locator).to_be_attached(timeout=timeout)
         return self
 
     def should_be_visible(self):

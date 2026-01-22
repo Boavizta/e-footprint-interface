@@ -3,6 +3,7 @@
 These exceptions represent domain-level errors that can occur during
 system operations, independent of the web framework.
 """
+from efootprint.logger import logger
 
 
 class PayloadSizeLimitExceeded(Exception):
@@ -16,6 +17,7 @@ class PayloadSizeLimitExceeded(Exception):
     def __init__(self, current_size_mb: float, limit_mb: float):
         self.current_size_mb = current_size_mb
         self.limit_mb = limit_mb
+        logger.error(f"Payload size limit exceeded: {current_size_mb:.1f} MB (limit: {limit_mb} MB)")
         message = (
             f"Your model has become too large to be saved on this shared instance "
             f"(current size: {current_size_mb:.1f} MB, limit: {limit_mb} MB).\n\n"
