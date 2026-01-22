@@ -2,8 +2,11 @@
 
 This middleware runs in all environments (including production) to provide
 visibility into session save times, which can be a significant performance bottleneck.
+
+Note: JSON payload size computation and limit enforcement is handled by
+SessionSystemRepository.save_system_data(). This middleware only times
+the actual database write.
 """
-import json
 import time
 from efootprint.logger import logger
 
@@ -20,32 +23,14 @@ class SessionPerformanceMiddleware:
 
     def __call__(self, request):
         # Wrap session.save to measure its timing
-        if hasattr(request, 'session'):
+        if hasattr(request, "session"):
             original_save = request.session.save
 
-
             def timed_save(*args, **kwargs):
-                # Compute payload size and measure overhead
-                size_start = time.time()
-                try:
-                    payload = json.dumps(dict(request.session))
-                    size_mb = len(payload.encode("utf-8")) / (1024 * 1024)
-                    size_overhead_ms = (time.time() - size_start) * 1000
-                except Exception:
-                    size_mb = None
-                    size_overhead_ms = None
-
                 start = time.time()
                 result = original_save(*args, **kwargs)
                 elapsed_ms = (time.time() - start) * 1000
-
-                if size_mb is not None:
-                    logger.info(
-                        f"Session DB write took {elapsed_ms:.1f}ms, "
-                        f"payload size: {size_mb:.2f}MB (size computation: {size_overhead_ms:.1f}ms)"
-                    )
-                else:
-                    logger.info(f"Session DB write took {elapsed_ms:.1f}ms")
+                logger.info(f"Session DB write took {elapsed_ms:.1f} ms")
                 return result
 
             request.session.save = timed_save

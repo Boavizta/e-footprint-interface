@@ -3,10 +3,14 @@
 This implementation stores system data in Django sessions, which is the
 current production storage mechanism for the application.
 """
+import os
 from typing import Dict, Any, Optional
 
 from django.contrib.sessions.backends.base import SessionBase
+from efootprint.logger import logger
 
+from e_footprint_interface.json_payload_utils import compute_json_size
+from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.interfaces import ISystemRepository
 
 
@@ -24,6 +28,7 @@ class SessionSystemRepository(ISystemRepository):
     """
 
     SYSTEM_DATA_KEY = "system_data"
+    MAX_PAYLOAD_SIZE_MB = float(os.environ.get("MAX_PAYLOAD_SIZE_MB", 30.0))
 
     def __init__(self, session: SessionBase):
         """Initialize with a Django session.
@@ -46,7 +51,19 @@ class SessionSystemRepository(ISystemRepository):
 
         Args:
             data: The system data dictionary to save.
+
+        Raises:
+            PayloadSizeLimitExceeded: If the data exceeds MAX_PAYLOAD_SIZE_MB.
         """
+        size_result = compute_json_size(data)
+        logger.info(
+            f"System data JSON size: {size_result.size_mb:.2f} MB "
+            f"(computation took {size_result.computation_time_ms:.1f} ms)"
+        )
+
+        if size_result.size_mb > self.MAX_PAYLOAD_SIZE_MB:
+            raise PayloadSizeLimitExceeded(size_result.size_mb, self.MAX_PAYLOAD_SIZE_MB)
+
         self._session[self.SYSTEM_DATA_KEY] = data
         self._session.modified = True
 
