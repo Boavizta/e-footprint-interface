@@ -24,7 +24,7 @@ DEFAULT_OBJECTS_CLASS_MAPPING = {
 
 
 class ModelWeb:
-    def __init__(self, repository: ISystemRepository):
+    def __init__(self, repository: ISystemRepository, system_data: dict = None):
         """Initialize ModelWeb with a system repository.
 
         Args:
@@ -32,7 +32,10 @@ class ModelWeb:
         """
         start = time()
         self.repository = repository
-        raw_system_data = self.repository.get_system_data()
+        if system_data is not None:
+            raw_system_data = system_data
+        else:
+            raw_system_data = self.repository.get_system_data()
         if raw_system_data is not None:
             self.initial_system_data_efootprint_version = raw_system_data.get("efootprint_version")
             self.system_data = self.repository.upgrade_system_data(raw_system_data)

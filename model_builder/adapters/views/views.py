@@ -93,7 +93,6 @@ def upload_json(request):
     repository = SessionSystemRepository(request.session)
     start = time()
     import_error_message = ""
-    initial_session_data = repository.get_system_data()
     data = None
 
     if "import-json-input" in request.FILES:
@@ -128,14 +127,9 @@ def upload_json(request):
             finally:
                 gc.collect()
 
-    if initial_session_data:
-        model_web = ModelWeb(repository)
-    else:
-        repository.clear()
-        model_web = None
-
     context = {"import_error_modal_id": "error-import-modal", "import_error_message": import_error_message}
-    if model_web:
+    model_web = ModelWeb(repository)
+    if model_web.system_data:
         context["model_web"] = model_web
 
     http_response = render(request, "model_builder/model_builder_main.html", context=context)
