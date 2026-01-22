@@ -1,12 +1,18 @@
 # Gunicorn configuration file
-import multiprocessing
+import os
+import psutil
 
-max_requests = 100
-max_requests_jitter = 10
 preload_app = True
 log_file = "-"
 bind = "0.0.0.0:8000"
-
-workers = 2
-threads = workers
+workers = 1
 timeout = 120
+
+MEMORY_LIMIT_MB = 1600  # 1.6 GB (80% of 2 GB instance)
+
+
+def post_request(worker, req, environ, resp):
+    """Restart worker when memory usage exceeds threshold."""
+    memory_mb = psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024
+    if memory_mb > MEMORY_LIMIT_MB:
+        worker.alive = False
