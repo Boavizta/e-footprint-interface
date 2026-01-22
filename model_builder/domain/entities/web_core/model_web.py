@@ -1,7 +1,6 @@
 from copy import deepcopy
 from time import time
 
-from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
@@ -33,32 +32,14 @@ class ModelWeb:
         """
         start = time()
         self.repository = repository
-        self.system_data = self.repository.get_system_data()
+        raw_system_data = self.repository.get_system_data()
+        self.system_data = self.repository.upgrade_system_data(raw_system_data)
         logger.info(f"System data loaded in {time() - start:.3f} seconds.")
-
-        # Apply interface-specific version upgrades before json_to_system
-        json_efootprint_version = self.system_data.get("efootprint_version")
-        if json_efootprint_version:
-            json_major_version = int(json_efootprint_version.split(".")[0])
-            from model_builder.version_upgrade_handlers import INTERFACE_VERSION_UPGRADE_HANDLERS
-            # Apply all interface upgrades for versions > json_major_version
-            for version in sorted(INTERFACE_VERSION_UPGRADE_HANDLERS.keys()):
-                if version > json_major_version:
-                    logger.info(f"Applying interface upgrade handler for version {version}")
-                    self.system_data = INTERFACE_VERSION_UPGRADE_HANDLERS[version](self.system_data)
 
         start = time()
         self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
             self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
-        if self.system.storages and getattr(self.system.storages[0]._modeling_obj, "storage_needed", None) is None:
-            # TODO: Remove this conditional block for V1
-            logger.info("Storage attributes need be recomputed because of e-footprint update from 10.1.13 to 10.1.14")
-            for storage in self.system.storages:
-                storage._modeling_obj.storage_needed = EmptyExplainableObject()
-                storage._modeling_obj.storage_freed = EmptyExplainableObject()
-                storage._modeling_obj.automatic_storage_dumps_after_storage_duration = EmptyExplainableObject()
-                storage.compute_calculated_attributes()
         logger.info(f"ModelWeb object created in {time() - start:.3f} seconds.")
 
     def to_json(self, save_calculated_attributes=True):
