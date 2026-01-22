@@ -7,6 +7,7 @@ presented by any adapter (HTMX, API, CLI, etc.).
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List
 
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.interfaces import ISystemRepository
 
 
@@ -38,6 +39,7 @@ class CreateObjectOutput:
     linked_parent_mirrored_web_ids: List[str] = field(default_factory=list)
     # For cases where a different object should be returned (e.g., ExternalApi returns server)
     override_object: Optional[Any] = None
+    model_web: ModelWeb = None
 
 
 class CreateObjectUseCase:
@@ -175,6 +177,7 @@ class CreateObjectUseCase:
                 linked_parent_web_id=linked_parent_web_id,
                 linked_parent_mirrored_web_ids=linked_parent_mirrored_web_ids,
                 override_object=override_object,
+                model_web=model_web
             )
         except Exception as e:
             if added_obj is not None:

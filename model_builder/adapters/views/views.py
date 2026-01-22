@@ -45,23 +45,16 @@ def model_builder_main(request, reboot=False):
         gc.collect()
 
         return redirect("model-builder")
-    if not repository.has_system_data():
-        return redirect("model-builder", reboot="reboot")
-
-    system_data = repository.get_system_data()
-    if system_data is None:
-        return redirect("model-builder", reboot="reboot")
-    if "efootprint_version" not in system_data:
-        system_data["efootprint_version"] = "9.1.4"
-        repository.save_system_data(system_data)
-    system_data_efootprint_version = system_data["efootprint_version"]
 
     model_web = ModelWeb(repository)
+    if model_web.system_data is None:
+        return redirect("model-builder", reboot="reboot")
 
-    if efootprint_version != system_data_efootprint_version:
-        logger.info(f"Upgrading system data from version {system_data_efootprint_version} to {efootprint_version}")
-        system_data["efootprint_version"] = efootprint_version
-        repository.save_system_data(system_data)
+    if efootprint_version != model_web.initial_system_data_efootprint_version:
+        logger.info(f"Upgrading system data from version "
+                    f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
+        model_web.system_data["efootprint_version"] = efootprint_version
+        repository.save_system_data(model_web.system_data)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         logger.info("Upgrade successful")
 

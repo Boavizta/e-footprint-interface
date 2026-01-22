@@ -42,6 +42,8 @@ class ISystemRepository(ABC):
             The upgraded system data dictionary.
         """
         # Apply interface-specific version upgrades before json_to_system
+        if "efootprint_version" not in data:
+            data["efootprint_version"] = "9.1.4"
         json_efootprint_version = data.get("efootprint_version")
         if json_efootprint_version:
             json_major_version = int(json_efootprint_version.split(".")[0])

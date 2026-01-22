@@ -25,14 +25,14 @@ class HtmxPresenter:
     formatting it into HTTP responses suitable for HTMX partial updates.
     """
 
-    def __init__(self, request: "HttpRequest"):
+    def __init__(self, request: "HttpRequest", model_web: "ModelWeb" = None):
         """Initialize with the HTTP request.
 
         Args:
             request: The Django HTTP request object.
         """
         self.request = request
-        self._model_web = None
+        self._model_web = model_web
 
     @property
     def model_web(self) -> "ModelWeb":

@@ -60,5 +60,5 @@ def add_object(request, object_type):
 
     # 4. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))
-    presenter = HtmxPresenter(request)
+    presenter = HtmxPresenter(request, output.model_web)
     return presenter.present_created_object(output, recompute=recompute)
