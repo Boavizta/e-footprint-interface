@@ -144,3 +144,11 @@ class TestFullJourney:
 
         model_builder.close_result_panel()
         expect(page.locator("#lineChart")).not_to_be_visible()
+
+        # --- Delete usage pattern ---
+        up_card = model_builder.get_object_card("UsagePattern", up_name)
+        up_card.click_edit_button()
+        side_panel.click_delete_button()
+        side_panel.confirm_delete()
+        model_builder.object_should_not_exist("UsagePattern", up_name)
+

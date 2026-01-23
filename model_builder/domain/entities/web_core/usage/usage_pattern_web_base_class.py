@@ -32,8 +32,18 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         return [self]
 
     @property
+    def modeling_obj_containers(self):
+        # Mimic having no containers for deletion checks
+        return []
+
+    @property
     def list_containers_and_attr_name_in_list_container(self) -> Tuple[List, Optional[str]]:
+        # Mimic having no containers for deletion checks
         return [], None
+
+    @property
+    def accordion_children(self):
+        return []
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
