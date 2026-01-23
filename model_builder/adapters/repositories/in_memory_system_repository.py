@@ -4,7 +4,7 @@ This implementation stores system data in memory, primarily for testing purposes
 It allows unit tests__old to run without Django session infrastructure.
 """
 from copy import deepcopy
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
@@ -49,6 +49,10 @@ class InMemorySystemRepository(ISystemRepository):
             The system data dictionary, or None if no data exists.
         """
         return self._data
+
+    def get_system_data_with_source(self) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        """Retrieve the current system data with a source label."""
+        return self._data, "memory" if self._data is not None else None
 
     def save_system_data(
         self,

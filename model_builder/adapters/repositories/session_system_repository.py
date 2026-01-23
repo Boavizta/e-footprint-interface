@@ -5,7 +5,7 @@ fallback cache, keyed by the Django session identifier.
 """
 import os
 from time import perf_counter
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 from django.contrib.sessions.backends.base import SessionBase
 from django.core.cache import caches
@@ -71,6 +71,15 @@ class SessionSystemRepository(ISystemRepository):
         Returns:
             The system data dictionary, or None if no data exists.
         """
+        data, _source = self.get_system_data_with_source()
+        return data
+
+    def get_system_data_with_source(self) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        """Retrieve the current system data with a source label.
+
+        Returns:
+            (system_data, source) where source can be "redis", "postgres", "session", or None.
+        """
         cache_key = self._cache_key(create_if_missing=True)
         redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
         postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
@@ -80,22 +89,17 @@ class SessionSystemRepository(ISystemRepository):
                 "get", self.REDIS_CACHE_ALIAS, lambda: redis_cache.get(cache_key)
             )
             if cached_data is not None:
-                return cached_data
+                return cached_data, "redis"
 
         if cache_key and postgres_cache is not None:
+            logger.info("No data in Redis cache; falling back to Postgres cache.")
             cached_data = self._time_cache_call(
                 "get", self.POSTGRES_CACHE_ALIAS, lambda: postgres_cache.get(cache_key)
             )
             if cached_data is not None:
-                if redis_cache is not None:
-                    self._time_cache_call(
-                        "set", self.REDIS_CACHE_ALIAS,
-                        lambda: redis_cache.set(
-                            cache_key, cached_data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
-                        ),
-                    )
-                return cached_data
+                return cached_data, "postgres"
 
+        # Todo: suppress legacy data part end of Feb 2026
         legacy_data = self._session.get(self.SYSTEM_DATA_KEY)
         if legacy_data is not None:
             if cache_key and redis_cache is not None:
@@ -114,7 +118,8 @@ class SessionSystemRepository(ISystemRepository):
                 )
             self._session.pop(self.SYSTEM_DATA_KEY, None)
             self._session.modified = True
-        return legacy_data
+            return legacy_data, "session"
+        return None, None
 
     def save_system_data(
         self,

@@ -2894,7 +2894,7 @@ version = "7.2.1"
 description = "Cross-platform lib for process and system monitoring."
 optional = false
 python-versions = ">=3.6"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "psutil-7.2.1-cp313-cp313t-macosx_10_13_x86_64.whl", hash = "sha256:ba9f33bb525b14c3ea563b2fd521a84d2fa214ec59e3e6a2858f78d0844dd60d"},
     {file = "psutil-7.2.1-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:81442dac7abfc2f4f4385ea9e12ddf5a796721c0f6133260687fec5c3780fa49"},
@@ -4396,4 +4396,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "7680b8f5d6fcc1f3e434c28d46a88fe6f422a45fc92bd42aea4a44b5c2ec6c3b"
+content-hash = "ff0888d7ad82c058566fe1c4b6c385cd490f114c92041e78a45d1ceff9767ca7"

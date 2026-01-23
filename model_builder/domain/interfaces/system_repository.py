@@ -6,7 +6,7 @@ Implementations can use Django sessions, databases, files, or in-memory storage.
 This module has NO Django dependencies, keeping the domain layer framework-agnostic.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 from efootprint.logger import logger
 
@@ -30,6 +30,14 @@ class ISystemRepository(ABC):
             The system data dictionary, or None if no data exists.
         """
         pass
+
+    def get_system_data_with_source(self) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        """Retrieve the current system data with a source label.
+
+        Returns:
+            (system_data, source) where source can be "redis", "postgres", or another backend label.
+        """
+        return self.get_system_data(), "unknown"
 
     @staticmethod
     def upgrade_system_data(data: Dict[str, Any]) -> Dict[str, Any]:

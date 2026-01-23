@@ -41,9 +41,8 @@ def model_builder_main(request, reboot=False):
             data = json.load(file)
         system_data = SessionSystemRepository.upgrade_system_data(data)
         import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-        result = import_service.import_system(system_data)
-        repository.save_system_data(system_data)
-        model_web = ModelWeb(repository)
+        import_service.gradually_hydrate_system_and_raise_error_if_too_big(deepcopy(system_data))
+        model_web = ModelWeb(repository, system_data)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         gc.collect()
 
@@ -56,8 +55,6 @@ def model_builder_main(request, reboot=False):
     if efootprint_version != model_web.initial_system_data_efootprint_version:
         logger.info(f"Upgrading system data from version "
                     f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
-        model_web.system_data["efootprint_version"] = efootprint_version
-        repository.save_system_data(model_web.system_data)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         logger.info("Upgrade successful")
 
@@ -222,9 +219,7 @@ def download_sources(request):
     wb.save(output)
     output.seek(0)
 
-    repository = SessionSystemRepository(request.session)
-    system_data = repository.get_system_data()
-    system_name = next(iter(system_data["System"].values()))["name"]
+    system_name = model_web.system.name
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     response = HttpResponse(
