@@ -1,6 +1,6 @@
-import math
 import random
 import string
+from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 from time import time
@@ -113,8 +113,8 @@ def upload_json(request):
                     data["efootprint_version"] = "9.1.4"
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-                result = import_service.import_system(system_data)
-                request.session["system_data"] = result.system_data
+                import_service.gradually_hydrate_system_and_raise_error_if_too_big(deepcopy(system_data))
+                request.session["system_data"] = system_data
                 logger.info(f"Importing system from JSON took {round((time() - start), 3)} seconds")
                 return redirect("model-builder")
             except Exception as e:

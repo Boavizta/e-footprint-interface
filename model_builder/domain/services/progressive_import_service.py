@@ -16,13 +16,6 @@ from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 
 
-@dataclass
-class ImportResult:
-    """Result of a progressive system import."""
-    system_data: Dict[str, Any]
-    success: bool
-
-
 class ProgressiveImportService:
     """Service for importing system data with progressive size validation.
 
@@ -40,20 +33,21 @@ class ProgressiveImportService:
         """
         self.max_payload_size_mb = max_payload_size_mb
 
-    def import_system(self, system_data: Dict[str, Any]) -> ImportResult:
+    def gradually_hydrate_system_and_raise_error_if_too_big(self, system_data: Dict[str, Any]) -> None:
         """Import system data with progressive size validation.
 
         This method:
         1. Parses the JSON into efootprint objects without computing attributes
         2. Monkey-patches each object to track size after computation
         3. Triggers computations, failing fast if size limit exceeded
-        4. Returns the fully computed system_data dict
 
         Args:
             system_data: The raw system data dictionary (already upgraded).
 
         Returns:
-            ImportResult containing the computed system_data.
+            IMPORTANT: Nothing, because json data generated with this function is off in terms of calculus graph
+            (objects dump their json before their children have been computed, which is ok in terms of json size
+            estimation, but will lead to bugs if given to ModelWeb).
 
         Raises:
             PayloadSizeLimitExceeded: If cumulative JSON size exceeds max_payload_size_mb.
@@ -72,8 +66,6 @@ class ProgressiveImportService:
         system.after_init()
 
         self._compute_remaining_objects(flat_efootprint_objs_dict, system_data, size_tracker)
-
-        return ImportResult(system_data=system_data, success=True)
 
     def _patch_objects_for_progressive_computation(
             self, flat_efootprint_objs_dict: Dict[str, Any], system_data: Dict[str, Any],

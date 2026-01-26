@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.1] - 2026-01-26
+
+### Fixed
+- Don’t save data returned by the ProgressiveImportService because it contains wrong calculus graph data. This service should only be used to estimate the model size and not to update the model data.
+
 ## [0.11.0] - 2026-01-26
 
 ### Fixed
