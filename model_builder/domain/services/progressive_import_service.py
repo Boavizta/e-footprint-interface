@@ -4,6 +4,7 @@ This service handles the import of e-footprint system data from JSON,
 computing calculated attributes progressively and checking size limits
 to fail fast if a model exceeds the maximum allowed size.
 """
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, Any, Tuple
 
@@ -33,39 +34,49 @@ class ProgressiveImportService:
         """
         self.max_payload_size_mb = max_payload_size_mb
 
-    def gradually_hydrate_system_and_raise_error_if_too_big(self, system_data: Dict[str, Any]) -> None:
+    def import_system(self, system_data: Dict[str, Any]) -> Dict[str, Any]:
         """Import system data with progressive size validation.
 
         This method:
         1. Parses the JSON into efootprint objects without computing attributes
         2. Monkey-patches each object to track size after computation
         3. Triggers computations, failing fast if size limit exceeded
+        4. Returns the fully computed system_data dict
 
         Args:
             system_data: The raw system data dictionary (already upgraded).
 
         Returns:
-            IMPORTANT: Nothing, because json data generated with this function is off in terms of calculus graph
-            (objects dump their json before their children have been computed, which is ok in terms of json size
-            estimation, but will lead to bugs if given to ModelWeb).
+            Computed system data.
 
         Raises:
             PayloadSizeLimitExceeded: If cumulative JSON size exceeds max_payload_size_mb.
         """
+        copied_system_data = deepcopy(system_data)
         response_objs, flat_efootprint_objs_dict = json_to_system(
-            system_data, launch_system_computations=False,
+            copied_system_data, launch_system_computations=False,
             efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
 
-        system_data["efootprint_version"] = efootprint_version
+        copied_system_data["efootprint_version"] = efootprint_version
         size_tracker = {"json_size": 0}
 
         self._patch_objects_for_progressive_computation(
-            flat_efootprint_objs_dict, system_data, size_tracker)
+            flat_efootprint_objs_dict, copied_system_data, size_tracker)
 
         system = next(iter(response_objs["System"].values()))
         system.after_init()
 
-        self._compute_remaining_objects(flat_efootprint_objs_dict, system_data, size_tracker)
+        self._compute_remaining_objects(flat_efootprint_objs_dict, copied_system_data, size_tracker)
+
+        # Reserialize all objects to ensure final calculation graph is captured
+        logger.info("Reserializing all objects to finalize system data.")
+        for efootprint_object in flat_efootprint_objs_dict.values():
+            del efootprint_object.__dict__["saved_to_json"]
+            copied_system_data[efootprint_object.class_as_simple_str][efootprint_object.id] = \
+                efootprint_object.to_json(save_calculated_attributes=True)
+        logger.info("Reserialized all objects to finalize system data.")
+
+        return copied_system_data
 
     def _patch_objects_for_progressive_computation(
             self, flat_efootprint_objs_dict: Dict[str, Any], system_data: Dict[str, Any],

@@ -1,6 +1,5 @@
 import random
 import string
-from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 from time import time
@@ -41,8 +40,8 @@ def model_builder_main(request, reboot=False):
             data = json.load(file)
         system_data = SessionSystemRepository.upgrade_system_data(data)
         import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-        import_service.gradually_hydrate_system_and_raise_error_if_too_big(deepcopy(system_data))
-        model_web = ModelWeb(repository, system_data)
+        system_data_with_calculated_attributes = import_service.import_system(system_data)
+        model_web = ModelWeb(repository, system_data_with_calculated_attributes)
         model_web.update_system_data_with_up_to_date_calculated_attributes()
         gc.collect()
 
@@ -110,8 +109,8 @@ def upload_json(request):
             try:
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-                import_service.gradually_hydrate_system_and_raise_error_if_too_big(deepcopy(system_data))
-                model_web = ModelWeb(repository, system_data)
+                system_data_with_calculated_attributes = import_service.import_system(system_data)
+                model_web = ModelWeb(repository, system_data_with_calculated_attributes)
                 model_web.update_system_data_with_up_to_date_calculated_attributes()
                 logger.info(f"Importing system from JSON took {round((time() - start), 3)} seconds")
                 return redirect("model-builder")
