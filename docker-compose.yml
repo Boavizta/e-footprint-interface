@@ -56,6 +56,20 @@ services:
     depends_on:
       - traefik
       - postgres
+      - redis
+    profiles:
+      - dev
+      - alpha
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - traefik
     profiles:
       - dev
       - alpha

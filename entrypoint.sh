@@ -3,6 +3,7 @@
 
 # Run migrations
 poetry run python manage.py migrate
+poetry run python manage.py createcachetable
 
 # Run NPM install
 npm install
