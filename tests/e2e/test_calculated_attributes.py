@@ -91,3 +91,7 @@ class TestCalculatedAttributes:
         uj_id = parts[2] if len(parts) >= 3 else ""
         explanation_locator = page.locator(f"#ancestors-formula-and-children-duration-in-{uj_id}")
         expect(explanation_locator).to_be_visible()
+        # Assert that the #explainable-ancestors element contains a list with at least one item, to make sure that
+        # calculus graph data isn’t corrupted
+        list_items = explanation_locator.locator("div.explainable-ancestors").locator("ul > li")
+        expect(list_items).not_to_have_count(0)

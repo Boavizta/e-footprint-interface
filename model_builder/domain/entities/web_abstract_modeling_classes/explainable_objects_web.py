@@ -24,6 +24,9 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
 
         ancestor_ids_to_symbols_mapping = {}
         ids_to_ancestors_mapping = {}
+        if isinstance(self.efootprint_object.explain_nested_tuples_from_json, tuple):
+            # For some reason, redis or local memory cache returns a tuple instead of a list
+            self.efootprint_object.explain_nested_tuples_from_json = list(self.efootprint_object.explain_nested_tuples_from_json)
         flat_tuple_formula = self.compute_formula_as_flat_tuple(self.explain_nested_tuples)
         literal_formula = []
         current_symbol_index = 0
