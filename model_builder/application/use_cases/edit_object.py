@@ -6,7 +6,7 @@ HTTP/presentation concerns.
 from dataclasses import dataclass, field
 from typing import Dict, Any, List
 
-from model_builder.domain.interfaces import ISystemRepository
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 @dataclass
@@ -40,13 +40,13 @@ class EditObjectUseCase:
     It returns pure data without any HTTP/presentation concerns.
     """
 
-    def __init__(self, repository: ISystemRepository):
-        """Initialize with a system repository.
+    def __init__(self, model_web: ModelWeb):
+        """Initialize with a web model.
 
         Args:
-            repository: Repository for loading and saving system data.
+            model web with a loaded system data.
         """
-        self.repository = repository
+        self.model_web = model_web
 
     def execute(self, input_data: EditObjectInput) -> EditObjectOutput:
         """Execute the object editing use case.
@@ -60,24 +60,21 @@ class EditObjectUseCase:
         from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.domain.services import EditService
 
-        # 1. Load system
-        model_web = ModelWeb(self.repository)
+        # Get object to edit
+        obj_to_edit = self.model_web.get_web_object_from_efootprint_id(input_data.object_id)
 
-        # 2. Get object to edit
-        obj_to_edit = model_web.get_web_object_from_efootprint_id(input_data.object_id)
-
-        # 3. Apply pre_edit hook if defined (e.g., ServerWeb edits storage first)
+        # Apply pre_edit hook if defined (e.g., ServerWeb edits storage first)
         if hasattr(obj_to_edit, 'pre_edit'):
             obj_to_edit.pre_edit(input_data.form_data)
 
-        # 4. Perform the edit with cascade cleanup (domain service, no HTML)
+        # Perform the edit with cascade cleanup (domain service, no HTML)
         edit_service = EditService()
         edit_result = edit_service.edit_with_cascade_cleanup(obj_to_edit, input_data.form_data)
 
-        # 5. Build output with pure data (presenter will generate HTML)
+        # Build output with pure data (presenter will generate HTML)
         edited_obj = edit_result.edited_object
 
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        self.model_web.update_system_data_with_up_to_date_calculated_attributes()
         return EditObjectOutput(
             edited_object_id=edited_obj.efootprint_id,
             edited_object_name=edited_obj.name,

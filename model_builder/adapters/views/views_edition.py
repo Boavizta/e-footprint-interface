@@ -39,6 +39,7 @@ def open_edit_object_panel(request, object_id):
 
 
 @render_exception_modal_if_error
+@time_it
 def edit_object(request, object_id, trigger_result_display=False):
     repository = SessionSystemRepository(request.session)
 
@@ -57,12 +58,12 @@ def edit_object(request, object_id, trigger_result_display=False):
     )
 
     # 4. Execute use case
-    use_case = EditObjectUseCase(repository)
+    use_case = EditObjectUseCase(model_web)
     output = use_case.execute(input_data)
 
     # 5. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))
-    presenter = HtmxPresenter(request)
+    presenter = HtmxPresenter(request, model_web)
     return presenter.present_edited_object(output, recompute=recompute, trigger_result_display=trigger_result_display)
 
 
