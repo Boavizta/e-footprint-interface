@@ -151,12 +151,15 @@ class SessionSystemRepository(ISystemRepository):
         postgres_payload = data_without_calculated_attributes or data
 
         if cache_key and redis_cache is not None:
-            self._time_cache_call(
-                "set", self.REDIS_CACHE_ALIAS,
-                lambda: redis_cache.set(
-                    cache_key, data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
-                ),
-            )
+            try:
+                self._time_cache_call(
+                    "set", self.REDIS_CACHE_ALIAS,
+                    lambda: redis_cache.set(
+                        cache_key, data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
+                    ),
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(f"Failed to write system data to Redis cache: {exc}")
         if cache_key and postgres_cache is not None:
             self._time_cache_call(
                 "set", self.POSTGRES_CACHE_ALIAS,

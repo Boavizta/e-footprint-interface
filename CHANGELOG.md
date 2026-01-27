@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.2] - 2026-01-27
+
+### Fixed
+- Catch Redis write errors when saving system with calculated attributes to avoid breaking model computation and falling back to Postgres when Redis is down (or misconfigured and full).
+
 ## [0.12.1] - 2026-01-27
 
 ### Changed
