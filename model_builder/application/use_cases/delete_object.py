@@ -4,12 +4,9 @@ This module contains the business logic for object deletion, separated from
 HTTP/presentation concerns.
 """
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional, TYPE_CHECKING
+from typing import Dict, Any, List, Optional
 
-if TYPE_CHECKING:
-    from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
-
-from model_builder.domain.interfaces import ISystemRepository
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 @dataclass
@@ -50,13 +47,13 @@ class DeleteObjectUseCase:
     including handling list container removals.
     """
 
-    def __init__(self, repository: ISystemRepository):
-        """Initialize with a system repository.
+    def __init__(self, model_web: ModelWeb):
+        """Initialize with a loaded web model.
 
         Args:
-            repository: Repository for loading and saving system data.
+            model_web: web model loaded with system data.
         """
-        self.repository = repository
+        self.model_web = model_web
 
     def check_can_delete(self, object_id: str) -> DeleteCheckResult:
         """Check if an object can be deleted and gather context for confirmation.
@@ -67,11 +64,9 @@ class DeleteObjectUseCase:
         Returns:
             DeleteCheckResult with deletion context information.
         """
-        from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
-        model_web = ModelWeb(self.repository)
-        web_obj = model_web.get_web_object_from_efootprint_id(object_id)
+        web_obj = self.model_web.get_web_object_from_efootprint_id(object_id)
 
         list_containers, _ = web_obj.list_containers_and_attr_name_in_list_container
 
@@ -119,12 +114,10 @@ class DeleteObjectUseCase:
         Returns:
             DeleteObjectOutput with deletion results.
         """
-        from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.domain.services import EditService
         from efootprint.logger import logger
 
-        model_web = ModelWeb(self.repository)
-        web_obj = model_web.get_web_object_from_efootprint_id(input_data.object_id)
+        web_obj = self.model_web.get_web_object_from_efootprint_id(input_data.object_id)
 
         object_name = web_obj.name
         object_type = web_obj.class_as_simple_str
@@ -154,7 +147,7 @@ class DeleteObjectUseCase:
                 edit_result = edit_service.edit_with_cascade_cleanup(list_container, edit_data)
                 edited_containers.append(edit_result.edited_object)
 
-            model_web.update_system_data_with_up_to_date_calculated_attributes()
+            self.model_web.update_system_data_with_up_to_date_calculated_attributes()
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
@@ -167,11 +160,11 @@ class DeleteObjectUseCase:
             from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
             web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(object_type)
             if web_class and hasattr(web_class, 'pre_delete'):
-                web_class.pre_delete(web_obj, model_web)
+                web_class.pre_delete(web_obj, self.model_web)
 
             web_obj.self_delete()
 
-            model_web.update_system_data_with_up_to_date_calculated_attributes()
+            self.model_web.update_system_data_with_up_to_date_calculated_attributes()
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
