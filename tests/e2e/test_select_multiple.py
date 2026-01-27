@@ -48,7 +48,6 @@ class TestSelectMultipleJobs:
         # Add Job 2 to the step
         uj_step_card.click_edit_button()
         page.locator("#add-btn-UsageJourneyStep_jobs").click()
-        page.wait_for_timeout(50)
         model_builder.side_panel.submit_and_wait_for_close()
 
         # Verify Job 2 now appears on the card
@@ -60,7 +59,6 @@ class TestSelectMultipleJobs:
         # Remove Job 2
         uj_step_card.click_edit_button()
         page.locator(f"#remove-{job2_id}").click()
-        page.wait_for_timeout(50)
         model_builder.side_panel.submit_and_wait_for_close()
 
         # Job 2 should be removed
@@ -72,7 +70,6 @@ class TestSelectMultipleJobs:
         job1_id = job1_card_in_step.locator.get_attribute("id")[4:10]
         uj_step_card.click_edit_button()
         page.locator(f"#remove-{job1_id}").click()
-        page.wait_for_timeout(50)
         model_builder.side_panel.submit_and_wait_for_close()
 
         # Job 1 should also be removed

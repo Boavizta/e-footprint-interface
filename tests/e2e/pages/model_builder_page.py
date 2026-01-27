@@ -118,7 +118,7 @@ class ModelBuilderPage:
         self.open_import_panel()
         self.page.locator("input[type='file']").set_input_files(file_path)
         # Here we don’t use click_and_wait_for_htmx because hx attributes are not on the button but on the form
-        self.page.wait_for_timeout(50)
+        self.page.wait_for_timeout(20)
         with self.page.expect_response(lambda r: "upload-json" in r.url):
             self.page.locator("button[type='submit']").click()
         self.side_panel.should_be_closed()

@@ -56,7 +56,6 @@ class TestUsageJourneys:
             model_builder.click_add_usage_journey()
             side_panel.fill_field("UsageJourney_name", name)
             side_panel.submit_and_wait_for_close()
-            model_builder.page.wait_for_timeout(timeout=100)
             model_builder.object_should_exist("UsageJourney", name)
 
     def test_delete_usage_journey(self, model_with_usage_journey: ModelBuilderPage):

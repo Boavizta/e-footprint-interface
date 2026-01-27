@@ -176,17 +176,14 @@ class TestTimeseriesValidation:
         model_builder.click_add_usage_pattern()
         model_builder.side_panel.should_be_visible()
         page.locator("#UsagePattern_name").fill(up_name)
-        page.wait_for_timeout(50)
         duration_unit_locator = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_unit")
         duration_unit_locator.click()
         duration_unit_locator.select_option("month")
         duration_unit_locator.click() # Need to encapsulate selection between clicks to trigger hyperscript logic.
-        page.wait_for_timeout(50)
 
         # Set a valid value (15 months)
         duration_field = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value")
         duration_field.fill("15")
-        page.wait_for_timeout(50)
         # Should not show error for 15 months
         expect(page.locator("#modeling_duration_value_error_message")).not_to_be_visible()
 
@@ -207,7 +204,6 @@ class TestTimeseriesValidation:
         duration_unit_locator.click()
         duration_unit_locator.select_option("year")
         duration_unit_locator.click()
-        page.wait_for_timeout(50)
         expect(page.locator("#modeling_duration_value_error_message")).to_contain_text(
             "Modeling duration value must be less than or equal to 10")
         current_value = int(duration_field.input_value())
