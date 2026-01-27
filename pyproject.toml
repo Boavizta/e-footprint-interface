@@ -49,6 +49,7 @@ openpyxl = "^3"
 gunicorn = "^23"
 psutil = "^7"
 redis = "^5.0"
+orjson = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"

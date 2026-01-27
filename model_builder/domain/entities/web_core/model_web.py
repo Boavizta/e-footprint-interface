@@ -41,12 +41,11 @@ class ModelWeb:
         if raw_system_data is not None:
             self.initial_system_data_efootprint_version = raw_system_data.get("efootprint_version")
             self.system_data = self.repository.upgrade_system_data(raw_system_data)
-            logger.info(f"System data loaded in {time() - start:.3f} seconds.")
             start = time()
             self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
                 self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
-            logger.info(f"ModelWeb object created in {time() - start:.3f} seconds.")
+            logger.info(f"ModelWeb object created in {1000 * (time() - start):.1f} ms.")
             if self.system_data_source == "postgres":
                 self.update_system_data_with_up_to_date_calculated_attributes()
         else:
