@@ -5,8 +5,7 @@ computing calculated attributes progressively and checking size limits
 to fail fast if a model exceeds the maximum allowed size.
 """
 from copy import deepcopy
-from dataclasses import dataclass
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.logger import logger
