@@ -1,6 +1,7 @@
 import json
 
 from django.shortcuts import render
+from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.form_data_parser import parse_form_data
@@ -13,6 +14,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 
 
 @render_exception_modal_if_error
+@time_it
 def open_create_object_panel(request, object_type):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
@@ -41,6 +43,7 @@ def open_create_object_panel(request, object_type):
 
 
 @render_exception_modal_if_error
+@time_it
 def add_object(request, object_type):
     repository = SessionSystemRepository(request.session)
 

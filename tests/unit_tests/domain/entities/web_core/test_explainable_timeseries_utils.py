@@ -11,7 +11,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     prepare_recurrent_quantity_data,
     prepare_timeseries_chart_context,
 )
-from tests.unit.domain.entities.web_core.helpers import DummyExplainableWeb, DummyModelWeb, DummyWebObj
+from tests.unit_tests.domain.entities.web_core.helpers import DummyExplainableWeb, DummyModelWeb, DummyWebObj
 
 
 class TestExplainableTimeseriesUtils:

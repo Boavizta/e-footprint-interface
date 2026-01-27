@@ -7,7 +7,7 @@ from efootprint.core.hardware.server import Server
 from efootprint.builders.services.web_application import WebApplication
 
 from model_builder.domain.entities.web_core.hardware.server_web import ServerWeb
-from tests.unit.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
+from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
 
 
 class TestServerWeb:

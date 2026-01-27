@@ -9,7 +9,7 @@ from efootprint.core.usage.job import Job, GPUJob
 from efootprint.builders.services.web_application import WebApplication
 
 from model_builder.domain.entities.web_core.usage.job_web import JobWeb
-from tests.unit.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
+from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
 
 
 class _StubService:

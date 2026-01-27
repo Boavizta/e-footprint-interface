@@ -34,8 +34,9 @@ Use `assert_creation_context_matches_snapshot(WebClass, model_web=MagicMock())` 
 - Pass `MagicMock()` as model_web to avoid test coupling to data
 
 ```python
-from tests.unit.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
+from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
 from unittest.mock import MagicMock
+
 
 def test_generate_object_creation_context_matches_snapshot(self, minimal_model_web):
     assert_creation_context_matches_snapshot(ServerWeb, model_web=MagicMock())

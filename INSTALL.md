@@ -355,7 +355,7 @@ poetry run pytest tests/e2e/ --browser webkit
 
 **Override the server URL (e.g., for Docker):**
 ```bash
-poetry run pytest tests/e2e/ --base-url http://localhost:8080
+poetry run pytest tests/e2e/ --headed --base-url https://efootprint.boavizta.dev
 ```
 
 ## JavaScript Unit Tests
