@@ -1050,14 +1050,14 @@ openai = ["openai (>=1.61.1,<2.0.0)"]
 
 [[package]]
 name = "efootprint"
-version = "14.2.2"
+version = "14.3.0"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-14.2.2-py3-none-any.whl", hash = "sha256:0cb46e6127c6b4d85dfb30cc247e44c2aed1e0ccf5c39cd97de93df4b7351179"},
-    {file = "efootprint-14.2.2.tar.gz", hash = "sha256:5a5cb714481f7ab96d4d7b8aa857fb053c3326d126e31b0897c08010cec79034"},
+    {file = "efootprint-14.3.0-py3-none-any.whl", hash = "sha256:b3fae809a8b9e9f6ae5d0da1f68b4f8c03eff6504c59c8c30890be90fc2f60d6"},
+    {file = "efootprint-14.3.0.tar.gz", hash = "sha256:1e33e2fe7d3c78744e424ded8d107e76a49b376a8e5dad564f48fa52cec598cc"},
 ]
 
 [package.dependencies]
@@ -1065,6 +1065,7 @@ boaviztapi = ">=1,<2"
 ciso8601 = ">=2.3,<3.0"
 ecologits = ">=0.6,<0.7"
 matplotlib = ">=3.10,<4.0"
+orjson = ">=3.11,<4.0"
 pandas = ">=2,<3"
 pint = ">=0,<1"
 plotly = "5.19"
@@ -4493,4 +4494,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "eea5856028faf5cb65e79482e172cd4736b7487c9df32f5a161a7c17d33385f5"
+content-hash = "f51a564d841a2a27ed0fd6a68ba1b200a66298ec8bc4d17e8c863bbc8c33dc10"

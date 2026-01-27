@@ -230,7 +230,6 @@ class TestEdgeObjects:
 
         # Step 2: Add CPU component to EdgeDevice
         edge_device_card = model_builder.get_object_card("EdgeDevice", edge_device_name)
-        edge_device_card.open_accordion()
         edge_device_card.locator.locator("button[hx-get*='EdgeComponent']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeCPUComponent")

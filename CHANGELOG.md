@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.1] - 2026-01-27
+
+### Changed
+- Update to e-footprint 14.3.0 for caching BoaviztAPI calls to reduce latency.
+
+## [0.12.0] - 2026-01-27
+
+### Changed
+- Use Redis as hot cache for system with calculated attributes, with Postgres fallback that saves systems without calculated attributes. This greatly improves performance when computing models with many calculated attributes, while having a fallback in case load is too high for Redis or Redis is down.
+
 ## [0.11.1] - 2026-01-26
 
 ### Fixed
