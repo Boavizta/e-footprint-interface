@@ -27,9 +27,9 @@ class SessionPerformanceMiddleware:
             original_save = request.session.save
 
             def timed_save(*args, **kwargs):
-                start = time.time()
+                start = time.perf_counter()
                 result = original_save(*args, **kwargs)
-                elapsed_ms = (time.time() - start) * 1000
+                elapsed_ms = (time.perf_counter() - start) * 1000
                 logger.info(f"Session DB write took {elapsed_ms:.1f} ms")
                 return result
 

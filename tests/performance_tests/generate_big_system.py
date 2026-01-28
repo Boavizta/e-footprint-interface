@@ -1,4 +1,4 @@
-from time import time
+from time import perf_counter
 
 import numpy as np
 from pint import Quantity
@@ -13,7 +13,7 @@ from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 
-start = time()
+start = perf_counter()
 
 import os
 os.environ["USE_BOAVIZTAPI_PACKAGE"] = "true"
@@ -37,7 +37,7 @@ from efootprint.core.system import System
 from efootprint.constants.countries import country_generator, tz, Countries
 from efootprint.constants.units import u
 from efootprint.logger import logger
-logger.info(f"Finished importing modules in {round((time() - start), 3)} seconds")
+logger.info(f"Finished importing modules in {round((perf_counter() - start), 3)} seconds")
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -45,7 +45,7 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 def generate_big_system(
         nb_of_servers_of_each_type=2, nb_of_uj_per_each_server_type=2, nb_of_uj_steps_per_uj=4, nb_of_up_per_uj=3,
         nb_of_edge_usage_patterns=3, nb_of_edge_processes_per_edge_computer=3, nb_years=5):
-    start = time()
+    start = perf_counter()
     usage_patterns = []
     for server_index in range(1, nb_of_servers_of_each_type + 1):
         autoscaling_server = Server.from_defaults(
@@ -179,7 +179,7 @@ def generate_big_system(
         edge_usage_patterns.append(edge_usage_pattern)
 
     system = System("system", usage_patterns=usage_patterns, edge_usage_patterns=edge_usage_patterns)
-    logger.info(f"Finished generating system in {round((time() - start), 3)} seconds")
+    logger.info(f"Finished generating system in {round((perf_counter() - start), 3)} seconds")
 
     timed_system_to_json(system, save_calculated_attributes=False,
                          output_filepath=os.path.join(root_dir, "big_system.json"))

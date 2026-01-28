@@ -5,6 +5,7 @@ computing calculated attributes progressively and checking size limits
 to fail fast if a model exceeds the maximum allowed size.
 """
 from copy import deepcopy
+from time import perf_counter
 from typing import Dict, Any
 
 from efootprint.api_utils.json_to_system import json_to_system
@@ -68,12 +69,13 @@ class ProgressiveImportService:
         self._compute_remaining_objects(flat_efootprint_objs_dict, copied_system_data, size_tracker)
 
         # Reserialize all objects to ensure final calculation graph is captured
-        logger.info("Reserializing all objects to finalize system data.")
+        start = perf_counter()
         for efootprint_object in flat_efootprint_objs_dict.values():
             del efootprint_object.__dict__["saved_to_json"]
             copied_system_data[efootprint_object.class_as_simple_str][efootprint_object.id] = \
                 efootprint_object.to_json(save_calculated_attributes=True)
-        logger.info("Reserialized all objects to finalize system data.")
+        elapsed_ms = (perf_counter() - start) * 1000
+        logger.info(f"Reserialized all objects to finalize system data in {round(elapsed_ms, 1)} ms.")
 
         return copied_system_data
 

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from time import time
+from time import perf_counter
 
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
@@ -30,7 +30,6 @@ class ModelWeb:
         Args:
             repository: An ISystemRepository implementation for loading and saving system data.
         """
-        start = time()
         self.repository = repository
         self.system_data_source = None
         if system_data is not None:
@@ -41,11 +40,11 @@ class ModelWeb:
         if raw_system_data is not None:
             self.initial_system_data_efootprint_version = raw_system_data.get("efootprint_version")
             self.system_data = self.repository.upgrade_system_data(raw_system_data)
-            start = time()
+            start = perf_counter()
             self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
                 self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
-            logger.info(f"ModelWeb object created in {1000 * (time() - start):.1f} ms.")
+            logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
             if self.system_data_source == "postgres":
                 self.update_system_data_with_up_to_date_calculated_attributes()
         else:
@@ -69,9 +68,11 @@ class ModelWeb:
 
     def update_system_data_with_up_to_date_calculated_attributes(self):
         """Updates the stored system data with the calculated attributes data."""
-        logger.info(f"Updating system data with calculated attributes.")
+        start = perf_counter()
         data_with_calculated_attributes = self.to_json(save_calculated_attributes=True)
         data_without_calculated_attributes = self.to_json(save_calculated_attributes=False)
+        elapsed_ms = (perf_counter() - start) * 1000
+        logger.info(f"Updated system data with calculated attributes in {round(elapsed_ms, 1)} ms.")
         self.repository.save_system_data(
             data_with_calculated_attributes,
             data_without_calculated_attributes=data_without_calculated_attributes

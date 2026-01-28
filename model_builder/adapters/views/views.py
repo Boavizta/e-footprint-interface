@@ -2,7 +2,6 @@ import random
 import string
 from datetime import datetime
 from io import BytesIO
-from time import time
 import json
 import os
 import gc
@@ -31,6 +30,7 @@ from model_builder.domain.services import ProgressiveImportService
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
+@time_it
 def model_builder_main(request, reboot=False):
     repository = SessionSystemRepository(request.session)
     if reboot and reboot != "reboot":
@@ -72,6 +72,7 @@ def open_import_json_panel(request):
     return render(request, "model_builder/side_panels/import_model.html", context={
               "header_name":"Import a model"})
 
+
 def download_json(request):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     system = model_web.system
@@ -85,9 +86,9 @@ def download_json(request):
     response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"
     return response
 
+@time_it
 def upload_json(request):
     repository = SessionSystemRepository(request.session)
-    start = time()
     import_error_message = ""
     data = None
 
@@ -112,7 +113,6 @@ def upload_json(request):
                 system_data_with_calculated_attributes = import_service.import_system(system_data)
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
                 model_web.update_system_data_with_up_to_date_calculated_attributes()
-                logger.info(f"Importing system from JSON took {round((time() - start), 3)} seconds")
                 return redirect("model-builder")
             except Exception as e:
                 if os.environ.get("RAISE_EXCEPTIONS"):
@@ -146,12 +146,15 @@ def result_chart(request):
 
     return http_response
 
+
 def get_calculus_graph(request, cache_key):
     content_to_return = request.session.pop(cache_key)
     request.session.modified = True
 
     return HttpResponse(content_to_return, content_type="text/html")
 
+
+@time_it
 def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
@@ -180,6 +183,7 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
     })
 
 
+@time_it
 def download_sources(request):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     sources = []
@@ -260,6 +264,7 @@ def get_explainable_recurrent_quantity_chart_and_explanation(
         "model_builder/side_panels/edit/calculated_attributes/recurrent_attribute_chart.html", context=context)
 
 
+@time_it
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
