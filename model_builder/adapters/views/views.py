@@ -174,6 +174,7 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
 
     calculus_graph = build_calculus_graph(calculated_attribute)
     calculus_graph.cdn_resources = "remote"
+    # TODO: Replace with cache table
     request.session[cache_key] = calculus_graph.generate_html()
 
     url = reverse("get-graph", kwargs={"cache_key": cache_key})
