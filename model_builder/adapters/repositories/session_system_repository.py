@@ -49,9 +49,18 @@ class SessionSystemRepository(ISystemRepository):
             return None
 
     @staticmethod
-    def _time_cache_call(action: str, cache_name: str, fn):
+    def _time_cache_call(action: str, cache_name: str, fn, default=None, swallow_exceptions: bool = True):
         start = perf_counter()
-        result = fn()
+        try:
+            result = fn()
+        except Exception as exc:  # noqa: BLE001
+            elapsed_ms = (perf_counter() - start) * 1000
+            logger.warning(
+                f"{cache_name} cache {action} failed after {elapsed_ms:.1f} ms: {exc}"
+            )
+            if swallow_exceptions:
+                return default
+            raise
         elapsed_ms = (perf_counter() - start) * 1000
         logger.info(f"{cache_name} cache {action} took {elapsed_ms:.1f} ms")
         return result
@@ -151,15 +160,12 @@ class SessionSystemRepository(ISystemRepository):
         postgres_payload = data_without_calculated_attributes or data
 
         if cache_key and redis_cache is not None:
-            try:
-                self._time_cache_call(
-                    "set", self.REDIS_CACHE_ALIAS,
-                    lambda: redis_cache.set(
-                        cache_key, data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
-                    ),
-                )
-            except Exception as exc:  # noqa: BLE001
-                logger.warning(f"Failed to write system data to Redis cache: {exc}")
+            self._time_cache_call(
+                "set", self.REDIS_CACHE_ALIAS,
+                lambda: redis_cache.set(
+                    cache_key, data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
+                ),
+            )
         if cache_key and postgres_cache is not None:
             self._time_cache_call(
                 "set", self.POSTGRES_CACHE_ALIAS,
