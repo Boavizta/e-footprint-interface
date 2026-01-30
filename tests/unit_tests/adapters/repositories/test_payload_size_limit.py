@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 from e_footprint_interface.json_payload_utils import compute_json_size, JsonSizeResult
 from model_builder.adapters.repositories.in_memory_system_repository import InMemorySystemRepository
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
+from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 
 
@@ -96,7 +97,7 @@ class TestSessionSystemRepositorySizeLimit:
 
         with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 1.0):
             small_data = {"System": {"test": "small data"}}
-            with patch.object(SessionSystemRepository, "_get_cache", side_effect=get_cache):
+            with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
                 repository.save_system_data(small_data)
 
         cache_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:{mock_session.session_key}"
@@ -125,7 +126,7 @@ class TestSessionSystemRepositorySizeLimit:
             large_data = {"System": {"data": "x" * 2000}}
 
             with pytest.raises(PayloadSizeLimitExceeded) as exc_info:
-                with patch.object(SessionSystemRepository, "_get_cache", side_effect=get_cache):
+                with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
                     repository.save_system_data(large_data)
 
             assert exc_info.value.limit_mb == 0.001
@@ -150,7 +151,7 @@ class TestSessionSystemRepositorySizeLimit:
             large_data = {"System": {"data": "x" * 2000}}
 
             with pytest.raises(PayloadSizeLimitExceeded):
-                with patch.object(SessionSystemRepository, "_get_cache", side_effect=get_cache):
+                with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
                     repository.save_system_data(large_data)
 
         redis_cache.set.assert_not_called()

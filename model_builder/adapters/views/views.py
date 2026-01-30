@@ -2,6 +2,7 @@ import random
 import string
 from datetime import datetime
 from io import BytesIO
+from time import perf_counter
 import json
 import os
 import gc
@@ -18,7 +19,7 @@ from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
 
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionSystemRepository, SessionCacheRepository
 from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
@@ -149,8 +150,11 @@ def result_chart(request):
 
 
 def get_calculus_graph(request, cache_key):
-    content_to_return = request.session.pop(cache_key)
-    request.session.modified = True
+    cache_repository = SessionCacheRepository(request.session, namespace="calculus_graph")
+    content_to_return = cache_repository.pop(cache_key)
+
+    if content_to_return is None:
+        return HttpResponse("Graph content expired.", content_type="text/plain", status=404)
 
     return HttpResponse(content_to_return, content_type="text/html")
 
@@ -161,6 +165,7 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
     iframe_height = 95
     cache_key = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    cache_repository = SessionCacheRepository(request.session, namespace="calculus_graph")
 
     web_attr = getattr(efootprint_object, attr_name)
     if id_of_key_in_dict is None:
@@ -175,7 +180,16 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
 
     calculus_graph = build_calculus_graph(calculated_attribute)
     calculus_graph.cdn_resources = "remote"
-    request.session[cache_key] = calculus_graph.generate_html()
+    calculus_graph_html = calculus_graph.generate_html()
+    size_start = perf_counter()
+    size_bytes = len(calculus_graph_html.encode("utf-8"))
+    size_result_mb = size_bytes / (1024 * 1024)
+    size_computation_time_ms = (perf_counter() - size_start) * 1000
+    logger.info(
+        f"Calculus graph HTML size: {size_result_mb:.2f} MB "
+        f"(computation took {size_computation_time_ms:.1f} ms)"
+    )
+    cache_repository.set(cache_key, calculus_graph_html, write_redis=False)
 
     url = reverse("get-graph", kwargs={"cache_key": cache_key})
 

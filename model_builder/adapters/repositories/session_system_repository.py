@@ -4,17 +4,15 @@ This implementation stores system data in Redis (fast cache) with a Postgres
 fallback cache, keyed by the Django session identifier.
 """
 import os
-from time import perf_counter
 from typing import Dict, Any, Optional, Tuple
 
 from django.contrib.sessions.backends.base import SessionBase
-from django.core.cache import caches
-from django.core.cache.backends.base import InvalidCacheBackendError
 from efootprint.logger import logger
 
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.interfaces import ISystemRepository
+from model_builder.adapters.repositories.cache_backend import CacheBackend
 
 
 class SessionSystemRepository(ISystemRepository):
@@ -40,30 +38,7 @@ class SessionSystemRepository(ISystemRepository):
             session: The Django session object (typically request.session)
         """
         self._session = session
-
-    def _get_cache(self, alias: str):
-        try:
-            return caches[alias]
-        except InvalidCacheBackendError:
-            logger.warning(f"Cache backend '{alias}' is not configured; falling back to session storage.")
-            return None
-
-    @staticmethod
-    def _time_cache_call(action: str, cache_name: str, fn, default=None, swallow_exceptions: bool = True):
-        start = perf_counter()
-        try:
-            result = fn()
-        except Exception as exc:  # noqa: BLE001
-            elapsed_ms = (perf_counter() - start) * 1000
-            logger.warning(
-                f"{cache_name} cache {action} failed after {elapsed_ms:.1f} ms: {exc}"
-            )
-            if swallow_exceptions:
-                return default
-            raise
-        elapsed_ms = (perf_counter() - start) * 1000
-        logger.info(f"{cache_name} cache {action} took {elapsed_ms:.1f} ms")
-        return result
+        self._cache_backend = CacheBackend()
 
     def _cache_key(self, create_if_missing: bool = True) -> Optional[str]:
         session_key = self._session.session_key
@@ -90,40 +65,22 @@ class SessionSystemRepository(ISystemRepository):
             (system_data, source) where source can be "redis", "postgres", "session", or None.
         """
         cache_key = self._cache_key(create_if_missing=True)
-        redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
-        postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
-
-        if cache_key and redis_cache is not None:
-            cached_data = self._time_cache_call(
-                "get", self.REDIS_CACHE_ALIAS, lambda: redis_cache.get(cache_key)
-            )
+        if cache_key:
+            cached_data, source = self._cache_backend.get_with_source(cache_key)
             if cached_data is not None:
-                return cached_data, "redis"
-
-        if cache_key and postgres_cache is not None:
-            logger.info("No data in Redis cache; falling back to Postgres cache.")
-            cached_data = self._time_cache_call(
-                "get", self.POSTGRES_CACHE_ALIAS, lambda: postgres_cache.get(cache_key)
-            )
-            if cached_data is not None:
-                return cached_data, "postgres"
+                if source == "postgres":
+                    logger.info("No data in Redis cache; falling back to Postgres cache.")
+                return cached_data, source
 
         # Todo: suppress legacy data part end of Feb 2026
         legacy_data = self._session.get(self.SYSTEM_DATA_KEY)
         if legacy_data is not None:
-            if cache_key and redis_cache is not None:
-                self._time_cache_call(
-                    "set", self.REDIS_CACHE_ALIAS,
-                    lambda: redis_cache.set(
-                        cache_key, legacy_data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
-                    ),
-                )
-            if cache_key and postgres_cache is not None:
-                self._time_cache_call(
-                    "set", self.POSTGRES_CACHE_ALIAS,
-                    lambda: postgres_cache.set(
-                        cache_key, legacy_data, timeout=self.POSTGRES_CACHE_TIMEOUT_SECONDS
-                    ),
+            if cache_key:
+                self._cache_backend.set(
+                    cache_key,
+                    legacy_data,
+                    redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
+                    postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
                 )
             self._session.pop(self.SYSTEM_DATA_KEY, None)
             self._session.modified = True
@@ -154,24 +111,22 @@ class SessionSystemRepository(ISystemRepository):
             raise PayloadSizeLimitExceeded(size_result.size_mb, self.MAX_PAYLOAD_SIZE_MB)
 
         cache_key = self._cache_key(create_if_missing=True)
-        redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
-        postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
 
         postgres_payload = data_without_calculated_attributes or data
 
-        if cache_key and redis_cache is not None:
-            self._time_cache_call(
-                "set", self.REDIS_CACHE_ALIAS,
-                lambda: redis_cache.set(
-                    cache_key, data, timeout=self.REDIS_CACHE_TIMEOUT_SECONDS
-                ),
+        if cache_key:
+            self._session.modified = True
+            self._cache_backend.set(
+                cache_key,
+                data,
+                redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
+                write_postgres=False,
             )
-        if cache_key and postgres_cache is not None:
-            self._time_cache_call(
-                "set", self.POSTGRES_CACHE_ALIAS,
-                lambda: postgres_cache.set(
-                    cache_key, postgres_payload, timeout=self.POSTGRES_CACHE_TIMEOUT_SECONDS
-                ),
+            self._cache_backend.set(
+                cache_key,
+                postgres_payload,
+                postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
+                write_redis=False,
             )
 
         if self.SYSTEM_DATA_KEY in self._session:
@@ -185,19 +140,8 @@ class SessionSystemRepository(ISystemRepository):
             True if system data exists, False otherwise.
         """
         cache_key = self._cache_key(create_if_missing=False)
-        redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
-        postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
-
-        if cache_key and redis_cache is not None:
-            cached_data = self._time_cache_call(
-                "get", self.REDIS_CACHE_ALIAS, lambda: redis_cache.get(cache_key)
-            )
-            if cached_data is not None:
-                return True
-        if cache_key and postgres_cache is not None:
-            cached_data = self._time_cache_call(
-                "get", self.POSTGRES_CACHE_ALIAS, lambda: postgres_cache.get(cache_key)
-            )
+        if cache_key:
+            cached_data = self._cache_backend.get(cache_key)
             if cached_data is not None:
                 return True
         return self.SYSTEM_DATA_KEY in self._session
@@ -205,17 +149,8 @@ class SessionSystemRepository(ISystemRepository):
     def clear(self) -> None:
         """Clear system data from Redis, Postgres, and the session."""
         cache_key = self._cache_key(create_if_missing=False)
-        redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
-        postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
-
-        if cache_key and redis_cache is not None:
-            self._time_cache_call(
-                "delete", self.REDIS_CACHE_ALIAS, lambda: redis_cache.delete(cache_key)
-            )
-        if cache_key and postgres_cache is not None:
-            self._time_cache_call(
-                "delete", self.POSTGRES_CACHE_ALIAS, lambda: postgres_cache.delete(cache_key)
-            )
+        if cache_key:
+            self._cache_backend.delete(cache_key)
 
         self._session.pop(self.SYSTEM_DATA_KEY, None)
         self._session.modified = True

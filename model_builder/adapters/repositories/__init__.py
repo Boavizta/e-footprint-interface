@@ -1,4 +1,5 @@
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
 from model_builder.adapters.repositories.in_memory_system_repository import InMemorySystemRepository
+from model_builder.adapters.repositories.session_cache_repository import SessionCacheRepository
 
-__all__ = ["SessionSystemRepository", "InMemorySystemRepository"]
+__all__ = ["SessionSystemRepository", "InMemorySystemRepository", "SessionCacheRepository"]
