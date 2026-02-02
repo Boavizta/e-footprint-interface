@@ -12042,6 +12042,11 @@ input:disabled {
   background-color: var(--gray-50);
 }
 
+/*Bootstrap overwrite - accordion body padding*/
+.accordion {
+  --bs-accordion-body-padding-y: 0.5rem;
+}
+
 /*Bootstrap overwrite - accordion-button (not expanded state) */
 .accordion-button.collapsed,
 .accordion-button.collapsed:hover,
@@ -13985,3 +13990,4 @@ input:disabled {
   border-color: var(--gray-400);
 }
 
+/*# sourceMappingURL=bs_main.css.map */

@@ -227,6 +227,9 @@ input:disabled{
     background-color: var(--gray-50);
 }
 
+/*Bootstrap overwrite - accordion body padding*/
+.accordion { --bs-accordion-body-padding-y: 0.5rem; }
+
 /*Bootstrap overwrite - accordion-button (not expanded state) */
 .accordion-button.collapsed,
 .accordion-button.collapsed:hover,
@@ -883,13 +886,13 @@ input:disabled{
   border-radius: 6px;
   text-decoration: none;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: var(--gray-100);
     border-color: var(--gray-350);
     color: var(--dark-blue);
   }
-  
+
   &:active {
     background-color: var(--gray-200);
     border-color: var(--gray-400);
