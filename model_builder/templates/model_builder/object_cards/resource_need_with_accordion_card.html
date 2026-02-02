@@ -45,32 +45,7 @@
                             {% endfor %}
                             <div id="add-{{ section.attr_name }}-to-{{ object.web_id }}"
                                  class="w-85 ms-15 px-0 py-1 d-flex justify-content-end position-relative">
-                                <button
-                                        class="btn btn-white text-end w-100 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
-                                        hx-get="/model_builder/open-create-object-panel/{{ section.type_str }}/"
-                                        hx-target="#sidePanel"
-                                        hx-trigger="click"
-                                        hx-swap="innerHTML"
-                                        hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ object.efootprint_id }}"}'
-                                        hx-disabled-elt="button"
-                                        _="on click removeAllOpenedObjectsHighlights()"
-                                >
-                                    <p class='h8 mb-0 text-break text-addition px-1'>
-                                        {{ section.type_str|add_child_text }}
-                                    </p>
-                                </button>
-                                <span class="position-absolute top-50 start-100 translate-middle bg-transparent rounded-circle">
-                                    <img src="{% static 'icons/circle_add_icon.svg' %}"  width="14" height="14" class="cursor"
-                                        hx-get="/model_builder/open-create-object-panel/{{ section.type_str }}/"
-                                        hx-target="#sidePanel"
-                                        hx-trigger="click"
-                                        hx-swap="innerHTML"
-                                        hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ object.efootprint_id }}"}'
-                                        hx-disabled-elt="button"
-                                        _="on click removeAllOpenedObjectsHighlights()"
-                                    >
-                                    <span class="visually-hidden">{{ section.type_str|add_child_text }}</span>
-                                </span>
+                                {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id %}
                             </div>
                         </div>
                     {% endwith %}
