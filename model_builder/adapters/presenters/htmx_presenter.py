@@ -99,7 +99,7 @@ class HtmxPresenter:
                 f"model_builder/object_cards/{override_obj.template_name}_card.html",
                 {"object": override_obj}
             )
-            response["HX-Trigger-After-Swap"] = json.dumps({
+            response["HX-Trigger-After-Settle"] = json.dumps({
                 "displayToastAndHighlightObjects": {
                     "ids": [override_obj.web_id],
                     "name": override_obj.name,
@@ -119,7 +119,7 @@ class HtmxPresenter:
             {"object": added_obj}
         )
 
-        response["HX-Trigger-After-Swap"] = json.dumps({
+        response["HX-Trigger-After-Settle"] = json.dumps({
             "resetLeaderLines": "",
             "setAccordionListeners": {"accordionIds": [output.web_id]},
             "displayToastAndHighlightObjects": {

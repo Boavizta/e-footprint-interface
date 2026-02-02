@@ -22,7 +22,7 @@ def ask_delete_object(request, object_id):
     # Present the confirmation modal
     presenter = HtmxPresenter(request, model_web)
     http_response = presenter.present_delete_confirmation(check_result, web_obj, object_id)
-    http_response["HX-Trigger-After-Swap"] = json.dumps({"openModalDialog": {"modal_id": "model-builder-modal"}})
+    http_response["HX-Trigger-After-Settle"] = json.dumps({"openModalDialog": {"modal_id": "model-builder-modal"}})
 
     return http_response
 

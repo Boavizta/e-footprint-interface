@@ -129,7 +129,7 @@ def upload_json(request):
         context["model_web"] = model_web
 
     http_response = render(request, "model_builder/model_builder_main.html", context=context)
-    http_response["HX-Trigger-After-Swap"] = json.dumps({"openModalDialog": {"modal_id": "error-import-modal"},
+    http_response["HX-Trigger-After-Settle"] = json.dumps({"openModalDialog": {"modal_id": "error-import-modal"},
                                                          "resetLeaderLines": ""})
 
     return http_response
