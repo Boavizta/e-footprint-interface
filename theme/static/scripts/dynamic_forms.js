@@ -3,16 +3,16 @@ document.addEventListener("initDynamicForm", function () {
     /**
      * 1) SWITCH ELEMENT LOGIC
      */
-    function switchForms(switchValues, switchElement){
+    function displayOnlyActiveForm(switchValues, switchElement){
         // Helper to get all actual form section IDs in the DOM
         const getActualFormSectionIds = () => {
             const formSections = document.querySelectorAll('[id^="item-"]');
             return Array.from(formSections).map(el => el.id.replace('item-', ''));
         };
-
+        const activeValue = switchElement.value;
         // Hide the other groups
         switchValues.forEach(function(switchValue) {
-            if (switchValue !== switchElement.value) {
+            if (switchValue !== activeValue) {
                 const itemToHide = document.getElementById("item-" + switchValue);
                 if (!itemToHide) {
                     const actualSections = getActualFormSectionIds();
@@ -35,15 +35,15 @@ document.addEventListener("initDynamicForm", function () {
         });
 
         // Show the newly selected group
-        const itemToShow = document.getElementById("item-" + switchElement.value);
+        const itemToShow = document.getElementById("item-" + activeValue);
         if (!itemToShow) {
             const actualSections = getActualFormSectionIds();
             throw new Error(
-                `Dynamic form error: Cannot find element with id "item-${switchElement.value}".\n\n` +
-                `Switch element "${switchElement.id}" has value: "${switchElement.value}"\n` +
+                `Dynamic form error: Cannot find element with id "item-${activeValue}".\n\n` +
+                `Switch element "${switchElement.id}" has value: "${activeValue}"\n` +
                 `Expected switch_values: [${switchValues.join(', ')}]\n` +
                 `Actual form sections in DOM: [${actualSections.join(', ')}]\n\n` +
-                `The selected value "${switchElement.value}" does not have a corresponding form section in the DOM.\n` +
+                `The selected value "${activeValue}" does not have a corresponding form section in the DOM.\n` +
                 `This often happens when dynamic_selects uses different class names than those used in generate_object_creation_structure().\n` +
                 `Example: dynamic_selects might use "RecurrentEdgeProcess" while available_efootprint_classes uses "RecurrentEdgeProcessFromForm".`
             );
@@ -55,17 +55,6 @@ document.addEventListener("initDynamicForm", function () {
         });
     }
 
-    if (dynamicFormData.switch_item) {
-        const switchElementId = dynamicFormData.switch_item;
-        const switchElement = document.getElementById(switchElementId);
-        const switchValues = dynamicFormData.switch_values;
-        switchForms(switchValues, switchElement);
-
-        switchElement.addEventListener("change", function () {
-            switchForms(switchValues, switchElement);
-        });
-    }
-
     /**
      * Reusable function that populates a target element (either <datalist> or <select>)
      * depending on 'type' ('datalist' vs 'select').
@@ -74,7 +63,7 @@ document.addEventListener("initDynamicForm", function () {
      * - targetId: the ID of the datalist/select to be populated
      * - type: either 'datalist' or 'select'
      */
-    function fillData(type, listValue, filterId, targetId) {
+    function updateDynamicDatalistOrSelect(type, listValue, filterId, targetId) {
         const filterElem = document.getElementById(filterId);
         const targetElem = document.getElementById(targetId);
 
@@ -132,7 +121,7 @@ document.addEventListener("initDynamicForm", function () {
 
 
     /**
-     * 2) Handle DYNAMIC LISTS (for <datalist>)
+     * Handle DYNAMIC LISTS (for <datalist>)
      */
     if (dynamicFormData.dynamic_lists) {
         dynamicFormData.dynamic_lists.forEach((dynamicList) => {
@@ -140,17 +129,17 @@ document.addEventListener("initDynamicForm", function () {
             const listId = "datalist_" + dynamicList.input_id;
 
             // Fill once initially
-            fillData("datalist", dynamicList.list_value, filterId, listId);
+            updateDynamicDatalistOrSelect("datalist", dynamicList.list_value, filterId, listId);
 
             document.getElementById(filterId)?.addEventListener("change", function () {
-                fillData("datalist", dynamicList.list_value, filterId, listId);
+                updateDynamicDatalistOrSelect("datalist", dynamicList.list_value, filterId, listId);
                 document.getElementById(dynamicList.input_id).value = "";
             });
         });
     }
 
     /**
-     * 3) Handle DYNAMIC SELECTS (for <select>)
+     * Handle DYNAMIC SELECTS (for <select>)
      */
     if (dynamicFormData.dynamic_selects) {
         dynamicFormData.dynamic_selects.forEach((dynamicSelect) => {
@@ -158,12 +147,26 @@ document.addEventListener("initDynamicForm", function () {
             const selectId = dynamicSelect.input_id;
 
             // Fill once initially
-            fillData("select", dynamicSelect.list_value, filterId, selectId);
+            updateDynamicDatalistOrSelect("select", dynamicSelect.list_value, filterId, selectId);
 
             // Re-fill on change
             document.getElementById(filterId)?.addEventListener("change", function () {
-                fillData("select", dynamicSelect.list_value, filterId, selectId);
+                updateDynamicDatalistOrSelect("select", dynamicSelect.list_value, filterId, selectId);
             });
+        });
+    }
+
+    /**
+     * Show right form section based on SWITCH ELEMENT
+     */
+    if (dynamicFormData.switch_item) {
+        const switchElementId = dynamicFormData.switch_item;
+        const switchElement = document.getElementById(switchElementId);
+        const switchValues = dynamicFormData.switch_values;
+        displayOnlyActiveForm(switchValues, switchElement);
+
+        switchElement.addEventListener("change", function () {
+            displayOnlyActiveForm(switchValues, switchElement);
         });
     }
 });

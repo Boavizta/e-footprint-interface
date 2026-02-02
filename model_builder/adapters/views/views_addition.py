@@ -37,7 +37,7 @@ def open_create_object_panel(request, object_type):
     http_response = render(
         request, f"model_builder/side_panels/add/{efootprint_class_web.add_template}", context=context_data)
 
-    http_response["HX-Trigger-After-Swap"] = "initDynamicForm"
+    http_response["HX-Trigger-After-Settle"] = "initDynamicForm"
 
     return http_response
 

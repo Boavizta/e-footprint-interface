@@ -29,7 +29,7 @@ def open_edit_object_panel(request, object_id):
     http_response = render(
         request, f"model_builder/side_panels/edit/{obj_to_edit.edit_template}", context=context_data)
 
-    http_response["HX-Trigger-After-Swap"] = json.dumps({
+    http_response["HX-Trigger-After-Settle"] = json.dumps({
         "initDynamicForm" : "",
         "highlightOpenedObjects": [f"button-{mirrored_card.web_id}" for mirrored_card in obj_to_edit.mirrored_cards]
         if len(obj_to_edit.mirrored_cards) > 1 else [],
