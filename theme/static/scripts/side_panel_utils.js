@@ -109,7 +109,21 @@ function warnBeforeClosingSidePanel() {
 function proceedWithPendingRequest() {
     if (pendingRequest) {
         formModified = false;
-        htmx.ajax("GET", pendingRequest.getAttribute("hx-get"), {target: "#sidePanel", swap: "innerHTML"});
+        let rawVals = pendingRequest.getAttribute("hx-vals");
+        let vals = {};
+
+        if (rawVals) {
+            if (rawVals.startsWith("js:")) {
+                vals = eval('(' + rawVals.slice(3) + ')');
+            } else {
+                vals = JSON.parse(rawVals);
+            }
+        }
+
+        const url = pendingRequest.getAttribute("hx-get");
+        const target = pendingRequest.getAttribute("hx-target") || "#sidePanel";
+        const swap = pendingRequest.getAttribute("hx-swap") || "innerHTML";
+        htmx.ajax("GET", url, {target: target, swap: swap, values: vals});
         pendingRequest = null;
     }
     closeWarningModal();
