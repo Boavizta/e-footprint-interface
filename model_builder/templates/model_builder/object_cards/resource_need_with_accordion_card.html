@@ -1,4 +1,4 @@
-{% load static %}
+{% load static label_filters %}
 <div id="{{ object.web_id }}" class="w-85 ms-15 px-0 py-1 leader-line-object"
     data-link-to="{{ object.links_to }}" data-line-opt="{{ object.data_line_opt }}">
     <div class="accordion accordion-flush">
@@ -8,11 +8,11 @@
                         data-bs-toggle="collapse"
                         data-bs-target="#flush-{{ object.web_id }}"
                         onclick="reverseIconAccordion('{{ object.web_id }}')"
-                        aria-expanded="{% if object.recurrent_edge_component_needs|length == 0 %}true{% else %}false{% endif %}"
+                        aria-expanded="{% if object.child_sections|length == 0 or object.child_sections.0.children|length == 0 %}true{% else %}false{% endif %}"
                         aria-controls="flush-{{ object.web_id }}">
                         <svg id="icon_accordion_{{ object.web_id }}" xmlns="http://www.w3.org/2000/svg"
                              width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
-                             class="bi bi-chevron-right {% if object.recurrent_edge_component_needs|length == 0 %}chevron-rotate{% endif %}"
+                             class="bi bi-chevron-right {% if object.child_sections|length == 0 or object.child_sections.0.children|length == 0 %}chevron-rotate{% endif %}"
                              viewBox="0 0 16 16">
                             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
                         </svg>
@@ -35,29 +35,31 @@
                 </button>
             </div>
             <div id="flush-{{ object.web_id }}"
-                 class="accordion-collapse collapse accordion-all {% if object.recurrent_edge_component_needs|length == 0 %}show{% endif %}"
+                 class="accordion-collapse collapse accordion-all {% if object.child_sections|length == 0 or object.child_sections.0.children|length == 0 %}show{% endif %}"
                  data-bs-parent="#{{ object.web_id }}">
                 <div class="accordion-body text-start">
-                    <div class="w-100 mx-0 my-0 align-items-center rounded-2 bg-white" id="{{ object.web_id }}-recurrent-edge-component-needs">
-                        {% for component_need in object.recurrent_edge_component_needs %}
-                            {% include 'model_builder/object_cards/recurrent_edge_component_need_card.html' with object=component_need %}
-                        {% endfor %}
-                        <button
-                            id="add-component-need-to-{{ object.web_id }}"
-                            class="btn btn-white text-start d-flex flex-row justify-content-end w-100 position-relative border-2"
-                            hx-get="/model_builder/open-create-object-panel/RecurrentEdgeComponentNeed/"
-                            hx-target="#sidePanel"
-                            hx-trigger="click"
-                            hx-swap="innerHTML"
-                            hx-disabled-elt="button"
-                            hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ object.efootprint_id }}"}'
-                            _="on click removeAllOpenedObjectsHighlights()"
-                            >
-                                <p class='h8 mb-0 text-break text-addition'>
-                                    Add recurrent edge component need
-                                </p>
-                        </button>
-                    </div>
+                    {% with section=object.child_sections.0 %}
+                        <div class="w-100 mx-0 my-2 align-items-center rounded-2 bg-white" id="{{ object.web_id }}-{{ section.attr_name }}">
+                            {% for child in section.children %}
+                                {% include 'model_builder/object_cards/'|add:child.template_name|add:'_card.html' with object=child %}
+                            {% endfor %}
+                            <button
+                                id="add-{{ section.attr_name }}-to-{{ object.web_id }}"
+                                class="btn btn-white text-start d-flex flex-row justify-content-end w-100 position-relative border-2"
+                                hx-get="/model_builder/open-create-object-panel/{{ section.type_str }}/"
+                                hx-target="#sidePanel"
+                                hx-trigger="click"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="button"
+                                hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ object.efootprint_id }}"}'
+                                _="on click removeAllOpenedObjectsHighlights()"
+                                >
+                                    <p class='h8 mb-0 text-break text-addition'>
+                                        {{ section.type_str|add_child_text }}
+                                    </p>
+                            </button>
+                        </div>
+                    {% endwith %}
                 </div>
             </div>
         </div>

@@ -80,6 +80,10 @@
         "label": "Recurrent edge component need",
         "type_object_available": "Recurrent edge component need"
     },
+    "RecurrentServerNeed": {
+        "label": "Recurrent server need",
+        "type_object_available": "Recurrent server needs"
+    },
     "EdgeFunction": {
         "label": "Edge function",
         "type_object_available": "Available edge functions"

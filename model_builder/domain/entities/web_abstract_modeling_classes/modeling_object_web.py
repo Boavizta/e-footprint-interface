@@ -260,7 +260,7 @@ class ModelingObjectWeb:
 
     @property
     def children_property_name(self) -> str:
-        """Property name for accessing children (e.g., 'jobs', 'recurrent_edge_device_needs')."""
+        """Property name for accessing children (e.g., 'jobs'). Assumes a single list attr."""
         list_attr_names = self.list_attr_names
         assert len(list_attr_names) == 1, (
             f"{self} should have exactly one list attribute, found: {list_attr_names}.")
@@ -268,12 +268,40 @@ class ModelingObjectWeb:
         return list_attr_names[0]
 
     @property
-    def child_object_type_str(self) -> str:
-        """Type string of child objects (e.g., 'Job', 'RecurrentEdgeDeviceNeed')."""
+    def child_object_types_str(self) -> List[str]:
+        """Type strings of child objects (supports multiple list attributes)."""
         init_signature = get_init_signature_params(self.efootprint_class)
-        child_object_type = init_signature[self.children_property_name].annotation.__args__[0].__name__
+        child_types = []
+        for attr_name in self.list_attr_names:
+            annotation = init_signature[attr_name].annotation
+            child_types.append(annotation.__args__[0].__name__)
 
-        return child_object_type
+        return child_types
+
+    @property
+    def child_object_type_str(self) -> str:
+        """Retained for backward compatibility when there is a single child type."""
+        child_types = self.child_object_types_str
+        assert len(child_types) == 1, (
+            f"{self} exposes multiple child types: {child_types}. Use child_object_types_str instead.")
+        return child_types[0]
+
+    @property
+    def child_sections(self):
+        """Structured view of children grouped by their list attribute/type."""
+        init_signature = get_init_signature_params(self.efootprint_class)
+        sections = []
+        for attr_name in self.list_attr_names:
+            children = getattr(self, attr_name, []) or []
+            annotation = init_signature[attr_name].annotation
+            child_type = annotation.__args__[0].__name__
+            sections.append({
+                "type_str": child_type,
+                "children": children,
+                "attr_name": attr_name,
+            })
+
+        return sections
 
     def self_delete(self):
         obj_type = self.class_as_simple_str

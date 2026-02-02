@@ -1,4 +1,4 @@
-{% if object.class_as_simple_str == "RecurrentEdgeDeviceNeed" %}
+{% if object.template_name == "resource_need_with_accordion" %}
     {% include 'model_builder/object_cards/resource_need_with_accordion_card.html' with object=object %}
 {% else %}
     <div id="{{ object.web_id }}" class="w-85 ms-15 px-0 py-1 leader-line-object"

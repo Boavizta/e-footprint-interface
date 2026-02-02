@@ -18,6 +18,7 @@ from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web i
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 from model_builder.domain.entities.web_core.hardware.server_web import ServerWeb
 from model_builder.domain.entities.web_core.hardware.storage_web import StorageWeb
+from model_builder.domain.entities.web_core.usage.edge.recurrent_server_web import RecurrentServerNeedWeb
 from model_builder.domain.entities.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
 from model_builder.domain.entities.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
 from model_builder.domain.entities.web_core.usage.edge.recurrent_edge_component_need_web import RecurrentEdgeComponentNeedWeb
@@ -71,6 +72,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "EdgeUsageJourney": JourneyBaseWeb,
     "EdgeFunction": EdgeFunctionWeb,
     "RecurrentEdgeDeviceNeedBase": RecurrentEdgeDeviceNeedBaseWeb,
+    "RecurrentServerNeed": RecurrentServerNeedWeb,
     "RecurrentEdgeProcess": RecurrentEdgeProcessWeb,
     "RecurrentEdgeWorkload": RecurrentEdgeWorkloadWeb,
     "RecurrentEdgeDeviceNeed": RecurrentEdgeDeviceNeedWeb,

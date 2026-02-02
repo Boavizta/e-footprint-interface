@@ -27,8 +27,10 @@ def edge_system_in_browser(model_builder_page: ModelBuilderPage):
     process1 = RecurrentEdgeProcess.from_defaults("Process on Journey 1", edge_device=edge_device)
     process2 = RecurrentEdgeProcess.from_defaults("Process on Journey 2", edge_device=edge_device)
 
-    edge_function1 = EdgeFunction("Function in Journey 1", recurrent_edge_device_needs=[process1])
-    edge_function2 = EdgeFunction("Function in Journey 2", recurrent_edge_device_needs=[process2])
+    edge_function1 = EdgeFunction("Function in Journey 1", recurrent_edge_device_needs=[process1],
+    recurrent_server_needs=[])
+    edge_function2 = EdgeFunction("Function in Journey 2", recurrent_edge_device_needs=[process2],
+    recurrent_server_needs=[])
 
     journey1 = EdgeUsageJourney.from_defaults(name="Edge Journey 1", edge_functions=[edge_function1])
     journey2 = EdgeUsageJourney.from_defaults(name="Edge Journey 2", edge_functions=[edge_function2])
@@ -51,7 +53,8 @@ def edge_system_with_mirrored_edge_functions(model_builder_page: ModelBuilderPag
     process2 = RecurrentEdgeProcess.from_defaults("Process on Journey 2", edge_device=edge_device)
 
     edge_function = EdgeFunction("Mirrored function, referenced in journey 1 and 2",
-                                  recurrent_edge_device_needs=[process1, process2])
+                                  recurrent_edge_device_needs=[process1, process2],
+                                  recurrent_server_needs=[])
 
     journey1 = EdgeUsageJourney.from_defaults(name="Edge Journey 1", edge_functions=[edge_function])
     journey2 = EdgeUsageJourney.from_defaults(name="Edge Journey 2", edge_functions=[edge_function])
