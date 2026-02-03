@@ -69,8 +69,8 @@
         "type_object_available": "Available recurrent edge device need types"
     },
     "RecurrentEdgeDeviceNeed": {
-        "label": "Custom recurrent edge device need",
-        "type_object_available": "Available custom recurrent edge device need types"
+        "label": "Recurrent edge device need",
+        "type_object_available": "Available recurrent edge device need types"
     },
     "RecurrentEdgeWorkload": {
         "label": "Recurrent edge workload",
