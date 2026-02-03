@@ -1,0 +1,85 @@
+[
+    {
+        "category": "efootprint_classes_available",
+        "header": "Recurrent server need selection",
+        "fields": [
+            {
+                "input_type": "select_object",
+                "web_id": "type_object_available",
+                "label": "Recurrent server needs",
+                "options": [
+                    {
+                        "label": "Recurrent server need",
+                        "value": "RecurrentServerNeed"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "category": "RecurrentServerNeed",
+        "header": "Recurrent server need creation",
+        "fields": [
+            {
+                "web_id": "RecurrentServerNeed_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "Recurrent server need 1"
+            },
+            {
+                "web_id": "RecurrentServerNeed_edge_device",
+                "attr_name": "edge_device",
+                "label": "edge device",
+                "tooltip": false,
+                "input_type": "select_object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
+                "web_id": "RecurrentServerNeed_jobs",
+                "attr_name": "jobs",
+                "label": "Jobs in this usage journey step",
+                "tooltip": false,
+                "input_type": "select_multiple",
+                "selected": [],
+                "unselected": [
+                    {
+                        "value": "efootprint_id1",
+                        "label": "option1"
+                    },
+                    {
+                        "value": "efootprint_id2",
+                        "label": "option2"
+                    }
+                ]
+            },
+            {
+                "web_id": "RecurrentServerNeed_recurrent_volume_per_edge_device",
+                "attr_name": "recurrent_volume_per_edge_device",
+                "label": "recurrent_volume_per_edge_device",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "recurrent_quantities_from_constant",
+                "default": {
+                    "constant_value": 1,
+                    "constant_unit": "occurrence"
+                }
+            }
+        ],
+        "advanced_fields": []
+    }
+]

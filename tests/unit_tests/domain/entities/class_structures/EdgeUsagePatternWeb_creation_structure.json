@@ -47,6 +47,24 @@
                 ]
             },
             {
+                "web_id": "EdgeUsagePattern_network",
+                "attr_name": "network",
+                "label": "network",
+                "tooltip": false,
+                "input_type": "select_object",
+                "selected": "efootprint_id1",
+                "options": [
+                    {
+                        "label": "option1",
+                        "value": "efootprint_id1"
+                    },
+                    {
+                        "label": "option2",
+                        "value": "efootprint_id2"
+                    }
+                ]
+            },
+            {
                 "web_id": "EdgeUsagePattern_country",
                 "attr_name": "country",
                 "label": "country",

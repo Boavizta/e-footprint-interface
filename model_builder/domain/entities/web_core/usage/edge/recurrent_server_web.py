@@ -30,7 +30,7 @@ class RecurrentServerNeedWeb(ResourceNeedBaseWeb):
             elif job_links:
                 jobs_links += job_links
         if jobs_links:
-            return self.edge_device.web_id + "|" + job_links
+            return self.edge_device.web_id + "|" + jobs_links
         return self.edge_device.web_id
 
     @classmethod
