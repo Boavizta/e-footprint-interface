@@ -43,8 +43,8 @@
         </svg>
     </button>
 </div>
-<div id="selected_data" data-json="{{ field.selected|safe }}"></div>
-<div id="unselected_data" data-json="{{ field.unselected|safe }}"></div>
+<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected|safe }}"></div>
+<div id="unselected_data_{{ field.web_id }}" data-json="{{ field.unselected|safe }}"></div>
 <input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value="">
 
 <script>

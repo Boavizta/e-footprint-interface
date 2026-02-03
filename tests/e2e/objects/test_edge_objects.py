@@ -111,9 +111,7 @@ class TestEdgeObjects:
 
         # Add recurrent edge process to edge function
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
-        # Expand the card to reveal the add button
-        edge_function_card.open_accordion()
-        edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeedBase']").click()
+        edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeed']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
 
         # Select edge device and fill recurrent process details
@@ -267,8 +265,7 @@ class TestEdgeObjects:
 
         # Step 6: Add RecurrentEdgeDeviceNeed to EdgeFunction
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
-        edge_function_card.open_accordion()
-        edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeedBase']").click()
+        edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeed']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_device", edge_device_name)
         # When selecting EdgeDevice (not EdgeComputer), RecurrentEdgeDeviceNeed is auto-selected

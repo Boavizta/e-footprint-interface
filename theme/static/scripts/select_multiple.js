@@ -1,5 +1,5 @@
 function sortSelectMultipleFields(fieldId, selectedValue, direction) {
-    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data");
+    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
     let index = selectedOptions.findIndex(option => String(option.value) === String(selectedValue));
     if (index === -1) return;
     if (direction === "up" && index > 0) {
@@ -10,14 +10,14 @@ function sortSelectMultipleFields(fieldId, selectedValue, direction) {
         [selectedOptions[index + 1], selectedOptions[index]] =
             [selectedOptions[index], selectedOptions[index + 1]];
     }
-    document.getElementById("selected_data").dataset.json = convertJsonToStringLikeDjango(selectedOptions);
+    document.getElementById("selected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(selectedOptions);
     refreshSelectMultipleFields(fieldId);
     tagFormAsModified();
 }
 
 function removeValueFromSelectMultiple(fieldId, selectedValue) {
-    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data");
-    let unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data");
+    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
+    let unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data_" + fieldId);
     let index = selectedOptions.findIndex(option => option.value === selectedValue);
     if (index === -1) return;
     let removedItem = selectedOptions.splice(index, 1)[0];
@@ -26,8 +26,8 @@ function removeValueFromSelectMultiple(fieldId, selectedValue) {
     newOption.value = removedItem.value;
     newOption.textContent = removedItem.label;
     document.getElementById("select-new-object-"+fieldId).appendChild(newOption);
-    document.getElementById("unselected_data").dataset.json = convertJsonToStringLikeDjango(unselectedOptions);
-    document.getElementById("selected_data").dataset.json = convertJsonToStringLikeDjango(selectedOptions);
+    document.getElementById("unselected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(unselectedOptions);
+    document.getElementById("selected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(selectedOptions);
     document.getElementById("add-btn-" + fieldId).removeAttribute("disabled");
     document.getElementById("select-new-object-"+fieldId).removeAttribute("disabled");
     refreshSelectMultipleFields(fieldId);
@@ -37,8 +37,8 @@ function removeValueFromSelectMultiple(fieldId, selectedValue) {
 function addValueToSelectMultiple(fieldId) {
     const selectElement = document.getElementById("select-new-object-" + fieldId);
     if (!selectElement.value) return;
-    const selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data");
-    const unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data");
+    const selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
+    const unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data_" + fieldId);
 
     const idx = unselectedOptions.findIndex(o => String(o.value) === String(selectElement.value));
     if (idx !== -1) {
@@ -49,15 +49,15 @@ function addValueToSelectMultiple(fieldId) {
     const opt = selectElement.querySelector(`option[value="${selectElement.value}"]`);
     if (opt) opt.remove();
 
-    document.getElementById("selected_data").dataset.json   = convertJsonToStringLikeDjango(selectedOptions);
-    document.getElementById("unselected_data").dataset.json = convertJsonToStringLikeDjango(unselectedOptions);
+    document.getElementById("selected_data_" + fieldId).dataset.json   = convertJsonToStringLikeDjango(selectedOptions);
+    document.getElementById("unselected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(unselectedOptions);
 
     refreshSelectMultipleFields(fieldId);
 }
 
 function refreshSelectMultipleFields(fieldId) {
     let objectsAlreadySelectedElement = document.getElementById("objects-already-selected-for-" + fieldId);
-    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data");
+    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
     let selectNewObjectElement = document.getElementById("select-new-object-" + fieldId);
 
     objectsAlreadySelectedElement.innerHTML = '';
