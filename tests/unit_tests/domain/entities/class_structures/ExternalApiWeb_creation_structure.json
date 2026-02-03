@@ -6,7 +6,7 @@
             {
                 "input_type": "select_object",
                 "web_id": "type_object_available",
-                "label": "Available services",
+                "label": "Available services for this server",
                 "options": [
                     {
                         "label": "Generative AI model",

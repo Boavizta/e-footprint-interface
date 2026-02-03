@@ -1,7 +1,7 @@
 """Unit tests for UsagePatternWeb entity."""
 from model_builder.domain.entities.web_core.usage.usage_pattern_web import UsagePatternWeb
 from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
-from tests.unit_tests.domain.entities.web_core.usage.snapshot_model_webs import build_usage_pattern_model_web
+from tests.unit_tests.domain.entities.snapshot_model_webs import build_usage_pattern_model_web
 
 
 class TestUsagePatternWeb:

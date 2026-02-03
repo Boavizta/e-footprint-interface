@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from unittest.mock import MagicMock
 
+from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.constants.units import u
 
 
@@ -93,4 +94,16 @@ def build_basic_edge_devices_model_web():
         class_as_simple_str="EdgeDevice",
     )
     model_web.edge_devices = [mock_edge_device]
+    return model_web
+
+
+def build_service_model_web():
+    """Model web stub for ServiceWeb creation snapshots."""
+    basic_model_web = build_basic_model_web()
+    model_web = deepcopy(basic_model_web)
+
+    server = MagicMock()
+    server.installable_services.return_value = SERVICE_CLASSES
+    model_web.get_web_object_from_efootprint_id.return_value = server
+
     return model_web

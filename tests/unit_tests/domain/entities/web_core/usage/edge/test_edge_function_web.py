@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from model_builder.domain.entities.web_core.usage.edge.edge_function_web import EdgeFunctionWeb
 from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
-from tests.unit_tests.domain.entities.web_core.usage.snapshot_model_webs import build_basic_model_web
+from tests.unit_tests.domain.entities.snapshot_model_webs import build_basic_model_web
 
 
 def _build_edge_function_web():
