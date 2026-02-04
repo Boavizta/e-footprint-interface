@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
@@ -67,7 +69,7 @@ def minimal_system():
 
 
 @pytest.fixture
-def minimal_system_data(minimal_system):
+def minimal_system_data(minimal_system) -> dict[str, Any]:
     """System data dict (JSON-serializable) from minimal system."""
     return system_to_json(minimal_system, save_calculated_attributes=False)
 
