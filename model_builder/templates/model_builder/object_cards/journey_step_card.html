@@ -50,7 +50,7 @@
                     <div class="accordion-body w-100 pe-0 m-0 d-flex flex-column py-1">
                         {% if object.child_object_types_str|length > 1 %}
                             {% for section in object.child_sections %}
-                                <div class="w-85 ms-15 px-2 py-2 d-flex flex-column"
+                                <div class="w-85 ms-15 px-2 py-2 my-1 d-flex flex-column"
                                      style="border: 1px dotted #d0d5dd; border-radius: 10px;">
                                     <p class="h8 text-secondary mb-2">{{ section.type_str|class_label }}s</p>
                                     {% for child in section.children %}
