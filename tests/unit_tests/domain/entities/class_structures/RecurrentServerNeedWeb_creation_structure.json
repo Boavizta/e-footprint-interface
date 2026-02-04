@@ -67,7 +67,7 @@
             {
                 "web_id": "RecurrentServerNeed_recurrent_volume_per_edge_device",
                 "attr_name": "recurrent_volume_per_edge_device",
-                "label": "recurrent_volume_per_edge_device",
+                "label": "recurrent volume per edge device",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",

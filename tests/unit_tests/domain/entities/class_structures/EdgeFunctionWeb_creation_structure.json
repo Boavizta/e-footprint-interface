@@ -49,7 +49,7 @@
             {
                 "web_id": "EdgeFunction_recurrent_server_needs",
                 "attr_name": "recurrent_server_needs",
-                "label": "recurrent_server_needs",
+                "label": "recurrent server needs",
                 "tooltip": false,
                 "input_type": "select_multiple",
                 "selected": [],

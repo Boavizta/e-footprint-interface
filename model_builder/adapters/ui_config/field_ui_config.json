@@ -27,6 +27,7 @@
             "Job",
             "GPUJob",
             "RecurrentEdgeDeviceNeed",
+            "RecurrentServerNeed",
             "RecurrentEdgeComponentNeed",
             "RecurrentEdgeProcessRAMNeed",
             "RecurrentEdgeProcessCPUNeed",
@@ -291,7 +292,8 @@
     },
     "jobs": {
         "modeling_obj_containers": [
-            "UsageJourneyStep"
+            "UsageJourneyStep",
+            "RecurrentServerNeed"
         ],
         "label": "Jobs in this usage journey step"
     },
@@ -315,7 +317,8 @@
     },
     "network": {
         "modeling_obj_containers": [
-            "UsagePattern"
+            "UsagePattern",
+            "EdgeUsagePattern"
         ],
         "label": "network"
     },
@@ -665,6 +668,7 @@
     "edge_device": {
         "modeling_obj_containers": [
             "RecurrentEdgeDeviceNeed",
+            "RecurrentServerNeed",
             "RecurrentEdgeProcess",
             "RecurrentEdgeWorkload"
         ],
@@ -795,5 +799,17 @@
             "RecurrentEdgeDeviceNeed"
         ],
         "label": "recurrent edge component needs"
+    },
+    "recurrent_server_needs": {
+        "modeling_obj_containers": [
+            "EdgeFunction"
+        ],
+        "label": "recurrent server needs"
+    },
+    "recurrent_volume_per_edge_device": {
+        "modeling_obj_containers": [
+            "RecurrentServerNeed"
+        ],
+        "label": "recurrent volume per edge device"
     }
 }
