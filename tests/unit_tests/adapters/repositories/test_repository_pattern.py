@@ -3,13 +3,13 @@
 These tests__old show how to use the InMemorySystemRepository to test ModelWeb
 without requiring Django session infrastructure.
 """
-import json
-import os
 import unittest
+from copy import deepcopy
 
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.reference_data import DEFAULT_SYSTEM_DATA
 
 
 class TestInMemoryRepository(unittest.TestCase):
@@ -64,13 +64,7 @@ class TestModelWebWithRepository(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Load test system data once for all tests__old."""
-        test_data_path = os.path.join(
-            os.path.dirname(__file__),
-            "default_system_data_with_calculated_attributes.json"
-        )
-        with open(test_data_path, "r") as f:
-            cls.test_system_data = json.load(f)
+        cls.test_system_data = deepcopy(DEFAULT_SYSTEM_DATA)
 
     def test_model_web_accepts_repository(self):
         """ModelWeb should accept an ISystemRepository implementation."""

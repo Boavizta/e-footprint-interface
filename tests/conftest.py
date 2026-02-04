@@ -1,6 +1,5 @@
 """Pytest configuration and shared fixtures."""
 import pytest
-from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.constants.countries import country_generator, tz
