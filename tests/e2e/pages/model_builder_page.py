@@ -82,6 +82,11 @@ class ModelBuilderPage:
         click_and_wait_for_htmx(self.page, self.page.locator("#add_usage_pattern"))
         return self.side_panel
 
+    def click_add_edge_usage_pattern(self):
+        """Click the 'Add Edge Usage Pattern' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#add_edge_usage_pattern"))
+        return self.side_panel
+
     # --- Result panel ---
 
     def open_result_panel(self):
@@ -99,6 +104,23 @@ class ModelBuilderPage:
     def result_chart_should_be_visible(self):
         """Assert that the result chart is visible."""
         expect(self.page.locator("#lineChart")).to_be_visible()
+        return self
+
+    # --- Error modal ---
+
+    def expect_error_modal(self, message_substring: str):
+        """Assert that the error modal is visible and contains text."""
+        modal = self.page.locator("#model-builder-modal")
+        expect(modal).to_be_visible()
+        expect(modal).to_contain_text(message_substring)
+        return self
+
+    def close_error_modal(self, modal_id: str = "model-builder-modal"):
+        """Close the error modal."""
+        go_back_button = self.page.locator(f"#btn-go-back-modal-{modal_id}")
+        expect(go_back_button).to_be_visible()
+        go_back_button.click()
+        expect(self.page.locator("#model-builder-modal")).not_to_be_visible()
         return self
 
     # --- Import/Export ---

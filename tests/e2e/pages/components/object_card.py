@@ -34,8 +34,15 @@ class ObjectCard:
         """Click the 'add job' button (triggers HTMX)."""
         click_and_wait_for_htmx(self.locator.page, self.locator.locator("button[hx-get*='open-create-object-panel/JobBase']"))
 
+    def click_add_child_button(self, child_type: str):
+        """Click the 'add child' button for a specific child type (triggers HTMX)."""
+        button = self.locator.locator(f"button[hx-get*='{child_type}']").first
+        if not button.is_visible():
+            self.open_accordion()
+        click_and_wait_for_htmx(self.locator.page, button)
+
     def open_accordion(self):
-        self.locator.locator(".chevron-btn").click()
+        self.locator.locator(".chevron-btn").first.click()
 
     def has_class(self, class_name: str) -> bool:
         """Check if the card has a specific CSS class."""

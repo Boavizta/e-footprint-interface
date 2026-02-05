@@ -80,17 +80,10 @@ class TestEdgeObjects:
         edge_journey_name = "Test Edge Journey"
         edge_function_name = "Test Edge Function"
         recurrent_process_name = "Test Recurrent Process"
-
-        # Create edge device
-        page.locator("#btn-add-edge-device").click()
-        page.locator("#sidePanelForm").wait_for(state="visible")
-        side_panel.select_object_type("EdgeComputer")
-        side_panel.fill_field("EdgeComputer_name", edge_device_name)
-        side_panel.fill_field("EdgeComputer_ram", "16")
-        side_panel.fill_field("EdgeComputer_compute", "8")
-        side_panel.submit_and_wait_for_close()
-
-        model_builder.object_should_exist("EdgeComputer", edge_device_name)
+        recurrent_server_need_name = "Test Recurrent Server Need"
+        server_name = "Test Server"
+        job_name = "Test Server Job"
+        edge_usage_pattern_name = "Test Edge Usage Pattern"
 
         # Create edge usage journey
         page.locator("#btn-add-edge-usage-journey").click()
@@ -109,9 +102,33 @@ class TestEdgeObjects:
 
         model_builder.object_should_exist("EdgeFunction", edge_function_name)
 
-        # Add recurrent edge process to edge function
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
-        edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeed']").click()
+
+        # Try to add recurrent edge process before creating an edge device - should show error
+        edge_function_card.click_add_child_button("RecurrentEdgeDeviceNeed")
+        model_builder.expect_error_modal(
+            "Please create an edge device before adding a recurrent edge resource need")
+        model_builder.close_error_modal("model-builder-modal")
+
+        # Try to add a recurrent server need before creating an edge device - should show error
+        edge_function_card.click_add_child_button("RecurrentServerNeed")
+        model_builder.expect_error_modal(
+            "Please create an edge device before adding a recurrent server need")
+        model_builder.close_error_modal("model-builder-modal")
+
+        # Create edge device
+        page.locator("#btn-add-edge-device").click()
+        page.locator("#sidePanelForm").wait_for(state="visible")
+        side_panel.select_object_type("EdgeComputer")
+        side_panel.fill_field("EdgeComputer_name", edge_device_name)
+        side_panel.fill_field("EdgeComputer_ram", "16")
+        side_panel.fill_field("EdgeComputer_compute", "8")
+        side_panel.submit_and_wait_for_close()
+
+        model_builder.object_should_exist("EdgeComputer", edge_device_name)
+
+        # Add recurrent edge process to edge function
+        edge_function_card.click_add_child_button("RecurrentEdgeDeviceNeed")
         page.locator("#sidePanelForm").wait_for(state="visible")
 
         # Select edge device and fill recurrent process details
@@ -119,10 +136,75 @@ class TestEdgeObjects:
         side_panel.fill_field("RecurrentEdgeProcess_name", recurrent_process_name)
         side_panel.fill_field("RecurrentEdgeProcess_recurrent_compute_needed", "2.5")
         side_panel.fill_field("RecurrentEdgeProcess_recurrent_ram_needed", "4.5")
-        side_panel.fill_field("RecurrentEdgeProcess_recurrent_storage_needed", "100")
+        side_panel.fill_field("RecurrentEdgeProcess_recurrent_storage_needed", "0")
         side_panel.submit_and_wait_for_close()
 
         model_builder.object_should_exist("RecurrentEdgeProcess", recurrent_process_name)
+
+        # Add a recurrent server need
+        edge_function_card.click_add_child_button("RecurrentServerNeed")
+        side_panel.fill_field("RecurrentServerNeed_name", recurrent_server_need_name)
+        side_panel.select_option("RecurrentServerNeed_edge_device", edge_device_name)
+        side_panel.submit_and_wait_for_close()
+        model_builder.object_should_exist("RecurrentServerNeed", recurrent_server_need_name)
+
+        # Try to add a job to the recurrent server need - should show error since no server
+        edge_function_card.open_accordion()
+        recurrent_server_need_card = model_builder.get_object_card("RecurrentServerNeed", recurrent_server_need_name)
+        recurrent_server_need_card.click_add_job_button()
+        model_builder.expect_error_modal(
+            "Please go to the infrastructure section and create a server before adding a job"
+        ).close_error_modal()
+
+        # Add a server
+        model_builder.click_add_server()
+        side_panel.select_object_type("BoaviztaCloudServer")
+        side_panel.fill_field("BoaviztaCloudServer_name", server_name)
+        side_panel.fill_field("BoaviztaCloudServer_instance_type", "ent1-l")
+        side_panel.submit_and_wait_for_close()
+        model_builder.object_should_exist("BoaviztaCloudServer", server_name)
+
+        # Add a job to the recurrent server need - should work
+        recurrent_server_need_card.click_add_job_button()
+        page.locator("#service").wait_for(state="attached")
+        side_panel.select_option("service", "direct_server_call")
+        side_panel.fill_field("Job_name", job_name)
+        side_panel.submit_and_wait_for_close()
+        model_builder.object_should_exist("Job", job_name)
+
+        # Add edge usage pattern
+        model_builder.click_add_edge_usage_pattern()
+        side_panel.fill_field("EdgeUsagePattern_name", edge_usage_pattern_name)
+        modeling_duration_field = (
+            "#EdgeUsagePattern_hourly_edge_usage_journey_starts__modeling_duration_value"
+        )
+        page.locator(modeling_duration_field).fill("2")
+        page.locator(modeling_duration_field).dispatch_event("change")
+        side_panel.fill_field(
+            "EdgeUsagePattern_hourly_edge_usage_journey_starts__initial_volume",
+            "1000"
+        )
+        side_panel.fill_field(
+            "EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_in_percentage",
+            "25"
+        )
+        page.locator(
+            "#EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_in_percentage"
+        ).dispatch_event("change")
+        side_panel.select_option(
+            "EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_timespan",
+            "year"
+        )
+        side_panel.select_option("EdgeUsagePattern_edge_usage_journey", edge_journey_name)
+        side_panel.submit_and_wait_for_close()
+        model_builder.object_should_exist("EdgeUsagePattern", edge_usage_pattern_name)
+
+        # Click results and check that server footprints are not zero.
+        model_builder.open_result_panel()
+        model_builder.result_chart_should_be_visible()
+        server_energy = page.evaluate("window.emissions.values['Servers_and_storage_energy']")
+        server_fabrication = page.evaluate("window.emissions.values['Servers_and_storage_fabrication']")
+        assert any(value > 0 for value in server_energy) or any(value > 0 for value in server_fabrication)
 
     def test_edge_device_with_advanced_options(self, empty_model_builder: ModelBuilderPage):
         """Create edge device with advanced parameters."""
