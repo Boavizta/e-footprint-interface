@@ -1,11 +1,11 @@
-# NOTE: you have to use single-quoted strings in TOML for regular expressions.
+ # NOTE: you have to use single-quoted strings in TOML for regular expressions.
 # It's the equivalent of r-strings in Python.  Multiline strings are treated as
 # verbose regular expressions by Black.  Use [ ] to denote a significant space
 # character.
 
 [tool.poetry]
 name = "efootprint-interface"
-version = "0.12.2"
+version = "0.13.0"
 description = "Digital service environmental footprint model interface"
 authors = ["Vincent Villet", "Clémence Knaébel", "Julien Houbart", "Jordane Frouin"]
 readme = "README.md"

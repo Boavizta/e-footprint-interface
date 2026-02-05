@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.0] - 2026-02-05
+
+### Added
+- Possibility to add recurrent server needs to edge functions, to model the interaction between edge devices and web servers.
+
+### Fixed
+- Apply initDynamicForm after htmx settle instead of swap, so that opening the same dynamic form twice in a row keeps hidden forms hidden.
+- When opening a form that depends on hx-vals while a modified form is open, conserve hx-vals in request so that if user clicks "Yes, continue" in the unsaved warning modal, the initial request is complete and doesn’t result in an error.
+
 ## [0.12.2] - 2026-01-27
 
 ### Fixed
