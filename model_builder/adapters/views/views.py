@@ -49,6 +49,7 @@ def model_builder_main(request, reboot=False):
 
     model_web = ModelWeb(repository)
     if model_web.system_data is None:
+        logger.info("No system data found in session, initializing with default system data through reboot")
         return redirect("model-builder", reboot="reboot")
 
     if efootprint_version != model_web.initial_system_data_efootprint_version:

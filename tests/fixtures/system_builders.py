@@ -20,6 +20,7 @@ from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quan
     ExplainableHourlyQuantitiesFromFormInputs
 )
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.reference_data import DEFAULT_SYSTEM_DATA
 
 
 def create_hourly_usage(
@@ -90,3 +91,15 @@ def minimal_model_web(minimal_repository):
 def empty_repository():
     """Empty InMemorySystemRepository."""
     return InMemorySystemRepository()
+
+
+@pytest.fixture
+def default_system_repository() -> InMemorySystemRepository:
+    """Repository loaded with the app's default (empty) system modeling.
+
+    The fixture normalizes data by computing calculated attributes once, so
+    integration tests can compare structure after create/edit/delete flows.
+    """
+    repository = InMemorySystemRepository(initial_data=DEFAULT_SYSTEM_DATA)
+    ModelWeb(repository).update_system_data_with_up_to_date_calculated_attributes()
+    return repository
