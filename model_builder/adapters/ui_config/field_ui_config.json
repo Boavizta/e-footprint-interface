@@ -20,10 +20,9 @@
             "EdgeDevice",
             "EdgeAppliance",
             "EdgeComputer",
-            "WebApplication",
             "VideoStreaming",
-            "GenAIModel",
             "BoaviztaCloudServer",
+            "EcoLogitsGenAIExternalAPI",
             "Job",
             "GPUJob",
             "RecurrentEdgeDeviceNeed",
@@ -35,12 +34,12 @@
             "RecurrentEdgeWorkloadNeed",
             "RecurrentEdgeProcess",
             "RecurrentEdgeWorkload",
-            "WebApplicationJob",
             "VideoStreamingJob",
-            "GenAIJob",
+            "EcoLogitsGenAIExternalAPIJob",
             "Network",
             "Server",
             "GPUServer",
+            "EcoLogitsGenAIExternalAPIServer",
             "Storage",
             "System"
         ],
@@ -273,8 +272,8 @@
     },
     "provider": {
         "modeling_obj_containers": [
-            "GenAIModel",
-            "BoaviztaCloudServer"
+            "BoaviztaCloudServer",
+            "EcoLogitsGenAIExternalAPI"
         ],
         "label": "provider"
     },
@@ -398,9 +397,7 @@
     },
     "server": {
         "modeling_obj_containers": [
-            "WebApplication",
             "VideoStreaming",
-            "GenAIModel",
             "Job",
             "GPUJob"
         ],
@@ -409,8 +406,7 @@
     "data_transferred": {
         "modeling_obj_containers": [
             "Job",
-            "GPUJob",
-            "WebApplicationJob"
+            "GPUJob"
         ],
         "label": "data transferred",
         "step": 1
@@ -419,7 +415,6 @@
         "modeling_obj_containers": [
             "Job",
             "GPUJob",
-            "WebApplicationJob",
             "VideoStreamingJob"
         ],
         "label": "data stored",
@@ -452,15 +447,13 @@
     },
     "service": {
         "modeling_obj_containers": [
-            "WebApplicationJob",
-            "VideoStreamingJob",
-            "GenAIJob"
+            "VideoStreamingJob"
         ],
         "label": "service"
     },
     "output_token_count": {
         "modeling_obj_containers": [
-            "GenAIJob"
+            "EcoLogitsGenAIExternalAPIJob"
         ],
         "label": "output token count",
         "step": 1
@@ -510,7 +503,7 @@
     },
     "model_name": {
         "modeling_obj_containers": [
-            "GenAIModel"
+            "EcoLogitsGenAIExternalAPI"
         ],
         "label": "model name"
     },
@@ -811,5 +804,11 @@
             "RecurrentServerNeed"
         ],
         "label": "recurrent volume per edge device"
+    },
+    "external_api": {
+        "modeling_obj_containers": [
+            "EcoLogitsGenAIExternalAPIJob"
+        ],
+        "label": "external api"
     }
 }

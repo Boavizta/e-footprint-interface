@@ -37,7 +37,8 @@ if __name__ == "__main__":
     from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 
     # Path to the ui_config and reference_data directories
-    ui_config_dir = script_os.path.join(script_os.path.dirname(__file__), "..", "model_builder", "adapters", "ui_config")
+    ui_config_dir = script_os.path.join(
+        script_os.path.dirname(__file__), "..", "..", "..", "model_builder", "adapters", "ui_config")
 
     def recompute_field_ui_config():
         reformatted_form_fields = deepcopy(FIELD_UI_CONFIG)

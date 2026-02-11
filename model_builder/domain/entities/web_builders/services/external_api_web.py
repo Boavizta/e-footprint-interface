@@ -11,8 +11,12 @@ class ExternalAPIWeb(ModelingObjectWeb):
     }
 
     @property
+    def class_title_style(self):
+        return "h6"
+
+    @property
     def template_name(self):
-        return "external_api"
+        return "usage_pattern"
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:

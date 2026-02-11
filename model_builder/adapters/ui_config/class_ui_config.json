@@ -158,6 +158,9 @@
     "GenAIJob": {
         "label": "Generative AI job"
     },
+    "EcoLogitsGenAIExternalAPIJob": {
+        "label": "Gen AI Job"
+    },
     "Network": {
         "label": "Network"
     },
