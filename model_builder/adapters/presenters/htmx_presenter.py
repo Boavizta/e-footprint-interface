@@ -91,7 +91,7 @@ class HtmxPresenter:
                 self._append_recomputation_html(response)
             return response
 
-        # Check if we should return a different object (e.g., ExternalApi returns server)
+        # Check if we should return a different object (e.g., server instead of service)
         if output.override_object:
             override_obj = output.override_object
             response = render(

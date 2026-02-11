@@ -236,8 +236,8 @@ class TestViewsAdditionWeb(TestModelingBase):
             "efootprint_version": "10.1.14",
             "System": {"uuid-system-1": {"name": "system 1", "id": "uuid-system-1", "usage_patterns": []}}
         }
-        add_request = self.create_post_request("/add-object/ExternalApi", external_api_data, system_data)
+        add_request = self.create_post_request("/add-object/ExternalAPI", external_api_data, system_data)
 
-        response = add_object(add_request, "ExternalApi")
+        response = add_object(add_request, "ExternalAPI")
 
         self.assert_response_ok(response)

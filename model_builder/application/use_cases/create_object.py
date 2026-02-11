@@ -37,7 +37,7 @@ class CreateObjectOutput:
     linked_parent_id: Optional[str] = None
     linked_parent_web_id: Optional[str] = None
     linked_parent_mirrored_web_ids: List[str] = field(default_factory=list)
-    # For cases where a different object should be returned (e.g., ExternalApi returns server)
+    # For cases where a different object should be returned (e.g., server instead of service)
     override_object: Optional[Any] = None
     model_web: ModelWeb = None
 
@@ -78,12 +78,12 @@ class CreateObjectUseCase:
         # 1. Load system
         model_web = ModelWeb(self.repository)
 
-        # 2. Get input web class (e.g., ExternalApiWeb) - hooks may be defined here
+        # 2. Get input web class - hooks may be defined here
         input_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(input_data.object_type)
         form_data = input_data.form_data
 
         # 3. Apply hooks from input web class first (before type resolution)
-        # 3a. Pre-create hook: create prerequisite objects (e.g., ExternalApi creates storage + server)
+        # 3a. Pre-create hook: create prerequisite objects (e.g., server creates storage)
         if input_web_class and hasattr(input_web_class, 'pre_create'):
             form_data = input_web_class.pre_create(form_data, model_web)
 
@@ -108,7 +108,7 @@ class CreateObjectUseCase:
         try:
             new_efootprint_obj = create_efootprint_obj_from_parsed_data(form_data, model_web, object_creation_type)
         except Exception as e:
-            # 6a. Handle creation error hook (e.g., ExternalApi handles InsufficientCapacityError)
+            # 6a. Handle creation error hook (e.g., ExternalAPI handled InsufficientCapacityError)
             # Check input_web_class first, then web_class
             handler_class = None
             if input_web_class and hasattr(input_web_class, 'handle_creation_error'):
@@ -148,7 +148,7 @@ class CreateObjectUseCase:
                     model_web, added_obj, input_data.parent_id)
                 linked_parent_id = input_data.parent_id
 
-            # 9. Post-create hook (e.g., ExternalApi returns server instead of service)
+            # 9. Post-create hook (e.g., ExternalAPI returned server instead of service)
             # Check input_web_class first, then web_class
             override_object = None
             post_create_class = None

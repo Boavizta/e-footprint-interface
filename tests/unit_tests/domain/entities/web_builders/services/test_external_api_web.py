@@ -1,4 +1,4 @@
-"""Unit tests for ExternalApiWeb entity."""
+"""Unit tests for ExternalAPIWeb entity."""
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -7,7 +7,7 @@ import pytest
 from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.constants.units import u
 
-from model_builder.domain.entities.web_builders.services.external_api_web import ExternalApiWeb
+from model_builder.domain.entities.web_builders.services.external_api_web import ExternalAPIWeb
 from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
 from tests.unit_tests.domain.entities.snapshot_model_webs import build_basic_model_web
 
@@ -36,14 +36,14 @@ class _FakeQuantity:
         return self._magnitude
 
 
-class TestExternalApiWeb:
-    """Tests for ExternalApiWeb-specific behavior."""
+class TestExternalAPIWeb:
+    """Tests for ExternalAPIWeb-specific behavior."""
 
     # --- get_htmx_form_config ---
 
     def test_get_htmx_form_config_targets_server_list(self):
         """HTMX config should append to the server list."""
-        assert ExternalApiWeb.get_htmx_form_config({}) == {"hx_target": "#server-list", "hx_swap": "beforeend"}
+        assert ExternalAPIWeb.get_htmx_form_config({}) == {"hx_target": "#server-list", "hx_swap": "beforeend"}
 
     # --- pre_create ---
 
@@ -64,25 +64,25 @@ class TestExternalApiWeb:
             gpu_mock.return_value = server
 
             form_data = {"type_object_available": "GenAIModel", "name": "GenAI"}
-            result = ExternalApiWeb.pre_create(form_data, model_web)
+            result = ExternalAPIWeb.pre_create(form_data, model_web)
 
         assert result["efootprint_id_of_parent_to_link_to"] == "server-id"
         assert "efootprint_id_of_parent_to_link_to" not in form_data
-        assert ExternalApiWeb._created_server_web == server_web
+        assert ExternalAPIWeb._created_server_web == server_web
 
     def test_pre_create_rejects_unsupported_service_type(self):
         """Unsupported service types should raise an explicit error."""
         with pytest.raises(Exception):
-            ExternalApiWeb.pre_create({"type_object_available": "Other"}, MagicMock())
+            ExternalAPIWeb.pre_create({"type_object_available": "Other"}, MagicMock())
 
     # --- post_create ---
 
     def test_post_create_returns_server_reference(self):
         """post_create should return the created server web object."""
         server_web = SimpleNamespace(modeling_obj=SimpleNamespace(id="server-id"))
-        ExternalApiWeb._created_server_web = server_web
+        ExternalAPIWeb._created_server_web = server_web
 
-        result = ExternalApiWeb.post_create(MagicMock(), {}, MagicMock())
+        result = ExternalAPIWeb.post_create(MagicMock(), {}, MagicMock())
 
         assert result == {"return_server_instead": True, "server_web": server_web}
 
@@ -97,7 +97,7 @@ class TestExternalApiWeb:
             ram_per_gpu=_FakeCapacity(1.0),
         )
         server_web = SimpleNamespace(modeling_obj=server)
-        ExternalApiWeb._created_server_web = server_web
+        ExternalAPIWeb._created_server_web = server_web
 
         model_web = MagicMock()
 
@@ -108,7 +108,7 @@ class TestExternalApiWeb:
             requested_capacity=_FakeCapacity(2.0),
         )
 
-        result = ExternalApiWeb.handle_creation_error(error, {}, model_web)
+        result = ExternalAPIWeb.handle_creation_error(error, {}, model_web)
 
         assert server.compute.value.magnitude == 3
         assert server.compute.value.units == u.gpu
@@ -121,4 +121,4 @@ class TestExternalApiWeb:
     def test_generate_object_creation_context_matches_snapshot(self):
         """Creation context form structure matches reference snapshot."""
         model_web = build_basic_model_web()
-        assert_creation_context_matches_snapshot(ExternalApiWeb, model_web=model_web, object_type="ExternalApi")
+        assert_creation_context_matches_snapshot(ExternalAPIWeb, model_web=model_web, object_type="ExternalAPI")

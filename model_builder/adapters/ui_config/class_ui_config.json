@@ -92,9 +92,9 @@
         "label": "Service",
         "type_object_available": "Available services for this server"
     },
-    "ExternalApi": {
-        "label": "server and service",
-        "post_addition_help": "A matching server will be autocreated and you will be able to fine tune it later."
+    "ExternalAPI": {
+        "label": "External API",
+        "type_object_available": "Available external APIs."
     },
     "Storage": {
         "label": "Storage",
@@ -135,6 +135,10 @@
     "GPUServer": {
         "label": "AI server",
         "more_descriptive_label_for_select_inputs": "Server for AI & GenAI services (GPUs)"
+    },
+    "EcoLogitsGenAIExternalAPI": {
+        "label": "Gen AI external API",
+        "more_descriptive_label_for_select_inputs": "EcoLogits modeling of API calls to major online AI providers."
     },
     "WebApplication": {
         "label": "Web application"

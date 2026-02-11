@@ -15,7 +15,7 @@ class TestsUIConfig(TestCase):
         objects_extra_fields_to_check = ['Server','Service']
 
         for efootprint_class_str in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys():
-            if efootprint_class_str in ["ServerBase", "Service", "ExternalApi", "EdgeDeviceBase", "JobBase",
+            if efootprint_class_str in ["ServerBase", "Service", "ExternalAPI", "EdgeDeviceBase", "JobBase",
                                         "RecurrentEdgeDeviceNeedBase", "EdgeComponent"]:
                 continue
             efootprint_obj_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
