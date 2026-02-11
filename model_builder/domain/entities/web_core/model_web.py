@@ -166,6 +166,10 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("ServerBase")
 
     @property
+    def external_apis(self):
+        return self.get_web_objects_from_efootprint_type("ExternalAPI")
+
+    @property
     def edge_devices(self):
         """Returns all edge devices."""
         all_edge_devices = self.get_web_objects_from_efootprint_type("EdgeDevice")

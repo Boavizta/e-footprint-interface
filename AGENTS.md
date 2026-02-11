@@ -21,7 +21,7 @@ model_builder/
 ├── domain/                    # Business logic, no Django dependencies
 │   ├── entities/              # Web wrappers around efootprint objects
 │   │   ├── web_core/          # Core entities (ModelWeb, ServerWeb, JobWeb, etc.)
-│   │   ├── web_builders/      # Builder-specific entities (ExternalApiWeb, etc.)
+│   │   ├── web_builders/      # Builder-specific entities (ExternalAPIWeb, etc.)
 │   │   ├── web_abstract_modeling_classes/  # Base classes (ModelingObjectWeb)
 │   │   └── efootprint_extensions/  # ExplainableObject extensions
 │   ├── services/              # Domain services (EmissionsCalculationService, etc.)

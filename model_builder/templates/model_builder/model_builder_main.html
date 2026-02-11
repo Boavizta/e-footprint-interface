@@ -95,7 +95,7 @@
                         </button>
                         <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
                                 id="btn-add-external-api"
-                                hx-get="{% url 'open-add-new-object-panel' 'ExternalApi' %}"
+                                hx-get="{% url 'open-add-new-object-panel' 'ExternalAPI' %}"
                                 hx-target="#sidePanel"
                                 hx-trigger="click"
                                 hx-swap="innerHTML"
@@ -120,9 +120,14 @@
                             <p class="mb-0 text-addition">Add edge device</p>
                         </button>
                     </div>
+                    <div id="external-api-list" class="list-group d-flex flew-column w-75 ms-25">
+                        {% for external_api in model_web.external_apis %}
+                            {% include 'model_builder/object_cards/external_api_card.html' with object=external_api %}
+                        {% endfor %}
+                    </div>
                     <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">
                         {% for server in model_web.servers %}
-                        {% include 'model_builder/object_cards/server_card.html' with object=server %}
+                            {% include 'model_builder/object_cards/server_card.html' with object=server %}
                         {% endfor %}
                     </div>
                     <div id="edge-devices-list" class="list-group d-flex flew-column w-75 ms-25">

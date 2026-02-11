@@ -7,7 +7,7 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 from model_builder.domain.entities.web_builders.hardware.edge.edge_appliance_component import EdgeApplianceComponentWeb
 from model_builder.domain.entities.web_builders.hardware.edge.edge_computer_cpu_component import EdgeComputerCPUComponentWeb
 from model_builder.domain.entities.web_builders.hardware.edge.edge_computer_ram_component import EdgeComputerRAMComponentWeb
-from model_builder.domain.entities.web_builders.services.external_api_web import ExternalApiWeb
+from model_builder.domain.entities.web_builders.services.external_api_web import ExternalAPIWeb
 from model_builder.domain.entities.web_builders.services.service_web import ServiceWeb
 from model_builder.domain.entities.web_builders.hardware.edge.edge_appliance_web import EdgeApplianceWeb
 from model_builder.domain.entities.web_builders.hardware.edge.edge_computer_web import EdgeComputerWeb
@@ -47,9 +47,10 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GPUJob": JobWeb,
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
+    "EcoLogitsGenAIExternalAPIJob": JobWeb,
     "WebApplicationJob": JobWeb,
-    # Is not an efootprint class but rather a builder that creates efootprint objects
-    "ExternalApi": ExternalApiWeb,
+    "ExternalAPI": ExternalAPIWeb,
+    "EcoLogitsGenAIExternalAPI": ExternalAPIWeb,
     "Service": ServiceWeb,
     "GenAIModel": ServiceWeb,
     "VideoStreaming": ServiceWeb,
