@@ -3,6 +3,8 @@ from time import perf_counter
 import numpy as np
 from pint import Quantity
 
+from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI, \
+    EcoLogitsGenAIExternalAPIJob
 from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
 from efootprint.builders.usage.edge.recurrent_edge_workload import RecurrentEdgeWorkload
 from efootprint.core.hardware.edge.edge_cpu_component import EdgeCPUComponent
@@ -10,14 +12,14 @@ from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_ram_component import EdgeRAMComponent
 from efootprint.core.usage.edge.recurrent_edge_component_need import RecurrentEdgeComponentNeed
 from efootprint.core.usage.edge.recurrent_edge_device_need import RecurrentEdgeDeviceNeed
+from efootprint.core.usage.edge.recurrent_edge_storage_need import RecurrentEdgeStorageNeed
+from efootprint.core.usage.edge.recurrent_server_need import RecurrentServerNeed
 
 start = perf_counter()
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, SourceRecurrentValues
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
-from efootprint.builders.services.generative_ai_ecologits import GenAIModel, GenAIJob
 from efootprint.builders.services.video_streaming import VideoStreaming, VideoStreamingJob
-from efootprint.builders.services.web_application import WebApplication, WebApplicationJob
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.server_base import ServerTypes
@@ -91,20 +93,18 @@ on_premise_gpu_server = GPUServer.from_defaults(
 )
 
 video_streaming = VideoStreaming.from_defaults("Video streaming service", server=autoscaling_server)
-web_application = WebApplication.from_defaults("Web application service", server=serverless_server)
-genai_model = GenAIModel.from_defaults("Generative AI model", server=on_premise_gpu_server)
+genai_model = EcoLogitsGenAIExternalAPI.from_defaults("Generative AI model")
 
 video_streaming_job = VideoStreamingJob.from_defaults(
     "Video streaming job", service=video_streaming, video_duration=SourceValue(20 * u.min))
-web_application_job = WebApplicationJob.from_defaults("Web application job", service=web_application)
-genai_model_job = GenAIJob.from_defaults("Generative AI model job", service=genai_model)
+genai_model_job = EcoLogitsGenAIExternalAPIJob.from_defaults("Generative AI model job", external_api=genai_model)
 manually_written_job = Job.from_defaults("Manually defined job", server=autoscaling_server)
 custom_gpu_job = GPUJob.from_defaults("Manually defined GPU job", server=on_premise_gpu_server)
 
 streaming_step = UsageJourneyStep(
     "20 min streaming",
     user_time_spent=SourceValue(20 * u.min, source=None),
-    jobs=[web_application_job, genai_model_job, video_streaming_job, manually_written_job, custom_gpu_job]
+    jobs=[genai_model_job, video_streaming_job, manually_written_job, custom_gpu_job]
     )
 
 usage_journey = UsageJourney("user journey", uj_steps=[streaming_step])
@@ -197,10 +197,20 @@ cpu_component = EdgeCPUComponent(
     base_compute_consumption=SourceValue(0.1 * u.cpu_core, source=None)
 )
 
+storage_component = EdgeStorage(
+    "edge storage component",
+    carbon_footprint_fabrication_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
+    power_per_storage_capacity=SourceValue(1.3 * u.W / u.TB, source=None),
+    lifespan=SourceValue(6 * u.years, source=None),
+    idle_power=SourceValue(0.1 * u.W, source=None),
+    storage_capacity=SourceValue(512 * u.GB, source=None),
+    base_storage_need=SourceValue(20 * u.GB, source=None),
+)
+
 edge_device = EdgeDevice(
     "custom edge device",
     structure_carbon_footprint_fabrication=SourceValue(50 * u.kg, source=None),
-    components=[ram_component, cpu_component],
+    components=[ram_component, cpu_component, storage_component],
     lifespan=SourceValue(6 * u.year, source=None)
 )
 
@@ -214,15 +224,31 @@ cpu_need = RecurrentEdgeComponentNeed(
     edge_component=cpu_component,
     recurrent_need=SourceRecurrentValues(Quantity(np.array([1] * 168, dtype=np.float32), u.cpu_core), source=None)
 )
+
+storage_need = RecurrentEdgeStorageNeed(
+    "Storage need",
+    edge_component=storage_component,
+    recurrent_need=SourceRecurrentValues(
+        Quantity(np.array([50] * 84 + [-50] * 84, dtype=np.float32), u.MB), source=None)
+)
+
 edge_device_need = RecurrentEdgeDeviceNeed(
     "custom edge device need",
     edge_device=edge_device,
-    recurrent_edge_component_needs=[ram_need, cpu_need]
+    recurrent_edge_component_needs=[ram_need, cpu_need, storage_need]
 )
+
+recurrent_volume = SourceRecurrentValues(np.array([1.0] * 168, dtype=np.float32) * u.occurrence, source=None)
+recurrent_server_need = RecurrentServerNeed(
+            "Server need",
+            edge_device=edge_computer,
+            recurrent_volume_per_edge_device=recurrent_volume,
+            jobs=[manually_written_job])
 
 edge_function = EdgeFunction(
     "edge function",
-    recurrent_edge_device_needs=[edge_process, edge_workload, edge_device_need]
+    recurrent_edge_device_needs=[edge_process, edge_workload, edge_device_need],
+    recurrent_server_needs=[recurrent_server_need]
 )
 
 edge_usage_journey = EdgeUsageJourney(
@@ -237,6 +263,7 @@ edge_usage_pattern = EdgeUsagePattern(
     country=country_generator(
             "devices country", "its 3 letter shortname, for example FRA",
         SourceValue(85 * u.g / u.kWh, source=None), tz('Europe/Paris'))(),
+    network=network,
     hourly_edge_usage_journey_starts=create_hourly_usage_from_frequency(
         timespan=6 * u.year, input_volume=1000, frequency='weekly',
         active_days=[0, 1, 2, 3, 4, 5], hours=[8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19])

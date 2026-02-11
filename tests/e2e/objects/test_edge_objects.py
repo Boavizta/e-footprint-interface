@@ -142,6 +142,7 @@ class TestEdgeObjects:
         model_builder.object_should_exist("RecurrentEdgeProcess", recurrent_process_name)
 
         # Add a recurrent server need
+        edge_function_card.open_accordion()
         edge_function_card.click_add_child_button("RecurrentServerNeed")
         side_panel.fill_field("RecurrentServerNeed_name", recurrent_server_need_name)
         side_panel.select_option("RecurrentServerNeed_edge_device", edge_device_name)
@@ -153,7 +154,7 @@ class TestEdgeObjects:
         recurrent_server_need_card = model_builder.get_object_card("RecurrentServerNeed", recurrent_server_need_name)
         recurrent_server_need_card.click_add_job_button()
         model_builder.expect_error_modal(
-            "Please go to the infrastructure section and create a server before adding a job"
+            "Please go to the infrastructure section and create a server or external API before adding a job"
         ).close_error_modal()
 
         # Add a server

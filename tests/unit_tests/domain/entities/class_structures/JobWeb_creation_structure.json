@@ -11,6 +11,10 @@
                     {
                         "label": "server",
                         "value": "server_efootprint_id"
+                    },
+                    {
+                        "label": "external_api",
+                        "value": "external_api_efootprint_id"
                     }
                 ],
                 "label": "Choose a server"
@@ -38,16 +42,12 @@
                         "value": "GPUJob"
                     },
                     {
-                        "label": "Web application job",
-                        "value": "WebApplicationJob"
+                        "label": "Gen AI Job",
+                        "value": "EcoLogitsGenAIExternalAPIJob"
                     },
                     {
                         "label": "Job",
                         "value": "Job"
-                    },
-                    {
-                        "label": "Generative AI job",
-                        "value": "GenAIJob"
                     },
                     {
                         "label": "Video streaming job",
@@ -149,85 +149,49 @@
         ]
     },
     {
-        "category": "WebApplicationJob",
-        "header": "Web application job creation",
+        "category": "EcoLogitsGenAIExternalAPIJob",
+        "header": "Gen AI Job creation",
         "fields": [
             {
-                "web_id": "WebApplicationJob_name",
+                "web_id": "EcoLogitsGenAIExternalAPIJob_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "Web application job 1"
+                "default": "Gen AI Job 1"
             },
             {
-                "web_id": "WebApplicationJob_data_transferred",
-                "attr_name": "data_transferred",
-                "label": "data transferred",
+                "web_id": "EcoLogitsGenAIExternalAPIJob_external_api",
+                "attr_name": "external_api",
+                "label": "external api",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "MB",
-                "default": 2.2,
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "web_id": "WebApplicationJob_data_stored",
-                "attr_name": "data_stored",
-                "label": "data stored",
-                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "kB",
-                "default": 100,
-                "can_be_negative": true,
-                "step": 1
-            },
-            {
-                "web_id": "WebApplicationJob_implementation_details",
-                "attr_name": "implementation_details",
-                "label": "implementation details",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "default": "default",
-                "input_type": "select_str_input",
-                "selected": "default",
+                "input_type": "select_object",
+                "selected": "efootprint_id1",
                 "options": [
                     {
-                        "label": "aggregation-code-side",
-                        "value": "aggregation-code-side"
+                        "label": "option1",
+                        "value": "efootprint_id1"
                     },
                     {
-                        "label": "orm-loop",
-                        "value": "orm-loop"
-                    },
-                    {
-                        "label": "mysql",
-                        "value": "mysql"
-                    },
-                    {
-                        "label": "default",
-                        "value": "default"
-                    },
-                    {
-                        "label": "no-index",
-                        "value": "no-index"
-                    },
-                    {
-                        "label": "no-pagination",
-                        "value": "no-pagination"
+                        "label": "option2",
+                        "value": "efootprint_id2"
                     }
                 ]
+            },
+            {
+                "web_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",
+                "attr_name": "output_token_count",
+                "label": "output token count",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "input",
+                "unit": "dimensionless",
+                "default": 1000,
+                "can_be_negative": false,
+                "step": 1
             }
         ],
         "advanced_fields": []
@@ -322,36 +286,6 @@
                 "step": 1
             }
         ]
-    },
-    {
-        "category": "GenAIJob",
-        "header": "Generative AI job creation",
-        "fields": [
-            {
-                "web_id": "GenAIJob_name",
-                "attr_name": "name",
-                "label": "name",
-                "tooltip": false,
-                "input_type": "str",
-                "default": "Generative AI job 1"
-            },
-            {
-                "web_id": "GenAIJob_output_token_count",
-                "attr_name": "output_token_count",
-                "label": "output token count",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "dimensionless",
-                "default": 1000,
-                "can_be_negative": false,
-                "step": 1
-            }
-        ],
-        "advanced_fields": []
     },
     {
         "category": "VideoStreamingJob",

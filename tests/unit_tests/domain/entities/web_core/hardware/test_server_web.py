@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.hardware.server import Server
-from efootprint.builders.services.web_application import WebApplication
+from efootprint.builders.services.video_streaming import VideoStreaming
 
 from model_builder.domain.entities.web_core.hardware.server_web import ServerWeb
 from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
@@ -46,7 +46,7 @@ class TestServerWeb:
         minimal_model_web.add_new_efootprint_object_to_system(storage)
         server_web = minimal_model_web.add_new_efootprint_object_to_system(server)
 
-        service = WebApplication.from_defaults("Test Service", server=server)
+        service = VideoStreaming.from_defaults("Test Service", server=server)
         added_service = minimal_model_web.add_new_efootprint_object_to_system(service)
         service_id = added_service.efootprint_id
 

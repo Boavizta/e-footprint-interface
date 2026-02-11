@@ -1,9 +1,8 @@
 {
     "switch_item": "type_object_available",
     "switch_values": [
-        "GenAIJob",
         "GPUJob",
-        "WebApplicationJob",
+        "EcoLogitsGenAIExternalAPIJob",
         "VideoStreamingJob",
         "Job"
     ],
@@ -22,6 +21,12 @@
                         "label": "direct call to server",
                         "value": "direct_server_call"
                     }
+                ],
+                "external_api_efootprint_id": [
+                    {
+                        "label": "external_api",
+                        "value": "external_api_efootprint_id"
+                    }
                 ]
             }
         },
@@ -33,6 +38,18 @@
                     {
                         "label": "Job",
                         "value": "Job"
+                    }
+                ],
+                "service_efootprint_id": [
+                    {
+                        "label": "Video streaming job",
+                        "value": "VideoStreamingJob"
+                    }
+                ],
+                "external_api_efootprint_id": [
+                    {
+                        "label": "Gen AI Job",
+                        "value": "EcoLogitsGenAIExternalAPIJob"
                     }
                 ]
             }

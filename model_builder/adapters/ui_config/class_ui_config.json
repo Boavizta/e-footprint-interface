@@ -140,23 +140,20 @@
         "label": "Gen AI external API",
         "more_descriptive_label_for_select_inputs": "EcoLogits modeling of API calls to major online AI providers."
     },
-    "WebApplication": {
-        "label": "Web application"
-    },
     "VideoStreaming": {
         "label": "Video streaming application"
     },
     "GenAIModel": {
         "label": "Generative AI model"
     },
-    "WebApplicationJob": {
-        "label": "Web application job"
-    },
     "VideoStreamingJob": {
         "label": "Video streaming job"
     },
     "GenAIJob": {
         "label": "Generative AI job"
+    },
+    "EcoLogitsGenAIExternalAPIJob": {
+        "label": "Gen AI Job"
     },
     "Network": {
         "label": "Network"

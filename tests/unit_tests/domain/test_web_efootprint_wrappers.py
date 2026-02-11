@@ -22,7 +22,7 @@ class TestWebEfootprintWrappers(TestCase):
         self.assertEqual(f"{storage.id}_modeling_obj", storage_web.id)
 
     def test_make_sure_that_all_canonical_classes_are_mapped(self):
-        excluded_classes = ["Device", "Country", "Network", "System"]
+        excluded_classes = ["Device", "Country", "Network", "System", "ExternalAPIServer"]
         unmapped_classes = []
         for canonical_class in CANONICAL_COMPUTATION_ORDER:
             if (canonical_class.__name__ not in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING

@@ -1,35 +1,35 @@
 [
     {
         "category": "efootprint_classes_available",
-        "header": "Service selection",
+        "header": "External API selection",
         "fields": [
             {
                 "input_type": "select_object",
                 "web_id": "type_object_available",
-                "label": "Available services for this server",
+                "label": "Available external APIs.",
                 "options": [
                     {
-                        "label": "Generative AI model",
-                        "value": "GenAIModel"
+                        "label": "EcoLogits modeling of API calls to major online AI providers.",
+                        "value": "EcoLogitsGenAIExternalAPI"
                     }
                 ]
             }
         ]
     },
     {
-        "category": "GenAIModel",
-        "header": "Generative AI model creation",
+        "category": "EcoLogitsGenAIExternalAPI",
+        "header": "Gen AI external API creation",
         "fields": [
             {
-                "web_id": "GenAIModel_name",
+                "web_id": "EcoLogitsGenAIExternalAPI_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "Generative AI model 1"
+                "default": "Gen AI external API 1"
             },
             {
-                "web_id": "GenAIModel_provider",
+                "web_id": "EcoLogitsGenAIExternalAPI_provider",
                 "attr_name": "provider",
                 "label": "provider",
                 "tooltip": false,
@@ -37,9 +37,9 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "default": "mistralai",
+                "default": "anthropic",
                 "input_type": "select_str_input",
-                "selected": "mistralai",
+                "selected": "anthropic",
                 "options": [
                     {
                         "label": "anthropic",
@@ -50,8 +50,8 @@
                         "value": "cohere"
                     },
                     {
-                        "label": "google",
-                        "value": "google"
+                        "label": "google_genai",
+                        "value": "google_genai"
                     },
                     {
                         "label": "huggingface_hub",
@@ -68,7 +68,7 @@
                 ]
             },
             {
-                "web_id": "GenAIModel_model_name",
+                "web_id": "EcoLogitsGenAIExternalAPI_model_name",
                 "attr_name": "model_name",
                 "label": "model name",
                 "tooltip": false,
@@ -76,58 +76,12 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "default": "open-mistral-7b",
+                "default": "claude-opus-4-5",
                 "input_type": "datalist",
-                "selected": "open-mistral-7b",
+                "selected": "claude-opus-4-5",
                 "options": null
             }
         ],
-        "advanced_fields": [
-            {
-                "web_id": "GenAIModel_nb_of_bits_per_parameter",
-                "attr_name": "nb_of_bits_per_parameter",
-                "label": "nb of bits per parameter",
-                "tooltip": "Reduce this number if quantization techniques have been used.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "dimensionless",
-                "default": 16,
-                "can_be_negative": false,
-                "step": 1
-            },
-            {
-                "web_id": "GenAIModel_llm_memory_factor",
-                "attr_name": "llm_memory_factor",
-                "label": "LLM memory factor",
-                "tooltip": "Ratio between the GPU RAM needed and the model size.",
-                "source": {
-                    "name": "Ecologits",
-                    "link": "https://github.com/genai-impact/ecologits"
-                },
-                "input_type": "input",
-                "unit": "dimensionless",
-                "default": 1.2,
-                "can_be_negative": false,
-                "step": 0.1
-            },
-            {
-                "web_id": "GenAIModel_bits_per_token",
-                "attr_name": "bits_per_token",
-                "label": "bits per token",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "input",
-                "unit": "dimensionless",
-                "default": 24,
-                "can_be_negative": false,
-                "step": 1
-            }
-        ]
+        "advanced_fields": []
     }
 ]

@@ -2,11 +2,13 @@
 from typing import List
 
 import pytest
-from efootprint.all_classes_in_order import SERVICE_CLASSES
+from efootprint.all_classes_in_order import SERVICE_CLASSES, EXTERNAL_API_CLASSES
+from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI, \
+    EcoLogitsGenAIExternalAPIJob
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.usage.job import Job, GPUJob
-from efootprint.builders.services.web_application import WebApplication
+from efootprint.builders.services.video_streaming import VideoStreaming, VideoStreamingJob
 
 from model_builder.domain.entities.web_core.usage.job_web import JobWeb
 from tests.unit_tests.domain.entities.snapshot_utils import assert_creation_context_matches_snapshot
@@ -25,18 +27,22 @@ class _StubServer:
         self.installed_services = installed_services
 
 
+class _StubExternalAPI:
+    def __init__(self, name: str, efootprint_id: str):
+        self.name = name
+        self.efootprint_id = efootprint_id
+
+
 class _FakeModelWeb:
     """Lightweight stand-in used to generate deterministic snapshot data."""
 
     def __init__(self):
         service = _StubService("service", "service_efootprint_id")
-        self._servers = [_StubServer("server", "server_efootprint_id", [service])]
-        # Mark all service classes as present to expose all compatible job classes in the form
+        self.servers = [_StubServer("server", "server_efootprint_id", [service])]
+        self.external_apis = [_StubExternalAPI("external_api", "efootprint_id")]
+        # Mark all service and external api classes as present to expose all compatible job classes in the form
         self.response_objs = {service_class.__name__: {} for service_class in SERVICE_CLASSES}
-
-    @property
-    def servers(self):
-        return self._servers
+        self.response_objs.update({external_api_class.__name__: {} for external_api_class in EXTERNAL_API_CLASSES})
 
     @property
     def services(self):
@@ -63,9 +69,10 @@ class TestJobWeb:
     # --- get_creation_prerequisites ---
 
     def test_get_creation_prerequisites_requires_server(self):
-        """Creating a job without any server should raise an explicit error."""
+        """Creating a job without any server nor external api should raise an explicit error."""
         fake_model_web = _FakeModelWeb()
-        fake_model_web._servers = []  # type: ignore[attr-defined]
+        fake_model_web.servers = []
+        fake_model_web.external_apis = []
 
         with pytest.raises(ValueError):
             JobWeb.get_creation_prerequisites(fake_model_web)
@@ -73,7 +80,7 @@ class TestJobWeb:
     def test_get_creation_prerequisites_include_services_and_direct_calls(self, minimal_model_web):
         """Prerequisites should include installed services and direct server call options."""
         server = minimal_model_web.servers[0]
-        service = WebApplication.from_defaults("Test Service", server=server.modeling_obj)
+        service = VideoStreaming.from_defaults("Test Service", server=server.modeling_obj)
         added_service = minimal_model_web.add_new_efootprint_object_to_system(service)
 
         prereqs = JobWeb.get_creation_prerequisites(minimal_model_web)
@@ -136,9 +143,18 @@ def _build_job_snapshot_model_web():
     service = MagicMock()
     service.name = "service"
     service.efootprint_id = "service_efootprint_id"
+    service.compatible_jobs.return_value = [VideoStreamingJob]
     server.installed_services = [service]
+    external_api = MagicMock(spec=EcoLogitsGenAIExternalAPI)
+    external_api.name = "external_api"
+    external_api.efootprint_id = "external_api_efootprint_id"
+    external_api.compatible_jobs.return_value = [EcoLogitsGenAIExternalAPIJob]
 
     model_web.servers = [server]
+    model_web.services = [service]
+    model_web.external_apis = [external_api]
     model_web.response_objs = {service_class.__name__: service_class for service_class in SERVICE_CLASSES}
+    model_web.response_objs.update({external_api_class.__name__: external_api_class
+                                    for external_api_class in EXTERNAL_API_CLASSES})
 
     return model_web

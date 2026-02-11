@@ -77,17 +77,16 @@ class TestFullJourney:
         # --- Add service to server ---
         server_card = model_builder.get_object_card("BoaviztaCloudServer", server_name)
         server_card.click_add_service_button()
-        side_panel.fill_field("WebApplication_name", service_name)
-        side_panel.select_option("WebApplication_technology", "php-symfony")
+        side_panel.fill_field("VideoStreaming_name", service_name)
         side_panel.submit_and_wait_for_close()
         expect(page.locator("div").filter(has_text=service_name).locator("button[id^='button']").first).to_be_visible()
 
-        # --- Add job to step 1 (WebApplicationJob linked to service) ---
+        # --- Add job to step 1 (VideoStreamingJob linked to service) ---
         step_card_one = model_builder.get_object_card("UsageJourneyStep", step_one)
         step_card_one.click_add_job_button()
         page.locator("#service").wait_for(state="attached")
         side_panel.select_option("service", service_name)
-        side_panel.fill_field("WebApplicationJob_name", job_one)
+        side_panel.fill_field("VideoStreamingJob_name", job_one)
         side_panel.submit_and_wait_for_close()
         expect(page.locator("div").filter(has_text=job_one).locator("button[id^='button']").first).to_be_visible()
 

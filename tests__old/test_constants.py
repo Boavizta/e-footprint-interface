@@ -43,20 +43,6 @@ EDGE_USAGE_PATTERN_FORM_DATA = {
     "EdgeUsagePattern_hourly_edge_usage_journey_starts__initial_volume_timespan": "month",
 }
 
-WEB_APPLICATION_FORM_DATA = {
-    "type_object_available": "WebApplication",
-    "WebApplication_technology": "php-symfony",
-}
-
-WEB_APPLICATION_JOB_FORM_DATA = {
-    "type_object_available": "WebApplicationJob",
-    "WebApplicationJob_implementation_details": "aggregation-code-side",
-    "WebApplicationJob_data_transferred": "150",
-    "WebApplicationJob_data_stored": "100",
-    "WebApplicationJob_data_transferred_unit": "MB",
-    "WebApplicationJob_data_stored_unit": "MB",
-}
-
 GPU_SERVER_FORM_DATA = {
     "type_object_available": "GPUServer",
     "GPUServer_average_carbon_intensity": "100",

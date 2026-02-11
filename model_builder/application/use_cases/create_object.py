@@ -94,7 +94,7 @@ class CreateObjectUseCase:
         # 4. Determine actual object type (may be different from input if using type_object_available)
         object_creation_type = form_data.get("type_object_available", input_data.object_type)
 
-        # 5. Get creation web class (e.g., GenAIModelWeb) - may have additional hooks
+        # 5. Get creation web class - may have additional hooks
         web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(object_creation_type)
 
         # 5a. Apply hooks from creation web class (if different from input class)
