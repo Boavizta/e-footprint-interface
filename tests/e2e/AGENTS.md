@@ -44,12 +44,12 @@ def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage, syst
     # Create orphaned server and service (not connected to system via jobs)
     storage = Storage.from_defaults("Test Storage")
     server = Server.from_defaults("Test Server", storage=storage)
-    service = WebApplication.from_defaults("Test Service", server=server)
+    service = VideoStreaming.from_defaults("Test Service", server=server)
 
     # Add orphaned objects to the system dict
     system_dict["Storage"] = {storage.id: storage.to_json(save_calculated_attributes=False)}
     system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
-    system_dict["WebApplication"] = {service.id: service.to_json(save_calculated_attributes=False)}
+    system_dict["VideoStreaming"] = {service.id: service.to_json(save_calculated_attributes=False)}
     
     return load_system_dict_into_browser(model_builder_page, system_dict)
 ```

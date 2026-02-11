@@ -136,17 +136,11 @@
         "label": "AI server",
         "more_descriptive_label_for_select_inputs": "Server for AI & GenAI services (GPUs)"
     },
-    "WebApplication": {
-        "label": "Web application"
-    },
     "VideoStreaming": {
         "label": "Video streaming application"
     },
     "GenAIModel": {
         "label": "Generative AI model"
-    },
-    "WebApplicationJob": {
-        "label": "Web application job"
     },
     "VideoStreamingJob": {
         "label": "Video streaming job"

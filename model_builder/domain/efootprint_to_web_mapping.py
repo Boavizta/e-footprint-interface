@@ -47,13 +47,11 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "GPUJob": JobWeb,
     "GenAIJob": JobWeb,
     "VideoStreamingJob": JobWeb,
-    "WebApplicationJob": JobWeb,
     # Is not an efootprint class but rather a builder that creates efootprint objects
     "ExternalApi": ExternalApiWeb,
     "Service": ServiceWeb,
     "GenAIModel": ServiceWeb,
     "VideoStreaming": ServiceWeb,
-    "WebApplication": ServiceWeb,
     "Storage": StorageWeb,
     # Edge hardware classes
     "EdgeDeviceBase": EdgeDeviceBaseWeb,

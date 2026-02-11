@@ -1,10 +1,10 @@
 """Tests for job creation."""
 import pytest
+from efootprint.builders.services.video_streaming import VideoStreaming
 from playwright.sync_api import expect
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
-from efootprint.builders.services.web_application import WebApplication
 from efootprint.constants.countries import country_generator, tz
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
@@ -47,12 +47,12 @@ def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage):
     # Create orphaned server and service (not connected to system via jobs)
     storage = Storage.from_defaults("Test Storage")
     server = Server.from_defaults("Test Server", storage=storage)
-    service = WebApplication.from_defaults("Test Service", server=server)
+    service = VideoStreaming.from_defaults("Test Service", server=server)
 
     # Add orphaned objects to the system dict
     system_dict["Storage"] = {storage.id: storage.to_json(save_calculated_attributes=False)}
     system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
-    system_dict["WebApplication"] = {service.id: service.to_json(save_calculated_attributes=False)}
+    system_dict["VideoStreaming"] = {service.id: service.to_json(save_calculated_attributes=False)}
 
     return load_system_dict_into_browser(model_builder_page, system_dict)
 
@@ -62,7 +62,7 @@ class TestJobs:
     """Tests for job CRUD operations."""
 
     def test_create_web_application_job(self, model_with_server_service_no_jobs: ModelBuilderPage):
-        """Test creating a WebApplicationJob linked to a service."""
+        """Test creating a VideoStreamingJob linked to a service."""
         model_builder = model_with_server_service_no_jobs
         side_panel = model_builder.side_panel
         page = model_builder.page
@@ -75,7 +75,7 @@ class TestJobs:
         step_card.click_add_job_button()
         page.locator("#service").wait_for(state="attached")
         side_panel.select_option("service", service_name)
-        side_panel.fill_field("WebApplicationJob_name", job_name)
+        side_panel.fill_field("VideoStreamingJob_name", job_name)
         side_panel.submit_and_wait_for_close()
 
         expect(page.locator("div").filter(has_text=job_name).locator("button[id^='button']").first).to_be_visible()
