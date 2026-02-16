@@ -58,7 +58,7 @@ class ModelWeb:
         :return: JSON representation of the system data.
         """
         output_json = {"efootprint_version": efootprint_version}
-        for efootprint_obj in reversed(self.flat_efootprint_objs_dict.values()):
+        for efootprint_obj in self.flat_efootprint_objs_dict.values():
             if efootprint_obj.class_as_simple_str not in output_json:
                 output_json[efootprint_obj.class_as_simple_str] = {}
             output_json[efootprint_obj.class_as_simple_str][efootprint_obj.id] = efootprint_obj.to_json(

@@ -7,11 +7,11 @@
                         data-bs-toggle="collapse"
                         data-bs-target="#flush-{{ object.web_id }}"
                         onclick="reverseIconAccordion('{{ object.web_id }}')"
-                        aria-expanded="{% if object.installed_services|length == 0 %}true{% else %}false{% endif %}"
+                        aria-expanded="{% if object.jobs|length == 0 %}true{% else %}false{% endif %}"
                         aria-controls="flush-{{ object.web_id }}">
                         <svg id="icon_accordion_{{ object.web_id }}" xmlns="http://www.w3.org/2000/svg"
                              width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
-                             class="bi bi-chevron-right {% if object.installed_services|length == 0 %}chevron-rotate{% endif %}"
+                             class="bi bi-chevron-right {% if object.jobs|length == 0 %}chevron-rotate{% endif %}"
                              viewBox="0 0 16 16">
                             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
                         </svg>
@@ -34,7 +34,7 @@
                 </button>
             </div>
             <div id="flush-{{ object.web_id }}"
-                 class="accordion-collapse collapse accordion-all  {% if object.installed_services|length == 0 %}show{% endif %}"
+                 class="accordion-collapse collapse accordion-all  {% if object.jobs|length == 0 %}show{% endif %}"
                  data-bs-parent="#{{ object.web_id }}">
                 <div class="accordion-body text-start">
                     <p class="h7">Services</p>

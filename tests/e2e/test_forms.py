@@ -83,6 +83,7 @@ class TestUnsavedChangesWarning:
         hx_vals = json.loads(hx_vals_raw or "{}")
         expected_parent_id = hx_vals.get("efootprint_id_of_parent_to_link_to")
 
+        server_card.open_accordion()
         add_service_button.click()
         expect(page.locator("#unsavedModal.show")).to_be_visible()
 

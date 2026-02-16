@@ -24,6 +24,7 @@ function initSortableObjectCards() {
     new Sortable(document.getElementById("up-list"), options);
     new Sortable(document.getElementById("uj-list"), options);
     new Sortable(document.getElementById("server-list"), options);
+    new Sortable(document.getElementById("edge-devices-list"), options);
 }
 
 let timer = null;
