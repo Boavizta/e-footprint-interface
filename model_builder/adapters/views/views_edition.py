@@ -23,7 +23,8 @@ def open_edit_object_panel(request, object_id):
     context_data = form_builder.build_edition_context(obj_to_edit)
 
     object_belongs_to_computable_system = (
-        (len(model_web.system.servers) > 0 or len(model_web.edge_devices) > 0) and (len(obj_to_edit.systems) > 0))
+        (len(model_web.system.servers) > 0 or len(model_web.system.external_apis) > 0
+         or len(model_web.system.edge_devices) > 0) and (len(obj_to_edit.systems) > 0))
     context_data['object_belongs_to_computable_system'] = object_belongs_to_computable_system
 
     http_response = render(
