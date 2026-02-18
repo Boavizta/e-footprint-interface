@@ -280,6 +280,18 @@ def get_explainable_recurrent_quantity_chart_and_explanation(
 
 
 @time_it
+def get_eco_logits_calculated_attribute_explanation(request, efootprint_id, attr_name):
+    model_web = ModelWeb(SessionSystemRepository(request.session))
+    explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+
+    return render(
+        request,
+        "model_builder/side_panels/edit/calculated_attributes/eco_logits_calculated_attribute_explanation.html",
+        {"explained_obj": explained_obj}
+    )
+
+
+@time_it
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)

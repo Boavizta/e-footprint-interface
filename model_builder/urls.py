@@ -42,4 +42,7 @@ urlpatterns = [
     path("get_calculated_attribute_explanation/<efootprint_id>/<attr_name>/",
          model_builder.adapters.views.views.get_calculated_attribute_explanation,
          name="get_calculated_attribute_explanation"),
+    path("get_eco_logits_calculated_attribute_explanation/<efootprint_id>/<attr_name>/",
+         model_builder.adapters.views.views.get_eco_logits_calculated_attribute_explanation,
+         name="get_eco_logits_calculated_attribute_explanation"),
 ]

@@ -4,6 +4,7 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 
 
 class ExternalAPIWeb(ModelingObjectWeb):
+    gets_deleted_if_unique_mod_obj_container_gets_deleted = False
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'simple',

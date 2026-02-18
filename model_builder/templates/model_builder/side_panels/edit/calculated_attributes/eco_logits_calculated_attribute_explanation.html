@@ -1,0 +1,21 @@
+<div class="card card-body mb-3 no-truncate">
+    <div id="ancestors-formula-and-children-{{ explained_obj.web_id }}" class="mb-3">
+        <div class="explainable-ancestors">
+          <h6>Input Variables</h6>
+          <ul>
+            {% for ancestor_key, ancestor_value in explained_obj.ancestors.items %}
+              <li>{{ ancestor_key }}: {{ ancestor_value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="explainable-formula mt-4">
+          <h6>EcoLogits computation code</h6>
+            <pre>{{ explained_obj.formula }}</pre>
+            <br>
+            <p>Check out full EcoLogits Python code in <a target="_blank" href="{{ explained_obj.source.link }}">EcoLogits’ llm module</a></p>
+        </div>
+    </div>
+
+    {% include "model_builder/side_panels/edit/calculated_attributes/components/calculus_graph_link.html" with calculus_graph_link_text="See the calculus graph" item=explained_obj %}
+</div>
