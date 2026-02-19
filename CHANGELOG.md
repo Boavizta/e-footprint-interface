@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.0] - 2026-02-19
+
+### Changed
+- The Add external API workflow now creates a native ExternalAPI e-footprint object instead of creating a server with a service. This allows for the integration of native EcoLogits genAI API modeling in the interface.
+- Display of EcoLogits code in EcoLogits jobs calculated attributes section.
+- Finished migration of all legacy tests.
+- Minor UI adjustments.
+
 ## [0.13.2] - 2026-02-16
 
 ### Fixed
