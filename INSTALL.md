@@ -108,6 +108,7 @@ SQLite database will be created automatically:
 
 ```bash
 poetry run python manage.py migrate
+poetry run python manage.py createcachetable
 poetry run python manage.py collectstatic
 ```
 
@@ -214,6 +215,7 @@ EOF
 
 ```bash
 poetry run python manage.py migrate
+poetry run python manage.py createcachetable
 poetry run python manage.py collectstatic
 ```
 
@@ -297,7 +299,7 @@ This approach is ideal for:
 To switch to full local mode for testing:
 1. Stop any running Docker containers: `docker compose -f docker-compose.infra.yml down`
 2. Remove or rename `.env.local` if it exists
-3. Run migrations: `poetry run python manage.py migrate`
+3. Run migrations: `poetry run python manage.py migrate && poetry run python manage.py createcachetable`
 4. Run tests as shown below
 
 ## Python Tests
@@ -389,6 +391,7 @@ You can easily switch between the three setup options:
 3. Run migrations:
    ```bash
    poetry run python manage.py migrate
+   poetry run python manage.py createcachetable
    ```
 
 ## From Hybrid (Option 2) to Full Local (Option 1)
