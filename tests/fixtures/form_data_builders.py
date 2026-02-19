@@ -41,7 +41,10 @@ def create_post_data_from_class_default_values(
     for key, value in overrides.items():
         if "__" in key:
             base_key, sub_key = key.split("__", 1)
-            form_inputs_overrides[base_key] = {sub_key: value}
+            if base_key not in form_inputs_overrides:
+                form_inputs_overrides[base_key] = {sub_key: value}
+            else:
+                form_inputs_overrides[base_key][sub_key] = value
 
     for attr_name, default_value in class_to_use_for_defaults.default_values.items():
         if attr_name in overrides or attr_name in web_class.attributes_to_skip_in_forms:
