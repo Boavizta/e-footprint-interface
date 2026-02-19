@@ -14,10 +14,6 @@ class ServiceWeb(ModelingObjectWeb):
     }
 
     @property
-    def class_title_style(self):
-        return "h8"
-
-    @property
     def template_name(self):
         return "service"
 

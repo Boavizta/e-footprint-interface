@@ -16,10 +16,6 @@ class JourneyBaseWeb(ModelingObjectWeb):
         return "journey"
 
     @property
-    def class_title_style(self):
-        return "h6"
-
-    @property
     def child_template_name(self) -> str:
         """Template name for child objects (e.g., 'journey_step')."""
         return "journey_step"

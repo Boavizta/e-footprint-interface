@@ -23,7 +23,3 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     @property
     def template_name(self):
         return "edge_device"
-
-    @property
-    def class_title_style(self):
-        return "h6"

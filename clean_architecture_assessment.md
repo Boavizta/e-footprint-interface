@@ -158,7 +158,6 @@ Note: The presenter already has access to `model_web` and could resolve objects 
 
 **Location:**
 - `model_builder/domain/entities/web_core/usage/journey_step_base_web.py:36-46`
-- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:134-135`
 
 **Problem:** Domain entities return CSS class names:
 ```python
@@ -170,10 +169,6 @@ def icon_leaderline_style(self):
     else:
         class_name = "step-dot-line"
     return class_name
-
-@property
-def class_title_style(self):
-    return None  # or "h7" in subclasses
 ```
 
 **Impact:** Domain layer knows about CSS/styling details.

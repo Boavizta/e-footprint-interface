@@ -41,7 +41,7 @@
                                 on mouseout add .d-none to #edit-icon-{{ object.web_id }}
                             "
                     >
-                        {% include 'model_builder/components/button_card_header.html' with object_card=object %}
+                        {% include 'model_builder/components/button_card_header.html' with object_card=object title_class="h7" %}
                     </button>
                 </div>
                 <div id="flush-{{ object.web_id }}"
@@ -54,7 +54,7 @@
                                      style="border: 1px dotted #d0d5dd; border-radius: 10px;">
                                     <p class="h8 text-secondary mb-2">{{ section.type_str|class_label }}s</p>
                                     {% for child in section.children %}
-                                        {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child %}
+                                        {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child title_class="h8" %}
                                     {% endfor %}
                                     <div class="d-flex justify-content-end position-relative mt-1">
                                         {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id %}
@@ -63,7 +63,7 @@
                             {% endfor %}
                         {% else %}
                             {% for child in object.accordion_children %}
-                                {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child %}
+                                {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child title_class="h8" %}
                             {% endfor %}
                             <div class="w-85 ms-15 px-0 py-1 d-flex justify-content-end position-relative">
                                 {% include 'model_builder/components/add_child_button.html' with type_str=object.child_object_type_str parent_efootprint_id=object.efootprint_id %}

@@ -10,10 +10,6 @@ class JourneyStepBaseWeb(ModelingObjectWeb):
     }
 
     @property
-    def class_title_style(self):
-        return "h7"
-
-    @property
     def template_name(self):
         return "journey_step"
 

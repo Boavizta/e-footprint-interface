@@ -33,10 +33,6 @@ class ServerWeb(ModelingObjectWeb):
     def template_name(self):
         return "server"
 
-    @property
-    def class_title_style(self):
-        return "h6"
-
     @classmethod
     def pre_create(cls, form_data, model_web: "ModelWeb"):
         """Create storage object before creating server.

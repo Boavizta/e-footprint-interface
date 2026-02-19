@@ -31,10 +31,6 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
     def template_name(self):
         return "recurrent_edge_component_need"
 
-    @property
-    def class_title_style(self):
-        return "h8"
-
     @classmethod
     def get_form_creation_data(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to: str) -> dict:
         """Provide form data for nested_parent_selection strategy.

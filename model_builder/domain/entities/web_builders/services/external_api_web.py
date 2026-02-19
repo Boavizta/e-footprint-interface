@@ -12,10 +12,6 @@ class ExternalAPIWeb(ModelingObjectWeb):
     }
 
     @property
-    def class_title_style(self):
-        return "h6"
-
-    @property
     def template_name(self):
         return "usage_pattern"
 

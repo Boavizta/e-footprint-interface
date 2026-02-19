@@ -20,10 +20,6 @@ class EdgeComponentWeb(ModelingObjectWeb):
     def template_name(self):
         return "edge_component"
 
-    @property
-    def class_title_style(self):
-        return "h8"
-
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
         """HTMX configuration for component creation forms - link to parent edge device."""
