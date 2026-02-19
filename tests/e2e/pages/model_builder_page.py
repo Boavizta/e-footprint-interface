@@ -77,6 +77,11 @@ class ModelBuilderPage:
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-server"))
         return self.side_panel
 
+    def click_add_external_api(self):
+        """Click the 'Add external API' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-external-api"))
+        return self.side_panel
+
     def click_add_usage_pattern(self):
         """Click the 'Add Usage Pattern' button (triggers HTMX)."""
         click_and_wait_for_htmx(self.page, self.page.locator("#add_usage_pattern"))
