@@ -27,6 +27,18 @@ nvm install node
 npm install
 ```
 
+## Generate latest requirements files with poetry (for developers not using poetry, not used in production)
+
+if not already done, install the export plugin:
+```shell
+poetry self add poetry-plugin-export
+```
+
+```shell
+poetry export -f requirements.txt --without-hashes -o requirements.txt 
+poetry export -f requirements.txt --without-hashes --dev -o requirements-dev.txt 
+```
+
 **Note**: Clever Cloud deploys using Docker, which installs dependencies via `poetry install` in the Dockerfile. No need to generate `requirements.txt`.
 
 ## 2. Testing
