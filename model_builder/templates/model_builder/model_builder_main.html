@@ -6,30 +6,8 @@
             <div class="equal-width p-2">
                 <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-pattern-container">
                     <h5><b>Usage patterns</b></h5>
-                    <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                            id="add_usage_pattern"
-                                hx-get="/model_builder/open-create-object-panel/UsagePattern/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-                                _="on click removeAllOpenedObjectsHighlights()"
-                    >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                        <p class="mb-0 text-addition">Add usage pattern</p>
-                    </button>
-                    <button class="w-75 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                            id="add_edge_usage_pattern"
-                                hx-get="/model_builder/open-create-object-panel/EdgeUsagePattern/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-                                _="on click removeAllOpenedObjectsHighlights()"
-                    >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                        <p class="mb-0 text-addition">Add edge usage pattern</p>
-                    </button>
+                    {% include 'model_builder/components/add_object_button.html' with btn_id="add_usage_pattern" hx_url="/model_builder/open-create-object-panel/UsagePattern/" label="Add usage pattern" btn_extra_classes="w-75 mb-3" %}
+                    {% include 'model_builder/components/add_object_button.html' with btn_id="add_edge_usage_pattern" hx_url="/model_builder/open-create-object-panel/EdgeUsagePattern/" label="Add edge usage pattern" btn_extra_classes="w-75 mb-3" %}
                     <div id="up-list" class="list-group w-75 ps-0 pb-0">
                         {% for usage_pattern in model_web.usage_patterns %}
                         {% include 'model_builder/object_cards/usage_pattern_card.html' with object=usage_pattern %}
@@ -43,30 +21,8 @@
             <div class="equal-width p-2">
                 <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-journey-container">
                      <h5><b>Usage journeys</b></h5>
-                    <button class="w-100 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                        id="btn-add-usage-journey"
-                            hx-get="/model_builder/open-create-object-panel/UsageJourney/"
-                            hx-target="#sidePanel"
-                            hx-trigger="click"
-                            hx-swap="innerHTML"
-                            hx-disabled-elt="button"
-                            _="on click removeAllOpenedObjectsHighlights()"
-                    >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                        <p class="mb-0 text-addition">Add usage journey</p>
-                    </button>
-                    <button class="w-100 mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                        id="btn-add-edge-usage-journey"
-                            hx-get="/model_builder/open-create-object-panel/EdgeUsageJourney/"
-                            hx-target="#sidePanel"
-                            hx-trigger="click"
-                            hx-swap="innerHTML"
-                            hx-disabled-elt="button"
-                            _="on click removeAllOpenedObjectsHighlights()"
-                    >
-                        <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                        <p class="mb-0 text-addition">Add edge usage journey</p>
-                    </button>
+                    {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-usage-journey" hx_url="/model_builder/open-create-object-panel/UsageJourney/" label="Add usage journey" btn_extra_classes="w-100 mb-3" %}
+                    {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-usage-journey" hx_url="/model_builder/open-create-object-panel/EdgeUsageJourney/" label="Add edge usage journey" btn_extra_classes="w-100 mb-3" %}
                     <div id="uj-list" class="list-group w-100 ps-0">
                         {% for usage_journey in model_web.usage_journeys %}
                         {% include 'model_builder/object_cards/journey_card.html' with object=usage_journey %}
@@ -80,45 +36,10 @@
             <div class="equal-width p-2">
                 <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container">
                     <h5><b>Infrastructure</b></h5>
-                    <div class="w-100 d-flex flex-row gap-1">
-                        <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                                id="btn-add-server"
-                                hx-get="/model_builder/open-create-object-panel/ServerBase/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-                                _="on click removeAllOpenedObjectsHighlights()"
-                        >
-                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                            <p class="mb-0 text-addition">Add server</p>
-                        </button>
-                        <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                                id="btn-add-external-api"
-                                hx-get="{% url 'open-add-new-object-panel' 'ExternalAPI' %}"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-                                _="on click removeAllOpenedObjectsHighlights()"
-                        >
-                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3"  width="16px" height="16px" alt="add icon" />
-                            <p class="mb-0 text-addition">Add external API</p>
-                        </button>
-                    </div>
-                    <div class="w-50 d-flex flex-row gap-1">
-                        <button class="equal-width mb-3 btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
-                                id="btn-add-edge-device"
-                                hx-get="/model_builder/open-create-object-panel/EdgeDeviceBase/"
-                                hx-target="#sidePanel"
-                                hx-trigger="click"
-                                hx-swap="innerHTML"
-                                hx-disabled-elt="button"
-                                _="on click removeAllOpenedObjectsHighlights()"
-                        >
-                            <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto"  width="16px" height="16px" alt="add icon" />
-                            <p class="mb-0 text-addition">Add edge device</p>
-                        </button>
+                    <div class="d-grid gap-3 mb-3" style="grid-template-columns: 1fr 1fr;">
+                        {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-server" hx_url="/model_builder/open-create-object-panel/ServerBase/" label="Add server" btn_extra_classes="" %}
+                        {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-external-api" hx_url="/model_builder/open-create-object-panel/ExternalAPI/" label="Add external API" btn_extra_classes="" %}
+                        {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device" hx_url="/model_builder/open-create-object-panel/EdgeDeviceBase/" label="Add edge device" btn_extra_classes="" %}
                     </div>
                     <div id="external-api-list" class="list-group d-flex flew-column w-75 ms-25">
                         {% for external_api in model_web.external_apis %}
