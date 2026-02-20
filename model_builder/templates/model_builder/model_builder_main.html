@@ -10,10 +10,10 @@
                     {% include 'model_builder/components/add_object_button.html' with btn_id="add_edge_usage_pattern" hx_url="/model_builder/open-create-object-panel/EdgeUsagePattern/" label="Add edge usage pattern" btn_extra_classes="w-75 mb-3" %}
                     <div id="up-list" class="list-group w-75 ps-0 pb-0">
                         {% for usage_pattern in model_web.usage_patterns %}
-                        {% include 'model_builder/object_cards/usage_pattern_card.html' with object=usage_pattern %}
+                        {% include 'model_builder/object_cards/basic_card.html' with object=usage_pattern %}
                         {% endfor %}
                         {% for edge_usage_pattern in model_web.edge_usage_patterns %}
-                        {% include 'model_builder/object_cards/usage_pattern_card.html' with object=edge_usage_pattern %}
+                        {% include 'model_builder/object_cards/basic_card.html' with object=edge_usage_pattern %}
                         {% endfor %}
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                     </div>
                     <div id="external-api-list" class="list-group d-flex flew-column w-75 ms-25">
                         {% for external_api in model_web.external_apis %}
-                            {% include 'model_builder/object_cards/usage_pattern_card.html' with object=external_api %}
+                            {% include 'model_builder/object_cards/basic_card.html' with object=external_api %}
                         {% endfor %}
                     </div>
                     <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">

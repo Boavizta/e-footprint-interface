@@ -20,7 +20,7 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
 
     @property
     def template_name(self):
-        return "usage_pattern"
+        return "basic"
 
     @property
     def mirrored_cards(self):

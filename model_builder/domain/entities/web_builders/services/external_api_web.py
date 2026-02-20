@@ -13,7 +13,7 @@ class ExternalAPIWeb(ModelingObjectWeb):
 
     @property
     def template_name(self):
-        return "usage_pattern"
+        return "basic"
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:
