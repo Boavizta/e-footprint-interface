@@ -1,4 +1,5 @@
 """Parent selection form strategy for objects requiring parent selection."""
+import re
 from typing import TYPE_CHECKING, Type
 
 from model_builder.adapters.forms.form_field_generator import generate_object_creation_structure
@@ -100,6 +101,13 @@ class ParentSelectionFormStrategy(FormStrategy):
             "header_name": f"Add new {ClassUIConfigProvider.get_label(object_type).lower()}"
         }
 
+    @staticmethod
+    def _indefinite_article(phrase: str) -> str:
+        match = re.search(r"[A-Za-z]", phrase or "")
+        if not match:
+            return "a"
+        return "an" if match.group(0).lower() in "aeiou" else "a"
+
     def _build_parent_select_field(self, parent_attr: str, parent_attr_label: str, parents: list) -> dict:
         """Build a select field for parent selection."""
         return {
@@ -107,7 +115,7 @@ class ParentSelectionFormStrategy(FormStrategy):
             "web_id": parent_attr,
             "name": parent_attr_label,
             "options": [{"label": p.name, "value": p.efootprint_id} for p in parents],
-            "label": f"Choose a {parent_attr_label}",
+            "label": f"Choose {self._indefinite_article(parent_attr_label)} {parent_attr_label}",
         }
 
     def _build_intermediate_select_field(self, intermediate_attr: str, intermediate_attr_label: str) -> dict:

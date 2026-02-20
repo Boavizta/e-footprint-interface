@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.1] - 2026-02-20
+
+### Fixed
+- Job forms by adding external_api to attributes_to_skip_in_forms and adding a pre_create hook to rename form fields according to job type.
+- Don’t include "install service" accordion for servers that don’t have any installable services.
+
+### Changed
+- Update to efootprint 16.0.3 for better EcoLogits impact units.
+
 ## [0.14.0] - 2026-02-19
 
 ### Changed
