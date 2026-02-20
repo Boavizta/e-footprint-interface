@@ -5,7 +5,7 @@
 
 [tool.poetry]
 name = "efootprint-interface"
-version = "0.14.0"
+version = "0.14.2"
 description = "Digital service environmental footprint model interface"
 authors = ["Vincent Villet", "Clémence Knaébel", "Julien Houbart", "Jordane Frouin"]
 readme = "README.md"
@@ -39,7 +39,7 @@ exclude = '''
 
 [tool.poetry.dependencies]
 python = "^3.12"
-efootprint = "16.0.3"
+efootprint = "16.0.4"
 django= "^5.0"
 django-browser-reload = "^1.12.1"
 django-environ = "^0"

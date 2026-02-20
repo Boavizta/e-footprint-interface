@@ -106,3 +106,35 @@ def test_delete_edge_appliance_cascades_to_component(default_system_repository):
     sd = default_system_repository.get_system_data()
     assert "EdgeAppliance" not in sd
     assert "EdgeApplianceComponent" not in sd
+
+
+def test_create_2_external_api_jobs_then_delete_one(default_system_repository):
+    """Creating two jobs linked to the same external API then deleting one should not raise any error.
+    This tests a weird bug solved by efootprint 16.0.4."""
+    uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id
+
+    api_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Test GenAI API", "EcoLogitsGenAIExternalAPI", provider="mistralai", model_name="open-mistral-7b"),
+    )
+    job1_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Test GenAI Job 1", "EcoLogitsGenAIExternalAPIJob", external_api=api_id),
+        parent_id=uj_step_id,
+    )
+    job2_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Test GenAI Job 2", "EcoLogitsGenAIExternalAPIJob", external_api=api_id),
+        parent_id=uj_step_id,
+    )
+
+    delete_object(default_system_repository, job1_id)
+
+    sd = default_system_repository.get_system_data()
+    assert "EcoLogitsGenAIExternalAPIJob" in sd
+    assert job2_id in sd["EcoLogitsGenAIExternalAPIJob"]
+    assert "EcoLogitsGenAIExternalAPIServer" in sd
+    assert api_id in sd["EcoLogitsGenAIExternalAPI"]
