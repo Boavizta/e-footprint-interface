@@ -84,8 +84,8 @@ class TestFullJourney:
         # --- Add job to step 1 (VideoStreamingJob linked to service) ---
         step_card_one = model_builder.get_object_card("UsageJourneyStep", step_one)
         step_card_one.click_add_job_button()
-        page.locator("#service").wait_for(state="attached")
-        side_panel.select_option("service", service_name)
+        page.locator("#service_or_external_api").wait_for(state="attached")
+        side_panel.select_option("service_or_external_api", service_name)
         side_panel.fill_field("VideoStreamingJob_name", job_one)
         side_panel.submit_and_wait_for_close()
         expect(page.locator("div").filter(has_text=job_one).locator("button[id^='button']").first).to_be_visible()
@@ -93,8 +93,8 @@ class TestFullJourney:
         # --- Add job to step 2 (direct server call) ---
         step_card_two = model_builder.get_object_card("UsageJourneyStep", step_two)
         step_card_two.click_add_job_button()
-        page.locator("#service").wait_for(state="attached")
-        side_panel.select_option("service", "direct_server_call")
+        page.locator("#service_or_external_api").wait_for(state="attached")
+        side_panel.select_option("service_or_external_api", "direct_server_call")
         side_panel.fill_field("Job_name", job_two)
         side_panel.submit_and_wait_for_close()
         expect(page.locator("div").filter(has_text=job_two).locator("button[id^='button']").first).to_be_visible()

@@ -73,8 +73,8 @@ class TestUnsavedChangesWarning:
         step_card.open_accordion()
         step_card.click_add_job_button()
 
-        page.locator("#service").wait_for(state="attached")
-        side_panel.select_option("service", "direct_server_call")
+        page.locator("#service_or_external_api").wait_for(state="attached")
+        side_panel.select_option("service_or_external_api", "direct_server_call")
         side_panel.fill_field("Job_data_transferred", "15")
 
         server_card = model_builder.get_object_card("Server", "Test Server")

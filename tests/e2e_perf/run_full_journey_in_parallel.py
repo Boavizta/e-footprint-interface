@@ -137,7 +137,7 @@ async def run_full_journey(page: Page, run_number: int, user_id: int) -> None:
     # --- Add job to step 1 ---
     step_card_one = await get_object_card("UsageJourneyStep", step_one)
     await click_and_wait_for_htmx(page, step_card_one.locator("button[hx-get*='open-create-object-panel/JobBase']"))
-    await page.locator("#service").wait_for(state="attached")
+    await page.locator("#service_or_external_api").wait_for(state="attached")
     await select_option("service", service_name)
     await fill_field("WebApplicationJob_name", job_one)
     await submit_and_wait_for_close()
@@ -145,7 +145,7 @@ async def run_full_journey(page: Page, run_number: int, user_id: int) -> None:
     # --- Add job to step 2 (direct server call) ---
     step_card_two = await get_object_card("UsageJourneyStep", step_two)
     await click_and_wait_for_htmx(page, step_card_two.locator("button[hx-get*='open-create-object-panel/JobBase']"))
-    await page.locator("#service").wait_for(state="attached")
+    await page.locator("#service_or_external_api").wait_for(state="attached")
     await select_option("service", "direct_server_call")
     await fill_field("Job_name", job_two)
     await submit_and_wait_for_close()

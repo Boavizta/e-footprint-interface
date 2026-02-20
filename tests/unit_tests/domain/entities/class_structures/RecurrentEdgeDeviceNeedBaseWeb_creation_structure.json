@@ -6,7 +6,7 @@
             {
                 "input_type": "select_object",
                 "web_id": "edge_device",
-                "name": "Edge Device",
+                "name": "edge device",
                 "options": [
                     {
                         "label": "mock_edge_device",

@@ -167,8 +167,8 @@ class TestEdgeObjects:
 
         # Add a job to the recurrent server need - should work
         recurrent_server_need_card.click_add_job_button()
-        page.locator("#service").wait_for(state="attached")
-        side_panel.select_option("service", "direct_server_call")
+        page.locator("#service_or_external_api").wait_for(state="attached")
+        side_panel.select_option("service_or_external_api", "direct_server_call")
         side_panel.fill_field("Job_name", job_name)
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("Job", job_name)

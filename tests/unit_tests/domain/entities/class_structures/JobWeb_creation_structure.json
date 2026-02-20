@@ -5,8 +5,8 @@
         "fields": [
             {
                 "input_type": "select_object",
-                "web_id": "server",
-                "name": "Server",
+                "web_id": "server_or_external_api",
+                "name": "server or external API",
                 "options": [
                     {
                         "label": "server",
@@ -17,14 +17,14 @@
                         "value": "external_api_efootprint_id"
                     }
                 ],
-                "label": "Choose a server"
+                "label": "Choose a server or external API"
             },
             {
                 "input_type": "select_object",
-                "web_id": "service",
-                "name": "Service",
+                "web_id": "service_or_external_api",
+                "name": "Service or external API",
                 "options": null,
-                "label": "Service used"
+                "label": "Service or external API used"
             }
         ]
     },
@@ -159,24 +159,6 @@
                 "tooltip": false,
                 "input_type": "str",
                 "default": "Gen AI Job 1"
-            },
-            {
-                "web_id": "EcoLogitsGenAIExternalAPIJob_external_api",
-                "attr_name": "external_api",
-                "label": "external api",
-                "tooltip": false,
-                "input_type": "select_object",
-                "selected": "efootprint_id1",
-                "options": [
-                    {
-                        "label": "option1",
-                        "value": "efootprint_id1"
-                    },
-                    {
-                        "label": "option2",
-                        "value": "efootprint_id2"
-                    }
-                ]
             },
             {
                 "web_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",

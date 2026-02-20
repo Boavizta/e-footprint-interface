@@ -20,6 +20,7 @@ class ParentSelectionFormStrategy(FormStrategy):
         - parent_attribute: Name of parent field (e.g., 'server', 'edge_device')
         - intermediate_attribute: Optional intermediate selection (e.g., 'service')
         - type_classes_by_parent_class: Optional mapping parent_class -> child_classes
+        - Optional parent_attribute_label and intermediate_attribute_label to override default labels
     - get_creation_prerequisites(model_web) -> dict with:
         - parents: List of parent web objects
         - available_classes: List of all possible classes
@@ -48,15 +49,18 @@ class ParentSelectionFormStrategy(FormStrategy):
         prereqs = web_class.get_creation_prerequisites(self.model_web)
 
         parent_attr = config['parent_attribute']
+        parent_attr_label = config.get('parent_attribute_label', parent_attr.replace('_', ' '))
         intermediate_attr = config.get('intermediate_attribute')
         parents = prereqs['parents']
         available_classes = prereqs['available_classes']
 
         # Build helper fields
-        helper_fields = [self._build_parent_select_field(parent_attr, parents)]
+        helper_fields = [self._build_parent_select_field(parent_attr, parent_attr_label, parents)]
 
         if intermediate_attr:
-            helper_fields.append(self._build_intermediate_select_field(intermediate_attr))
+            intermediate_attr_label = config.get(
+                'intermediate_attribute_label', intermediate_attr.replace('_', ' ').title())
+            helper_fields.append(self._build_intermediate_select_field(intermediate_attr, intermediate_attr_label))
 
         # Build dynamic selects
         dynamic_selects = []
@@ -96,24 +100,24 @@ class ParentSelectionFormStrategy(FormStrategy):
             "header_name": f"Add new {ClassUIConfigProvider.get_label(object_type).lower()}"
         }
 
-    def _build_parent_select_field(self, parent_attr: str, parents: list) -> dict:
+    def _build_parent_select_field(self, parent_attr: str, parent_attr_label: str, parents: list) -> dict:
         """Build a select field for parent selection."""
         return {
             "input_type": "select_object",
             "web_id": parent_attr,
-            "name": parent_attr.replace('_', ' ').title(),
+            "name": parent_attr_label,
             "options": [{"label": p.name, "value": p.efootprint_id} for p in parents],
-            "label": f"Choose a {parent_attr.replace('_', ' ')}",
+            "label": f"Choose a {parent_attr_label}",
         }
 
-    def _build_intermediate_select_field(self, intermediate_attr: str) -> dict:
+    def _build_intermediate_select_field(self, intermediate_attr: str, intermediate_attr_label: str) -> dict:
         """Build a select field for intermediate selection (options filled dynamically)."""
         return {
             "input_type": "select_object",
             "web_id": intermediate_attr,
-            "name": intermediate_attr.replace('_', ' ').title(),
+            "name": intermediate_attr_label,
             "options": None,  # Filled by dynamic select
-            "label": f"{intermediate_attr.replace('_', ' ').title()} used",
+            "label": f"{intermediate_attr_label} used",
         }
 
     def _build_intermediate_dynamic_selects(

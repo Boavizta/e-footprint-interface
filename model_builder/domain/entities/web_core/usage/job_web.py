@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 
-from efootprint.all_classes_in_order import SERVICE_CLASSES, EXTERNAL_API_CLASSES
+from efootprint.all_classes_in_order import SERVICE_CLASSES, EXTERNAL_API_CLASSES, ALL_CONCRETE_EFOOTPRINT_CLASSES_DICT
+from efootprint.builders.external_apis.external_api_job_base_class import ExternalAPIJob
+from efootprint.builders.services.service_job_base_class import ServiceJob
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.usage.job import Job, GPUJob
 
@@ -11,13 +13,15 @@ if TYPE_CHECKING:
 
 
 class JobWeb(ResourceNeedBaseWeb):
-    attributes_to_skip_in_forms = ["service", "server"]
+    attributes_to_skip_in_forms = ["service", "server", "external_api"]
 
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
-        'strategy': 'parent_selection',
-        'parent_attribute': 'server',
-        'intermediate_attribute': 'service',
+        "strategy": "parent_selection",
+        "parent_attribute": "server_or_external_api",
+        "parent_attribute_label": "server or external API",
+        "intermediate_attribute": "service_or_external_api",
+        "intermediate_attribute_label": "Service or external API",
     }
 
     @property
@@ -50,11 +54,11 @@ class JobWeb(ResourceNeedBaseWeb):
         for server in servers:
             is_gpu = isinstance(server.modeling_obj, GPUServer)
             intermediate_by_parent[server.efootprint_id] = {
-                'items': server.installed_services,
-                'extra_options': [{
-                    'id': 'direct_server_call_gpu' if is_gpu else 'direct_server_call',
-                    'label': f"direct call to{' GPU' if is_gpu else ''} server",
-                    'type_classes': [GPUJob if is_gpu else Job],
+                "items": server.installed_services,
+                "extra_options": [{
+                    "id": "direct_server_call_gpu" if is_gpu else "direct_server_call",
+                    "label": f"direct call to{' GPU' if is_gpu else ''} server",
+                    "type_classes": [GPUJob if is_gpu else Job],
                 }],
             }
 
@@ -71,8 +75,29 @@ class JobWeb(ResourceNeedBaseWeb):
             {external_api.efootprint_id: list(external_api.compatible_jobs()) for external_api in external_apis})
 
         return {
-            'parents': servers + external_apis,
-            'available_classes': list(available_classes),
-            'intermediate_by_parent': intermediate_by_parent,
-            'type_classes_by_intermediate': type_classes_by_intermediate,
+            "parents": servers + external_apis,
+            "available_classes": list(available_classes),
+            "intermediate_by_parent": intermediate_by_parent,
+            "type_classes_by_intermediate": type_classes_by_intermediate,
         }
+
+    @classmethod
+    def pre_create(cls, form_data, model_web: "ModelWeb"):
+        """Adapt dependent object (server, service, external api) to job type.
+        """
+        if "service_or_external_api" not in form_data and "server_or_external_api" not in form_data:
+            # Case of creating object forms directly from annotations in tests.
+            return form_data
+
+        efootprint_class_str = form_data.get("type_object_available")
+        efootprint_class = ALL_CONCRETE_EFOOTPRINT_CLASSES_DICT[efootprint_class_str]
+        if issubclass(efootprint_class, ExternalAPIJob):
+            form_data["external_api"] = form_data["service_or_external_api"]
+        elif issubclass(efootprint_class, ServiceJob):
+            form_data["service"] = form_data["service_or_external_api"]
+        else:
+            form_data["server"] = form_data["server_or_external_api"]
+        del form_data["service_or_external_api"]
+        del form_data["server_or_external_api"]
+
+        return form_data

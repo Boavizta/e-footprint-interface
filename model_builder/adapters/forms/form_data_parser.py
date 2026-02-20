@@ -96,8 +96,9 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             # List attribute - split by semicolon
             parsed[attr_key] = [v for v in str(value).split(";") if v]
         elif annotation is None:
-            logger.warning(f"Unable to determine annotation for {attr_key} in {object_type} form data.")
-            continue
+            # Case of JobWeb form: some fields like server_or_external_api or service_or_external_api are resolved
+            # in the pre_create hook and thus not annotated in the JobWeb __init__. We want to pass them through as-is.
+            parsed[attr_key] = value
         elif issubclass(annotation, ModelingObject):
             parsed[attr_key] = value
         elif issubclass(annotation, ExplainableObject):

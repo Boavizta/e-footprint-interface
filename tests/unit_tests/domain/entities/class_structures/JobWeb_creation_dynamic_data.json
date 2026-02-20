@@ -9,8 +9,8 @@
     "dynamic_lists": [],
     "dynamic_selects": [
         {
-            "input_id": "service",
-            "filter_by": "server",
+            "input_id": "service_or_external_api",
+            "filter_by": "server_or_external_api",
             "list_value": {
                 "server_efootprint_id": [
                     {
@@ -32,7 +32,7 @@
         },
         {
             "input_id": "type_object_available",
-            "filter_by": "service",
+            "filter_by": "service_or_external_api",
             "list_value": {
                 "direct_server_call": [
                     {
