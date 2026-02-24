@@ -6,10 +6,13 @@
         "start": "poetry run python manage.py runserver",
         "test": "poetry run python manage.py test",
         "watch": "npx sass --watch theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss",
+        "build:result-charts": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --minify --outfile=theme/static/bundles/result_charts.js",
+        "build:result-charts:dev": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --outfile=theme/static/bundles/result_charts.js",
         "jest": "jest"
     },
     "devDependencies": {
         "@types/node": "^20.12",
+        "esbuild": "^0.25.0",
         "jest-environment-jsdom": "^29.7.0",
         "luxon": "^3.5.0",
         "sass": "^1.81",

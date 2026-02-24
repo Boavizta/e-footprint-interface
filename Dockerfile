@@ -1,9 +1,22 @@
-# Production Build
-# Golden image
+# ----------------------------------------------------------------------------
+# Assets build (JS bundling)
+# ----------------------------------------------------------------------------
+FROM node:20-slim AS assets
+WORKDIR /app
+
+COPY package.json package-lock.json /app/
+RUN npm ci
+
+COPY theme/static/scripts/result_charts /app/theme/static/scripts/result_charts
+RUN mkdir -p /app/theme/static/bundles
+RUN npm run build:result-charts
+
+# ----------------------------------------------------------------------------
+# Production runtime image
+# ----------------------------------------------------------------------------
 FROM python:3.12-slim-bookworm
 LABEL org.opencontainers.image.authors="Publicis Sapient Engineering"
 
-# Set workdir
 WORKDIR /app
 
 # Install components, upgrade machine & add supervisor
@@ -28,18 +41,16 @@ RUN pip3 install supervisor poetry
 # Prepare some stuff
 RUN mkdir -p /var/log/supervisor
 
-# Install node
-RUN apt-get install nodejs npm -y
-
-# Set workdir
-WORKDIR /app
-
 # Configure nginx
 ADD ./docker/conf/nginx.conf /etc/nginx/nginx.conf
 ADD ./docker/conf/supervisord-prod.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy the full app
 ADD . /app
+
+# Copy bundled JS from assets stage (avoids runtime npm install)
+COPY --from=assets /app/theme/static/bundles/result_charts.js /app/theme/static/bundles/result_charts.js
+COPY --from=assets /app/theme/static/bundles/result_charts.js.map /app/theme/static/bundles/result_charts.js.map
 
 # Install requirements
 ADD poetry.lock /app

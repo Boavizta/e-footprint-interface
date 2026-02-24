@@ -53,6 +53,8 @@ cloud-sql-proxy
 pylintrc
 
 staticfiles/
+/theme/static/bundles/*.js
+/theme/static/bundles/*.map
 /theme/static/scripts/external_librairies/htmx_full.js
 opencode.json
 docker/conf/ssl/*.pem

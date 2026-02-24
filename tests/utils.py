@@ -1,3 +1,7 @@
+from pathlib import Path
+
+test_rootdir = Path(__file__).parent
+
 def assert_dicts_equal(json1, json2, path=""):
     """
     Recursively asserts that two JSON-like Python structures are equal,
