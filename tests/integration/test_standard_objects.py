@@ -22,7 +22,7 @@ def _usage_pattern_post_data(name: str, uj_id: str) -> dict:
         devices=next(iter(DEFAULT_DEVICES.keys())),
         network=next(iter(DEFAULT_NETWORKS.keys())),
         country=next(iter(DEFAULT_COUNTRIES.keys())),
-        hourly_usage_journey_starts__initial_volume=1000,
+        hourly_usage_journey_starts__initial_volume=100000,
     )
 
 
@@ -139,5 +139,12 @@ def test_create_ecologits_external_api_and_job(default_system_repository):
     )
 
     sd = default_system_repository.get_system_data()
-    assert api_id in sd.get("EcoLogitsGenAIExternalAPI", {}) or api_id in sd.get("EcoLogitsGenAIExternalAPIServer", {})
+    assert api_id in sd.get("EcoLogitsGenAIExternalAPI", {})
     assert job_id in sd["EcoLogitsGenAIExternalAPIJob"]
+
+    uj_id = ModelWeb(default_system_repository).usage_journey_steps[0].usage_journeys[0].efootprint_id
+    up_id = create_object(default_system_repository, _usage_pattern_post_data("UP", uj_id))
+
+    model_web = ModelWeb(default_system_repository)
+    assert sum(model_web.system_emissions["values"]["ExternalAPIs_energy"]) > 0
+    assert sum(model_web.system_emissions["values"]["ExternalAPIs_fabrication"]) > 0

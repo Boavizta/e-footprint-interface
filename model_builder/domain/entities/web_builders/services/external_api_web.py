@@ -19,3 +19,7 @@ class ExternalAPIWeb(ModelingObjectWeb):
     def get_htmx_form_config(cls, context_data: dict) -> dict:
         """HTMX configuration for external API creation forms - append to #server-list."""
         return {"hx_target": "#external-api-list", "hx_swap": "beforeend"}
+
+    @property
+    def calculated_attributes_values(self):
+        return super().calculated_attributes_values + self.server.calculated_attributes_values

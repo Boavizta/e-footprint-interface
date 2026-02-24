@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.3] - 2026-02-24
+
+### Fixed
+- Added External APIs to results categories in the results panel.
+
+### Added
+- External API server calculated attributes in External API calculated attributes section. 
+
 ## [0.14.2] - 2026-02-20
 
 ### Fixed
