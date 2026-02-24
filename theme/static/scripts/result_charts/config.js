@@ -190,13 +190,17 @@ export const HARDWARE_TYPE_CONFIG = {
         label: "Servers and storage usage",
         backgroundColor: "#80E5DE",
     },
+    ExternalAPIs_energy: {
+        label: "External APIs usage",
+        backgroundColor: "#70CFC9",
+    },
     Edge_devices_energy: {
         label: "Edge devices and storage usage",
-        backgroundColor: "#2DC9BF",
+        backgroundColor: "#5CB6B1",
     },
     Devices_energy: {
         label: "Devices usage",
-        backgroundColor: "#00A19E",
+        backgroundColor: "#429693",
     },
     Network_energy: {
         label: "Network usage",
@@ -206,9 +210,13 @@ export const HARDWARE_TYPE_CONFIG = {
         label: "Servers and storage fabrication",
         backgroundColor: "#9DC4E6",
     },
+    ExternalAPIs_fabrication: {
+        label: "External APIs fabrication",
+        backgroundColor: "#85AFD8",
+    },
     Edge_devices_fabrication: {
         label: "Edge devices and storage fabrication",
-        backgroundColor: "#5B9BD5",
+        backgroundColor: "#6595C8",
     },
     Devices_fabrication: {
         label: "Devices fabrication",

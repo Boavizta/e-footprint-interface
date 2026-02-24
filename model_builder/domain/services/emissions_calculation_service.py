@@ -75,6 +75,9 @@ class EmissionsCalculationService:
                 get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
                 + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
             ),
+            "ExternalAPIs_energy": to_rounded_daily_values(
+                get_reindexed_array_from_dict("ExternalAPIs", energy, global_start, total_hours)
+            ),
             "Edge_devices_energy": to_rounded_daily_values(
                 get_reindexed_array_from_dict("EdgeDevices", energy, global_start, total_hours)
             ),
@@ -87,6 +90,9 @@ class EmissionsCalculationService:
             "Servers_and_storage_fabrication": to_rounded_daily_values(
                 get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
                 + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
+            ),
+            "ExternalAPIs_fabrication": to_rounded_daily_values(
+                get_reindexed_array_from_dict("ExternalAPIs", fab, global_start, total_hours)
             ),
             "Edge_devices_fabrication": to_rounded_daily_values(
                 get_reindexed_array_from_dict("EdgeDevices", fab, global_start, total_hours)

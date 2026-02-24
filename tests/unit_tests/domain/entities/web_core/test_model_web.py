@@ -20,6 +20,7 @@ class TestModelWeb(unittest.TestCase):
         self.model_web.system.total_energy_footprints = {
             "Servers": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
             "Storage": {"value": [300, 400], "start_date": "2023-01-01 00:00"},
+            "ExternalAPIs": {"value": [100, 300], "start_date": "2023-01-01 00:00"},
             "Devices": {"value": [500, 600], "start_date": "2023-01-02 00:00"},
             "Network": {"value": [700, 800], "start_date": "2023-01-01 00:00"},
             "EdgeDevices": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
@@ -27,6 +28,7 @@ class TestModelWeb(unittest.TestCase):
         self.model_web.system.total_fabrication_footprints = {
             "Servers": {"value": [900, 1000], "start_date": "2023-01-01 00:00"},
             "Storage": {"value": [1100, 1200], "start_date": "2023-01-01 00:00"},
+            "ExternalAPIs": {"value": [500, 700], "start_date": "2023-01-01 00:00"},
             "Devices": {"value": [1300, 1400], "start_date": "2023-01-02 00:00"},
             "Network": EmptyExplainableObject(),
             "EdgeDevices": {"value": [1500, 1600], "start_date": "2023-01-01 00:00"},
@@ -46,8 +48,10 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["dates"], ["2023-01-01", "2023-01-02"])
         self.assertListEqual(emissions["values"]["Servers_and_storage_energy"], [1, 0])
         self.assertListEqual(emissions["values"]["Devices_energy"], [0, 1.1])
+        self.assertListEqual(emissions["values"]["ExternalAPIs_energy"], [0.4, 0])
         self.assertListEqual(emissions["values"]["Network_energy"], [1.5, 0])
         self.assertListEqual(emissions["values"]["Servers_and_storage_fabrication"], [4.2, 0])
+        self.assertListEqual(emissions["values"]["ExternalAPIs_fabrication"], [1.2, 0])
         self.assertListEqual(emissions["values"]["Devices_fabrication"], [0, 2.7])
         self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
         self.assertListEqual(emissions["values"]["Edge_devices_fabrication"], [3.1, 0])
