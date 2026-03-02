@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.5] - 2026-03-02
+
+### Fixed
+- Upgraded to e-footprint 16.0.6 to fix a bug that occurred when importing e-footprint V15 models with GenAIModel objects.
+
 ## [0.14.4] - 2026-02-24
 
 ### Fixed
