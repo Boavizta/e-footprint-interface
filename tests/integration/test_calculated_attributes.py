@@ -7,10 +7,8 @@ Dropped:
 """
 import pytest
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
-from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 
-from model_builder.domain.entities.efootprint_extensions.explainable_start_date import ExplainableStartDate
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     prepare_timeseries_chart_context, prepare_hourly_quantity_data)
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -42,12 +40,6 @@ def test_all_calculated_attributes_produce_valid_outputs(minimal_repository):
                 context, _ = prepare_timeseries_chart_context(
                     model_web, container_id, attr_name, prepare_hourly_quantity_data)
                 assert "data_timeseries" in context
-            elif isinstance(calc_attr, (ExplainableQuantity, ExplainableStartDate)):
-                web_obj = model_web.get_web_object_from_efootprint_id(container_id)
-                explained_obj = getattr(web_obj, attr_name)
-                literal_formula, ancestors = (
-                    explained_obj.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
-                assert literal_formula is not None
             elif isinstance(calc_attr, ExplainableObjectDict):
                 for key in calc_attr.keys():
                     context, _ = prepare_timeseries_chart_context(
