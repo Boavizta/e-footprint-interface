@@ -1,3 +1,4 @@
+import math
 from copy import copy, deepcopy
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args, TYPE_CHECKING
@@ -147,7 +148,7 @@ def generate_dynamic_form(
             if issubclass(annotation, ExplainableQuantity):
                 default_value = float(round(default.magnitude, 2))
                 step = field_config.get("step", 0.1)
-                if default_value == int(default_value):
+                if math.isfinite(default_value) and default_value == int(default_value):
                     default_value = int(default_value)
                 else:
                     step = 0.1
