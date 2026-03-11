@@ -537,7 +537,7 @@
             "EcoLogitsCustomGenAIExternalAPI"
         ],
         "label": "custom average carbon intensity",
-        "step": 1
+        "step": 0.001
     },
     "custom_batch_size": {
         "modeling_obj_containers": [
