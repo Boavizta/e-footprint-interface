@@ -147,11 +147,10 @@ def generate_dynamic_form(
             structure_field.update({"source": source_json})
             if issubclass(annotation, ExplainableQuantity):
                 default_value = float(round(default.magnitude, 2))
-                step = field_config.get("step", 0.1)
+                configured_step = field_config.get("step")
+                step = configured_step if configured_step is not None else 0.1
                 if math.isfinite(default_value) and default_value == int(default_value):
                     default_value = int(default_value)
-                else:
-                    step = 0.1
                 structure_field.update({
                     "input_type": "input",
                     "unit": "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}",
