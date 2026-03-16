@@ -437,3 +437,35 @@ You can easily switch between the three setup options:
 ## From Any Option to Full Docker (Option 3)
 
 See the [Docker Setup Guide](docker/README.md) for complete instructions.
+
+---
+
+# Developing with a Local e-footprint
+
+If you need to make changes to both `e-footprint` and `e-footprint-interface` simultaneously (e.g., adding a new modeling feature and its UI), you can install the local `e-footprint` as an editable dependency. This way, any change you make to the local `e-footprint` code is immediately available in the interface without reinstalling.
+
+### Setup
+
+From the `e-footprint-interface` directory, run:
+
+```bash
+poetry add ../e-footprint --editable
+```
+
+This updates `pyproject.toml` to point to your local copy and installs it in development mode. You can verify it worked with:
+
+```bash
+poetry show efootprint
+```
+
+The source should show the local path instead of PyPI.
+
+### Reverting to the Published Version
+
+When you're done with local development, switch back to the released version:
+
+```bash
+poetry add efootprint@<version>
+```
+
+**Important**: the `pyproject.toml` and `poetry.lock` changes from `poetry add ../e-footprint --editable` should not be committed, as they reference a local path that won't exist on other machines or in CI.

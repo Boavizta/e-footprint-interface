@@ -9,8 +9,7 @@ from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeP
 from efootprint.core.usage.edge.edge_function import EdgeFunction
 from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
-
-from model_builder.domain.entities.efootprint_extensions.explainable_hourly_quantities_from_form_inputs import \
+from efootprint.builders.timeseries.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 
 start = perf_counter()

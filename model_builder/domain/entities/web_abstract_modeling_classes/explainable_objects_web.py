@@ -82,5 +82,9 @@ class ExplainableQuantityWeb(ExplainableObjectWeb):
 class ExplainableObjectDictWeb(ObjectLinkedToModelingObjWeb):
     @property
     def get_values_as_list(self) -> List[ExplainableObjectWeb]:
-        return [ExplainableObjectWeb(explainable_object, self.model_web)
-                for explainable_object in self.efootprint_object.values()]
+        wrapped_values = []
+        for explainable_object in self.efootprint_object.values():
+            web_wrapper = ExplainableQuantityWeb if isinstance(explainable_object, ExplainableQuantity) else ExplainableObjectWeb
+            wrapped_values.append(web_wrapper(explainable_object, self.model_web))
+
+        return wrapped_values

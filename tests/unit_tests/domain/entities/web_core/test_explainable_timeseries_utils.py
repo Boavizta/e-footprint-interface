@@ -1,12 +1,15 @@
 """Unit tests for explainable_timeseries_utils helpers."""
 from datetime import datetime
+from types import SimpleNamespace
 
 import numpy as np
 import pytz
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.constants.units import u
 
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
+    get_web_explainable_from_attr,
     prepare_hourly_quantity_data,
     prepare_recurrent_quantity_data,
     prepare_timeseries_chart_context,
@@ -65,3 +68,18 @@ class TestExplainableTimeseriesUtils:
         assert context["web_explainable"] is web_explainable
         assert context["literal_formula"] == "x"
         assert context["data_timeseries"]["2025-01-01"] == 4.0
+
+    def test_get_web_explainable_from_attr_wraps_quantity_inside_dict(self):
+        scalar = ExplainableQuantity(1 * u.dimensionless, label="scalar")
+        dict_wrapper = SimpleNamespace(efootprint_object={"system-id": scalar})
+        model_web = DummyModelWeb(DummyWebObj("impact_repartition_weights", dict_wrapper))
+
+        resolved = get_web_explainable_from_attr(
+            model_web,
+            efootprint_id="obj1",
+            attr_name="impact_repartition_weights",
+            id_of_key_in_dict="system-id",
+        )
+
+        assert resolved.efootprint_object is scalar
+        assert resolved.rounded_value == 1

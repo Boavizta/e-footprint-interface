@@ -2,9 +2,9 @@ from typing import TYPE_CHECKING
 
 from efootprint.constants.sources import Sources
 from efootprint.core.usage.edge.recurrent_edge_component_need import RecurrentEdgeComponentNeed
-
-from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_quantities_from_constant import (
+from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import (
     ExplainableRecurrentQuantitiesFromConstant)
+
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:

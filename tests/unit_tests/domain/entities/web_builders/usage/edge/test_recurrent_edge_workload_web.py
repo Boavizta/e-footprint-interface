@@ -1,8 +1,9 @@
 """Unit tests for RecurrentEdgeWorkloadWeb entity."""
-from model_builder.domain.entities.web_builders.usage.edge.recurrent_edge_workload_web import RecurrentEdgeWorkloadWeb
-from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_quantities_from_constant import (
+from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import (
     ExplainableRecurrentQuantitiesFromConstant,
 )
+
+from model_builder.domain.entities.web_builders.usage.edge.recurrent_edge_workload_web import RecurrentEdgeWorkloadWeb
 
 
 class TestRecurrentEdgeWorkloadWeb:

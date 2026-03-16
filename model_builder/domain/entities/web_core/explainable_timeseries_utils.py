@@ -2,9 +2,32 @@ import math
 from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 
 from model_builder.domain.entities.web_core.model_web_utils import to_rounded_daily_values, reindex_array
-from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
+from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
+    ExplainableObjectWeb,
+    ExplainableQuantityWeb,
+)
+
+
+def get_web_explainable_from_attr(model_web, efootprint_id: str, attr_name: str, id_of_key_in_dict: Optional[str] = None):
+    """Resolve a calculated attribute or one of its dict entries to the concrete web explainable wrapper."""
+    edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
+    web_attr = getattr(edited_web_obj, attr_name)
+
+    if id_of_key_in_dict is None:
+        return web_attr
+
+    selected_explainable = web_attr.efootprint_object[
+        model_web.get_efootprint_object_from_efootprint_id(
+            id_of_key_in_dict,
+            "object_type unnecessary because the key necessarily already belongs to the system",
+        )
+    ]
+    web_wrapper = ExplainableQuantityWeb if isinstance(selected_explainable, ExplainableQuantity) else ExplainableObjectWeb
+
+    return web_wrapper(selected_explainable, model_web)
 
 
 def prepare_timeseries_chart_context(
@@ -27,18 +50,7 @@ def prepare_timeseries_chart_context(
     Returns:
         (context_dict, web_explainable_object)
     """
-    edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
-    web_attr = getattr(edited_web_obj, attr_name)
-
-    if id_of_key_in_dict is None:
-        web_explainable = web_attr
-    else:
-        web_explainable = ExplainableObjectWeb(
-            web_attr.efootprint_object[
-                model_web.get_efootprint_object_from_efootprint_id(
-                    id_of_key_in_dict,
-                    "object_type unnecessary because the usage pattern necessarily already belongs to the system")],
-            model_web)
+    web_explainable = get_web_explainable_from_attr(model_web, efootprint_id, attr_name, id_of_key_in_dict)
 
     data_dict, extra_context = data_preparer_func(web_explainable)
 

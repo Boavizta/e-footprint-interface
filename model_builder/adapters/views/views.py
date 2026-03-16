@@ -23,7 +23,11 @@ from model_builder.adapters.repositories import SessionSystemRepository, Session
 from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
-    prepare_timeseries_chart_context, prepare_hourly_quantity_data, prepare_recurrent_quantity_data)
+    get_web_explainable_from_attr,
+    prepare_timeseries_chart_context,
+    prepare_hourly_quantity_data,
+    prepare_recurrent_quantity_data,
+)
 from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
@@ -293,9 +297,9 @@ def get_eco_logits_calculated_attribute_explanation(request, efootprint_id, attr
 
 
 @time_it
-def get_calculated_attribute_explanation(request, efootprint_id, attr_name):
+def get_calculated_attribute_explanation(request, efootprint_id, attr_name, id_of_key_in_dict=None):
     model_web = ModelWeb(SessionSystemRepository(request.session))
-    explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
+    explained_obj = get_web_explainable_from_attr(model_web, efootprint_id, attr_name, id_of_key_in_dict)
     literal_formula, ancestors_mapped_to_symbols_list = (
         explained_obj.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
 

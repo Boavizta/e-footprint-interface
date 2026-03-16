@@ -21,7 +21,11 @@
 <div class="collapse" id="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}_{{ item.web_id }}">
     <div class="card card-body mb-3 no-truncate">
         {% for sub_item in item.get_values_as_list %}
-            {% include "model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}
+            {% if sub_item.class_as_snake_str == "explainable_quantity" %}
+                {% include "model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html" with item=sub_item %}
+            {% else %}
+                {% include "model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}
+            {% endif %}
         {% endfor %}
     </div>
 </div>

@@ -8,6 +8,7 @@ Dropped:
 import pytest
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     prepare_timeseries_chart_context, prepare_hourly_quantity_data)
@@ -42,6 +43,10 @@ def test_all_calculated_attributes_produce_valid_outputs(minimal_repository):
                 assert "data_timeseries" in context
             elif isinstance(calc_attr, ExplainableObjectDict):
                 for key in calc_attr.keys():
-                    context, _ = prepare_timeseries_chart_context(
-                        model_web, container_id, attr_name, prepare_hourly_quantity_data, key.id)
-                    assert "data_timeseries" in context
+                    value = calc_attr[key]
+                    if isinstance(value, ExplainableHourlyQuantities):
+                        context, _ = prepare_timeseries_chart_context(
+                            model_web, container_id, attr_name, prepare_hourly_quantity_data, key.id)
+                        assert "data_timeseries" in context
+                    elif isinstance(value, ExplainableQuantity):
+                        assert value.value is not None

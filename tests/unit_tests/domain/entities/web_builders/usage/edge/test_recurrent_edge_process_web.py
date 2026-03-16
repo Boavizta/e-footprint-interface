@@ -1,8 +1,9 @@
 """Unit tests for RecurrentEdgeProcessWeb entity."""
-from model_builder.domain.entities.web_builders.usage.edge.recurrent_edge_process_web import RecurrentEdgeProcessWeb
-from model_builder.domain.entities.efootprint_extensions.explainable_recurrent_quantities_from_constant import (
+from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import (
     ExplainableRecurrentQuantitiesFromConstant,
 )
+
+from model_builder.domain.entities.web_builders.usage.edge.recurrent_edge_process_web import RecurrentEdgeProcessWeb
 
 
 class TestRecurrentEdgeProcessWeb:
