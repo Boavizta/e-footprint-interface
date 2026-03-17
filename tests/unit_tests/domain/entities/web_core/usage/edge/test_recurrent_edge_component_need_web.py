@@ -2,6 +2,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 
 from model_builder.domain.entities.web_core.usage.edge.recurrent_edge_component_need_web import (
     RecurrentEdgeComponentNeedWeb,
@@ -12,6 +13,32 @@ from tests.unit_tests.domain.entities.snapshot_model_webs import build_recurrent
 
 class TestRecurrentEdgeComponentNeedWeb:
     """Tests for RecurrentEdgeComponentNeedWeb-specific behavior."""
+
+    # --- pre_create ---
+
+    def test_pre_create_promotes_edge_storage_need_to_storage_type(self):
+        """Storage-selected needs should be created as RecurrentEdgeStorageNeed."""
+        form_data = {"edge_component": "storage-id"}
+        model_web = MagicMock()
+        model_web.get_efootprint_object_from_efootprint_id.return_value = MagicMock(spec=EdgeStorage)
+
+        result = RecurrentEdgeComponentNeedWeb.pre_create(form_data, model_web)
+
+        assert result["type_object_available"] == "RecurrentEdgeStorageNeed"
+        assert "type_object_available" not in form_data
+        model_web.get_efootprint_object_from_efootprint_id.assert_called_once_with("storage-id", "EdgeComponent")
+
+    def test_pre_create_keeps_generic_type_for_non_storage_component(self):
+        """Non-storage components should remain generic recurrent edge component needs."""
+        form_data = {"edge_component": "component-id"}
+        model_web = MagicMock()
+        model_web.get_efootprint_object_from_efootprint_id.return_value = MagicMock()
+
+        result = RecurrentEdgeComponentNeedWeb.pre_create(form_data, model_web)
+
+        assert "type_object_available" not in result
+        assert result == form_data
+        model_web.get_efootprint_object_from_efootprint_id.assert_called_once_with("component-id", "EdgeComponent")
 
     # --- get_form_creation_data ---
 

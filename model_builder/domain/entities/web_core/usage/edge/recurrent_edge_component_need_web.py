@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from efootprint.constants.sources import Sources
+from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 from efootprint.core.usage.edge.recurrent_edge_component_need import RecurrentEdgeComponentNeed
 from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import (
     ExplainableRecurrentQuantitiesFromConstant)
@@ -30,6 +31,19 @@ class RecurrentEdgeComponentNeedWeb(ModelingObjectWeb):
     @property
     def template_name(self):
         return "recurrent_edge_component_need"
+
+    @classmethod
+    def pre_create(cls, form_data, model_web: "ModelWeb"):
+        form_data = dict(form_data)
+        edge_component_id = form_data.get("edge_component")
+        if edge_component_id is None:
+            return form_data
+
+        edge_component = model_web.get_efootprint_object_from_efootprint_id(edge_component_id, "EdgeComponent")
+        if isinstance(edge_component, EdgeStorage):
+            form_data["type_object_available"] = "RecurrentEdgeStorageNeed"
+
+        return form_data
 
     @classmethod
     def get_form_creation_data(cls, model_web: "ModelWeb", efootprint_id_of_parent_to_link_to: str) -> dict:

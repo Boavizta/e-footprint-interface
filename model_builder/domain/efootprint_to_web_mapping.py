@@ -74,6 +74,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     "RecurrentEdgeWorkload": RecurrentEdgeWorkloadWeb,
     "RecurrentEdgeDeviceNeed": RecurrentEdgeDeviceNeedWeb,
     "RecurrentEdgeComponentNeed": RecurrentEdgeComponentNeedWeb,
+    "RecurrentEdgeStorageNeed": RecurrentEdgeComponentNeedWeb,
 }
 
 def wrap_efootprint_object(modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None):
