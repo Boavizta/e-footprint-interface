@@ -1,0 +1,169 @@
+<div class="sankey-card" id="sankey-card-{{ card_id }}">
+
+    <div class="sankey-card-header" onclick="sankeyToggleSettings('{{ card_id }}')">
+        <div id="sankey-title-{{ card_id }}" class="sankey-card-title-area">
+            <span class="card-title">Impact repartition</span>
+            <span class="card-subtitle">All phases</span>
+        </div>
+        <div class="card-actions">
+            <button class="btn-icon" title="Toggle settings"
+                    onclick="event.stopPropagation(); sankeyToggleSettings('{{ card_id }}')">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.434-.901 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.116l.094-.318z"/></svg>
+            </button>
+            <button class="btn-icon btn-delete" title="Remove diagram"
+                    onclick="event.stopPropagation(); sankeyRemoveCard('{{ card_id }}')">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <form id="settings-{{ card_id }}" class="sankey-settings"
+          hx-post="/model_builder/sankey-diagram/"
+          hx-target="#sankey-diagram-area-{{ card_id }}"
+          hx-swap="outerHTML"
+          hx-sync="this:replace"
+          hx-trigger="load, change delay:300ms, input delay:300ms from:find input[type=range]">
+        <input type="hidden" name="card_id" value="{{ card_id }}">
+
+        <div class="settings-row">
+            <div class="setting-group">
+                <label>Lifecycle phase
+                    <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                          title="Focus on manufacturing (hardware production) or usage (energy consumption) impacts, or view both.">
+                        <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                    </span>
+                </label>
+                <select name="lifecycle_phase_filter">
+                    <option value="">All phases</option>
+                    <option value="Manufacturing">Manufacturing only</option>
+                    <option value="Usage">Usage only</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label>Aggregation threshold
+                    <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                          title="Components below this share of total emissions are grouped into 'Other' to reduce clutter.">
+                        <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                    </span>
+                </label>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="range" name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="1"
+                           style="width: 90px;"
+                           oninput="this.nextElementSibling.textContent = this.value + '%'">
+                    <span style="font-size: 13px; color: #555; min-width: 28px;">1%</span>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label>Detail level
+                    <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                          title="Control breakdown levels: Phase (manufacturing vs. usage), Category (object type groups), Object (individual components).">
+                        <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                    </span>
+                </label>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <input class="form-check-input" type="checkbox" name="phase_split" checked id="toggle-phase-{{ card_id }}">
+                        <label for="toggle-phase-{{ card_id }}">Phase</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input class="form-check-input" type="checkbox" name="category_split" checked id="toggle-category-{{ card_id }}">
+                        <label for="toggle-category-{{ card_id }}">Category</label>
+                    </div>
+                    <div class="toggle-item">
+                        <input class="form-check-input" type="checkbox" name="object_split" checked id="toggle-object-{{ card_id }}">
+                        <label for="toggle-object-{{ card_id }}">Object</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="advanced-toggle" onclick="sankeyToggleAdvanced('{{ card_id }}')">
+            <span id="advanced-arrow-{{ card_id }}">&#9654;</span> Advanced options
+        </button>
+
+        <div class="advanced-settings" id="advanced-{{ card_id }}" style="display: none;">
+            <div class="settings-row">
+                <div class="setting-group">
+                    <label>Excluded types
+                        <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                              title="Completely remove these hardware types from the analysis. Their impact will not appear in the diagram at all.">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                        </span>
+                    </label>
+                    <div class="chip-select" id="exclude-chips-{{ card_id }}">
+                        {% for chip in exclude_chips %}
+                        <span class="chip{% if chip.active %} active-exclude{% endif %}"
+                              data-class="{{ chip.class_name }}"
+                              data-type="exclude"
+                              data-card="{{ card_id }}"
+                              onclick="sankeyToggleChip(this)">{{ chip.label }}</span>
+                        {% if chip.active %}
+                        <input type="hidden" name="excluded_types" value="{{ chip.class_name }}" data-chip-input="{{ chip.class_name }}-{{ card_id }}-exclude">
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>Skipped types
+                        <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                              title="These types won't appear as nodes — their children connect directly to the parent. Useful to simplify intermediate levels.">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                        </span>
+                    </label>
+                    <div class="chip-select" id="skip-chips-{{ card_id }}">
+                        {% for chip in skip_chips %}
+                        <span class="chip{% if chip.active %} active{% endif %}"
+                              data-class="{{ chip.class_name }}"
+                              data-type="skip"
+                              data-card="{{ card_id }}"
+                              onclick="sankeyToggleChip(this)">{{ chip.label }}</span>
+                        {% if chip.active %}
+                        <input type="hidden" name="skipped_classes" value="{{ chip.class_name }}" data-chip-input="{{ chip.class_name }}-{{ card_id }}-skip">
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>Column headers
+                        <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                              title="Show labels above the diagram indicating what each column represents.">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                        </span>
+                    </label>
+                    <div class="toggle-item">
+                        <input class="form-check-input" type="checkbox" name="display_column_headers" checked id="toggle-columns-{{ card_id }}">
+                        <label for="toggle-columns-{{ card_id }}">Show</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>Label length
+                        <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
+                              title="Truncate long node names to keep the diagram readable.">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+                        </span>
+                    </label>
+                    <input type="number" name="node_label_max_length" value="15" min="5" max="50" style="width: 70px;">
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div id="sankey-diagram-area-{{ card_id }}" class="sankey-diagram-area">
+        <div class="sankey-card-title-area" style="padding: 8px 16px;">
+            <span class="card-title">Impact repartition</span>
+            <span class="card-subtitle">Generating diagram...</span>
+        </div>
+        <div id="sankey-plot-{{ card_id }}" class="sankey-plot-container" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+            <div class="text-center text-secondary">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Generating diagram...
+            </div>
+        </div>
+    </div>
+
+</div>

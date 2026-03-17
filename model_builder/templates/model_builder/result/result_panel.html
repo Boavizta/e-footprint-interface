@@ -41,7 +41,10 @@
             <b>Sources</b>
         </button>
     </div>
-    <div id="graph-block" class="col d-block overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">{% include 'model_builder/result/result_graph.html' %}</div>
+    <div id="graph-block" class="col d-block overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">
+        {% include 'model_builder/result/result_graph.html' %}
+        {% include 'model_builder/result/sankey_section.html' %}
+    </div>
     <div id="source-block" class="col d-none overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">{% include 'model_builder/result/source_table.html' %}</div>
 </div>
 

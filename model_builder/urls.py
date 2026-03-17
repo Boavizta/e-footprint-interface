@@ -4,6 +4,7 @@ import model_builder.adapters.views.views_addition
 import model_builder.adapters.views.views_deletion
 import model_builder.adapters.views.views_edition
 from .adapters.views import views
+from .adapters.views import sankey_views
 
 urlpatterns = [
     path("", views.model_builder_main, name="model-builder"),
@@ -48,4 +49,6 @@ urlpatterns = [
     path("get_eco_logits_calculated_attribute_explanation/<efootprint_id>/<attr_name>/",
          model_builder.adapters.views.views.get_eco_logits_calculated_attribute_explanation,
          name="get_eco_logits_calculated_attribute_explanation"),
+    path("sankey-diagram/", sankey_views.sankey_diagram, name="sankey-diagram"),
+    path("sankey-form/", sankey_views.sankey_form, name="sankey-form"),
 ]

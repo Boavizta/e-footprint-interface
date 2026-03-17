@@ -13990,4 +13990,365 @@ input:disabled {
   border-color: var(--gray-400);
 }
 
+.sankey-section {
+  padding: 0 4px 16px;
+}
+
+.sankey-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.sankey-onboarding {
+  background: linear-gradient(135deg, #f0f6ff 0%, #f8f4ff 100%);
+  border: 1px solid #d4e4f7;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.5;
+}
+.sankey-onboarding .onboarding-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.sankey-onboarding .onboarding-text b {
+  color: #333;
+}
+.sankey-onboarding .onboarding-dismiss {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+}
+.sankey-onboarding .onboarding-dismiss:hover {
+  color: #555;
+}
+.sankey-onboarding .onboarding-tip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #777;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.sankey-landscape-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #6a5000;
+  margin-bottom: 12px;
+}
+
+.sankey-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.sankey-card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.sankey-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+}
+
+.sankey-card-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sankey-card-title-area .card-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0;
+  color: #333;
+}
+.sankey-card-title-area .card-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: #999;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.15s;
+}
+.btn-icon:hover {
+  background: #f0f0f0;
+  color: #555;
+}
+.btn-icon.btn-delete:hover {
+  background: #fee;
+  color: #c33;
+}
+
+.sankey-settings {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: flex-end;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 130px;
+}
+.setting-group > label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+.setting-group select,
+.setting-group input[type=number],
+.setting-group input[type=range] {
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
+.setting-group select {
+  min-width: 130px;
+}
+.setting-group input[type=range] {
+  border: none;
+  padding: 4px 0;
+  accent-color: #4a90d9;
+}
+
+.setting-help {
+  display: inline-flex;
+  align-items: center;
+  color: #ccc;
+  cursor: help;
+  line-height: 1;
+}
+.setting-help:hover {
+  color: #4a90d9;
+}
+
+.toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+}
+.toggle-item .form-check-input {
+  width: 32px;
+  height: 17px;
+  cursor: pointer;
+}
+
+.advanced-toggle {
+  font-size: 12px;
+  color: #4a90d9;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 3px 0;
+  margin-top: 6px;
+}
+.advanced-toggle:hover {
+  text-decoration: underline;
+}
+
+.advanced-settings {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.chip-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #666;
+  transition: all 0.15s;
+  user-select: none;
+}
+.chip.active {
+  background: #4a90d9;
+  color: #fff;
+  border-color: #4a90d9;
+}
+.chip.active-exclude {
+  background: #dc6b6b;
+  color: #fff;
+  border-color: #dc6b6b;
+}
+.chip:hover {
+  border-color: #4a90d9;
+}
+.chip.active-exclude:hover {
+  border-color: #c55;
+}
+
+.sankey-diagram-area {
+  padding: 8px 30px 0 30px;
+}
+
+.sankey-column-headers {
+  position: relative;
+  min-height: 36px;
+  margin-bottom: 4px;
+}
+
+.column-header-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 500;
+  color: #555;
+  background: rgba(250, 250, 250, 0.95);
+  border: 1px solid rgb(210, 210, 210);
+  border-radius: 4px;
+  padding: 4px 6px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.column-header-tag .col-header-line {
+  display: block;
+  text-align: center;
+}
+
+.sankey-plot-container {
+  min-height: 400px;
+  position: relative;
+}
+@media (max-width: 768px) {
+  .sankey-plot-container {
+    min-height: 300px;
+  }
+}
+
+.interaction-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: #aaa;
+  pointer-events: none;
+  z-index: 1;
+}
+.interaction-hint .hint-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.interaction-hint svg {
+  opacity: 0.5;
+}
+@media (hover: none) {
+  .interaction-hint .hint-item:last-child {
+    display: none;
+  }
+}
+
+.btn-add-sankey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  background: none;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-add-sankey:hover {
+  border-color: #4a90d9;
+  color: #4a90d9;
+  background: #f0f6ff;
+}
+
 /*# sourceMappingURL=bs_main.css.map */
