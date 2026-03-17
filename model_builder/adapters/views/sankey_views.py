@@ -18,9 +18,9 @@ DEFAULT_SKIPPED_CLASSES = [
 EXCLUDABLE_CLASSES = ["Device", "EdgeDevice", "Network", "ServerBase", "ExternalAPI", "Storage", "EdgeStorage"]
 
 SKIPPABLE_CLASSES = [
-    "UsagePattern", "EdgeUsagePattern", "UsageJourney", "EdgeUsageJourney", "JobBase",
-    "RecurrentEdgeDeviceNeed", "RecurrentServerNeed", "RecurrentEdgeComponentNeed",
-    "Service", "VideoStreaming", "GenAIModel",
+    "Country", "UsagePattern", "EdgeUsagePattern", "UsageJourney", "EdgeUsageJourney", "EdgeFunction",
+    "JobBase", "EdgeDevice", "RecurrentEdgeDeviceNeed", "RecurrentServerNeed", "RecurrentEdgeComponentNeed",
+    "Service", "ExternalAPI",
 ]
 
 _LIFECYCLE_PHASE_MAP = {
@@ -110,7 +110,7 @@ def sankey_diagram(request):
         labels = [ClassUIConfigProvider.get_label(cls) for cls in excluded_object_types]
         excluded_info = f" excluding {', '.join(labels)}"
     total_co2 = display_co2_amount(format_co2_amount(sankey.total_system_kg))
-    title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info}: {total_co2} CO₂eq"
+    title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info} (total {total_co2} CO₂eq)"
     subtitle_map = {None: "All phases", LifeCyclePhases.MANUFACTURING: "Manufacturing only", LifeCyclePhases.USAGE: "Usage only"}
     subtitle = subtitle_map[lifecycle_phase_filter]
 
