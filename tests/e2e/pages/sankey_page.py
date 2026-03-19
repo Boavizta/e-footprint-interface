@@ -30,14 +30,13 @@ class SankeyCard:
         return title_el.inner_text()
 
     def diagram_is_rendered(self) -> bool:
-        """Check that Plotly has rendered content inside the plot container."""
+        """Check that ECharts has rendered content inside the plot container."""
         plot_el = self.plot_locator()
-        # Plotly creates a .plotly div (or .js-plotly-plot) when rendered
-        return plot_el.locator(".js-plotly-plot, .plotly, svg.main-svg").count() > 0
+        return plot_el.locator("canvas").count() > 0
 
     def wait_for_diagram_update(self, timeout: int = 10000) -> None:
-        """Wait for Plotly to render inside the plot container."""
-        self.plot_locator().locator("svg.main-svg").first.wait_for(state="attached", timeout=timeout)
+        """Wait for ECharts to render inside the plot container."""
+        self.plot_locator().locator("canvas").first.wait_for(state="attached", timeout=timeout)
 
     def set_lifecycle_filter(self, value: str) -> None:
         """Set the lifecycle phase filter. value: '' | 'Manufacturing' | 'Usage'."""

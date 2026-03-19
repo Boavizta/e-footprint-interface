@@ -8,11 +8,24 @@
 
 // Mock htmx before requiring sankey.js (it runs addEventListener at load time)
 global.htmx = { trigger: jest.fn() };
+global.ResizeObserver = class {
+    observe() {}
+    disconnect() {}
+};
+global.echarts = {
+    init: jest.fn()
+};
 
 // Mock document.body.addEventListener for HTMX events (added at module load)
 // jsdom supports this natively, so no special setup needed.
 
-const { sankeyToggleChip } = require('../theme/static/scripts/sankey.js');
+const {
+    disposeSankeyPlot,
+    estimateSankeyRightPadding,
+    getSankeyLayout,
+    renderSankeyPlot,
+    sankeyToggleChip
+} = require('../theme/static/scripts/sankey.js');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -50,6 +63,7 @@ function getHiddenInput(form, inputKey) {
 
 beforeEach(() => {
     htmx.trigger.mockClear();
+    echarts.init.mockReset();
 });
 
 describe('sankeyToggleChip — skip chips', () => {
@@ -147,5 +161,81 @@ describe('sankeyToggleChip — multiple chips', () => {
         const values = Array.from(inputs).map(i => i.value);
         expect(values).toContain('UsagePattern');
         expect(values).toContain('JobBase');
+    });
+});
+
+describe('ECharts rendering', () => {
+    test('getSankeyLayout prefers payload layout when provided', () => {
+        const layout = getSankeyLayout({
+            nodes: [],
+            layout: { leftPaddingPx: 42, rightPaddingPx: 128 }
+        });
+
+        expect(layout.leftPaddingPx).toBe(42);
+        expect(layout.rightPaddingPx).toBe(128);
+    });
+
+    test('estimateSankeyRightPadding reserves extra space for long rightmost labels', () => {
+        const padding = estimateSankeyRightPadding({
+            nodes: [
+                { label: 'Manufacturing', depth: 0 },
+                { label: 'Short', depth: 1 },
+                { label: 'mutualized_equipment_cluster_alpha_beta', depth: 2 }
+            ]
+        });
+
+        expect(padding).toBeGreaterThan(30);
+        expect(padding).toBeLessThanOrEqual(260);
+    });
+
+    test('renderSankeyPlot initialises an ECharts instance with Sankey payload', () => {
+        const chart = { setOption: jest.fn(), dispose: jest.fn(), resize: jest.fn() };
+        echarts.init.mockReturnValue(chart);
+        document.body.innerHTML = `
+            <div id="sankey-plot-1" data-sankey='{"nodes":[{"key":"node-0","name_key":"Root⁣0","label":"Root","value_kg":10,"depth":0,"color":"rgba(1,2,3,0.8)","tooltip_html":"root"}],"links":[],"layout":{"left_padding_px":30,"right_padding_px":120}}'></div>
+        `;
+
+        const plotEl = document.getElementById('sankey-plot-1');
+        renderSankeyPlot(plotEl);
+
+        expect(echarts.init).toHaveBeenCalledTimes(1);
+        expect(chart.setOption).toHaveBeenCalledTimes(1);
+        const option = chart.setOption.mock.calls[0][0];
+        expect(option.series[0].type).toBe('sankey');
+        expect(option.series[0].left).toBe(30);
+        expect(option.series[0].right).toBe(120);
+        expect(option.series[0].data[0].name).toBe('Root⁣0');
+        expect(option.series[0].data[0].value).toBeUndefined();
+        expect(option.series[0].label.formatter({ name: 'Root⁣0' })).toBe('Root');
+    });
+
+    test('renderSankeyPlot disposes the previous chart instance before re-rendering', () => {
+        const previousChart = { setOption: jest.fn(), dispose: jest.fn(), resize: jest.fn() };
+        const nextChart = { setOption: jest.fn(), dispose: jest.fn(), resize: jest.fn() };
+        echarts.init.mockReturnValueOnce(nextChart);
+        document.body.innerHTML = `
+            <div id="sankey-plot-1" data-sankey='{"nodes":[],"links":[]}'></div>
+        `;
+
+        const plotEl = document.getElementById('sankey-plot-1');
+        plotEl.__sankeyChart = previousChart;
+        renderSankeyPlot(plotEl);
+
+        expect(previousChart.dispose).toHaveBeenCalledTimes(1);
+        expect(nextChart.setOption).toHaveBeenCalledTimes(1);
+    });
+
+    test('disposeSankeyPlot disposes the chart and clears the instance reference', () => {
+        const chart = { dispose: jest.fn(), resize: jest.fn() };
+        document.body.innerHTML = '<div id="sankey-plot-1"></div>';
+        const plotEl = document.getElementById('sankey-plot-1');
+        plotEl.__sankeyChart = chart;
+        plotEl.__sankeyResizeObserver = { disconnect: jest.fn() };
+
+        disposeSankeyPlot(plotEl);
+
+        expect(chart.dispose).toHaveBeenCalledTimes(1);
+        expect(plotEl.__sankeyChart).toBeNull();
+        expect(plotEl.__sankeyResizeObserver).toBeNull();
     });
 });

@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 
+from model_builder.adapters.views.sankey_views import _build_sankey_payload
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -28,10 +29,21 @@ def _make_sankey_mock(mock_cls):
     """Configure a mocked ImpactRepartitionSankey to return minimal valid data."""
     instance = MagicMock()
     mock_cls.return_value = instance
-    mock_fig = MagicMock()
-    mock_fig.to_json.return_value = json.dumps({"data": [], "layout": {}})
-    instance.figure.return_value = mock_fig
+    instance.build.return_value = None
     instance.total_system_kg = 1_000_000.0  # 1000 kg → "1 t"
+    instance.node_labels = ["Test System", "Usage"]
+    instance.full_node_labels = ["Test System", "Usage"]
+    instance.link_sources = [0]
+    instance.link_targets = [1]
+    instance.link_values = [1.0]
+    instance.node_total_kg = [1_000_000.0, 1_000_000.0]
+    instance.aggregated_node_members = {}
+    instance._node_columns = {0: 1, 1: 2}
+    instance._spacer_nodes = set()
+    instance._category_node_indices = set()
+    instance._leaf_node_indices = set()
+    instance._breakdown_node_indices = set()
+    instance._compute_node_colors.return_value = ["rgba(100,100,100,0.8)", "rgba(80,120,180,0.8)"]
     instance.get_column_information.return_value = []
     instance.get_column_metadata.return_value = []
     return instance
@@ -141,9 +153,9 @@ class TestSankeyDiagramStructure:
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
         assert 'id="sankey-diagram-area-1"' in response.content.decode()
 
-    def test_plotly_json_present_in_data_attribute(self, sankey_client, default_post):
+    def test_sankey_payload_present_in_data_attribute(self, sankey_client, default_post):
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
-        assert "data-plotly=" in response.content.decode()
+        assert "data-sankey=" in response.content.decode()
 
     def test_title_contains_system_name(self, sankey_client, default_post):
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
@@ -184,6 +196,26 @@ class TestSankeyDiagramStructure:
         data = {**default_post, "card_id": "42"}
         response = sankey_client.post("/model_builder/sankey-diagram/", data)
         assert 'id="sankey-diagram-area-42"' in response.content.decode()
+
+    @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
+    def test_column_headers_use_same_dynamic_padding_as_chart(self, mock_cls, sankey_client, default_post):
+        instance = _make_sankey_mock(mock_cls)
+        instance.node_labels = ["System", "Very long rightmost equipment label for alignment"]
+        instance.full_node_labels = instance.node_labels
+        instance.get_column_information.return_value = [{
+            "column_index": 1,
+            "column_type": "manual_split",
+            "description": "Lifecycle phase",
+            "class_names": [],
+            "x_center": 0.5,
+        }]
+
+        response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
+        content = response.content.decode()
+
+        assert "padding-left: 30px;" in content
+        assert "padding-right: 260px;" in content
+        assert "100% - 290px" in content
 
 
 # ---------------------------------------------------------------------------
@@ -281,3 +313,70 @@ class TestSankeyDiagramParameterMapping:
         data = {k: v for k, v in default_post.items() if k not in ("skipped_classes",)}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skipped_impact_repartition_classes"] is None
+
+
+class TestBuildSankeyPayload:
+
+    def test_layout_padding_added_to_payload(self):
+        sankey = MagicMock()
+        sankey.build.return_value = None
+        sankey.node_labels = ["Root", "Very long rightmost equipment label for layout"]
+        sankey.full_node_labels = sankey.node_labels
+        sankey.link_sources = [0]
+        sankey.link_targets = [1]
+        sankey.link_values = [1.0]
+        sankey.node_total_kg = [1000.0, 1000.0]
+        sankey.total_system_kg = 1000.0
+        sankey.aggregated_node_members = {}
+        sankey._node_columns = {0: 1, 1: 2}
+        sankey._spacer_nodes = set()
+        sankey._category_node_indices = set()
+        sankey._leaf_node_indices = set()
+        sankey._breakdown_node_indices = set()
+        sankey._compute_node_colors.return_value = [
+            "rgba(100,100,100,0.8)",
+            "rgba(80,120,180,0.8)",
+        ]
+
+        payload, _ = _build_sankey_payload(sankey)
+
+        assert payload["layout"] == {
+            "left_padding_px": 30,
+            "right_padding_px": 260,
+            "horizontal_padding_px": 290,
+        }
+
+    def test_spacer_links_are_not_double_counted(self):
+        sankey = MagicMock()
+        sankey.build.return_value = None
+        sankey.node_labels = ["Root", "", "Leaf"]
+        sankey.full_node_labels = ["Root", "", "Leaf"]
+        sankey.link_sources = [0, 1]
+        sankey.link_targets = [1, 2]
+        sankey.link_values = [1.0, 1.0]
+        sankey.node_total_kg = [1000.0, 1000.0, 1000.0]
+        sankey.total_system_kg = 1000.0
+        sankey.aggregated_node_members = {}
+        sankey._node_columns = {0: 1, 1: 2, 2: 3}
+        sankey._spacer_nodes = {1}
+        sankey._category_node_indices = set()
+        sankey._leaf_node_indices = set()
+        sankey._breakdown_node_indices = set()
+        sankey._compute_node_colors.return_value = [
+            "rgba(100,100,100,0.8)",
+            "rgba(100,100,100,0.3)",
+            "rgba(80,120,180,0.8)",
+        ]
+
+        payload, _ = _build_sankey_payload(sankey)
+
+        assert payload["links"] == [{
+            "source_key": "node-0",
+            "target_key": "node-2",
+            "source_name_key": "Root⁣0",
+            "target_name_key": "Leaf⁣2",
+            "value": 1.0,
+            "value_kg": 1000.0,
+            "color": "rgba(100,100,100,0.35)",
+            "tooltip_html": "Root → Leaf<br>1.0 tonnes CO2eq (100.0%)",
+        }]

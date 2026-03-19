@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
@@ -27,6 +29,13 @@ _LIFECYCLE_PHASE_MAP = {
     "Manufacturing": LifeCyclePhases.MANUFACTURING,
     "Usage": LifeCyclePhases.USAGE,
 }
+
+_SANKEY_NAME_DELIMITER = "\u2063"
+_SANKEY_SIDE_PADDING_PX = 30
+_SANKEY_RIGHT_PADDING_MIN_PX = 90
+_SANKEY_RIGHT_PADDING_MAX_PX = 260
+_SANKEY_LABEL_CHAR_WIDTH_PX = 7
+_SANKEY_LABEL_BUFFER_PX = 36
 
 
 def _get_present_classes(model_web: ModelWeb) -> set[str]:
@@ -60,12 +69,142 @@ def _build_chip_list(candidate_classes: list[str], present_classes: set[str], de
     return chips
 
 
+def _estimate_sankey_right_padding(nodes: list[dict]) -> int:
+    if not nodes:
+        return _SANKEY_SIDE_PADDING_PX
+
+    max_depth = max(node["depth"] for node in nodes)
+    longest_right_label_length = max(
+        (len(node["label"]) for node in nodes if node["depth"] == max_depth),
+        default=0,
+    )
+
+    if longest_right_label_length == 0:
+        return _SANKEY_SIDE_PADDING_PX
+
+    estimated_padding = longest_right_label_length * _SANKEY_LABEL_CHAR_WIDTH_PX + _SANKEY_LABEL_BUFFER_PX
+    return max(_SANKEY_RIGHT_PADDING_MIN_PX, min(_SANKEY_RIGHT_PADDING_MAX_PX, estimated_padding))
+
+
 def _build_column_headers_context(sankey: ImpactRepartitionSankey) -> list[dict]:
     headers = []
     for info in sorted(sankey.get_column_information(), key=lambda x: x["column_index"]):
         lines = [info["description"]] if info["column_type"] == "manual_split" else [ClassUIConfigProvider.get_label(cn) for cn in info["class_names"]]
         headers.append({"lines": lines, "x_center": info["x_center"]})
     return headers
+
+
+def _resolve_visible_node_idx(node_idx: int, adjacency: dict[int, list[int]], spacer_nodes: set[int]) -> int:
+    current = node_idx
+    while current in spacer_nodes:
+        neighbors = adjacency.get(current, [])
+        if not neighbors:
+            break
+        current = neighbors[0]
+    return current
+
+
+def _build_node_tooltip(sankey: ImpactRepartitionSankey, node_idx: int) -> str:
+    kg = sankey.node_total_kg[node_idx]
+    amount_str = display_co2_amount(format_co2_amount(kg))
+    pct = (kg / sankey.total_system_kg * 100) if sankey.total_system_kg > 0 else 0
+    if node_idx in sankey.aggregated_node_members:
+        members_str = "<br>".join(
+            f"{label}: {display_co2_amount(format_co2_amount(member_kg))} CO2eq"
+            for label, member_kg in sankey.aggregated_node_members[node_idx]
+        )
+        return f"{sankey.full_node_labels[node_idx]}<br>{amount_str} CO2eq ({pct:.1f}%)<br><br>Aggregated objects:<br>{members_str}"
+    return f"{sankey.full_node_labels[node_idx]}<br>{amount_str} CO2eq ({pct:.1f}%)"
+
+
+def _build_link_tooltip(sankey: ImpactRepartitionSankey, source_idx: int, target_idx: int, value_tonnes: float) -> str:
+    kg = value_tonnes * 1000
+    amount_str = display_co2_amount(format_co2_amount(kg))
+    pct = (kg / sankey.total_system_kg * 100) if sankey.total_system_kg > 0 else 0
+    return f"{sankey.full_node_labels[source_idx]} → {sankey.full_node_labels[target_idx]}<br>{amount_str} CO2eq ({pct:.1f}%)"
+
+
+def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
+    sankey.build()
+    node_columns = getattr(sankey, "_node_columns", {})
+    spacer_nodes = getattr(sankey, "_spacer_nodes", set())
+    category_nodes = getattr(sankey, "_category_node_indices", set())
+    leaf_nodes = getattr(sankey, "_leaf_node_indices", set())
+    breakdown_nodes = getattr(sankey, "_breakdown_node_indices", set())
+    node_colors = sankey._compute_node_colors()
+
+    incoming_by_target = {}
+    outgoing_by_source = {}
+    for source, target in zip(sankey.link_sources, sankey.link_targets):
+        incoming_by_target.setdefault(target, []).append(source)
+        outgoing_by_source.setdefault(source, []).append(target)
+
+    visible_columns = [column for node_idx, column in node_columns.items() if node_idx not in spacer_nodes]
+    min_column = min(visible_columns) if visible_columns else 0
+
+    nodes_per_column: dict[int, int] = {}
+    nodes = []
+    for node_idx, label in enumerate(sankey.node_labels):
+        if node_idx in spacer_nodes:
+            continue
+        column = node_columns.get(node_idx, min_column)
+        nodes_per_column[column] = nodes_per_column.get(column, 0) + 1
+        name_key = f"{label}{_SANKEY_NAME_DELIMITER}{node_idx}"
+        nodes.append({
+            "key": f"node-{node_idx}",
+            "name_key": name_key,
+            "label": label,
+            "full_name": sankey.full_node_labels[node_idx],
+            "value_kg": sankey.node_total_kg[node_idx],
+            "value_tonnes": sankey.node_total_kg[node_idx] / 1000,
+            "depth": column - min_column,
+            "column": column,
+            "color": node_colors[node_idx],
+            "tooltip_html": _build_node_tooltip(sankey, node_idx),
+            "is_aggregated": node_idx in sankey.aggregated_node_members,
+            "is_category": node_idx in category_nodes,
+            "is_leaf": node_idx in leaf_nodes,
+            "is_breakdown": node_idx in breakdown_nodes,
+        })
+
+    right_padding_px = _estimate_sankey_right_padding(nodes)
+
+    collapsed_links = {}
+    for source, target, value_tonnes in zip(sankey.link_sources, sankey.link_targets, sankey.link_values):
+        if source in spacer_nodes:
+            continue
+        visible_source = _resolve_visible_node_idx(source, incoming_by_target, spacer_nodes)
+        visible_target = _resolve_visible_node_idx(target, outgoing_by_source, spacer_nodes)
+        if visible_source == visible_target or visible_source in spacer_nodes or visible_target in spacer_nodes:
+            continue
+        collapsed_links[(visible_source, visible_target)] = collapsed_links.get((visible_source, visible_target), 0.0) + value_tonnes
+
+    links = []
+    for (source_idx, target_idx), value_tonnes in sorted(collapsed_links.items()):
+        links.append({
+            "source_key": f"node-{source_idx}",
+            "target_key": f"node-{target_idx}",
+            "source_name_key": f"{sankey.node_labels[source_idx]}{_SANKEY_NAME_DELIMITER}{source_idx}",
+            "target_name_key": f"{sankey.node_labels[target_idx]}{_SANKEY_NAME_DELIMITER}{target_idx}",
+            "value": value_tonnes,
+            "value_kg": value_tonnes * 1000,
+            "color": node_colors[source_idx].replace("0.8)", "0.35)"),
+            "tooltip_html": _build_link_tooltip(sankey, source_idx, target_idx, value_tonnes),
+        })
+
+    node_width, node_gap, chart_top, chart_bottom = 20, 20, 10, 30
+    max_nodes_per_col = max(nodes_per_column.values()) if nodes_per_column else 1
+    recommended_height = max(400, max_nodes_per_col * (node_width + node_gap) + chart_top + chart_bottom)
+
+    return {
+        "nodes": nodes,
+        "links": links,
+        "layout": {
+            "left_padding_px": _SANKEY_SIDE_PADDING_PX,
+            "right_padding_px": right_padding_px,
+            "horizontal_padding_px": _SANKEY_SIDE_PADDING_PX + right_padding_px,
+        },
+    }, recommended_height
 
 
 @render_exception_modal_if_error
@@ -98,9 +237,8 @@ def sankey_diagram(request):
         lifecycle_phase_filter=lifecycle_phase_filter,
         display_column_information=False,
     )
-    fig = sankey.figure()
-    fig.update_layout(title=None, margin=dict(t=10, b=30, l=20, r=20), paper_bgcolor="rgba(0,0,0,0)")
-    plotly_json = fig.to_json()
+    sankey_payload, sankey_height = _build_sankey_payload(sankey)
+    sankey_payload_json = json.dumps(sankey_payload)
 
     column_headers = _build_column_headers_context(sankey) if display_column_headers else []
 
@@ -116,8 +254,10 @@ def sankey_diagram(request):
 
     return render(request, "model_builder/result/sankey_diagram.html", {
         "card_id": card_id,
-        "plotly_json": plotly_json,
+        "sankey_payload_json": sankey_payload_json,
+        "sankey_height": sankey_height,
         "column_headers": column_headers,
+        "sankey_layout": sankey_payload["layout"],
         "display_column_headers": display_column_headers,
         "title": title,
         "subtitle": subtitle,

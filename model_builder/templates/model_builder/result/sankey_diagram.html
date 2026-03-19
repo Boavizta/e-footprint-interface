@@ -12,17 +12,19 @@ Also does out-of-band title update via hx-swap-oob.
 {# Main swap target content #}
 <div id="sankey-diagram-area-{{ card_id }}" class="sankey-diagram-area">
     {% if column_headers %}
-    <div class="sankey-column-headers" style="position: relative; padding: 0 30px; margin-bottom: 4px;">
+    <div class="sankey-column-headers"
+         style="position: relative; padding-left: {{ sankey_layout.left_padding_px }}px; padding-right: {{ sankey_layout.right_padding_px }}px; margin-bottom: 4px;">
         {% for header in column_headers %}
-        <div class="column-header-tag" style="left: calc(30px + {{ header.x_center }} * (100% - 60px));">
+        <div class="column-header-tag"
+             style="left: calc({{ sankey_layout.left_padding_px }}px + {{ header.x_center }} * (100% - {{ sankey_layout.horizontal_padding_px }}px));">
             {% for line in header.lines %}<span class="col-header-line">{{ line }}</span>{% endfor %}
         </div>
         {% endfor %}
     </div>
     {% endif %}
     <div class="sankey-plot-container" id="sankey-plot-{{ card_id }}"
-         data-plotly="{{ plotly_json }}"
-         style="min-height: 400px; position: relative;">
+         data-sankey="{{ sankey_payload_json }}"
+         style="height: {{ sankey_height }}px; position: relative;">
         <div class="interaction-hint" id="hint-{{ card_id }}">
             <span class="hint-item">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.75 1a.75.75 0 0 1 .75.75V8a.5.5 0 0 0 1 0V5.467l.086-.004a1.5 1.5 0 0 1 1.006.293c.154.121.254.296.287.487l.35 1.992a.5.5 0 0 0 .983-.172l-.35-1.992a1.5 1.5 0 0 0-.287-.487l-.002-.002V1.75a.75.75 0 0 1 1.5 0V8a.5.5 0 0 0 1 0V3.75a.75.75 0 0 1 1.5 0V8a.5.5 0 0 0 1 0V5.75a.75.75 0 0 1 1.5 0v5.5a5.25 5.25 0 0 1-10.5 0V1.75A.75.75 0 0 1 6.75 1z"/></svg>
@@ -34,17 +36,4 @@ Also does out-of-band title update via hx-swap-oob.
             </span>
         </div>
     </div>
-    <script>
-        (function() {
-            var el = document.getElementById('sankey-plot-{{ card_id }}');
-            if (!el || !window.Plotly) return;
-            var plotData = JSON.parse(el.getAttribute('data-plotly'));
-            plotData.layout = plotData.layout || {};
-            plotData.layout.height = 400;
-            plotData.layout.width = undefined;
-            plotData.layout.paper_bgcolor = 'transparent';
-            plotData.layout.margin = { t: 10, b: 30, l: 30, r: 30 };
-            Plotly.newPlot(el, plotData.data, plotData.layout, { responsive: true, displayModeBar: false });
-        })();
-    </script>
 </div>
