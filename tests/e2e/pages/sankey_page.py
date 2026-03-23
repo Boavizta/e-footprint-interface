@@ -29,10 +29,13 @@ class SankeyCard:
         title_el = self.page.locator(f"#sankey-title-{self.card_id} .card-title")
         return title_el.inner_text()
 
-    def diagram_is_rendered(self) -> bool:
-        """Check that ECharts has rendered content inside the plot container."""
-        plot_el = self.plot_locator()
-        return plot_el.locator("canvas").count() > 0
+    def diagram_is_rendered(self, timeout: int = 10000) -> bool:
+        """Check that ECharts has rendered content inside the plot container, waiting for async rendering."""
+        try:
+            self.plot_locator().locator("canvas").first.wait_for(state="attached", timeout=timeout)
+            return True
+        except Exception:
+            return False
 
     def wait_for_diagram_update(self, timeout: int = 10000) -> None:
         """Wait for ECharts to render inside the plot container."""

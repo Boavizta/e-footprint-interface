@@ -270,9 +270,9 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["skip_object_footprint_split"] is False
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skip_object_true_when_hardware_inactive(self, mock_cls, sankey_client, default_post):
+    def test_skip_object_true_when_hardware_and_component_breakdown_inactive(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {**default_post, "active_columns": [c for c in default_post["active_columns"] if c != "7"]}
+        data = {**default_post, "active_columns": [c for c in default_post["active_columns"] if c not in ["7", "8"]]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skip_object_footprint_split"] is True
 

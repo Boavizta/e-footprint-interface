@@ -302,31 +302,6 @@ $sankey-bg-settings: #f8f9fa;
     @media (max-width: 768px) { min-height: 300px; }
 }
 
-// Interaction hints overlay
-.interaction-hint {
-    position: absolute;
-    bottom: 12px;
-    right: 16px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 11px;
-    color: #aaa;
-    pointer-events: none;
-    z-index: 1;
-
-    .hint-item {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-    svg { opacity: 0.5; }
-
-    @media (hover: none) {
-        .hint-item:last-child { display: none; }
-    }
-}
-
 // Add card button
 .btn-add-sankey {
     display: flex;
