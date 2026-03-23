@@ -216,7 +216,7 @@ function sankeyToggleChip(chipEl) {
 
     var inputAttr = 'data-chip-input';
     var inputKey = className + '-' + cardId + '-' + type;
-    var fieldName = type === 'exclude' ? 'excluded_types' : 'skipped_columns';
+    var fieldName = type === 'exclude' ? 'excluded_types' : 'active_columns';
     var activeClass = type === 'exclude' ? 'active-exclude' : 'active';
 
     var existing = form.querySelector('[' + inputAttr + '="' + inputKey + '"]');

@@ -74,18 +74,18 @@ class SankeyCard:
             self._container.locator(".advanced-toggle").click()
             advanced_el.wait_for(state="visible")
 
-    def toggle_skip_chip(self, label: str) -> None:
-        """Toggle a skip chip by its UI label text."""
+    def toggle_analyse_by_chip(self, label: str) -> None:
+        """Toggle an analyse-by chip by its UI label text."""
         with self.page.expect_response(lambda r: "sankey-diagram" in r.url):
-            self._container.locator(f'.chip[data-type="skip"]').filter(has_text=label).click()
+            self._container.locator(f'.chip[data-type="analyse"]').filter(has_text=label).click()
 
     def toggle_exclude_chip(self, label: str) -> None:
         """Toggle an exclude chip by its UI label text."""
         with self.page.expect_response(lambda r: "sankey-diagram" in r.url):
             self._container.locator(f'.chip[data-type="exclude"]').filter(has_text=label).click()
 
-    def skip_chip_exists(self, label: str) -> bool:
-        return self._container.locator(f'.chip[data-type="skip"]').filter(has_text=label).count() > 0
+    def analyse_by_chip_exists(self, label: str) -> bool:
+        return self._container.locator(f'.chip[data-type="analyse"]').filter(has_text=label).count() > 0
 
     def exclude_chip_exists(self, label: str) -> bool:
         return self._container.locator(f'.chip[data-type="exclude"]').filter(has_text=label).count() > 0

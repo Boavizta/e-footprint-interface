@@ -55,26 +55,27 @@
                 </div>
             </div>
 
-            <div class="setting-group">
-                <label>Detail level
+        </div>
+
+        <div class="settings-row">
+            <div class="setting-group" style="flex: 1;padding-top: 5px;">
+                <label>Analyse by
                     <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
-                          title="Control breakdown levels: Phase (manufacturing vs. usage), Category (object type groups), Object (individual components).">
+                          title="Choose which columns appear in the diagram. Active chips are shown as Sankey columns from left to right.">
                         <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                     </span>
                 </label>
-                <div class="toggle-group">
-                    <div class="toggle-item">
-                        <input class="form-check-input" type="checkbox" name="phase_split" checked id="toggle-phase-{{ card_id }}">
-                        <label for="toggle-phase-{{ card_id }}">Phase</label>
-                    </div>
-                    <div class="toggle-item">
-                        <input class="form-check-input" type="checkbox" name="category_split" checked id="toggle-category-{{ card_id }}">
-                        <label for="toggle-category-{{ card_id }}">Category</label>
-                    </div>
-                    <div class="toggle-item">
-                        <input class="form-check-input" type="checkbox" name="object_split" checked id="toggle-object-{{ card_id }}">
-                        <label for="toggle-object-{{ card_id }}">Object</label>
-                    </div>
+                <div class="chip-select" id="analyse-by-chips-{{ card_id }}">
+                    {% for chip in analyse_by_chips %}
+                    <span class="chip{% if chip.active %} active{% endif %}"
+                          data-class="{{ chip.chip_id }}"
+                          data-type="analyse"
+                          data-card="{{ card_id }}"
+                          onclick="sankeyToggleChip(this)">{{ chip.label }}</span>
+                    {% if chip.active %}
+                    <input type="hidden" name="active_columns" value="{{ chip.chip_id }}" data-chip-input="{{ chip.chip_id }}-{{ card_id }}-analyse">
+                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -101,27 +102,6 @@
                               onclick="sankeyToggleChip(this)">{{ chip.label }}</span>
                         {% if chip.active %}
                         <input type="hidden" name="excluded_types" value="{{ chip.class_name }}" data-chip-input="{{ chip.class_name }}-{{ card_id }}-exclude">
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="setting-group">
-                    <label>Skipped columns
-                        <span class="setting-help" data-bs-toggle="tooltip" data-bs-placement="top"
-                              title="These columns won't appear as nodes — their children connect directly to the parent. Useful to simplify intermediate levels.">
-                            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
-                        </span>
-                    </label>
-                    <div class="chip-select" id="skip-chips-{{ card_id }}">
-                        {% for chip in skip_column_chips %}
-                        <span class="chip{% if chip.active %} active{% endif %}"
-                              data-class="{{ chip.column_index }}"
-                              data-type="skip"
-                              data-card="{{ card_id }}"
-                              onclick="sankeyToggleChip(this)">{{ chip.label }}</span>
-                        {% if chip.active %}
-                        <input type="hidden" name="skipped_columns" value="{{ chip.column_index }}" data-chip-input="{{ chip.column_index }}-{{ card_id }}-skip">
                         {% endif %}
                         {% endfor %}
                     </div>

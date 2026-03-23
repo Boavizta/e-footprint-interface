@@ -141,14 +141,13 @@ class TestSankeySection:
         sankey_system.open_result_panel()
         assert not SankeyPage(sankey_system).onboarding_banner_visible()
 
-    def test_skip_chip_toggle_triggers_diagram_update(self, sankey_system: ModelBuilderPage):
-        """Toggling a skip chip triggers a live diagram update."""
+    def test_analyse_by_chip_toggle_triggers_diagram_update(self, sankey_system: ModelBuilderPage):
+        """Toggling an analyse-by chip triggers a live diagram update."""
         sankey_system.open_result_panel()
         card = SankeyPage(sankey_system).first_card()
         card.wait_for_diagram_update()
-        card.open_advanced()
 
-        card.toggle_skip_chip("Usage journeys")
+        card.toggle_analyse_by_chip("Usage journeys")
         assert card.diagram_is_rendered()
 
     def test_settings_panel_open_by_default_on_new_card(self, sankey_system: ModelBuilderPage):
@@ -161,16 +160,18 @@ class TestSankeySection:
         assert card2.settings_visible()
 
     def test_chip_lists_filtered_to_system_classes(self, sankey_system: ModelBuilderPage):
-        """Skip/exclude chip lists only show classes present in the current system."""
+        """Analyse-by and exclude chip lists only show relevant items."""
         sankey_system.open_result_panel()
         card = SankeyPage(sankey_system).first_card()
         card.wait_for_diagram_update()
-        card.open_advanced()
 
-        # Edge device not in this system — its exclude chip must not appear
+        # Analyse-by chips for present columns should appear
+        assert card.analyse_by_chip_exists("Usage journeys")
+        assert card.analyse_by_chip_exists("Phase")
+
+        # Exclude chips in advanced — edge device not in this system
+        card.open_advanced()
         assert not card.exclude_chip_exists("Edge device")
-        # All skippable columns should appear since minimal system has classes in each
-        assert card.skip_chip_exists("Usage journeys")
 
     def test_exclude_chip_updates_diagram_title(self, sankey_system: ModelBuilderPage):
         """Excluding an object type updates the title to mention it."""

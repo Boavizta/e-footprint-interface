@@ -11,7 +11,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 
-from model_builder.adapters.views.sankey_views import _build_sankey_payload, _expand_skipped_columns
+from model_builder.adapters.views.sankey_views import (
+    _build_sankey_payload, _expand_skipped_columns, DEFAULT_ACTIVE_COLUMNS,
+)
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -65,9 +67,7 @@ def default_post():
         "card_id": "1",
         "lifecycle_phase_filter": "",
         "aggregation_threshold_percent": "1.0",
-        "phase_split": "on",
-        "category_split": "on",
-        "object_split": "on",
+        "active_columns": list(DEFAULT_ACTIVE_COLUMNS),
         "display_column_headers": "on",
         "node_label_max_length": "15",
     }
@@ -91,44 +91,47 @@ class TestSankeyForm:
         id2 = re.search(r'name="card_id" value="(\d+)"', r2.content.decode()).group(1)
         assert id1 != id2
 
-    def test_skip_column_chips_show_only_columns_with_present_classes(self, sankey_client):
+    def test_analyse_by_chips_show_only_columns_with_present_classes(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # minimal_system has no edge objects — columns containing only edge classes should not appear
-        # But columns with mixed classes (e.g. column 2 = UsagePattern + EdgeUsagePattern) should appear
-        # if at least one class is present
+        # Phase and Category are always present (virtual chips)
+        assert "Phase" in content
+        assert "Category" in content
+        # Columns with at least one present class should appear
         assert "Usage patterns" in content
         assert "Usage journeys" in content
 
     def test_exclude_chips_show_only_present_classes(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # EdgeDevice and EdgeStorage not in minimal_system
         assert "EdgeDevice" not in content
         assert "EdgeStorage" not in content
 
     def test_exclude_chips_present_for_server_via_serverbase(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # ServerBase chip should appear because Server (subclass) is in system
         assert 'data-class="ServerBase"' in content
 
-    def test_default_skipped_column_has_hidden_input(self, sankey_client):
+    def test_default_active_column_has_hidden_input(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # Column 2 (Usage patterns) is a default skipped column
-        assert 'name="skipped_columns" value="2"' in content
+        # "phase" is active by default
+        assert 'name="active_columns" value="phase"' in content
+        # Column 3 (Usage journeys) is active by default
+        assert 'name="active_columns" value="3"' in content
 
-    def test_non_default_skipped_column_has_no_hidden_input(self, sankey_client):
+    def test_non_default_active_column_has_no_hidden_input(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # Column 3 (Usage journeys) is not a default skipped column
-        assert 'name="skipped_columns" value="3"' not in content
+        # Column 2 (Usage patterns) is NOT active by default
+        assert 'name="active_columns" value="2"' not in content
 
-    def test_skip_column_chips_use_column_index_as_data_class(self, sankey_client):
+    def test_analyse_by_chips_use_chip_id_as_data_class(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        assert 'data-class="2"' in content  # Usage patterns column
+        assert 'data-class="phase"' in content
+        assert 'data-class="category"' in content
+        assert 'data-class="3"' in content
 
     def test_form_contains_card_id_input(self, sankey_client):
         r = sankey_client.get("/model_builder/sankey-form/")
@@ -241,30 +244,37 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["lifecycle_phase_filter"] == LifeCyclePhases.USAGE
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skip_phase_true_when_checkbox_absent(self, mock_cls, sankey_client, default_post):
+    def test_skip_phase_true_when_phase_not_in_active_columns(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {k: v for k, v in default_post.items() if k != "phase_split"}
+        data = {**default_post, "active_columns": ["1", "3", "4", "category", "7"]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skip_phase_footprint_split"] is True
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skip_phase_false_when_checkbox_present(self, mock_cls, sankey_client, default_post):
+    def test_skip_phase_false_when_phase_in_active_columns(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
         sankey_client.post("/model_builder/sankey-diagram/", default_post)
         assert mock_cls.call_args.kwargs["skip_phase_footprint_split"] is False
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skip_category_true_when_checkbox_absent(self, mock_cls, sankey_client, default_post):
+    def test_skip_category_true_when_category_not_in_active_columns(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {k: v for k, v in default_post.items() if k != "category_split"}
+        data = {**default_post, "active_columns": ["phase", "1", "3", "4", "7"]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skip_object_category_footprint_split"] is True
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skip_object_false_when_checkbox_present(self, mock_cls, sankey_client, default_post):
+    def test_skip_object_false_when_hardware_active(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
         sankey_client.post("/model_builder/sankey-diagram/", default_post)
         assert mock_cls.call_args.kwargs["skip_object_footprint_split"] is False
+
+    @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
+    def test_skip_object_true_when_hardware_inactive(self, mock_cls, sankey_client, default_post):
+        _make_sankey_mock(mock_cls)
+        data = {**default_post, "active_columns": [c for c in default_post["active_columns"] if c != "7"]}
+        sankey_client.post("/model_builder/sankey-diagram/", data)
+        assert mock_cls.call_args.kwargs["skip_object_footprint_split"] is True
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_aggregation_threshold_passed_as_float(self, mock_cls, sankey_client, default_post):
@@ -280,15 +290,15 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["excluded_object_types"] == ["Device", "Network"]
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skipped_columns_expanded_to_classes(self, mock_cls, sankey_client, default_post):
+    def test_inactive_columns_expanded_to_skipped_classes(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {**default_post, "skipped_columns": ["2", "6"]}
-        sankey_client.post("/model_builder/sankey-diagram/", data)
+        # Default active_columns excludes columns 2, 5, 6 — those should be skipped
+        sankey_client.post("/model_builder/sankey-diagram/", default_post)
         skipped = mock_cls.call_args.kwargs["skipped_impact_repartition_classes"]
         assert "UsagePattern" in skipped
         assert "EdgeUsagePattern" in skipped
+        assert "RecurrentEdgeDeviceNeed" in skipped
         assert "JobBase" in skipped
-        assert "RecurrentEdgeComponentNeed" in skipped
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_display_column_information_always_false(self, mock_cls, sankey_client, default_post):
@@ -309,9 +319,9 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["excluded_object_types"] is None
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skipped_classes_none_when_no_columns(self, mock_cls, sankey_client, default_post):
+    def test_skipped_classes_none_when_all_columns_active(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {k: v for k, v in default_post.items() if k not in ("skipped_columns",)}
+        data = {**default_post, "active_columns": ["phase", "1", "2", "3", "4", "5", "6", "category", "7", "8"]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skipped_impact_repartition_classes"] is None
 

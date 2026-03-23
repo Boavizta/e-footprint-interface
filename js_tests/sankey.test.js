@@ -31,13 +31,13 @@ const {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function setupSkipChip(cardId = '1', columnIndex = '2') {
+function setupAnalyseChip(cardId = '1', chipId = '3') {
     document.body.innerHTML = `
         <form id="settings-${cardId}"></form>
         <span class="chip"
-              data-class="${columnIndex}"
-              data-type="skip"
-              data-card="${cardId}">Column ${columnIndex}</span>
+              data-class="${chipId}"
+              data-type="analyse"
+              data-card="${cardId}">Chip ${chipId}</span>
     `;
     return document.querySelector('.chip');
 }
@@ -66,41 +66,41 @@ beforeEach(() => {
     echarts.init.mockReset();
 });
 
-describe('sankeyToggleChip — skip chips', () => {
-    test('activating a skip chip adds "active" CSS class', () => {
-        const chip = setupSkipChip();
+describe('sankeyToggleChip — analyse chips', () => {
+    test('activating an analyse chip adds "active" CSS class', () => {
+        const chip = setupAnalyseChip();
         sankeyToggleChip(chip);
         expect(chip.classList.contains('active')).toBe(true);
     });
 
-    test('activating a skip chip adds a hidden input with correct name and value', () => {
-        const chip = setupSkipChip('1', '2');
+    test('activating an analyse chip adds a hidden input with correct name and value', () => {
+        const chip = setupAnalyseChip('1', 'phase');
         sankeyToggleChip(chip);
         const form = document.getElementById('settings-1');
-        const hidden = getHiddenInput(form, '2-1-skip');
+        const hidden = getHiddenInput(form, 'phase-1-analyse');
         expect(hidden).not.toBeNull();
-        expect(hidden.name).toBe('skipped_columns');
-        expect(hidden.value).toBe('2');
+        expect(hidden.name).toBe('active_columns');
+        expect(hidden.value).toBe('phase');
     });
 
-    test('deactivating a skip chip removes "active" CSS class', () => {
-        const chip = setupSkipChip();
+    test('deactivating an analyse chip removes "active" CSS class', () => {
+        const chip = setupAnalyseChip();
         sankeyToggleChip(chip); // activate
         sankeyToggleChip(chip); // deactivate
         expect(chip.classList.contains('active')).toBe(false);
     });
 
-    test('deactivating a skip chip removes the hidden input', () => {
-        const chip = setupSkipChip('1', '6');
+    test('deactivating an analyse chip removes the hidden input', () => {
+        const chip = setupAnalyseChip('1', '6');
         sankeyToggleChip(chip); // activate
         sankeyToggleChip(chip); // deactivate
         const form = document.getElementById('settings-1');
-        const hidden = getHiddenInput(form, '6-1-skip');
+        const hidden = getHiddenInput(form, '6-1-analyse');
         expect(hidden).toBeNull();
     });
 
     test('toggle calls htmx.trigger on the form', () => {
-        const chip = setupSkipChip();
+        const chip = setupAnalyseChip();
         sankeyToggleChip(chip);
         expect(htmx.trigger).toHaveBeenCalledTimes(1);
         const [calledEl, calledEvent] = htmx.trigger.mock.calls[0];
@@ -145,22 +145,22 @@ describe('sankeyToggleChip — exclude chips', () => {
 });
 
 describe('sankeyToggleChip — multiple chips', () => {
-    test('multiple active skip chips produce multiple hidden inputs with same name', () => {
+    test('multiple active analyse chips produce multiple hidden inputs with same name', () => {
         document.body.innerHTML = `
             <form id="settings-1"></form>
-            <span class="chip" data-class="2" data-type="skip" data-card="1">Usage patterns</span>
-            <span class="chip" data-class="6" data-type="skip" data-card="1">Jobs / component needs</span>
+            <span class="chip" data-class="phase" data-type="analyse" data-card="1">Phase</span>
+            <span class="chip" data-class="3" data-type="analyse" data-card="1">Usage journeys</span>
         `;
         const chips = document.querySelectorAll('.chip');
         sankeyToggleChip(chips[0]);
         sankeyToggleChip(chips[1]);
 
         const form = document.getElementById('settings-1');
-        const inputs = form.querySelectorAll('input[name="skipped_columns"]');
+        const inputs = form.querySelectorAll('input[name="active_columns"]');
         expect(inputs.length).toBe(2);
         const values = Array.from(inputs).map(i => i.value);
-        expect(values).toContain('2');
-        expect(values).toContain('6');
+        expect(values).toContain('phase');
+        expect(values).toContain('3');
     });
 });
 

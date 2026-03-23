@@ -16,24 +16,26 @@ EXCLUDABLE_CLASSES = ["Device", "EdgeDevice", "Network", "ServerBase", "External
 
 # Virtual column for breakdown-only classes (e.g. EdgeComponent), appended after SANKEY_COLUMNS
 _BREAKDOWN_COLUMN_INDEX = len(SANKEY_COLUMNS)
-_ALL_SKIPPABLE_COLUMNS = list(SANKEY_COLUMNS) + [SANKEY_BREAKDOWN_ONLY_CLASSES]
+_ALL_COLUMNS = list(SANKEY_COLUMNS) + [SANKEY_BREAKDOWN_ONLY_CLASSES]
 
-# Column indices that can be skipped (1–8, excluding 0=System)
-SKIPPABLE_COLUMN_INDICES = list(range(1, len(_ALL_SKIPPABLE_COLUMNS)))
+# "Analyse by" chips: ordered list of (identifier, label, classes_for_presence_check_or_None)
+# "phase" and "category" are virtual chips mapping to backend boolean flags.
+# Numbered entries map to SANKEY_COLUMNS / breakdown indices.
+ANALYSE_BY_CHIPS = [
+    ("phase", "Phase", None),
+    ("1", "Countries", _ALL_COLUMNS[1]),
+    ("2", "Usage patterns", _ALL_COLUMNS[2]),
+    ("3", "Usage journeys", _ALL_COLUMNS[3]),
+    ("4", "Steps / Functions", _ALL_COLUMNS[4]),
+    ("5", "Recurrent edge and server needs", _ALL_COLUMNS[5]),
+    ("6", "Jobs / component needs", _ALL_COLUMNS[6]),
+    ("category", "Category", None),
+    ("7", "Hardware", _ALL_COLUMNS[7]),
+    (str(_BREAKDOWN_COLUMN_INDEX), "Component breakdown", _ALL_COLUMNS[_BREAKDOWN_COLUMN_INDEX]),
+]
 
-SANKEY_COLUMN_NAMES = {
-    1: "Countries",
-    2: "Usage patterns",
-    3: "Usage journeys",
-    4: "Steps / Functions",
-    5: "Recurrent edge and server needs",
-    6: "Jobs / component needs",
-    7: "Hardware",
-    _BREAKDOWN_COLUMN_INDEX: "Component breakdown",
-}
-
-# Columns 2, 5, 6 skipped by default (Usage patterns, Recurrent needs, Jobs/component needs)
-DEFAULT_SKIPPED_COLUMNS = [2, 5, 6]
+# Chips active by default — matches previous behavior (Phase, Category on; columns 2, 5, 6 skipped)
+DEFAULT_ACTIVE_COLUMNS = {"phase", "1", "3", "4", "category", "7", str(_BREAKDOWN_COLUMN_INDEX)}
 
 _LIFECYCLE_PHASE_MAP = {
     "Manufacturing": LifeCyclePhases.MANUFACTURING,
@@ -79,26 +81,21 @@ def _column_has_present_classes(column_classes: list[type], present_classes: set
     return any(_class_or_subclass_present(cls.__name__, present_classes) for cls in column_classes)
 
 
-def _build_skip_column_chips(present_classes: set[str]) -> list[dict]:
+def _build_analyse_by_chips(present_classes: set[str]) -> list[dict]:
     chips = []
-    for col_idx in SKIPPABLE_COLUMN_INDICES:
-        column_classes = _ALL_SKIPPABLE_COLUMNS[col_idx]
-        if not _column_has_present_classes(column_classes, present_classes):
+    for chip_id, label, column_classes in ANALYSE_BY_CHIPS:
+        if column_classes is not None and not _column_has_present_classes(column_classes, present_classes):
             continue
-        chips.append({
-            "column_index": col_idx,
-            "label": SANKEY_COLUMN_NAMES[col_idx],
-            "active": col_idx in DEFAULT_SKIPPED_COLUMNS,
-        })
+        chips.append({"chip_id": chip_id, "label": label, "active": chip_id in DEFAULT_ACTIVE_COLUMNS})
     return chips
 
 
-def _expand_skipped_columns(column_indices: list[int]) -> list[str]:
+def _expand_skipped_columns(column_indices: list[str]) -> list[str]:
     class_names = []
-    for col_idx in column_indices:
-        idx = int(col_idx)
-        if 0 <= idx < len(_ALL_SKIPPABLE_COLUMNS):
-            class_names.extend(cls.__name__ for cls in _ALL_SKIPPABLE_COLUMNS[idx])
+    for col_id in column_indices:
+        idx = int(col_id)
+        if 0 <= idx < len(_ALL_COLUMNS):
+            class_names.extend(cls.__name__ for cls in _ALL_COLUMNS[idx])
     return class_names
 
 
@@ -250,12 +247,16 @@ def sankey_diagram(request):
     lifecycle_phase_filter = _LIFECYCLE_PHASE_MAP.get(lifecycle_phase_str)
 
     aggregation_threshold_percent = float(request.POST.get("aggregation_threshold_percent", "1.0"))
-    skip_phase_footprint_split = "phase_split" not in request.POST
-    skip_object_category_footprint_split = "category_split" not in request.POST
-    skip_object_footprint_split = "object_split" not in request.POST
+    active_columns = set(request.POST.getlist("active_columns"))
+    skip_phase_footprint_split = "phase" not in active_columns
+    skip_object_category_footprint_split = "category" not in active_columns
+    skip_object_footprint_split = "7" not in active_columns and "8" not in active_columns
+    inactive_column_indices = [
+        chip_id for chip_id, _, _ in ANALYSE_BY_CHIPS
+        if chip_id not in active_columns and chip_id not in ("phase", "category")
+    ]
+    skipped_classes = _expand_skipped_columns(inactive_column_indices)
     excluded_object_types = request.POST.getlist("excluded_types")
-    skipped_columns = request.POST.getlist("skipped_columns")
-    skipped_classes = _expand_skipped_columns(skipped_columns) if skipped_columns else []
     display_column_headers = "display_column_headers" in request.POST
     node_label_max_length = int(request.POST.get("node_label_max_length", "15"))
 
@@ -307,10 +308,10 @@ def sankey_form(request):
     present_classes = _get_present_classes(model_web)
 
     exclude_chips = _build_exclude_chip_list(EXCLUDABLE_CLASSES, present_classes)
-    skip_column_chips = _build_skip_column_chips(present_classes)
+    analyse_by_chips = _build_analyse_by_chips(present_classes)
 
     return render(request, "model_builder/result/sankey_card.html", {
         "card_id": card_id,
         "exclude_chips": exclude_chips,
-        "skip_column_chips": skip_column_chips,
+        "analyse_by_chips": analyse_by_chips,
     })
