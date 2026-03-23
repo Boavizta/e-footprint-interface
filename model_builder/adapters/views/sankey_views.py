@@ -2,7 +2,7 @@ import json
 
 from django.shortcuts import render
 
-from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
+from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 from efootprint.utils.impact_repartition.sankey import ImpactRepartitionSankey
 from efootprint.utils.tools import display_co2_amount, format_co2_amount
@@ -12,18 +12,28 @@ from model_builder.adapters.ui_config.class_ui_config_provider import ClassUICon
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 
-DEFAULT_SKIPPED_CLASSES = [
-    "UsagePattern", "EdgeUsagePattern", "JobBase",
-    "RecurrentEdgeDeviceNeed", "RecurrentServerNeed", "RecurrentEdgeComponentNeed",
-]
-
 EXCLUDABLE_CLASSES = ["Device", "EdgeDevice", "Network", "ServerBase", "ExternalAPI", "Storage", "EdgeStorage"]
 
-SKIPPABLE_CLASSES = [
-    "Country", "UsagePattern", "EdgeUsagePattern", "UsageJourney", "EdgeUsageJourney", "EdgeFunction",
-    "JobBase", "EdgeDevice", "RecurrentEdgeDeviceNeed", "RecurrentServerNeed", "RecurrentEdgeComponentNeed",
-    "Service", "ExternalAPI",
-]
+# Virtual column for breakdown-only classes (e.g. EdgeComponent), appended after SANKEY_COLUMNS
+_BREAKDOWN_COLUMN_INDEX = len(SANKEY_COLUMNS)
+_ALL_SKIPPABLE_COLUMNS = list(SANKEY_COLUMNS) + [SANKEY_BREAKDOWN_ONLY_CLASSES]
+
+# Column indices that can be skipped (1–8, excluding 0=System)
+SKIPPABLE_COLUMN_INDICES = list(range(1, len(_ALL_SKIPPABLE_COLUMNS)))
+
+SANKEY_COLUMN_NAMES = {
+    1: "Countries",
+    2: "Usage patterns",
+    3: "Usage journeys",
+    4: "Steps / Functions",
+    5: "Recurrent edge and server needs",
+    6: "Jobs / component needs",
+    7: "Hardware",
+    _BREAKDOWN_COLUMN_INDEX: "Component breakdown",
+}
+
+# Columns 2, 5, 6 skipped by default (Usage patterns, Recurrent needs, Jobs/component needs)
+DEFAULT_SKIPPED_COLUMNS = [2, 5, 6]
 
 _LIFECYCLE_PHASE_MAP = {
     "Manufacturing": LifeCyclePhases.MANUFACTURING,
@@ -56,17 +66,40 @@ def _class_or_subclass_present(candidate_class_name: str, present_class_names: s
     )
 
 
-def _build_chip_list(candidate_classes: list[str], present_classes: set[str], default_active: list[str]) -> list[dict]:
+def _build_exclude_chip_list(candidate_classes: list[str], present_classes: set[str]) -> list[dict]:
     chips = []
     for cls_name in candidate_classes:
         if not _class_or_subclass_present(cls_name, present_classes):
             continue
+        chips.append({"class_name": cls_name, "label": ClassUIConfigProvider.get_label(cls_name), "active": False})
+    return chips
+
+
+def _column_has_present_classes(column_classes: list[type], present_classes: set[str]) -> bool:
+    return any(_class_or_subclass_present(cls.__name__, present_classes) for cls in column_classes)
+
+
+def _build_skip_column_chips(present_classes: set[str]) -> list[dict]:
+    chips = []
+    for col_idx in SKIPPABLE_COLUMN_INDICES:
+        column_classes = _ALL_SKIPPABLE_COLUMNS[col_idx]
+        if not _column_has_present_classes(column_classes, present_classes):
+            continue
         chips.append({
-            "class_name": cls_name,
-            "label": ClassUIConfigProvider.get_label(cls_name),
-            "active": cls_name in default_active,
+            "column_index": col_idx,
+            "label": SANKEY_COLUMN_NAMES[col_idx],
+            "active": col_idx in DEFAULT_SKIPPED_COLUMNS,
         })
     return chips
+
+
+def _expand_skipped_columns(column_indices: list[int]) -> list[str]:
+    class_names = []
+    for col_idx in column_indices:
+        idx = int(col_idx)
+        if 0 <= idx < len(_ALL_SKIPPABLE_COLUMNS):
+            class_names.extend(cls.__name__ for cls in _ALL_SKIPPABLE_COLUMNS[idx])
+    return class_names
 
 
 def _estimate_sankey_right_padding(nodes: list[dict]) -> int:
@@ -221,7 +254,8 @@ def sankey_diagram(request):
     skip_object_category_footprint_split = "category_split" not in request.POST
     skip_object_footprint_split = "object_split" not in request.POST
     excluded_object_types = request.POST.getlist("excluded_types")
-    skipped_classes = request.POST.getlist("skipped_classes")
+    skipped_columns = request.POST.getlist("skipped_columns")
+    skipped_classes = _expand_skipped_columns(skipped_columns) if skipped_columns else []
     display_column_headers = "display_column_headers" in request.POST
     node_label_max_length = int(request.POST.get("node_label_max_length", "15"))
 
@@ -272,11 +306,11 @@ def sankey_form(request):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     present_classes = _get_present_classes(model_web)
 
-    exclude_chips = _build_chip_list(EXCLUDABLE_CLASSES, present_classes, [])
-    skip_chips = _build_chip_list(SKIPPABLE_CLASSES, present_classes, DEFAULT_SKIPPED_CLASSES)
+    exclude_chips = _build_exclude_chip_list(EXCLUDABLE_CLASSES, present_classes)
+    skip_column_chips = _build_skip_column_chips(present_classes)
 
     return render(request, "model_builder/result/sankey_card.html", {
         "card_id": card_id,
         "exclude_chips": exclude_chips,
-        "skip_chips": skip_chips,
+        "skip_column_chips": skip_column_chips,
     })

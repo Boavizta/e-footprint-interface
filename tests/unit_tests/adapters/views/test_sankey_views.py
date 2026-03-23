@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 
-from model_builder.adapters.views.sankey_views import _build_sankey_payload
+from model_builder.adapters.views.sankey_views import _build_sankey_payload, _expand_skipped_columns
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -91,12 +91,14 @@ class TestSankeyForm:
         id2 = re.search(r'name="card_id" value="(\d+)"', r2.content.decode()).group(1)
         assert id1 != id2
 
-    def test_skip_chips_show_only_present_classes(self, sankey_client):
+    def test_skip_column_chips_show_only_columns_with_present_classes(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # minimal_system has no edge objects — their chips must not appear
-        assert "EdgeUsagePattern" not in content
-        assert "EdgeUsageJourney" not in content
+        # minimal_system has no edge objects — columns containing only edge classes should not appear
+        # But columns with mixed classes (e.g. column 2 = UsagePattern + EdgeUsagePattern) should appear
+        # if at least one class is present
+        assert "Usage patterns" in content
+        assert "Usage journeys" in content
 
     def test_exclude_chips_show_only_present_classes(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
@@ -111,27 +113,22 @@ class TestSankeyForm:
         # ServerBase chip should appear because Server (subclass) is in system
         assert 'data-class="ServerBase"' in content
 
-    def test_skip_chips_present_for_jobbase(self, sankey_client):
+    def test_default_skipped_column_has_hidden_input(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        # JobBase chip should appear because Job (subclass) is in system
-        assert 'data-class="JobBase"' in content
+        # Column 2 (Usage patterns) is a default skipped column
+        assert 'name="skipped_columns" value="2"' in content
 
-    def test_default_skipped_usage_pattern_has_hidden_input(self, sankey_client):
+    def test_non_default_skipped_column_has_no_hidden_input(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        assert 'name="skipped_classes" value="UsagePattern"' in content
+        # Column 3 (Usage journeys) is not a default skipped column
+        assert 'name="skipped_columns" value="3"' not in content
 
-    def test_default_skipped_jobbase_has_hidden_input(self, sankey_client):
+    def test_skip_column_chips_use_column_index_as_data_class(self, sankey_client):
         response = sankey_client.get("/model_builder/sankey-form/")
         content = response.content.decode()
-        assert 'name="skipped_classes" value="JobBase"' in content
-
-    def test_non_default_skipped_chip_has_no_hidden_input(self, sankey_client):
-        response = sankey_client.get("/model_builder/sankey-form/")
-        content = response.content.decode()
-        # UsageJourney is in SKIPPABLE_CLASSES but NOT in DEFAULT_SKIPPED_CLASSES
-        assert 'name="skipped_classes" value="UsageJourney"' not in content
+        assert 'data-class="2"' in content  # Usage patterns column
 
     def test_form_contains_card_id_input(self, sankey_client):
         r = sankey_client.get("/model_builder/sankey-form/")
@@ -283,11 +280,15 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["excluded_object_types"] == ["Device", "Network"]
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skipped_classes_passed_from_chips(self, mock_cls, sankey_client, default_post):
+    def test_skipped_columns_expanded_to_classes(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {**default_post, "skipped_classes": ["UsagePattern", "JobBase"]}
+        data = {**default_post, "skipped_columns": ["2", "6"]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
-        assert mock_cls.call_args.kwargs["skipped_impact_repartition_classes"] == ["UsagePattern", "JobBase"]
+        skipped = mock_cls.call_args.kwargs["skipped_impact_repartition_classes"]
+        assert "UsagePattern" in skipped
+        assert "EdgeUsagePattern" in skipped
+        assert "JobBase" in skipped
+        assert "RecurrentEdgeComponentNeed" in skipped
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_display_column_information_always_false(self, mock_cls, sankey_client, default_post):
@@ -308,9 +309,9 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["excluded_object_types"] is None
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skipped_classes_none_when_empty(self, mock_cls, sankey_client, default_post):
+    def test_skipped_classes_none_when_no_columns(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {k: v for k, v in default_post.items() if k not in ("skipped_classes",)}
+        data = {k: v for k, v in default_post.items() if k not in ("skipped_columns",)}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skipped_impact_repartition_classes"] is None
 
@@ -380,3 +381,56 @@ class TestBuildSankeyPayload:
             "color": "rgba(100,100,100,0.35)",
             "tooltip_html": "Root → Leaf<br>1.0 tonnes CO2eq (100.0%)",
         }]
+
+
+class TestSankeyColumnsGuard:
+    """Guard test: if SANKEY_COLUMNS changes in e-footprint, this test fails and must be manually revalidated."""
+
+    def test_sankey_columns_match_expected_structure(self):
+        from efootprint.all_classes_in_order import SANKEY_COLUMNS
+
+        actual = [[cls.__name__ for cls in col] for col in SANKEY_COLUMNS]
+        expected = [
+            ["System"],
+            ["Country"],
+            ["UsagePattern", "EdgeUsagePattern"],
+            ["UsageJourney", "EdgeUsageJourney"],
+            ["EdgeFunction", "UsageJourneyStep"],
+            ["RecurrentEdgeDeviceNeed", "RecurrentServerNeed"],
+            ["JobBase", "RecurrentEdgeComponentNeed"],
+            ["Device", "EdgeDevice", "Network", "ExternalAPI", "ServerBase", "ExternalAPIServer", "Storage"],
+        ]
+        assert actual == expected, (
+            "SANKEY_COLUMNS in e-footprint has changed. Update SANKEY_COLUMN_NAMES and "
+            "SKIPPABLE_COLUMN_INDICES in sankey_views.py, then update this test."
+        )
+
+    def test_sankey_breakdown_only_classes_match_expected(self):
+        from efootprint.all_classes_in_order import SANKEY_BREAKDOWN_ONLY_CLASSES
+
+        actual = [cls.__name__ for cls in SANKEY_BREAKDOWN_ONLY_CLASSES]
+        assert actual == ["EdgeComponent"], (
+            "SANKEY_BREAKDOWN_ONLY_CLASSES in e-footprint has changed. Update SANKEY_COLUMN_NAMES "
+            "and _BREAKDOWN_COLUMN_INDEX in sankey_views.py, then update this test."
+        )
+
+
+class TestExpandSkippedColumns:
+
+    def test_expand_single_column(self):
+        result = _expand_skipped_columns(["2"])
+        assert "UsagePattern" in result
+        assert "EdgeUsagePattern" in result
+
+    def test_expand_multiple_columns(self):
+        result = _expand_skipped_columns(["1", "6"])
+        assert "Country" in result
+        assert "JobBase" in result
+        assert "RecurrentEdgeComponentNeed" in result
+
+    def test_expand_breakdown_column(self):
+        result = _expand_skipped_columns(["8"])
+        assert "EdgeComponent" in result
+
+    def test_expand_empty_returns_empty(self):
+        assert _expand_skipped_columns([]) == []

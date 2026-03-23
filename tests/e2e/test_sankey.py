@@ -148,7 +148,7 @@ class TestSankeySection:
         card.wait_for_diagram_update()
         card.open_advanced()
 
-        card.toggle_skip_chip("Usage journey")
+        card.toggle_skip_chip("Usage journeys")
         assert card.diagram_is_rendered()
 
     def test_settings_panel_open_by_default_on_new_card(self, sankey_system: ModelBuilderPage):
@@ -167,9 +167,10 @@ class TestSankeySection:
         card.wait_for_diagram_update()
         card.open_advanced()
 
-        # Edge classes are not in this system — their chips must not appear
-        assert not card.skip_chip_exists("Edge usage pattern")
+        # Edge device not in this system — its exclude chip must not appear
         assert not card.exclude_chip_exists("Edge device")
+        # All skippable columns should appear since minimal system has classes in each
+        assert card.skip_chip_exists("Usage journeys")
 
     def test_exclude_chip_updates_diagram_title(self, sankey_system: ModelBuilderPage):
         """Excluding an object type updates the title to mention it."""

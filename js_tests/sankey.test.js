@@ -31,13 +31,13 @@ const {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function setupSkipChip(cardId = '1', className = 'UsagePattern') {
+function setupSkipChip(cardId = '1', columnIndex = '2') {
     document.body.innerHTML = `
         <form id="settings-${cardId}"></form>
         <span class="chip"
-              data-class="${className}"
+              data-class="${columnIndex}"
               data-type="skip"
-              data-card="${cardId}">${className}</span>
+              data-card="${cardId}">Column ${columnIndex}</span>
     `;
     return document.querySelector('.chip');
 }
@@ -74,13 +74,13 @@ describe('sankeyToggleChip — skip chips', () => {
     });
 
     test('activating a skip chip adds a hidden input with correct name and value', () => {
-        const chip = setupSkipChip('1', 'UsagePattern');
+        const chip = setupSkipChip('1', '2');
         sankeyToggleChip(chip);
         const form = document.getElementById('settings-1');
-        const hidden = getHiddenInput(form, 'UsagePattern-1-skip');
+        const hidden = getHiddenInput(form, '2-1-skip');
         expect(hidden).not.toBeNull();
-        expect(hidden.name).toBe('skipped_classes');
-        expect(hidden.value).toBe('UsagePattern');
+        expect(hidden.name).toBe('skipped_columns');
+        expect(hidden.value).toBe('2');
     });
 
     test('deactivating a skip chip removes "active" CSS class', () => {
@@ -91,11 +91,11 @@ describe('sankeyToggleChip — skip chips', () => {
     });
 
     test('deactivating a skip chip removes the hidden input', () => {
-        const chip = setupSkipChip('1', 'JobBase');
+        const chip = setupSkipChip('1', '6');
         sankeyToggleChip(chip); // activate
         sankeyToggleChip(chip); // deactivate
         const form = document.getElementById('settings-1');
-        const hidden = getHiddenInput(form, 'JobBase-1-skip');
+        const hidden = getHiddenInput(form, '6-1-skip');
         expect(hidden).toBeNull();
     });
 
@@ -148,19 +148,19 @@ describe('sankeyToggleChip — multiple chips', () => {
     test('multiple active skip chips produce multiple hidden inputs with same name', () => {
         document.body.innerHTML = `
             <form id="settings-1"></form>
-            <span class="chip" data-class="UsagePattern" data-type="skip" data-card="1">UP</span>
-            <span class="chip" data-class="JobBase" data-type="skip" data-card="1">Job</span>
+            <span class="chip" data-class="2" data-type="skip" data-card="1">Usage patterns</span>
+            <span class="chip" data-class="6" data-type="skip" data-card="1">Jobs / component needs</span>
         `;
         const chips = document.querySelectorAll('.chip');
         sankeyToggleChip(chips[0]);
         sankeyToggleChip(chips[1]);
 
         const form = document.getElementById('settings-1');
-        const inputs = form.querySelectorAll('input[name="skipped_classes"]');
+        const inputs = form.querySelectorAll('input[name="skipped_columns"]');
         expect(inputs.length).toBe(2);
         const values = Array.from(inputs).map(i => i.value);
-        expect(values).toContain('UsagePattern');
-        expect(values).toContain('JobBase');
+        expect(values).toContain('2');
+        expect(values).toContain('6');
     });
 });
 
