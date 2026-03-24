@@ -394,6 +394,35 @@ class TestBuildSankeyPayload:
             "tooltip_html": "Root → Leaf<br>1.0 tonnes CO2eq (100.0%)",
         }]
 
+    def test_category_nodes_use_object_category_ui_labels(self):
+        sankey = MagicMock()
+        sankey.build.return_value = None
+        sankey.node_labels = ["EdgeDevices Usage", "Leaf"]
+        sankey.full_node_labels = ["EdgeDevices Usage", "Leaf"]
+        sankey.link_sources = [0]
+        sankey.link_targets = [1]
+        sankey.link_values = [1.0]
+        sankey.node_total_kg = [1000.0, 1000.0]
+        sankey.total_system_kg = 1000.0
+        sankey.aggregated_node_members = {}
+        sankey._node_columns = {0: 1, 1: 2}
+        sankey._spacer_nodes = set()
+        sankey._category_node_indices = {0}
+        sankey._leaf_node_indices = {1}
+        sankey._breakdown_node_indices = set()
+        sankey._compute_node_colors.return_value = [
+            "rgba(100,100,100,0.8)",
+            "rgba(80,120,180,0.8)",
+        ]
+
+        payload, _ = _build_sankey_payload(sankey)
+
+        assert payload["nodes"][0]["label"] == "Edge devices Usage"
+        assert payload["nodes"][0]["full_name"] == "Edge devices Usage"
+        assert payload["nodes"][0]["tooltip_html"] == "Edge devices Usage<br>1.0 tonnes CO2eq (100.0%)"
+        assert payload["links"][0]["source_name_key"] == "Edge devices Usage⁣0"
+        assert payload["links"][0]["tooltip_html"] == "Edge devices Usage → Leaf<br>1.0 tonnes CO2eq (100.0%)"
+
 
 class TestSankeyColumnsGuard:
     """Guard test: if SANKEY_COLUMNS changes in e-footprint, this test fails and must be manually revalidated."""

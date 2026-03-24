@@ -13,3 +13,6 @@ with open(os.path.join(_root, "class_ui_config.json"), "r") as f:
 
 with open(os.path.join(_root, "field_ui_config.json"), "r") as f:
     FIELD_UI_CONFIG = json.load(f)
+
+with open(os.path.join(_root, "object_category_ui_config.json"), "r") as f:
+    OBJECT_CATEGORY_UI_CONFIG = json.load(f)

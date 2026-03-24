@@ -1,0 +1,20 @@
+{
+    "Servers": {
+        "label": "Servers"
+    },
+    "Storage": {
+        "label": "Storage"
+    },
+    "ExternalAPIs": {
+        "label": "External APIs"
+    },
+    "Network": {
+        "label": "Network"
+    },
+    "Devices": {
+        "label": "Devices"
+    },
+    "EdgeDevices": {
+        "label": "Edge devices"
+    }
+}

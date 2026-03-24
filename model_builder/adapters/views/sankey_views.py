@@ -9,6 +9,7 @@ from efootprint.utils.tools import display_co2_amount, format_co2_amount
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
+from model_builder.adapters.ui_config.object_category_ui_config_provider import ObjectCategoryUIConfigProvider
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 
@@ -138,24 +139,39 @@ def _resolve_visible_node_idx(node_idx: int, adjacency: dict[int, list[int]], sp
     return current
 
 
-def _build_node_tooltip(sankey: ImpactRepartitionSankey, node_idx: int) -> str:
+def _get_display_category_label(raw_label: str) -> str:
+    for category_name in ObjectCategoryUIConfigProvider.get_category_names():
+        if raw_label == category_name:
+            return ObjectCategoryUIConfigProvider.get_label(category_name)
+        if raw_label.startswith(f"{category_name} "):
+            return f"{ObjectCategoryUIConfigProvider.get_label(category_name)} {raw_label[len(category_name) + 1:]}"
+    return raw_label
+
+
+def _get_display_node_label(sankey: ImpactRepartitionSankey, node_idx: int, raw_label: str) -> str:
+    category_nodes = getattr(sankey, "_category_node_indices", set())
+    return _get_display_category_label(raw_label) if node_idx in category_nodes else raw_label
+
+
+def _build_node_tooltip(sankey: ImpactRepartitionSankey, node_idx: int, display_full_label: str) -> str:
     kg = sankey.node_total_kg[node_idx]
     amount_str = display_co2_amount(format_co2_amount(kg))
     pct = (kg / sankey.total_system_kg * 100) if sankey.total_system_kg > 0 else 0
     if node_idx in sankey.aggregated_node_members:
         members_str = "<br>".join(
-            f"{label}: {display_co2_amount(format_co2_amount(member_kg))} CO2eq"
+            f"{_get_display_category_label(label)}: {display_co2_amount(format_co2_amount(member_kg))} CO2eq"
             for label, member_kg in sankey.aggregated_node_members[node_idx]
         )
-        return f"{sankey.full_node_labels[node_idx]}<br>{amount_str} CO2eq ({pct:.1f}%)<br><br>Aggregated objects:<br>{members_str}"
-    return f"{sankey.full_node_labels[node_idx]}<br>{amount_str} CO2eq ({pct:.1f}%)"
+        return f"{display_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)<br><br>Aggregated objects:<br>{members_str}"
+    return f"{display_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
 
 
-def _build_link_tooltip(sankey: ImpactRepartitionSankey, source_idx: int, target_idx: int, value_tonnes: float) -> str:
+def _build_link_tooltip(
+        sankey: ImpactRepartitionSankey, source_full_label: str, target_full_label: str, value_tonnes: float) -> str:
     kg = value_tonnes * 1000
     amount_str = display_co2_amount(format_co2_amount(kg))
     pct = (kg / sankey.total_system_kg * 100) if sankey.total_system_kg > 0 else 0
-    return f"{sankey.full_node_labels[source_idx]} → {sankey.full_node_labels[target_idx]}<br>{amount_str} CO2eq ({pct:.1f}%)"
+    return f"{source_full_label} → {target_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
 
 
 def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
@@ -176,6 +192,12 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
     visible_columns = [column for node_idx, column in node_columns.items() if node_idx not in spacer_nodes]
     min_column = min(visible_columns) if visible_columns else 0
 
+    display_labels_by_idx = {}
+    display_full_labels_by_idx = {}
+    for node_idx, label in enumerate(sankey.node_labels):
+        display_labels_by_idx[node_idx] = _get_display_node_label(sankey, node_idx, label)
+        display_full_labels_by_idx[node_idx] = _get_display_node_label(sankey, node_idx, sankey.full_node_labels[node_idx])
+
     nodes_per_column: dict[int, int] = {}
     nodes = []
     for node_idx, label in enumerate(sankey.node_labels):
@@ -183,18 +205,20 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
             continue
         column = node_columns.get(node_idx, min_column)
         nodes_per_column[column] = nodes_per_column.get(column, 0) + 1
-        name_key = f"{label}{_SANKEY_NAME_DELIMITER}{node_idx}"
+        display_label = display_labels_by_idx[node_idx]
+        display_full_label = display_full_labels_by_idx[node_idx]
+        name_key = f"{display_label}{_SANKEY_NAME_DELIMITER}{node_idx}"
         nodes.append({
             "key": f"node-{node_idx}",
             "name_key": name_key,
-            "label": label,
-            "full_name": sankey.full_node_labels[node_idx],
+            "label": display_label,
+            "full_name": display_full_label,
             "value_kg": sankey.node_total_kg[node_idx],
             "value_tonnes": sankey.node_total_kg[node_idx] / 1000,
             "depth": column - min_column,
             "column": column,
             "color": node_colors[node_idx],
-            "tooltip_html": _build_node_tooltip(sankey, node_idx),
+            "tooltip_html": _build_node_tooltip(sankey, node_idx, display_full_label),
             "is_aggregated": node_idx in sankey.aggregated_node_members,
             "is_category": node_idx in category_nodes,
             "is_leaf": node_idx in leaf_nodes,
@@ -218,12 +242,13 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
         links.append({
             "source_key": f"node-{source_idx}",
             "target_key": f"node-{target_idx}",
-            "source_name_key": f"{sankey.node_labels[source_idx]}{_SANKEY_NAME_DELIMITER}{source_idx}",
-            "target_name_key": f"{sankey.node_labels[target_idx]}{_SANKEY_NAME_DELIMITER}{target_idx}",
+            "source_name_key": f"{display_labels_by_idx[source_idx]}{_SANKEY_NAME_DELIMITER}{source_idx}",
+            "target_name_key": f"{display_labels_by_idx[target_idx]}{_SANKEY_NAME_DELIMITER}{target_idx}",
             "value": value_tonnes,
             "value_kg": value_tonnes * 1000,
             "color": node_colors[source_idx].replace("0.8)", "0.35)"),
-            "tooltip_html": _build_link_tooltip(sankey, source_idx, target_idx, value_tonnes),
+            "tooltip_html": _build_link_tooltip(
+                sankey, display_full_labels_by_idx[source_idx], display_full_labels_by_idx[target_idx], value_tonnes),
         })
 
     node_width, node_gap, chart_top, chart_bottom = 20, 20, 10, 30
