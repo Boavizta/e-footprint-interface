@@ -119,12 +119,12 @@ def upload_json(request):
 
         if data and not import_error_message:
             try:
-                interface_config = data.get("interface_config", {})
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
                 system_data_with_calculated_attributes = import_service.import_system(system_data)
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
-                repository.interface_config = interface_config
+                if "interface_config" in data:
+                    repository.interface_config = data["interface_config"]
                 model_web.persist_to_cache()
                 return redirect("model-builder")
             except Exception as e:
