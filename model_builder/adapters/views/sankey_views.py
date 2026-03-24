@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 from efootprint.utils.impact_repartition.sankey import ImpactRepartitionSankey
-from efootprint.utils.tools import display_co2_amount, format_co2_amount
+from efootprint.utils.tools import display_co2_amount, format_co2_amount, time_it
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
@@ -26,6 +26,7 @@ _ALL_COLUMNS = list(SANKEY_COLUMNS) + [SANKEY_BREAKDOWN_ONLY_CLASSES]
 # "phase" and "category" are virtual chips mapping to backend boolean flags.
 # Numbered entries map to SANKEY_COLUMNS / breakdown indices.
 ANALYSE_BY_CHIPS = [
+    ("0", "Total impact", _ALL_COLUMNS[0]),
     ("phase", "Phase", None),
     ("1", "Countries", _ALL_COLUMNS[1]),
     ("2", "Usage patterns", _ALL_COLUMNS[2]),
@@ -39,7 +40,7 @@ ANALYSE_BY_CHIPS = [
 ]
 
 # Chips active by default — matches previous behavior (Phase, Category on; columns 2, 5, 6 skipped)
-DEFAULT_ACTIVE_COLUMNS = {"phase", "1", "3", "4", "category", "7", str(_BREAKDOWN_COLUMN_INDEX)}
+DEFAULT_ACTIVE_COLUMNS = {"0", "phase", "1", "3", "4", "category", "7", str(_BREAKDOWN_COLUMN_INDEX)}
 
 _LIFECYCLE_PHASE_MAP = {
     "Manufacturing": LifeCyclePhases.MANUFACTURING,
@@ -180,6 +181,9 @@ def _build_link_tooltip(
 def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
     sankey.build()
     node_columns = getattr(sankey, "_node_columns", {})
+    # Spacer nodes are necessary for Plotly (which is used for e-footprint sankey graph generation) because Plotly
+    # doesn’t support setting the node depth, contrary to ECharts. One day, Plotly might be dropped in e-footprint
+    # to make data ECharts compatible from the start and simplify the whole system.
     spacer_nodes = getattr(sankey, "_spacer_nodes", set())
     category_nodes = getattr(sankey, "_category_node_indices", set())
     leaf_nodes = getattr(sankey, "_leaf_node_indices", set())
@@ -270,6 +274,7 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 
 
 @render_exception_modal_if_error
+@time_it
 def sankey_diagram(request):
     card_id = request.POST.get("card_id", "")
     repository = SessionSystemRepository(request.session)

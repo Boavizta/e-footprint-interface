@@ -23,9 +23,8 @@ from tests.fixtures.system_builders import create_hourly_usage
 # ---------------------------------------------------------------------------
 
 def _setup_session(client, system_data: dict) -> None:
-    session = client.session
-    session["system_data"] = system_data
-    session.save()
+    repository = SessionSystemRepository(client.session)
+    repository.save_data(system_data)
 
 
 def _make_sankey_mock(mock_cls):
@@ -427,7 +426,7 @@ class TestSankeyDiagramParameterMapping:
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_skipped_classes_none_when_all_columns_active(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        data = {**default_post, "active_columns": ["phase", "1", "2", "3", "4", "5", "6", "category", "7", "8"]}
+        data = {**default_post, "active_columns": ["0", "phase", "1", "2", "3", "4", "5", "6", "category", "7", "8"]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
         assert mock_cls.call_args.kwargs["skipped_impact_repartition_classes"] is None
 
