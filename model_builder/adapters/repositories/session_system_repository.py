@@ -26,6 +26,8 @@ class SessionSystemRepository(ISystemRepository):
     """
 
     SYSTEM_DATA_KEY = "system_data"
+    INTERFACE_CONFIG_SESSION_KEY = "interface_config"
+    INTERFACE_VERSION_SESSION_KEY = "efootprint_interface_version"
     REDIS_CACHE_ALIAS = os.environ.get("SYSTEM_DATA_REDIS_CACHE_ALIAS", "redis")
     POSTGRES_CACHE_ALIAS = os.environ.get("SYSTEM_DATA_POSTGRES_CACHE_ALIAS", "postgres")
     REDIS_CACHE_TIMEOUT_SECONDS = int(os.environ.get("SYSTEM_DATA_REDIS_TTL_SECONDS", "600"))
@@ -77,11 +79,39 @@ class SessionSystemRepository(ISystemRepository):
                 return cached_data, source
         return None, None
 
+    def _load_interface_config_from_session(self) -> dict:
+        """Load interface config fallback from Django session."""
+        config = self._session.get(self.INTERFACE_CONFIG_SESSION_KEY, {})
+        json_interface_version = self._session.get(self.INTERFACE_VERSION_SESSION_KEY, "0.14.5")
+
+        if config:
+            from model_builder.version_upgrade_handlers import upgrade_interface_config
+
+            current_major = int(interface_version.split(".")[0])
+            json_major = int(json_interface_version.split(".")[0])
+            if json_major < current_major:
+                config = upgrade_interface_config(config, json_major)
+                self._session[self.INTERFACE_CONFIG_SESSION_KEY] = config
+                self._session[self.INTERFACE_VERSION_SESSION_KEY] = interface_version
+                self._session.modified = True
+
+        return config
+
+    def _save_interface_config_to_session(self) -> None:
+        """Persist interface config fallback into Django session."""
+        if self._interface_config is None:
+            return
+        self._session[self.INTERFACE_CONFIG_SESSION_KEY] = self._interface_config
+        self._session[self.INTERFACE_VERSION_SESSION_KEY] = interface_version
+        self._session.modified = True
+
     @property
     def interface_config(self) -> dict:
         """Return the repository-scoped interface config."""
         if self._interface_config is None:
             self.get_system_data_with_source()
+        if self._interface_config is None:
+            self._interface_config = self._load_interface_config_from_session()
         return {} if self._interface_config is None else self._interface_config
 
     @interface_config.setter
@@ -102,11 +132,12 @@ class SessionSystemRepository(ISystemRepository):
         Raises:
             PayloadSizeLimitExceeded: If the data exceeds MAX_PAYLOAD_SIZE_MB.
         """
-        if self.interface_config is not None:
+        if self._interface_config is not None:
             for payload in (data, data_without_calculated_attributes):
                 if payload is not None:
-                    payload["interface_config"] = self.interface_config
+                    payload["interface_config"] = self._interface_config
                     payload["efootprint_interface_version"] = interface_version
+            self._save_interface_config_to_session()
 
         size_result = compute_json_size(data)
         logger.info(
@@ -160,6 +191,8 @@ class SessionSystemRepository(ISystemRepository):
             self._cache_backend.delete(cache_key)
 
         self._session.pop(self.SYSTEM_DATA_KEY, None)
+        self._session.pop(self.INTERFACE_CONFIG_SESSION_KEY, None)
+        self._session.pop(self.INTERFACE_VERSION_SESSION_KEY, None)
         self._session.modified = True
         self._interface_config = None
 

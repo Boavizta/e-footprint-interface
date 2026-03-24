@@ -3,7 +3,10 @@
 These tests__old show how to use the InMemorySystemRepository to test ModelWeb
 without requiring Django session infrastructure.
 """
+from unittest.mock import patch
+
 from model_builder.adapters.repositories import InMemorySystemRepository
+from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 
@@ -112,3 +115,47 @@ class TestModelWebWithRepository:
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FakeSession(dict):
+    def __init__(self):
+        super().__init__()
+        self.session_key = "session-key"
+        self.modified = False
+
+    def save(self):
+        pass
+
+
+class TestSessionSystemRepositoryInterfaceConfigFallback:
+    def test_interface_config_falls_back_to_session_when_cache_empty(self):
+        session = FakeSession()
+        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {"sankey_diagrams": [{"id": "deadbeef"}]}
+        session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
+        repository = SessionSystemRepository(session)
+
+        with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.get_with_source", return_value=(None, None)):
+            assert repository.interface_config == {"sankey_diagrams": [{"id": "deadbeef"}]}
+
+    def test_save_data_persists_interface_config_to_session(self):
+        session = FakeSession()
+        repository = SessionSystemRepository(session)
+        repository.interface_config = {"sankey_diagrams": [{"id": "deadbeef"}]}
+
+        with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.set"):
+            repository.save_data({"System": {"sys-1": {"name": "Test System"}}})
+
+        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == {"sankey_diagrams": [{"id": "deadbeef"}]}
+        assert session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY]
+
+    def test_clear_removes_interface_config_session_keys(self):
+        session = FakeSession()
+        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {"sankey_diagrams": [{"id": "deadbeef"}]}
+        session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
+        repository = SessionSystemRepository(session)
+
+        with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.delete"):
+            repository.clear()
+
+        assert SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY not in session
+        assert SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY not in session

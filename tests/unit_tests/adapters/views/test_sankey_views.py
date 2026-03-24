@@ -173,6 +173,37 @@ class TestSankeyCards:
         assert 'name="node_label_max_length" value="31"' in content
         assert 'name="excluded_types" value="Device"' in content
 
+    def test_restores_saved_cards_from_session_interface_config_fallback(self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        session = client.session
+        session.pop("system_data", None)
+        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {
+            "sankey_diagrams": [{
+                "id": "deadbeef",
+                "lifecycle_phase_filter": "Usage",
+                "aggregation_threshold_percent": 3.5,
+                "active_columns": ["phase", "category", "7"],
+                "excluded_types": ["Network"],
+                "display_column_headers": True,
+                "node_label_max_length": 22,
+            }]
+        }
+        session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
+        session.save()
+
+        with patch(
+            "model_builder.adapters.repositories.session_system_repository.CacheBackend.get_with_source",
+            side_effect=[(None, None), (minimal_system_data, "memory")],
+        ):
+            response = client.get("/model_builder/sankey-cards/")
+        content = response.content.decode()
+
+        assert 'value="deadbeef"' in content
+        assert 'option value="Usage" selected' in content
+        assert 'name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="3.5"' in content
+        assert 'name="node_label_max_length" value="22"' in content
+        assert 'name="excluded_types" value="Network"' in content
+
     def test_delete_endpoint_removes_saved_card(self, client, minimal_system_data):
         system_data = {
             **minimal_system_data,
