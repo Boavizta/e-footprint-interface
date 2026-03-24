@@ -41,10 +41,24 @@ class TestInMemoryRepository:
         repository = InMemorySystemRepository()
         data = {"System": {"sys-1": {"name": "Test System"}}}
 
-        repository.save_system_data(data)
+        repository.save_data(data)
 
         assert repository.has_system_data()
         assert repository.get_system_data() == data
+
+    def test_interface_config_defaults_to_empty_dict(self):
+        repository = InMemorySystemRepository()
+        assert repository.interface_config == {}
+
+    def test_save_merges_interface_config(self):
+        repository = InMemorySystemRepository()
+        repository.interface_config = {"sankey_diagrams": [{"id": "deadbeef"}]}
+
+        repository.save_data({"System": {"sys-1": {"name": "Test System"}}})
+
+        saved_data = repository.get_system_data()
+        assert saved_data["interface_config"] == {"sankey_diagrams": [{"id": "deadbeef"}]}
+        assert "efootprint_interface_version" in saved_data
 
     def test_clear(self):
         """Clear should remove all data."""
@@ -77,7 +91,7 @@ class TestModelWebWithRepository:
         assert initial_server_count > 0, "Test data should have at least one server"
 
         # Trigger a save
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        model_web.persist_to_cache()
 
         # Repository should have updated data
         saved_data = repository.get_system_data()
@@ -91,7 +105,7 @@ class TestModelWebWithRepository:
         # Should implement all abstract methods
         assert isinstance(repository, ISystemRepository)
         assert hasattr(repository, 'get_system_data')
-        assert hasattr(repository, 'save_system_data')
+        assert hasattr(repository, 'save_data')
         assert hasattr(repository, 'has_system_data')
         assert hasattr(repository, 'clear')
 

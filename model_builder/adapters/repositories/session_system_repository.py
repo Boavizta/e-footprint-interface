@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, Tuple
 
 from django.contrib.sessions.backends.base import SessionBase
 from efootprint.logger import logger
+from e_footprint_interface import __version__ as interface_version
 
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
@@ -21,7 +22,7 @@ class SessionSystemRepository(ISystemRepository):
     Usage:
         repository = SessionSystemRepository(request.session)
         data = repository.get_system_data()
-        repository.save_system_data(modified_data)
+        repository.save_data(modified_data)
     """
 
     SYSTEM_DATA_KEY = "system_data"
@@ -39,6 +40,7 @@ class SessionSystemRepository(ISystemRepository):
         """
         self._session = session
         self._cache_backend = CacheBackend()
+        self._interface_config: Optional[Dict[str, Any]] = None
 
     def _cache_key(self, create_if_missing: bool = True) -> Optional[str]:
         session_key = self._session.session_key
@@ -70,37 +72,42 @@ class SessionSystemRepository(ISystemRepository):
             if cached_data is not None:
                 if source == "postgres":
                     logger.info("No data in Redis cache; falling back to Postgres cache.")
+                if self._interface_config is None:
+                    self._interface_config = cached_data.get("interface_config", {})
                 return cached_data, source
-
-        # Todo: suppress legacy data part end of Feb 2026
-        legacy_data = self._session.get(self.SYSTEM_DATA_KEY)
-        if legacy_data is not None:
-            if cache_key:
-                self._cache_backend.set(
-                    cache_key,
-                    legacy_data,
-                    redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
-                    postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
-                )
-            self._session.pop(self.SYSTEM_DATA_KEY, None)
-            self._session.modified = True
-            return legacy_data, "session"
         return None, None
 
-    def save_system_data(
+    @property
+    def interface_config(self) -> dict:
+        """Return the repository-scoped interface config."""
+        if self._interface_config is None:
+            self.get_system_data_with_source()
+        return {} if self._interface_config is None else self._interface_config
+
+    @interface_config.setter
+    def interface_config(self, value: dict) -> None:
+        self._interface_config = value
+
+    def save_data(
         self,
         data: Dict[str, Any],
         data_without_calculated_attributes: Optional[Dict[str, Any]] = None
     ) -> None:
         """Persist the system data to Redis and Postgres.
 
-        Args:
-            data: The system data dictionary to save.
-            data_without_calculated_attributes: Optional version without calculated attributes.
+        Args: system data dictionary to save.
+            data_with
+            data: Theout_calculated_attributes: Optional version without calculated attributes.
 
         Raises:
             PayloadSizeLimitExceeded: If the data exceeds MAX_PAYLOAD_SIZE_MB.
         """
+        if self.interface_config is not None:
+            for payload in (data, data_without_calculated_attributes):
+                if payload is not None:
+                    payload["interface_config"] = self.interface_config
+                    payload["efootprint_interface_version"] = interface_version
+
         size_result = compute_json_size(data)
         logger.info(
             f"System data JSON size: {size_result.size_mb:.2f} MB "
@@ -154,6 +161,7 @@ class SessionSystemRepository(ISystemRepository):
 
         self._session.pop(self.SYSTEM_DATA_KEY, None)
         self._session.modified = True
+        self._interface_config = None
 
     @property
     def session(self) -> SessionBase:

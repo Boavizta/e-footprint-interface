@@ -18,6 +18,7 @@ from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.tools import time_it
+from e_footprint_interface import __version__ as interface_version
 
 from model_builder.adapters.repositories import SessionSystemRepository, SessionCacheRepository
 from model_builder.adapters.label_resolver import LabelResolver
@@ -47,7 +48,7 @@ def model_builder_main(request, reboot=False):
         import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
         system_data_with_calculated_attributes = import_service.import_system(system_data)
         model_web = ModelWeb(repository, system_data_with_calculated_attributes)
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        model_web.persist_to_cache()
         gc.collect()
 
         return redirect("model-builder")
@@ -60,7 +61,7 @@ def model_builder_main(request, reboot=False):
     if efootprint_version != model_web.initial_system_data_efootprint_version:
         logger.info(f"Upgrading system data from version "
                     f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        model_web.persist_to_cache()
         logger.info("Upgrade successful")
 
     http_response = htmx_render(
@@ -80,9 +81,13 @@ def open_import_json_panel(request):
 
 
 def download_json(request):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    repository = SessionSystemRepository(request.session)
+    model_web = ModelWeb(repository)
     system = model_web.system
     system_data_without_calculated_attributes = model_web.to_json(save_calculated_attributes=False)
+    if repository.interface_config:
+        system_data_without_calculated_attributes["interface_config"] = repository.interface_config
+        system_data_without_calculated_attributes["efootprint_interface_version"] = interface_version
     json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
@@ -114,11 +119,13 @@ def upload_json(request):
 
         if data and not import_error_message:
             try:
+                interface_config = data.get("interface_config", {})
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
                 system_data_with_calculated_attributes = import_service.import_system(system_data)
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
-                model_web.update_system_data_with_up_to_date_calculated_attributes()
+                repository.interface_config = interface_config
+                model_web.persist_to_cache()
                 return redirect("model-builder")
             except Exception as e:
                 if os.environ.get("RAISE_EXCEPTIONS"):

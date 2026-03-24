@@ -39,6 +39,20 @@ class ISystemRepository(ABC):
         """
         return self.get_system_data(), "unknown"
 
+    def get_interface_config(self) -> dict:
+        """Retrieve interface_config from stored system data."""
+        data = self.get_system_data()
+        return data.get("interface_config", {}) if data else {}
+
+    @property
+    def interface_config(self) -> dict:
+        """Return in-memory interface config when available."""
+        return self.get_interface_config()
+
+    @interface_config.setter
+    def interface_config(self, value: dict) -> None:
+        self._interface_config = value
+
     @staticmethod
     def upgrade_system_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """Upgrade system data to the latest schema version.
@@ -62,10 +76,21 @@ class ISystemRepository(ABC):
                     logger.info(f"Applying interface upgrade handler for version {version}")
                     data = INTERFACE_VERSION_UPGRADE_HANDLERS[version](data)
 
+        if "interface_config" in data:
+            from e_footprint_interface import __version__ as interface_version
+            from model_builder.version_upgrade_handlers import upgrade_interface_config
+
+            current_major = int(interface_version.split(".")[0])
+            json_interface_version = data.get("efootprint_interface_version", "0.14.5")
+            json_major = int(json_interface_version.split(".")[0])
+            if json_major < current_major:
+                data["interface_config"] = upgrade_interface_config(data["interface_config"], json_major)
+                data["efootprint_interface_version"] = interface_version
+
         return data
 
     @abstractmethod
-    def save_system_data(
+    def save_data(
         self,
         data: Dict[str, Any],
         data_without_calculated_attributes: Optional[Dict[str, Any]] = None

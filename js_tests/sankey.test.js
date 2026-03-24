@@ -15,6 +15,7 @@ global.ResizeObserver = class {
 global.echarts = {
     init: jest.fn()
 };
+global.fetch = jest.fn(() => Promise.resolve());
 
 // Mock document.body.addEventListener for HTMX events (added at module load)
 // jsdom supports this natively, so no special setup needed.
@@ -22,8 +23,10 @@ global.echarts = {
 const {
     disposeSankeyPlot,
     estimateSankeyRightPadding,
+    getCsrfToken,
     getSankeyLayout,
     renderSankeyPlot,
+    sankeyRemoveCard,
     sankeyToggleChip
 } = require('../theme/static/scripts/sankey.js');
 
@@ -64,6 +67,8 @@ function getHiddenInput(form, inputKey) {
 beforeEach(() => {
     htmx.trigger.mockClear();
     echarts.init.mockReset();
+    fetch.mockClear();
+    document.cookie = '';
 });
 
 describe('sankeyToggleChip — analyse chips', () => {
@@ -237,5 +242,31 @@ describe('ECharts rendering', () => {
         expect(chart.dispose).toHaveBeenCalledTimes(1);
         expect(plotEl.__sankeyChart).toBeNull();
         expect(plotEl.__sankeyResizeObserver).toBeNull();
+    });
+});
+
+describe('sankeyRemoveCard', () => {
+    test('posts persisted deletion before removing the card', () => {
+        jest.useFakeTimers();
+        document.body.innerHTML = '<input name="csrfmiddlewaretoken" value="token-123"><div id="sankey-card-1"></div><div id="sankey-plot-1"></div>';
+
+        sankeyRemoveCard('1');
+
+        expect(fetch).toHaveBeenCalledWith('/model_builder/sankey-delete-card/', expect.objectContaining({
+            method: 'POST',
+            headers: expect.objectContaining({ 'X-CSRFToken': 'token-123' }),
+            body: 'card_id=1'
+        }));
+
+        jest.runAllTimers();
+        expect(document.getElementById('sankey-card-1')).toBeNull();
+        jest.useRealTimers();
+    });
+});
+
+describe('getCsrfToken', () => {
+    test('reads the CSRF token from a form input first', () => {
+        document.body.innerHTML = '<input name="csrfmiddlewaretoken" value="token-abc">';
+        expect(getCsrfToken()).toBe('token-abc');
     });
 });

@@ -4,7 +4,7 @@ This middleware runs in all environments (including production) to provide
 visibility into session save times, which can be a significant performance bottleneck.
 
 Note: JSON payload size computation and limit enforcement is handled by
-SessionSystemRepository.save_system_data(). This middleware only times
+SessionSystemRepository.save_data(). This middleware only times
 the actual database write.
 """
 import time

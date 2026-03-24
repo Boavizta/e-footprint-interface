@@ -161,7 +161,7 @@ class CreateObjectUseCase:
                 if post_create_result and post_create_result.get("return_server_instead"):
                     override_object = post_create_result.get("server_web")
 
-            model_web.update_system_data_with_up_to_date_calculated_attributes()
+            model_web.persist_to_cache()
 
             # 10. Build output
             return CreateObjectOutput(

@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 
+from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.sankey_views import (
     _build_sankey_payload, _expand_skipped_columns, DEFAULT_ACTIVE_COLUMNS,
 )
@@ -84,11 +85,11 @@ class TestSankeyForm:
         response = sankey_client.get("/model_builder/sankey-form/")
         assert response.status_code == 200
 
-    def test_card_id_increments_across_calls(self, sankey_client):
+    def test_card_id_updates_across_calls(self, sankey_client):
         r1 = sankey_client.get("/model_builder/sankey-form/")
         r2 = sankey_client.get("/model_builder/sankey-form/")
-        id1 = re.search(r'name="card_id" value="(\d+)"', r1.content.decode()).group(1)
-        id2 = re.search(r'name="card_id" value="(\d+)"', r2.content.decode()).group(1)
+        id1 = re.search(r'name="card_id" value="([0-9a-f]{8})"', r1.content.decode()).group(1)
+        id2 = re.search(r'name="card_id" value="([0-9a-f]{8})"', r2.content.decode()).group(1)
         assert id1 != id2
 
     def test_analyse_by_chips_show_only_columns_with_present_classes(self, sankey_client):
@@ -136,6 +137,62 @@ class TestSankeyForm:
     def test_form_contains_card_id_input(self, sankey_client):
         r = sankey_client.get("/model_builder/sankey-form/")
         assert 'name="card_id"' in r.content.decode()
+
+
+@pytest.mark.django_db
+class TestSankeyCards:
+
+    def test_returns_default_card_when_no_saved_cards(self, sankey_client):
+        response = sankey_client.get("/model_builder/sankey-cards/")
+        assert response.status_code == 200
+        assert response.content.decode().count('class="sankey-card"') == 1
+
+    def test_restores_saved_cards_with_saved_settings(self, client, minimal_system_data):
+        system_data = {
+            **minimal_system_data,
+            "interface_config": {
+                "sankey_diagrams": [{
+                    "id": "deadbeef",
+                    "lifecycle_phase_filter": "Manufacturing",
+                    "aggregation_threshold_percent": 2.5,
+                    "active_columns": ["phase", "category", "3"],
+                    "excluded_types": ["Device"],
+                    "display_column_headers": False,
+                    "node_label_max_length": 31,
+                }]
+            },
+        }
+        _setup_session(client, system_data)
+
+        response = client.get("/model_builder/sankey-cards/")
+        content = response.content.decode()
+
+        assert 'value="deadbeef"' in content
+        assert 'option value="Manufacturing" selected' in content
+        assert 'name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="2.5"' in content
+        assert 'name="node_label_max_length" value="31"' in content
+        assert 'name="excluded_types" value="Device"' in content
+
+    def test_delete_endpoint_removes_saved_card(self, client, minimal_system_data):
+        system_data = {
+            **minimal_system_data,
+            "interface_config": {
+                "sankey_diagrams": [
+                    {"id": "deadbeef", "active_columns": ["phase"], "excluded_types": []},
+                    {"id": "cafebabe", "active_columns": ["phase"], "excluded_types": []},
+                ]
+            },
+        }
+        _setup_session(client, system_data)
+
+        response = client.post("/model_builder/sankey-delete-card/", {"card_id": "deadbeef"})
+
+        assert response.status_code == 200
+        repository = SessionSystemRepository(client.session)
+        saved_data = repository.get_system_data()
+        assert saved_data["interface_config"]["sankey_diagrams"] == [
+            {"id": "cafebabe", "active_columns": ["phase"], "excluded_types": []}
+        ]
 
 
 # ---------------------------------------------------------------------------
@@ -196,6 +253,22 @@ class TestSankeyDiagramStructure:
         data = {**default_post, "card_id": "42"}
         response = sankey_client.post("/model_builder/sankey-diagram/", data)
         assert 'id="sankey-diagram-area-42"' in response.content.decode()
+
+    def test_diagram_persists_card_settings(self, sankey_client, default_post):
+        response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
+
+        assert response.status_code == 200
+        repository = SessionSystemRepository(sankey_client.session)
+        saved_data = repository.get_system_data()
+        assert saved_data["interface_config"]["sankey_diagrams"] == [{
+            "id": "1",
+            "lifecycle_phase_filter": "",
+            "aggregation_threshold_percent": 1.0,
+            "active_columns": sorted(DEFAULT_ACTIVE_COLUMNS),
+            "excluded_types": [],
+            "display_column_headers": True,
+            "node_label_max_length": 15,
+        }]
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_column_headers_use_same_dynamic_padding_as_chart(self, mock_cls, sankey_client, default_post):

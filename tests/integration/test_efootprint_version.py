@@ -27,7 +27,7 @@ def test_legacy_v9_system_data_is_upgraded_and_persisted_with_current_efootprint
     model_web = ModelWeb(repository)
 
     if efootprint_version != model_web.initial_system_data_efootprint_version:
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        model_web.persist_to_cache()
 
     saved_system_data = repository.get_system_data()
     assert saved_system_data is not None

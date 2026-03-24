@@ -144,6 +144,6 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
     ModelingUpdate(changes_list, compute_previous_system_footprints=False)
 
     if update_system_data:
-        model_web.update_system_data_with_up_to_date_calculated_attributes()
+        model_web.persist_to_cache()
 
     return obj_to_edit

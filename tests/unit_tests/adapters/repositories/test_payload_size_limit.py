@@ -1,4 +1,5 @@
 """Unit tests for payload size limit enforcement in repositories."""
+import os
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -40,7 +41,7 @@ class TestInMemorySystemRepositorySizeLimit:
         repository = InMemorySystemRepository(max_payload_size_mb=1.0)
         small_data = {"System": {"test": "small data"}}
 
-        repository.save_system_data(small_data)
+        repository.save_data(small_data)
 
         assert repository.get_system_data() == small_data
 
@@ -50,7 +51,7 @@ class TestInMemorySystemRepositorySizeLimit:
         large_data = {"System": {"data": "x" * 2000}}  # ~2 KB
 
         with pytest.raises(PayloadSizeLimitExceeded) as exc_info:
-            repository.save_system_data(large_data)
+            repository.save_data(large_data)
 
         assert exc_info.value.current_size_mb > 0.001
         assert exc_info.value.limit_mb == 0.001
@@ -60,7 +61,7 @@ class TestInMemorySystemRepositorySizeLimit:
         repository = InMemorySystemRepository()  # No limit
         large_data = {"System": {"data": "x" * 100000}}
 
-        repository.save_system_data(large_data)
+        repository.save_data(large_data)
 
         assert repository.get_system_data() == large_data
 
@@ -71,7 +72,7 @@ class TestInMemorySystemRepositorySizeLimit:
         large_data = {"System": {"data": "x" * 2000}}
 
         with pytest.raises(PayloadSizeLimitExceeded):
-            repository.save_system_data(large_data)
+            repository.save_data(large_data)
 
         # Original data should still be there
         assert repository.get_system_data() == initial_data
@@ -98,7 +99,7 @@ class TestSessionSystemRepositorySizeLimit:
         with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 1.0):
             small_data = {"System": {"test": "small data"}}
             with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
-                repository.save_system_data(small_data)
+                repository.save_data(small_data)
 
         cache_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:{mock_session.session_key}"
         redis_cache.set.assert_called_once_with(
@@ -127,7 +128,7 @@ class TestSessionSystemRepositorySizeLimit:
 
             with pytest.raises(PayloadSizeLimitExceeded) as exc_info:
                 with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
-                    repository.save_system_data(large_data)
+                    repository.save_data(large_data)
 
             assert exc_info.value.limit_mb == 0.001
             redis_cache.set.assert_not_called()
@@ -152,12 +153,12 @@ class TestSessionSystemRepositorySizeLimit:
 
             with pytest.raises(PayloadSizeLimitExceeded):
                 with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
-                    repository.save_system_data(large_data)
+                    repository.save_data(large_data)
 
         redis_cache.set.assert_not_called()
         postgres_cache.set.assert_not_called()
 
     def test_limit_from_environment_variable(self):
         """Should use MAX_PAYLOAD_SIZE_MB class attribute (set from env)."""
-        # Default is 30.0 MB from environment or default
-        assert SessionSystemRepository.MAX_PAYLOAD_SIZE_MB == 30.0
+        expected_limit = float(os.environ.get("MAX_PAYLOAD_SIZE_MB", 30.0))
+        assert SessionSystemRepository.MAX_PAYLOAD_SIZE_MB == expected_limit

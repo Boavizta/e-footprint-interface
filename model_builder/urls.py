@@ -50,5 +50,7 @@ urlpatterns = [
          model_builder.adapters.views.views.get_eco_logits_calculated_attribute_explanation,
          name="get_eco_logits_calculated_attribute_explanation"),
     path("sankey-diagram/", sankey_views.sankey_diagram, name="sankey-diagram"),
+    path("sankey-cards/", sankey_views.sankey_cards, name="sankey-cards"),
+    path("sankey-delete-card/", sankey_views.sankey_delete_card, name="sankey-delete-card"),
     path("sankey-form/", sankey_views.sankey_form, name="sankey-form"),
 ]

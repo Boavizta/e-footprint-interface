@@ -6,6 +6,7 @@ It allows unit tests__old to run without Django session infrastructure.
 from copy import deepcopy
 from typing import Dict, Any, Optional, Tuple
 
+from e_footprint_interface import __version__ as interface_version
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.interfaces import ISystemRepository
@@ -20,7 +21,7 @@ class InMemorySystemRepository(ISystemRepository):
     Usage:
         # For testing
         repository = InMemorySystemRepository()
-        repository.save_system_data({"System": {...}})
+        repository.save_data({"System": {...}})
 
         # Or initialize with data
         repository = InMemorySystemRepository(initial_data=test_data)
@@ -41,6 +42,11 @@ class InMemorySystemRepository(ISystemRepository):
         """
         self._data: Optional[Dict[str, Any]] = deepcopy(initial_data) if initial_data else None
         self._max_payload_size_mb = max_payload_size_mb
+        self._interface_config: Optional[Dict[str, Any]] = (
+            deepcopy(initial_data["interface_config"])
+            if initial_data and "interface_config" in initial_data
+            else None
+        )
 
     def get_system_data(self) -> Optional[Dict[str, Any]]:
         """Retrieve the current system data from memory.
@@ -54,7 +60,17 @@ class InMemorySystemRepository(ISystemRepository):
         """Retrieve the current system data with a source label."""
         return self._data, "memory" if self._data is not None else None
 
-    def save_system_data(
+    @property
+    def interface_config(self) -> dict:
+        if self._interface_config is None and self._data and "interface_config" in self._data:
+            self._interface_config = deepcopy(self._data["interface_config"])
+        return {} if self._interface_config is None else self._interface_config
+
+    @interface_config.setter
+    def interface_config(self, value: dict) -> None:
+        self._interface_config = value
+
+    def save_data(
         self,
         data: Dict[str, Any],
         data_without_calculated_attributes: Optional[Dict[str, Any]] = None
@@ -69,6 +85,12 @@ class InMemorySystemRepository(ISystemRepository):
         Raises:
             PayloadSizeLimitExceeded: If max_payload_size_mb is set and data exceeds the limit.
         """
+        if self._interface_config is not None:
+            for payload in (data, data_without_calculated_attributes):
+                if payload is not None:
+                    payload["interface_config"] = deepcopy(self._interface_config)
+                    payload["efootprint_interface_version"] = interface_version
+
         if self._max_payload_size_mb is not None:
             size_result = compute_json_size(data)
             if size_result.size_mb > self._max_payload_size_mb:
@@ -87,3 +109,4 @@ class InMemorySystemRepository(ISystemRepository):
     def clear(self) -> None:
         """Clear system data from memory."""
         self._data = None
+        self._interface_config = None

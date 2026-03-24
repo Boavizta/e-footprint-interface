@@ -34,9 +34,9 @@
                     </span>
                 </label>
                 <select name="lifecycle_phase_filter">
-                    <option value="">All phases</option>
-                    <option value="Manufacturing">Manufacturing only</option>
-                    <option value="Usage">Usage only</option>
+                    <option value="" {% if not initial_settings or initial_settings.lifecycle_phase_filter == "" %}selected{% endif %}>All phases</option>
+                    <option value="Manufacturing" {% if initial_settings and initial_settings.lifecycle_phase_filter == "Manufacturing" %}selected{% endif %}>Manufacturing only</option>
+                    <option value="Usage" {% if initial_settings and initial_settings.lifecycle_phase_filter == "Usage" %}selected{% endif %}>Usage only</option>
                 </select>
             </div>
 
@@ -48,10 +48,12 @@
                     </span>
                 </label>
                 <div class="d-flex align-items-center gap-2">
-                    <input type="range" name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="1"
+                    {% with threshold=initial_settings.aggregation_threshold_percent|default:"1" %}
+                    <input type="range" name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="{{ threshold }}"
                            style="width: 90px;"
                            oninput="this.nextElementSibling.textContent = this.value + '%'">
-                    <span style="font-size: 13px; color: #555; min-width: 28px;">1%</span>
+                    <span style="font-size: 13px; color: #555; min-width: 28px;">{{ threshold }}%</span>
+                    {% endwith %}
                 </div>
             </div>
 
@@ -115,7 +117,7 @@
                         </span>
                     </label>
                     <div class="toggle-item">
-                        <input class="form-check-input" type="checkbox" name="display_column_headers" checked id="toggle-columns-{{ card_id }}">
+                        <input class="form-check-input" type="checkbox" name="display_column_headers" {% if not initial_settings or initial_settings.display_column_headers %}checked{% endif %} id="toggle-columns-{{ card_id }}">
                         <label for="toggle-columns-{{ card_id }}">Show</label>
                     </div>
                 </div>
@@ -127,7 +129,7 @@
                             <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
                         </span>
                     </label>
-                    <input type="number" name="node_label_max_length" value="20" min="5" max="50" style="width: 70px;">
+                    <input type="number" name="node_label_max_length" value="{% if initial_settings %}{{ initial_settings.node_label_max_length }}{% else %}20{% endif %}" min="5" max="50" style="width: 70px;">
                 </div>
             </div>
         </div>

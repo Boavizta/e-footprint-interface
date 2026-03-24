@@ -196,11 +196,30 @@ function sankeyToggleAdvanced(cardId) {
     if (arrow) arrow.innerHTML = open ? '&#9654;' : '&#9660;';
 }
 
+function getCsrfToken() {
+    var input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (input && input.value) {
+        return input.value;
+    }
+    var match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
 function sankeyRemoveCard(cardId) {
     var card = document.getElementById('sankey-card-' + cardId);
     if (!card) return;
     var plotEl = document.getElementById('sankey-plot-' + cardId);
     disposeSankeyPlot(plotEl);
+    if (window.fetch) {
+        fetch('/model_builder/sankey-delete-card/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'card_id=' + encodeURIComponent(cardId)
+        }).catch(function() {});
+    }
     card.style.transition = 'opacity 0.2s, transform 0.2s';
     card.style.opacity = '0';
     card.style.transform = 'translateY(-10px)';
@@ -280,6 +299,7 @@ if (typeof module !== 'undefined') {
         sankeyToggleChip,
         sankeyToggleSettings,
         sankeyToggleAdvanced,
+        getCsrfToken,
         sankeyRemoveCard
     };
 }

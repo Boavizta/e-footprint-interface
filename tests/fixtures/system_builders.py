@@ -101,5 +101,5 @@ def default_system_repository() -> InMemorySystemRepository:
     integration tests can compare structure after create/edit/delete flows.
     """
     repository = InMemorySystemRepository(initial_data=DEFAULT_SYSTEM_DATA)
-    ModelWeb(repository).update_system_data_with_up_to_date_calculated_attributes()
+    ModelWeb(repository).persist_to_cache()
     return repository

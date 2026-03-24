@@ -46,7 +46,7 @@ class ModelWeb:
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
             if self.system_data_source == "postgres":
-                self.update_system_data_with_up_to_date_calculated_attributes()
+                self.persist_to_cache()
         else:
             self.system_data = raw_system_data
             logger.info(f"Empty system data so e-footprint modeling hasn’t been hydrated.")
@@ -66,14 +66,14 @@ class ModelWeb:
 
         return output_json
 
-    def update_system_data_with_up_to_date_calculated_attributes(self):
-        """Updates the stored system data with the calculated attributes data."""
+    def persist_to_cache(self):
+        """Serialize current system state and persist it to the repository."""
         start = perf_counter()
         data_with_calculated_attributes = self.to_json(save_calculated_attributes=True)
         data_without_calculated_attributes = self.to_json(save_calculated_attributes=False)
         elapsed_ms = (perf_counter() - start) * 1000
-        logger.info(f"Updated system data with calculated attributes in {round(elapsed_ms, 1)} ms.")
-        self.repository.save_system_data(
+        logger.info(f"Serialized system data in {round(elapsed_ms, 1)} ms.")
+        self.repository.save_data(
             data_with_calculated_attributes,
             data_without_calculated_attributes=data_without_calculated_attributes
         )

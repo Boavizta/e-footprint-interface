@@ -92,3 +92,18 @@ def upgrade_interface_version_pre_14(system_dict):
 INTERFACE_VERSION_UPGRADE_HANDLERS = {
     14: upgrade_interface_version_pre_14,
 }
+
+
+def upgrade_interface_config(config: dict, from_major_version: int) -> dict:
+    """Apply interface_config migrations from from_major_version to current."""
+    from e_footprint_interface import __version__ as interface_version
+
+    current_major = int(interface_version.split(".")[0])
+    for version in range(from_major_version, current_major):
+        handler = INTERFACE_CONFIG_UPGRADE_HANDLERS.get(version)
+        if handler:
+            config = handler(config)
+    return config
+
+
+INTERFACE_CONFIG_UPGRADE_HANDLERS = {}

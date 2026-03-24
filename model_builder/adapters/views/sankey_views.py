@@ -1,6 +1,9 @@
 import json
+import uuid
 
+from django.http import HttpResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
 from efootprint.core.lifecycle_phases import LifeCyclePhases
@@ -268,8 +271,9 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 
 @render_exception_modal_if_error
 def sankey_diagram(request):
-    card_id = request.POST.get("card_id", "1")
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    card_id = request.POST.get("card_id", "")
+    repository = SessionSystemRepository(request.session)
+    model_web = ModelWeb(repository)
     system = list(model_web.response_objs["System"].values())[0]
 
     lifecycle_phase_str = request.POST.get("lifecycle_phase_filter", "")
@@ -316,6 +320,24 @@ def sankey_diagram(request):
     subtitle_map = {None: "All phases", LifeCyclePhases.MANUFACTURING: "Manufacturing only", LifeCyclePhases.USAGE: "Usage only"}
     subtitle = subtitle_map[lifecycle_phase_filter]
 
+    card_settings = {
+        "id": card_id,
+        "lifecycle_phase_filter": lifecycle_phase_str,
+        "aggregation_threshold_percent": aggregation_threshold_percent,
+        "active_columns": sorted(active_columns),
+        "excluded_types": excluded_object_types,
+        "display_column_headers": display_column_headers,
+        "node_label_max_length": node_label_max_length,
+    }
+    config = repository.interface_config
+    diagrams = config.setdefault("sankey_diagrams", [])
+    existing_index = next((i for i, diagram in enumerate(diagrams) if diagram["id"] == card_id), None)
+    if existing_index is None:
+        diagrams.append(card_settings)
+    else:
+        diagrams[existing_index] = card_settings
+    model_web.persist_to_cache()
+
     return render(request, "model_builder/result/sankey_diagram.html", {
         "card_id": card_id,
         "sankey_payload_json": sankey_payload_json,
@@ -329,12 +351,10 @@ def sankey_diagram(request):
 
 
 def sankey_form(request):
-    counter_key = "sankey_card_counter"
-    card_id = request.session.get(counter_key, 0) + 1
-    request.session[counter_key] = card_id
-
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    repository = SessionSystemRepository(request.session)
+    model_web = ModelWeb(repository)
     present_classes = _get_present_classes(model_web)
+    card_id = uuid.uuid4().hex[:8]
 
     exclude_chips = _build_exclude_chip_list(EXCLUDABLE_CLASSES, present_classes)
     analyse_by_chips = _build_analyse_by_chips(present_classes)
@@ -344,3 +364,52 @@ def sankey_form(request):
         "exclude_chips": exclude_chips,
         "analyse_by_chips": analyse_by_chips,
     })
+
+
+def sankey_cards(request):
+    """Return all saved Sankey cards, or a default one if none exist."""
+    repository = SessionSystemRepository(request.session)
+    saved_diagrams = repository.interface_config.get("sankey_diagrams", [])
+
+    if not saved_diagrams:
+        return sankey_form(request)
+
+    model_web = ModelWeb(repository)
+    present_classes = _get_present_classes(model_web)
+    cards_html = []
+
+    for saved_diagram in saved_diagrams:
+        exclude_chips = _build_exclude_chip_list(EXCLUDABLE_CLASSES, present_classes)
+        analyse_by_chips = _build_analyse_by_chips(present_classes)
+
+        saved_active_columns = set(saved_diagram.get("active_columns", []))
+        saved_excluded_types = set(saved_diagram.get("excluded_types", []))
+        for chip in analyse_by_chips:
+            chip["active"] = chip["chip_id"] in saved_active_columns
+        for chip in exclude_chips:
+            chip["active"] = chip["class_name"] in saved_excluded_types
+
+        cards_html.append(render_to_string(
+            "model_builder/result/sankey_card.html",
+            {
+                "card_id": saved_diagram["id"],
+                "exclude_chips": exclude_chips,
+                "analyse_by_chips": analyse_by_chips,
+                "initial_settings": saved_diagram,
+            },
+            request=request,
+        ))
+
+    return HttpResponse("".join(cards_html))
+
+
+def sankey_delete_card(request):
+    """Delete a persisted Sankey card configuration."""
+    card_id = request.POST.get("card_id", "")
+    repository = SessionSystemRepository(request.session)
+    model_web = ModelWeb(repository)
+    config = repository.interface_config
+    diagrams = config.get("sankey_diagrams", [])
+    config["sankey_diagrams"] = [diagram for diagram in diagrams if diagram["id"] != card_id]
+    model_web.persist_to_cache()
+    return HttpResponse("")
