@@ -120,7 +120,11 @@ def _build_column_headers_context(sankey: ImpactRepartitionSankey) -> list[dict]
     headers = []
     for info in sorted(sankey.get_column_information(), key=lambda x: x["column_index"]):
         lines = [info["description"]] if info["column_type"] == "manual_split" else [ClassUIConfigProvider.get_label(cn) for cn in info["class_names"]]
-        headers.append({"lines": lines, "x_center": info["x_center"]})
+        headers.append({
+            "lines": lines,
+            "x_left": info["x_left"],
+            "x_shift_px": sankey.get_column_header_x_shift_px(),
+        })
     return headers
 
 

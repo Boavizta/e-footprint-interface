@@ -277,22 +277,21 @@ $sankey-bg-settings: #f8f9fa;
 .column-header-tag {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-end;
     position: absolute;
     bottom: 0;
-    transform: translateX(-50%);
-    font-size: 11px;
-    font-weight: 500;
-    color: #555;
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
     background: rgba(250,250,250,0.95);
     border: 1px solid rgba(210,210,210,1);
     border-radius: 4px;
-    padding: 4px 6px;
+    padding: 6px 10px;
     line-height: 1.3;
     white-space: nowrap;
 
-    .col-header-line { display: block; text-align: center; }
+    .col-header-line { display: block; text-align: left; }
 }
 
 .sankey-plot-container {

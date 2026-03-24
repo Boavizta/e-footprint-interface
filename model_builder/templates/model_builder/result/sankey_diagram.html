@@ -16,7 +16,7 @@ Also does out-of-band title update via hx-swap-oob.
          style="position: relative; padding-left: {{ sankey_layout.left_padding_px }}px; padding-right: {{ sankey_layout.right_padding_px }}px; margin-bottom: 4px;">
         {% for header in column_headers %}
         <div class="column-header-tag"
-             style="left: calc({{ sankey_layout.left_padding_px }}px + {{ header.x_center }} * (100% - {{ sankey_layout.horizontal_padding_px }}px));">
+             style="left: calc({{ sankey_layout.left_padding_px }}px + {{ header.x_left }} * (100% - {{ sankey_layout.horizontal_padding_px }}px) + {{ header.x_shift_px }}px);">
             {% for line in header.lines %}<span class="col-header-line">{{ line }}</span>{% endfor %}
         </div>
         {% endfor %}

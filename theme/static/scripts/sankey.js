@@ -85,7 +85,7 @@ function buildEchartsOption(payload) {
             label: {
                 show: true,
                 color: '#334155',
-                fontSize: 12,
+                fontSize: 14,
                 formatter: function(params) {
                     return labelByKey[params.name] || '';
                 }

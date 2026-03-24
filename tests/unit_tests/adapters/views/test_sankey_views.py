@@ -207,8 +207,9 @@ class TestSankeyDiagramStructure:
             "column_type": "manual_split",
             "description": "Lifecycle phase",
             "class_names": [],
-            "x_center": 0.5,
+            "x_left": 0.5,
         }]
+        instance.get_column_header_x_shift_px.return_value = -10
 
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
         content = response.content.decode()
@@ -216,6 +217,7 @@ class TestSankeyDiagramStructure:
         assert "padding-left: 30px;" in content
         assert "padding-right: 260px;" in content
         assert "100% - 290px" in content
+        assert "+ -10px" in content
 
 
 # ---------------------------------------------------------------------------
