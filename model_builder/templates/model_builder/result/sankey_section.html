@@ -43,10 +43,15 @@
 <script>
     (function() {
         // Onboarding dismissal with localStorage persistence
-        if (localStorage.getItem('sankeyOnboardingDismissed')) {
+        // Also auto-hide on mobile to save vertical space (bars are hidden there)
+        function checkOnboardingVisibility() {
             var banner = document.getElementById('sankey-onboarding-banner');
-            if (banner) banner.style.display = 'none';
+            if (!banner) return;
+            var dismissed = localStorage.getItem('sankeyOnboardingDismissed');
+            var isMobile = window.innerWidth < 1200;
+            banner.style.display = (dismissed || isMobile) ? 'none' : '';
         }
+        checkOnboardingVisibility();
 
         // Landscape hint for mobile portrait
         function checkLandscapeHint() {

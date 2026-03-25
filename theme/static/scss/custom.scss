@@ -66,6 +66,7 @@ $zindex-levels: (
         var(--model-canva-calculated-height)- var(--open-result-btn)
     );
     --result-panel-opened : calc(var(--full-height) - var(--navbar-height) - var(--toolbar-height) - 8px );
+    --result-content-offset: 50px;
     --home-page-height : calc(var(--full-height) - var(--navbar-height));
 }
 
@@ -743,6 +744,10 @@ input:disabled{
 }
 
 @media (min-width: 1200px) {
+    :root {
+        --result-content-offset: 120px;
+    }
+
     .home-page{
         height: var(--home-page-height);
     }

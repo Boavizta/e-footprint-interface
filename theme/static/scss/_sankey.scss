@@ -13,6 +13,11 @@ $sankey-bg-settings: #f8f9fa;
     align-items: center;
     justify-content: space-between;
     padding: 12px 0;
+
+    @media (max-width: 1199.9px) {
+        padding: 4px 0;
+        h5 { font-size: 14px; }
+    }
 }
 
 // Onboarding banner

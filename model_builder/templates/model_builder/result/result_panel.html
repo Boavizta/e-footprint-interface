@@ -1,18 +1,53 @@
-<div class="rounded-top-5 shadow-sm-up h-100 bg-white px-2 px-xl-4 pt-4">
-    <div class="row align-items-center">
-        <div class="col-4 text-start px-4 py-0">
-            <p class="h5 m-0"><b>Results</b></p>
+<div class="rounded-top-5 shadow-sm-up h-100 bg-white px-2 px-xl-4 pt-2 pt-xl-4">
+    <!-- Desktop header: original two-row layout (xl and up) -->
+    <div class="d-none d-xl-block">
+        <div class="row align-items-center">
+            <div class="col-4 text-start px-4 py-0">
+                <p class="h5 m-0"><b>Results</b></p>
+            </div>
+            <div class="col-4 text-center text-secondary" onclick="hidePanelResult()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67" />
+                </svg>
+            </div>
         </div>
-        <div class="col-4 text-center text-secondary" onclick="hidePanelResult()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67" />
-            </svg>
+        <div class="d-flex flex-row mb-3">
+            <button
+                class="bg-transparent header-btn-result result-active p-2 fs-3xl me-2 header-btn-result-chart-desktop"
+                _="on click
+                            repeat for button in .result-active
+                                remove .result-active from button
+                            end
+                            remove .d-block from #source-block
+                            add .d-none to #source-block
+                            remove .d-none from #graph-block
+                            add .d-block to #graph-block
+                            add .result-active to me
+                            add .result-active to .header-btn-result-chart-mobile"
+            >
+                <b>Results</b>
+            </button>
+            <button
+                class="bg-transparent header-btn-result p-2 fs-3xl me-2 header-btn-result-sources-desktop"
+                _="on click
+                            repeat for button in .result-active
+                                remove .result-active from button
+                            end
+                            remove .d-block from #graph-block
+                            add .d-none to #graph-block
+                            remove .d-none from #source-block
+                            add .d-block to #source-block
+                            add .result-active to me
+                            add .result-active to .header-btn-result-sources-mobile"
+            >
+                <b>Sources</b>
+            </button>
         </div>
     </div>
-    <div class="d-flex flex-row mb-3">
+    <!-- Mobile header: compact single-row layout (below xl) -->
+    <div class="d-flex d-xl-none flex-row align-items-center mb-1">
         <button
-            id="header-btn-result-chart"
-            class="bg-transparent bg-transparent header-btn-result result-active p-2 fs-3xl me-2"
+            class="bg-transparent header-btn-result result-active p-2 fs-3xl me-2 header-btn-result-chart-mobile"
             _="on click
                         repeat for button in .result-active
                             remove .result-active from button
@@ -21,13 +56,13 @@
                         add .d-none to #source-block
                         remove .d-none from #graph-block
                         add .d-block to #graph-block
-                        add .result-active to me"
+                        add .result-active to me
+                        add .result-active to .header-btn-result-chart-desktop"
         >
             <b>Results</b>
         </button>
         <button
-            id="header-btn-result-sources"
-            class="bg-transparent bg-transparent header-btn-result p-2 fs-3xl me-2"
+            class="bg-transparent header-btn-result p-2 fs-3xl me-2 header-btn-result-sources-mobile"
             _="on click
                         repeat for button in .result-active
                             remove .result-active from button
@@ -36,16 +71,23 @@
                         add .d-none to #graph-block
                         remove .d-none from #source-block
                         add .d-block to #source-block
-                        add .result-active to me"
+                        add .result-active to me
+                        add .result-active to .header-btn-result-sources-desktop"
         >
             <b>Sources</b>
         </button>
+        <button class="ms-auto me-1 btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 py-1 px-2" onclick="hidePanelResult()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+            </svg>
+            <span style="font-size: 12px;">Back to model</span>
+        </button>
     </div>
-    <div id="graph-block" class="col d-block overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">
+    <div id="graph-block" class="col d-block overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - var(--result-content-offset))">
         {% include 'model_builder/result/result_graph.html' %}
         {% include 'model_builder/result/sankey_section.html' %}
     </div>
-    <div id="source-block" class="col d-none overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - 120px)">{% include 'model_builder/result/source_table.html' %}</div>
+    <div id="source-block" class="col d-none overflow-auto w-100 px-0 py-2" style="max-height: calc(var(--result-panel-opened) - var(--result-content-offset))">{% include 'model_builder/result/source_table.html' %}</div>
 </div>
 
 <script>

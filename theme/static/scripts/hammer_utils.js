@@ -1,4 +1,25 @@
+function enterResultFullscreen() {
+    if (window.innerWidth >= 1200) return;
+    var navbar = document.querySelector("nav.navbar");
+    var toolbar = document.getElementById("toolbar-nav");
+    if (navbar) navbar.style.display = "none";
+    if (toolbar) toolbar.style.display = "none";
+    document.documentElement.style.setProperty("--navbar-height", "0px");
+    document.documentElement.style.setProperty("--toolbar-height", "0px");
+}
+
+function exitResultFullscreen() {
+    var navbar = document.querySelector("nav.navbar");
+    var toolbar = document.getElementById("toolbar-nav");
+    if (navbar) navbar.style.display = "";
+    if (toolbar) toolbar.style.display = "";
+    document.documentElement.style.setProperty("--navbar-height", "50px");
+    document.documentElement.style.setProperty("--toolbar-height", "48px");
+}
+
+
 function displayPanelResult(){
+    enterResultFullscreen();
     let panel = document.getElementById("panel-result-btn");
     let btn = document.getElementById("btn-open-panel-result");
     let resultDiv = document.getElementById("result-block");
@@ -16,6 +37,7 @@ function displayPanelResult(){
 }
 
 function hidePanelResult(){
+    exitResultFullscreen();
     let panel = document.getElementById("panel-result-btn");
     let btn = document.getElementById("btn-open-panel-result");
     let resultDiv = document.getElementById("result-block");
