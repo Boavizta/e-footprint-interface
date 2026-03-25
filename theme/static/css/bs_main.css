@@ -11887,7 +11887,8 @@ textarea.form-control-lg {
 /* CSS class utilities*/
 /*----------------------------------*/
 html, body {
-  overflow: hidden !important;
+  overflow: clip !important;
+  overscroll-behavior-x: none;
   position: relative;
 }
 
@@ -12250,7 +12251,7 @@ input:disabled {
 #model-builder-page {
   flex: 1 1 0;
   min-height: 0;
-  width: 100vw !important;
+  width: 100%;
   overflow-x: hidden;
   position: relative;
 }
@@ -12307,7 +12308,8 @@ input:disabled {
 #graph-block, #source-block {
   flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Home page layout */
@@ -12507,7 +12509,7 @@ input:disabled {
 /* Mobile */
 @media (max-width: 575.98px) {
   .side-panel-open {
-    width: 100vw;
+    width: 100%;
   }
   #model-canva {
     overflow-x: auto;
@@ -12518,8 +12520,8 @@ input:disabled {
     min-width: 300px;
   }
   #sidePanel {
-    width: 100vw;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     left: 0;
     right: 0;
     top: 0;
@@ -12570,7 +12572,7 @@ input:disabled {
     width: 100%;
   }
   #chart-calculated-attribute {
-    width: 100vw;
+    width: 100%;
     height: var(--full-height) !important;
     right: 0 !important;
     top: 0 !important;
@@ -12589,7 +12591,7 @@ input:disabled {
     max-height: 100%;
   }
   .result-width {
-    width: 100vw;
+    width: 100%;
   }
 }
 @media (min-width: 1200px) {

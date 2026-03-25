@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Side panel hidden behind navbar and result bar on mobile. Bump sidePanel z-index above toolbar on mobile/tablet and hide result button when side panel is open via CSS sibling selector.
 - Prevent native form submission on sankey card label length input. Pressing Enter on the number input triggered a native form submit instead of an HTMX request, replacing the entire results page. Block native submit and add HTMX input trigger for number inputs.
+- Prevent horizontal scrolling on mobile results page.
 
 ### Changed
 - Lower default Sankey label length and reduce Sankey right space on mobile.

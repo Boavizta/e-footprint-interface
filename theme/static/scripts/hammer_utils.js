@@ -25,6 +25,12 @@ function displayPanelResult() {
         panel.classList.add("result-width");
     }
     btn.style.display = "none";
+
+    var scrollableArea = document.getElementById("model-canva-scrollable-area");
+    if (scrollableArea) {
+        scrollableArea.classList.remove("overflow-x-auto");
+        scrollableArea.classList.add("overflow-x-hidden");
+    }
 }
 
 function hidePanelResult() {
@@ -43,6 +49,12 @@ function hidePanelResult() {
         resultDiv.classList.remove("result-width");
     }
     btn.style.display = "block";
+
+    var scrollableArea = document.getElementById("model-canva-scrollable-area");
+    if (scrollableArea) {
+        scrollableArea.classList.remove("overflow-x-hidden");
+        scrollableArea.classList.add("overflow-x-auto");
+    }
 }
 
 function initHammer() {
