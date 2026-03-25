@@ -664,6 +664,11 @@ input:disabled{
         border-bottom: 1px solid var(--gray-200);
     }
 
+    /* Hide result button when side panel is open */
+    #sidePanel:not(.d-none) ~ #panel-result-btn {
+        display: none !important;
+    }
+
     /* Hamburger dropdown as overlay instead of expanding inline */
     #navbarSupportedContent {
         position: absolute;
@@ -702,6 +707,7 @@ input:disabled{
         top: 0;
         position: fixed;
         height: var(--full-height);
+        z-index: 4 !important;
     }
 
 }
@@ -721,6 +727,7 @@ input:disabled{
         top: 0;
         position: fixed;
         height: var(--full-height);
+        z-index: 4 !important;
     }
 
     .side-panel-open{
