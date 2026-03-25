@@ -18,11 +18,12 @@
     </div>
 
     <form id="settings-{{ card_id }}" class="sankey-settings"
+          onsubmit="return false;"
           hx-post="/model_builder/sankey-diagram/"
           hx-target="#sankey-diagram-area-{{ card_id }}"
           hx-swap="outerHTML"
           hx-sync="this:replace"
-          hx-trigger="load, change delay:300ms, input delay:300ms from:find input[type=range]">
+          hx-trigger="load, change delay:300ms, input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
         <input type="hidden" name="card_id" value="{{ card_id }}">
 
         <div class="settings-row">
