@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.2] - 2026-03-25
+
+### Fixed
+- Side panel hidden behind navbar and result bar on mobile. Bump sidePanel z-index above toolbar on mobile/tablet and hide result button when side panel is open via CSS sibling selector.
+- Prevent native form submission on sankey card label length input. Pressing Enter on the number input triggered a native form submit instead of an HTMX request, replacing the entire results page. Block native submit and add HTMX input trigger for number inputs.
+
+### Changed
+- Lower default Sankey label length and reduce Sankey right space on mobile.
+
 ## [1.0.1] - 2026-03-25
 
 ### Fixed

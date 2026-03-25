@@ -149,4 +149,13 @@
         </div>
     </div>
 
+    {% if not initial_settings %}
+    <script>
+        if (window.innerWidth < 768) {
+            var input = document.querySelector('#settings-{{ card_id }} input[name="node_label_max_length"]');
+            if (input) input.value = 10;
+        }
+    </script>
+    {% endif %}
+
 </div>
