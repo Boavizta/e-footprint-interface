@@ -12268,6 +12268,35 @@ input:disabled {
   cursor: pointer;
 }
 
+/* Source table — compact on mobile, auto on desktop */
+@media (max-width: 1199.9px) {
+  .source-table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 12px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  .source-table th, .source-table td {
+    padding: 4px 6px;
+  }
+  .source-table .source-col-name {
+    width: 30%;
+  }
+  .source-table .source-col-attr {
+    width: 20%;
+  }
+  .source-table .source-col-value {
+    width: 12%;
+    text-align: right;
+  }
+  .source-table .source-col-unit {
+    width: 13%;
+  }
+  .source-table .source-col-source {
+    width: 25%;
+  }
+}
 /* Result panel inner layout */
 #result-block > div {
   display: flex;

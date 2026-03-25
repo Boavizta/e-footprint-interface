@@ -111,7 +111,7 @@ class TestResultsPanel:
         assert filename.endswith("_sources.xlsx")
 
         # Toggle back to graph view
-        page.locator("#header-btn-result-chart").click()
+        page.locator(".header-btn-result-chart-desktop").click()
         expect(page.locator("#graph-block")).to_have_class(re.compile(r"d-block"))
         expect(page.locator("#source-block")).to_have_class(re.compile(r"d-none"))
 

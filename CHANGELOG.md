@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.1] - 2026-03-25
+
+### Fixed
+- Explicitly load interface config from session on JSON upload without config. When uploading a JSON without interface_config, the repository's _interface_config stayed None, so save_data() skipped persisting it. On the next request, cache data had no config and the session fallback never fired because _interface_config was set to {} (not None) from the cache. Now explicitly loads config from session before saving.
+- Refactor css layout for simplification and better mobile experience: more room for results on mobile, and rearranged results source table.
+
+
 ## [1.0.0] - 2026-03-24
 
 ### Added
