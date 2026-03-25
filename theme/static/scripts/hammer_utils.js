@@ -1,56 +1,48 @@
 function enterResultFullscreen() {
     if (window.innerWidth >= 1200) return;
-    var navbar = document.querySelector("nav.navbar");
     var toolbar = document.getElementById("toolbar-nav");
-    if (navbar) navbar.style.display = "none";
     if (toolbar) toolbar.style.display = "none";
-    document.documentElement.style.setProperty("--navbar-height", "0px");
-    document.documentElement.style.setProperty("--toolbar-height", "0px");
 }
 
 function exitResultFullscreen() {
-    var navbar = document.querySelector("nav.navbar");
     var toolbar = document.getElementById("toolbar-nav");
-    if (navbar) navbar.style.display = "";
     if (toolbar) toolbar.style.display = "";
-    document.documentElement.style.setProperty("--navbar-height", "50px");
-    document.documentElement.style.setProperty("--toolbar-height", "48px");
 }
 
-
-function displayPanelResult(){
+function displayPanelResult() {
     enterResultFullscreen();
-    let panel = document.getElementById("panel-result-btn");
-    let btn = document.getElementById("btn-open-panel-result");
-    let resultDiv = document.getElementById("result-block");
-    panel.style.transition = "height 0.2s ease-in-out";
-    panel.style.minHeight = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
-    resultDiv.style.minHeight = getComputedStyle(document.documentElement).getPropertyValue("--result-panel-opened");
+    var panel = document.getElementById("panel-result-btn");
+    var btn = document.getElementById("btn-open-panel-result");
+    var resultDiv = document.getElementById("result-block");
 
-    if(document.getElementById("sidePanel").classList.contains("d-none")){
+    panel.style.height = "100%";
+    resultDiv.style.height = "100%";
+
+    if (document.getElementById("sidePanel").classList.contains("d-none")) {
         panel.classList.add("w-100");
-    }else{
+    } else {
         panel.classList.remove("w-100");
         panel.classList.add("result-width");
     }
     btn.style.display = "none";
 }
 
-function hidePanelResult(){
+function hidePanelResult() {
     exitResultFullscreen();
-    let panel = document.getElementById("panel-result-btn");
-    let btn = document.getElementById("btn-open-panel-result");
-    let resultDiv = document.getElementById("result-block");
-    panel.style.transition = "height 0.2s ease-in-out";
-    panel.style.minHeight = getComputedStyle(document.documentElement).getPropertyValue("--open-result-btn");
-    btn.style.display = "block";
+    var panel = document.getElementById("panel-result-btn");
+    var btn = document.getElementById("btn-open-panel-result");
+    var resultDiv = document.getElementById("result-block");
+
+    panel.style.height = "";
     resultDiv.innerHTML = "";
-    resultDiv.style.height = "0px";
-    if(document.getElementById("sidePanel").classList.contains("d-none")){
+    resultDiv.style.height = "";
+
+    if (document.getElementById("sidePanel").classList.contains("d-none")) {
         resultDiv.classList.remove("w-100");
-    }else{
+    } else {
         resultDiv.classList.remove("result-width");
     }
+    btn.style.display = "block";
 }
 
 function initHammer() {

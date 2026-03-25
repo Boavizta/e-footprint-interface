@@ -90,7 +90,7 @@ class TestResultsPanel:
         model_builder.open_result_panel()
 
         # Click Sources button
-        page.locator("#header-btn-result-sources").click()
+        page.locator(".header-btn-result-sources-desktop").click()
 
         # Verify source-block is visible and graph-block is hidden
         expect(page.locator("#source-block")).to_have_class(re.compile(r"d-block"))

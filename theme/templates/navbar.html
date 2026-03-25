@@ -1,8 +1,9 @@
 {% load static %}
-<nav class="navbar navbar-expand bg-body-tertiary px-4 py-0 z-2">
+<!-- Desktop navbar: logo + GitHub (hidden on mobile, merged into toolbar there) -->
+<nav class="navbar navbar-expand bg-body-tertiary px-4 py-0 z-2 d-none d-xl-flex">
     <div class="container-fluid py-0 d-flex align-items-center">
         <a class="navbar-brand fs-5" href="/" id="link-to-home">
-            <img width="150" height="75" src="{% static 'images/e-footprint-logo-horizontal-full.svg' %}" alt="e-footprint-logo" />
+            <img width="120" height="40" src="{% static 'images/e-footprint-logo-horizontal-full.svg' %}" alt="e-footprint-logo" />
         </a>
         <a href="https://github.com/Boavizta/e-footprint" target="_blank" rel="noopener noreferrer" class="custom-github-button" aria-label="View Boavizta/e-footprint on GitHub">
             <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
