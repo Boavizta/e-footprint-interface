@@ -79,7 +79,7 @@ class SessionSystemRepository(ISystemRepository):
                 return cached_data, source
         return None, None
 
-    def _load_interface_config_from_session(self) -> dict:
+    def load_interface_config_from_session(self) -> dict:
         """Load interface config fallback from Django session."""
         config = self._session.get(self.INTERFACE_CONFIG_SESSION_KEY, {})
         json_interface_version = self._session.get(self.INTERFACE_VERSION_SESSION_KEY, "0.14.5")
@@ -111,7 +111,7 @@ class SessionSystemRepository(ISystemRepository):
         if self._interface_config is None:
             self.get_system_data_with_source()
         if self._interface_config is None:
-            self._interface_config = self._load_interface_config_from_session()
+            self._interface_config = self.load_interface_config_from_session()
         return {} if self._interface_config is None else self._interface_config
 
     @interface_config.setter

@@ -125,6 +125,8 @@ def upload_json(request):
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
                 if "interface_config" in data:
                     repository.interface_config = data["interface_config"]
+                else:
+                    repository.interface_config = repository.load_interface_config_from_session()
                 model_web.persist_to_cache()
                 return redirect("model-builder")
             except Exception as e:
