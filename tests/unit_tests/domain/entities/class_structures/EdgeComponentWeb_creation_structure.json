@@ -17,7 +17,7 @@
                         "value": "EdgeRAMComponent"
                     },
                     {
-                        "label": "Edge Storage",
+                        "label": "Edge storage",
                         "value": "EdgeStorage"
                     },
                     {
@@ -242,7 +242,7 @@
     },
     {
         "category": "EdgeStorage",
-        "header": "Edge Storage creation",
+        "header": "Edge storage creation",
         "fields": [
             {
                 "web_id": "EdgeStorage_name",
@@ -250,7 +250,7 @@
                 "label": "name",
                 "tooltip": false,
                 "input_type": "str",
-                "default": "Edge Storage 1"
+                "default": "Edge storage 1"
             },
             {
                 "web_id": "EdgeStorage_storage_capacity",

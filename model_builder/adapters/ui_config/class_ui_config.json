@@ -101,7 +101,7 @@
         "type_object_available": "Available storage types"
     },
     "EdgeStorage": {
-        "label": "Edge Storage",
+        "label": "Edge storage",
         "type_object_available": "Available edge storage types"
     },
     "UsagePattern": {
