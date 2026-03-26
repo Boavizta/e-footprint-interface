@@ -19,6 +19,7 @@ class TestEdgeComputerWeb:
             cpu_component=cpu_component,
             ram_component=ram_component,
             calculated_attributes=[],
+            calculated_attributes_without_validations=[],
         )
 
         web_obj = EdgeComputerWeb(modeling_obj, MagicMock())

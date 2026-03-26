@@ -19,7 +19,7 @@ def test_hourly_quantity_dict_attribute_produces_chart_data(minimal_repository):
     """Preparing chart data for one key of an ExplainableObjectDict attribute works."""
     model_web = ModelWeb(minimal_repository)
     for efootprint_obj in model_web.flat_efootprint_objs_dict.values():
-        for attr_name in efootprint_obj.calculated_attributes:
+        for attr_name in efootprint_obj.calculated_attributes_without_validations:
             calc_attr = getattr(efootprint_obj, attr_name)
             if isinstance(calc_attr, ExplainableObjectDict):
                 key = next(iter(calc_attr.keys()))
@@ -35,7 +35,7 @@ def test_all_calculated_attributes_produce_valid_outputs(minimal_repository):
     model_web = ModelWeb(minimal_repository)
     for efootprint_obj in model_web.flat_efootprint_objs_dict.values():
         container_id = efootprint_obj.id
-        for attr_name in efootprint_obj.calculated_attributes:
+        for attr_name in efootprint_obj.calculated_attributes_without_validations:
             calc_attr = getattr(efootprint_obj, attr_name)
             if isinstance(calc_attr, ExplainableHourlyQuantities):
                 context, _ = prepare_timeseries_chart_context(

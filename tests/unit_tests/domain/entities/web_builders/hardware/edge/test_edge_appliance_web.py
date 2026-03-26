@@ -21,6 +21,8 @@ class TestEdgeApplianceWeb:
             class_as_simple_str="EdgeAppliance",
             name="appliance",
             appliance_component=appliance_component,
+            calculated_attributes_without_validations=[
+                "instances_fabrication_footprint_per_usage_pattern", "instances_fabrication_footprint"],
             instances_fabrication_footprint_per_usage_pattern="per-usage",
             instances_fabrication_footprint="fabrication",
         )

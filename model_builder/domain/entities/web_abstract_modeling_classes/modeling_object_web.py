@@ -106,7 +106,7 @@ class ModelingObjectWeb:
 
     @property
     def calculated_attributes_values(self):
-        return [self.__getattr__(attr_name) for attr_name in self.calculated_attributes]
+        return [self.__getattr__(attr_name) for attr_name in self.calculated_attributes_without_validations]
 
     @property
     def modeling_obj(self):

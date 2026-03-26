@@ -121,7 +121,9 @@ class TestModelingObjectWeb:
     # --- calculated_attributes_values ---
 
     def test_calculated_attributes_values_use_modeling_obj_list(self):
-        stub_model = StubModelingObject(calculated_attributes=["alpha", "beta"], alpha=1, beta=2)
+        stub_model = StubModelingObject(
+            calculated_attributes=["alpha", "beta"], calculated_attributes_without_validations=["alpha", "beta"],
+            alpha=1, beta=2)
         wrapper = ModelingObjectWeb(stub_model, MagicMock())
 
         assert wrapper.calculated_attributes_values == [1, 2]

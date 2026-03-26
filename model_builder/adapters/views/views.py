@@ -221,7 +221,7 @@ def download_sources(request):
             source = attr_value.source
             web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
             web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, model_web)
-            if attr_name in efootprint_object.calculated_attributes:
+            if attr_name in efootprint_object.calculated_attributes_without_validations:
                 source = Source("Computed", "")
 
             sources.append([
