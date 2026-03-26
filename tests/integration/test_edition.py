@@ -22,8 +22,7 @@ from tests.fixtures.use_case_helpers import create_object, delete_object, edit_o
 
 
 def _total_emissions(model_web: ModelWeb) -> float:
-    emissions = model_web.system_emissions
-    return sum(sum(values) for values in emissions["values"].values())
+    return model_web.system.total_footprint.sum().value.to(u.kg).magnitude
 
 
 def _usage_pattern_post_data(name: str, uj_id: str, initial_volume: int) -> dict:

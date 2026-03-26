@@ -21,7 +21,7 @@
     <input disabled
        name="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
        id="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
-       value="{{ item.rounded_value }}"
+       value="{{ item.display_magnitude }} {{ item.display_unit }}"
        class="form-control form-control-sm"
     >
 {% endblock %}

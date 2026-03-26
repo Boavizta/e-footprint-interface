@@ -9,6 +9,7 @@ from datetime import timedelta
 from typing import Dict, List, Any, Protocol, runtime_checkable
 
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.utils.display import best_display_unit, human_readable_unit
 
 from model_builder.domain.entities.web_core.model_web_utils import (
     determine_global_time_bounds, get_reindexed_array_from_dict, to_rounded_daily_values
@@ -22,6 +23,8 @@ class SystemWithFootprints(Protocol):
     def total_energy_footprints(self) -> Dict: ...
     @property
     def total_fabrication_footprints(self) -> Dict: ...
+    @property
+    def total_footprint(self): ...
 
 
 @dataclass
@@ -29,10 +32,11 @@ class EmissionsResult:
     """Result of emissions calculation."""
     dates: List[str]
     values: Dict[str, List[float]]
+    display_unit: str
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
-        return {"dates": self.dates, "values": self.values}
+        return {"dates": self.dates, "values": self.values, "display_unit": self.display_unit}
 
 
 class EmissionsCalculationService:
@@ -69,37 +73,31 @@ class EmissionsCalculationService:
             (global_start + timedelta(days=i)).strftime("%Y-%m-%d")
             for i in range(math.ceil(total_hours / 24))
         ]
+        display_unit = best_display_unit(system.total_footprint.value)
+
+        def _daily_values(key: str, footprint_dict: Dict) -> List[float]:
+            return to_rounded_daily_values(get_reindexed_array_from_dict(key, footprint_dict, global_start, total_hours).to(display_unit))
 
         values = {
             "Servers_and_storage_energy": to_rounded_daily_values(
-                get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
-                + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
+                (
+                    get_reindexed_array_from_dict("Servers", energy, global_start, total_hours)
+                    + get_reindexed_array_from_dict("Storage", energy, global_start, total_hours)
+                ).to(display_unit)
             ),
-            "ExternalAPIs_energy": to_rounded_daily_values(
-                get_reindexed_array_from_dict("ExternalAPIs", energy, global_start, total_hours)
-            ),
-            "Edge_devices_energy": to_rounded_daily_values(
-                get_reindexed_array_from_dict("EdgeDevices", energy, global_start, total_hours)
-            ),
-            "Devices_energy": to_rounded_daily_values(
-                get_reindexed_array_from_dict("Devices", energy, global_start, total_hours)
-            ),
-            "Network_energy": to_rounded_daily_values(
-                get_reindexed_array_from_dict("Network", energy, global_start, total_hours)
-            ),
+            "ExternalAPIs_energy": _daily_values("ExternalAPIs", energy),
+            "Edge_devices_energy": _daily_values("EdgeDevices", energy),
+            "Devices_energy": _daily_values("Devices", energy),
+            "Network_energy": _daily_values("Network", energy),
             "Servers_and_storage_fabrication": to_rounded_daily_values(
-                get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
-                + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
+                (
+                    get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
+                    + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
+                ).to(display_unit)
             ),
-            "ExternalAPIs_fabrication": to_rounded_daily_values(
-                get_reindexed_array_from_dict("ExternalAPIs", fab, global_start, total_hours)
-            ),
-            "Edge_devices_fabrication": to_rounded_daily_values(
-                get_reindexed_array_from_dict("EdgeDevices", fab, global_start, total_hours)
-            ),
-            "Devices_fabrication": to_rounded_daily_values(
-                get_reindexed_array_from_dict("Devices", fab, global_start, total_hours)
-            ),
+            "ExternalAPIs_fabrication": _daily_values("ExternalAPIs", fab),
+            "Edge_devices_fabrication": _daily_values("EdgeDevices", fab),
+            "Devices_fabrication": _daily_values("Devices", fab),
         }
 
-        return EmissionsResult(dates=dates, values=values)
+        return EmissionsResult(dates=dates, values=values, display_unit=human_readable_unit(display_unit))

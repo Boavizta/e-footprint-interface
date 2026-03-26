@@ -39,10 +39,8 @@ def get_reindexed_array_from_dict(
     key: str, d: Dict[str, ExplainableHourlyQuantities], global_start, total_hours: int) -> u.Quantity:
     val = d.get(key)
     if isinstance(val, EmptyExplainableObject):
-        return np.zeros(total_hours, dtype=np.float32) * u.tonne
-    converted_to_tonnes = val.to(u.tonne)
-
-    return reindex_array(converted_to_tonnes, global_start, total_hours)
+        return np.zeros(total_hours, dtype=np.float32) * u.kg
+    return reindex_array(val, global_start, total_hours)
 
 
 def to_rounded_daily_values(quantity_arr: u.Quantity, rounding_depth: int = 5) -> List[float]:

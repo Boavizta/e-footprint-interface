@@ -9,6 +9,7 @@ class DummyExplainableWeb:
         self.efootprint_object = efootprint_obj
         self.start_date = efootprint_obj.start_date
         self.value = efootprint_obj.value
+        self.display_quantity = efootprint_obj.display_quantity
         self.magnitude = efootprint_obj.magnitude
         self.unit = efootprint_obj.unit
         self._literal_formula = literal_formula

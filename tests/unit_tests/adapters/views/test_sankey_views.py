@@ -9,6 +9,7 @@ import re
 from unittest.mock import MagicMock, patch
 
 import pytest
+from efootprint.constants.units import u
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -32,13 +33,13 @@ def _make_sankey_mock(mock_cls):
     instance = MagicMock()
     mock_cls.return_value = instance
     instance.build.return_value = None
-    instance.total_system_kg = 1_000_000.0  # 1000 kg → "1 t"
+    instance.total_system_value = 1_000_000.0 * u.kg  # 1000 t
     instance.node_labels = ["Test System", "Usage"]
     instance.full_node_labels = ["Test System", "Usage"]
     instance.link_sources = [0]
     instance.link_targets = [1]
-    instance.link_values = [1.0]
-    instance.node_total_kg = [1_000_000.0, 1_000_000.0]
+    instance.link_values = [1_000.0 * u.tonne]
+    instance.node_total_values = [1_000_000.0 * u.kg, 1_000_000.0 * u.kg]
     instance.aggregated_node_members = {}
     instance._node_columns = {0: 1, 1: 2}
     instance._spacer_nodes = set()
@@ -48,6 +49,11 @@ def _make_sankey_mock(mock_cls):
     instance._compute_node_colors.return_value = ["rgba(100,100,100,0.8)", "rgba(80,120,180,0.8)"]
     instance.get_column_information.return_value = []
     instance.get_column_metadata.return_value = []
+    instance.get_root_display_unit.return_value = u.tonne
+    instance.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+    instance.get_percentage_of_total.side_effect = (
+        lambda value: value.to(u.tonne).magnitude / instance.total_system_value.to(u.tonne).magnitude * 100
+    )
     return instance
 
 
@@ -440,9 +446,9 @@ class TestBuildSankeyPayload:
         sankey.full_node_labels = sankey.node_labels
         sankey.link_sources = [0]
         sankey.link_targets = [1]
-        sankey.link_values = [1.0]
-        sankey.node_total_kg = [1000.0, 1000.0]
-        sankey.total_system_kg = 1000.0
+        sankey.link_values = [1.0 * u.tonne]
+        sankey.node_total_values = [1000.0 * u.kg, 1000.0 * u.kg]
+        sankey.total_system_value = 1000.0 * u.kg
         sankey.aggregated_node_members = {}
         sankey._node_columns = {0: 1, 1: 2}
         sankey._spacer_nodes = set()
@@ -453,6 +459,11 @@ class TestBuildSankeyPayload:
             "rgba(100,100,100,0.8)",
             "rgba(80,120,180,0.8)",
         ]
+        sankey.get_root_display_unit.return_value = u.tonne
+        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+        sankey.get_percentage_of_total.side_effect = (
+            lambda value: value.to(u.tonne).magnitude / sankey.total_system_value.to(u.tonne).magnitude * 100
+        )
 
         payload, _ = _build_sankey_payload(sankey)
 
@@ -469,9 +480,9 @@ class TestBuildSankeyPayload:
         sankey.full_node_labels = ["Root", "", "Leaf"]
         sankey.link_sources = [0, 1]
         sankey.link_targets = [1, 2]
-        sankey.link_values = [1.0, 1.0]
-        sankey.node_total_kg = [1000.0, 1000.0, 1000.0]
-        sankey.total_system_kg = 1000.0
+        sankey.link_values = [1.0 * u.tonne, 1.0 * u.tonne]
+        sankey.node_total_values = [1000.0 * u.kg, 1000.0 * u.kg, 1000.0 * u.kg]
+        sankey.total_system_value = 1000.0 * u.kg
         sankey.aggregated_node_members = {}
         sankey._node_columns = {0: 1, 1: 2, 2: 3}
         sankey._spacer_nodes = {1}
@@ -483,6 +494,11 @@ class TestBuildSankeyPayload:
             "rgba(100,100,100,0.3)",
             "rgba(80,120,180,0.8)",
         ]
+        sankey.get_root_display_unit.return_value = u.tonne
+        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+        sankey.get_percentage_of_total.side_effect = (
+            lambda value: value.to(u.tonne).magnitude / sankey.total_system_value.to(u.tonne).magnitude * 100
+        )
 
         payload, _ = _build_sankey_payload(sankey)
 
@@ -492,9 +508,8 @@ class TestBuildSankeyPayload:
             "source_name_key": "Root⁣0",
             "target_name_key": "Leaf⁣2",
             "value": 1.0,
-            "value_kg": 1000.0,
             "color": "rgba(100,100,100,0.35)",
-            "tooltip_html": "Root → Leaf<br>1.0 tonnes CO2eq (100.0%)",
+            "tooltip_html": "Root → Leaf<br>1 t CO2eq (100.0%)",
         }]
 
     def test_category_nodes_use_object_category_ui_labels(self):
@@ -504,9 +519,9 @@ class TestBuildSankeyPayload:
         sankey.full_node_labels = ["EdgeDevices Usage", "Leaf"]
         sankey.link_sources = [0]
         sankey.link_targets = [1]
-        sankey.link_values = [1.0]
-        sankey.node_total_kg = [1000.0, 1000.0]
-        sankey.total_system_kg = 1000.0
+        sankey.link_values = [1.0 * u.tonne]
+        sankey.node_total_values = [1000.0 * u.kg, 1000.0 * u.kg]
+        sankey.total_system_value = 1000.0 * u.kg
         sankey.aggregated_node_members = {}
         sankey._node_columns = {0: 1, 1: 2}
         sankey._spacer_nodes = set()
@@ -517,14 +532,19 @@ class TestBuildSankeyPayload:
             "rgba(100,100,100,0.8)",
             "rgba(80,120,180,0.8)",
         ]
+        sankey.get_root_display_unit.return_value = u.tonne
+        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+        sankey.get_percentage_of_total.side_effect = (
+            lambda value: value.to(u.tonne).magnitude / sankey.total_system_value.to(u.tonne).magnitude * 100
+        )
 
         payload, _ = _build_sankey_payload(sankey)
 
         assert payload["nodes"][0]["label"] == "Edge devices Usage"
         assert payload["nodes"][0]["full_name"] == "Edge devices Usage"
-        assert payload["nodes"][0]["tooltip_html"] == "Edge devices Usage<br>1.0 tonnes CO2eq (100.0%)"
+        assert payload["nodes"][0]["tooltip_html"] == "Edge devices Usage<br>1 t CO2eq (100.0%)"
         assert payload["links"][0]["source_name_key"] == "Edge devices Usage⁣0"
-        assert payload["links"][0]["tooltip_html"] == "Edge devices Usage → Leaf<br>1.0 tonnes CO2eq (100.0%)"
+        assert payload["links"][0]["tooltip_html"] == "Edge devices Usage → Leaf<br>1 t CO2eq (100.0%)"
 
 
 class TestSankeyColumnsGuard:

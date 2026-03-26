@@ -14,7 +14,7 @@
         {{ elt.modeling_obj_container.name }}
     {% endif %}
     {% if elt.class_as_snake_str == "explainable_hourly_quantities" %}
-         {% if elt.dict_container %} for usage pattern {{ elt.key_in_dict.name }}{% endif %}({{ elt.unit }})
+         {% if elt.dict_container %} for usage pattern {{ elt.key_in_dict.name }}{% endif %}({{ elt.display_unit }})
       <a
         href="#"
         {% if elt.dict_container %}
@@ -29,7 +29,7 @@
         _="on click openCalculatedAttributesChart()"
       >(see graph)</a>
     {% elif elt.class_as_snake_str == "explainable_quantity" %}
-        = {{ elt.rounded_value|stringformat:"s"|truncatechars:30 }}
+        = {{ elt.display_magnitude|stringformat:"s"|truncatechars:30 }} {{ elt.display_unit }}
     {% else %}
         = {{ elt.value|stringformat:"s"|truncatechars:30 }}
     {% endif %}

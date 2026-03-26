@@ -103,7 +103,7 @@ function buildEchartsOption(payload) {
                 return {
                     source: link.sourceNameKey,
                     target: link.targetNameKey,
-                    value: link.valueKg,
+                    value: link.value,
                     tooltipHtml: link.tooltipHtml,
                     lineStyle: { color: link.color, opacity: 0.35 }
                 };
@@ -143,7 +143,7 @@ function renderSankeyPlot(plotEl) {
             key: node.key,
             nameKey: node.name_key,
             label: node.label,
-            valueKg: node.value_kg,
+            value: node.value,
             depth: node.depth,
             color: node.color,
             tooltipHtml: node.tooltip_html
@@ -156,7 +156,6 @@ function renderSankeyPlot(plotEl) {
             sourceNameKey: link.source_name_key,
             targetNameKey: link.target_name_key,
             value: link.value,
-            valueKg: link.value_kg,
             color: link.color,
             tooltipHtml: link.tooltip_html
         };

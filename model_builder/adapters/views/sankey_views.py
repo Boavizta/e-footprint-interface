@@ -4,11 +4,19 @@ import uuid
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from pint import Quantity
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
+from efootprint.constants.units import u
 from efootprint.core.lifecycle_phases import LifeCyclePhases
+from efootprint.utils.display import (
+    best_display_unit,
+    format_display_number,
+    format_quantity_for_display,
+    human_readable_unit,
+)
 from efootprint.utils.impact_repartition.sankey import ImpactRepartitionSankey
-from efootprint.utils.tools import display_co2_amount, format_co2_amount, time_it
+from efootprint.utils.tools import time_it
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
@@ -157,24 +165,61 @@ def _get_display_node_label(sankey: ImpactRepartitionSankey, node_idx: int, raw_
     return _get_display_category_label(raw_label) if node_idx in category_nodes else raw_label
 
 
+def _get_sankey_total_value(sankey: ImpactRepartitionSankey):
+    return sankey.total_system_value
+
+
+def _get_sankey_node_value(sankey: ImpactRepartitionSankey, node_idx: int):
+    return sankey.node_total_values[node_idx]
+
+
+def _format_sankey_value(sankey: ImpactRepartitionSankey, value) -> str:
+    formatter = getattr(sankey, "format_value_in_root_unit", None)
+    if callable(formatter):
+        formatted = formatter(value)
+        if isinstance(formatted, str):
+            return formatted
+    quantity = value if isinstance(value, Quantity) else value * u.kg
+    display_quantity = format_quantity_for_display(quantity.to(_get_sankey_display_unit(sankey)))
+    magnitude = format_display_number(display_quantity.magnitude)
+    return f"{magnitude} {human_readable_unit(display_quantity.units)}"
+
+
+def _get_sankey_display_unit(sankey: ImpactRepartitionSankey):
+    getter = getattr(sankey, "get_root_display_unit", None)
+    if callable(getter):
+        return getter()
+    return best_display_unit(_get_sankey_total_value(sankey))
+
+
+def _get_sankey_percentage(sankey: ImpactRepartitionSankey, value: Quantity) -> float:
+    getter = getattr(sankey, "get_percentage_of_total", None)
+    if callable(getter):
+        return getter(value)
+    display_unit = _get_sankey_display_unit(sankey)
+    total = sankey.total_system_value.to(display_unit).magnitude
+    if total <= 0:
+        return 0.0
+    return value.to(display_unit).magnitude / total * 100
+
+
 def _build_node_tooltip(sankey: ImpactRepartitionSankey, node_idx: int, display_full_label: str) -> str:
-    kg = sankey.node_total_kg[node_idx]
-    amount_str = display_co2_amount(format_co2_amount(kg))
-    pct = (kg / sankey.total_system_kg * 100) if sankey.total_system_kg > 0 else 0
+    value = _get_sankey_node_value(sankey, node_idx)
+    amount_str = _format_sankey_value(sankey, value)
+    pct = _get_sankey_percentage(sankey, value)
     if node_idx in sankey.aggregated_node_members:
         members_str = "<br>".join(
-            f"{_get_display_category_label(label)}: {display_co2_amount(format_co2_amount(member_kg))} CO2eq"
-            for label, member_kg in sankey.aggregated_node_members[node_idx]
+            f"{_get_display_category_label(label)}: {_format_sankey_value(sankey, member_value)} CO2eq"
+            for label, member_value in sankey.aggregated_node_members[node_idx]
         )
         return f"{display_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)<br><br>Aggregated objects:<br>{members_str}"
     return f"{display_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
 
 
 def _build_link_tooltip(
-        sankey: ImpactRepartitionSankey, source_full_label: str, target_full_label: str, value_tonnes: float) -> str:
-    kg = value_tonnes * 1000
-    amount_str = display_co2_amount(format_co2_amount(kg))
-    pct = (kg / sankey.total_system_kg * 100) if sankey.total_system_kg > 0 else 0
+        sankey: ImpactRepartitionSankey, source_full_label: str, target_full_label: str, value: Quantity) -> str:
+    amount_str = _format_sankey_value(sankey, value)
+    pct = _get_sankey_percentage(sankey, value)
     return f"{source_full_label} → {target_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
 
 
@@ -201,6 +246,8 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 
     display_labels_by_idx = {}
     display_full_labels_by_idx = {}
+    display_unit = _get_sankey_display_unit(sankey)
+    display_unit_str = human_readable_unit(display_unit)
     for node_idx, label in enumerate(sankey.node_labels):
         display_labels_by_idx[node_idx] = _get_display_node_label(sankey, node_idx, label)
         display_full_labels_by_idx[node_idx] = _get_display_node_label(sankey, node_idx, sankey.full_node_labels[node_idx])
@@ -220,8 +267,7 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
             "name_key": name_key,
             "label": display_label,
             "full_name": display_full_label,
-            "value_kg": sankey.node_total_kg[node_idx],
-            "value_tonnes": sankey.node_total_kg[node_idx] / 1000,
+            "value": sankey.node_total_values[node_idx].to(display_unit).magnitude,
             "depth": column - min_column,
             "column": column,
             "color": node_colors[node_idx],
@@ -234,28 +280,28 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 
     right_padding_px = _estimate_sankey_right_padding(nodes)
 
-    collapsed_links = {}
-    for source, target, value_tonnes in zip(sankey.link_sources, sankey.link_targets, sankey.link_values):
+    collapsed_links: dict[tuple[int, int], Quantity] = {}
+    for source, target, value in zip(sankey.link_sources, sankey.link_targets, sankey.link_values):
         if source in spacer_nodes:
             continue
         visible_source = _resolve_visible_node_idx(source, incoming_by_target, spacer_nodes)
         visible_target = _resolve_visible_node_idx(target, outgoing_by_source, spacer_nodes)
         if visible_source == visible_target or visible_source in spacer_nodes or visible_target in spacer_nodes:
             continue
-        collapsed_links[(visible_source, visible_target)] = collapsed_links.get((visible_source, visible_target), 0.0) + value_tonnes
+        existing = collapsed_links.get((visible_source, visible_target))
+        collapsed_links[(visible_source, visible_target)] = value if existing is None else existing + value
 
     links = []
-    for (source_idx, target_idx), value_tonnes in sorted(collapsed_links.items()):
+    for (source_idx, target_idx), value in sorted(collapsed_links.items()):
         links.append({
             "source_key": f"node-{source_idx}",
             "target_key": f"node-{target_idx}",
             "source_name_key": f"{display_labels_by_idx[source_idx]}{_SANKEY_NAME_DELIMITER}{source_idx}",
             "target_name_key": f"{display_labels_by_idx[target_idx]}{_SANKEY_NAME_DELIMITER}{target_idx}",
-            "value": value_tonnes,
-            "value_kg": value_tonnes * 1000,
+            "value": value.to(display_unit).magnitude,
             "color": node_colors[source_idx].replace("0.8)", "0.35)"),
             "tooltip_html": _build_link_tooltip(
-                sankey, display_full_labels_by_idx[source_idx], display_full_labels_by_idx[target_idx], value_tonnes),
+                sankey, display_full_labels_by_idx[source_idx], display_full_labels_by_idx[target_idx], value),
         })
 
     node_width, node_gap, chart_top, chart_bottom = 20, 20, 10, 30
@@ -265,6 +311,7 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
     return {
         "nodes": nodes,
         "links": links,
+        "display_unit": display_unit_str,
         "layout": {
             "left_padding_px": _SANKEY_SIDE_PADDING_PX,
             "right_padding_px": right_padding_px,
@@ -320,7 +367,7 @@ def sankey_diagram(request):
     if excluded_object_types:
         labels = [ClassUIConfigProvider.get_label(cls) for cls in excluded_object_types]
         excluded_info = f" excluding {', '.join(labels)}"
-    total_co2 = display_co2_amount(format_co2_amount(sankey.total_system_kg))
+    total_co2 = _format_sankey_value(sankey, _get_sankey_total_value(sankey))
     title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info} (total {total_co2} CO₂eq)"
     subtitle_map = {None: "All phases", LifeCyclePhases.MANUFACTURING: "Manufacturing only", LifeCyclePhases.USAGE: "Usage only"}
     subtitle = subtitle_map[lifecycle_phase_filter]

@@ -17,6 +17,7 @@ from efootprint.abstract_modeling_classes.modeling_object import get_instance_at
 from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
+from efootprint.utils.display import format_quantity_for_display, human_readable_unit
 from efootprint.utils.tools import time_it
 from e_footprint_interface import __version__ as interface_version
 
@@ -223,13 +224,14 @@ def download_sources(request):
             web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, model_web)
             if attr_name in efootprint_object.calculated_attributes_without_validations:
                 source = Source("Computed", "")
+            display_value = format_quantity_for_display(attr_value.value)
 
             sources.append([
                 LabelResolver.get_field_label(web_attr_value.attr_name_web),
                 web_efootprint_object.name,
                 LabelResolver.get_class_label(web_efootprint_object.class_as_simple_str),
-                attr_value.value.magnitude,
-                str(attr_value.value.units),
+                display_value.magnitude,
+                human_readable_unit(display_value.units),
                 source.name if source else "",
                 source.link if source else "",
             ])

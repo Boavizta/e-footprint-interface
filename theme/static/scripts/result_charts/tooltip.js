@@ -42,6 +42,7 @@ function calculateTotal(items) {
  * Custom tooltip external function that renders HTML with sections
  */
 export function customTooltipHandler(context) {
+    const unit = window.emissions?.display_unit || "t";
     // Tooltip Element
     let tooltipEl = document.getElementById("chartjs-tooltip");
 
@@ -77,7 +78,7 @@ export function customTooltipHandler(context) {
             innerHtml +=
                 '<tr><td class="section-header">FABRICATION: <span class="section-total">' +
                 fabricationTotal.toFixed(2) +
-                " t CO₂-eq</span></td></tr>";
+                ` ${unit} CO₂-eq</span></td></tr>`;
             fabrication.forEach((item) => {
                 const colors = item.dataset.backgroundColor;
                 const label = item.dataset.label;
@@ -85,7 +86,7 @@ export function customTooltipHandler(context) {
 
                 innerHtml += "<tr><td>";
                 innerHtml += '<span class="tooltip-color-box" style="background:' + colors + '"></span>';
-                innerHtml += label + ": " + value + " t CO₂-eq";
+                innerHtml += `${label}: ${value} ${unit} CO₂-eq`;
                 innerHtml += "</td></tr>";
             });
         }
@@ -99,7 +100,7 @@ export function customTooltipHandler(context) {
             innerHtml +=
                 '<tr><td class="section-header">USAGE: <span class="section-total">' +
                 usageTotal.toFixed(2) +
-                " t CO₂-eq</span></td></tr>";
+                ` ${unit} CO₂-eq</span></td></tr>`;
             usage.forEach((item) => {
                 const colors = item.dataset.backgroundColor;
                 const label = item.dataset.label;
@@ -107,7 +108,7 @@ export function customTooltipHandler(context) {
 
                 innerHtml += "<tr><td>";
                 innerHtml += '<span class="tooltip-color-box" style="background:' + colors + '"></span>';
-                innerHtml += label + ": " + value + " t CO₂-eq";
+                innerHtml += `${label}: ${value} ${unit} CO₂-eq`;
                 innerHtml += "</td></tr>";
             });
         }
@@ -119,7 +120,7 @@ export function customTooltipHandler(context) {
             const grandTotal = fabricationTotal + usageTotal;
 
             innerHtml += '<tr><td class="section-spacer"></td></tr>';
-            innerHtml += '<tr><td class="total-row">Total: ' + grandTotal.toFixed(2) + " t CO₂-eq</td></tr>";
+            innerHtml += `<tr><td class="total-row">Total: ${grandTotal.toFixed(2)} ${unit} CO₂-eq</td></tr>`;
         }
 
         innerHtml += "</tbody>";

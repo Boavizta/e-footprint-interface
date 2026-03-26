@@ -3,6 +3,7 @@ from typing import Tuple, List, Dict, Type
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.utils.display import format_display_number, human_readable_unit
 
 from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 
@@ -68,11 +69,21 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
 
         return web_children
 
+    @property
+    def display_unit(self):
+        if hasattr(self.efootprint_object, "display_unit"):
+            return human_readable_unit(self.efootprint_object.display_unit)
+        return ""
+
 
 class ExplainableQuantityWeb(ExplainableObjectWeb):
     @property
     def rounded_value(self):
-        return round(self.value, 2)
+        return self.display_quantity.magnitude
+
+    @property
+    def display_magnitude(self):
+        return format_display_number(self.display_quantity.magnitude)
 
     @property
     def unit(self):

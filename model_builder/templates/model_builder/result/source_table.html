@@ -28,8 +28,8 @@
                     <th scope="row" class="source-col-name">{{ explainable_quantity.label|capfirst }}</th>
                     <td class="source-col-attr">{{ explainable_quantity.modeling_obj_container.name }}</td>
                     <td class="d-none d-xl-table-cell">{{ explainable_quantity.modeling_obj_container.class_as_simple_str|class_label }}</td>
-                    <td class="source-col-value">{{ explainable_quantity.value.magnitude }}</td>
-                    <td class="source-col-unit">{{ explainable_quantity.value.units }}</td>
+                    <td class="source-col-value">{{ explainable_quantity.display_magnitude }}</td>
+                    <td class="source-col-unit">{{ explainable_quantity.display_unit }}</td>
                     <td>
                         {% if explainable_quantity.attr_name_in_mod_obj_container in explainable_quantity.modeling_obj_container.calculated_attributes %}
                             Computed <a href="{% url 'display-calculus-graph' explainable_quantity.modeling_obj_container.efootprint_id explainable_quantity.attr_name_in_mod_obj_container %}" target="_blank">
@@ -47,5 +47,3 @@
         </table>
     </div>
 </div>
-
-

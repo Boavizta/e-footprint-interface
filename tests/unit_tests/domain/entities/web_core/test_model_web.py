@@ -15,6 +15,7 @@ from model_builder.domain.entities.web_core.model_web import ModelWeb
 class TestModelWeb(unittest.TestCase):
     def setUp(self):
         self.model_web = ModelWeb.__new__(ModelWeb)
+        self.model_web._system_emissions = None
 
         self.model_web.system = MagicMock()
         self.model_web.system.total_energy_footprints = {
@@ -42,10 +43,17 @@ class TestModelWeb(unittest.TestCase):
                         Quantity(np.array(data["value"]), u.kg),
                         start_date=pytz.utc.localize(ciso8601.parse_datetime(data["start_date"])), label="test")
 
+        self.model_web.system.total_footprint = ExplainableHourlyQuantities(
+            Quantity(np.array([7900, 7600]), u.kg),
+            start_date=pytz.utc.localize(ciso8601.parse_datetime("2023-01-01 00:00")),
+            label="total",
+        )
+
     def test_system_emissions(self):
         emissions = self.model_web.system_emissions
 
         self.assertListEqual(emissions["dates"], ["2023-01-01", "2023-01-02"])
+        self.assertEqual(emissions["display_unit"], "t")
         self.assertListEqual(emissions["values"]["Servers_and_storage_energy"], [1, 0])
         self.assertListEqual(emissions["values"]["Devices_energy"], [0, 1.1])
         self.assertListEqual(emissions["values"]["ExternalAPIs_energy"], [0.4, 0])

@@ -3,6 +3,7 @@ from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.utils.display import best_display_unit
 
 from model_builder.domain.entities.web_core.model_web_utils import to_rounded_daily_values, reindex_array
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
@@ -70,13 +71,17 @@ def prepare_timeseries_chart_context(
 
 def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, Dict]:
     """Prepare data for hourly quantity charts."""
+    display_unit = best_display_unit(web_ehq.value)
     if web_ehq.start_date.hour == 0:
-        reindexed_values = web_ehq.value
+        reindexed_values = web_ehq.value.to(display_unit)
         start_date_starting_at_midnight = web_ehq.start_date
     else:
         start_date_starting_at_midnight = web_ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         reindexed_values = reindex_array(
-            web_ehq, start_date_starting_at_midnight, len(web_ehq.value) + web_ehq.start_date.hour)
+            web_ehq.efootprint_object.copy().to(display_unit),
+            start_date_starting_at_midnight,
+            len(web_ehq.value) + web_ehq.start_date.hour,
+        )
 
     n_days = math.ceil(len(reindexed_values) / 24)
     start = np.datetime64(start_date_starting_at_midnight, "D")
@@ -90,8 +95,8 @@ def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, D
 
 def prepare_recurrent_quantity_data(web_erq: ExplainableObjectWeb) -> Tuple[Dict, Dict]:
     """Prepare data for recurrent quantity charts (168-hour canonical week)."""
-    recurrent_values = web_erq.value
+    recurrent_values = web_erq.display_quantity
     hours = list(range(len(recurrent_values)))
-    data_dict = {str(hour): float(val) for hour, val in zip(hours, recurrent_values.magnitude)}
+    data_dict = {str(hour): float(str(val)) for hour, val in zip(hours, recurrent_values.magnitude)}
 
     return data_dict, {}

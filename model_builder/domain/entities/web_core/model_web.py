@@ -31,6 +31,7 @@ class ModelWeb:
             repository: An ISystemRepository implementation for loading and saving system data.
         """
         self.repository = repository
+        self._system_emissions = None
         self.system_data_source = None
         if system_data is not None:
             raw_system_data = system_data
@@ -252,7 +253,10 @@ class ModelWeb:
     @property
     def system_emissions(self):
         """Calculate daily emissions timeseries for the system."""
-        from model_builder.domain.services import EmissionsCalculationService
-        service = EmissionsCalculationService()
-        result = service.calculate_daily_emissions(self.system)
-        return result.to_dict()
+        if self._system_emissions is None:
+            from model_builder.domain.services import EmissionsCalculationService
+
+            service = EmissionsCalculationService()
+            result = service.calculate_daily_emissions(self.system)
+            self._system_emissions = result.to_dict()
+        return self._system_emissions

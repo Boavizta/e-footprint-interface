@@ -37,16 +37,15 @@ class TestModelWebUtils:
         assert padded.units == u.kWh
 
     def test_get_reindexed_array_from_dict(self):
-        """Should yield values in tonne with correct length."""
+        """Should preserve the source unit while reindexing."""
         start = datetime(2025, 1, 1, tzinfo=pytz.utc)
         ehq = ExplainableHourlyQuantities(np.array([1, 1, 1], dtype=np.float32) * u.kg, start_date=start, label="ehq")
         global_start = start - timedelta(hours=1)
         reindexed_present = model_web_utils.get_reindexed_array_from_dict(
             "present", {"present": ehq}, global_start, total_hours=4)
 
-        # kg converted to tonnes
-        np.testing.assert_array_equal(reindexed_present.magnitude, np.array([0, 0.001, 0.001, 0.001], dtype=np.float32))
-        assert reindexed_present.units == u.tonne
+        np.testing.assert_array_equal(reindexed_present.magnitude, np.array([0, 1, 1, 1], dtype=np.float32))
+        assert reindexed_present.units == u.kg
 
     @pytest.mark.parametrize(
         "unit,values,expected",
