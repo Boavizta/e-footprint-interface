@@ -53,15 +53,18 @@ function openCalculatedAttributesChart() {
    let element = document.getElementById("chart-calculated-attribute");
     if(element.classList.contains("d-none")){
         element.classList.remove("d-none");
-        element.classList.add("d-block");
+        element.classList.add("d-flex");
     }
 }
 
 function closeCalculatedAttributesChart() {
     let element = document.getElementById("chart-calculated-attribute");
-    if(element.classList.contains("d-block")){
-        element.classList.remove("d-block");
+    if(element.classList.contains("d-flex")){
+        element.classList.remove("d-flex");
         element.classList.add("d-none");
+    }
+    if (window.calculatedAttributesChart !== null) {
+        window.calculatedAttributesChart.destroy();
     }
     window.calculatedAttributesChart = null;
 }
@@ -90,8 +93,8 @@ function prepareChartCanvas(canvasId) {
     if (window.calculatedAttributesChart !== null) {
         window.calculatedAttributesChart.destroy();
         window.calculatedAttributesChart = null;
-        resetCanvas(canva);
     }
+    resetCanvas(canva);
 
     return canva;
 }
@@ -139,18 +142,24 @@ function createChart(canva, timeSeries, label, unit, chartConfig) {
 // ========== Specific Chart Creators ==========
 
 function createOrUpdateCalculatedAttributeChart() {
-    let canva = prepareChartCanvas("chart-render-calculated-attribute");
-    let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
-    let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({ x: date, y: value }));
-    let { label, unit } = extractLabelAndUnit();
+    requestAnimationFrame(() => {
+        let canva = prepareChartCanvas("chart-render-calculated-attribute");
+        let aggregatedByDay = JSON.parse(document.getElementById('data_timeseries').textContent);
+        let timeSeries = Object.entries(aggregatedByDay).map(([date, value]) => ({ x: date, y: value }));
+        let { label, unit } = extractLabelAndUnit();
 
-    createChart(canva, timeSeries, label, unit, {
-        xScale: calculatedAttributeChartJSOptions.scales.x,
-        pointRadius: 2
+        createChart(canva, timeSeries, label, unit, {
+            xScale: calculatedAttributeChartJSOptions.scales.x,
+            pointRadius: 2
+        });
     });
 }
 
 function createOrUpdateRecurrentQuantityChart() {
+    requestAnimationFrame(() => { _createOrUpdateRecurrentQuantityChart(); });
+}
+
+function _createOrUpdateRecurrentQuantityChart() {
     let canva = prepareChartCanvas("chart-render-recurrent-attribute");
     let hourlyData = JSON.parse(document.getElementById('data_timeseries').textContent);
 
