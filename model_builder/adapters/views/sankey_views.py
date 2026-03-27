@@ -9,12 +9,7 @@ from pint import Quantity
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
 from efootprint.constants.units import u
 from efootprint.core.lifecycle_phases import LifeCyclePhases
-from efootprint.utils.display import (
-    best_display_unit,
-    format_display_number,
-    format_quantity_for_display,
-    human_readable_unit,
-)
+from efootprint.utils.display import best_display_unit, human_readable_unit, display_quantity_as_str
 from efootprint.utils.impact_repartition.sankey import ImpactRepartitionSankey
 from efootprint.utils.tools import time_it
 
@@ -180,9 +175,7 @@ def _format_sankey_value(sankey: ImpactRepartitionSankey, value) -> str:
         if isinstance(formatted, str):
             return formatted
     quantity = value if isinstance(value, Quantity) else value * u.kg
-    display_quantity = format_quantity_for_display(quantity.to(_get_sankey_display_unit(sankey)))
-    magnitude = format_display_number(display_quantity.magnitude)
-    return f"{magnitude} {human_readable_unit(display_quantity.units)}"
+    return display_quantity_as_str(quantity)
 
 
 def _get_sankey_display_unit(sankey: ImpactRepartitionSankey):

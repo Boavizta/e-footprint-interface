@@ -3,7 +3,8 @@ from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.utils.display import best_display_unit
+from efootprint.utils.display import display_quantity_as_str
+from pint import Quantity
 
 from model_builder.domain.entities.web_core.model_web_utils import to_rounded_daily_values, reindex_array
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
@@ -71,9 +72,10 @@ def prepare_timeseries_chart_context(
 
 def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, Dict]:
     """Prepare data for hourly quantity charts."""
-    display_unit = best_display_unit(web_ehq.value)
+    display_value = web_ehq.display_quantity
+    display_unit = display_value.units
     if web_ehq.start_date.hour == 0:
-        reindexed_values = web_ehq.value.to(display_unit)
+        reindexed_values = display_value
         start_date_starting_at_midnight = web_ehq.start_date
     else:
         start_date_starting_at_midnight = web_ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -89,7 +91,12 @@ def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, D
     daily_data = to_rounded_daily_values(reindexed_values)
     data_dict = dict(zip(dates, daily_data))
 
-    extra_context = {"aggregation_strategy": web_ehq.efootprint_object.plot_aggregation_strategy}
+    aggregation_strategy = web_ehq.efootprint_object.plot_aggregation_strategy
+    if aggregation_strategy == "mean":
+        aggregation_value = display_quantity_as_str(Quantity(np.mean(daily_data), display_unit))
+    elif aggregation_strategy == "sum":
+        aggregation_value = display_quantity_as_str(web_ehq.sum().display_quantity)
+    extra_context = {"aggregation_strategy": aggregation_strategy, "aggregation_value": aggregation_value}
     return data_dict, extra_context
 
 
