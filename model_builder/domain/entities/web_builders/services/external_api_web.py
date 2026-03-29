@@ -1,4 +1,5 @@
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
+from efootprint.builders.external_apis.ecologits.ecologits_custom_external_api import EcoLogitsCustomGenAIExternalAPI
 
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
@@ -8,7 +9,7 @@ class ExternalAPIWeb(ModelingObjectWeb):
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {
         'strategy': 'simple',
-        'available_classes': [EcoLogitsGenAIExternalAPI],
+        'available_classes': [EcoLogitsGenAIExternalAPI, EcoLogitsCustomGenAIExternalAPI],
     }
 
     @property

@@ -23,6 +23,7 @@
             "VideoStreaming",
             "BoaviztaCloudServer",
             "EcoLogitsGenAIExternalAPI",
+            "EcoLogitsCustomGenAIExternalAPI",
             "Job",
             "GPUJob",
             "RecurrentEdgeDeviceNeed",
@@ -273,7 +274,8 @@
     "provider": {
         "modeling_obj_containers": [
             "BoaviztaCloudServer",
-            "EcoLogitsGenAIExternalAPI"
+            "EcoLogitsGenAIExternalAPI",
+            "EcoLogitsCustomGenAIExternalAPI"
         ],
         "label": "provider"
     },
@@ -453,7 +455,8 @@
     },
     "output_token_count": {
         "modeling_obj_containers": [
-            "EcoLogitsGenAIExternalAPIJob"
+            "EcoLogitsGenAIExternalAPIJob",
+            "EcoLogitsCustomGenAIExternalAPIJob"
         ],
         "label": "output token count",
         "step": 1
@@ -503,9 +506,73 @@
     },
     "model_name": {
         "modeling_obj_containers": [
-            "EcoLogitsGenAIExternalAPI"
+            "EcoLogitsGenAIExternalAPI",
+            "EcoLogitsCustomGenAIExternalAPI"
         ],
         "label": "model name"
+    },
+    "custom_model_total_parameter_count": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom model total parameter count",
+        "step": 1
+    },
+    "custom_model_active_parameter_count": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom model active parameter count",
+        "step": 1
+    },
+    "custom_data_center_pue": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom data center PUE",
+        "step": 0.01
+    },
+    "custom_average_carbon_intensity": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom average carbon intensity",
+        "step": 0.001
+    },
+    "custom_batch_size": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom batch size",
+        "step": 1
+    },
+    "custom_model_quantization_bits": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom model quantization bits",
+        "step": 1
+    },
+    "custom_server_power": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom server power",
+        "step": 0.1
+    },
+    "custom_server_gpu_count": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom server GPU count",
+        "step": 1
+    },
+    "custom_request_latency": {
+        "modeling_obj_containers": [
+            "EcoLogitsCustomGenAIExternalAPI"
+        ],
+        "label": "custom request latency",
+        "step": 0.1
     },
     "nb_of_bits_per_parameter": {
         "modeling_obj_containers": [
@@ -807,7 +874,8 @@
     },
     "external_api": {
         "modeling_obj_containers": [
-            "EcoLogitsGenAIExternalAPIJob"
+            "EcoLogitsGenAIExternalAPIJob",
+            "EcoLogitsCustomGenAIExternalAPIJob"
         ],
         "label": "external api"
     }

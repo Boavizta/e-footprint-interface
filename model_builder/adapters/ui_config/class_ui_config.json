@@ -138,7 +138,11 @@
     },
     "EcoLogitsGenAIExternalAPI": {
         "label": "Gen AI external API",
-        "more_descriptive_label_for_select_inputs": "EcoLogits modeling of API calls to major online AI providers."
+        "more_descriptive_label_for_select_inputs": "EcoLogits via model repository (provider + hosted model catalog)."
+    },
+    "EcoLogitsCustomGenAIExternalAPI": {
+        "label": "Gen AI external API (custom)",
+        "more_descriptive_label_for_select_inputs": "EcoLogits custom (set your own model parameters and carbon assumptions)."
     },
     "VideoStreaming": {
         "label": "Video streaming application"
@@ -154,6 +158,9 @@
     },
     "EcoLogitsGenAIExternalAPIJob": {
         "label": "Gen AI Job"
+    },
+    "EcoLogitsCustomGenAIExternalAPIJob": {
+        "label": "Gen AI Job (custom external API)"
     },
     "Network": {
         "label": "Network"
