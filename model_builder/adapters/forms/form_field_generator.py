@@ -1,3 +1,4 @@
+import json
 from copy import copy, deepcopy
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args, TYPE_CHECKING
@@ -115,7 +116,9 @@ def generate_dynamic_form(
             structure_field.update({
                 "input_type": "select_multiple",
                 "selected": selected,
-                "unselected": unselected
+                "unselected": unselected,
+                "selected_json": json.dumps(selected),
+                "unselected_json": json.dumps(unselected),
             })
         elif issubclass(annotation, str):
             structure_field.update({

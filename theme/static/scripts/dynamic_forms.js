@@ -249,10 +249,9 @@ function addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption(){
 }
 
 function convertJsonToStringLikeDjango(obj) {
-    const jsonStr = JSON.stringify(obj);
-    return jsonStr.replace(/\"/g, "'").replace(/\\'/g, "'");
+    return JSON.stringify(obj);
 }
 
 function convertStringLikeJsonToRealJsonFromElementWeb(str) {
-    return JSON.parse(document.getElementById(str).dataset.json.replace(/'/g, '"'));
+    return JSON.parse(document.getElementById(str).dataset.json);
 }

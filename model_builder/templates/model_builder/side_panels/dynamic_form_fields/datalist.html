@@ -5,10 +5,10 @@
     name="{{ field.web_id }}"
     {% if field.selected %}value="{{ field.selected }}"{% endif %}
     {% if object_to_edit %}
-    _="on focusout if my value is empty set my value to '{{ field.default }}' then updateSource(@id)"
+    _="on focusout if my value is empty set my value to my @data-default-value then updateSource(@id)"
     {% else %}
     _="on click set my value to ''
-          on focusout if my value is empty set my value to '{{ field.default }}' then updateSource(@id)"
+          on focusout if my value is empty set my value to my @data-default-value then updateSource(@id)"
     {% endif %}
     data-default-value="{{ field.default }}"
     data-default-name="{{ field.source.name }}"

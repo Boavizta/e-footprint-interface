@@ -75,6 +75,8 @@ def convert_multiselect_to_single(field: dict) -> None:
         })
 
     field.pop('unselected', None)
+    field.pop('selected_json', None)
+    field.pop('unselected_json', None)
 
 
 def has_meaningful_dynamic_data(dynamic_form_data: dict) -> bool:

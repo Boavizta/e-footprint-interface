@@ -59,7 +59,9 @@
                         "value": "efootprint_id2",
                         "label": "option2"
                     }
-                ]
+                ],
+                "selected_json": "[]",
+                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]"
             }
         ],
         "advanced_fields": []
