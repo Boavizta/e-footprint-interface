@@ -615,6 +615,7 @@ input:disabled{
 
 .equal-width {
   flex: 1;
+  min-width: 0;
 }
 
 /* CSS class use model canvas and objects */
@@ -801,6 +802,7 @@ input:disabled{
     #model-canva{
         width:100%;
         flex-wrap:wrap;
+        min-width: 0;
     }
 
     #chartTimeseries, #chart-calculated-attribute{
