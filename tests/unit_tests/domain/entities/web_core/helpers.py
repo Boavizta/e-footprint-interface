@@ -18,6 +18,9 @@ class DummyExplainableWeb:
     def compute_literal_formula_and_ancestors_mapped_to_symbols_list(self) -> Tuple[str, List[Any]]:
         return self._literal_formula, self._ancestors
 
+    def sum(self):
+        return self.efootprint_object.sum()
+
 
 class DummyWebObj:
     """Container exposing a single explainable attribute."""

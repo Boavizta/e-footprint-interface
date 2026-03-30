@@ -5,7 +5,7 @@ This document describes the steps to create and deploy a new release.
 ## 1. Pre-release: Update Version and Dependencies
 
 ### Update interface version
-Edit version in [pyproject.toml](pyproject.toml):
+Edit version in [pyproject.toml](pyproject.toml) and in [version.py](efootprint_interface/version.py) to the new version number (e.g., `x.y.z`):
 ```toml
 [tool.poetry]
 version = "x.y.z"

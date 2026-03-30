@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2026-03-30
+
+### Changed
+- Hide validation attributes from interface users.
+- Implement unified quantity display plan. Now all numerical attributes are displayed with 3 significant numbers, and get a unit appropriate for their magnitude (for example, a power of 0.000001 kWh will be displayed as 1 mWh). This allows for better readability and easier comparison of values.
+- Added global sum and mean values in explainable hourly quantities graphs.
+- e-footprint logo upgraded to newest version.
+
+### Fixed
+- Handle explainable_recurrent_quantities case in ancestor_or_child_list_element.html.
+- Calculated attribute chart sizing and flickering issues.
+
 ## [1.0.2] - 2026-03-25
 
 ### Fixed
