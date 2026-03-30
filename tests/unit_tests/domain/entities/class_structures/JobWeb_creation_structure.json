@@ -88,7 +88,7 @@
                 "web_id": "GPUJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "tooltip": "Data stored in the server’s storage.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
@@ -209,7 +209,7 @@
                 "web_id": "Job_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "tooltip": "Data stored in the server’s storage.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
@@ -343,7 +343,7 @@
                 "web_id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+                "tooltip": "Data stored in the server’s storage.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null

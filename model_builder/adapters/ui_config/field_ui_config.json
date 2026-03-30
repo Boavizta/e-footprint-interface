@@ -151,6 +151,7 @@
             "GPUServer"
         ],
         "label": "average carbon intensity of electricity",
+        "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
         "step": 1
     },
     "utilization_rate": {
@@ -418,7 +419,7 @@
             "VideoStreamingJob"
         ],
         "label": "data stored",
-        "tooltip": "Data stored in the server. Can be negative if the job is deleting data.",
+        "tooltip": "Data stored in the server’s storage.",
         "step": 1
     },
     "request_duration": {
@@ -596,7 +597,8 @@
             "EdgeStorage",
             "Storage"
         ],
-        "label": "storage capacity",
+        "label": "capacity per storage unit",
+        "tooltip": "The number of storage units will automatically adapt to data storage requirements.",
         "step": 0.1
     },
     "data_replication_factor": {
@@ -617,6 +619,7 @@
             "Storage"
         ],
         "label": "base storage need",
+        "tooltip": "Initial amount of data stored, prior to this use case.",
         "is_advanced_parameter": true
     },
     "nb_of_active_instances": {

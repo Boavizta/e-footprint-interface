@@ -255,14 +255,14 @@
             {
                 "web_id": "EdgeStorage_storage_capacity",
                 "attr_name": "storage_capacity",
-                "label": "storage capacity",
-                "tooltip": false,
+                "label": "capacity per storage unit",
+                "tooltip": "The number of storage units will automatically adapt to data storage requirements.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "TB",
+                "unit": "TB_stored",
                 "default": 1,
                 "can_be_negative": false,
                 "step": 0.1
@@ -294,7 +294,7 @@
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "kg/TB",
+                "unit": "kg/TB_stored",
                 "default": 160,
                 "can_be_negative": false,
                 "step": 1
@@ -303,13 +303,13 @@
                 "web_id": "EdgeStorage_base_storage_need",
                 "attr_name": "base_storage_need",
                 "label": "base storage need",
-                "tooltip": false,
+                "tooltip": "Initial amount of data stored, prior to this use case.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "input_type": "input",
-                "unit": "GB",
+                "unit": "GB_stored",
                 "default": 30,
                 "can_be_negative": false,
                 "step": 0.1

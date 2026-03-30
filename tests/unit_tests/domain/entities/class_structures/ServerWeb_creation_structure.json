@@ -112,7 +112,7 @@
                 "web_id": "Server_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
-                "tooltip": false,
+                "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
                 "default": 400,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -275,7 +275,7 @@
                 "web_id": "GPUServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
-                "tooltip": false,
+                "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
                 "default": 400,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -562,7 +562,7 @@
                 "web_id": "BoaviztaCloudServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
-                "tooltip": false,
+                "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
                 "default": 400,
                 "source": {
                     "name": "e-footprint hypothesis",
