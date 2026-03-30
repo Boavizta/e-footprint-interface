@@ -10,6 +10,6 @@ class EdgeApplianceComponentWeb(ModelingObjectWeb):
         return [edge_appliance_web], "components"
 
     @property
-    def calculated_attributes(self):
-        return [elt for elt in self.modeling_obj.calculated_attributes
+    def calculated_attributes_without_validations(self):
+        return [elt for elt in self.modeling_obj.calculated_attributes_without_validations
                 if elt not in ["lifespan", "power", "idle_power"]]

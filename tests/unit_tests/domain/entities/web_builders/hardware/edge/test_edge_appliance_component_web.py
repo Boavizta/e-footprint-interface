@@ -32,9 +32,9 @@ class TestEdgeApplianceComponentWeb:
             class_as_simple_str="EdgeApplianceComponent",
             name="component",
             edge_device=SimpleNamespace(id="edge-device"),
-            calculated_attributes=["lifespan", "power", "idle_power", "other"],
+            calculated_attributes_without_validations=["lifespan", "power", "idle_power", "other"],
         )
 
         web_obj = EdgeApplianceComponentWeb(modeling_obj, MagicMock())
 
-        assert web_obj.calculated_attributes == ["other"]
+        assert web_obj.calculated_attributes_without_validations == ["other"]

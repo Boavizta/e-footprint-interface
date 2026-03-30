@@ -8,7 +8,7 @@ class EdgeComputerCPUComponentWeb(ModelingObjectWeb):
         return [edge_computer_web], "components"
 
     @property
-    def calculated_attributes(self):
-        return [elt for elt in self.modeling_obj.calculated_attributes
+    def calculated_attributes_without_validations(self):
+        return [elt for elt in self.modeling_obj.calculated_attributes_without_validations
                 if elt not in ["compute", "base_compute_consumption", "lifespan", "power", "idle_power",
                                "instances_fabrication_footprint_per_usage_pattern", "instances_fabrication_footprint"]]

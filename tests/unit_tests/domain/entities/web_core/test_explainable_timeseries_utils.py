@@ -50,7 +50,7 @@ class TestExplainableTimeseriesUtils:
         data, extra = prepare_recurrent_quantity_data(DummyExplainableWeb(recurrent))
 
         assert data == {"0": 1.5, "1": 2.5, "2": 3.5}
-        assert extra == {}
+        assert extra == {"display_unit": "kWh"}
 
     def test_prepare_timeseries_chart_context_passes_literal_and_data(self):
         """prepare_timeseries_chart_context wires web_explainable and data together."""

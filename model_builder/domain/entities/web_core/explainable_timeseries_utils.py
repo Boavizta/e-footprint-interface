@@ -3,7 +3,7 @@ from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.utils.display import display_quantity_as_str
+from efootprint.utils.display import display_quantity_as_str, best_display_unit, human_readable_unit
 from pint import Quantity
 
 from model_builder.domain.entities.web_core.model_web_utils import to_rounded_daily_values, reindex_array
@@ -72,8 +72,12 @@ def prepare_timeseries_chart_context(
 
 def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, Dict]:
     """Prepare data for hourly quantity charts."""
-    display_value = web_ehq.display_quantity
-    display_unit = display_value.units
+    aggregation_strategy = web_ehq.efootprint_object.plot_aggregation_strategy
+    if aggregation_strategy == "sum":
+        display_unit = best_display_unit(24 * web_ehq.value)
+    else:
+        display_unit = best_display_unit(web_ehq.value)
+    display_value = web_ehq.value.to(display_unit)
     if web_ehq.start_date.hour == 0:
         reindexed_values = display_value
         start_date_starting_at_midnight = web_ehq.start_date
@@ -91,12 +95,12 @@ def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, D
     daily_data = to_rounded_daily_values(reindexed_values)
     data_dict = dict(zip(dates, daily_data))
 
-    aggregation_strategy = web_ehq.efootprint_object.plot_aggregation_strategy
     if aggregation_strategy == "mean":
         aggregation_value = display_quantity_as_str(Quantity(np.mean(daily_data), display_unit))
     elif aggregation_strategy == "sum":
         aggregation_value = display_quantity_as_str(web_ehq.sum().display_quantity)
-    extra_context = {"aggregation_strategy": aggregation_strategy, "aggregation_value": aggregation_value}
+    extra_context = {"aggregation_strategy": aggregation_strategy, "aggregation_value": aggregation_value,
+                     "display_unit": human_readable_unit(display_unit)}
     return data_dict, extra_context
 
 
@@ -106,4 +110,4 @@ def prepare_recurrent_quantity_data(web_erq: ExplainableObjectWeb) -> Tuple[Dict
     hours = list(range(len(recurrent_values)))
     data_dict = {str(hour): float(str(val)) for hour, val in zip(hours, recurrent_values.magnitude)}
 
-    return data_dict, {}
+    return data_dict, {"display_unit": human_readable_unit(web_erq.display_quantity.units)}

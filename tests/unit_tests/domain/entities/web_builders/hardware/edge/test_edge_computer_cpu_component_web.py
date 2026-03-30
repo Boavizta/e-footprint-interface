@@ -34,7 +34,7 @@ class TestEdgeComputerCPUComponentWeb:
             class_as_simple_str="EdgeComputerCPUComponent",
             name="cpu",
             edge_device=SimpleNamespace(id="edge-device"),
-            calculated_attributes=[
+            calculated_attributes_without_validations=[
                 "compute",
                 "base_compute_consumption",
                 "lifespan",
@@ -48,4 +48,4 @@ class TestEdgeComputerCPUComponentWeb:
 
         web_obj = EdgeComputerCPUComponentWeb(modeling_obj, MagicMock())
 
-        assert web_obj.calculated_attributes == ["other"]
+        assert web_obj.calculated_attributes_without_validations == ["other"]

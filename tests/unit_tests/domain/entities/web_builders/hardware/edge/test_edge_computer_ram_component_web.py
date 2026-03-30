@@ -34,7 +34,7 @@ class TestEdgeComputerRAMComponentWeb:
             class_as_simple_str="EdgeComputerRAMComponent",
             name="ram",
             edge_device=SimpleNamespace(id="edge-device"),
-            calculated_attributes=[
+            calculated_attributes_without_validations=[
                 "ram",
                 "base_ram_consumption",
                 "lifespan",
@@ -46,4 +46,4 @@ class TestEdgeComputerRAMComponentWeb:
 
         web_obj = EdgeComputerRAMComponentWeb(modeling_obj, MagicMock())
 
-        assert web_obj.calculated_attributes == ["other"]
+        assert web_obj.calculated_attributes_without_validations == ["other"]
