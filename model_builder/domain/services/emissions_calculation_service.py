@@ -73,10 +73,11 @@ class EmissionsCalculationService:
             (global_start + timedelta(days=i)).strftime("%Y-%m-%d")
             for i in range(math.ceil(total_hours / 24))
         ]
-        display_unit = best_display_unit(system.total_footprint.value)
+        display_unit = best_display_unit(system.total_footprint.sum().value)
 
         def _daily_values(key: str, footprint_dict: Dict) -> List[float]:
-            return to_rounded_daily_values(get_reindexed_array_from_dict(key, footprint_dict, global_start, total_hours).to(display_unit))
+            return to_rounded_daily_values(
+                get_reindexed_array_from_dict(key, footprint_dict, global_start, total_hours).to(display_unit))
 
         values = {
             "Servers_and_storage_energy": to_rounded_daily_values(
