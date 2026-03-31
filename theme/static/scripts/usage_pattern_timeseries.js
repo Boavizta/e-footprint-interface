@@ -49,10 +49,45 @@ let timeSeriesChartJSOptions = {
     }
 };
 
+function shouldDisplayTimeseriesChart() {
+    return window.innerWidth >= 1200;
+}
+
+function getTimeseriesChartElement() {
+    return document.getElementById("chartTimeseries");
+}
+
+function hideTimeseriesChartElement() {
+    const element = getTimeseriesChartElement();
+    if (!element) {
+        return;
+    }
+
+    element.classList.remove("d-block");
+    element.classList.add("d-none");
+}
+
+function destroyTimeseriesChart() {
+    if (!window.chart) {
+        return;
+    }
+
+    window.chart.destroy();
+    window.chart = null;
+}
+
 function openOrCloseTimeseriesChartAndTriggerUpdate() {
-    if( window.innerWidth < 1200){return}
-    let element = document.getElementById("chartTimeseries");
+    if (!shouldDisplayTimeseriesChart()) {
+        closeTimeseriesChart();
+        return;
+    }
+
+    let element = getTimeseriesChartElement();
     let sidePanel = document.getElementById("sidePanelContent");
+    if (!element || !sidePanel) {
+        return;
+    }
+
     let startDate = sidePanel.querySelector('[id$="start_date"]').value;
     let modelingDurationValue = sidePanel.querySelector('[id$="modeling_duration_value"]').value;
     let initialUsageJourneyVolume = sidePanel.querySelector('[id$="initial_volume"]').value;
@@ -70,24 +105,15 @@ function openOrCloseTimeseriesChartAndTriggerUpdate() {
         createOrUpdateTimeSeriesChart();
     }else{
         if(element.classList.contains("d-block")) {
-            element.classList.remove("d-block");
-            element.classList.add("d-none");
-            if (window.chart) {
-                window.chart.destroy();
-                window.chart = null;
-            }
+            hideTimeseriesChartElement();
+            destroyTimeseriesChart();
         }
     }
 }
 
 function closeTimeseriesChart() {
-    if(window.chart){
-        let element = document.getElementById("chartTimeseries");
-        element.classList.remove("d-block");
-        element.classList.add("d-none");
-        window.chart.destroy();
-        window.chart = null;
-    }
+    hideTimeseriesChartElement();
+    destroyTimeseriesChart();
 }
 
 function applyMaxLimitOnModelingDurationValue() {
@@ -112,7 +138,16 @@ function applyMaxLimitOnModelingDurationValue() {
 }
 
 function createOrUpdateTimeSeriesChart(){
+    if (!shouldDisplayTimeseriesChart()) {
+        closeTimeseriesChart();
+        return;
+    }
+
     let sidePanel = document.getElementById("sidePanelContent");
+    if (!sidePanel) {
+        return;
+    }
+
     let startDate = luxon.DateTime.fromISO(sidePanel.querySelector('[id$="start_date"]').value);
     let modelingDurationValue = parseInt(sidePanel.querySelector('[id$="modeling_duration_value"]').value);
     let modelingDurationUnit = sidePanel.querySelector('[id$="modeling_duration_unit"]').value;
@@ -129,15 +164,17 @@ function createOrUpdateTimeSeriesChart(){
     let usageJourneyVolume = sumDailyValuesByDisplayGranularity(
         Object.keys(dailyUsageJourneyVolume), Object.values(dailyUsageJourneyVolume), displayGranularity);
 
-    if (window.chart) {
-        window.chart.destroy();
-        window.chart = null;
-    }
+    destroyTimeseriesChart();
 
     timeSeriesChartJSOptions.scales.x.time.unit = displayGranularity === "month" ? "month" : "year";
     timeSeriesChartJSOptions.scales.x.time.tooltipFormat = displayGranularity === "month" ? "MMM yyyy" : "yyyy";
 
-    const ctx = document.getElementById("timeSeriesChart").getContext('2d');
+    const chartCanvas = document.getElementById("timeSeriesChart");
+    if (!chartCanvas) {
+        return;
+    }
+
+    const ctx = chartCanvas.getContext('2d');
     window.chart = new Chart(ctx, {
         type: "bar",
         data: {
@@ -189,8 +226,17 @@ function computeUsageJourneyVolume(
     return dailyUsageJourneyVolume;
 }
 
+function handleTimeseriesChartViewportChange() {
+    if (!shouldDisplayTimeseriesChart()) {
+        closeTimeseriesChart();
+    }
+}
+
+window.addEventListener("resize", handleTimeseriesChartViewportChange);
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
-        computeUsageJourneyVolume
+        computeUsageJourneyVolume,
+        shouldDisplayTimeseriesChart
     };
 }

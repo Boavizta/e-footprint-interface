@@ -265,3 +265,18 @@ class TestTimeseriesResponsiveChart:
 
         # On tablet, chart should not be visible/rendered
         expect(page.locator("#chartTimeseries")).to_contain_class("d-none")
+
+    def test_chart_closes_after_resizing_from_desktop_to_mobile(self, model_builder_page: ModelBuilderPage):
+        """A visible desktop chart should be cleaned up when the viewport becomes mobile-sized."""
+        model_builder = model_builder_page
+        page = model_builder.page
+
+        page.set_viewport_size({"width": 1440, "height": 900})
+        model_builder.goto()
+
+        page.locator("button").filter(has_text="Add usage pattern").click()
+        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        expect(page.locator("#chartTimeseries")).to_contain_class("d-block")
+
+        page.set_viewport_size({"width": 375, "height": 812})
+        expect(page.locator("#chartTimeseries")).to_contain_class("d-none")

@@ -1,4 +1,7 @@
-const {computeUsageJourneyVolume} = require('../theme/static/scripts/usage_pattern_timeseries.js');
+const {
+    computeUsageJourneyVolume,
+    shouldDisplayTimeseriesChart
+} = require('../theme/static/scripts/usage_pattern_timeseries.js');
 const { DateTime, Duration } = require("luxon");
 global.luxon = { DateTime, Duration };
 
@@ -84,3 +87,11 @@ test(
         expect(dailyGrowthRate).toBeCloseTo(expectedValue, 4);
     }
 )
+
+test("Timeseries chart stays desktop-only", () => {
+    window.innerWidth = 1199;
+    expect(shouldDisplayTimeseriesChart()).toBe(false);
+
+    window.innerWidth = 1200;
+    expect(shouldDisplayTimeseriesChart()).toBe(true);
+})

@@ -12395,9 +12395,27 @@ input:disabled {
   position: fixed;
   height: 70vh !important;
   top: 15vh !important;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
   border-radius: 15px;
   background-color: #FFFFFF;
   padding: 2rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.chart-timeseries-toolbar,
+.chart-timeseries-canvas-wrapper {
+  min-width: 0;
+}
+
+.chart-timeseries-canvas-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+#timeSeriesChart {
+  max-width: 100%;
 }
 
 #chart-render-calculated-attribute {
@@ -12579,8 +12597,11 @@ input:disabled {
     top: 0 !important;
   }
   #chartTimeseries {
-    width: 50vw;
-    right: 33vw;
+    display: none !important;
+    inset: 1rem;
+    width: auto;
+    height: auto !important;
+    right: auto;
   }
   .custom-ms-3 {
     margin-left: 0;
