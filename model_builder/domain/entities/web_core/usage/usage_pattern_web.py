@@ -13,24 +13,31 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
     }
     attr_name_in_system = "usage_patterns"
     object_type_in_volume = "usage_journey"
+    hourly_quantities_from_growth_ui_config = {
+        "initial_volume": {
+            "label": "Initial number of usage journey starts",
+            "tooltip": (
+                "The number of usage journeys started in the chosen period at the beginning of the projection."
+            ),
+        },
+    }
 
     # Declarative form configuration - extends parent's config
     form_creation_config = {
-        'strategy': 'simple',
-        'field_defaults': {
-            'country': {'default_by_label': 'France'},
+        "strategy": "simple",
+        "field_defaults": {
+            "country": {"default_by_label": "France"},
         },
-        'field_transforms': {
+        "field_transforms": {
             # Convert devices from multiselect to single select
-            'devices': {'multiselect_to_single': True},
+            "devices": {"multiselect_to_single": True},
         },
     }
 
     # Edition also needs the same transform
     form_edition_config = {
-        'strategy': 'simple',
-        'field_transforms': {
-            'devices': {'multiselect_to_single': True},
+        "strategy": "simple",
+        "field_transforms": {
+            "devices": {"multiselect_to_single": True},
         },
     }
-

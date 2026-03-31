@@ -187,7 +187,8 @@ def generate_dynamic_form(
                     # Editable: extract form inputs
                     structure_field.update({
                         "input_type": "hourly_quantities_from_growth",
-                        "default": default.form_inputs
+                        "default": default.form_inputs,
+                        "subfields_ui_config": corresponding_web_class.hourly_quantities_from_growth_ui_config,
                     })
                 else:
                     # Read-only: base efootprint class

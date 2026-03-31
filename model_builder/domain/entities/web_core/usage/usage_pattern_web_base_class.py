@@ -12,9 +12,16 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
 
     # Declarative form configuration
     form_creation_config = {
-        'strategy': 'simple',
-        'field_defaults': {
-            'country': {'default_by_label': 'France'},
+        "strategy": "simple",
+        "field_defaults": {
+            "country": {"default_by_label": "France"},
+        },
+    }
+
+    hourly_quantities_from_growth_ui_config = {
+        "initial_volume": {
+            "label": "Initial volume",
+            "tooltip": None,
         },
     }
 

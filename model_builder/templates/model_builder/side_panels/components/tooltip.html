@@ -1,8 +1,8 @@
-<div class="col-auto">
+<div class="{{ tooltip_wrapper_class|default:'col-auto' }}">
     <svg
         data-bs-toggle="popover"
         data-bs-trigger="hover focus"
-        data-bs-content="{{ field.tooltip }}"
+        data-bs-content="{{ tooltip|default:field.tooltip }}"
         data-bs-placement="top"
         data-bs-custom-class="blue-popover"
         data-location="side_panel"

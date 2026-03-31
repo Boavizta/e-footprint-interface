@@ -110,6 +110,12 @@
                     "link": null
                 },
                 "input_type": "hourly_quantities_from_growth",
+                "subfields_ui_config": {
+                    "initial_volume": {
+                        "label": "Initial number of usage journey starts",
+                        "tooltip": "The number of usage journeys started in the chosen period at the beginning of the projection."
+                    }
+                },
                 "default": {
                     "start_date": "2025-01-01",
                     "modeling_duration_value": 3,

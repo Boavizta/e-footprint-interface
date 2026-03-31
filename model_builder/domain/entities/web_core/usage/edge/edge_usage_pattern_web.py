@@ -13,3 +13,13 @@ class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
     }
     attr_name_in_system = "edge_usage_patterns"
     object_type_in_volume = "edge_usage_journey"
+
+    hourly_quantities_from_growth_ui_config = {
+        "initial_volume": {
+            "label": "Initial number of edge devices put in service",
+            "tooltip": (
+                "The number of edge devices put in service in the chosen period that execute the selected "
+                "edge usage journey throughout their usage span."
+            ),
+        },
+    }

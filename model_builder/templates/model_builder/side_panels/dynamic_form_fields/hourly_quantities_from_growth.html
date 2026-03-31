@@ -72,7 +72,14 @@
 
                     <!-- Initial Volume -->
                     <div class="mb-3">
-                        <label for="{{ field.web_id }}__initial_volume" class="form-label w-100">Initial volume</label>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label for="{{ field.web_id }}__initial_volume" class="form-label mb-0">
+                                {{ field.subfields_ui_config.initial_volume.label|default:"Initial volume" }}
+                            </label>
+                            {% if field.subfields_ui_config.initial_volume.tooltip %}
+                                {% include "model_builder/side_panels/components/tooltip.html" with tooltip=field.subfields_ui_config.initial_volume.tooltip tooltip_wrapper_class="d-inline-flex align-items-center" %}
+                            {% endif %}
+                        </div>
                         <div class="input-group">
                             <input type="number" class="form-control input_with_add_on"
                                    name="{{ field.web_id }}__initial_volume"
