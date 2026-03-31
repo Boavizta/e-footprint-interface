@@ -73,6 +73,38 @@ def generate_object_creation_structure(
     return form_sections, dynamic_form_dict
 
 
+def generate_select_multiple_field(
+    attr_name: str, id_prefix: str, selected_objects: list, child_type_str: str, model_web: "ModelWeb"
+) -> dict:
+    """Build a select_multiple field dict for a list attribute.
+
+    Args:
+        attr_name: The list attribute name (e.g. 'jobs')
+        id_prefix: The class name prefix used for web_id (e.g. 'UsageJourneyStep')
+        selected_objects: Raw ModelingObject instances currently linked
+        child_type_str: Class name of child objects (e.g. 'Job')
+        model_web: ModelWeb instance for querying available objects
+    """
+    field_config = FieldUIConfigProvider.get_config(attr_name)
+    unselected = [
+        {"value": option.id, "label": option.name}
+        for option in model_web.get_efootprint_objects_from_efootprint_type(child_type_str)
+        if option not in selected_objects
+    ]
+    selected = [{"value": elt.id, "label": elt.name} for elt in selected_objects]
+    return {
+        "web_id": f"{id_prefix}_{attr_name}",
+        "attr_name": attr_name,
+        "label": field_config.get("label", attr_name),
+        "tooltip": field_config.get("tooltip", False),
+        "input_type": "select_multiple",
+        "selected": selected,
+        "unselected": unselected,
+        "selected_json": json.dumps(selected),
+        "unselected_json": json.dumps(unselected),
+    }
+
+
 def generate_dynamic_form(
     efootprint_class_str: str, default_values: dict, model_web: "ModelWeb"):
     structure_fields = []
@@ -104,22 +136,10 @@ def generate_dynamic_form(
         }
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
-            if attr_name in default_values:
-                selected = default_values[attr_name]
-            else:
-                selected = []
-            unselected = [
-                {"value":option.id,"label":option.name}
-                for option in model_web.get_efootprint_objects_from_efootprint_type(list_attribute_object_type_str)
-                if option not in selected]
-            selected = [{"value": elt.id, "label": elt.name} for elt in selected]
-            structure_field.update({
-                "input_type": "select_multiple",
-                "selected": selected,
-                "unselected": unselected,
-                "selected_json": json.dumps(selected),
-                "unselected_json": json.dumps(unselected),
-            })
+            selected_objects = default_values.get(attr_name, [])
+            structure_field.update(
+                generate_select_multiple_field(attr_name, id_prefix, selected_objects, list_attribute_object_type_str, model_web)
+            )
         elif issubclass(annotation, str):
             structure_field.update({
                 "input_type": "str",

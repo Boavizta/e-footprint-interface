@@ -294,10 +294,14 @@ class ModelingObjectWeb:
             children = getattr(self, attr_name, []) or []
             annotation = init_signature[attr_name].annotation
             child_type = annotation.__args__[0].__name__
+            linked_ids = {child.efootprint_id for child in children}
+            all_of_type = self.model_web.get_efootprint_objects_from_efootprint_type(child_type)
+            linkable_existing_count = sum(1 for obj in all_of_type if obj.id not in linked_ids)
             sections.append({
                 "type_str": child_type,
                 "children": children,
                 "attr_name": attr_name,
+                "linkable_existing_count": linkable_existing_count,
             })
 
         return sections

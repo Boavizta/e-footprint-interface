@@ -1,6 +1,6 @@
 {% load static label_filters %}
 <button
-        class="btn btn-white text-end w-100 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
+        class="btn btn-white text-end flex-grow-1 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
         hx-get="/model_builder/open-create-object-panel/{{ type_str }}/"
         hx-target="#sidePanel"
         hx-trigger="click"
@@ -13,8 +13,24 @@
         {{ type_str|add_child_text }}
     </p>
 </button>
+{% if linkable_existing_count %}
+<span class="vr"></span>
+<button
+        class="btn btn-white text-end d-flex flex-row align-items-center rounded-start-0 rounded-end-0 border-2 border-end-0"
+        hx-get="/model_builder/open-link-existing-panel/{{ parent_efootprint_id }}/{{ type_str }}/"
+        hx-target="#sidePanel"
+        hx-trigger="click"
+        hx-swap="innerHTML"
+        hx-disabled-elt="button"
+        _="on click removeAllOpenedObjectsHighlights()"
+>
+    <p class='h8 mb-0 text-break text-secondary px-1'>
+        {{ type_str|link_child_text }}
+    </p>
+</button>
+{% endif %}
 <span class="position-absolute top-50 start-100 translate-middle bg-transparent rounded-circle">
-    <img src="{% static 'icons/circle_add_icon.svg' %}"  width="14" height="14" class="cursor"
+    <img src="{% static 'icons/circle_add_icon.svg' %}" width="14" height="14" class="cursor"
          hx-get="/model_builder/open-create-object-panel/{{ type_str }}/"
          hx-target="#sidePanel"
          hx-trigger="click"

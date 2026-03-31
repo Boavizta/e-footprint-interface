@@ -73,13 +73,13 @@ class HtmxPresenter:
             # Parent was linked - generate HTML for all mirrored parent cards
             parent_obj = self.model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
 
-            html_updates = ""
-            for mirrored_card in parent_obj.mirrored_cards:
-                html_updates += (
-                    f"<div hx-swap-oob='outerHTML:#{mirrored_card.web_id}'>"
-                    f"{render_to_string(f'model_builder/object_cards/{mirrored_card.template_name}_card.html', {'object': mirrored_card})}"
-                    f"</div>"
-                )
+            html_updates = self._generate_mirrored_cards_html(parent_obj.mirrored_cards)
+
+            # Re-render siblings whose "link existing" button just appeared (count crossed 0→1)
+            for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_obj.class_as_simple_str):
+                if sibling.efootprint_id != output.linked_parent_id and any(
+                    s["linkable_existing_count"] == 1 for s in sibling.child_sections):
+                    html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
 
             toast_and_highlight_data = {
                 "ids": output.mirrored_web_ids,
@@ -179,6 +179,14 @@ class HtmxPresenter:
 
         html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
 
+        # Re-render siblings whose "link existing" button just disappeared
+        # (cascade delete during edit reduced count from 1 to 0)
+        edited_ids = {card.efootprint_id for card in output.mirrored_cards}
+        for sibling in self.model_web.get_web_objects_from_efootprint_type(output.edited_object_type):
+            if sibling.efootprint_id not in edited_ids and any(
+                s["linkable_existing_count"] == 0 for s in sibling.child_sections):
+                html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
+
         if recompute:
             refresh_content = render_to_string(
                 "model_builder/result/result_panel.html", context={"model_web": self.model_web})
@@ -257,6 +265,16 @@ class HtmxPresenter:
             html_updates = ""
             for edited_container in output.edited_containers:
                 html_updates += self._generate_mirrored_cards_html(edited_container.mirrored_cards)
+
+            # Re-render siblings whose "link existing" button just disappeared (count crossed 1→0)
+            if output.edited_containers:
+                edited_ids = {c.efootprint_id for c in output.edited_containers}
+                parent_type = output.edited_containers[0].class_as_simple_str
+                for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_type):
+                    if sibling.efootprint_id not in edited_ids and any(
+                        s["linkable_existing_count"] == 0 for s in sibling.child_sections):
+                        html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
+
             return self._build_oob_response(html_updates, toast_and_highlight_data)
         else:
             response = HttpResponse(status=204)

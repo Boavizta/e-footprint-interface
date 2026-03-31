@@ -43,6 +43,17 @@ class ObjectCard:
             self.open_accordion()
         click_and_wait_for_htmx(self.locator.page, button)
 
+    def has_link_existing_child_button(self, child_type: str) -> bool:
+        """Return whether a 'link existing' button is present for the given child type."""
+        return self.locator.locator(
+            f"button[hx-get*='open-link-existing-panel'][hx-get*='{child_type}']").count() > 0
+
+    def click_link_existing_child_button(self, child_type: str):
+        """Click the 'link existing' button for a specific child type (triggers HTMX)."""
+        button = self.locator.locator(
+            f"button[hx-get*='open-link-existing-panel'][hx-get*='{child_type}']")
+        click_and_wait_for_htmx(self.locator.page, button)
+
     def open_accordion(self):
         self.locator.locator(".chevron-btn").first.click()
 

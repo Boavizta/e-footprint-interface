@@ -1,0 +1,13 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+
+{% block panel_body %}
+    <form id="sidePanelForm"
+          hx-post="/model_builder/edit-object/{{ parent_id }}/"
+          hx-swap="none"
+          hx-disabled-elt="button"
+          hx-on::after-request="closeAndEmptySidePanel()"
+    >
+        {% csrf_token %}
+        {% include "model_builder/side_panels/dynamic_form_fields/select_multiple.html" %}
+    </form>
+{% endblock %}

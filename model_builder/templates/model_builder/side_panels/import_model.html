@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block panel_body %}
-<form class="my-3"
+<form id="sidePanelForm" class="my-3"
         hx-post="{% url 'upload-json' %}"
         hx-disabled-elt="button"
         enctype="multipart/form-data"
@@ -15,15 +15,6 @@
             <p id="importModalPanelError" class="text-center font-bold text-red-1">{{uploadError}}</p>
         {% endif %}
     </div>
-
-    <div class="mb-3">
-            <button
-                    id="btn-submit-form"
-                    class="btn btn-primary rounded-pill w-100"
-                    type="submit">
-                Use your model
-            </button>
-        </div>
 </form>
 {% endblock %}
 

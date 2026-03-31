@@ -11,10 +11,6 @@ Edit version in [pyproject.toml](pyproject.toml) and in [version.py](efootprint_
 version = "x.y.z"
 ```
 
-### Update documentation
-- Update [CHANGELOG.md](CHANGELOG.md) with all changes since last release
-- Update [README.md](README.md) if needed
-
 ### Update dependencies
 ```shell
 # Update Python dependencies
@@ -66,6 +62,10 @@ jest
 ```
 
 All tests must pass before proceeding.
+
+### Update documentation
+- Update [CHANGELOG.md](CHANGELOG.md) with all changes since last release
+- Update [README.md](README.md) if needed
 
 ## 3. Create Release Commit and PR
 

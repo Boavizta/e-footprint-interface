@@ -24,17 +24,4 @@
         {% endblock %}
     </div>
 
-    <div class="mb-3">
-        <button
-                id="btn-submit-form"
-                class="btn btn-primary rounded-pill w-100"
-                onclick="
-                    addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption();
-                    setRecomputationToTrueIfResultPaneIsOpen();
-                    document.getElementById('sidePanelForm').requestSubmit()
-                "
-        >
-            Save
-        </button>
-    </div>
 {% endblock %}

@@ -57,7 +57,7 @@
                                         {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child title_class="h8" %}
                                     {% endfor %}
                                     <div class="d-flex justify-content-end position-relative mt-1">
-                                        {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id %}
+                                        {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id linkable_existing_count=section.linkable_existing_count %}
                                     </div>
                                 </div>
                             {% endfor %}
@@ -65,9 +65,11 @@
                             {% for child in object.accordion_children %}
                                 {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child title_class="h8" %}
                             {% endfor %}
+                            {% with section=object.child_sections.0 %}
                             <div class="w-85 ms-15 px-0 py-1 d-flex justify-content-end position-relative">
-                                {% include 'model_builder/components/add_child_button.html' with type_str=object.child_object_type_str parent_efootprint_id=object.efootprint_id %}
+                                {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id linkable_existing_count=section.linkable_existing_count %}
                             </div>
+                            {% endwith %}
                         {% endif %}
                     </div>
                 </div>

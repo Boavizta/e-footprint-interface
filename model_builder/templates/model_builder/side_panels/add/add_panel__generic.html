@@ -33,17 +33,4 @@
     <p class="mb-3 mt-4">
         You will be able to edit all attributes of the created {{ obj_formatting_data.label|lower }} later by clicking on the object card.
     </p>
-
-    <div class="mb-3">
-        <button
-                id="btn-submit-form"
-                class="btn btn-primary rounded-pill w-100"
-                onclick="
-                    addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption();
-                    setRecomputationToTrueIfResultPaneIsOpen();
-                    document.getElementById('sidePanelForm').requestSubmit()"
-        >
-            Save
-        </button>
-    </div>
 {% endblock %}

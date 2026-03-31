@@ -142,7 +142,6 @@ class TestEdgeObjects:
         model_builder.object_should_exist("RecurrentEdgeProcess", recurrent_process_name)
 
         # Add a recurrent server need
-        edge_function_card.open_accordion()
         edge_function_card.click_add_child_button("RecurrentServerNeed")
         side_panel.fill_field("RecurrentServerNeed_name", recurrent_server_need_name)
         side_panel.select_option("RecurrentServerNeed_edge_device", edge_device_name)
@@ -150,7 +149,6 @@ class TestEdgeObjects:
         model_builder.object_should_exist("RecurrentServerNeed", recurrent_server_need_name)
 
         # Try to add a job to the recurrent server need - should show error since no server
-        edge_function_card.open_accordion()
         recurrent_server_need_card = model_builder.get_object_card("RecurrentServerNeed", recurrent_server_need_name)
         recurrent_server_need_card.click_add_job_button()
         model_builder.expect_error_modal(
@@ -323,7 +321,6 @@ class TestEdgeObjects:
         cpu_card.should_exist()
 
         # Step 3: Add RAM component to EdgeDevice
-        edge_device_card.open_accordion()
         edge_device_card.locator.locator("button[hx-get*='EdgeComponent']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeRAMComponent")
@@ -357,7 +354,6 @@ class TestEdgeObjects:
         model_builder.object_should_exist("RecurrentEdgeDeviceNeed", recurrent_need_name)
 
         # Step 7: Add RecurrentEdgeComponentNeed for CPU
-        edge_function_card.locator.locator(".accordion-header > .chevron-btn").first.click()
         recurrent_need_card = model_builder.get_object_card("RecurrentEdgeDeviceNeed", recurrent_need_name)
         recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
@@ -372,7 +368,6 @@ class TestEdgeObjects:
         cpu_need_card.should_exist()
 
         # Step 8: Add RecurrentEdgeComponentNeed for RAM
-        recurrent_need_card.locator.locator(".accordion-header > .chevron-btn").first.click()
         recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_component", ram_component_name)
@@ -386,7 +381,6 @@ class TestEdgeObjects:
         ram_need_card.should_exist()
 
         # Step 9: Verify unit changes dynamically when switching components
-        recurrent_need_card.locator.locator(".accordion-header > .chevron-btn").first.click()
         recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']").click()
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_component", cpu_component_name)

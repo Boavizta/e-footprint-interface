@@ -1091,14 +1091,14 @@ opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-
 
 [[package]]
 name = "efootprint"
-version = "17.1.0"
+version = "18.0.0"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-17.1.0-py3-none-any.whl", hash = "sha256:056b12c1d2adad4e1ac5b915a1780be1fa49c50e3ec6b12e4935c46343e2a91f"},
-    {file = "efootprint-17.1.0.tar.gz", hash = "sha256:ed10c032df137a76ded0f1d34a4ae6fa3a20972866113b6fce46dc461bf6e991"},
+    {file = "efootprint-18.0.0-py3-none-any.whl", hash = "sha256:76be82b7707ff5e739ef9f8dee845146e4b94b74f7e323f6e593175e88421fd7"},
+    {file = "efootprint-18.0.0.tar.gz", hash = "sha256:2119e32ce5894b87b6e644ff6eecf2b6a5b32a31ebbd3c04000d69ab078559c9"},
 ]
 
 [package.dependencies]
@@ -3813,14 +3813,14 @@ ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==23.2.1)", "requests (>=2.31.0)"
 
 [[package]]
 name = "requests"
-version = "2.33.0"
+version = "2.33.1"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "requests-2.33.0-py3-none-any.whl", hash = "sha256:3324635456fa185245e24865e810cecec7b4caf933d7eb133dcde67d48cee69b"},
-    {file = "requests-2.33.0.tar.gz", hash = "sha256:c7ebc5e8b0f21837386ad0e1c8fe8b829fa5f544d8df3b2253bff14ef29d7652"},
+    {file = "requests-2.33.1-py3-none-any.whl", hash = "sha256:4e6d1ef462f3626a1f0a0a9c42dd93c63bad33f9f1c1937509b8c5c8718ab56a"},
+    {file = "requests-2.33.1.tar.gz", hash = "sha256:18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517"},
 ]
 
 [package.dependencies]
@@ -3831,7 +3831,6 @@ urllib3 = ">=1.26,<3"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
-test = ["PySocks (>=1.5.6,!=1.5.7)", "pytest (>=3)", "pytest-cov", "pytest-httpbin (==2.1.0)", "pytest-mock", "pytest-xdist"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<8)"]
 
 [[package]]
@@ -4506,4 +4505,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "77c106785a08ef7cd034d4fd93157e22e7c875415b5d4e16f7d97ca50e1867e8"
+content-hash = "d085a58e666799b47fa83e707b2b8d344a5d7b2927f1b571f82427a7f0865372"

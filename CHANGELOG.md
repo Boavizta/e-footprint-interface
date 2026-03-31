@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.1] - 2026-03-31
+
+### Fixed
+- Single quotes in object names breaking hyperscript and JSON parsing.
+- EdgeComputer and EdgeAppliance calculated attributes list, and display unit for calculated_attribute_chart.html.
+- Upgrade to e-footprint 18.0.0 for various bug fixes, notably timeseries shift because of UTC conversion that created years with very small impact.
+- Datalist field (notably model name for External APIs): disable browser autocomplete and clear value on mousedown for unfiltered suggestions on first click.
+- Prevent horizontal scroll when opening side panel on desktop.
+- Raise SessionExpiredError with clear message when session data is missing.
+- Fix job card title class when updating job name.
+
+### Added
+- Preserve accordion open/close state across structural card OOB re-renders.
+- Add-or-link: offer "Link existing" alongside "Add new" on child object buttons.
+
 ## [1.1.0] - 2026-03-30
 
 ### Changed
