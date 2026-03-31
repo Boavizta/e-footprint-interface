@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Prevent horizontal scroll when opening side panel on desktop.
 - Raise SessionExpiredError with clear message when session data is missing.
 - Fix job card title class when updating job name.
+- Set system total footprint sum as reference for result panel display unit.
+- Format values with significant numbers and most appropriate unit in result paned graph tooltips
 
 ### Added
 - Preserve accordion open/close state across structural card OOB re-renders.

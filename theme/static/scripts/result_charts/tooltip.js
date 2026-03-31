@@ -4,6 +4,7 @@
  */
 
 import { CHART_FONT, CHART_COLORS } from "./config.js";
+import { formatEmissionsQuantity } from "./display.js";
 
 /**
  * Categorize and sort tooltip items into fabrication and usage groups
@@ -77,16 +78,14 @@ export function customTooltipHandler(context) {
             const fabricationTotal = calculateTotal(fabrication);
             innerHtml +=
                 '<tr><td class="section-header">FABRICATION: <span class="section-total">' +
-                fabricationTotal.toFixed(2) +
-                ` ${unit} CO₂-eq</span></td></tr>`;
+                `${formatEmissionsQuantity(fabricationTotal, unit)}</span></td></tr>`;
             fabrication.forEach((item) => {
                 const colors = item.dataset.backgroundColor;
                 const label = item.dataset.label;
-                const value = item.parsed.y.toFixed(2);
 
                 innerHtml += "<tr><td>";
                 innerHtml += '<span class="tooltip-color-box" style="background:' + colors + '"></span>';
-                innerHtml += `${label}: ${value} ${unit} CO₂-eq`;
+                innerHtml += `${label}: ${formatEmissionsQuantity(item.parsed.y, unit)}`;
                 innerHtml += "</td></tr>";
             });
         }
@@ -99,16 +98,14 @@ export function customTooltipHandler(context) {
             const usageTotal = calculateTotal(usage);
             innerHtml +=
                 '<tr><td class="section-header">USAGE: <span class="section-total">' +
-                usageTotal.toFixed(2) +
-                ` ${unit} CO₂-eq</span></td></tr>`;
+                `${formatEmissionsQuantity(usageTotal, unit)}</span></td></tr>`;
             usage.forEach((item) => {
                 const colors = item.dataset.backgroundColor;
                 const label = item.dataset.label;
-                const value = item.parsed.y.toFixed(2);
 
                 innerHtml += "<tr><td>";
                 innerHtml += '<span class="tooltip-color-box" style="background:' + colors + '"></span>';
-                innerHtml += `${label}: ${value} ${unit} CO₂-eq`;
+                innerHtml += `${label}: ${formatEmissionsQuantity(item.parsed.y, unit)}`;
                 innerHtml += "</td></tr>";
             });
         }
@@ -120,7 +117,7 @@ export function customTooltipHandler(context) {
             const grandTotal = fabricationTotal + usageTotal;
 
             innerHtml += '<tr><td class="section-spacer"></td></tr>';
-            innerHtml += `<tr><td class="total-row">Total: ${grandTotal.toFixed(2)} ${unit} CO₂-eq</td></tr>`;
+            innerHtml += `<tr><td class="total-row">Total: ${formatEmissionsQuantity(grandTotal, unit)}</td></tr>`;
         }
 
         innerHtml += "</tbody>";
