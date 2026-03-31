@@ -94,12 +94,13 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
         update_system_data: Whether to update system data after editing
 
     Returns:
-        The edited object
+        Tuple of (edited_object, had_non_name_changes: bool, name_changed: bool)
     """
     model_web = obj_to_edit.model_web
     init_sig_params = get_init_signature_params(obj_to_edit.efootprint_class)
 
     changes_list = []
+    old_name = obj_to_edit.name
 
     for attr_name, value in parsed_data.items():
         if attr_name not in init_sig_params or attr_name == "self":
@@ -146,4 +147,4 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
     if update_system_data:
         model_web.persist_to_cache()
 
-    return obj_to_edit
+    return obj_to_edit, bool(changes_list), obj_to_edit.name != old_name

@@ -165,7 +165,18 @@ class HtmxPresenter:
         Returns:
             HttpResponse with the updated HTML and HTMX triggers.
         """
-        # Generate HTML for all mirrored cards (moved from use case)
+        toast_and_highlight_data = {
+            "ids": output.mirrored_web_ids,
+            "name": output.edited_object_name,
+            "action_type": "edit_object"
+        }
+
+        if output.name_only_change and not recompute:
+            html_updates = self._generate_name_only_updates_html(output.mirrored_cards)
+            response = HttpResponse(html_updates)
+            response["HX-Trigger-After-Settle"] = json.dumps({"displayToastAndHighlightObjects": toast_and_highlight_data})
+            return response
+
         html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
 
         if recompute:
@@ -175,12 +186,17 @@ class HtmxPresenter:
                             f"{refresh_content}</div>")
             trigger_result_display = True
 
-        toast_and_highlight_data = {
-            "ids": output.mirrored_web_ids,
-            "name": output.edited_object_name,
-            "action_type": "edit_object"
-        }
         return self._build_oob_response(html_updates, toast_and_highlight_data, trigger_result_display)
+
+    def _generate_name_only_updates_html(self, mirrored_cards) -> str:
+        """Generate OOB innerHTML swaps targeting only the name element of each mirrored card.
+
+        Used for name-only edits to avoid full card re-renders, preserving accordion state.
+        """
+        return "".join(
+            f"<div hx-swap-oob='innerHTML:#name-{card.web_id}'>{card.name}</div>"
+            for card in mirrored_cards
+        )
 
     def _generate_mirrored_cards_html(self, mirrored_cards) -> str:
         """Generate OOB swap HTML for a list of mirrored cards.
