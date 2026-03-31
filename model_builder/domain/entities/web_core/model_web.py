@@ -14,6 +14,7 @@ from model_builder.domain.entities.web_abstract_modeling_classes.explainable_obj
 from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
 
+from model_builder.domain.exceptions import SessionExpiredError
 from model_builder.domain.reference_data import DEFAULT_NETWORKS, DEFAULT_DEVICES, DEFAULT_COUNTRIES
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {
@@ -51,6 +52,14 @@ class ModelWeb:
         else:
             self.system_data = raw_system_data
             logger.info(f"Empty system data so e-footprint modeling hasn’t been hydrated.")
+
+    def __getattr__(self, name):
+        if name in ("system", "response_objs", "flat_efootprint_objs_dict", "initial_system_data_efootprint_version"):
+            raise SessionExpiredError(
+                "Your session has expired (model data is no longer available). "
+                "Please reload the page to start a new session."
+            )
+        raise AttributeError(f"’ModelWeb’ object has no attribute ‘{name}’")
 
     def to_json(self, save_calculated_attributes=True):
         """

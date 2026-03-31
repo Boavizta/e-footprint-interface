@@ -6,6 +6,11 @@ system operations, independent of the web framework.
 from efootprint.logger import logger
 
 
+class SessionExpiredError(Exception):
+    """Raised when the user's session has expired and model data is no longer available."""
+    pass
+
+
 class PayloadSizeLimitExceeded(Exception):
     """Raised when the system data exceeds the maximum allowed size for storage.
 
