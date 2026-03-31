@@ -68,6 +68,39 @@ def edit_object(request, object_id, trigger_result_display=False):
     return presenter.present_edited_object(output, recompute=recompute, trigger_result_display=trigger_result_display)
 
 
+@render_exception_modal_if_error
+@time_it
+def open_link_existing_panel(request, parent_id, child_type_str):
+    from typing import get_args
+    from efootprint.utils.tools import get_init_signature_params
+    from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
+    from model_builder.adapters.forms.form_field_generator import generate_select_multiple_field
+
+    model_web = ModelWeb(SessionSystemRepository(request.session))
+    parent_obj = model_web.get_web_object_from_efootprint_id(parent_id)
+
+    init_sig = get_init_signature_params(parent_obj.efootprint_class)
+    attr_name = next(
+        attr for attr in parent_obj.list_attr_names
+        if get_args(init_sig[attr].annotation)[0].__name__ == child_type_str
+    )
+
+    currently_linked = getattr(parent_obj._modeling_obj, attr_name, []) or []
+
+    field = generate_select_multiple_field(
+        attr_name, parent_obj.class_as_simple_str, currently_linked, child_type_str, model_web)
+
+    context = {
+        "header_name": f"Link existing {ClassUIConfigProvider.get_label(child_type_str).lower()} to {parent_obj.name}",
+        "parent_id": parent_id,
+        "field": field,
+    }
+
+    http_response = render(request, "model_builder/side_panels/link/link_existing_panel.html", context=context)
+    http_response["HX-Trigger-After-Settle"] = "initDynamicForm"
+    return http_response
+
+
 def open_panel_system_name(request):
     repository = SessionSystemRepository(request.session)
     system_data = repository.get_system_data()

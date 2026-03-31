@@ -63,3 +63,15 @@ def add_child_text(class_name: str) -> str:
         return ""
     label = LabelResolver.get_class_label(class_name).lower()
     return f"Add {label}"
+
+
+@register.filter
+def link_child_text(class_name: str) -> str:
+    """Generate 'Link existing {label}' text for a class name.
+
+    Usage: {{ child_object_type_str|link_child_text }}
+    """
+    if class_name is None:
+        return ""
+    label = LabelResolver.get_class_label(class_name).lower()
+    return f"Link existing {label}"

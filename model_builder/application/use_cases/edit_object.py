@@ -58,7 +58,6 @@ class EditObjectUseCase:
         Returns:
             EditObjectOutput with the edited object details.
         """
-        from model_builder.domain.entities.web_core.model_web import ModelWeb
         from model_builder.domain.services import EditService
 
         # Get object to edit

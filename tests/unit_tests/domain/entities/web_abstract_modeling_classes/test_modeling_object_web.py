@@ -307,9 +307,10 @@ class TestModelingObjectWeb:
 
     def test_child_sections_returns_types_and_children(self):
         class Foo:
-            pass
+            def __init__(self, efootprint_id: str):
+                self.efootprint_id = efootprint_id
 
-        class Bar:
+        class Bar(Foo):
             pass
 
         class Container:  # pragma: no cover - only signature used
@@ -317,20 +318,22 @@ class TestModelingObjectWeb:
                 self.foos = foos
                 self.bars = bars
 
-        foos = [Foo(), Foo()]
-        bars = [Bar()]
+        foos = [Foo("id1"), Foo("id2")]
+        bars = [Bar("id3")]
         base_model = StubModelingObject(
             efootprint_class=Container,
             foos=foos,
             bars=bars,
         )
-        wrapper = ModelingObjectWeb(base_model, MagicMock())
+        mock_model_web = MagicMock()
+        mock_model_web.get_efootprint_objects_from_efootprint_type.return_value = []
+        wrapper = ModelingObjectWeb(base_model, mock_model_web)
 
         sections = wrapper.child_sections
 
         assert sections == [
-            {"type_str": "Foo", "children": foos, "attr_name": "foos"},
-            {"type_str": "Bar", "children": bars, "attr_name": "bars"},
+            {"type_str": "Foo", "children": foos, "attr_name": "foos", "linkable_existing_count": 0},
+            {"type_str": "Bar", "children": bars, "attr_name": "bars", "linkable_existing_count": 0},
         ]
 
     def test_child_object_types_str_and_type_str_validation(self):

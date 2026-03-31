@@ -81,6 +81,17 @@ class SidePanelPage:
         self.page.locator("#model-builder-modal").wait_for(state="hidden", timeout=5000)
         return self
 
+    def add_to_select_multiple(self, web_id: str, option_label: str):
+        """Select an option from the unselected dropdown and add it to the selection.
+
+        Args:
+            web_id: The web_id of the select_multiple field (e.g. 'UsageJourneyStep_jobs')
+            option_label: The display label of the option to add
+        """
+        self.page.locator(f"#select-new-object-{web_id}").select_option(label=option_label)
+        self.page.locator(f"#add-btn-{web_id}").click()
+        return self
+
     def get_type_selector(self):
         """Get the object type selector dropdown (scoped to the visible form)."""
         # Scope to sidePanelForm to avoid matching hidden storage form selector

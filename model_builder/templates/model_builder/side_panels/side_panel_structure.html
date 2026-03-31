@@ -17,6 +17,17 @@
             </div>
         </div>
     </div>
+    {% block save_button %}
+    <div class="mb-3">
+        <button id="btn-submit-form" class="btn btn-primary rounded-pill w-100"
+                type="submit"
+                form="sidePanelForm"
+                onclick="addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption();
+                         setRecomputationToTrueIfResultPaneIsOpen();">
+            {{ save_button_label|default:"Save" }}
+        </button>
+    </div>
+    {% endblock %}
     {{ dynamic_form_data|json_script:"dynamic-form-data" }}
 </div>
 
