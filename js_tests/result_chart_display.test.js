@@ -36,3 +36,7 @@ test("formatDisplayNumber normalizes negative zero", () => {
 test("formatEmissionsQuantity builds the tooltip label with dynamic unit scaling", () => {
     expect(formatEmissionsQuantity(0.00042, "t")).toBe("420 g CO2-eq");
 });
+
+test("formatEmissionsQuantity handles very large values without toFixed overflows", () => {
+    expect(formatEmissionsQuantity(123456789, "kg")).toBe("123000 t CO2-eq");
+});

@@ -52,7 +52,8 @@ function roundToSigFigs(value, sigFigs = 3) {
         return 0;
     }
     const digits = sigFigs - Math.floor(Math.log10(Math.abs(value))) - 1;
-    return Number(value.toFixed(digits));
+    const scale = 10 ** digits;
+    return Math.round(value * scale) / scale;
 }
 
 function formatDisplayNumber(value) {
