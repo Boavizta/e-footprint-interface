@@ -1,5 +1,7 @@
 """Object card component for interacting with modeling objects on the canvas."""
-from playwright.sync_api import Locator
+import re
+
+from playwright.sync_api import Locator, expect
 
 from tests.e2e.utils import click_and_wait_for_htmx
 
@@ -44,13 +46,25 @@ class ObjectCard:
     def open_accordion(self):
         self.locator.locator(".chevron-btn").first.click()
 
+    def accordion_should_be_open(self):
+        """Assert that the card's accordion is expanded (Bootstrap .show class present)."""
+        expect(self.locator.locator(".accordion-collapse")).to_have_class(re.compile(r"\bshow\b"))
+        return self
+
+    def accordion_should_be_closed(self):
+        """Assert that the card's accordion is collapsed (Bootstrap .show class absent).
+
+        Retries until the Bootstrap collapse animation completes.
+        """
+        expect(self.locator.locator(".accordion-collapse")).not_to_have_class(re.compile(r"\bshow\b"))
+        return self
+
     def has_class(self, class_name: str) -> bool:
         """Check if the card has a specific CSS class."""
         return class_name in (self.locator.get_attribute("class") or "")
 
     def should_exist(self, timeout: float = 5000):
         """Assert that the card exists in the DOM with its expected content."""
-        from playwright.sync_api import expect
         # expect().to_be_attached() retries the entire locator chain including filters
         expect(self.locator).to_be_attached(timeout=timeout)
         return self
@@ -62,7 +76,5 @@ class ObjectCard:
 
     def should_have_class(self, class_name: str):
         """Assert that the card has a specific CSS class."""
-        from playwright.sync_api import expect
-        import re
         expect(self.locator).to_have_class(re.compile(class_name))
         return self

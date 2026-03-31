@@ -188,3 +188,45 @@ document.addEventListener("DOMContentLoaded", () => {
     wrapper.addEventListener("scroll", updateScrollButtons);
     updateScrollButtons();
 });
+
+function restoreAccordionStateInFragment(serverResponse) {
+    // Snapshot all currently-known accordion states (open = true, closed = false)
+    const accordionStates = new Map();
+    document.querySelectorAll('.accordion-collapse').forEach(el => {
+        accordionStates.set(el.id, el.classList.contains('show'));
+    });
+    if (accordionStates.size === 0) return serverResponse;
+
+    const doc = new DOMParser().parseFromString(serverResponse, 'text/html');
+    let modified = false;
+
+    doc.querySelectorAll('.accordion-collapse').forEach(collapseEl => {
+        const wasOpen = accordionStates.get(collapseEl.id);
+        if (wasOpen === undefined) return; // new element — keep server default
+
+        const webId = collapseEl.id.replace(/^flush-/, '');
+        const icon = doc.getElementById(`icon_accordion_${webId}`);
+        const toggleBtn = doc.querySelector(`[data-bs-target="#flush-${webId}"]`);
+        const isOpenInFragment = collapseEl.classList.contains('show');
+
+        if (wasOpen && !isOpenInFragment) {
+            collapseEl.classList.add('show');
+            if (icon) icon.classList.add('chevron-rotate');
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+            modified = true;
+        } else if (!wasOpen && isOpenInFragment) {
+            collapseEl.classList.remove('show');
+            if (icon) icon.classList.remove('chevron-rotate');
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+            modified = true;
+        }
+    });
+
+    return modified ? doc.body.innerHTML : serverResponse;
+}
+
+document.body.addEventListener('htmx:beforeSwap', function (evt) {
+    const response = evt.detail.serverResponse;
+    if (!response || !response.includes("hx-swap-oob='outerHTML:")) return;
+    evt.detail.serverResponse = restoreAccordionStateInFragment(response);
+});

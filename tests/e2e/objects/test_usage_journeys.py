@@ -86,7 +86,11 @@ class TestUsageJourneySteps:
     """Tests for usage journey step operations."""
 
     def test_add_multiple_steps_to_usage_journey(self, model_with_usage_journey: ModelBuilderPage):
-        """Test adding multiple steps to a usage journey."""
+        """Test adding multiple steps to a usage journey.
+
+        Also verifies accordion state is preserved across structural card re-renders:
+        step one's accordion is manually closed, then stays closed after each subsequent add.
+        """
         model_builder = model_with_usage_journey
         side_panel = model_builder.side_panel
         page = model_builder.page
@@ -100,11 +104,30 @@ class TestUsageJourneySteps:
 
         uj_card = model_builder.get_object_card("UsageJourney", uj_name)
 
-        for step_name, time_spent in steps:
-            uj_card.click_add_step_button()
-            side_panel.fill_field("UsageJourneyStep_name", step_name)
-            side_panel.fill_field("UsageJourneyStep_user_time_spent", time_spent, clear_first=False)
-            side_panel.submit_and_wait_for_close()
+        # Add first step
+        uj_card.click_add_step_button()
+        side_panel.fill_field("UsageJourneyStep_name", steps[0][0])
+        side_panel.fill_field("UsageJourneyStep_user_time_spent", steps[0][1], clear_first=False)
+        side_panel.submit_and_wait_for_close()
+
+        # Step one's accordion opens by default (no jobs yet); close it
+        step_one_card = model_builder.get_object_card("UsageJourneyStep", steps[0][0])
+        step_one_card.open_accordion()  # toggle: open → closed
+        step_one_card.accordion_should_be_closed()
+
+        # Add second step — UJ card is re-rendered; step one's accordion should stay closed
+        uj_card.click_add_step_button()
+        side_panel.fill_field("UsageJourneyStep_name", steps[1][0])
+        side_panel.fill_field("UsageJourneyStep_user_time_spent", steps[1][1], clear_first=False)
+        side_panel.submit_and_wait_for_close()
+        step_one_card.accordion_should_be_closed()
+
+        # Add third step — accordion state still preserved
+        uj_card.click_add_step_button()
+        side_panel.fill_field("UsageJourneyStep_name", steps[2][0])
+        side_panel.fill_field("UsageJourneyStep_user_time_spent", steps[2][1], clear_first=False)
+        side_panel.submit_and_wait_for_close()
+        step_one_card.accordion_should_be_closed()
 
         # Verify all steps were added
         for step_name, _ in steps:
