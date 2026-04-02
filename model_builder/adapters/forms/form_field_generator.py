@@ -1,5 +1,6 @@
 import json
 from copy import copy, deepcopy
+from decimal import Decimal
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args, TYPE_CHECKING
 
@@ -21,6 +22,23 @@ from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
+
+
+def _format_decimal_for_number_input(value: Decimal) -> int | str:
+    """Format a Decimal for an HTML number input without losing precision."""
+    if value == value.to_integral():
+        return int(value)
+    return format(value.normalize(), "f")
+
+
+def _get_compatible_step(value: Decimal, configured_step: int | float | None) -> int | str:
+    """Return the configured step unless it rejects the rendered value."""
+    step_decimal = Decimal(str(configured_step if configured_step is not None else 0.1))
+    if step_decimal > 0 and value % step_decimal == 0:
+        return configured_step if configured_step is not None else 0.1
+
+    decimal_places = max(0, -value.as_tuple().exponent)
+    return _format_decimal_for_number_input(Decimal("1").scaleb(-decimal_places))
 
 
 def generate_object_creation_structure(
@@ -168,12 +186,9 @@ def generate_dynamic_form(
             source_json = {"name":default.source.name, "link":default.source.link} if default.source else None
             structure_field.update({"source": source_json})
             if issubclass(annotation, ExplainableQuantity):
-                default_value = float(round(default.magnitude, 2))
-                step = field_config.get("step", 0.1)
-                if default_value == int(default_value):
-                    default_value = int(default_value)
-                else:
-                    step = 0.1
+                default_value_decimal = Decimal(str(default.magnitude))
+                default_value = _format_decimal_for_number_input(default_value_decimal)
+                step = _get_compatible_step(default_value_decimal, field_config.get("step", 0.1))
                 structure_field.update({
                     "input_type": "input",
                     "unit": "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}",
