@@ -1,5 +1,5 @@
 {% load static %}
-<button class="{{ btn_extra_classes }} btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2"
+<button class="{{ btn_extra_classes }} btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row ps-0 pe-3 py-2"
         id="{{ btn_id }}"
         hx-get="{{ hx_url }}"
         hx-target="#sidePanel"
@@ -8,6 +8,6 @@
         hx-disabled-elt="button"
         _="on click removeAllOpenedObjectsHighlights()"
 >
-    <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto" width="16px" height="16px" alt="add icon" />
-    <p class="mb-0 text-addition">{{ label }}</p>
+    <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-2 my-auto" width="14px" height="14px" alt="add icon" />
+    <p class="mb-0 text-addition" style="min-width: 0">{{ label }}</p>
 </button>
