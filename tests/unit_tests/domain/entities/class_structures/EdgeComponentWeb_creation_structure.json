@@ -51,9 +51,9 @@
                 },
                 "input_type": "input",
                 "unit": "yr",
-                "default": 6,
+                "default": "6",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeCPUComponent_compute",
@@ -66,9 +66,9 @@
                 },
                 "input_type": "input",
                 "unit": "cpu_core",
-                "default": 4,
+                "default": "4",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": [
@@ -83,9 +83,9 @@
                 },
                 "input_type": "input",
                 "unit": "kg",
-                "default": 20,
+                "default": "20",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeCPUComponent_power",
@@ -98,9 +98,9 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "default": 15,
+                "default": "15",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeCPUComponent_idle_power",
@@ -113,9 +113,9 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "default": 3,
+                "default": "3",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeCPUComponent_base_compute_consumption",
@@ -128,9 +128,9 @@
                 },
                 "input_type": "input",
                 "unit": "cpu_core",
-                "default": 0.1,
+                "default": "0.1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ]
     },
@@ -157,9 +157,9 @@
                 },
                 "input_type": "input",
                 "unit": "yr",
-                "default": 6,
+                "default": "6",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeRAMComponent_ram",
@@ -172,9 +172,9 @@
                 },
                 "input_type": "input",
                 "unit": "GB_ram",
-                "default": 8,
+                "default": "8",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": [
@@ -189,9 +189,9 @@
                 },
                 "input_type": "input",
                 "unit": "kg",
-                "default": 20,
+                "default": "20",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeRAMComponent_power",
@@ -204,9 +204,9 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "default": 10,
+                "default": "10",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeRAMComponent_idle_power",
@@ -219,9 +219,9 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "default": 2,
+                "default": "2",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeRAMComponent_base_ram_consumption",
@@ -234,9 +234,9 @@
                 },
                 "input_type": "input",
                 "unit": "GB_ram",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ]
     },
@@ -263,9 +263,9 @@
                 },
                 "input_type": "input",
                 "unit": "TB_stored",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "EdgeStorage_lifespan",
@@ -278,9 +278,9 @@
                 },
                 "input_type": "input",
                 "unit": "yr",
-                "default": 6,
+                "default": "6",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": [
@@ -295,9 +295,9 @@
                 },
                 "input_type": "input",
                 "unit": "kg/TB_stored",
-                "default": 160,
+                "default": "160",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeStorage_base_storage_need",
@@ -310,9 +310,9 @@
                 },
                 "input_type": "input",
                 "unit": "GB_stored",
-                "default": 30,
+                "default": "30",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ]
     },
@@ -339,9 +339,9 @@
                 },
                 "input_type": "input",
                 "unit": "yr",
-                "default": 6,
+                "default": "6",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": [
@@ -356,9 +356,9 @@
                 },
                 "input_type": "input",
                 "unit": "kg",
-                "default": 100,
+                "default": "100",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeWorkloadComponent_power",
@@ -371,9 +371,9 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "default": 50,
+                "default": "50",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "EdgeWorkloadComponent_idle_power",
@@ -386,9 +386,9 @@
                 },
                 "input_type": "input",
                 "unit": "W",
-                "default": 5,
+                "default": "5",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ]
     }

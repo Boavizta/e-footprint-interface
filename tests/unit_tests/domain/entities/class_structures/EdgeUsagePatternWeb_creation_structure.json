@@ -100,9 +100,9 @@
                 },
                 "default": {
                     "start_date": "2025-01-01",
-                    "modeling_duration_value": 3,
+                    "modeling_duration_value": "3",
                     "modeling_duration_unit": "year",
-                    "net_growth_rate_in_percentage": 10,
+                    "net_growth_rate_in_percentage": "10",
                     "net_growth_rate_timespan": "year",
                     "initial_volume": null,
                     "initial_volume_timespan": "month"

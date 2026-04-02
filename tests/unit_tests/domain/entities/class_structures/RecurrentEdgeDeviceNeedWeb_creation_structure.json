@@ -73,7 +73,7 @@
                 },
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "cpu_core"
                 }
             },
@@ -88,7 +88,7 @@
                 },
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "GB_ram"
                 }
             },
@@ -103,7 +103,7 @@
                 },
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
-                    "constant_value": 0,
+                    "constant_value": "0",
                     "constant_unit": "GB"
                 }
             }
@@ -133,7 +133,7 @@
                 },
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "concurrent"
                 }
             }

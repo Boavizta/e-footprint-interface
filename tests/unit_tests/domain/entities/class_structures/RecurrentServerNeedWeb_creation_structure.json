@@ -77,7 +77,7 @@
                 },
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "occurrence"
                 }
             }

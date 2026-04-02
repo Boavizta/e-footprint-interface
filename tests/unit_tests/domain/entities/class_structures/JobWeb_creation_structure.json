@@ -80,24 +80,24 @@
                 },
                 "input_type": "input",
                 "unit": "kB",
-                "default": 150,
+                "default": "150",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "GPUJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server’s storage.",
+                "tooltip": "Data stored in the server\u2019s storage.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "input_type": "input",
                 "unit": "kB",
-                "default": 100,
+                "default": "100",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "GPUJob_request_duration",
@@ -110,9 +110,9 @@
                 },
                 "input_type": "input",
                 "unit": "s",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ],
         "advanced_fields": [
@@ -127,9 +127,9 @@
                 },
                 "input_type": "input",
                 "unit": "gpu",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "GPUJob_ram_needed",
@@ -142,9 +142,9 @@
                 },
                 "input_type": "input",
                 "unit": "MB_ram",
-                "default": 50,
+                "default": "50",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ]
     },
@@ -171,9 +171,9 @@
                 },
                 "input_type": "input",
                 "unit": "dimensionless",
-                "default": 1000,
+                "default": "1000",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": []
@@ -201,24 +201,24 @@
                 },
                 "input_type": "input",
                 "unit": "kB",
-                "default": 150,
+                "default": "150",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "Job_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server’s storage.",
+                "tooltip": "Data stored in the server\u2019s storage.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "input_type": "input",
                 "unit": "kB",
-                "default": 100,
+                "default": "100",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "Job_request_duration",
@@ -231,9 +231,9 @@
                 },
                 "input_type": "input",
                 "unit": "s",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ],
         "advanced_fields": [
@@ -248,9 +248,9 @@
                 },
                 "input_type": "input",
                 "unit": "cpu_core",
-                "default": 0.1,
+                "default": "0.1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "Job_ram_needed",
@@ -263,9 +263,9 @@
                 },
                 "input_type": "input",
                 "unit": "MB_ram",
-                "default": 50,
+                "default": "50",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ]
     },
@@ -335,24 +335,24 @@
                 },
                 "input_type": "input",
                 "unit": "h",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server’s storage.",
+                "tooltip": "Data stored in the server\u2019s storage.",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
                 "input_type": "input",
                 "unit": "MB",
-                "default": 0,
+                "default": "0",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": [
@@ -367,9 +367,9 @@
                 },
                 "input_type": "input",
                 "unit": "1/s",
-                "default": 30,
+                "default": "30",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ]
     }

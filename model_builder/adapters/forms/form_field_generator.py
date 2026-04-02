@@ -24,18 +24,35 @@ if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
-def _format_decimal_for_number_input(value: Decimal) -> int | str:
+def _format_decimal_for_number_input(value: Decimal) -> str:
     """Format a Decimal for an HTML number input without losing precision."""
     if value == value.to_integral():
-        return int(value)
+        return str(int(value))
     return format(value.normalize(), "f")
 
 
-def _get_compatible_step(value: Decimal, configured_step: int | float | None) -> int | str:
+def _stringify_form_value(value):
+    """Convert numeric default values to strings for template rendering."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, Decimal):
+        return _format_decimal_for_number_input(value)
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, dict):
+        return {key: _stringify_form_value(val) for key, val in value.items()}
+    if isinstance(value, list):
+        return [_stringify_form_value(val) for val in value]
+    if isinstance(value, tuple):
+        return tuple(_stringify_form_value(val) for val in value)
+    return value
+
+
+def _get_compatible_step(value: Decimal, configured_step: int | float | None) -> str:
     """Return the configured step unless it rejects the rendered value."""
     step_decimal = Decimal(str(configured_step if configured_step is not None else 0.1))
     if step_decimal > 0 and value % step_decimal == 0:
-        return configured_step if configured_step is not None else 0.1
+        return _stringify_form_value(configured_step if configured_step is not None else 0.1)
 
     decimal_places = max(0, -value.as_tuple().exponent)
     return _format_decimal_for_number_input(Decimal("1").scaleb(-decimal_places))
@@ -161,7 +178,7 @@ def generate_dynamic_form(
         elif issubclass(annotation, str):
             structure_field.update({
                 "input_type": "str",
-                "default": default_values[attr_name]
+                "default": _stringify_form_value(default_values[attr_name])
             })
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
@@ -202,7 +219,7 @@ def generate_dynamic_form(
                     # Editable: extract form inputs
                     structure_field.update({
                         "input_type": "hourly_quantities_from_growth",
-                        "default": default.form_inputs,
+                        "default": _stringify_form_value(default.form_inputs),
                         "subfields_ui_config": corresponding_web_class.hourly_quantities_from_growth_ui_config,
                     })
                 else:
@@ -214,13 +231,13 @@ def generate_dynamic_form(
                     # Editable: extract constant value
                     structure_field.update({
                         "input_type": "recurrent_quantities_from_constant",
-                        "default": default.form_inputs
+                        "default": _stringify_form_value(default.form_inputs)
                     })
                 else:
                     # Read-only: base efootprint class
                     structure_field.update({"input_type": "recurrent_timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableObject):
-                structure_field.update({"default": default.value})
+                structure_field.update({"default": _stringify_form_value(default.value)})
                 if attr_name in list_values.keys():
                     structure_field.update({
                         "input_type": "select_str_input",

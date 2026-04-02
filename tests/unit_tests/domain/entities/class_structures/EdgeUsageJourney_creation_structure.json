@@ -51,7 +51,7 @@
                 "attr_name": "usage_span",
                 "label": "usage span",
                 "tooltip": false,
-                "default": 6,
+                "default": "6",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
@@ -59,7 +59,7 @@
                 "input_type": "input",
                 "unit": "yr",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": []

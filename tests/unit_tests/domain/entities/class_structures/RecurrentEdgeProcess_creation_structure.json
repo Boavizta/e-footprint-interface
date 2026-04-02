@@ -34,7 +34,7 @@
                 "label": "recurrent compute needed",
                 "tooltip": false,
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "cpu_core"
                 },
                 "source": {
@@ -49,7 +49,7 @@
                 "label": "recurrent ram needed",
                 "tooltip": false,
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "GB_ram"
                 },
                 "source": {
@@ -64,7 +64,7 @@
                 "label": "recurrent storage needed",
                 "tooltip": false,
                 "default": {
-                    "constant_value": 0,
+                    "constant_value": "0",
                     "constant_unit": "GB"
                 },
                 "source": {

@@ -34,7 +34,7 @@
                 "label": "recurrent workload",
                 "tooltip": false,
                 "default": {
-                    "constant_value": 1,
+                    "constant_value": "1",
                     "constant_unit": "concurrent"
                 },
                 "source": {

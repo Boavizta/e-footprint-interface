@@ -39,9 +39,9 @@
                 },
                 "input_type": "input",
                 "unit": "TB_stored",
-                "default": 1,
+                "default": "1",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "Storage_data_replication_factor",
@@ -54,9 +54,9 @@
                 },
                 "input_type": "input",
                 "unit": "dimensionless",
-                "default": 3,
+                "default": "3",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "Storage_data_storage_duration",
@@ -69,9 +69,9 @@
                 },
                 "input_type": "input",
                 "unit": "yr",
-                "default": 5,
+                "default": "5",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             },
             {
                 "web_id": "Storage_lifespan",
@@ -84,9 +84,9 @@
                 },
                 "input_type": "input",
                 "unit": "yr",
-                "default": 6,
+                "default": "6",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             }
         ],
         "advanced_fields": [
@@ -101,9 +101,9 @@
                 },
                 "input_type": "input",
                 "unit": "kg/TB_stored",
-                "default": 160,
+                "default": "160",
                 "can_be_negative": false,
-                "step": 1
+                "step": "1"
             },
             {
                 "web_id": "Storage_base_storage_need",
@@ -116,9 +116,9 @@
                 },
                 "input_type": "input",
                 "unit": "TB_stored",
-                "default": 0,
+                "default": "0",
                 "can_be_negative": false,
-                "step": 0.1
+                "step": "0.1"
             }
         ]
     }

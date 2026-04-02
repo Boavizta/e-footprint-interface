@@ -28,5 +28,5 @@ def test_generate_dynamic_form_keeps_integer_step_for_integral_values(minimal_mo
 
     power_field = _get_field_by_web_id(advanced_fields, "Server_power")
 
-    assert power_field["default"] == 250
-    assert power_field["step"] == 1
+    assert power_field["default"] == "250"
+    assert power_field["step"] == "1"
