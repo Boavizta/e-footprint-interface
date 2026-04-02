@@ -1,7 +1,7 @@
-<div id="{{ object.web_id }}" class="w-100 mb-2">
+<div id="{{ object.web_id }}" class="w-100 mb-2 d-flex align-items-center">
     <button
             id="button-{{ object.web_id }}"
-            class="btn btn-white text-end d-flex flex-row justify-content-end w-100 border-2 position-relative"
+            class="btn btn-white text-end d-flex flex-row justify-content-end flex-grow-1 border-2 border-end-0 rounded-start-2 rounded-end-0 position-relative"
             hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
             hx-target="#sidePanel"
             hx-trigger="click"
@@ -15,4 +15,5 @@
     >
         {% include 'model_builder/components/button_card_header.html' with object_card=object title_class="h8 text-secondary" %}
     </button>
+    <div class="component-station-dot"></div>
 </div>

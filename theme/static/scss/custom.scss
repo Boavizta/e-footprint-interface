@@ -924,6 +924,34 @@ input:disabled{
   --bs-tooltip-opacity: 1;
 }
 
+/* Metro-line styling for RecurrentEdgeComponentNeed items */
+.component-needs-track {
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 4px;
+        width: 2px;
+        background-color: var(--gray-300);
+        pointer-events: none;
+        z-index: 0;
+    }
+}
+
+.component-station-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-300);
+    background: white;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
 /* GitHub Button */
 .custom-github-button {
   display: inline-flex;
