@@ -90,12 +90,17 @@ function closeTimeseriesChart() {
     }
 }
 
+function getModelingDurationMaxValue(inputUnit) {
+    return inputUnit === "month" ? 120 : 10;
+}
+
 function applyMaxLimitOnModelingDurationValue() {
     let sidePanel = document.getElementById("sidePanelContent");
     let inputValue = sidePanel.querySelector('[id$="modeling_duration_value"]');
     let inputUnit = sidePanel.querySelector('[id$="modeling_duration_unit"]').value;
     let currentValue = parseInt(inputValue.value);
-    let maxValue = parseInt(inputValue.max);
+    let maxValue = getModelingDurationMaxValue(inputUnit);
+    inputValue.max = maxValue;
     let errorElement = document.getElementById('modeling_duration_value_error_message');
     if(currentValue <= 0 || isNaN(currentValue) || !currentValue){
         errorElement.innerHTML = "Modeling duration value must be greater than 0 and can't be empty";

@@ -53,12 +53,7 @@
                                     id="{{ field.web_id }}__modeling_duration_unit"
                                     _="
                                     on change
-                                        if my value is 'year' then
-                                            set {max:10} on #{{ field.web_id }}__modeling_duration_value
-                                        else
-                                            set {max:120} on #{{ field.web_id }}__modeling_duration_value
-                                        end
-                                        then applyMaxLimitOnModelingDurationValue()
+                                        applyMaxLimitOnModelingDurationValue()
                                         then openOrCloseTimeseriesChartAndTriggerUpdate()
                                     "
                                     data-default-value="{{ field.default.modeling_duration_unit }}"
