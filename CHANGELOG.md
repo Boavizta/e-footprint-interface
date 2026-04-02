@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.2] - 2026-04-02
+
+### Added
+- Dynamic `Initial volume` label and tooltip in `hourly_quantities_from_growth`.
+
+### Fixed
+- Preserve quantity precision in edit forms. That way, for models that have been created in e-footprint with more decimals than the interface accepts won’t break.
+- Auto-open advanced fields on validation errors, instead of silently failing.
+
 ## [1.1.1] - 2026-03-31
 
 ### Fixed

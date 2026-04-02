@@ -36,7 +36,7 @@ def model_builder_page(page: Page, base_url: str) -> ModelBuilderPage:
     - base_url in pytest.ini
     - Environment variable PYTEST_BASE_URL
     """
-    page.set_default_timeout(3000)  # 3 second default timeout
+    page.set_default_timeout(5000)  # 5 second default timeout for HTMX/UI updates under suite load
     server_url = base_url or DEFAULT_BASE_URL
 
     # Override goto to use server URL for relative paths

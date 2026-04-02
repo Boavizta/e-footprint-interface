@@ -14,7 +14,7 @@ from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
 from tests.e2e.pages.components import ObjectCard
-from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update
+from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update, click_and_wait_for_htmx
 
 
 @pytest.fixture
@@ -86,7 +86,7 @@ class TestEdgeObjects:
         edge_usage_pattern_name = "Test Edge Usage Pattern"
 
         # Create edge usage journey
-        page.locator("#btn-add-edge-usage-journey").click()
+        click_and_wait_for_htmx(page, page.locator("#btn-add-edge-usage-journey"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.fill_field("EdgeUsageJourney_name", edge_journey_name)
         side_panel.fill_field("EdgeUsageJourney_usage_span", "6")
@@ -117,7 +117,7 @@ class TestEdgeObjects:
         model_builder.close_error_modal("model-builder-modal")
 
         # Create edge device
-        page.locator("#btn-add-edge-device").click()
+        click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeComputer")
         side_panel.fill_field("EdgeComputer_name", edge_device_name)
@@ -214,7 +214,7 @@ class TestEdgeObjects:
         edge_device_name = "Advanced Edge Device"
 
         # Create edge device
-        page.locator("#btn-add-edge-device").click()
+        click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeComputer")
         side_panel.fill_field("EdgeComputer_name", edge_device_name)
@@ -303,7 +303,7 @@ class TestEdgeObjects:
         ram_need_value = "4.0"
 
         # Step 1: Create EdgeDevice
-        page.locator("#btn-add-edge-device").click()
+        click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeDevice")
         side_panel.fill_field("EdgeDevice_name", edge_device_name)
@@ -312,7 +312,7 @@ class TestEdgeObjects:
 
         # Step 2: Add CPU component to EdgeDevice
         edge_device_card = model_builder.get_object_card("EdgeDevice", edge_device_name)
-        edge_device_card.locator.locator("button[hx-get*='EdgeComponent']").click()
+        click_and_wait_for_htmx(page, edge_device_card.locator.locator("button[hx-get*='EdgeComponent']"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeCPUComponent")
         side_panel.fill_field("EdgeCPUComponent_name", cpu_component_name)
@@ -321,7 +321,7 @@ class TestEdgeObjects:
         cpu_card.should_exist()
 
         # Step 3: Add RAM component to EdgeDevice
-        edge_device_card.locator.locator("button[hx-get*='EdgeComponent']").click()
+        click_and_wait_for_htmx(page, edge_device_card.locator.locator("button[hx-get*='EdgeComponent']"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_object_type("EdgeRAMComponent")
         side_panel.fill_field("EdgeRAMComponent_name", ram_component_name)
@@ -330,7 +330,7 @@ class TestEdgeObjects:
         ram_card.should_exist()
 
         # Step 4: Create EdgeUsageJourney
-        page.locator("#btn-add-edge-usage-journey").click()
+        click_and_wait_for_htmx(page, page.locator("#btn-add-edge-usage-journey"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.fill_field("EdgeUsageJourney_name", edge_journey_name)
         side_panel.submit_and_wait_for_close()
@@ -345,7 +345,7 @@ class TestEdgeObjects:
 
         # Step 6: Add RecurrentEdgeDeviceNeed to EdgeFunction
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
-        edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeed']").click()
+        click_and_wait_for_htmx(page, edge_function_card.locator.locator("button[hx-get*='RecurrentEdgeDeviceNeed']"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_device", edge_device_name)
         # When selecting EdgeDevice (not EdgeComputer), RecurrentEdgeDeviceNeed is auto-selected
@@ -355,7 +355,7 @@ class TestEdgeObjects:
 
         # Step 7: Add RecurrentEdgeComponentNeed for CPU
         recurrent_need_card = model_builder.get_object_card("RecurrentEdgeDeviceNeed", recurrent_need_name)
-        recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']").click()
+        click_and_wait_for_htmx(page, recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_component", cpu_component_name)
         side_panel.fill_field("RecurrentEdgeComponentNeed_name", cpu_need_name)
@@ -368,7 +368,7 @@ class TestEdgeObjects:
         cpu_need_card.should_exist()
 
         # Step 8: Add RecurrentEdgeComponentNeed for RAM
-        recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']").click()
+        click_and_wait_for_htmx(page, recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_component", ram_component_name)
         side_panel.fill_field("RecurrentEdgeComponentNeed_name", ram_need_name)
@@ -381,7 +381,7 @@ class TestEdgeObjects:
         ram_need_card.should_exist()
 
         # Step 9: Verify unit changes dynamically when switching components
-        recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']").click()
+        click_and_wait_for_htmx(page, recurrent_need_card.locator.locator("button[hx-get*='RecurrentEdgeComponentNeed']"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_component", cpu_component_name)
         expect(page.locator("#RecurrentEdgeComponentNeed_recurrent_need__constant_unit")).to_have_value("cpu_core")

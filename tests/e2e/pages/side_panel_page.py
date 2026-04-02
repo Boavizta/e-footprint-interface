@@ -1,5 +1,5 @@
 """Side panel page object for form interactions."""
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, expect
 
 from tests.e2e.utils import click_and_wait_for_htmx
 
@@ -59,9 +59,22 @@ class SidePanelPage:
         return self
 
     def submit_and_wait_for_close(self):
-        """Submit the form and wait for the panel to close (closed via client-side JS)."""
-        self.submit_button.click()
+        """Submit the form, wait for its HTMX request, then wait for the panel to close."""
+        hx_url = self.form.get_attribute("hx-post")
+        if hx_url:
+            try:
+                with self.page.expect_response(lambda r: hx_url in r.url, timeout=1000):
+                    self.submit_button.click()
+            except PlaywrightTimeoutError:
+                # Some valid flows close the panel without an easily matchable response in Playwright.
+                pass
+        else:
+            self.submit_button.click()
         self.form.wait_for(state="hidden", timeout=500)
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request') === null",
+            timeout=1000,
+        )
         return self
 
     def close(self):
