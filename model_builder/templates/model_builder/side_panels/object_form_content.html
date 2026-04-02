@@ -4,6 +4,7 @@
 {% if form_fields_advanced|length > 0 %}
     <button type="button" class="btn btn-white border border-dark rounded-2 fs-xl mb-3"
             id="display-advanced-{{ object_type }}"
+            data-advanced-toggle-for="{{ object_type }}"
             _="on click
                 if #advanced-{{ object_type }}.classList.contains('d-none')
                     remove .d-none from #advanced-{{ object_type }}
@@ -17,7 +18,7 @@
            >
         Show advanced parameters
     </button>
-    <div id="advanced-{{ object_type }}" class="d-none mb-3">
+    <div id="advanced-{{ object_type }}" class="d-none mb-3" data-advanced-fields data-object-type="{{ object_type }}">
         {% for field in form_fields_advanced %}
             {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
         {% endfor %}

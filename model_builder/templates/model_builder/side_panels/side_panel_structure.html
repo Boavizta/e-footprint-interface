@@ -35,5 +35,32 @@
     openSidePanel();
     window.popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="side_panel"]')
     window.popoverList = [...window.popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+
+    (() => {
+        const sidePanelContent = document.getElementById("sidePanelContent");
+        if (!sidePanelContent) {
+            return;
+        }
+
+        function openAdvancedFieldsForInvalidElement(element) {
+            const advancedFieldsSection = element.closest("[data-advanced-fields]");
+            if (!advancedFieldsSection || !advancedFieldsSection.classList.contains("d-none")) {
+                return;
+            }
+
+            advancedFieldsSection.classList.remove("d-none");
+            advancedFieldsSection.classList.add("d-block");
+
+            const { objectType } = advancedFieldsSection.dataset;
+            const advancedFieldsToggle = document.getElementById(`display-advanced-${objectType}`);
+            if (advancedFieldsToggle) {
+                advancedFieldsToggle.innerText = "Hide advanced parameters";
+            }
+        }
+
+        sidePanelContent.addEventListener("invalid", (event) => {
+            openAdvancedFieldsForInvalidElement(event.target);
+        }, true);
+    })();
 </script>
 {% block extra_scripts %}{% endblock %}
