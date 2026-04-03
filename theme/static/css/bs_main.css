@@ -11984,6 +11984,11 @@ body {
   scroll-behavior: smooth;
 }
 
+.modal-message {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 /*Bootstrap overwrite*/
 .bg-light {
   background-color: var(--new-light) !important;
