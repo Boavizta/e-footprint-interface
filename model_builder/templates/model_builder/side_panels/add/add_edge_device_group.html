@@ -1,0 +1,17 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+
+{% block panel_body %}
+    <form id="sidePanelForm" class="my-3"
+        hx-post="/model_builder/add-object/{{ object_type }}/"
+        hx-target="#edge-device-groups-list"
+        hx-swap="beforeend"
+        hx-disabled-elt="button"
+        hx-on::after-request="closeAndEmptySidePanel()"
+    >
+        {% include "model_builder/side_panels/add/add_form_content.html" %}
+    </form>
+
+    <p class="mb-3 mt-4">
+        You will be able to edit all attributes of the created {{ obj_formatting_data.label|lower }} later by clicking on the object card.
+    </p>
+{% endblock %}

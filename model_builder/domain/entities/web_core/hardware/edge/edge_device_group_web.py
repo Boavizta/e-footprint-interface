@@ -17,6 +17,27 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
         form_data["edge_device_counts"] = {}
         return form_data
 
+    @staticmethod
+    def _count_to_display_value(count):
+        magnitude = count.value.magnitude
+        return int(magnitude) if float(magnitude).is_integer() else magnitude
+
+    def _build_group_entry(self, obj, count):
+        from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
+
+        return {
+            "object": wrap_efootprint_object(obj, self.model_web, self),
+            "count": self._count_to_display_value(count),
+        }
+
+    @property
+    def sub_group_entries(self):
+        return [self._build_group_entry(group, count) for group, count in self.modeling_obj.sub_group_counts.items()]
+
+    @property
+    def edge_device_entries(self):
+        return [self._build_group_entry(device, count) for device, count in self.modeling_obj.edge_device_counts.items()]
+
     @classmethod
     def pre_delete(cls, web_obj, model_web):
         """Remove group references from parent groups before deletion."""

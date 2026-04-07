@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
+from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
@@ -23,6 +24,38 @@ class TestEdgeDeviceGroupWeb:
         assert result["edge_device_counts"] == {}
         assert "sub_group_counts" not in form_data
         assert "edge_device_counts" not in form_data
+
+    # --- group entry helpers ---
+
+    def test_sub_group_entries_wrap_children_and_keep_counts(self):
+        """Sub-group entries should expose wrapped children with their counts."""
+        model_web = MagicMock()
+        parent = EdgeDeviceGroup("Building")
+        child = EdgeDeviceGroup("Floor")
+        parent.sub_group_counts[child] = SourceValue(2 * u.dimensionless)
+        web_obj = EdgeDeviceGroupWeb(parent, model_web)
+
+        entries = web_obj.sub_group_entries
+
+        assert len(entries) == 1
+        assert entries[0]["object"].name == "Floor"
+        assert entries[0]["object"].list_container == web_obj
+        assert entries[0]["count"] == 2
+
+    def test_edge_device_entries_wrap_devices_and_keep_counts(self):
+        """Device entries should expose wrapped children with their counts."""
+        model_web = MagicMock()
+        group = EdgeDeviceGroup("Building")
+        device = EdgeDevice("Sensor", SourceValue(50 * u.kg), [], SourceValue(6 * u.year))
+        group.edge_device_counts[device] = SourceValue(3 * u.dimensionless)
+        web_obj = EdgeDeviceGroupWeb(group, model_web)
+
+        entries = web_obj.edge_device_entries
+
+        assert len(entries) == 1
+        assert entries[0]["object"].name == "Sensor"
+        assert entries[0]["object"].list_container == web_obj
+        assert entries[0]["count"] == 3
 
     # --- pre_delete ---
 

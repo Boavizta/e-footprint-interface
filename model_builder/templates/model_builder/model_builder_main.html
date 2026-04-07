@@ -40,6 +40,7 @@
                         {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-server" hx_url="/model_builder/open-create-object-panel/ServerBase/" label="Add server" btn_extra_classes="" %}
                         {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-external-api" hx_url="/model_builder/open-create-object-panel/ExternalAPI/" label="Add external API" btn_extra_classes="" %}
                         {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device" hx_url="/model_builder/open-create-object-panel/EdgeDeviceBase/" label="Add edge device" btn_extra_classes="" %}
+                        {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device-group" hx_url="/model_builder/open-create-object-panel/EdgeDeviceGroup/" label="Add group" btn_extra_classes="" %}
                     </div>
                     <div id="external-api-list" class="list-group d-flex flew-column w-75 ms-25">
                         {% for external_api in model_web.external_apis %}
@@ -51,8 +52,13 @@
                             {% include 'model_builder/object_cards/server_card.html' with object=server %}
                         {% endfor %}
                     </div>
+                    <div id="edge-device-groups-list" class="list-group d-flex flew-column w-75 ms-25">
+                        {% for group in model_web.root_edge_device_groups %}
+                            {% include 'model_builder/object_cards/edge_device_group_card.html' with object=group %}
+                        {% endfor %}
+                    </div>
                     <div id="edge-devices-list" class="list-group d-flex flew-column w-75 ms-25">
-                        {% for edge_device in model_web.edge_devices %}
+                        {% for edge_device in model_web.ungrouped_edge_devices %}
                             {% include 'model_builder/object_cards/edge_device_card.html' with object=edge_device %}
                         {% endfor %}
                     </div>

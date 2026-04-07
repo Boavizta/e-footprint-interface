@@ -1,0 +1,56 @@
+{% load static %}
+<div id="{{ object.web_id }}" class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab rounded-3">
+    <div class="accordion accordion-flush">
+        <div class="accordion-item">
+            <div class="accordion-header p-0 d-flex align-items-center">
+                <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#flush-{{ object.web_id }}"
+                        onclick="reverseIconAccordion('{{ object.web_id }}')"
+                        aria-expanded="{% if object.sub_group_entries|length == 0 and object.edge_device_entries|length == 0 %}true{% else %}false{% endif %}"
+                        aria-controls="flush-{{ object.web_id }}">
+                    <svg id="icon_accordion_{{ object.web_id }}" xmlns="http://www.w3.org/2000/svg"
+                         width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                         class="bi bi-chevron-right {% if object.sub_group_entries|length == 0 and object.edge_device_entries|length == 0 %}chevron-rotate{% endif %}"
+                         viewBox="0 0 16 16">
+                        <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                    </svg>
+                </button>
+                <button id="button-{{ object.web_id }}"
+                        class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between w-100 text-break position-relative"
+                        type="button"
+                        hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
+                        hx-target="#sidePanel"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-disabled-elt="button"
+                        _="
+                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ object.web_id }}
+                            on mouseover remove .d-none from #edit-icon-{{ object.web_id }}
+                            on mouseout add .d-none to #edit-icon-{{ object.web_id }}
+                        "
+                >
+                    {% include 'model_builder/components/button_card_header.html' with object_card=object %}
+                </button>
+            </div>
+            <div id="flush-{{ object.web_id }}"
+                 class="accordion-collapse collapse accordion-all {% if object.sub_group_entries|length == 0 and object.edge_device_entries|length == 0 %}show{% endif %}">
+                <div class="accordion-body text-start">
+                    {% include 'model_builder/object_cards/partials/group_content.html' with group=object %}
+                    <button
+                        id="add-or-link-to-{{ object.web_id }}"
+                        class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2 mt-2"
+                        hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
+                        hx-target="#sidePanel"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-disabled-elt="button"
+                        _="on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ object.web_id }}"
+                    >
+                        <p class="h8 mb-0 text-break text-addition">Add or link existing</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
