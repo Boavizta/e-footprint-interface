@@ -23,3 +23,12 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     @property
     def template_name(self):
         return "edge_device"
+
+    @classmethod
+    def pre_delete(cls, web_obj, model_web):
+        """Remove device references from parent groups before deletion."""
+        del model_web
+        efp_obj = web_obj.modeling_obj
+        for parent_dict in list(efp_obj.explainable_object_dicts_containers):
+            if efp_obj in parent_dict:
+                del parent_dict[efp_obj]

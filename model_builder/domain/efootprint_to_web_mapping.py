@@ -15,6 +15,7 @@ from model_builder.domain.entities.web_builders.usage.edge.recurrent_edge_proces
 from model_builder.domain.entities.web_builders.usage.edge.recurrent_edge_workload_web import RecurrentEdgeWorkloadWeb
 from model_builder.domain.entities.web_core.hardware.edge.edge_component_base_web import EdgeComponentWeb
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
+from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 from model_builder.domain.entities.web_core.hardware.server_web import ServerWeb
 from model_builder.domain.entities.web_core.hardware.storage_web import StorageWeb
@@ -55,6 +56,7 @@ EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING = {
     # Edge hardware classes
     "EdgeDeviceBase": EdgeDeviceBaseWeb,
     "EdgeDevice": EdgeDeviceWeb,
+    "EdgeDeviceGroup": EdgeDeviceGroupWeb,
     "EdgeComputer": EdgeComputerWeb,
     "EdgeComputerCPUComponent": EdgeComputerCPUComponentWeb,
     "EdgeComputerRAMComponent": EdgeComputerRAMComponentWeb,

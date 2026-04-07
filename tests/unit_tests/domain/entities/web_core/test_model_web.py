@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
+from types import SimpleNamespace
 
 import ciso8601
 import numpy as np
@@ -63,6 +64,26 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["values"]["Devices_fabrication"], [0, 2.7])
         self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
         self.assertListEqual(emissions["values"]["Edge_devices_fabrication"], [3.1, 0])
+
+    def test_root_edge_device_groups_returns_only_groups_without_parents(self):
+        root_group = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: []))
+        nested_group = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: ["parent"]))
+        self.model_web.get_web_objects_from_efootprint_type = MagicMock(return_value=[root_group, nested_group])
+
+        result = self.model_web.root_edge_device_groups
+
+        self.assertEqual([root_group], result)
+        self.model_web.get_web_objects_from_efootprint_type.assert_called_with("EdgeDeviceGroup")
+
+    def test_ungrouped_edge_devices_returns_only_devices_without_parents(self):
+        ungrouped_device = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: []))
+        grouped_device = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: ["group"]))
+        self.model_web.get_web_objects_from_efootprint_type = MagicMock(return_value=[ungrouped_device, grouped_device])
+
+        result = self.model_web.ungrouped_edge_devices
+
+        self.assertEqual([ungrouped_device], result)
+        self.model_web.get_web_objects_from_efootprint_type.assert_called_with("EdgeDevice")
 
 if __name__ == '__main__':
     unittest.main()

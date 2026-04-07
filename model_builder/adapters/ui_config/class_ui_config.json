@@ -11,6 +11,9 @@
         "label": "Edge device",
         "more_descriptive_label_for_select_inputs": "Edge device (build from components)"
     },
+    "EdgeDeviceGroup": {
+        "label": "Edge device group"
+    },
     "EdgeComputer": {
         "label": "Edge computer",
         "more_descriptive_label_for_select_inputs": "Edge computer (with storage and compute resources)"

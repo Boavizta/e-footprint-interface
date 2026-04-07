@@ -186,6 +186,20 @@ class ModelWeb:
         return all_edge_devices
 
     @property
+    def edge_device_groups(self):
+        return self.get_web_objects_from_efootprint_type("EdgeDeviceGroup")
+
+    @property
+    def root_edge_device_groups(self):
+        """Root-level groups (not sub-groups of any other group)."""
+        return [group for group in self.edge_device_groups if not group.modeling_obj._find_parent_groups()]
+
+    @property
+    def ungrouped_edge_devices(self):
+        """Edge devices not referenced by any group."""
+        return [device for device in self.edge_devices if not device.modeling_obj._find_parent_groups()]
+
+    @property
     def edge_computers(self):
         return self.get_web_objects_from_efootprint_type("EdgeComputer")
 
