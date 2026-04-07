@@ -63,7 +63,7 @@ def test_edit_server_updates_nested_storage(default_system_repository):
         "Updated Storage",
         "Storage",
         carbon_footprint_fabrication_per_storage_capacity="160.0",
-        carbon_footprint_fabrication_per_storage_capacity_unit=str(u.kg / u.TB),
+        carbon_footprint_fabrication_per_storage_capacity__unit=str(u.kg / u.TB),
     )
 
     edit_object(
@@ -73,7 +73,7 @@ def test_edit_server_updates_nested_storage(default_system_repository):
         {
             "name": "Updated server",
             "carbon_footprint_fabrication": "60",
-            "carbon_footprint_fabrication_unit": str(u.kg),
+            "carbon_footprint_fabrication__unit": str(u.kg),
             "Storage_form_data": json.dumps(storage_form_data),
         },
     )
@@ -233,7 +233,7 @@ def test_delete_one_of_two_usage_patterns_then_edit_shared_server(default_system
         {
             "name": "Shared Server Updated",
             "average_carbon_intensity": "60",
-            "average_carbon_intensity_unit": str(u.g / u.kWh),
+            "average_carbon_intensity__unit": str(u.g / u.kWh),
             "Storage_form_data": json.dumps(storage_form_data),
         },
     )

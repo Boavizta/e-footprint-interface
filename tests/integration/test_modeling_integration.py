@@ -59,7 +59,7 @@ def test_integration_create_edit_delete_flow(default_system_repository):
         ModelWeb(default_system_repository).system.usage_patterns[0].network.energy_footprint.sum())
 
     # --- Edit job data_transferred and verify it impacts computed footprints ---
-    edit_object(default_system_repository, job_id, "Job", {"data_transferred": "20", "data_transferred_unit": str(u.MB)})
+    edit_object(default_system_repository, job_id, "Job", {"data_transferred": "20", "data_transferred__unit": str(u.MB)})
 
     updated_network_energy = (
         ModelWeb(default_system_repository).system.usage_patterns[0].network.energy_footprint.sum())

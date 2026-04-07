@@ -18,7 +18,7 @@ def create_post_data_from_class_default_values(
     """Create HTTP-like form data from an e-footprint class default values.
 
     This helper intentionally mirrors the legacy `tests__old` behavior:
-    it produces prefixed keys (e.g., `Server_cpu_cores`) plus `*_unit` fields
+    it produces prefixed keys (e.g., `Server_cpu_cores`) plus `*__unit` fields
     for quantities. Integration tests can then run the real adapter parser
     (`parse_form_data`) on top of it.
     """
@@ -69,7 +69,7 @@ def create_post_data_from_class_default_values(
                 continue
 
             data[f"{efootprint_class_name}_{attr_name}"] = str(magnitude)
-            data[f"{efootprint_class_name}_{attr_name}_unit"] = str(unit)
+            data[f"{efootprint_class_name}_{attr_name}__unit"] = str(unit)
 
     for key, value in overrides.items():
         if "form_data" in key:
@@ -77,7 +77,7 @@ def create_post_data_from_class_default_values(
             data[key] = json.dumps(value)
         elif isinstance(value, ExplainableQuantity):
             data[f"{efootprint_class_name}_{key}"] = str(value.magnitude)
-            data[f"{efootprint_class_name}_{key}_unit"] = str(value.unit)
+            data[f"{efootprint_class_name}_{key}__unit"] = str(value.unit)
         else:
             data[f"{efootprint_class_name}_{key}"] = value
 

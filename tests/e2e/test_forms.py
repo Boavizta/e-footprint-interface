@@ -256,7 +256,7 @@ class TestUnitsPersistence:
         server_card.click_edit_button()
 
         # Verify unit is 'month' (custom, not default 'year')
-        storage_unit_select = page.locator("#Storage_data_storage_duration_unit")
+        storage_unit_select = page.locator("#Storage_data_storage_duration__unit")
         expect(storage_unit_select).to_have_value("month")
 
         # Change the value to 3

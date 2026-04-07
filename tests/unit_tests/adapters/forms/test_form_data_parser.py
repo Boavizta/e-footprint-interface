@@ -48,19 +48,45 @@ class TestParseFormData:
         assert nested["modeling_duration_value"] == "5"
         assert nested["modeling_duration_unit"] == "month"
 
-    def test_parses_unit_fields(self):
-        """Should extract _unit suffix fields into _units metadata."""
+    def test_parses_scalar_quantity_unit_fields(self):
+        """Should extract __unit suffix fields into quantity metadata."""
         form_data = {
             "Server_compute": "4",
-            "Server_compute_unit": "core",
+            "Server_compute__unit": "core",
             "Server_ram": "16",
-            "Server_ram_unit": "GB",
+            "Server_ram__unit": "GB",
         }
 
         result = parse_form_data(form_data, "Server")
 
         assert result["compute"] == {"value": 4, "unit": "core", "label": "no label"}
         assert result["ram"] == {"value": 16, "unit": "GB", "label": "no label"}
+
+    def test_keeps_real_fields_ending_with_unit_as_regular_fields(self, monkeypatch):
+        """Should not confuse real *_unit attributes with quantity helper fields."""
+
+        class FakeModel:
+            pass
+
+        monkeypatch.setitem(
+            parse_form_data.__globals__["MODELING_OBJECT_CLASSES_DICT"],
+            "FakeModel",
+            FakeModel,
+        )
+        monkeypatch.setitem(
+            parse_form_data.__globals__,
+            "get_init_signature_params",
+            lambda _: {"storage_duration_unit": type("Param", (), {"annotation": None})()},
+        )
+
+        form_data = {
+            "FakeModel_name": "Test",
+            "FakeModel_storage_duration_unit": "month",
+        }
+
+        result = parse_form_data(form_data, "FakeModel")
+
+        assert result == {"name": "Test", "storage_duration_unit": "month"}
 
     def test_handles_mixed_prefixed_and_unprefixed(self):
         """Should handle mix of prefixed and unprefixed keys."""
@@ -80,15 +106,15 @@ class TestParseFormData:
         assert result == {}
 
     def test_parse_inline_form_data(self):
-        value = '{"type_object_available":"Storage","Storage_name":"Storage 3","Storage_storage_capacity":"1","Storage_storage_capacity_unit":"TB","Storage_data_replication_factor":"3", "Storage_data_replication_factor_unit":"dimensionless"}'
+        value = '{"type_object_available":"Storage","Storage_name":"Storage 3","Storage_storage_capacity":"1","Storage_storage_capacity__unit":"TB","Storage_data_replication_factor":"3", "Storage_data_replication_factor__unit":"dimensionless"}'
         from model_builder.adapters.forms.form_data_parser import _parse_inline_form_data
         parsed_key, parsed_form = _parse_inline_form_data("Storage_form_data", value)
 
         expected = {
-            'name': 'Storage 3',
-            'type_object_available': 'Storage',
-            'storage_capacity': {'value': 1.0, 'unit': 'TB', "label": "no label"},
-            'data_replication_factor': {'value': 3.0, 'unit': 'dimensionless', "label": "no label"}}
+            "name": "Storage 3",
+            "type_object_available": "Storage",
+            "storage_capacity": {"value": 1.0, "unit": "TB", "label": "no label"},
+            "data_replication_factor": {"value": 3.0, "unit": "dimensionless", "label": "no label"}}
 
         assert parsed_key == "_parsed_Storage"
 

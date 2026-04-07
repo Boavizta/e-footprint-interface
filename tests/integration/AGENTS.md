@@ -36,7 +36,7 @@ Then parse them with:
 
 `create_post_data_from_class_default_values(...)` makes post data cheap to create and consistent with the UI:
 
-- Fills scalar quantity defaults as `Class_attr` + `Class_attr_unit`.
+- Fills scalar quantity defaults as `Class_attr` + `Class_attr__unit`.
 - Uses web-wrapper defaults (`*.default_values`) when available (so web-specific defaults are honored).
 - Supports nested forms and explainable objects “form_inputs” via `__` overrides (see below).
 

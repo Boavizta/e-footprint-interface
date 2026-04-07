@@ -25,7 +25,7 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         {
             "Server_name": "My Server",
             "Server_cpu_cores": "4",
-            "Server_cpu_cores_unit": "core",
+            "Server_cpu_cores__unit": "core",
             "Server_hourly_usage__start_date": "2024-01-01",
             "Server_hourly_usage__duration": "365",
         }
@@ -75,18 +75,17 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         if attr_key in init_sig_params:
             annotation = init_sig_params[attr_key].annotation
             annotation = resolve_optional_annotation(annotation)
-        if "__" in attr_key:
+        if attr_key.endswith("__unit"):
+            base_attr = attr_key[:-6]
+            if base_attr not in parsed or "value" not in parsed[base_attr]:
+                raise ValueError(f"Received unit field for unknown quantity {base_attr} in {object_type} form data.")
+            parsed[base_attr]["value"] = float(parsed[base_attr]["value"])
+            parsed[base_attr]["unit"] = value
+        elif "__" in attr_key:
             base_attr, field_name = attr_key.split("__", 1)
             if base_attr not in parsed:
                 parsed[base_attr] = {"form_inputs": {}, "label": "no label"}
             parsed[base_attr]["form_inputs"][field_name] = value
-        # Check for unit suffix (only for non-nested fields)
-        # For example, "hourly_usage__modeling_duration_unit" won’t match here.
-        elif attr_key.endswith("_unit"):
-            base_attr = attr_key[:-5]  # Remove "_unit"
-            # value should already have been parsed
-            parsed[base_attr]["value"] = float(parsed[base_attr]["value"])
-            parsed[base_attr]["unit"] = value
         elif key.endswith("_form_data") and isinstance(value, str):
             parsed_key, parsed_form = _parse_inline_form_data(key, value)
             parsed[parsed_key] = parsed_form
