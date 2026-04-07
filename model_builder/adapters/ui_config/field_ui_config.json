@@ -18,6 +18,7 @@
             "EdgeComputerCPUComponent",
             "EdgeApplianceComponent",
             "EdgeDevice",
+            "EdgeDeviceGroup",
             "EdgeAppliance",
             "EdgeComputer",
             "VideoStreaming",
@@ -56,9 +57,6 @@
     "carbon_footprint_fabrication": {
         "modeling_obj_containers": [
             "Device",
-            "EdgeRAMComponent",
-            "EdgeCPUComponent",
-            "EdgeWorkloadComponent",
             "EdgeAppliance",
             "EdgeComputer",
             "Server"
@@ -70,9 +68,6 @@
     "power": {
         "modeling_obj_containers": [
             "Device",
-            "EdgeRAMComponent",
-            "EdgeCPUComponent",
-            "EdgeWorkloadComponent",
             "EdgeAppliance",
             "EdgeComputer",
             "Server"
@@ -101,15 +96,10 @@
     },
     "idle_power": {
         "modeling_obj_containers": [
-            "EdgeRAMComponent",
-            "EdgeCPUComponent",
-            "EdgeWorkloadComponent",
-            "EdgeStorage",
             "EdgeAppliance",
             "EdgeComputer",
             "BoaviztaCloudServer",
-            "Server",
-            "Storage"
+            "Server"
         ],
         "label": "idle power",
         "is_advanced_parameter": true,
@@ -117,7 +107,6 @@
     },
     "ram": {
         "modeling_obj_containers": [
-            "EdgeRAMComponent",
             "EdgeComputer",
             "Server"
         ],
@@ -126,7 +115,6 @@
     },
     "compute": {
         "modeling_obj_containers": [
-            "EdgeCPUComponent",
             "EdgeComputer",
             "Server",
             "GPUServer"
@@ -419,7 +407,7 @@
             "VideoStreamingJob"
         ],
         "label": "data stored",
-        "tooltip": "Data stored in the server’s storage.",
+        "tooltip": "Data stored in the server\u2019s storage.",
         "step": 1
     },
     "request_duration": {
@@ -594,7 +582,6 @@
     },
     "storage_capacity": {
         "modeling_obj_containers": [
-            "EdgeStorage",
             "Storage"
         ],
         "label": "capacity per storage unit",
@@ -813,5 +800,78 @@
             "EcoLogitsGenAIExternalAPIJob"
         ],
         "label": "external api"
+    },
+    "carbon_footprint_fabrication_per_unit": {
+        "modeling_obj_containers": [
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent"
+        ],
+        "label": "carbon footprint fabrication per unit",
+        "is_advanced_parameter": true,
+        "step": 1
+    },
+    "power_per_unit": {
+        "modeling_obj_containers": [
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent"
+        ],
+        "label": "power per unit",
+        "is_advanced_parameter": true,
+        "step": 1
+    },
+    "idle_power_per_unit": {
+        "modeling_obj_containers": [
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent"
+        ],
+        "label": "idle power per unit",
+        "is_advanced_parameter": true,
+        "step": 1
+    },
+    "ram_per_unit": {
+        "modeling_obj_containers": [
+            "EdgeRAMComponent"
+        ],
+        "label": "ram per unit",
+        "step": 1
+    },
+    "nb_of_units": {
+        "modeling_obj_containers": [
+            "EdgeRAMComponent",
+            "EdgeCPUComponent",
+            "EdgeWorkloadComponent",
+            "EdgeStorage"
+        ],
+        "label": "nb of units",
+        "step": 1
+    },
+    "compute_per_unit": {
+        "modeling_obj_containers": [
+            "EdgeCPUComponent"
+        ],
+        "label": "compute per unit",
+        "step": 1
+    },
+    "storage_capacity_per_unit": {
+        "modeling_obj_containers": [
+            "EdgeStorage"
+        ],
+        "label": "storage capacity per unit",
+        "step": 1
+    },
+    "sub_group_counts": {
+        "modeling_obj_containers": [
+            "EdgeDeviceGroup"
+        ],
+        "label": "sub group counts"
+    },
+    "edge_device_counts": {
+        "modeling_obj_containers": [
+            "EdgeDeviceGroup"
+        ],
+        "label": "edge device counts"
     }
 }

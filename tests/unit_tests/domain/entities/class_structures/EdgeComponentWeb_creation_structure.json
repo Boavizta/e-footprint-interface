@@ -56,9 +56,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeCPUComponent_compute",
-                "attr_name": "compute",
-                "label": "compute",
+                "web_id": "EdgeCPUComponent_compute_per_unit",
+                "attr_name": "compute_per_unit",
+                "label": "compute per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -69,13 +69,28 @@
                 "default": "4",
                 "can_be_negative": false,
                 "step": "1"
+            },
+            {
+                "web_id": "EdgeCPUComponent_nb_of_units",
+                "attr_name": "nb_of_units",
+                "label": "nb of units",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "explainable_quantity",
+                "unit": "dimensionless",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "1"
             }
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeCPUComponent_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
+                "web_id": "EdgeCPUComponent_carbon_footprint_fabrication_per_unit",
+                "attr_name": "carbon_footprint_fabrication_per_unit",
+                "label": "carbon footprint fabrication per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -88,9 +103,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeCPUComponent_power",
-                "attr_name": "power",
-                "label": "power",
+                "web_id": "EdgeCPUComponent_power_per_unit",
+                "attr_name": "power_per_unit",
+                "label": "power per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -103,9 +118,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeCPUComponent_idle_power",
-                "attr_name": "idle_power",
-                "label": "idle power",
+                "web_id": "EdgeCPUComponent_idle_power_per_unit",
+                "attr_name": "idle_power_per_unit",
+                "label": "idle power per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -162,9 +177,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeRAMComponent_ram",
-                "attr_name": "ram",
-                "label": "RAM",
+                "web_id": "EdgeRAMComponent_ram_per_unit",
+                "attr_name": "ram_per_unit",
+                "label": "ram per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -175,13 +190,28 @@
                 "default": "8",
                 "can_be_negative": false,
                 "step": "1"
+            },
+            {
+                "web_id": "EdgeRAMComponent_nb_of_units",
+                "attr_name": "nb_of_units",
+                "label": "nb of units",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "explainable_quantity",
+                "unit": "dimensionless",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "1"
             }
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeRAMComponent_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
+                "web_id": "EdgeRAMComponent_carbon_footprint_fabrication_per_unit",
+                "attr_name": "carbon_footprint_fabrication_per_unit",
+                "label": "carbon footprint fabrication per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -194,9 +224,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeRAMComponent_power",
-                "attr_name": "power",
-                "label": "power",
+                "web_id": "EdgeRAMComponent_power_per_unit",
+                "attr_name": "power_per_unit",
+                "label": "power per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -209,9 +239,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeRAMComponent_idle_power",
-                "attr_name": "idle_power",
-                "label": "idle power",
+                "web_id": "EdgeRAMComponent_idle_power_per_unit",
+                "attr_name": "idle_power_per_unit",
+                "label": "idle power per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -253,10 +283,10 @@
                 "default": "Edge storage 1"
             },
             {
-                "web_id": "EdgeStorage_storage_capacity",
-                "attr_name": "storage_capacity",
-                "label": "capacity per storage unit",
-                "tooltip": "The number of storage units will automatically adapt to data storage requirements.",
+                "web_id": "EdgeStorage_storage_capacity_per_unit",
+                "attr_name": "storage_capacity_per_unit",
+                "label": "storage capacity per unit",
+                "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
@@ -265,7 +295,7 @@
                 "unit": "TB_stored",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "1"
             },
             {
                 "web_id": "EdgeStorage_lifespan",
@@ -279,6 +309,21 @@
                 "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
+                "can_be_negative": false,
+                "step": "1"
+            },
+            {
+                "web_id": "EdgeStorage_nb_of_units",
+                "attr_name": "nb_of_units",
+                "label": "nb of units",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "explainable_quantity",
+                "unit": "dimensionless",
+                "default": "1",
                 "can_be_negative": false,
                 "step": "1"
             }
@@ -342,13 +387,28 @@
                 "default": "6",
                 "can_be_negative": false,
                 "step": "1"
+            },
+            {
+                "web_id": "EdgeWorkloadComponent_nb_of_units",
+                "attr_name": "nb_of_units",
+                "label": "nb of units",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "input_type": "explainable_quantity",
+                "unit": "dimensionless",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "1"
             }
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeWorkloadComponent_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
+                "web_id": "EdgeWorkloadComponent_carbon_footprint_fabrication_per_unit",
+                "attr_name": "carbon_footprint_fabrication_per_unit",
+                "label": "carbon footprint fabrication per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -361,9 +421,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeWorkloadComponent_power",
-                "attr_name": "power",
-                "label": "power",
+                "web_id": "EdgeWorkloadComponent_power_per_unit",
+                "attr_name": "power_per_unit",
+                "label": "power per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
@@ -376,9 +436,9 @@
                 "step": "1"
             },
             {
-                "web_id": "EdgeWorkloadComponent_idle_power",
-                "attr_name": "idle_power",
-                "label": "idle power",
+                "web_id": "EdgeWorkloadComponent_idle_power_per_unit",
+                "attr_name": "idle_power_per_unit",
+                "label": "idle power per unit",
                 "tooltip": false,
                 "source": {
                     "name": "e-footprint hypothesis",
