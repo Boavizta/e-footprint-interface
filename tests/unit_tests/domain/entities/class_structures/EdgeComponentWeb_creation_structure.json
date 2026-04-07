@@ -49,7 +49,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
@@ -64,7 +64,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "default": "4",
                 "can_be_negative": false,
@@ -81,7 +81,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg",
                 "default": "20",
                 "can_be_negative": false,
@@ -96,7 +96,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "15",
                 "can_be_negative": false,
@@ -111,7 +111,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "3",
                 "can_be_negative": false,
@@ -126,7 +126,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "default": "0.1",
                 "can_be_negative": false,
@@ -155,7 +155,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
@@ -170,7 +170,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "default": "8",
                 "can_be_negative": false,
@@ -187,7 +187,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg",
                 "default": "20",
                 "can_be_negative": false,
@@ -202,7 +202,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "10",
                 "can_be_negative": false,
@@ -217,7 +217,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "2",
                 "can_be_negative": false,
@@ -232,7 +232,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "default": "1",
                 "can_be_negative": false,
@@ -261,7 +261,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "TB_stored",
                 "default": "1",
                 "can_be_negative": false,
@@ -276,7 +276,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
@@ -293,7 +293,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg/TB_stored",
                 "default": "160",
                 "can_be_negative": false,
@@ -308,7 +308,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_stored",
                 "default": "30",
                 "can_be_negative": false,
@@ -337,7 +337,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
@@ -354,7 +354,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg",
                 "default": "100",
                 "can_be_negative": false,
@@ -369,7 +369,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "50",
                 "can_be_negative": false,
@@ -384,7 +384,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "5",
                 "can_be_negative": false,

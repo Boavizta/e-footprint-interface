@@ -56,7 +56,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "can_be_negative": false,
                 "step": "1"

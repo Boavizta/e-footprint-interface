@@ -73,7 +73,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "can_be_negative": false,
                 "step": "1"
@@ -88,7 +88,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": "1"
@@ -103,7 +103,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "can_be_negative": false,
                 "step": "1"
@@ -118,7 +118,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "g/kWh",
                 "can_be_negative": false,
                 "step": "1"
@@ -135,7 +135,7 @@
                     "name": "Base ADEME_V19",
                     "link": "https://data.ademe.fr/datasets/base-carbone(r)"
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg",
                 "can_be_negative": false,
                 "step": "1"
@@ -150,7 +150,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "can_be_negative": false,
                 "step": "1"
@@ -165,7 +165,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "can_be_negative": false,
                 "step": "1"
@@ -180,7 +180,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -195,7 +195,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -210,7 +210,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -225,7 +225,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -281,7 +281,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "g/kWh",
                 "can_be_negative": false,
                 "step": "1"
@@ -296,7 +296,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "gpu",
                 "can_be_negative": false,
                 "step": "1"
@@ -311,7 +311,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "can_be_negative": false,
                 "step": "1"
@@ -328,7 +328,7 @@
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W/gpu",
                 "can_be_negative": false,
                 "step": "1"
@@ -343,7 +343,7 @@
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W/gpu",
                 "can_be_negative": false,
                 "step": "1"
@@ -358,7 +358,7 @@
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram/gpu",
                 "can_be_negative": false,
                 "step": "1"
@@ -373,7 +373,7 @@
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg/gpu",
                 "can_be_negative": false,
                 "step": "1"
@@ -388,7 +388,7 @@
                     "name": "Estimating the Carbon Footprint of BLOOM",
                     "link": "https://arxiv.org/abs/2211.05100"
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kg",
                 "can_be_negative": false,
                 "step": "1"
@@ -403,7 +403,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -418,7 +418,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -433,7 +433,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "gpu",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -448,7 +448,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -553,7 +553,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "yr",
                 "can_be_negative": false,
                 "step": "1"
@@ -568,7 +568,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "g/kWh",
                 "can_be_negative": false,
                 "step": "1"
@@ -585,7 +585,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "W",
                 "can_be_negative": false,
                 "step": "1"
@@ -600,7 +600,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -615,7 +615,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -630,7 +630,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -645,7 +645,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "can_be_negative": false,
                 "step": "0.1"

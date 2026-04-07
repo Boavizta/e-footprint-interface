@@ -209,7 +209,7 @@ def generate_dynamic_form(
                 default_value = _format_decimal_for_number_input(default_value_decimal)
                 step = _get_compatible_step(default_value_decimal, field_config.get("step", 0.1))
                 structure_field.update({
-                    "input_type": "input",
+                    "input_type": "explainable_quantity",
                     "unit": "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}",
                     "default": default_value,
                     "can_be_negative": attr_name in attributes_that_can_have_negative_values,

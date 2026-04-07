@@ -33,7 +33,7 @@
                 "attr_name": "user_time_spent",
                 "label": "time spent by user",
                 "tooltip": false,
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "min",
                 "default": "1",
                 "source": {

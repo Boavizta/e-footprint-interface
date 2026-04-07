@@ -40,7 +40,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -55,7 +55,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -70,7 +70,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core\u00b7s/GB",
                 "can_be_negative": false,
                 "step": "0.1"
@@ -85,7 +85,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "MB_ram",
                 "can_be_negative": false,
                 "step": "0.1"

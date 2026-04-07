@@ -78,7 +78,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kB",
                 "default": "150",
                 "can_be_negative": false,
@@ -93,7 +93,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kB",
                 "default": "100",
                 "can_be_negative": false,
@@ -108,7 +108,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "s",
                 "default": "1",
                 "can_be_negative": false,
@@ -125,7 +125,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "gpu",
                 "default": "1",
                 "can_be_negative": false,
@@ -140,7 +140,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "MB_ram",
                 "default": "50",
                 "can_be_negative": false,
@@ -169,7 +169,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "dimensionless",
                 "default": "1000",
                 "can_be_negative": false,
@@ -199,7 +199,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kB",
                 "default": "150",
                 "can_be_negative": false,
@@ -214,7 +214,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "kB",
                 "default": "100",
                 "can_be_negative": false,
@@ -229,7 +229,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "s",
                 "default": "1",
                 "can_be_negative": false,
@@ -246,7 +246,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "default": "0.1",
                 "can_be_negative": false,
@@ -261,7 +261,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "MB_ram",
                 "default": "50",
                 "can_be_negative": false,
@@ -333,7 +333,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "h",
                 "default": "1",
                 "can_be_negative": false,
@@ -348,7 +348,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "MB",
                 "default": "0",
                 "can_be_negative": false,
@@ -365,7 +365,7 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
-                "input_type": "input",
+                "input_type": "explainable_quantity",
                 "unit": "1/s",
                 "default": "30",
                 "can_be_negative": false,
