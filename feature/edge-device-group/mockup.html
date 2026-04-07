@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <title>Edge Device Group — UI Mockup</title>
+    <link rel="stylesheet" href="file:///Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/css/bs_main.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f5f6fa; padding: 24px; }
+        .infrastructure-column {
+            max-width: 420px;
+            background: var(--gray-50);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        /* Count badge (clickable for inline edit) */
+        .count-badge {
+            display: inline-flex; align-items: center; gap: 2px;
+            background: var(--new-light-primary); color: var(--new-primary);
+            border-radius: 6px; padding: 2px 8px;
+            font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; border: 1px solid transparent;
+            transition: border-color 0.15s;
+        }
+        .count-badge:hover { border-color: var(--new-primary); }
+        /* Count inline edit */
+        .count-inline-edit {
+            width: 52px; padding: 2px 6px;
+            font-size: 0.75rem; font-weight: 600;
+            border: 1px solid var(--new-primary); border-radius: 6px;
+            color: var(--new-primary); background: #fff;
+            text-align: center; outline: none;
+        }
+        /* Unlink button */
+        .unlink-btn {
+            background: none; border: none; color: var(--gray-350);
+            padding: 2px 4px; cursor: pointer; font-size: 0.8rem;
+            border-radius: 4px; transition: color 0.15s, background 0.15s;
+            line-height: 1;
+        }
+        .unlink-btn:hover { color: #dc3545; background: #fce4e4; }
+        /* Section label */
+        .section-label {
+            font-size: clamp(0.6rem, 0.8vw, 1.3rem); font-weight: 200;
+            color: var(--gray-400); margin-bottom: 6px;
+        }
+        /* Device entry row */
+        .device-entry {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 8px; border: 2px solid var(--gray-200);
+            border-radius: 8px; background: #fff; margin-bottom: 4px;
+            transition: border-color 0.15s;
+        }
+        .device-entry:hover { border-color: var(--gray-300); }
+        .device-entry .device-name {
+            flex: 1; font-size: clamp(0.65rem, 0.85vw, 1.3rem); font-weight: 300;
+            color: var(--dark-blue); cursor: pointer;
+        }
+        .device-entry .device-name:hover { text-decoration: underline; }
+        /* Chevron icon */
+        .chevron-icon {
+            transition: transform 0.2s;
+        }
+        .chevron-icon.rotated {
+            transform: rotate(90deg);
+        }
+        /* Nested group indentation */
+        .nested-group-body {
+            padding-left: 8px;
+        }
+        /* Component cards inside device */
+        .component-card {
+            padding: 4px 8px; border: 2px solid var(--gray-200);
+            border-radius: 6px; background: #fff; margin-bottom: 3px;
+            font-size: clamp(0.6rem, 0.75vw, 1.1rem); font-weight: 200;
+            color: var(--dark-blue); cursor: pointer;
+        }
+        .component-card:hover { border-color: var(--gray-300); }
+        /* Top-level add buttons */
+        .top-add-btn {
+            border: 2px dotted var(--gray-350);
+            background: #fff; border-radius: 8px;
+            padding: 6px 12px; font-size: 0.75rem;
+            color: var(--gray-400); cursor: pointer;
+            transition: background 0.15s;
+        }
+        .top-add-btn:hover { background: var(--gray-100); }
+        /* Force show for collapsed elements that have .show */
+        .collapse.show, .dev-accordion.show { display: block !important; }
+        .collapse:not(.show) { display: none !important; }
+        .dev-accordion:not(.show) { display: none !important; }
+        /* Sub-group entry — slightly different style from device entries */
+        .subgroup-entry {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 8px; border: 2px solid var(--gray-250, #d0d5dd);
+            border-radius: 8px; background: var(--gray-50, #f9fafb); margin-bottom: 4px;
+            transition: border-color 0.15s;
+        }
+        .subgroup-entry:hover { border-color: var(--gray-300); }
+        .subgroup-entry .device-name {
+            flex: 1; font-size: clamp(0.65rem, 0.85vw, 1.3rem); font-weight: 400;
+            color: var(--dark-blue); cursor: pointer;
+        }
+        .subgroup-entry .device-name:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<h5 style="color: var(--dark-blue); margin-bottom: 20px;"><b>Edge Device Groups — UI Mockup</b></h5>
+
+<div class="infrastructure-column">
+    <h5><b>Infrastructure</b></h5>
+
+    <!-- Top-level add buttons -->
+    <div class="d-grid gap-2 mb-3" style="grid-template-columns: 1fr 1fr;">
+        <button class="top-add-btn">Add server</button>
+        <button class="top-add-btn">Add external API</button>
+        <button class="top-add-btn">Add edge device</button>
+        <button class="top-add-btn" style="border-color: var(--new-primary); color: var(--new-primary);">Add group</button>
+    </div>
+
+    <!-- ======== GROUP CARD: Rack A (expanded, read-only) ======== -->
+    <div class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab rounded-3">
+        <div class="accordion accordion-flush">
+            <div class="accordion-item">
+                <!-- Group header -->
+                <div class="accordion-header p-0 d-flex align-items-center">
+                    <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0" onclick="this.querySelector('svg').classList.toggle('rotated')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                             class="bi bi-chevron-right chevron-icon rotated" viewBox="0 0 16 16">
+                            <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                        </svg>
+                    </button>
+                    <button class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between w-100 text-break position-relative">
+                        <p class="h6 mb-0 text-break">Rack A</p>
+                        <span class="d-none position-absolute top-50 start-100 translate-middle badge rounded-circle badge-gray-100 text-black z-3 p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Group accordion body (expanded, read-only) -->
+                <div class="accordion-collapse collapse show">
+                    <div class="accordion-body text-start">
+
+                        <!-- SUB-GROUP: Shelf 1 (expanded) — visually distinct from devices -->
+                        <div class="list-group-item w-100 mt-0 mb-2 py-2 px-0 rounded-3" style="border: 2px solid var(--gray-200); background: var(--gray-50);">
+                            <div class="accordion accordion-flush">
+                                <div class="accordion-item">
+                                    <div class="accordion-header p-0 d-flex align-items-center">
+                                        <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0" onclick="this.querySelector('svg').classList.toggle('rotated')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#9CA3AF" stroke-width="3"
+                                                 class="bi bi-chevron-right chevron-icon rotated" viewBox="0 0 16 16">
+                                                <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-white ms-1 text-start flex-grow-1 text-break p-1">
+                                            <p class="h7 mb-0 text-break">Shelf 1</p>
+                                        </button>
+                                        <span class="count-badge me-1" title="Click to edit count" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'; this.nextElementSibling.querySelector('input').focus();">
+                                            &times;3
+                                        </span>
+                                        <span style="display:none;">
+                                            <input type="number" class="count-inline-edit me-1" value="3" min="1"
+                                                   onblur="this.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='inline-flex';"
+                                                   onkeydown="if(event.key==='Enter'||event.key==='Escape'){this.blur();}">
+                                        </span>
+                                        <button class="unlink-btn me-1" title="Remove from Rack A">&times;</button>
+                                    </div>
+
+                                    <!-- Shelf 1 body: devices only -->
+                                    <div class="accordion-collapse collapse show">
+                                        <div class="accordion-body text-start nested-group-body">
+
+                                            <!-- Device: Camera (with component accordion, collapsed) -->
+                                            <div class="mb-2">
+                                                <div class="accordion accordion-flush">
+                                                    <div class="accordion-item" style="border:none;">
+                                                        <div class="device-entry" style="margin-bottom:0; border-radius: 8px 8px 0 0;">
+                                                            <button type="button" class="chevron-btn btn btn-link text-black p-0" style="min-width:16px;" onclick="let t=this.closest('.accordion-item').querySelector('.dev-accordion'); t.classList.toggle('show'); this.querySelector('svg').classList.toggle('rotated');">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#9CA3AF" stroke-width="3"
+                                                                     class="bi bi-chevron-right chevron-icon" viewBox="0 0 16 16">
+                                                                    <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                                                                </svg>
+                                                            </button>
+                                                            <span class="device-name">Camera</span>
+                                                            <span class="count-badge" title="Click to edit count" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'; this.nextElementSibling.querySelector('input').focus();">
+                                                                &times;4
+                                                            </span>
+                                                            <span style="display:none;">
+                                                                <input type="number" class="count-inline-edit" value="4" min="1"
+                                                                       onblur="this.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='inline-flex';"
+                                                                       onkeydown="if(event.key==='Enter'||event.key==='Escape'){this.blur();}">
+                                                            </span>
+                                                            <button class="unlink-btn" title="Remove from Shelf 1">&times;</button>
+                                                        </div>
+                                                        <!-- Component accordion body (collapsed by default) -->
+                                                        <div class="dev-accordion collapse" style="border: 2px solid var(--gray-200); border-top: none; border-radius: 0 0 8px 8px; padding: 6px 8px 6px 28px; background: var(--gray-50);">
+                                                            <p class="section-label" style="margin-bottom:4px;">Components</p>
+                                                            <div class="component-card">Edge CPU</div>
+                                                            <div class="component-card">Edge Storage</div>
+                                                            <button class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2 mt-1" style="font-size: clamp(0.6rem, 0.75vw, 1.1rem); padding:3px 8px;">
+                                                                <p class="mb-0 text-break text-addition" style="font-size: inherit;">Add component</p>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DEVICES (direct children of Rack A, below sub-groups) -->
+
+                        <!-- Device: Sensor (with component accordion, expanded + shared badge) -->
+                        <div class="mb-2">
+                            <div class="accordion accordion-flush">
+                                <div class="accordion-item" style="border:none;">
+                                    <div class="device-entry" style="margin-bottom:0; border-radius: 8px 8px 0 0;">
+                                        <button type="button" class="chevron-btn btn btn-link text-black p-0" style="min-width:16px;" onclick="let t=this.closest('.accordion-item').querySelector('.dev-accordion'); t.classList.toggle('show'); this.querySelector('svg').classList.toggle('rotated');">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#9CA3AF" stroke-width="3"
+                                                 class="bi bi-chevron-right chevron-icon rotated" viewBox="0 0 16 16">
+                                                <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                                            </svg>
+                                        </button>
+                                        <span class="device-name">Sensor</span>
+                                        <span class="count-badge" title="Click to edit count" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'; this.nextElementSibling.querySelector('input').focus();">
+                                            &times;10
+                                        </span>
+                                        <span style="display:none;">
+                                            <input type="number" class="count-inline-edit" value="10" min="1"
+                                                   onblur="this.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='inline-flex';"
+                                                   onkeydown="if(event.key==='Enter'||event.key==='Escape'){this.blur();}">
+                                        </span>
+                                        <button class="unlink-btn" title="Remove from Rack A">&times;</button>
+                                    </div>
+                                    <!-- Component accordion (expanded) -->
+                                    <div class="dev-accordion collapse show" style="border: 2px solid var(--gray-200); border-top: none; border-radius: 0 0 8px 8px; padding: 6px 8px 6px 28px; background: var(--gray-50);">
+                                        <p class="section-label" style="margin-bottom:4px;">Components</p>
+                                        <div class="component-card">Edge CPU</div>
+                                        <div class="component-card">Edge RAM</div>
+                                        <div class="component-card">Edge Storage</div>
+                                        <button class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2 mt-1" style="font-size: clamp(0.6rem, 0.75vw, 1.1rem); padding:3px 8px;">
+                                            <p class="mb-0 text-break text-addition" style="font-size: inherit;">Add component</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Device: Gateway (collapsed) -->
+                        <div class="mb-2">
+                            <div class="accordion accordion-flush">
+                                <div class="accordion-item" style="border:none;">
+                                    <div class="device-entry">
+                                        <button type="button" class="chevron-btn btn btn-link text-black p-0" style="min-width:16px;" onclick="let t=this.closest('.accordion-item').querySelector('.dev-accordion'); t.classList.toggle('show'); this.querySelector('svg').classList.toggle('rotated');">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="#9CA3AF" stroke-width="3"
+                                                 class="bi bi-chevron-right chevron-icon" viewBox="0 0 16 16">
+                                                <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                                            </svg>
+                                        </button>
+                                        <span class="device-name">Gateway</span>
+                                        <span class="count-badge" title="Click to edit count" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'; this.nextElementSibling.querySelector('input').focus();">
+                                            &times;2
+                                        </span>
+                                        <span style="display:none;">
+                                            <input type="number" class="count-inline-edit" value="2" min="1"
+                                                   onblur="this.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='inline-flex';"
+                                                   onkeydown="if(event.key==='Enter'||event.key==='Escape'){this.blur();}">
+                                        </span>
+                                        <button class="unlink-btn" title="Remove from Rack A">&times;</button>
+                                    </div>
+                                    <div class="dev-accordion collapse" style="border: 2px solid var(--gray-200); border-top: none; border-radius: 0 0 8px 8px; padding: 6px 8px 6px 28px; background: var(--gray-50);">
+                                        <p class="section-label" style="margin-bottom:4px;">Components</p>
+                                        <div class="component-card">Edge CPU</div>
+                                        <button class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2 mt-1" style="font-size: clamp(0.6rem, 0.75vw, 1.1rem); padding:3px 8px;">
+                                            <p class="mb-0 text-break text-addition" style="font-size: inherit;">Add component</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- "Add or link existing" button — opens group edit panel -->
+                        <div class="d-flex justify-content-end mt-1">
+                            <button class="btn btn-white text-end d-flex flex-row justify-content-end align-items-center rounded-2 border-2 position-relative">
+                                <p class="h8 mb-0 text-break text-addition px-1" style="font-size: clamp(0.6rem, 0.8vw, 1.3rem); font-weight: 200;">Add or link existing</p>
+                                <span class="position-absolute top-50 start-100 translate-middle bg-transparent rounded-circle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="var(--gray-350)" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="var(--gray-50)" stroke="var(--gray-350)" stroke-width="1.5"/><line x1="8" y1="4" x2="8" y2="12" stroke="var(--gray-350)" stroke-width="1.5"/><line x1="4" y1="8" x2="12" y2="8" stroke="var(--gray-350)" stroke-width="1.5"/></svg>
+                                </span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GROUP CARD: Rack B (collapsed) -->
+    <div class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab rounded-3">
+        <div class="accordion accordion-flush">
+            <div class="accordion-item">
+                <div class="accordion-header p-0 d-flex align-items-center">
+                    <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                             class="bi bi-chevron-right chevron-icon" viewBox="0 0 16 16">
+                            <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                        </svg>
+                    </button>
+                    <button class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between w-100 text-break position-relative">
+                        <p class="h6 mb-0 text-break">Rack B</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== UNGROUPED EDGE DEVICES (no section label) ======== -->
+
+    <!-- Standalone device: Monitoring Station -->
+    <div class="list-group-item w-100 mt-0 mb-3 py-2 px-0 model-builder-card grab rounded-3">
+        <div class="accordion accordion-flush">
+            <div class="accordion-item">
+                <div class="accordion-header p-0 d-flex align-items-center">
+                    <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0" onclick="this.querySelector('svg').classList.toggle('rotated'); document.getElementById('standalone-body').classList.toggle('show');">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                             class="bi bi-chevron-right chevron-icon" viewBox="0 0 16 16">
+                            <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                        </svg>
+                    </button>
+                    <button class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between w-100 text-break position-relative">
+                        <p class="h6 mb-0 text-break">Monitoring Station</p>
+                    </button>
+                </div>
+                <div id="standalone-body" class="accordion-collapse collapse">
+                    <div class="accordion-body text-start">
+                        <p class="h7">Components</p>
+                        <div class="w-100 mx-0 my-0 align-items-center rounded-2 bg-white">
+                            <div>
+                                <button class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2">
+                                    <p class="h8 mb-0 text-break">Edge CPU</p>
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2">
+                                    <p class="h8 mb-0 text-break">Edge RAM</p>
+                                </button>
+                            </div>
+                            <button class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2">
+                                <p class="h8 mb-0 text-break text-addition">Add component</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="file:///Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/external_librairies/bootstrap.bundle.min.js"></script>
+</body>
+</html>
