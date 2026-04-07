@@ -18,6 +18,7 @@ from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 if TYPE_CHECKING:
     from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
@@ -57,6 +58,7 @@ def create_efootprint_obj_from_parsed_data(
         if attr_name not in init_sig_params:
             continue
         annotation = init_sig_params[attr_name].annotation
+        annotation = resolve_optional_annotation(annotation)
         if get_origin(annotation) and get_origin(annotation) in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             obj_creation_kwargs[attr_name] = [
@@ -110,6 +112,7 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
             continue
 
         annotation = init_sig_params[attr_name].annotation
+        annotation = resolve_optional_annotation(annotation)
         current_value = getattr(obj_to_edit.modeling_obj, attr_name)
 
         if get_origin(annotation) and get_origin(annotation) in (list, List):

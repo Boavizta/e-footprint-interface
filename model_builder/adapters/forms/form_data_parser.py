@@ -10,10 +10,10 @@ from typing import Any, Dict, Mapping, get_origin, List
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 
 def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str, Any]:
@@ -74,6 +74,7 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         annotation = None
         if attr_key in init_sig_params:
             annotation = init_sig_params[attr_key].annotation
+            annotation = resolve_optional_annotation(annotation)
         if "__" in attr_key:
             base_attr, field_name = attr_key.split("__", 1)
             if base_attr not in parsed:

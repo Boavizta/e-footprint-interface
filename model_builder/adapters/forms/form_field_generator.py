@@ -19,6 +19,7 @@ from model_builder.adapters.ui_config.class_ui_config_provider import ClassUICon
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
+from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -162,6 +163,7 @@ def generate_dynamic_form(
             logger.warning(
                 f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
             annotation = str
+        annotation = resolve_optional_annotation(annotation)
         field_config = FieldUIConfigProvider.get_config(attr_name)
         structure_field = {
             "web_id": id_prefix + "_" + attr_name,
