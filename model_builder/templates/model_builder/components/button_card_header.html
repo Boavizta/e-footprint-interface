@@ -1,4 +1,8 @@
-<p class="{{ title_class|default:'h6' }} mb-0 text-break" id="name-{{ object_card.web_id }}">
+<p class="{{ title_class|default:'h6' }} mb-0 flex-grow-1 text-truncate min-w-0 object-card-title-tooltip"
+   id="name-{{ object_card.web_id }}"
+   data-bs-toggle="tooltip"
+   data-bs-placement="top"
+   data-bs-title="{{ object_card.name }}">
     {{ object_card.name }}
 </p>
 

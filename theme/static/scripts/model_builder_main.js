@@ -3,6 +3,34 @@ function initModelBuilderMain() {
     initSortableObjectCards();
     initGrabEffect();
     initHammer();
+    initObjectCardTitleTooltips();
+}
+
+function initObjectCardTitleTooltips(root = document) {
+    if (!window.bootstrap || !bootstrap.Tooltip) {
+        return;
+    }
+
+    root.querySelectorAll(".object-card-title-tooltip[data-bs-toggle='tooltip']").forEach(element => {
+        if (element.dataset.tooltipTruncationListenerAdded !== "true") {
+            element.addEventListener("show.bs.tooltip", event => {
+                if (!isTextTruncated(element)) {
+                    event.preventDefault();
+                }
+            });
+            element.dataset.tooltipTruncationListenerAdded = "true";
+        }
+
+        bootstrap.Tooltip.getOrCreateInstance(element, {
+            container: "body",
+            delay: { show: 0, hide: 0 },
+            trigger: "hover"
+        });
+    });
+}
+
+function isTextTruncated(element) {
+    return element.scrollWidth > element.clientWidth;
 }
 
 function initSortableObjectCards() {
@@ -185,6 +213,7 @@ function updateScrollButtons(){
 
 document.addEventListener("DOMContentLoaded", () => {
     const wrapper = document.getElementById("model-canva-scrollable-area");
+    initObjectCardTitleTooltips();
     if (!wrapper) return;
     wrapper.addEventListener("scroll", updateScrollButtons);
     updateScrollButtons();
@@ -230,4 +259,8 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
     const response = evt.detail.serverResponse;
     if (!response || !response.includes("hx-swap-oob='outerHTML:")) return;
     evt.detail.serverResponse = restoreAccordionStateInFragment(response);
+});
+
+document.body.addEventListener("htmx:afterSettle", function (event) {
+    initObjectCardTitleTooltips(event.detail.elt);
 });

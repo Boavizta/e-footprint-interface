@@ -12,7 +12,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ object.web_id }}"
-                        class="btn btn-white ms-1 w-100 text-start d-flex flex-row justify-content-between align-items-center text-break position-relative"
+                        class="btn btn-white ms-1 w-100 text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
                         hx-target="#sidePanel"

@@ -18,7 +18,7 @@
                             </svg>
                         </button>
                         <button id="button-{{ entry.object.web_id }}"
-                                class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center w-100 text-break position-relative"
+                                class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center w-100 flex-grow-1 overflow-hidden position-relative min-w-0"
                                 type="button"
                                 hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                                 hx-target="#sidePanel"
@@ -65,7 +65,7 @@
                                 </svg>
                             </button>
                             <button id="button-{{ entry.object.web_id }}"
-                                    class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center w-100 text-break position-relative"
+                                    class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center w-100 flex-grow-1 overflow-hidden position-relative min-w-0"
                                     type="button"
                                     hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                                     hx-target="#sidePanel"
@@ -95,7 +95,7 @@
         {% else %}
             <div id="{{ entry.object.web_id }}" class="rounded-3 border border-light-subtle overflow-hidden">
                 <button id="button-{{ entry.object.web_id }}"
-                        class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center w-100 position-relative"
+                        class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center w-100 flex-grow-1 overflow-hidden position-relative min-w-0"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                         hx-target="#sidePanel"

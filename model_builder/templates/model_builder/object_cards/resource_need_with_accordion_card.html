@@ -18,7 +18,7 @@
                         </svg>
                 </button>
                 <button id="button-{{ object.web_id }}"
-                        class="btn btn-white text-end px-3 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative w-100"
+                        class="btn btn-white text-end px-3 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 flex-grow-1 overflow-hidden border-2 border-end-0 position-relative w-100 min-w-0"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
                         hx-target="#sidePanel"

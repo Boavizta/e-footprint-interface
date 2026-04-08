@@ -1,7 +1,7 @@
 <div id="{{ object.web_id }}">
     <button
     id="button-{{ object.web_id }}"
-    class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2"
+    class="btn btn-white text-start d-flex flex-row justify-content-between w-100 flex-grow-1 overflow-hidden position-relative border-2 min-w-0"
     hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
     hx-target="#sidePanel"
     hx-trigger="click"
