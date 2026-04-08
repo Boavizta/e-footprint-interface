@@ -40,9 +40,11 @@
                 <div class="accordion-body text-start">
                     {% with section=object.child_sections.0 %}
                         <div class="w-100 mx-0 my-0 align-items-center rounded-2 bg-white" id="{{ object.web_id }}-{{ section.attr_name }}">
-                            {% for child in section.children %}
-                                {% include 'model_builder/object_cards/'|add:child.template_name|add:'_card.html' with object=child title_class="h8 text-secondary" %}
-                            {% endfor %}
+                            <div class="{% if section.type_str == 'RecurrentEdgeComponentNeed' %}component-needs-track{% endif %}">
+                                {% for child in section.children %}
+                                    {% include 'model_builder/object_cards/'|add:child.template_name|add:'_card.html' with object=child title_class="h8 text-secondary" %}
+                                {% endfor %}
+                            </div>
                             <div id="add-{{ section.attr_name }}-to-{{ object.web_id }}"
                                  class="w-85 ms-15 px-0 py-0 d-flex justify-content-end position-relative">
                                 {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id linkable_existing_count=section.linkable_existing_count %}
