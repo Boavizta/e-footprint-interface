@@ -1,5 +1,4 @@
 """Unit tests for JourneyStepBaseWeb entity."""
-from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from model_builder.domain.entities.web_core.usage.journey_step_base_web import JourneyStepBaseWeb
@@ -24,11 +23,18 @@ class TestJourneyStepBaseWeb:
 
     def test_icon_links_and_styles_follow_step_order(self):
         """Icon links and leaderline styles should point to the next step or add button."""
-        model_web = MagicMock()
-        list_container = SimpleNamespace(web_id="journey-1", accordion_children=[])
+        class StepModel:
+            def __init__(self, name: str):
+                self.id = name
+                self.class_as_simple_str = "UsageJourneyStep"
+                self.name = name
+                self.efootprint_class = type(self)
 
-        step1_obj = SimpleNamespace(id="step1", class_as_simple_str="UsageJourneyStep", name="step1")
-        step2_obj = SimpleNamespace(id="step2", class_as_simple_str="UsageJourneyStep", name="step2")
+        model_web = MagicMock()
+        list_container = MagicMock(web_id="journey-1", accordion_children=[])
+
+        step1_obj = StepModel("step1")
+        step2_obj = StepModel("step2")
 
         step1 = JourneyStepBaseWeb(step1_obj, model_web, list_container=list_container)
         step2 = JourneyStepBaseWeb(step2_obj, model_web, list_container=list_container)

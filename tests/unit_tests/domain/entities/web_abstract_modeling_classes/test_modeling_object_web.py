@@ -3,11 +3,12 @@
 These tests cover entity-specific behavior (attribute delegation, protection
 against setting wrapped objects, child/list helpers, and web id formatting).
 """
-
+from types import SimpleNamespace
 from typing import List
 from unittest.mock import MagicMock
 
 import pytest
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 
 from model_builder.domain.entities.web_abstract_modeling_classes import modeling_object_web
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
@@ -167,16 +168,16 @@ class TestModelingObjectWeb:
     def test_links_to_direct_modeling_objects(self, monkeypatch):
         stub_model = StubModelingObject()
         model_web = MagicMock()
-        obj_a = StubModelingObject(id_="a")
-        obj_b = StubModelingObject(id_="b")
-        model_web.get_web_object_from_efootprint_id.side_effect = [
-            MagicMock(web_id="web-a"),
-            MagicMock(web_id="web-b"),
-        ]
+        web_obj_a = MagicMock(web_id="web-a")
+        web_obj_b = MagicMock(web_id="web-b")
+        web_obj_a.mirrored_cards = [web_obj_a]
+        web_obj_b.mirrored_cards = [web_obj_b]
+        model_web.get_web_object_from_efootprint_id.side_effect = [web_obj_a, web_obj_b]
 
         def fake_get_instance_attributes(obj, target_class):
             if target_class.__name__ == "ModelingObject":
-                return {"a": obj_a, "b": obj_b}
+                # Actual values within the dict don’t matter since model_web.get_web_object_from_efootprint_id is mocked
+                return {"a": SimpleNamespace(id="stub-id"), "b": SimpleNamespace(id="stub-id2")}
             return {}
 
         monkeypatch.setattr(modeling_object_web, "get_instance_attributes", fake_get_instance_attributes)
@@ -184,25 +185,15 @@ class TestModelingObjectWeb:
 
         assert wrapper.links_to == "|web-a|web-b"
 
-    def test_links_to_list_modeling_objects(self, monkeypatch):
-        stub_model = StubModelingObject()
-        model_web = MagicMock()
-        obj_a = StubModelingObject(id_="a")
-        obj_b = StubModelingObject(id_="b")
-        model_web.get_web_object_from_efootprint_id.side_effect = [
-            MagicMock(links_to="link-a"),
-            MagicMock(links_to="link-b"),
-        ]
+    def test_links_to_returns_empty_for_accordion_container(self):
+        class ContainerWrapper(ModelingObjectWeb):
+            @property
+            def accordion_children(self):
+                return [MagicMock()]
 
-        def fake_get_instance_attributes(obj, target_class):
-            if target_class.__name__ == "ListLinkedToModelingObj":
-                return {"items": [obj_a, obj_b]}
-            return {}
+        wrapper = ContainerWrapper(StubModelingObject(), MagicMock())
 
-        monkeypatch.setattr(modeling_object_web, "get_instance_attributes", fake_get_instance_attributes)
-        wrapper = ModelingObjectWeb(stub_model, model_web)
-
-        assert wrapper.links_to == "|link-a|link-b"
+        assert wrapper.links_to == ""
 
     # --- data_attributes_as_list_of_dict ---
 
@@ -359,6 +350,35 @@ class TestModelingObjectWeb:
 
         assert wrapper.list_attr_names == ["items", "tags"]
         assert wrapper.accordion_children == [1, 2, "a"]
+
+    def test_dict_attr_names_and_accordion_children(self, monkeypatch):
+        class Container:  # pragma: no cover - only signature used
+            def __init__(self, child_counts: ExplainableObjectDict[StubModelingObject, int], name: str):
+                self.child_counts = child_counts
+                self.name = name
+
+        child_model = StubModelingObject(id_="child", class_name="Child")
+        stub_model = StubModelingObject(
+            efootprint_class=Container,
+            child_counts={child_model: 2},
+            name="ignore",
+        )
+        wrapper = ModelingObjectWeb(stub_model, MagicMock())
+
+        monkeypatch.setattr(modeling_object_web, "ModelingObject", StubModelingObject)
+        monkeypatch.setattr(
+            "model_builder.domain.efootprint_to_web_mapping.wrap_efootprint_object",
+            lambda modeling_obj, model_web, list_container=None, dict_container=None: MagicMock(
+                modeling_obj=modeling_obj,
+                dict_container=dict_container,
+                efootprint_id=modeling_obj.id,
+            ),
+        )
+
+        assert wrapper.dict_attr_names == ["child_counts"]
+        assert len(wrapper.accordion_children) == 1
+        assert wrapper.accordion_children[0].efootprint_id == "child"
+        assert wrapper.accordion_children[0].dict_container is wrapper
 
     def test_child_sections_returns_types_and_children(self):
         class Foo:

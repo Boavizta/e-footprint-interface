@@ -22,25 +22,6 @@ class TestRecurrentServerNeedWeb:
         with pytest.raises(ValueError):
             RecurrentServerNeedWeb.get_creation_prerequisites(model_web)
 
-    # --- links_to ---
-
-    def test_links_to_includes_edge_device_and_job_links(self):
-        """links_to should concatenate edge device and job links."""
-        job1 = SimpleNamespace(links_to="server-1")
-        job2 = SimpleNamespace(links_to="server-2")
-        edge_device = SimpleNamespace(web_id="edge-device")
-        modeling_obj = SimpleNamespace(
-            id="rs-1",
-            class_as_simple_str="RecurrentServerNeed",
-            name="rs",
-            jobs=[job1, job2],
-            edge_device=edge_device,
-        )
-
-        web_obj = RecurrentServerNeedWeb(modeling_obj, MagicMock())
-
-        assert web_obj.links_to == "edge-device|server-1|server-2"
-
     # --- generate_object_creation_context (snapshot test) ---
 
     def test_generate_object_creation_context_matches_snapshot(self):

@@ -1,10 +1,9 @@
 import re
-from typing import TYPE_CHECKING, get_origin, List, Tuple, Optional
+from typing import TYPE_CHECKING, get_origin, Dict, List, Tuple, Optional
 
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.abstract_modeling_classes.list_linked_to_modeling_obj import ListLinkedToModelingObj
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject, get_instance_attributes
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
@@ -158,18 +157,14 @@ class ModelingObjectWeb:
 
     @property
     def links_to(self):
+        if self.accordion_children:
+            return ""
         output = ""
         direct_modeling_object_attributes = get_instance_attributes(self.modeling_obj, ModelingObject)
-        if len(direct_modeling_object_attributes) == 0:
-            list_modeling_object_attributes = get_instance_attributes(self.modeling_obj, ListLinkedToModelingObj)
-            for list_modeling_objects in list_modeling_object_attributes.values():
-                for list_modeling_object in list_modeling_objects:
-                    web_object = self.model_web.get_web_object_from_efootprint_id(list_modeling_object.id)
-                    output += f"|{web_object.links_to}"
-        else:
-            for modeling_object_attr in direct_modeling_object_attributes.values():
-                web_object = self.model_web.get_web_object_from_efootprint_id(modeling_object_attr.id)
-                output += f"|{web_object.web_id}"
+        for modeling_object_attr in direct_modeling_object_attributes.values():
+            web_object = self.model_web.get_web_object_from_efootprint_id(modeling_object_attr.id)
+            for mirrored_card in web_object.mirrored_cards:
+                output += f"|{mirrored_card.web_id}"
         return output
 
     @property
@@ -268,13 +263,33 @@ class ModelingObjectWeb:
         return list_attr_names
 
     @property
+    def dict_attr_names(self):
+        init_signature = get_init_signature_params(self.efootprint_class)
+        dict_attr_names = []
+        for attr_name, param_info in init_signature.items():
+            annotation = param_info.annotation
+            if get_origin(annotation) and get_origin(annotation) in (dict, Dict, ExplainableObjectDict):
+                dict_attr_names.append(attr_name)
+        return dict_attr_names
+
+    @property
     def accordion_children(self):
-        """Automatically compute accordion children from list attributes."""
+        """Automatically compute accordion children from list and dict container attributes."""
+        from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
+
         children = []
         for attr_name in self.list_attr_names:
             attr_value = getattr(self, attr_name, None)
             if attr_value and isinstance(attr_value, list):
                 children.extend(attr_value)
+        for attr_name in self.dict_attr_names:
+            attr_value = self.get_efootprint_value(attr_name)
+            if attr_value and isinstance(attr_value, dict):
+                children.extend([
+                    wrap_efootprint_object(child, self.model_web, dict_container=self)
+                    for child in attr_value.keys()
+                    if isinstance(child, ModelingObject)
+                ])
 
         return children
 

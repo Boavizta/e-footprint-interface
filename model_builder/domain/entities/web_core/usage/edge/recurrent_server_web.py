@@ -20,19 +20,6 @@ class RecurrentServerNeedWeb(ResourceNeedBaseWeb):
     def template_name(self):
         return "resource_need_with_accordion"
 
-    @property
-    def links_to(self):
-        jobs_links = ""
-        for job in self.jobs:
-            job_links = job.links_to
-            if jobs_links and job_links:
-                jobs_links += "|" + job_links
-            elif job_links:
-                jobs_links += job_links
-        if jobs_links:
-            return self.edge_device.web_id + "|" + jobs_links
-        return self.edge_device.web_id
-
     @classmethod
     def get_creation_prerequisites(cls, model_web: "ModelWeb") -> None:
         """Raise error if no edge devices exist in the model.

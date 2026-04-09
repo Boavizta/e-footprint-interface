@@ -2,6 +2,7 @@ let resizeTimeout;
 let globalListenersInitialized = false;
 let currentScrollableArea = null;
 let currentScrollContainer = null;
+let rebuildAnimationFrameId = null;
 
 let dictLeaderLineOption = {
     'object-to-object': {
@@ -40,7 +41,7 @@ let dictLeaderLineOption = {
     }
 };
 
-let allLines = new Map();
+let allLines = {};
 
 function updateLines() {
     Object.values(allLines).forEach(lineArray => {
@@ -73,61 +74,126 @@ function removeAllLines() {
     Object.values(allLines).forEach(lineArray => {
         lineArray.forEach(line => line.remove());
     });
-    allLines = [];
+    allLines = {};
 }
 
-function updateOrCreateLines(element) {
+function parseLinkedIds(fromElement) {
+    return (fromElement.dataset.linkTo || "")
+        .split("|")
+        .map(linkedId => linkedId.trim())
+        .filter(Boolean);
+}
 
-    function drawLines(fromElement) {
-        const linkedIds = fromElement.dataset.linkTo?.split('|') || [];
-        linkedIds.forEach(toElementId => {
-            if (!allLines[fromElement.id]) {
-                allLines[fromElement.id] = [];
+function isElementVisible(element) {
+    if (!element) {
+        return false;
+    }
+    const computedStyle = window.getComputedStyle(element);
+    return computedStyle.visibility !== "hidden" && computedStyle.display !== "none" && element.getClientRects().length > 0;
+}
+
+function getAccordionOwnerElement(accordionCollapse) {
+    if (!accordionCollapse?.id?.startsWith("flush-")) {
+        return null;
+    }
+    return document.getElementById(accordionCollapse.id.slice("flush-".length));
+}
+
+function resolveLeaderLineEndpoint(element) {
+    if (!element) {
+        return null;
+    }
+    if (isElementVisible(element)) {
+        return element;
+    }
+
+    let currentAccordionCollapse = element.closest(".accordion-collapse");
+    while (currentAccordionCollapse) {
+        const ownerElement = getAccordionOwnerElement(currentAccordionCollapse);
+        if (ownerElement && isElementVisible(ownerElement)) {
+            return ownerElement;
+        }
+        currentAccordionCollapse = currentAccordionCollapse.parentElement?.closest(".accordion-collapse") || null;
+    }
+
+    return null;
+}
+
+function resolveLeaderLineTargets(fromElement) {
+    const resolvedTargetsById = new Map();
+    parseLinkedIds(fromElement).forEach(targetId => {
+        const targetElement = document.getElementById(targetId);
+        const resolvedTarget = resolveLeaderLineEndpoint(targetElement);
+        if (resolvedTarget && !resolvedTargetsById.has(resolvedTarget.id)) {
+            resolvedTargetsById.set(resolvedTarget.id, resolvedTarget);
+        }
+    });
+
+    return Array.from(resolvedTargetsById.values());
+}
+
+function buildLineRegistry(lineSpecs) {
+    const nextLines = {};
+    const layer = document.getElementById("leaderlines-layer");
+
+    lineSpecs.forEach(({fromElement, targets, optLine}) => {
+        targets.forEach(toElement => {
+            if (!nextLines[fromElement.id]) {
+                nextLines[fromElement.id] = [];
             }
-            const existingLine = allLines[fromElement.id].find(line => line.end.id === toElementId);
-            if (!existingLine) {
-                const toElement = document.getElementById(toElementId);
-                if (toElement) {
-                    let optLine = fromElement.getAttribute('data-line-opt');
-                    let line = new LeaderLine(fromElement, toElement, {
-                      ...dictLeaderLineOption[optLine],
-                      parent: document.getElementById('leaderlines-layer')
-                    });
-                    allLines[fromElement.id].push(line);
-                }
+            nextLines[fromElement.id].push(
+                new LeaderLine(fromElement, toElement, {
+                    ...dictLeaderLineOption[optLine],
+                    parent: layer
+                })
+            );
+        });
+    });
+
+    return nextLines;
+}
+
+function rebuildAllLeaderLines() {
+    const deduplicatedLineSpecs = new Map();
+    document.querySelectorAll(".leader-line-object").forEach(sourceElement => {
+        const resolvedSourceElement = resolveLeaderLineEndpoint(sourceElement);
+        if (!resolvedSourceElement) {
+            return;
+        }
+
+        const optLine = sourceElement.getAttribute("data-line-opt");
+        resolveLeaderLineTargets(sourceElement).forEach(targetElement => {
+            if (resolvedSourceElement.id === targetElement.id) {
+                return;
+            }
+            const specKey = `${resolvedSourceElement.id}|${targetElement.id}|${optLine}`;
+            if (!deduplicatedLineSpecs.has(specKey)) {
+                deduplicatedLineSpecs.set(specKey, {
+                    fromElement: resolvedSourceElement,
+                    targets: [targetElement],
+                    optLine
+                });
             }
         });
-    }
+    });
 
-    function getDirectLeaderLineChildren(parent) {
-        return Array.from(parent.querySelectorAll('.leader-line-object'))
-            .filter(child => child.parentElement.closest('.leader-line-object') === parent);
-    }
+    const previousLines = allLines;
+    allLines = buildLineRegistry(Array.from(deduplicatedLineSpecs.values()));
 
-    const elementId = element.id;
-    let accordionCollapse = document.getElementById("flush-" + elementId);
-    if (accordionCollapse) {
-        let isOpen = accordionCollapse.classList.contains('show');
-        if (isOpen) {
-            const childElements = getDirectLeaderLineChildren(element);
-            if (childElements.length > 0) {
-                removeAllLinesDepartingFromElement(elementId);
-                childElements.forEach(child => updateOrCreateLines(child));
-            } else {
-                drawLines(element);
-            }
-            // Handle usage journey step circles
-            const svgLeaderLineChildren = element.querySelectorAll('img.leader-line-object');
-            svgLeaderLineChildren.forEach(child => drawLines(child));
-        }
-        else {
-            drawLines(element);
-            const childElements = element.querySelectorAll('.leader-line-object');
-            childElements.forEach(child => removeAllLinesDepartingFromElement(child.id));
-        }
-    } else {
-        drawLines(element);
+    Object.values(previousLines).forEach(lineArray => {
+        lineArray.forEach(line => line.remove());
+    });
+}
+
+function scheduleRebuildAllLeaderLines() {
+    if (rebuildAnimationFrameId !== null) {
+        cancelAnimationFrame(rebuildAnimationFrameId);
     }
+    rebuildAnimationFrameId = requestAnimationFrame(() => {
+        rebuildAnimationFrameId = null;
+        rebuildAllLeaderLines();
+        updateLines();
+    });
 }
 
 function addAccordionListener(accordion){
@@ -138,35 +204,15 @@ function addAccordionListener(accordion){
     accordion.dataset.leaderLineListenerAdded = "true";
 
     accordion.addEventListener('shown.bs.collapse', function () {
-        let closestLeaderlineObject = accordion.closest('.leader-line-object');
-        if (closestLeaderlineObject) {
-            updateOrCreateLines(closestLeaderlineObject);
-        }
-        updateLines();
+        scheduleRebuildAllLeaderLines();
     });
     accordion.addEventListener('hidden.bs.collapse', function () {
-        let closestLeaderlineObject = accordion.closest('.leader-line-object');
-        if (closestLeaderlineObject) {
-            updateOrCreateLines(closestLeaderlineObject);
-        }
-        updateLines();
-    });
-    accordion.addEventListener('hide.bs.collapse', function (event) {
-        event.stopPropagation();
-        const childElements = accordion.querySelectorAll('.leader-line-object');
-        childElements.forEach(child => removeAllLinesDepartingFromElement(child.id));
+        scheduleRebuildAllLeaderLines();
     });
 }
 
 function initLeaderLines() {
-    removeAllLines();
-    let leaderLineObjects = document.querySelectorAll('.leader-line-object');
-    leaderLineObjects.forEach(leaderLineObject => {
-        let leaderLineObjectParent = leaderLineObject.parentElement.closest('.leader-line-object');
-        if (leaderLineObjectParent == null) {
-            updateOrCreateLines(leaderLineObject);
-        }
-    });
+    rebuildAllLeaderLines();
     document.querySelectorAll('.accordion').forEach(accordion => {
         addAccordionListener(accordion);
     });
@@ -186,6 +232,16 @@ function initLeaderLines() {
     }
 
     updateLines();
+}
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+        getAccordionOwnerElement,
+        isElementVisible,
+        parseLinkedIds,
+        resolveLeaderLineEndpoint,
+        resolveLeaderLineTargets,
+    };
 }
 
 function attachScrollListeners() {
