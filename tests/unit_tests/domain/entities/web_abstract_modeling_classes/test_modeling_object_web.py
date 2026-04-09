@@ -24,6 +24,7 @@ class StubModelingObject:
         object.__setattr__(self, "class_as_simple_str", class_name)
         object.__setattr__(self, "values", {})
         object.__setattr__(self, "efootprint_class", type(self))
+        object.__setattr__(self, "contextual_modeling_obj_containers", [])
         for key, value in extra_attrs.items():
             object.__setattr__(self, key, value)
 
@@ -147,6 +148,12 @@ class TestModelingObjectWeb:
 
         assert child.web_id == "Child-c1_in_Parent-p1"
 
+    def test_web_id_includes_dict_container_when_present(self):
+        parent = ModelingObjectWeb(StubModelingObject("p1", "Parent"), MagicMock())
+        child = ModelingObjectWeb(StubModelingObject("c1", "Child"), MagicMock(), dict_container=parent)
+
+        assert child.web_id == "Child-c1_in_Parent-p1"
+
     # --- template_name ---
 
     def test_template_name_converts_to_snake_case(self):
@@ -241,6 +248,28 @@ class TestModelingObjectWeb:
         assert list_containers[0].web_id == "container-web"
         assert attr_name == "items"
 
+    def test_dict_containers_and_attr_name_in_dict_container(self):
+        class ContextualDictContainer:
+            def __init__(self, attr_name_in_mod_obj_container, modeling_obj_container, dict_container):
+                self.attr_name_in_mod_obj_container = attr_name_in_mod_obj_container
+                self.modeling_obj_container = modeling_obj_container
+                self.dict_container = dict_container
+
+        container_obj = StubModelingObject(id_="g1", class_name="Group")
+        contextual_containers = [
+            ContextualDictContainer("edge_device_counts", container_obj, {"child": "count"}),
+        ]
+        stub_modeling_object = StubModelingObject(contextual_modeling_obj_containers=contextual_containers)
+        model_web = MagicMock()
+        model_web.get_web_object_from_efootprint_id.return_value = MagicMock(web_id="group-web")
+
+        wrapper = ModelingObjectWeb(stub_modeling_object, model_web)
+        dict_containers, attr_name = wrapper.dict_containers_and_attr_name_in_dict_container
+
+        assert len(dict_containers) == 1
+        assert dict_containers[0].web_id == "group-web"
+        assert attr_name == "edge_device_counts"
+
     def test_mirrored_cards_returns_self_when_no_list_containers(self):
         stub_model = StubModelingObject(contextual_modeling_obj_containers=[])
         wrapper = ModelingObjectWeb(stub_model, MagicMock())
@@ -265,6 +294,24 @@ class TestModelingObjectWeb:
         assert len(mirrored) == 1
         assert mirrored[0].list_container is mirror_container
 
+    def test_mirrored_cards_returns_mirrors_for_dict_containers(self):
+        class MirroredWrapper(ModelingObjectWeb):
+            @property
+            def dict_containers_and_attr_name_in_dict_container(self):
+                return [self._dict_container], "edge_device_counts"
+
+        stub_modeling_object = StubModelingObject()
+        dict_container = MagicMock()
+        mirror_container = MagicMock()
+        dict_container.mirrored_cards = [mirror_container]
+        wrapper = MirroredWrapper(stub_modeling_object, MagicMock())
+        object.__setattr__(wrapper, "_dict_container", dict_container)
+
+        mirrored = wrapper.mirrored_cards
+
+        assert len(mirrored) == 1
+        assert mirrored[0].dict_container is mirror_container
+
     # --- accordion hierarchy ---
 
     def test_all_accordion_parents_and_top_parent(self):
@@ -273,6 +320,14 @@ class TestModelingObjectWeb:
         leaf = ModelingObjectWeb(StubModelingObject("leaf", "Leaf"), MagicMock(), list_container=mid)
 
         assert leaf.all_accordion_parents == [mid, top]
+        assert leaf.top_parent == top
+
+    def test_accordion_parent_uses_dict_container_when_present(self):
+        top = ModelingObjectWeb(StubModelingObject("top", "Top"), MagicMock())
+        leaf = ModelingObjectWeb(StubModelingObject("leaf", "Leaf"), MagicMock(), dict_container=top)
+
+        assert leaf.accordion_parent == top
+        assert leaf.all_accordion_parents == [top]
         assert leaf.top_parent == top
 
     # --- children helpers ---

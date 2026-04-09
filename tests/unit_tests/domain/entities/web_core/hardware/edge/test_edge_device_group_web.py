@@ -39,7 +39,8 @@ class TestEdgeDeviceGroupWeb:
 
         assert len(entries) == 1
         assert entries[0]["object"].name == "Floor"
-        assert entries[0]["object"].list_container == web_obj
+        assert entries[0]["object"].dict_container == web_obj
+        assert entries[0]["object"].accordion_parent == web_obj
         assert entries[0]["count"] == 2
 
     def test_edge_device_entries_wrap_devices_and_keep_counts(self):
@@ -54,7 +55,8 @@ class TestEdgeDeviceGroupWeb:
 
         assert len(entries) == 1
         assert entries[0]["object"].name == "Sensor"
-        assert entries[0]["object"].list_container == web_obj
+        assert entries[0]["object"].dict_container == web_obj
+        assert entries[0]["object"].accordion_parent == web_obj
         assert entries[0]["count"] == 3
 
     # --- pre_delete ---

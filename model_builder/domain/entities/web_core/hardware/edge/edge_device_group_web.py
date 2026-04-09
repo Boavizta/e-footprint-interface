@@ -26,7 +26,7 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
         return {
-            "object": wrap_efootprint_object(obj, self.model_web, self),
+            "object": wrap_efootprint_object(obj, self.model_web, dict_container=self),
             "count": self._count_to_display_value(count),
         }
 

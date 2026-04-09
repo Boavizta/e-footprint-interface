@@ -24,14 +24,15 @@ class ModelingObjectWeb:
     attributes_to_skip_in_forms = []
     gets_deleted_if_unique_mod_obj_container_gets_deleted = True
 
-    def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None):
+    def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None, dict_container=None):
         self._modeling_obj = modeling_obj
         self.model_web = model_web
         self.list_container = list_container
+        self.dict_container = dict_container
 
     @property
     def settable_attributes(self):
-        return ["_modeling_obj", "model_web", "list_container"]
+        return ["_modeling_obj", "model_web", "list_container", "dict_container"]
 
     def __getattr__(self, name):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
@@ -121,8 +122,8 @@ class ModelingObjectWeb:
 
     @property
     def web_id(self):
-        if self.list_container is not None:
-            return f"{self.class_as_simple_str}-{self._modeling_obj.id}_in_{self.list_container.web_id}"
+        if self.parent_container is not None:
+            return f"{self.class_as_simple_str}-{self._modeling_obj.id}_in_{self.parent_container.web_id}"
         return f"{self.class_as_simple_str}-{self._modeling_obj.id}"
 
     @property
@@ -199,25 +200,45 @@ class ModelingObjectWeb:
         return list_containers, attr_name_in_list_container
 
     @property
+    def dict_containers_and_attr_name_in_dict_container(self) -> Tuple[List["ModelingObjectWeb"], Optional[str]]:
+        dict_containers = []
+        attr_name_in_dict_container = None
+        for contextual_container in self.efootprint_contextual_modeling_obj_containers:
+            dict_container = getattr(contextual_container, "dict_container", None)
+            if dict_container is None:
+                continue
+            container = contextual_container.modeling_obj_container
+            dict_containers.append(self.model_web.get_web_object_from_efootprint_id(container.id))
+            attr_name_in_dict_container = contextual_container.attr_name_in_mod_obj_container
+
+        return dict_containers, attr_name_in_dict_container
+
+    @property
     def mirrored_cards(self):
-        """Recursively compute all mirrored instances of this object based on list containers."""
+        """Recursively compute all mirrored instances based on rendered parent containers."""
         result = []
+        list_containers, _ = self.list_containers_and_attr_name_in_list_container
+        dict_containers, _ = self.dict_containers_and_attr_name_in_dict_container
 
-        # Check if this object appears in any list attributes of container objects
-        list_containers, attr_name_in_list_container = self.list_containers_and_attr_name_in_list_container
-        for list_container in list_containers:
-            for container_mirror in list_container.mirrored_cards:
-                result.append(type(self)(self._modeling_obj, self.model_web, container_mirror))
+        for container in list_containers:
+            for container_mirror in container.mirrored_cards:
+                result.append(type(self)(self._modeling_obj, self.model_web, list_container=container_mirror))
+        for container in dict_containers:
+            for container_mirror in container.mirrored_cards:
+                result.append(type(self)(self._modeling_obj, self.model_web, dict_container=container_mirror))
 
-        # If no list containers found, return self (base case for recursion)
-        if not list_containers:
+        if not result:
             return [self]
 
         return result
 
     @property
+    def parent_container(self):
+        return self.list_container or self.dict_container
+
+    @property
     def accordion_parent(self):
-        return self.list_container
+        return self.parent_container
 
     @property
     def all_accordion_parents(self):
