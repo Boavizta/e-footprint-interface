@@ -59,6 +59,41 @@ class TestModelingObjectWeb:
 
         assert wrapper.extra_attr == "domain_value"
 
+    def test_getattr_does_not_assign_list_container_for_computed_modeling_object_lists(self, monkeypatch):
+        class Container:  # pragma: no cover - only signature used
+            def __init__(self, items: List[StubModelingObject]):
+                self.items = items
+
+        child = StubModelingObject("child-1", "Child")
+        stub_model = StubModelingObject(
+            efootprint_class=Container,
+            installed_services=[child],
+        )
+        model_web = MagicMock()
+
+        wrapped_calls = []
+
+        def fake_wrap_efootprint_object(modeling_obj, model_web_arg, list_container=None, dict_container=None):
+            wrapped_calls.append({
+                "modeling_obj": modeling_obj,
+                "model_web": model_web_arg,
+                "list_container": list_container,
+                "dict_container": dict_container,
+            })
+            return MagicMock(modeling_obj=modeling_obj, list_container=list_container, dict_container=dict_container)
+
+        monkeypatch.setattr(modeling_object_web, "ModelingObject", StubModelingObject)
+        monkeypatch.setattr("model_builder.domain.efootprint_to_web_mapping.wrap_efootprint_object",
+                            fake_wrap_efootprint_object)
+
+        wrapper = ModelingObjectWeb(stub_model, model_web)
+        wrapped_children = wrapper.installed_services
+
+        assert len(wrapped_children) == 1
+        assert wrapped_calls[0]["modeling_obj"] is child
+        assert wrapped_calls[0]["list_container"] is None
+        assert wrapped_children[0].list_container is None
+
     def test_getattr_blocks_id_access(self):
         stub_model = StubModelingObject()
         wrapper = ModelingObjectWeb(stub_model, MagicMock())

@@ -58,7 +58,8 @@ class ModelingObjectWeb:
                              "Use efootprint_id and web_id for clear disambiguation.")
 
         if isinstance(attr, list) and len(attr) > 0 and isinstance(attr[0], ModelingObject):
-            return [wrap_efootprint_object(item, self.model_web, self) for item in attr]
+            list_container = self if name in self.list_attr_names else None
+            return [wrap_efootprint_object(item, self.model_web, list_container=list_container) for item in attr]
 
         if isinstance(attr, ModelingObject):
             return wrap_efootprint_object(attr, self.model_web)
