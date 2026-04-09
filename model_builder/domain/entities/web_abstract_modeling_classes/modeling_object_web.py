@@ -161,10 +161,9 @@ class ModelingObjectWeb:
         if self.accordion_children:
             return ""
         output = ""
-        direct_modeling_object_attributes = get_instance_attributes(self.modeling_obj, ModelingObject)
-        for modeling_object_attr in direct_modeling_object_attributes.values():
-            web_object = self.model_web.get_web_object_from_efootprint_id(modeling_object_attr.id)
-            for mirrored_card in web_object.mirrored_cards:
+        direct_modeling_object_attributes_attr_names = self.modeling_object_attr_names
+        for modeling_object_web in [getattr(self, name) for name in direct_modeling_object_attributes_attr_names]:
+            for mirrored_card in modeling_object_web.mirrored_cards:
                 output += f"|{mirrored_card.web_id}"
         return output
 
@@ -272,6 +271,16 @@ class ModelingObjectWeb:
             if get_origin(annotation) and get_origin(annotation) in (dict, Dict, ExplainableObjectDict):
                 dict_attr_names.append(attr_name)
         return dict_attr_names
+
+    @property
+    def modeling_object_attr_names(self):
+        init_signature = get_init_signature_params(self.efootprint_class)
+        mod_obj_attr_names = []
+        for attr_name, param_info in init_signature.items():
+            annotation = param_info.annotation
+            if not get_origin(annotation) and issubclass(annotation, ModelingObject):
+                mod_obj_attr_names.append(attr_name)
+        return mod_obj_attr_names
 
     @property
     def accordion_children(self):

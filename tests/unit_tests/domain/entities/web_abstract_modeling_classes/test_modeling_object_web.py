@@ -3,7 +3,6 @@
 These tests cover entity-specific behavior (attribute delegation, protection
 against setting wrapped objects, child/list helpers, and web id formatting).
 """
-from types import SimpleNamespace
 from typing import List
 from unittest.mock import MagicMock
 
@@ -201,21 +200,30 @@ class TestModelingObjectWeb:
     # --- links_to ---
 
     def test_links_to_direct_modeling_objects(self, monkeypatch):
-        stub_model = StubModelingObject()
         model_web = MagicMock()
+        child_a = StubModelingObject("stub-id", "ChildA")
+        child_b = StubModelingObject("stub-id2", "ChildB")
         web_obj_a = MagicMock(web_id="web-a")
         web_obj_b = MagicMock(web_id="web-b")
         web_obj_a.mirrored_cards = [web_obj_a]
         web_obj_b.mirrored_cards = [web_obj_b]
-        model_web.get_web_object_from_efootprint_id.side_effect = [web_obj_a, web_obj_b]
 
-        def fake_get_instance_attributes(obj, target_class):
-            if target_class.__name__ == "ModelingObject":
-                # Actual values within the dict don’t matter since model_web.get_web_object_from_efootprint_id is mocked
-                return {"a": SimpleNamespace(id="stub-id"), "b": SimpleNamespace(id="stub-id2")}
-            return {}
+        class DirectLinksSig:
+            def __init__(self, a: StubModelingObject, b: StubModelingObject, label: str = ""):
+                self.a = a
+                self.b = b
+                self.label = label
 
-        monkeypatch.setattr(modeling_object_web, "get_instance_attributes", fake_get_instance_attributes)
+        def fake_wrap_efootprint_object(modeling_obj, model_web_arg, list_container=None, dict_container=None):
+            assert model_web_arg is model_web
+            assert list_container is None
+            assert dict_container is None
+            return {child_a: web_obj_a, child_b: web_obj_b}[modeling_obj]
+
+        monkeypatch.setattr(modeling_object_web, "ModelingObject", StubModelingObject)
+        monkeypatch.setattr("model_builder.domain.efootprint_to_web_mapping.wrap_efootprint_object",
+                            fake_wrap_efootprint_object)
+        stub_model = StubModelingObject(efootprint_class=DirectLinksSig, a=child_a, b=child_b)
         wrapper = ModelingObjectWeb(stub_model, model_web)
 
         assert wrapper.links_to == "|web-a|web-b"
