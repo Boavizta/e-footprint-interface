@@ -28,6 +28,8 @@ class JobWeb(ResourceNeedBaseWeb):
     def links_to(self):
         if hasattr(self.modeling_obj, "external_api"):
             return self.external_api.web_id
+        elif hasattr(self.modeling_obj, "service"):
+            return self.service.web_id
         return self.server.web_id
 
     @classmethod
