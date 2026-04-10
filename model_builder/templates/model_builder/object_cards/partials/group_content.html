@@ -18,7 +18,7 @@
                             </svg>
                         </button>
                         <button id="button-{{ entry.object.web_id }}"
-                                class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center w-100 flex-grow-1 overflow-hidden position-relative min-w-0"
+                                class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0"
                                 type="button"
                                 hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                                 hx-target="#sidePanel"
@@ -32,7 +32,21 @@
                                 "
                         >
                             {% include 'model_builder/components/button_card_header.html' with object_card=entry.object title_class="h8 fw-normal" %}
-                            <span class="badge rounded-pill text-bg-light me-2">x{{ entry.count }}</span>
+                        </button>
+                        <input type="number" min="1" step="1" value="{{ entry.count }}" name="count"
+                               class="count-inline-edit form-control form-control-sm me-2"
+                               style="width: 4.5rem;"
+                               hx-post="/model_builder/update-dict-count/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
+                               hx-trigger="change"
+                               hx-swap="none"
+                               hx-vals='js: document.getElementById("btn-open-panel-result").style.display === "none" ? {"recomputation": true} : {}'>
+                        <button type="button"
+                                class="unlink-btn btn btn-sm btn-outline-light text-secondary me-2"
+                                title="Remove from {{ group.name }}"
+                                hx-post="/model_builder/unlink-dict-entry/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
+                                hx-swap="none"
+                                hx-vals='js: document.getElementById("btn-open-panel-result").style.display === "none" ? {"recomputation": true} : {}'>
+                            &times;
                         </button>
                     </div>
                     <div id="flush-{{ entry.object.web_id }}" class="accordion-collapse collapse">
@@ -65,7 +79,7 @@
                                 </svg>
                             </button>
                             <button id="button-{{ entry.object.web_id }}"
-                                    class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center w-100 flex-grow-1 overflow-hidden position-relative min-w-0"
+                                    class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0"
                                     type="button"
                                     hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                                     hx-target="#sidePanel"
@@ -79,7 +93,21 @@
                                     "
                             >
                                 {% include 'model_builder/components/button_card_header.html' with object_card=entry.object title_class="h8" %}
-                                <span class="badge rounded-pill text-bg-light me-2">x{{ entry.count }}</span>
+                            </button>
+                            <input type="number" min="1" step="1" value="{{ entry.count }}" name="count"
+                                   class="count-inline-edit form-control form-control-sm me-2"
+                                   style="width: 4.5rem;"
+                                   hx-post="/model_builder/update-dict-count/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
+                                   hx-trigger="change"
+                                   hx-swap="none"
+                                   hx-vals='js: document.getElementById("btn-open-panel-result").style.display === "none" ? {"recomputation": true} : {}'>
+                            <button type="button"
+                                    class="unlink-btn btn btn-sm btn-outline-light text-secondary me-2"
+                                    title="Remove from {{ group.name }}"
+                                    hx-post="/model_builder/unlink-dict-entry/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
+                                    hx-swap="none"
+                                    hx-vals='js: document.getElementById("btn-open-panel-result").style.display === "none" ? {"recomputation": true} : {}'>
+                                &times;
                             </button>
                         </div>
                         <div id="flush-{{ entry.object.web_id }}" class="accordion-collapse collapse">
@@ -93,9 +121,9 @@
                 </div>
             </div>
         {% else %}
-            <div id="{{ entry.object.web_id }}" class="rounded-3 border border-light-subtle overflow-hidden">
+            <div id="{{ entry.object.web_id }}" class="rounded-3 border border-light-subtle overflow-hidden d-flex align-items-center">
                 <button id="button-{{ entry.object.web_id }}"
-                        class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center w-100 flex-grow-1 overflow-hidden position-relative min-w-0"
+                        class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -109,7 +137,21 @@
                         "
                 >
                     {% include 'model_builder/components/button_card_header.html' with object_card=entry.object title_class="h8" %}
-                    <span class="badge rounded-pill text-bg-light me-2">x{{ entry.count }}</span>
+                </button>
+                <input type="number" min="1" step="1" value="{{ entry.count }}" name="count"
+                       class="count-inline-edit form-control form-control-sm me-2"
+                       style="width: 4.5rem;"
+                       hx-post="/model_builder/update-dict-count/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
+                       hx-trigger="change"
+                       hx-swap="none"
+                       hx-vals='js: document.getElementById("btn-open-panel-result").style.display === "none" ? {"recomputation": true} : {}'>
+                <button type="button"
+                        class="unlink-btn btn btn-sm btn-outline-light text-secondary me-2"
+                        title="Remove from {{ group.name }}"
+                        hx-post="/model_builder/unlink-dict-entry/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
+                        hx-swap="none"
+                        hx-vals='js: document.getElementById("btn-open-panel-result").style.display === "none" ? {"recomputation": true} : {}'>
+                    &times;
                 </button>
             </div>
         {% endif %}

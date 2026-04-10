@@ -224,6 +224,40 @@ class HtmxPresenter:
             )
         return html
 
+    def _generate_oob_container_html(self, target_id: str, content: str, classes: str) -> str:
+        return f"<div id='{target_id}' class='{classes}' hx-swap-oob='outerHTML:#{target_id}'>{content}</div>"
+
+    def _render_root_edge_device_groups_html(self) -> str:
+        return render_to_string(
+            "model_builder/object_cards/partials/root_edge_device_groups_list.html",
+            {"model_web": self.model_web},
+        )
+
+    def _render_ungrouped_edge_devices_html(self) -> str:
+        return render_to_string(
+            "model_builder/object_cards/partials/ungrouped_edge_devices_list.html",
+            {"model_web": self.model_web},
+        )
+
+    def present_dict_mutation(self, recompute: bool = False) -> HttpResponse:
+        html = self._generate_oob_container_html(
+            "edge-device-groups-list",
+            self._render_root_edge_device_groups_html(),
+            "list-group d-flex flew-column w-75 ms-25",
+        )
+        html += self._generate_oob_container_html(
+            "edge-devices-list",
+            self._render_ungrouped_edge_devices_html(),
+            "list-group d-flex flew-column w-75 ms-25",
+        )
+
+        response = HttpResponse(html)
+        response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
+        if recompute:
+            self._append_recomputation_html(response)
+            response["HX-Trigger-After-Settle"] = json.dumps({"triggerResultRendering": ""})
+        return response
+
     def _build_oob_response(
         self, html: str, toast_data: dict, trigger_result_display: bool = False
     ) -> HttpResponse:

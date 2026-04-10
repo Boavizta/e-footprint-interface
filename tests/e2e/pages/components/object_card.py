@@ -43,6 +43,46 @@ class ObjectCard:
             self.open_accordion()
         click_and_wait_for_htmx(self.locator.page, button)
 
+    def click_unlink_button(self):
+        """Click the unlink button for a grouped entry (triggers HTMX)."""
+        button = self.locator.locator("button.unlink-btn").first
+        hx_url = button.get_attribute("hx-post")
+        button.scroll_into_view_if_needed()
+        if hx_url:
+            with self.locator.page.expect_response(lambda r: hx_url in r.url):
+                button.click(force=True)
+        else:
+            button.click(force=True)
+        return self
+
+    def set_inline_count(self, value: str):
+        """Update the inline count control for a grouped entry."""
+        field = self.locator.locator("input[name='count']").first
+        hx_url = field.get_attribute("hx-post")
+        if hx_url:
+            with self.locator.page.expect_response(lambda r: hx_url in r.url):
+                field.evaluate(
+                    """(el, newValue) => {
+                        el.value = newValue;
+                        el.dispatchEvent(new Event("change", { bubbles: true }));
+                    }""",
+                    value,
+                )
+        else:
+            field.evaluate(
+                """(el, newValue) => {
+                    el.value = newValue;
+                    el.dispatchEvent(new Event("change", { bubbles: true }));
+                }""",
+                value,
+            )
+        return self
+
+    def inline_count_should_equal(self, value: str):
+        """Assert the grouped entry inline count."""
+        expect(self.locator.locator("input[name='count']").first).to_have_value(value)
+        return self
+
     def has_link_existing_child_button(self, child_type: str) -> bool:
         """Return whether a 'link existing' button is present for the given child type."""
         return self.locator.locator(

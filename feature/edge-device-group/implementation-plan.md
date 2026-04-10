@@ -412,7 +412,216 @@ Styles from the mockup (`feature/edge-device-group/mockup.html`):
 
 ---
 
-## Verification
+## Testing strategy
+
+The existing "verification" list is not enough for this feature. From Phase 3 onward, the feature introduces:
+- new adapter logic in Django views
+- new cross-object invariants in the session-backed model
+- new JavaScript state handling in the dict-count widget
+- HTMX-driven UI updates that only show up in a browser
+
+The tests should therefore be split across the existing layers in this repo:
+- **Python unit tests** for entity hooks, view validation, presenter shape, and form-context assembly
+- **Integration tests** for create/edit/delete/link workflows via use cases and `ModelWeb`, without Django rendering
+- **E2E tests** for HTMX swaps, JS widget behavior in the browser, and side-panel/card synchronization
+- **JS unit tests** for `dict_count.js`, since that logic is DOM-manipulation-heavy but does not require a real browser
+
+The goal is to keep most behavioral assertions out of E2E. E2E should cover only what cannot be trusted without a browser: HTMX/OOB swaps, accordion state, side panel interactions, and widget-driven DOM updates.
+
+### Phase 3 - Dict mutation endpoints
+
+#### Python unit tests
+
+Extend `tests/unit_tests/adapters/views/test_views_dict_mutation.py`.
+
+Keep the existing happy-path tests and add:
+- one parametrized `test_update_dict_count_rejects_invalid_count`
+  - values: non-integer, zero, negative
+- `test_link_dict_entry_rejects_self_link_for_group`
+- `test_link_dict_entry_rejects_descendant_cycle`
+
+These tests should assert:
+- the persisted session model is unchanged on invalid requests
+- the error path is surfaced through the exception-handling wrapper
+
+Lower-priority follow-up coverage, only if the implementation starts depending on it:
+- rejection of non-groupable object types passed directly to the endpoint
+- recomputation-specific response shape for dict mutations
+
+#### Integration tests
+
+Add `tests/integration/test_edge_device_groups.py`.
+
+Cover the model invariants behind the new endpoints:
+- linking a device into a group removes it from `ModelWeb.ungrouped_edge_devices`
+- unlinking a device puts it back into `ModelWeb.ungrouped_edge_devices`
+- linking a child group into a parent removes it from `ModelWeb.root_edge_device_groups`
+- unlinking a child group restores it to `ModelWeb.root_edge_device_groups`
+- deleting a grouped device removes it from every parent dict before deletion
+- deleting a nested group removes parent references and promotes its sub-groups back to root groups
+
+These tests should use the existing `create_object`, `edit_object`, and `delete_object` helpers rather than Django client calls.
+
+#### E2E tests
+
+Add `tests/e2e/objects/test_edge_device_groups.py`.
+
+Create one high-value browser test for the card workflow:
+- create an edge device and a group
+- verify the device initially appears as a standalone card in the infrastructure column
+- link the device into the group
+- verify the standalone card disappears from the infrastructure column because the device is now grouped
+- change the count inline in the group card
+- reload the page and verify the count persists
+- unlink the device
+- verify the standalone card reappears in the infrastructure column / ungrouped list
+
+This test is important because Phase 3 relies on HTMX OOB swaps and inline controls rendered inside recursive cards.
+
+### Phase 4 - Group creation side panel
+
+#### JS unit tests
+
+Add `js_tests/dict_count.test.js` for `theme/static/scripts/dict_count.js`.
+
+Test the widget logic directly:
+- adding an entry removes it from the dropdown and inserts a row with count `1`
+- editing a count updates the hidden JSON field
+- removing an entry adds it back to the dropdown
+- duplicate entries cannot be added
+- the hidden JSON payload stays in sync after multiple add/remove/edit operations
+
+This is the cheapest layer to catch silent regressions in the widget.
+
+#### Python unit tests
+
+Extend `tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_device_group_web.py`.
+
+Add tests for:
+- `post_create` with empty `sub_group_counts_json` / `edge_device_counts_json`
+- `post_create` populating both dicts with the expected `SourceValue(... * u.dimensionless)` values
+- `post_create` rejecting malformed JSON or unknown ids without leaving partially-mutated state
+
+Add form-context tests around `model_builder/adapters/forms/form_context_builder.py` or a new adapter-form test file to assert:
+- `build_creation_context` exposes `available_edge_device_groups`
+- `build_creation_context` exposes `available_edge_devices`
+- the creation context excludes already-selected entries where appropriate
+
+#### Integration tests
+
+In `tests/integration/test_edge_device_groups.py`, add a create flow that submits group creation data through the real create use case:
+- create two devices and one pre-existing group
+- create a new group with both `sub_group_counts_json` and `edge_device_counts_json`
+- assert counts are persisted correctly
+- assert linked devices disappear from `ungrouped_edge_devices`
+- assert linked sub-groups disappear from `root_edge_device_groups`
+
+This verifies the `prepare_creation_input` + `post_create` contract end to end.
+
+#### E2E tests
+
+Add one browser workflow for the creation panel:
+- open "Add group"
+- add at least one device and one sub-group through the dict-count widget
+- set non-default counts
+- submit the form
+- verify the card renders with nested content immediately, without a second edit step
+
+This should be the only E2E test dedicated to creation; the single workflow implicitly covers the empty/default add flow.
+
+### Phase 5 - Group edit panel and device membership editing
+
+#### Python unit tests
+
+Add `tests/unit_tests/adapters/views/test_views_edition.py` if it does not already exist.
+
+Cover the edit-panel context assembly:
+- opening an edge device edit panel includes `group_memberships`
+- each membership entry contains the expected `group_id`, `group_name`, and count
+- opening a group edit panel excludes illegal subgroup choices:
+  - the group itself
+  - its ancestors
+  - groups already linked in `sub_group_counts`
+
+If some of this logic ends up in `FormContextBuilder`, keep the test near that seam instead of testing templates directly.
+
+#### Integration tests
+
+Extend `tests/integration/test_edge_device_groups.py` with edit/delete lifecycle scenarios:
+- deleting a parent group promotes child groups back to root groups
+- deleting a grouped edge device removes all memberships before object deletion
+- editing memberships across multiple groups keeps all parent dicts consistent
+- updating a membership count through the same mutation path preserves unrelated memberships
+
+These are the main invariants that can regress even if the templates still render.
+
+#### E2E tests
+
+Add two workflow tests to `tests/e2e/objects/test_edge_device_groups.py`.
+
+1. Group edit panel workflow:
+- open a group edit panel
+- link and unlink both a subgroup and a device
+- verify the main infrastructure column updates live after each action
+- verify nested accordions still behave correctly after the HTMX swaps
+
+2. Device edit panel workflow:
+- open a grouped device
+- verify the "Group membership" section is shown
+- change a membership count from the device panel
+- remove a membership from the device panel
+- verify the corresponding group card updates and the device moves back to the ungrouped list when appropriate
+
+These tests should use page objects rather than raw Playwright selectors. If needed, extend:
+- `tests/e2e/pages/model_builder_page.py`
+- `tests/e2e/pages/side_panel_page.py`
+- `tests/e2e/pages/components/object_card.py`
+
+### Phase 6 - Styling and UI polish
+
+Phase 6 should have only light automated coverage. Do not add CSS-only unit tests.
+
+#### E2E assertions to add to existing workflows
+
+Reuse the Phase 4/5 browser tests to assert:
+- subgroup rows have their distinct class/styling hook
+- inline count controls are still interactive after OOB re-render
+- open accordions stay open across HTMX updates when expected
+- nested content remains readable and targetable after repeated edits
+
+#### Manual visual QA
+
+Keep a short manual checklist for:
+- nested group readability
+- count badge / inline input affordance
+- unlink button hover/focus visibility
+- spacing and overflow on narrow screens
+- overall match with `feature/edge-device-group/mockup.html`
+
+### Test file plan
+
+#### New files
+
+- `tests/integration/test_edge_device_groups.py`
+- `tests/e2e/objects/test_edge_device_groups.py`
+- `tests/unit_tests/adapters/views/test_views_edition.py`
+- `js_tests/dict_count.test.js`
+
+#### Existing files to extend
+
+- `tests/unit_tests/adapters/views/test_views_dict_mutation.py`
+- `tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_device_group_web.py`
+
+### Recommended implementation order for tests
+
+1. Extend Phase 3 unit tests first, because the endpoint logic already exists and is the most likely source of edge-case bugs.
+2. Add the integration test file for group invariants before implementing Phase 4 and 5 UI flows.
+3. Add `dict_count.js` unit tests as soon as the widget is introduced.
+4. Keep the browser suite small: one test for Phase 3, one for Phase 4, two for Phase 5.
+
+---
+
+## Manual verification
 
 1. **Start server:** `python manage.py runserver`
 2. **Create group:** "Add group" → enter name → save → card appears in `#edge-device-groups-list`

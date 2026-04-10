@@ -2,6 +2,7 @@ from django.urls import path
 
 import model_builder.adapters.views.views_addition
 import model_builder.adapters.views.views_deletion
+import model_builder.adapters.views.views_dict_mutation
 import model_builder.adapters.views.views_edition
 from .adapters.views import views
 from .adapters.views import sankey_views
@@ -19,6 +20,15 @@ urlpatterns = [
     path("open-link-existing-panel/<parent_id>/<child_type_str>/",
          model_builder.adapters.views.views_edition.open_link_existing_panel,
          name="open-link-existing-panel"),
+    path("update-dict-count/<str:parent_id>/<str:key_id>/",
+         model_builder.adapters.views.views_dict_mutation.update_dict_count,
+         name="update-dict-count"),
+    path("unlink-dict-entry/<str:parent_id>/<str:key_id>/",
+         model_builder.adapters.views.views_dict_mutation.unlink_dict_entry,
+         name="unlink-dict-entry"),
+    path("link-dict-entry/<str:parent_id>/<str:key_id>/",
+         model_builder.adapters.views.views_dict_mutation.link_dict_entry,
+         name="link-dict-entry"),
     path("delete-object/<object_id>/", model_builder.adapters.views.views_deletion.delete_object, name="delete-object"),
     path("ask-delete-object/<object_id>/", model_builder.adapters.views.views_deletion.ask_delete_object, name="ask-delete-object"),
     path("download-json/", views.download_json, name="download-json"),

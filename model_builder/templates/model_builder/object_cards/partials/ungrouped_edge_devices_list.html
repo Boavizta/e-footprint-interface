@@ -1,0 +1,3 @@
+{% for edge_device in model_web.ungrouped_edge_devices %}
+    {% include 'model_builder/object_cards/edge_device_card.html' with object=edge_device %}
+{% endfor %}

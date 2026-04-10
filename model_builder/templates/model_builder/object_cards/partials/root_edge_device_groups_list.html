@@ -1,0 +1,3 @@
+{% for group in model_web.root_edge_device_groups %}
+    {% include 'model_builder/object_cards/edge_device_group_card.html' with object=group %}
+{% endfor %}

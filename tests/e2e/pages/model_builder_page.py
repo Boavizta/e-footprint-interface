@@ -53,6 +53,18 @@ class ModelBuilderPage:
         locator = self.page.locator(f"div[id^='{object_type}-']").filter(has_text=name)
         return ObjectCard(locator)
 
+    def get_edge_device_group_card(self, name: str) -> ObjectCard:
+        """Get an edge device group card from the infrastructure column."""
+        locator = self.page.locator("#edge-device-groups-list").locator("div[id^='EdgeDeviceGroup-']").filter(has_text=name)
+        return ObjectCard(locator)
+
+    def get_ungrouped_edge_device_card(self, name: str) -> ObjectCard:
+        """Get an ungrouped edge device card from the infrastructure column."""
+        locator = self.page.locator("#edge-devices-list").locator(
+            "div[id^='EdgeDevice-'], div[id^='EdgeComputer-'], div[id^='EdgeAppliance-']"
+        ).filter(has_text=name)
+        return ObjectCard(locator)
+
     def object_should_exist(self, object_type: str, name: str):
         """Assert that an object card exists on the canvas."""
         card = self.get_object_card(object_type, name)
@@ -63,6 +75,18 @@ class ModelBuilderPage:
         """Assert that an object card does not exist on the canvas."""
         locator = self.page.locator(f"div[id^='{object_type}'] p").filter(has_text=name)
         expect(locator).not_to_be_visible()
+        return self
+
+    def ungrouped_edge_device_should_exist(self, name: str):
+        """Assert that an edge device is shown as a standalone infrastructure card."""
+        self.get_ungrouped_edge_device_card(name).should_exist()
+        return self
+
+    def ungrouped_edge_device_should_not_exist(self, name: str):
+        """Assert that an edge device is not shown in the ungrouped infrastructure list."""
+        expect(self.page.locator("#edge-devices-list").locator(
+            "div[id^='EdgeDevice-'], div[id^='EdgeComputer-'], div[id^='EdgeAppliance-']"
+        ).filter(has_text=name)).to_have_count(0)
         return self
 
     # --- Add object buttons ---
@@ -91,6 +115,29 @@ class ModelBuilderPage:
         """Click the 'Add Edge Usage Pattern' button (triggers HTMX)."""
         click_and_wait_for_htmx(self.page, self.page.locator("#add_edge_usage_pattern"))
         return self.side_panel
+
+    def trigger_htmx_post(self, url: str, values: dict | None = None, trigger_id: str = "test-htmx-post-trigger"):
+        """Fire an HTMX POST from the page to exercise OOB browser updates."""
+        self.page.evaluate(
+            """([targetUrl, payload, elementId]) => {
+                const existing = document.getElementById(elementId);
+                if (existing) existing.remove();
+                const button = document.createElement("button");
+                button.id = elementId;
+                button.type = "button";
+                button.textContent = "trigger";
+                button.setAttribute("hx-post", targetUrl);
+                button.setAttribute("hx-swap", "none");
+                if (payload) {
+                    button.setAttribute("hx-vals", JSON.stringify(payload));
+                }
+                document.body.appendChild(button);
+                htmx.process(button);
+            }""",
+            [url, values, trigger_id],
+        )
+        click_and_wait_for_htmx(self.page, self.page.locator(f"#{trigger_id}"))
+        return self
 
     # --- Result panel ---
 
