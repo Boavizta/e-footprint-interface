@@ -156,6 +156,14 @@ class ModelingObjectWeb:
         """
         return {}  # Default: no special HTMX configuration
 
+    def get_edition_context_overrides(self) -> dict:
+        """Return object-specific additions for edit-panel rendering.
+
+        Adapters remain generic and ask the web wrapper for any extra context
+        needed by custom edit templates.
+        """
+        return {}
+
 
     @property
     def links_to(self):

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
-from model_builder.adapters.forms.form_data_parser import parse_form_data, parse_form_data
+from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput

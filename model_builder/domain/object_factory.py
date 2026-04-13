@@ -26,6 +26,17 @@ if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
+def _build_explainable_object_dict_entries(value: Dict[str, Any], model_web: "ModelWeb", attr_name: str) -> dict:
+    entries = {}
+    for key_id, explainable_value_dict in value.items():
+        if key_id not in model_web.flat_efootprint_objs_dict:
+            raise ValueError(f"Unknown modeling object id '{key_id}' in {attr_name}.")
+        explainable_obj = ExplainableObject.from_json_dict(explainable_value_dict)
+        explainable_obj.source = Sources.USER_DATA
+        entries[model_web.flat_efootprint_objs_dict[key_id]] = explainable_obj
+    return entries
+
+
 def create_efootprint_obj_from_parsed_data(
     parsed_data: Dict[str, Any], model_web: "ModelWeb", object_type: str
 ) -> ModelingObject:
@@ -138,6 +149,13 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                  for obj_id in value]])
             continue
 
+        if issubclass(annotation, ExplainableObjectDict):
+            new_entries = _build_explainable_object_dict_entries(value, model_web, attr_name)
+            if new_entries != current_value:
+                logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
+                changes_list.append([current_value, ExplainableObjectDict(new_entries)])
+            continue
+
         if issubclass(annotation, ModelingObject):
             new_mod_obj_id = value
             current_mod_obj_id = getattr(obj_to_edit, attr_name).efootprint_id
@@ -156,7 +174,8 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
             if new_value != current_value:
                 changes_list.append([current_value, new_value])
 
-    ModelingUpdate(changes_list, compute_previous_system_footprints=False)
+    if changes_list:
+        ModelingUpdate(changes_list, compute_previous_system_footprints=False)
 
     if update_system_data:
         model_web.persist_to_cache()

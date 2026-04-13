@@ -97,9 +97,14 @@ class ObjectCard:
     def open_accordion(self):
         self.locator.locator(".chevron-btn").first.click()
 
+    def get_nested_object_card(self, object_type: str, name: str):
+        """Get a nested object card rendered inside this card."""
+        locator = self.locator.locator(f"div[id^='{object_type}-']").filter(has_text=name).first
+        return ObjectCard(locator)
+
     def accordion_should_be_open(self):
         """Assert that the card's accordion is expanded (Bootstrap .show class present)."""
-        expect(self.locator.locator(".accordion-collapse")).to_have_class(re.compile(r"\bshow\b"))
+        expect(self.locator.locator(".accordion-collapse").first).to_have_class(re.compile(r"\bshow\b"))
         return self
 
     def accordion_should_be_closed(self):
@@ -107,7 +112,7 @@ class ObjectCard:
 
         Retries until the Bootstrap collapse animation completes.
         """
-        expect(self.locator.locator(".accordion-collapse")).not_to_have_class(re.compile(r"\bshow\b"))
+        expect(self.locator.locator(".accordion-collapse").first).not_to_have_class(re.compile(r"\bshow\b"))
         return self
 
     def has_class(self, class_name: str) -> bool:

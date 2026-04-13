@@ -1,151 +1,129 @@
-"""Integration tests for edge device group membership invariants."""
-import json
-
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
-from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
 from tests.fixtures.use_case_helpers import create_object, delete_object
 
 
-def _persist_dict_mutation(repository, parent_id: str, key_id: str, count: int | None) -> None:
-    model_web = ModelWeb(repository)
+def _model_web(repository) -> ModelWeb:
+    return ModelWeb(repository)
+
+
+def _link_group_to_group(repository, parent_id: str, child_id: str, count: int = 1) -> None:
+    model_web = _model_web(repository)
     parent_group = model_web.get_efootprint_object_from_efootprint_id(parent_id, "EdgeDeviceGroup")
-    key_obj = model_web.flat_efootprint_objs_dict[key_id]
-    target_dict = parent_group.sub_group_counts if isinstance(key_obj, EdgeDeviceGroup) else parent_group.edge_device_counts
-
-    if count is None:
-        del target_dict[key_obj]
-    else:
-        target_dict[key_obj] = SourceValue(count * u.dimensionless)
-
+    child_group = model_web.get_efootprint_object_from_efootprint_id(child_id, "EdgeDeviceGroup")
+    parent_group.sub_group_counts[child_group] = SourceValue(count * u.dimensionless)
     model_web.persist_to_cache()
 
 
-def test_link_and_unlink_edge_device_updates_ungrouped_devices(default_system_repository):
-    device_id = create_object(
-        default_system_repository,
-        create_post_data_from_class_default_values("Sensor", "EdgeDevice", components=""),
-    )
-    group_id = create_object(
-        default_system_repository,
-        create_post_data_from_class_default_values("Rack A", "EdgeDeviceGroup"),
-    )
-
-    _persist_dict_mutation(default_system_repository, group_id, device_id, count=1)
-
-    model_web = ModelWeb(default_system_repository)
-    assert [device.efootprint_id for device in model_web.ungrouped_edge_devices] == []
-
-    _persist_dict_mutation(default_system_repository, group_id, device_id, count=None)
-
-    model_web = ModelWeb(default_system_repository)
-    assert [device.efootprint_id for device in model_web.ungrouped_edge_devices] == [device_id]
+def _set_group_device_count(repository, group_id: str, device_id: str, count: int) -> None:
+    model_web = _model_web(repository)
+    group = model_web.get_efootprint_object_from_efootprint_id(group_id, "EdgeDeviceGroup")
+    device = model_web.get_efootprint_object_from_efootprint_id(device_id, "EdgeDevice")
+    group.edge_device_counts[device] = SourceValue(count * u.dimensionless)
+    model_web.persist_to_cache()
 
 
-def test_link_and_unlink_sub_group_updates_root_groups(default_system_repository):
-    parent_group_id = create_object(
+def _unlink_group_device(repository, group_id: str, device_id: str) -> None:
+    model_web = _model_web(repository)
+    group = model_web.get_efootprint_object_from_efootprint_id(group_id, "EdgeDeviceGroup")
+    device = model_web.get_efootprint_object_from_efootprint_id(device_id, "EdgeDevice")
+    del group.edge_device_counts[device]
+    model_web.persist_to_cache()
+
+
+def test_deleting_parent_group_promotes_child_groups_back_to_root_groups(default_system_repository):
+    parent_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values("Building", "EdgeDeviceGroup"),
     )
-    child_group_id = create_object(
+    child_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values("Floor", "EdgeDeviceGroup"),
     )
+    _link_group_to_group(default_system_repository, parent_id, child_id, count=2)
 
-    _persist_dict_mutation(default_system_repository, parent_group_id, child_group_id, count=2)
+    delete_object(default_system_repository, parent_id)
 
-    model_web = ModelWeb(default_system_repository)
-    assert [group.efootprint_id for group in model_web.root_edge_device_groups] == [parent_group_id]
-
-    _persist_dict_mutation(default_system_repository, parent_group_id, child_group_id, count=None)
-
-    model_web = ModelWeb(default_system_repository)
-    assert {group.efootprint_id for group in model_web.root_edge_device_groups} == {parent_group_id, child_group_id}
+    model_web = _model_web(default_system_repository)
+    assert parent_id not in model_web.flat_efootprint_objs_dict
+    assert [group.efootprint_id for group in model_web.root_edge_device_groups] == [child_id]
 
 
-def test_delete_grouped_edge_device_removes_parent_group_reference(default_system_repository):
+def test_deleting_grouped_edge_device_removes_all_parent_memberships(default_system_repository):
     device_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Sensor", "EdgeDevice", components=""),
+        create_post_data_from_class_default_values("Shared Sensor", "EdgeDevice", components=""),
     )
-    group_id = create_object(
+    alpha_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Rack A", "EdgeDeviceGroup"),
+        create_post_data_from_class_default_values("Alpha", "EdgeDeviceGroup"),
     )
-    _persist_dict_mutation(default_system_repository, group_id, device_id, count=3)
+    beta_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Beta", "EdgeDeviceGroup"),
+    )
+    _set_group_device_count(default_system_repository, alpha_id, device_id, count=2)
+    _set_group_device_count(default_system_repository, beta_id, device_id, count=4)
 
     delete_object(default_system_repository, device_id)
 
-    model_web = ModelWeb(default_system_repository)
-    group = model_web.get_efootprint_object_from_efootprint_id(group_id, "EdgeDeviceGroup")
-    assert "EdgeDevice" not in default_system_repository.get_system_data()
-    assert len(group.edge_device_counts) == 0
+    model_web = _model_web(default_system_repository)
+    alpha = model_web.get_efootprint_object_from_efootprint_id(alpha_id, "EdgeDeviceGroup")
+    beta = model_web.get_efootprint_object_from_efootprint_id(beta_id, "EdgeDeviceGroup")
+    assert device_id not in model_web.flat_efootprint_objs_dict
+    assert alpha.edge_device_counts == {}
+    assert beta.edge_device_counts == {}
 
 
-def test_delete_nested_group_promotes_child_group_back_to_root(default_system_repository):
-    parent_group_id = create_object(
+def test_updating_one_membership_count_preserves_other_group_memberships(default_system_repository):
+    device_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Building", "EdgeDeviceGroup"),
+        create_post_data_from_class_default_values("Shared Sensor", "EdgeDevice", components=""),
     )
-    child_group_id = create_object(
+    alpha_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Floor", "EdgeDeviceGroup"),
+        create_post_data_from_class_default_values("Alpha", "EdgeDeviceGroup"),
     )
-    grandchild_group_id = create_object(
+    beta_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Shelf", "EdgeDeviceGroup"),
+        create_post_data_from_class_default_values("Beta", "EdgeDeviceGroup"),
     )
-    _persist_dict_mutation(default_system_repository, parent_group_id, child_group_id, count=1)
-    _persist_dict_mutation(default_system_repository, child_group_id, grandchild_group_id, count=1)
+    _set_group_device_count(default_system_repository, alpha_id, device_id, count=1)
+    _set_group_device_count(default_system_repository, beta_id, device_id, count=3)
 
-    delete_object(default_system_repository, child_group_id)
+    _set_group_device_count(default_system_repository, alpha_id, device_id, count=5)
 
-    model_web = ModelWeb(default_system_repository)
-    assert {group.efootprint_id for group in model_web.root_edge_device_groups} == {
-        parent_group_id,
-        grandchild_group_id,
-    }
+    model_web = _model_web(default_system_repository)
+    device = model_web.get_efootprint_object_from_efootprint_id(device_id, "EdgeDevice")
+    alpha = model_web.get_efootprint_object_from_efootprint_id(alpha_id, "EdgeDeviceGroup")
+    beta = model_web.get_efootprint_object_from_efootprint_id(beta_id, "EdgeDeviceGroup")
+    assert alpha.edge_device_counts[device].value.magnitude == 5
+    assert beta.edge_device_counts[device].value.magnitude == 3
 
 
-def test_create_group_with_initial_sub_groups_and_devices(default_system_repository):
-    first_device_id = create_object(
+def test_unlinking_device_from_multiple_groups_only_ungroups_after_last_membership(default_system_repository):
+    device_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Sensor A", "EdgeDevice", components=""),
+        create_post_data_from_class_default_values("Shared Sensor", "EdgeDevice", components=""),
     )
-    second_device_id = create_object(
+    alpha_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Sensor B", "EdgeDevice", components=""),
+        create_post_data_from_class_default_values("Alpha", "EdgeDeviceGroup"),
     )
-    child_group_id = create_object(
+    beta_id = create_object(
         default_system_repository,
-        create_post_data_from_class_default_values("Floor", "EdgeDeviceGroup"),
+        create_post_data_from_class_default_values("Beta", "EdgeDeviceGroup"),
     )
+    _set_group_device_count(default_system_repository, alpha_id, device_id, count=1)
+    _set_group_device_count(default_system_repository, beta_id, device_id, count=2)
 
-    parent_group_id = create_object(
-        default_system_repository,
-        create_post_data_from_class_default_values(
-            "Building",
-            "EdgeDeviceGroup",
-            sub_group_counts=json.dumps({child_group_id: 2}),
-            edge_device_counts=json.dumps({first_device_id: 3, second_device_id: 1}),
-        ),
-    )
-
-    model_web = ModelWeb(default_system_repository)
-    parent_group = model_web.get_efootprint_object_from_efootprint_id(parent_group_id, "EdgeDeviceGroup")
-
-    assert {
-        group.efootprint_id: parent_group.sub_group_counts[group.modeling_obj].value.magnitude
-        for group in model_web.edge_device_groups
-        if group.modeling_obj in parent_group.sub_group_counts
-    } == {child_group_id: 2}
-    assert {
-        device.efootprint_id: parent_group.edge_device_counts[device.modeling_obj].value.magnitude
-        for device in model_web.edge_devices
-        if device.modeling_obj in parent_group.edge_device_counts
-    } == {first_device_id: 3, second_device_id: 1}
+    _unlink_group_device(default_system_repository, alpha_id, device_id)
+    model_web = _model_web(default_system_repository)
     assert [device.efootprint_id for device in model_web.ungrouped_edge_devices] == []
-    assert [group.efootprint_id for group in model_web.root_edge_device_groups] == [parent_group_id]
+
+    _unlink_group_device(default_system_repository, beta_id, device_id)
+    model_web = _model_web(default_system_repository)
+    assert [device.efootprint_id for device in model_web.ungrouped_edge_devices] == [device_id]

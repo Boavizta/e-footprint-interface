@@ -29,6 +29,14 @@ class SidePanelPage:
         expect(self.panel).to_contain_text(text)
         return self
 
+    def expand_section(self, section_name: str):
+        """Open a collapsed accordion section in the side panel."""
+        button = self.panel.get_by_role("button", name=section_name, exact=True)
+        expect(button).to_be_visible()
+        if button.get_attribute("aria-expanded") != "true":
+            button.click()
+        return self
+
     def fill_field(self, field_id: str, value: str, clear_first: bool = True):
         """Fill a form field by its ID.
 
@@ -113,6 +121,85 @@ class SidePanelPage:
             row = self.page.locator(f"#objects-already-selected-for-{web_id} tr").filter(has_text=option_label)
             row.locator("input[type='number']").fill(count)
             row.locator("input[type='number']").dispatch_event("change")
+        return self
+
+    def remove_from_dict_count(self, web_id: str, option_label: str):
+        """Remove an object from a dict-count widget."""
+        row = self.page.locator(f"#objects-already-selected-for-{web_id} tr").filter(has_text=option_label)
+        row.locator("button").click()
+        return self
+
+    def update_dict_count_value(self, web_id: str, option_label: str, count: str):
+        """Update the count for one selected entry in a dict-count widget."""
+        row = self.page.locator(f"#objects-already-selected-for-{web_id} tr").filter(has_text=option_label)
+        row.locator("input[type='number']").fill(count)
+        row.locator("input[type='number']").dispatch_event("change")
+        return self
+
+    def link_group_member(self, web_id: str, option_label: str):
+        """Link an existing subgroup or device from the group edit panel."""
+        self.expand_section("Sub-groups" if "sub_group" in web_id else "Devices")
+        self.page.locator(f"#select-new-object-{web_id}").select_option(label=option_label)
+        with self.page.expect_response(lambda response: "/model_builder/link-dict-entry/" in response.url):
+            self.page.locator(f"#add-btn-{web_id}").click()
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request') === null",
+            timeout=2000,
+        )
+        return self
+
+    def set_linked_entry_count(self, entry_name: str, count: str, section_name: str):
+        """Update a linked subgroup or device count inside the group edit panel."""
+        self.expand_section(section_name)
+        row = self.panel.locator(f"[data-linked-entry-name='{entry_name}']").first
+        field = row.locator("input[type='number']")
+        with self.page.expect_response(lambda response: "/model_builder/update-dict-count/" in response.url):
+            field.click()
+            field.fill(count)
+            field.press("Tab")
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request') === null",
+            timeout=2000,
+        )
+        return self
+
+    def remove_linked_entry(self, entry_name: str, section_name: str):
+        """Remove a linked subgroup or device from the group edit panel."""
+        self.expand_section(section_name)
+        row = self.panel.locator(f"[data-linked-entry-name='{entry_name}']").first
+        with self.page.expect_response(lambda response: "/model_builder/unlink-dict-entry/" in response.url):
+            row.get_by_role("button", name="Remove").click()
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request') === null",
+            timeout=2000,
+        )
+        return self
+
+    def set_group_membership_count(self, group_name: str, count: str):
+        """Update a group membership count from a device edit panel."""
+        self.expand_section("Group membership")
+        row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
+        field = row.locator("input[type='number']")
+        with self.page.expect_response(lambda response: "/model_builder/update-dict-count/" in response.url):
+            field.click()
+            field.fill(count)
+            field.press("Tab")
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request') === null",
+            timeout=2000,
+        )
+        return self
+
+    def remove_group_membership(self, group_name: str):
+        """Remove a group membership from a device edit panel."""
+        self.expand_section("Group membership")
+        row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
+        with self.page.expect_response(lambda response: "/model_builder/unlink-dict-entry/" in response.url):
+            row.get_by_role("button", name="Remove").click()
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request') === null",
+            timeout=2000,
+        )
         return self
 
     def get_type_selector(self):

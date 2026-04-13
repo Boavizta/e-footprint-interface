@@ -121,29 +121,6 @@ class ModelBuilderPage:
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-edge-device-group"))
         return self.side_panel
 
-    def trigger_htmx_post(self, url: str, values: dict | None = None, trigger_id: str = "test-htmx-post-trigger"):
-        """Fire an HTMX POST from the page to exercise OOB browser updates."""
-        self.page.evaluate(
-            """([targetUrl, payload, elementId]) => {
-                const existing = document.getElementById(elementId);
-                if (existing) existing.remove();
-                const button = document.createElement("button");
-                button.id = elementId;
-                button.type = "button";
-                button.textContent = "trigger";
-                button.setAttribute("hx-post", targetUrl);
-                button.setAttribute("hx-swap", "none");
-                if (payload) {
-                    button.setAttribute("hx-vals", JSON.stringify(payload));
-                }
-                document.body.appendChild(button);
-                htmx.process(button);
-            }""",
-            [url, values, trigger_id],
-        )
-        click_and_wait_for_htmx(self.page, self.page.locator(f"#{trigger_id}"))
-        return self
-
     # --- Result panel ---
 
     def open_result_panel(self):

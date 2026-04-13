@@ -178,6 +178,17 @@ class HtmxPresenter:
             return response
 
         html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
+        if output.edited_object_type == "EdgeDeviceGroup":
+            html_updates += self._generate_oob_container_html(
+                "edge-device-groups-list",
+                self._render_root_edge_device_groups_html(),
+                "list-group d-flex flew-column w-75 ms-25",
+            )
+            html_updates += self._generate_oob_container_html(
+                "edge-devices-list",
+                self._render_ungrouped_edge_devices_html(),
+                "list-group d-flex flew-column w-75 ms-25",
+            )
 
         # Re-render siblings whose "link existing" button just disappeared
         # (cascade delete during edit reduced count from 1 to 0)

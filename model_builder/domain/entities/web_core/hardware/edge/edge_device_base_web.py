@@ -24,6 +24,18 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     def template_name(self):
         return "edge_device"
 
+    def get_edition_context_overrides(self) -> dict:
+        return {
+            "group_memberships": [
+                {
+                    "group_id": group.id,
+                    "group_name": group.name,
+                    "count": group.edge_device_counts[self.modeling_obj].value.magnitude,
+                }
+                for group in sorted(self.modeling_obj._find_parent_groups(), key=lambda group: group.name)
+            ]
+        }
+
     @classmethod
     def pre_delete(cls, web_obj, model_web):
         """Remove device references from parent groups before deletion."""

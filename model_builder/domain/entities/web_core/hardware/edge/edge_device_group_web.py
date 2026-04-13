@@ -3,6 +3,7 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 
 class EdgeDeviceGroupWeb(ModelingObjectWeb):
     add_template = "add_edge_device_group.html"
+    edit_template = "edit_edge_device_group.html"
     attributes_to_skip_in_forms = ["sub_group_counts", "edge_device_counts"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
     form_creation_config = {
@@ -17,6 +18,34 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
     def template_name(self):
         return "edge_device_group"
 
+    def get_edition_context_overrides(self) -> dict:
+        ancestor_ids = {group.id for group in self.modeling_obj._find_all_ancestor_groups()}
+        selectable_sub_groups = [
+            group for group in self.model_web.edge_device_groups
+            if group.efootprint_id not in ancestor_ids | {self.efootprint_id}
+        ]
+
+        return {
+            "dict_count_fields": [
+                {
+                    "attr_name": "sub_group_counts",
+                    "available_objects": selectable_sub_groups,
+                    "selected_counts": {
+                        group.id: count.value.magnitude
+                        for group, count in self.modeling_obj.sub_group_counts.items()
+                    },
+                },
+                {
+                    "attr_name": "edge_device_counts",
+                    "available_objects": self.model_web.edge_devices,
+                    "selected_counts": {
+                        device.id: count.value.magnitude
+                        for device, count in self.modeling_obj.edge_device_counts.items()
+                    },
+                },
+            ],
+        }
+
     @classmethod
     def get_creation_prerequisites(cls, model_web):
         return {
@@ -24,17 +53,12 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
             "available_edge_devices": model_web.edge_devices,
         }
 
-    @staticmethod
-    def _count_to_display_value(count):
-        magnitude = count.value.magnitude
-        return int(magnitude) if float(magnitude).is_integer() else magnitude
-
     def _build_group_entry(self, obj, count):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
         return {
             "object": wrap_efootprint_object(obj, self.model_web, dict_container=self),
-            "count": self._count_to_display_value(count),
+            "count": count.value.magnitude,
         }
 
     @property

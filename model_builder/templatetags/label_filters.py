@@ -75,3 +75,13 @@ def link_child_text(class_name: str) -> str:
         return ""
     label = LabelResolver.get_class_label(class_name).lower()
     return f"Link existing {label}"
+
+
+@register.filter
+def display_count(value):
+    """Render numeric counts without a trailing .0 when integral."""
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return value
+    return int(numeric) if numeric.is_integer() else value

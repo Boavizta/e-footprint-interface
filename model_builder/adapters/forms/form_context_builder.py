@@ -116,14 +116,23 @@ class FormContextBuilder:
             raise ValueError(f"Unknown form edition strategy: {strategy_name}")
 
         strategy = strategy_class(self.model_web)
-        return strategy.build_edition_context(obj_to_edit, config)
+        context = strategy.build_edition_context(obj_to_edit, config)
+        context.update(obj_to_edit.get_edition_context_overrides())
+        if context.get("dict_count_fields"):
+            context["dict_count_fields"] = self._hydrate_dict_count_fields(
+                context["dict_count_fields"],
+                obj_to_edit.class_as_simple_str,
+            )
+        if context.get("group_memberships"):
+            context["group_memberships"] = self._hydrate_group_memberships(context["group_memberships"])
+        return context
 
     @staticmethod
     def _build_dict_count_fields(object_type: str, config: dict, prerequisites: dict) -> list[dict]:
         fields = []
         for attr_name, prerequisite_key in config["dict_count_fields"].items():
             available_objects = prerequisites.get(prerequisite_key, [])
-            options = [{"value": obj.efootprint_id, "label": obj.name} for obj in available_objects]
+            options = FormContextBuilder._build_select_options(available_objects)
             fields.append({
                 "web_id": f"{object_type}_{attr_name}",
                 "attr_name": attr_name,
@@ -135,3 +144,49 @@ class FormContextBuilder:
                 "selected_json": json.dumps({}),
             })
         return fields
+
+    @staticmethod
+    def _hydrate_dict_count_fields(fields: list[dict], object_type: str) -> list[dict]:
+        hydrated_fields = []
+        for field in fields:
+            hydrated_field = dict(field)
+            attr_name = hydrated_field["attr_name"]
+            hydrated_field.setdefault("web_id", f"{object_type}_{attr_name}")
+            if "available_objects" in hydrated_field:
+                hydrated_field["options"] = FormContextBuilder._build_select_options(
+                    hydrated_field.pop("available_objects")
+                )
+            selected_counts = hydrated_field.pop("selected_counts", None)
+            if selected_counts is not None:
+                hydrated_field["selected_json"] = json.dumps({
+                    key_id: FormContextBuilder._normalize_count_value(count)
+                    for key_id, count in selected_counts.items()
+                })
+            if "options" in hydrated_field and "options_json" not in hydrated_field:
+                hydrated_field["options_json"] = json.dumps(hydrated_field["options"])
+            hydrated_field.setdefault("label", FieldUIConfigProvider.get_label(attr_name))
+            hydrated_field.setdefault("tooltip", FieldUIConfigProvider.get_tooltip(attr_name))
+            hydrated_field.setdefault("input_type", "dict_count")
+            hydrated_fields.append(hydrated_field)
+        return hydrated_fields
+
+    @staticmethod
+    def _hydrate_group_memberships(group_memberships: list[dict]) -> list[dict]:
+        return [
+            {
+                **membership,
+                "count": FormContextBuilder._normalize_count_value(membership["count"]),
+            }
+            for membership in group_memberships
+        ]
+
+    @staticmethod
+    def _build_select_options(objects) -> list[dict]:
+        return sorted(
+            [{"value": obj.efootprint_id, "label": obj.name} for obj in objects],
+            key=lambda option: option["label"].lower(),
+        )
+
+    @staticmethod
+    def _normalize_count_value(count) -> int | float:
+        return int(count) if float(count).is_integer() else count
