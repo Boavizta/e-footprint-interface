@@ -12,18 +12,17 @@ from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web 
 class TestEdgeDeviceGroupWeb:
     """Tests for EdgeDeviceGroupWeb-specific behavior."""
 
-    # --- prepare_creation_input ---
+    # --- get_creation_prerequisites ---
 
-    def test_prepare_creation_input_adds_empty_group_dicts(self):
-        """Creation input should add empty dict attributes without mutating input."""
-        form_data = {"name": "Campus"}
+    def test_get_creation_prerequisites_returns_raw_available_groups_and_devices(self, minimal_model_web):
+        parent = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Building"))
+        device = minimal_model_web.add_new_efootprint_object_to_system(
+            EdgeDevice.from_defaults("Sensor", components=[]))
 
-        result = EdgeDeviceGroupWeb.prepare_creation_input(form_data)
+        prerequisites = EdgeDeviceGroupWeb.get_creation_prerequisites(minimal_model_web)
 
-        assert result["sub_group_counts"] == {}
-        assert result["edge_device_counts"] == {}
-        assert "sub_group_counts" not in form_data
-        assert "edge_device_counts" not in form_data
+        assert [group.efootprint_id for group in prerequisites["available_edge_device_groups"]] == [parent.efootprint_id]
+        assert [edge_device.efootprint_id for edge_device in prerequisites["available_edge_devices"]] == [device.efootprint_id]
 
     # --- group entry helpers ---
 

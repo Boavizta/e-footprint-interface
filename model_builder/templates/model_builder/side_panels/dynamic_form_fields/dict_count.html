@@ -1,0 +1,37 @@
+{% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
+<div class="mb-3 bg-light rounded-2 p-2">
+    <table class="w-100" id="objects-already-selected-for-{{ field.web_id }}">
+        <tr>
+            <td colspan="3">
+                <span class="text-muted">No values selected</span>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="d-flex flex-row mb-2 gap-2">
+    <select
+        class="form-select flex-grow-1 form-control p-2"
+        id="select-new-object-{{ field.web_id }}"
+        name="select-new-object-{{ field.web_id }}"
+    >
+        {% for option in field.options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+        {% endfor %}
+    </select>
+    <button
+        id="add-btn-{{ field.web_id }}"
+        type="button"
+        class="btn btn-white border border-dark rounded-2 fs-xl p-2"
+        onclick="event.stopPropagation();tagFormAsModified();addDictCountEntry('{{ field.web_id }}')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+        </svg>
+    </button>
+</div>
+<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}"></div>
+<div id="available_data_{{ field.web_id }}" data-json="{{ field.options_json }}"></div>
+<input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value="">
+
+<script>
+    refreshDictCountField('{{ field.web_id }}');
+</script>

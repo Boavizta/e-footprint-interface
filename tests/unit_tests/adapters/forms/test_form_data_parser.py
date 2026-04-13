@@ -1,4 +1,6 @@
 """Unit tests for form data parser."""
+import pytest
+
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from tests.utils import assert_dicts_equal
 
@@ -119,3 +121,51 @@ class TestParseFormData:
         assert parsed_key == "_parsed_Storage"
 
         assert_dicts_equal(parsed_form, expected)
+
+    def test_parses_explainable_object_dict_widget_payload(self):
+        form_data = {
+            "type_object_available": "EdgeDeviceGroup",
+            "EdgeDeviceGroup_name": "Campus",
+            "EdgeDeviceGroup_sub_group_counts": '{"group-1": 2}',
+            "EdgeDeviceGroup_edge_device_counts": '{"device-1": 3}',
+        }
+
+        result = parse_form_data(form_data, "EdgeDeviceGroup")
+
+        assert result["sub_group_counts"] == {
+            "group-1": {"value": 2, "unit": "dimensionless", "label": "no label"}
+        }
+        assert result["edge_device_counts"] == {
+            "device-1": {"value": 3, "unit": "dimensionless", "label": "no label"}
+        }
+
+    def test_parses_empty_explainable_object_dict_widget_payload(self):
+        form_data = {
+            "type_object_available": "EdgeDeviceGroup",
+            "EdgeDeviceGroup_name": "Campus",
+            "EdgeDeviceGroup_sub_group_counts": "",
+        }
+
+        result = parse_form_data(form_data, "EdgeDeviceGroup")
+
+        assert result["sub_group_counts"] == {}
+
+    @pytest.mark.parametrize(
+        ("payload", "message"),
+        [
+            ('{"group-1": "abc"}', "must be an integer"),
+            ('{"group-1": 0}', "must be at least 1"),
+            ('{"group-1": -1}', "must be at least 1"),
+            ('["group-1"]', "must be a JSON object"),
+            ('{bad json}', "must be valid JSON"),
+        ],
+    )
+    def test_rejects_invalid_explainable_object_dict_widget_payload(self, payload, message):
+        form_data = {
+            "type_object_available": "EdgeDeviceGroup",
+            "EdgeDeviceGroup_name": "Campus",
+            "EdgeDeviceGroup_sub_group_counts": payload,
+        }
+
+        with pytest.raises(ValueError, match=message):
+            parse_form_data(form_data, "EdgeDeviceGroup")

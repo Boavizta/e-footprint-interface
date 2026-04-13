@@ -8,8 +8,10 @@ The key principle is:
 - Domain entities declare WHAT (configuration/data)
 - Strategy classes decide HOW (generates actual form structures)
 """
+import json
 from typing import TYPE_CHECKING, Type
 
+from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.adapters.forms.strategies import (
     SimpleFormStrategy,
     WithStorageFormStrategy,
@@ -88,9 +90,13 @@ class FormContextBuilder:
             raise ValueError(f"Unknown form creation strategy: {strategy_name}")
 
         strategy = strategy_class(self.model_web)
-        return strategy.build_creation_context(
+        context = strategy.build_creation_context(
             web_class, object_type, config, efootprint_id_of_parent_to_link_to
         )
+        if web_class and config and config.get("dict_count_fields"):
+            prerequisites = web_class.get_creation_prerequisites(self.model_web)
+            context["dict_count_fields"] = self._build_dict_count_fields(object_type, config, prerequisites)
+        return context
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
         """Build form context for object edition.
@@ -111,3 +117,21 @@ class FormContextBuilder:
 
         strategy = strategy_class(self.model_web)
         return strategy.build_edition_context(obj_to_edit, config)
+
+    @staticmethod
+    def _build_dict_count_fields(object_type: str, config: dict, prerequisites: dict) -> list[dict]:
+        fields = []
+        for attr_name, prerequisite_key in config["dict_count_fields"].items():
+            available_objects = prerequisites.get(prerequisite_key, [])
+            options = [{"value": obj.efootprint_id, "label": obj.name} for obj in available_objects]
+            fields.append({
+                "web_id": f"{object_type}_{attr_name}",
+                "attr_name": attr_name,
+                "label": FieldUIConfigProvider.get_label(attr_name),
+                "tooltip": FieldUIConfigProvider.get_tooltip(attr_name),
+                "input_type": "dict_count",
+                "options": options,
+                "options_json": json.dumps(options),
+                "selected_json": json.dumps({}),
+            })
+        return fields

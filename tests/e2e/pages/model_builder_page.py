@@ -116,6 +116,11 @@ class ModelBuilderPage:
         click_and_wait_for_htmx(self.page, self.page.locator("#add_edge_usage_pattern"))
         return self.side_panel
 
+    def click_add_edge_device_group(self):
+        """Click the 'Add group' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-edge-device-group"))
+        return self.side_panel
+
     def trigger_htmx_post(self, url: str, values: dict | None = None, trigger_id: str = "test-htmx-post-trigger"):
         """Fire an HTMX POST from the page to exercise OOB browser updates."""
         self.page.evaluate(

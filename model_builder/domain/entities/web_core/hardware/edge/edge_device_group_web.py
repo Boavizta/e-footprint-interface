@@ -5,17 +5,24 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
     add_template = "add_edge_device_group.html"
     attributes_to_skip_in_forms = ["sub_group_counts", "edge_device_counts"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
+    form_creation_config = {
+        "strategy": "simple",
+        "dict_count_fields": {
+            "sub_group_counts": "available_edge_device_groups",
+            "edge_device_counts": "available_edge_devices",
+        },
+    }
 
     @property
     def template_name(self):
         return "edge_device_group"
 
     @classmethod
-    def prepare_creation_input(cls, form_data):
-        form_data = dict(form_data)
-        form_data["sub_group_counts"] = {}
-        form_data["edge_device_counts"] = {}
-        return form_data
+    def get_creation_prerequisites(cls, model_web):
+        return {
+            "available_edge_device_groups": model_web.edge_device_groups,
+            "available_edge_devices": model_web.edge_devices,
+        }
 
     @staticmethod
     def _count_to_display_value(count):

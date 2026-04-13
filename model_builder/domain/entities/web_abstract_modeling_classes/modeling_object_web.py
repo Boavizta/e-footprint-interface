@@ -156,6 +156,7 @@ class ModelingObjectWeb:
         """
         return {}  # Default: no special HTMX configuration
 
+
     @property
     def links_to(self):
         if self.accordion_children:

@@ -9,11 +9,63 @@ import json
 from typing import Any, Dict, Mapping, get_origin, List
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
+
+
+def _parse_positive_integer(raw_value: Any, *, field_name: str, key_id: str) -> int:
+    """Parse a strictly positive integer value for a dict-count widget entry."""
+    try:
+        parsed = int(raw_value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name}[{key_id}] must be an integer.") from exc
+
+    if parsed < 1:
+        raise ValueError(f"{field_name}[{key_id}] must be at least 1.")
+
+    if isinstance(raw_value, float) and not raw_value.is_integer():
+        raise ValueError(f"{field_name}[{key_id}] must be an integer.")
+
+    return parsed
+
+
+def _parse_explainable_object_dict_input(raw_value: Any, *, field_name: str) -> Dict[str, Dict[str, Any]]:
+    """Normalize ExplainableObjectDict widget payloads into canonical parsed data."""
+    if raw_value in ("", None):
+        return {}
+
+    if isinstance(raw_value, str):
+        try:
+            raw_mapping = json.loads(raw_value)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{field_name} must be valid JSON.") from exc
+    else:
+        raw_mapping = raw_value
+
+    if not isinstance(raw_mapping, dict):
+        raise ValueError(f"{field_name} must be a JSON object.")
+
+    parsed_mapping = {}
+    for key_id, explainable_value in raw_mapping.items():
+        if isinstance(explainable_value, dict):
+            if "value" not in explainable_value:
+                raise ValueError(f"{field_name}[{key_id}] must contain a value.")
+            normalized_value = dict(explainable_value)
+            normalized_value.setdefault("label", "no label")
+        else:
+            normalized_value = {
+                "value": _parse_positive_integer(explainable_value, field_name=field_name, key_id=key_id),
+                "unit": "dimensionless",
+                "label": "no label",
+            }
+
+        parsed_mapping[str(key_id)] = normalized_value
+
+    return parsed_mapping
 
 
 def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str, Any]:
@@ -95,6 +147,8 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         elif get_origin(annotation) and get_origin(annotation) in (list, List):
             # List attribute - split by semicolon
             parsed[attr_key] = [v for v in str(value).split(";") if v]
+        elif annotation is not None and issubclass(annotation, ExplainableObjectDict):
+            parsed[attr_key] = _parse_explainable_object_dict_input(value, field_name=attr_key)
         elif annotation is None:
             # Case of JobWeb form: some fields like server_or_external_api or service_or_external_api are resolved
             # in the pre_create hook and thus not annotated in the JobWeb __init__. We want to pass them through as-is.

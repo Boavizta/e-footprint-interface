@@ -1,4 +1,6 @@
 """Integration tests for edge device group membership invariants."""
+import json
+
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
@@ -106,3 +108,44 @@ def test_delete_nested_group_promotes_child_group_back_to_root(default_system_re
         parent_group_id,
         grandchild_group_id,
     }
+
+
+def test_create_group_with_initial_sub_groups_and_devices(default_system_repository):
+    first_device_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Sensor A", "EdgeDevice", components=""),
+    )
+    second_device_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Sensor B", "EdgeDevice", components=""),
+    )
+    child_group_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Floor", "EdgeDeviceGroup"),
+    )
+
+    parent_group_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Building",
+            "EdgeDeviceGroup",
+            sub_group_counts=json.dumps({child_group_id: 2}),
+            edge_device_counts=json.dumps({first_device_id: 3, second_device_id: 1}),
+        ),
+    )
+
+    model_web = ModelWeb(default_system_repository)
+    parent_group = model_web.get_efootprint_object_from_efootprint_id(parent_group_id, "EdgeDeviceGroup")
+
+    assert {
+        group.efootprint_id: parent_group.sub_group_counts[group.modeling_obj].value.magnitude
+        for group in model_web.edge_device_groups
+        if group.modeling_obj in parent_group.sub_group_counts
+    } == {child_group_id: 2}
+    assert {
+        device.efootprint_id: parent_group.edge_device_counts[device.modeling_obj].value.magnitude
+        for device in model_web.edge_devices
+        if device.modeling_obj in parent_group.edge_device_counts
+    } == {first_device_id: 3, second_device_id: 1}
+    assert [device.efootprint_id for device in model_web.ungrouped_edge_devices] == []
+    assert [group.efootprint_id for group in model_web.root_edge_device_groups] == [parent_group_id]

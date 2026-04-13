@@ -11,6 +11,7 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List, get_origin, get_args, TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import Sources
@@ -65,6 +66,16 @@ def create_efootprint_obj_from_parsed_data(
                 model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
                 for obj_id in value
             ]
+        elif issubclass(annotation, ExplainableObjectDict):
+            explainable_dict = ExplainableObjectDict()
+            for key_id, explainable_value_dict in value.items():
+                if key_id not in model_web.flat_efootprint_objs_dict:
+                    raise ValueError(f"Unknown modeling object id '{key_id}' in {attr_name}.")
+                explainable_value = ExplainableObject.from_json_dict(explainable_value_dict)
+                if explainable_value.source is None:
+                    explainable_value.source = Sources.USER_DATA
+                explainable_dict[model_web.flat_efootprint_objs_dict[key_id]] = explainable_value
+            obj_creation_kwargs[attr_name] = explainable_dict
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
             obj_to_add = model_web.get_efootprint_object_from_efootprint_id(value, mod_obj_attribute_object_type_str)

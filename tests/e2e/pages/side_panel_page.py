@@ -105,6 +105,16 @@ class SidePanelPage:
         self.page.locator(f"#add-btn-{web_id}").click()
         return self
 
+    def add_to_dict_count(self, web_id: str, option_label: str, count: str = "1"):
+        """Add an object to a dict-count widget and optionally change its count."""
+        self.page.locator(f"#select-new-object-{web_id}").select_option(label=option_label)
+        self.page.locator(f"#add-btn-{web_id}").click()
+        if count != "1":
+            row = self.page.locator(f"#objects-already-selected-for-{web_id} tr").filter(has_text=option_label)
+            row.locator("input[type='number']").fill(count)
+            row.locator("input[type='number']").dispatch_event("change")
+        return self
+
     def get_type_selector(self):
         """Get the object type selector dropdown (scoped to the visible form)."""
         # Scope to sidePanelForm to avoid matching hidden storage form selector

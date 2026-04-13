@@ -27,13 +27,6 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
         return "edge_device_group"
 
     @classmethod
-    def prepare_creation_input(cls, form_data):
-        form_data = dict(form_data)
-        form_data["sub_group_counts"] = {}
-        form_data["edge_device_counts"] = {}
-        return form_data
-
-    @classmethod
     def pre_delete(cls, web_obj, model_web):
         # Remove from all parent groups' sub_group_counts dicts
         # (backend self_delete raises PermissionError if still referenced)
@@ -284,21 +277,47 @@ Inspired by `select_multiple.html` but with per-entry count fields:
 - `available_edge_device_groups`: all existing groups (for sub-group picker)
 - `available_edge_devices`: all existing devices (for device picker)
 
-### 4e. post_create hook to populate dicts
+### 4e. Parse dict-count inputs as constructor inputs
 
-The creation form includes dict-count data as JSON in the form submission. A `post_create` hook on `EdgeDeviceGroupWeb` populates the dicts after the empty group is created:
+Do not create the group with empty dicts and populate them afterwards. The dict-count widget payload should be parsed before object creation and passed directly into the `EdgeDeviceGroup` constructor so counts-dependent attributes are computed once, not once per inserted entry.
+
+This should be implemented as **generic support for input `ExplainableObjectDict` constructor parameters**, not as `EdgeDeviceGroup`-specific creation glue.
+
+**File:** `model_builder/adapters/forms/form_data_parser.py`
+
+Teach `parse_form_data()` to recognize dict-count widget payloads and normalize them into a canonical parsed shape for any input `ExplainableObjectDict` attribute:
+
+- keys: object ids
+- values: serialized explainable-object payloads
+
+For this feature, the hidden input can still carry simple JSON such as `{"<obj_id>": 3, ...}`, but the parser should convert it to the same generic internal representation the factory expects, for example:
 
 ```python
-@classmethod
-def post_create(cls, added_obj, form_data, model_web):
-    efp_obj = added_obj.modeling_obj
-    for group_id, count in json.loads(form_data.get("sub_group_counts_json", "{}")).items():
-        group = model_web.flat_efootprint_objs_dict[group_id]
-        efp_obj.sub_group_counts[group] = SourceValue(int(count) * u.dimensionless)
-    for device_id, count in json.loads(form_data.get("edge_device_counts_json", "{}")).items():
-        device = model_web.flat_efootprint_objs_dict[device_id]
-        efp_obj.edge_device_counts[device] = SourceValue(int(count) * u.dimensionless)
+{
+    "sub_group_counts": {
+        "<group_id>": {"value": "3", "unit": "dimensionless", "label": "no label"},
+    },
+    "edge_device_counts": {
+        "<device_id>": {"value": "1", "unit": "dimensionless", "label": "no label"},
+    },
+}
 ```
+
+Validation to do here:
+- JSON is well-formed
+- counts are integers
+- counts are strictly positive
+
+**File:** `model_builder/domain/object_factory.py`
+
+Extend `create_efootprint_obj_from_parsed_data()` so that any constructor input annotated as `ExplainableObjectDict` is built generically:
+
+- resolve each key id via `model_web.flat_efootprint_objs_dict`
+- build each value via `ExplainableObject.from_json_dict(...)`
+- instantiate an `ExplainableObjectDict` from the resolved mapping
+- pass that dict directly into `from_defaults(...)`
+
+This keeps the parser responsible for HTTP/widget normalization and the factory responsible for model-object resolution.
 
 ---
 
@@ -395,7 +414,7 @@ Styles from the mockup (`feature/edge-device-group/mockup.html`):
 | `model_builder/adapters/views/views_dict_mutation.py` | Dict mutation endpoints |
 | `theme/static/scripts/dict_count.js` | Dict-count widget JS |
 
-### Modified files (10)
+### Modified files (12)
 
 | File | Change |
 |------|--------|
@@ -409,6 +428,8 @@ Styles from the mockup (`feature/edge-device-group/mockup.html`):
 | `model_builder/templates/model_builder/side_panels/edit/edit_panel__generic.html` | Add group membership block |
 | `model_builder/adapters/views/views_edition.py` | Pass `group_memberships` context |
 | `model_builder/adapters/forms/form_context_builder.py` | Provide available groups/devices for dict-count |
+| `model_builder/adapters/forms/form_data_parser.py` | Parse dict-count widget payloads into generic `ExplainableObjectDict` input data |
+| `model_builder/domain/object_factory.py` | Add generic constructor support for input `ExplainableObjectDict` attributes |
 
 ---
 
@@ -498,9 +519,16 @@ This is the cheapest layer to catch silent regressions in the widget.
 Extend `tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_device_group_web.py`.
 
 Add tests for:
-- `post_create` with empty `sub_group_counts_json` / `edge_device_counts_json`
-- `post_create` populating both dicts with the expected `SourceValue(... * u.dimensionless)` values
-- `post_create` rejecting malformed JSON or unknown ids without leaving partially-mutated state
+- the group web class no longer needs creation-time dict population hooks
+
+Add adapter/factory tests around `model_builder/adapters/forms/form_data_parser.py`
+and `model_builder/domain/object_factory.py` to cover:
+- dict-count payload parsing with empty values
+- dict-count payload parsing into the canonical parsed `ExplainableObjectDict` shape
+- rejection of malformed JSON
+- rejection of non-integer, zero, and negative counts
+- factory resolution of object ids into `ExplainableObjectDict` keys
+- factory rejection of unknown ids without leaving partially-created state
 
 Add form-context tests around `model_builder/adapters/forms/form_context_builder.py` or a new adapter-form test file to assert:
 - `build_creation_context` exposes `available_edge_device_groups`
@@ -511,12 +539,12 @@ Add form-context tests around `model_builder/adapters/forms/form_context_builder
 
 In `tests/integration/test_edge_device_groups.py`, add a create flow that submits group creation data through the real create use case:
 - create two devices and one pre-existing group
-- create a new group with both `sub_group_counts_json` and `edge_device_counts_json`
+- create a new group with both `sub_group_counts` and `edge_device_counts` populated through the parsed creation input path
 - assert counts are persisted correctly
 - assert linked devices disappear from `ungrouped_edge_devices`
 - assert linked sub-groups disappear from `root_edge_device_groups`
 
-This verifies the `prepare_creation_input` + `post_create` contract end to end.
+This verifies the parse + factory + constructor path end to end.
 
 #### E2E tests
 
