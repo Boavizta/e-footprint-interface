@@ -33,26 +33,27 @@
                 </h2>
                 <div id="collapseGroupMembership{{ object_to_edit.class_as_simple_str }}"
                      class="accordion-collapse collapse" data-bs-parent="#accordionAllAttributes">
-                    <div class="accordion-body gy-2">
+                    <div class="accordion-body">
                         {% for membership in group_memberships %}
-                            <div class="d-flex align-items-center gap-2 mb-2"
+                            <div class="group-membership-row"
                                  data-group-membership-name="{{ membership.group_name }}">
-                                <span class="flex-grow-1">{{ membership.group_name }}</span>
+                                <span class="group-membership-name">{{ membership.group_name }}</span>
                                 <input type="number" min="1" step="1" value="{{ membership.count }}"
-                                       class="form-control form-control-sm"
-                                       style="width: 5rem;"
+                                       class="count-inline-edit form-control form-control-sm"
+                                       title="Count in {{ membership.group_name }}"
                                        hx-post="/model_builder/update-dict-count/{{ membership.group_id }}/{{ object_to_edit.efootprint_id }}/"
                                        hx-trigger="change"
                                        hx-swap="none"
                                        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'
                                        hx-on::after-request="if (event.detail.successful) { refreshEditObjectPanel('{{ object_to_edit.efootprint_id }}'); }">
                                 <button type="button"
-                                        class="btn btn-sm btn-outline-danger"
+                                        class="unlink-btn btn"
+                                        title="Remove from {{ membership.group_name }}"
                                         hx-post="/model_builder/unlink-dict-entry/{{ membership.group_id }}/{{ object_to_edit.efootprint_id }}/"
                                         hx-swap="none"
                                         hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'
                                         hx-on::after-request="if (event.detail.successful) { refreshEditObjectPanel('{{ object_to_edit.efootprint_id }}'); }">
-                                    Remove
+                                    &times;
                                 </button>
                             </div>
                         {% endfor %}

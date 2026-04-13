@@ -39,7 +39,7 @@
                     {% include 'model_builder/object_cards/partials/group_content.html' with group=object %}
                     <button
                         id="add-or-link-to-{{ object.web_id }}"
-                        class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2 mt-2"
+                        class="add-or-link-btn btn text-center d-flex flex-row justify-content-center align-items-center w-100 mt-2"
                         hx-get="/model_builder/open-edit-object-panel/{{ object.efootprint_id }}/"
                         hx-target="#sidePanel"
                         hx-trigger="click"
@@ -47,7 +47,10 @@
                         hx-disabled-elt="button"
                         _="on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ object.web_id }}"
                     >
-                        <p class="h8 mb-0 text-break text-addition">Add or link existing</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus me-1" viewBox="0 0 16 16">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                        </svg>
+                        <p class="h8 mb-0 text-break">Add or link existing</p>
                     </button>
                 </div>
             </div>

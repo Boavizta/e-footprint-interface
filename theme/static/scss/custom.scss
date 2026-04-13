@@ -933,6 +933,151 @@ input:disabled{
   --bs-tooltip-opacity: 1;
 }
 
+/* Edge device groups */
+/*----------------------------------*/
+
+.group-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.group-entry {
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    transition: border-color 0.15s;
+
+    &:hover {
+        border-color: var(--gray-300);
+    }
+
+    .accordion-header {
+        min-height: 2.25rem;
+    }
+
+    .btn-white {
+        background-color: transparent;
+    }
+}
+
+.group-entry--subgroup {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+
+    > .accordion > .accordion-item > .accordion-header {
+        background: var(--gray-50);
+    }
+}
+
+.count-inline-edit.form-control {
+    width: 3.25rem;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--new-primary);
+    background: var(--new-light-primary);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    text-align: center;
+    -moz-appearance: textfield;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+
+    &:hover {
+        border-color: var(--new-primary);
+    }
+
+    &:focus {
+        border-color: var(--new-primary);
+        background: #fff;
+        box-shadow: none;
+        outline: none;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}
+
+.unlink-btn.btn {
+    background: none;
+    border: none;
+    color: var(--gray-350);
+    padding: 2px 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+
+    &:hover,
+    &:focus {
+        color: #dc3545;
+        background: #fce4e4;
+    }
+}
+
+.add-or-link-btn.btn {
+    border: 2px dotted var(--gray-350) !important;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.375rem 0.75rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+    p {
+        color: var(--gray-400);
+        transition: color 0.15s;
+    }
+
+    &:hover {
+        background: var(--gray-50);
+        border-color: var(--new-primary) !important;
+
+        p {
+            color: var(--new-primary);
+        }
+    }
+}
+
+#btn-add-edge-device-group {
+    border-color: var(--new-primary) !important;
+    color: var(--new-primary) !important;
+}
+
+.group-membership-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.15s;
+
+    &:hover {
+        border-color: var(--gray-300);
+    }
+
+    .group-membership-name {
+        flex: 1;
+        min-width: 0;
+        color: var(--dark-blue);
+        font-weight: 400;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .unlink-btn.btn {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+}
+
 /* GitHub Button */
 .custom-github-button {
   display: inline-flex;

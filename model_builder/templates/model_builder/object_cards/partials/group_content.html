@@ -1,18 +1,18 @@
 {% load label_filters %}
-<div class="w-100 d-flex flex-column gap-2" id="{{ group.web_id }}-content">
+<div class="w-100 group-content" id="{{ group.web_id }}-content">
     {% for entry in group.sub_group_entries %}
-        <div id="{{ entry.object.web_id }}" class="rounded-3 border border-light-subtle overflow-hidden">
+        <div id="{{ entry.object.web_id }}" class="group-entry group-entry--subgroup">
             <div class="accordion accordion-flush">
                 <div class="accordion-item">
-                    <div class="accordion-header p-0 d-flex align-items-center" style="background-color: var(--gray-50);">
-                        <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0"
+                    <div class="accordion-header p-0 d-flex align-items-center">
+                        <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#flush-{{ entry.object.web_id }}"
                                 onclick="reverseIconAccordion('{{ entry.object.web_id }}')"
                                 aria-expanded="false"
                                 aria-controls="flush-{{ entry.object.web_id }}">
                             <svg id="icon_accordion_{{ entry.object.web_id }}" xmlns="http://www.w3.org/2000/svg"
-                                 width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                                 width="14" height="14" fill="none" stroke="#9CA3AF" stroke-width="3"
                                  class="bi bi-chevron-right"
                                  viewBox="0 0 16 16">
                                 <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
@@ -36,13 +36,13 @@
                         </button>
                         <input type="number" min="1" step="1" value="{{ entry.count|display_count }}" name="count"
                                class="count-inline-edit form-control form-control-sm me-2"
-                               style="width: 4.5rem;"
+                               title="Count in {{ group.name }}"
                                hx-post="/model_builder/update-dict-count/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
                                hx-trigger="change"
                                hx-swap="none"
                                hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
                         <button type="button"
-                                class="unlink-btn btn btn-sm btn-outline-light text-secondary me-2"
+                                class="unlink-btn btn me-2"
                                 title="Remove from {{ group.name }}"
                                 hx-post="/model_builder/unlink-dict-entry/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
                                 hx-swap="none"
@@ -51,7 +51,7 @@
                         </button>
                     </div>
                     <div id="flush-{{ entry.object.web_id }}" class="accordion-collapse collapse">
-                        <div class="accordion-body pt-2 pb-0 px-3">
+                        <div class="accordion-body pt-2 pb-2 px-3">
                             {% include 'model_builder/object_cards/partials/group_content.html' with group=entry.object %}
                         </div>
                     </div>
@@ -62,18 +62,18 @@
 
     {% for entry in group.edge_device_entries %}
         {% if entry.object.class_as_simple_str == "EdgeDevice" %}
-            <div id="{{ entry.object.web_id }}" class="rounded-3 border border-light-subtle overflow-hidden">
+            <div id="{{ entry.object.web_id }}" class="group-entry">
                 <div class="accordion accordion-flush">
                     <div class="accordion-item">
                         <div class="accordion-header p-0 d-flex align-items-center">
-                            <button type="button" class="chevron-btn btn btn-link text-black ms-3 p-0"
+                            <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#flush-{{ entry.object.web_id }}"
                                     onclick="reverseIconAccordion('{{ entry.object.web_id }}')"
                                     aria-expanded="false"
                                     aria-controls="flush-{{ entry.object.web_id }}">
                                 <svg id="icon_accordion_{{ entry.object.web_id }}" xmlns="http://www.w3.org/2000/svg"
-                                     width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="3"
+                                     width="14" height="14" fill="none" stroke="#9CA3AF" stroke-width="3"
                                      class="bi bi-chevron-right"
                                      viewBox="0 0 16 16">
                                     <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
@@ -97,13 +97,13 @@
                             </button>
                             <input type="number" min="1" step="1" value="{{ entry.count|display_count }}" name="count"
                                    class="count-inline-edit form-control form-control-sm me-2"
-                                   style="width: 4.5rem;"
+                                   title="Count in {{ group.name }}"
                                    hx-post="/model_builder/update-dict-count/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
                                    hx-trigger="change"
                                    hx-swap="none"
                                    hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
                             <button type="button"
-                                    class="unlink-btn btn btn-sm btn-outline-light text-secondary me-2"
+                                    class="unlink-btn btn me-2"
                                     title="Remove from {{ group.name }}"
                                     hx-post="/model_builder/unlink-dict-entry/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
                                     hx-swap="none"
@@ -112,7 +112,7 @@
                             </button>
                         </div>
                         <div id="flush-{{ entry.object.web_id }}" class="accordion-collapse collapse">
-                            <div class="accordion-body pt-2 pb-0 px-3">
+                            <div class="accordion-body pt-2 pb-2 px-3">
                                 {% for component in entry.object.components %}
                                     {% include 'model_builder/object_cards/edge_component_card.html' with object=component %}
                                 {% endfor %}
@@ -122,9 +122,9 @@
                 </div>
             </div>
         {% else %}
-            <div id="{{ entry.object.web_id }}" class="rounded-3 border border-light-subtle overflow-hidden d-flex align-items-center">
+            <div id="{{ entry.object.web_id }}" class="group-entry d-flex align-items-center">
                 <button id="button-{{ entry.object.web_id }}"
-                        class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0"
+                        class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0 ms-2"
                         type="button"
                         hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
                         hx-target="#sidePanel"
@@ -141,13 +141,13 @@
                 </button>
                 <input type="number" min="1" step="1" value="{{ entry.count|display_count }}" name="count"
                        class="count-inline-edit form-control form-control-sm me-2"
-                       style="width: 4.5rem;"
+                       title="Count in {{ group.name }}"
                        hx-post="/model_builder/update-dict-count/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
                        hx-trigger="change"
                        hx-swap="none"
                        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
                 <button type="button"
-                        class="unlink-btn btn btn-sm btn-outline-light text-secondary me-2"
+                        class="unlink-btn btn me-2"
                         title="Remove from {{ group.name }}"
                         hx-post="/model_builder/unlink-dict-entry/{{ group.efootprint_id }}/{{ entry.object.efootprint_id }}/"
                         hx-swap="none"
