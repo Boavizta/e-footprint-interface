@@ -110,7 +110,8 @@ class SimpleFormStrategy(FormStrategy):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
             obj_to_edit.class_as_simple_str,
             obj_to_edit.modeling_obj.__dict__,
-            self.model_web
+            self.model_web,
+            obj_to_edit=obj_to_edit,
         )
 
         # Apply field transforms if configured

@@ -142,9 +142,11 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             attr_key = key
 
         annotation = None
+        annotation_origin = None
         if attr_key in init_sig_params:
             annotation = init_sig_params[attr_key].annotation
             annotation = resolve_optional_annotation(annotation)
+            annotation_origin = get_origin(annotation)
         if attr_key.endswith("__unit"):
             base_attr = attr_key[:-6]
             if base_attr not in parsed or "value" not in parsed[base_attr]:
@@ -164,10 +166,14 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         elif attr_key in ["name", "id", "type_object_available", "efootprint_id_of_parent_to_link_to",
                           "csrfmiddlewaretoken", "recomputation"]:
             parsed[attr_key] = value
-        elif get_origin(annotation) and get_origin(annotation) in (list, List):
+        elif annotation_origin and annotation_origin in (list, List):
             # List attribute - split by semicolon
             parsed[attr_key] = [v for v in str(value).split(";") if v]
-        elif annotation is not None and issubclass(annotation, ExplainableObjectDict):
+        elif (annotation_origin is not None
+              and isinstance(annotation_origin, type)
+              and issubclass(annotation_origin, ExplainableObjectDict)):
+            parsed[attr_key] = _parse_explainable_object_dict_input(value, field_name=attr_key)
+        elif annotation is not None and isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict):
             parsed[attr_key] = _parse_explainable_object_dict_input(value, field_name=attr_key)
         elif annotation is None:
             # Case of JobWeb form: some fields like server_or_external_api or service_or_external_api are resolved

@@ -6,6 +6,7 @@ from typing import get_origin, List, get_args, TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -67,6 +68,28 @@ def format_magnitude_for_number_input(magnitude) -> str:
 def compatible_step_for_magnitude(magnitude, default_step: float = 0.1) -> str:
     """Return a step value compatible with the given magnitude (falling back to default_step)."""
     return _get_compatible_step(Decimal(str(magnitude)), default_step)
+
+
+def _build_dict_count_field_from_annotation(
+    attr_name: str, id_prefix: str, type_arg_str: str,
+    default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None) -> dict:
+    """Build a dict_count field payload for an `ExplainableObjectDict[X]` attribute."""
+    available_web_objects = model_web.get_web_objects_from_efootprint_type(type_arg_str)
+    if obj_to_edit is not None:
+        available_web_objects = obj_to_edit.filter_dict_count_options(attr_name, available_web_objects)
+    options = sorted(
+        [{"value": obj.efootprint_id, "label": obj.name} for obj in available_web_objects],
+        key=lambda option: option["label"].lower(),
+    )
+    selected_raw = default_values.get(attr_name) or {}
+    selected_counts = {key.id: count.value.magnitude for key, count in selected_raw.items()}
+    return {
+        "input_type": "dict_count",
+        "web_id": f"{id_prefix}_{attr_name}",
+        "options": options,
+        "options_json": json.dumps(options),
+        "selected_json": json.dumps(selected_counts),
+    }
 
 
 def generate_object_creation_structure(
@@ -152,7 +175,8 @@ def generate_select_multiple_field(
 
 
 def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb"):
+    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb",
+    obj_to_edit: "ModelingObjectWeb" = None):
     structure_fields = []
     structure_fields_advanced = []
     dynamic_lists = []
@@ -181,11 +205,21 @@ def generate_dynamic_form(
             "label": field_config.get("label", attr_name),
             "tooltip": field_config.get("tooltip", False)
         }
-        if get_origin(annotation) and get_origin(annotation) in (list, List):
+        annotation_origin = get_origin(annotation)
+        if annotation_origin and annotation_origin in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             selected_objects = default_values.get(attr_name, [])
             structure_field.update(
                 generate_select_multiple_field(attr_name, id_prefix, selected_objects, list_attribute_object_type_str, model_web)
+            )
+        elif (annotation_origin is not None
+              and isinstance(annotation_origin, type)
+              and issubclass(annotation_origin, ExplainableObjectDict)):
+            type_arg = get_args(annotation)[0]
+            type_arg_str = type_arg if isinstance(type_arg, str) else type_arg.__name__
+            structure_field.update(
+                _build_dict_count_field_from_annotation(
+                    attr_name, id_prefix, type_arg_str, default_values, model_web, obj_to_edit)
             )
         elif issubclass(annotation, str):
             structure_field.update({

@@ -9,16 +9,10 @@
         hx-on::after-request="closeAndEmptySidePanel()"
     >
         {% if parent_group_membership_field %}
-            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" with field=parent_group_membership_field %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" with field=parent_group_membership_field %}
         {% endif %}
 
-        {% for form_section in form_sections %}
-            {% include "model_builder/side_panels/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
-        {% endfor %}
-
-        {% for field in dict_count_fields %}
-            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
-        {% endfor %}
+        {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>
 
     <p class="mb-3 mt-4">

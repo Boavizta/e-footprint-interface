@@ -112,6 +112,15 @@ class ModelingObjectWeb:
                     "fabrication_impact_repartition_weights", "fabrication_impact_repartition_weight_sum",
                     "usage_impact_repartition_weights", "usage_impact_repartition_weight_sum"]]
 
+    def filter_dict_count_options(self, attr_name: str, available_options: list) -> list:
+        """Filter options offered for an `ExplainableObjectDict[X]` attribute in the edit form.
+
+        Default: exclude the object being edited so it cannot reference itself. Subclasses may
+        override to apply domain-specific cycle filters (e.g. excluding ancestor groups).
+        """
+        del attr_name
+        return [obj for obj in available_options if obj.efootprint_id != self.efootprint_id]
+
     @property
     def modeling_obj(self):
         return self._modeling_obj

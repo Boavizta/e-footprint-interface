@@ -90,7 +90,8 @@ class WithStorageFormStrategy(FormStrategy):
         form_fields, form_fields_advanced, dynamic_lists = generate_dynamic_form(
             obj_to_edit.class_as_simple_str,
             obj_to_edit.modeling_obj.__dict__,
-            self.model_web
+            self.model_web,
+            obj_to_edit=obj_to_edit,
         )
 
         context_data = {
@@ -105,7 +106,8 @@ class WithStorageFormStrategy(FormStrategy):
         storage_form_fields, storage_form_fields_advanced, storage_dynamic_lists = generate_dynamic_form(
             storage_to_edit.class_as_simple_str,
             storage_to_edit.modeling_obj.__dict__,
-            storage_to_edit.model_web
+            storage_to_edit.model_web,
+            obj_to_edit=storage_to_edit,
         )
 
         context_data.update({

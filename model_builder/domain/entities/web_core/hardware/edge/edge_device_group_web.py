@@ -8,27 +8,22 @@ from model_builder.domain.services.group_membership_service import (
 class EdgeDeviceGroupWeb(ModelingObjectWeb):
     add_template = "add_edge_device_group.html"
     edit_template = "edit_edge_device_group.html"
-    attributes_to_skip_in_forms = ["sub_group_counts", "edge_device_counts"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
-    form_creation_config = {
-        "strategy": "simple",
-        "dict_count_fields": {
-            "sub_group_counts": "available_edge_device_groups",
-            "edge_device_counts": "available_edge_devices",
-        },
-    }
+    form_creation_config = {"strategy": "simple"}
 
     @property
     def template_name(self):
         return "edge_device_group"
 
-    def get_edition_context_overrides(self) -> dict:
+    def filter_dict_count_options(self, attr_name, available_options):
+        options = super().filter_dict_count_options(attr_name, available_options)
+        if attr_name != "sub_group_counts":
+            return options
+        # Exclude ancestors: picking an ancestor as a sub-group would create a cycle.
         ancestor_ids = {group.id for group in self.modeling_obj._find_all_ancestor_groups()}
-        selectable_sub_groups = [
-            group for group in self.model_web.edge_device_groups
-            if group.efootprint_id not in ancestor_ids | {self.efootprint_id}
-        ]
+        return [obj for obj in options if obj.efootprint_id not in ancestor_ids]
 
+    def get_edition_context_overrides(self) -> dict:
         parent_groups = self.modeling_obj._find_parent_groups()
         parent_ids = {group.id for group in parent_groups}
         # A group can join another group X only if X is not self and self is not an ancestor of X
@@ -49,24 +44,6 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
                 for group in sorted(parent_groups, key=lambda group: group.name)
             ],
             "available_groups_to_join": available_groups_to_join,
-            "dict_count_fields": [
-                {
-                    "attr_name": "sub_group_counts",
-                    "available_objects": selectable_sub_groups,
-                    "selected_counts": {
-                        group.id: count.value.magnitude
-                        for group, count in self.modeling_obj.sub_group_counts.items()
-                    },
-                },
-                {
-                    "attr_name": "edge_device_counts",
-                    "available_objects": self.model_web.edge_devices,
-                    "selected_counts": {
-                        device.id: count.value.magnitude
-                        for device, count in self.modeling_obj.edge_device_counts.items()
-                    },
-                },
-            ],
         }
 
     @classmethod
@@ -81,13 +58,6 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
     def post_create(cls, added_obj, form_data, model_web):
         apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
         return None
-
-    @classmethod
-    def get_creation_prerequisites(cls, model_web):
-        return {
-            "available_edge_device_groups": model_web.edge_device_groups,
-            "available_edge_devices": model_web.edge_devices,
-        }
 
     def _build_group_entry(self, obj, count):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object

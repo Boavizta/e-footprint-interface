@@ -11,10 +11,6 @@
           id="sidePanelForm">
         {% include "model_builder/side_panels/object_form_content.html" with object_type=object_to_edit.class_as_simple_str %}
 
-        {% for field in dict_count_fields %}
-            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
-        {% endfor %}
-
         <div class="accordion my-3" id="accordionAllAttributes">
             {% include "model_builder/side_panels/edit/calculated_attributes_section.html" %}
         </div>

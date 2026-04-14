@@ -12,18 +12,6 @@ from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web 
 class TestEdgeDeviceGroupWeb:
     """Tests for EdgeDeviceGroupWeb-specific behavior."""
 
-    # --- get_creation_prerequisites ---
-
-    def test_get_creation_prerequisites_returns_raw_available_groups_and_devices(self, minimal_model_web):
-        parent = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Building"))
-        device = minimal_model_web.add_new_efootprint_object_to_system(
-            EdgeDevice.from_defaults("Sensor", components=[]))
-
-        prerequisites = EdgeDeviceGroupWeb.get_creation_prerequisites(minimal_model_web)
-
-        assert [group.efootprint_id for group in prerequisites["available_edge_device_groups"]] == [parent.efootprint_id]
-        assert [edge_device.efootprint_id for edge_device in prerequisites["available_edge_devices"]] == [device.efootprint_id]
-
     # --- group entry helpers ---
 
     def test_sub_group_entries_wrap_children_and_keep_counts(self):
@@ -58,37 +46,35 @@ class TestEdgeDeviceGroupWeb:
         assert entries[0]["object"].accordion_parent == web_obj
         assert entries[0]["count"] == 3
 
-    # --- get_edition_context_overrides ---
+    # --- filter_dict_count_options ---
 
-    def test_get_edition_context_overrides_filters_illegal_sub_groups_and_linked_devices(self, minimal_model_web):
+    def test_filter_dict_count_options_excludes_self_and_ancestors_for_sub_groups(self, minimal_model_web):
         campus = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Campus"))
         building = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Building"))
         floor = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Floor"))
         room = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Room"))
         annex = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Annex"))
+
+        campus.modeling_obj.sub_group_counts[building.modeling_obj] = SourceValue(1 * u.dimensionless)
+        building.modeling_obj.sub_group_counts[floor.modeling_obj] = SourceValue(1 * u.dimensionless)
+        floor.modeling_obj.sub_group_counts[room.modeling_obj] = SourceValue(2 * u.dimensionless)
+
+        filtered = floor.filter_dict_count_options("sub_group_counts", minimal_model_web.edge_device_groups)
+
+        assert sorted(group.efootprint_id for group in filtered) == sorted(
+            [annex.efootprint_id, room.efootprint_id])
+
+    def test_filter_dict_count_options_for_edge_devices_only_excludes_self(self, minimal_model_web):
+        group = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Group"))
         shared_device = minimal_model_web.add_new_efootprint_object_to_system(
             EdgeDevice.from_defaults("Shared Sensor", components=[]))
         free_device = minimal_model_web.add_new_efootprint_object_to_system(
             EdgeDevice.from_defaults("Free Sensor", components=[]))
 
-        campus.modeling_obj.sub_group_counts[building.modeling_obj] = SourceValue(1 * u.dimensionless)
-        building.modeling_obj.sub_group_counts[floor.modeling_obj] = SourceValue(1 * u.dimensionless)
-        floor.modeling_obj.sub_group_counts[room.modeling_obj] = SourceValue(2 * u.dimensionless)
-        floor.modeling_obj.edge_device_counts[shared_device.modeling_obj] = SourceValue(3 * u.dimensionless)
+        filtered = group.filter_dict_count_options("edge_device_counts", minimal_model_web.edge_devices)
 
-        overrides = floor.get_edition_context_overrides()
-
-        fields_by_attr = {field["attr_name"]: field for field in overrides["dict_count_fields"]}
-        assert sorted(group.efootprint_id for group in fields_by_attr["sub_group_counts"]["available_objects"]) == sorted([
-            annex.efootprint_id,
-            room.efootprint_id,
-        ])
-        assert fields_by_attr["sub_group_counts"]["selected_counts"] == {room.efootprint_id: 2}
-        assert sorted(device.efootprint_id for device in fields_by_attr["edge_device_counts"]["available_objects"]) == sorted([
-            free_device.efootprint_id,
-            shared_device.efootprint_id,
-        ])
-        assert fields_by_attr["edge_device_counts"]["selected_counts"] == {shared_device.efootprint_id: 3}
+        assert sorted(device.efootprint_id for device in filtered) == sorted(
+            [free_device.efootprint_id, shared_device.efootprint_id])
 
     # --- pre_delete ---
 

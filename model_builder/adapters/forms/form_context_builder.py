@@ -97,9 +97,6 @@ class FormContextBuilder:
         context = strategy.build_creation_context(
             web_class, object_type, config, efootprint_id_of_parent_to_link_to
         )
-        if web_class and config and config.get("dict_count_fields"):
-            prerequisites = web_class.get_creation_prerequisites(self.model_web)
-            context["dict_count_fields"] = self._build_dict_count_fields(object_type, config, prerequisites)
         if web_class and hasattr(web_class, "get_creation_context_overrides"):
             overrides = web_class.get_creation_context_overrides(self.model_web)
             if "available_groups_to_join" in overrides:
@@ -127,11 +124,6 @@ class FormContextBuilder:
         strategy = strategy_class(self.model_web)
         context = strategy.build_edition_context(obj_to_edit, config)
         context.update(obj_to_edit.get_edition_context_overrides())
-        if context.get("dict_count_fields"):
-            context["dict_count_fields"] = self._hydrate_dict_count_fields(
-                context["dict_count_fields"],
-                obj_to_edit.class_as_simple_str,
-            )
         if context.get("group_memberships"):
             context["group_memberships"] = self.hydrate_group_memberships(context["group_memberships"])
         return context
@@ -147,46 +139,6 @@ class FormContextBuilder:
             }
             for membership in group_memberships
         ]
-
-    @staticmethod
-    def _build_dict_count_fields(object_type: str, config: dict, prerequisites: dict) -> list[dict]:
-        fields = []
-        for attr_name, prerequisite_key in config["dict_count_fields"].items():
-            available_objects = prerequisites.get(prerequisite_key, [])
-            options = FormContextBuilder._build_select_options(available_objects)
-            fields.append({
-                "web_id": f"{object_type}_{attr_name}",
-                "attr_name": attr_name,
-                "label": FieldUIConfigProvider.get_label(attr_name),
-                "tooltip": FieldUIConfigProvider.get_tooltip(attr_name),
-                "input_type": "dict_count",
-                "options": options,
-                "options_json": json.dumps(options),
-                "selected_json": json.dumps({}),
-            })
-        return fields
-
-    @staticmethod
-    def _hydrate_dict_count_fields(fields: list[dict], object_type: str) -> list[dict]:
-        hydrated_fields = []
-        for field in fields:
-            hydrated_field = dict(field)
-            attr_name = hydrated_field["attr_name"]
-            hydrated_field.setdefault("web_id", f"{object_type}_{attr_name}")
-            if "available_objects" in hydrated_field:
-                hydrated_field["options"] = FormContextBuilder._build_select_options(
-                    hydrated_field.pop("available_objects")
-                )
-            selected_counts = hydrated_field.pop("selected_counts", None)
-            if selected_counts is not None:
-                hydrated_field["selected_json"] = json.dumps(selected_counts)
-            if "options" in hydrated_field and "options_json" not in hydrated_field:
-                hydrated_field["options_json"] = json.dumps(hydrated_field["options"])
-            hydrated_field.setdefault("label", FieldUIConfigProvider.get_label(attr_name))
-            hydrated_field.setdefault("tooltip", FieldUIConfigProvider.get_tooltip(attr_name))
-            hydrated_field.setdefault("input_type", "dict_count")
-            hydrated_fields.append(hydrated_field)
-        return hydrated_fields
 
     @staticmethod
     def _build_parent_group_membership_field(available_groups: list) -> dict | None:

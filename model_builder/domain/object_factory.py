@@ -71,13 +71,16 @@ def create_efootprint_obj_from_parsed_data(
             continue
         annotation = init_sig_params[attr_name].annotation
         annotation = resolve_optional_annotation(annotation)
-        if get_origin(annotation) and get_origin(annotation) in (list, List):
+        annotation_origin = get_origin(annotation)
+        if annotation_origin and annotation_origin in (list, List):
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             obj_creation_kwargs[attr_name] = [
                 model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
                 for obj_id in value
             ]
-        elif issubclass(annotation, ExplainableObjectDict):
+        elif (annotation_origin is not None and isinstance(annotation_origin, type)
+              and issubclass(annotation_origin, ExplainableObjectDict)) or (
+                isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)):
             explainable_dict = ExplainableObjectDict()
             for key_id, explainable_value_dict in value.items():
                 if key_id not in model_web.flat_efootprint_objs_dict:
@@ -135,9 +138,10 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
 
         annotation = init_sig_params[attr_name].annotation
         annotation = resolve_optional_annotation(annotation)
+        annotation_origin = get_origin(annotation)
         current_value = getattr(obj_to_edit.modeling_obj, attr_name)
 
-        if get_origin(annotation) and get_origin(annotation) in (list, List):
+        if annotation_origin and annotation_origin in (list, List):
             current_mod_obj_ids = [mod_obj.efootprint_id for mod_obj in getattr(obj_to_edit, attr_name)]
             if value == current_mod_obj_ids:
                 continue
@@ -149,7 +153,11 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                  for obj_id in value]])
             continue
 
-        if issubclass(annotation, ExplainableObjectDict):
+        is_explainable_object_dict = (
+            (annotation_origin is not None and isinstance(annotation_origin, type)
+             and issubclass(annotation_origin, ExplainableObjectDict))
+            or (isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)))
+        if is_explainable_object_dict:
             new_entries = _build_explainable_object_dict_entries(value, model_web, attr_name)
             if new_entries != current_value:
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
