@@ -38,7 +38,7 @@
                             <div class="group-membership-row"
                                  data-group-membership-name="{{ membership.group_name }}">
                                 <span class="group-membership-name">{{ membership.group_name }}</span>
-                                <input type="number" min="1" step="1" value="{{ membership.count }}"
+                                <input type="number" min="1" step="1" value="{{ membership.count }}" name="count"
                                        class="count-inline-edit form-control form-control-sm"
                                        title="Count in {{ membership.group_name }}"
                                        hx-post="/model_builder/update-dict-count/{{ membership.group_id }}/{{ object_to_edit.efootprint_id }}/"

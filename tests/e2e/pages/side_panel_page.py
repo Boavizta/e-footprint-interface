@@ -168,7 +168,7 @@ class SidePanelPage:
         self.expand_section(section_name)
         row = self.panel.locator(f"[data-linked-entry-name='{entry_name}']").first
         with self.page.expect_response(lambda response: "/model_builder/unlink-dict-entry/" in response.url):
-            row.get_by_role("button", name="Remove").click()
+            row.locator("button.unlink-btn").click()
         self.page.wait_for_function(
             "() => document.querySelector('.htmx-request') === null",
             timeout=2000,
@@ -195,7 +195,7 @@ class SidePanelPage:
         self.expand_section("Group membership")
         row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
         with self.page.expect_response(lambda response: "/model_builder/unlink-dict-entry/" in response.url):
-            row.get_by_role("button", name="Remove").click()
+            row.locator("button.unlink-btn").click()
         self.page.wait_for_function(
             "() => document.querySelector('.htmx-request') === null",
             timeout=2000,
