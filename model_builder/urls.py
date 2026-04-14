@@ -26,7 +26,7 @@ urlpatterns = [
     path("unlink-dict-entry/<str:parent_id>/<str:key_id>/",
          model_builder.adapters.views.views_dict_mutation.unlink_dict_entry,
          name="unlink-dict-entry"),
-    path("link-dict-entry/<str:parent_id>/<str:key_id>/",
+    path("link-dict-entry/<str:key_id>/",
          model_builder.adapters.views.views_dict_mutation.link_dict_entry,
          name="link-dict-entry"),
     path("delete-object/<object_id>/", model_builder.adapters.views.views_deletion.delete_object, name="delete-object"),

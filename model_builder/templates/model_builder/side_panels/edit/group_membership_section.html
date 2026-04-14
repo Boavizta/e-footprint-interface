@@ -26,7 +26,7 @@
         {% endfor %}
         {% if available_groups_to_join %}
             <div class="add-to-group-row d-flex align-items-center gap-2 mt-2">
-                <select id="add-to-group-select-{{ panel_id }}"
+                <select id="add-to-group-select-{{ panel_id }}" name="parent_id"
                         class="form-select form-select-sm flex-grow-1">
                     {% for group in available_groups_to_join %}
                         <option value="{{ group.efootprint_id }}">{{ group.name }}</option>
@@ -34,7 +34,10 @@
                 </select>
                 <button type="button"
                         class="btn btn-sm btn-primary"
-                        onclick="addObjectToGroup('{{ panel_id }}')">
+                        hx-post="/model_builder/link-dict-entry/{{ panel_id }}/"
+                        hx-include="#add-to-group-select-{{ panel_id }}"
+                        hx-swap="none"
+                        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
                     Add to group
                 </button>
             </div>

@@ -60,7 +60,10 @@ def unlink_dict_entry(request, parent_id, key_id):
 
 @render_exception_modal_if_error
 @time_it
-def link_dict_entry(request, parent_id, key_id):
+def link_dict_entry(request, key_id):
+    parent_id = request.POST.get("parent_id")
+    if not parent_id:
+        raise ValueError("Missing parent_id in request body.")
     model_web = ModelWeb(SessionSystemRepository(request.session))
     parent_group, target_dict, key_obj = _get_group_dict_and_key(model_web, parent_id, key_id)
 

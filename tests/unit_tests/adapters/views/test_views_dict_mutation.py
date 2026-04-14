@@ -46,7 +46,8 @@ class TestDictMutationViews:
             create_post_data_from_class_default_values("Rack A", "EdgeDeviceGroup"),
         )
 
-        link_response = client.post(f"/model_builder/link-dict-entry/{group_id}/{device_id}/")
+        link_response = client.post(
+            f"/model_builder/link-dict-entry/{device_id}/", {"parent_id": group_id})
 
         assert link_response.status_code == 200
         assert "hx-swap-oob='outerHTML:#edge-device-groups-list'" in link_response.content.decode()
@@ -89,7 +90,8 @@ class TestDictMutationViews:
             create_post_data_from_class_default_values("Shelf 1", "EdgeDeviceGroup"),
         )
 
-        response = client.post(f"/model_builder/link-dict-entry/{parent_group_id}/{child_group_id}/")
+        response = client.post(
+            f"/model_builder/link-dict-entry/{child_group_id}/", {"parent_id": parent_group_id})
 
         assert response.status_code == 200
         model_web = _model_web(client)
@@ -118,7 +120,7 @@ class TestDictMutationViews:
             client,
             create_post_data_from_class_default_values("Rack A", "EdgeDeviceGroup"),
         )
-        client.post(f"/model_builder/link-dict-entry/{group_id}/{device_id}/")
+        client.post(f"/model_builder/link-dict-entry/{device_id}/", {"parent_id": group_id})
 
         response = client.post(
             f"/model_builder/update-dict-count/{group_id}/{device_id}/",
@@ -138,7 +140,8 @@ class TestDictMutationViews:
             create_post_data_from_class_default_values("Rack A", "EdgeDeviceGroup"),
         )
 
-        response = client.post(f"/model_builder/link-dict-entry/{group_id}/{group_id}/")
+        response = client.post(
+            f"/model_builder/link-dict-entry/{group_id}/", {"parent_id": group_id})
 
         _assert_error_modal_response(response, "A group cannot be linked to itself or one of its descendants.")
         model_web = _model_web(client)
@@ -156,9 +159,11 @@ class TestDictMutationViews:
             client,
             create_post_data_from_class_default_values("Floor", "EdgeDeviceGroup"),
         )
-        client.post(f"/model_builder/link-dict-entry/{parent_group_id}/{child_group_id}/")
+        client.post(
+            f"/model_builder/link-dict-entry/{child_group_id}/", {"parent_id": parent_group_id})
 
-        response = client.post(f"/model_builder/link-dict-entry/{child_group_id}/{parent_group_id}/")
+        response = client.post(
+            f"/model_builder/link-dict-entry/{parent_group_id}/", {"parent_id": child_group_id})
 
         _assert_error_modal_response(response, "A group cannot be linked to itself or one of its descendants.")
         model_web = _model_web(client)
