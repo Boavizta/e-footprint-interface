@@ -11,6 +11,10 @@ The key principle is:
 import json
 from typing import TYPE_CHECKING, Type
 
+from model_builder.adapters.forms.form_field_generator import (
+    compatible_step_for_magnitude,
+    format_magnitude_for_number_input,
+)
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.adapters.forms.strategies import (
     SimpleFormStrategy,
@@ -129,8 +133,20 @@ class FormContextBuilder:
                 obj_to_edit.class_as_simple_str,
             )
         if context.get("group_memberships"):
-            context["group_memberships"] = self._hydrate_group_memberships(context["group_memberships"])
+            context["group_memberships"] = self.hydrate_group_memberships(context["group_memberships"])
         return context
+
+    @staticmethod
+    def hydrate_group_memberships(group_memberships: list[dict]) -> list[dict]:
+        """Format raw magnitudes from the domain layer into <input type=number>-ready strings."""
+        return [
+            {
+                **membership,
+                "count": format_magnitude_for_number_input(membership["count"]),
+                "step": compatible_step_for_magnitude(membership["count"]),
+            }
+            for membership in group_memberships
+        ]
 
     @staticmethod
     def _build_dict_count_fields(object_type: str, config: dict, prerequisites: dict) -> list[dict]:
@@ -163,10 +179,7 @@ class FormContextBuilder:
                 )
             selected_counts = hydrated_field.pop("selected_counts", None)
             if selected_counts is not None:
-                hydrated_field["selected_json"] = json.dumps({
-                    key_id: FormContextBuilder._normalize_count_value(count)
-                    for key_id, count in selected_counts.items()
-                })
+                hydrated_field["selected_json"] = json.dumps(selected_counts)
             if "options" in hydrated_field and "options_json" not in hydrated_field:
                 hydrated_field["options_json"] = json.dumps(hydrated_field["options"])
             hydrated_field.setdefault("label", FieldUIConfigProvider.get_label(attr_name))
@@ -193,22 +206,8 @@ class FormContextBuilder:
         }
 
     @staticmethod
-    def _hydrate_group_memberships(group_memberships: list[dict]) -> list[dict]:
-        return [
-            {
-                **membership,
-                "count": FormContextBuilder._normalize_count_value(membership["count"]),
-            }
-            for membership in group_memberships
-        ]
-
-    @staticmethod
     def _build_select_options(objects) -> list[dict]:
         return sorted(
             [{"value": obj.efootprint_id, "label": obj.name} for obj in objects],
             key=lambda option: option["label"].lower(),
         )
-
-    @staticmethod
-    def _normalize_count_value(count) -> int | float:
-        return int(count) if float(count).is_integer() else count

@@ -4,6 +4,7 @@ from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 from efootprint.utils.tools import time_it
 
+from model_builder.adapters.forms.form_data_parser import parse_count
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
@@ -23,16 +24,6 @@ def _get_group_dict_and_key(model_web: ModelWeb, parent_id: str, key_id: str):
     raise ValueError(f"Object {key_id} cannot be linked in an edge device group.")
 
 
-def _parse_count(raw_count: str) -> int:
-    try:
-        count = int(raw_count)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("Count must be an integer.") from exc
-    if count < 1:
-        raise ValueError("Count must be at least 1.")
-    return count
-
-
 def _persist_and_present(request, model_web: ModelWeb, panel_object_id: str):
     model_web.persist_to_cache()
     recompute = bool(request.POST.get("recomputation"))
@@ -45,7 +36,8 @@ def _persist_and_present(request, model_web: ModelWeb, panel_object_id: str):
 def update_dict_count(request, parent_id, key_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     _parent_group, target_dict, key_obj = _get_group_dict_and_key(model_web, parent_id, key_id)
-    target_dict[key_obj] = SourceValue(_parse_count(request.POST.get("count")) * u.dimensionless)
+    count = parse_count(request.POST.get("count"), error_prefix="Count")
+    target_dict[key_obj] = SourceValue(count * u.dimensionless)
     return _persist_and_present(request, model_web, panel_object_id=key_id)
 
 

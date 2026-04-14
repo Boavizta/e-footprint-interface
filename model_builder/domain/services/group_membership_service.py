@@ -1,10 +1,6 @@
 """Domain service for attaching a newly created edge device or edge device group
-to existing parent edge device groups, based on a JSON payload produced by the
-creation-panel dict_count widget.
+to existing parent edge device groups.
 """
-import json
-from typing import Any
-
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
 from efootprint.core.hardware.edge.edge_device import EdgeDevice
@@ -15,15 +11,13 @@ PARENT_GROUP_MEMBERSHIPS_FIELD = "parent_group_memberships"
 
 
 def apply_parent_group_memberships_from_form_data(added_obj, form_data: dict, model_web) -> None:
-    """Read the `parent_group_memberships` field from form_data and link the new
-    object into the selected parent groups with their requested counts.
+    """Link `added_obj` into the parent groups listed in the pre-parsed
+    `parent_group_memberships` mapping.
 
-    `added_obj` is the web wrapper returned by `add_new_efootprint_object_to_system`.
-    `form_data` carries the widget's hidden-input value as a JSON-encoded
-    `{parent_group_id: count}` mapping.
+    `form_data[PARENT_GROUP_MEMBERSHIPS_FIELD]` is a `{parent_group_id: count}` dict
+    already parsed by the adapter layer.
     """
-    raw = form_data.get(PARENT_GROUP_MEMBERSHIPS_FIELD)
-    memberships = _parse_memberships(raw)
+    memberships = form_data.get(PARENT_GROUP_MEMBERSHIPS_FIELD) or {}
     if not memberships:
         return
 
@@ -33,32 +27,7 @@ def apply_parent_group_memberships_from_form_data(added_obj, form_data: dict, mo
         if not isinstance(parent_group, EdgeDeviceGroup):
             raise ValueError(f"Parent {parent_id} is not an EdgeDeviceGroup.")
         target_dict = _pick_target_dict(parent_group, member_obj)
-        target_dict[member_obj] = SourceValue(_parse_count(count) * u.dimensionless)
-
-
-def _parse_memberships(raw: Any) -> dict:
-    if raw in (None, ""):
-        return {}
-    if isinstance(raw, str):
-        try:
-            parsed = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"{PARENT_GROUP_MEMBERSHIPS_FIELD} must be valid JSON.") from exc
-    else:
-        parsed = raw
-    if not isinstance(parsed, dict):
-        raise ValueError(f"{PARENT_GROUP_MEMBERSHIPS_FIELD} must be a JSON object.")
-    return parsed
-
-
-def _parse_count(raw_count: Any) -> int:
-    try:
-        count = int(raw_count)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("Parent group membership count must be an integer.") from exc
-    if count < 1:
-        raise ValueError("Parent group membership count must be at least 1.")
-    return count
+        target_dict[member_obj] = SourceValue(count * u.dimensionless)
 
 
 def _pick_target_dict(parent_group: EdgeDeviceGroup, member_obj):

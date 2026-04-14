@@ -9,6 +9,14 @@ from model_builder.domain.services.group_membership_service import (
 )
 
 
+def _build_group_membership_row(group, magnitude) -> dict:
+    return {
+        "group_id": group.id,
+        "group_name": group.name,
+        "count": magnitude,
+    }
+
+
 class EdgeDeviceBaseWeb(ModelingObjectWeb):
     """Base web wrapper for EdgeDevice and its subclasses (EdgeComputer, EdgeAppliance)."""
     add_template = "add_edge_device.html"
@@ -48,11 +56,7 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
         )
         return {
             "group_memberships": [
-                {
-                    "group_id": group.id,
-                    "group_name": group.name,
-                    "count": group.edge_device_counts[self.modeling_obj].value.magnitude,
-                }
+                _build_group_membership_row(group, group.edge_device_counts[self.modeling_obj].value.magnitude)
                 for group in sorted(parent_groups, key=lambda group: group.name)
             ],
             "available_groups_to_join": available_to_join,

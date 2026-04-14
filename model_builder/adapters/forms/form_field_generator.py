@@ -59,6 +59,16 @@ def _get_compatible_step(value: Decimal, configured_step: int | float | None) ->
     return _format_decimal_for_number_input(Decimal("1").scaleb(-decimal_places))
 
 
+def format_magnitude_for_number_input(magnitude) -> str:
+    """Format a numeric magnitude as a canonical dot-decimal string for <input type=number>."""
+    return _format_decimal_for_number_input(Decimal(str(magnitude)))
+
+
+def compatible_step_for_magnitude(magnitude, default_step: float = 0.1) -> str:
+    """Return a step value compatible with the given magnitude (falling back to default_step)."""
+    return _get_compatible_step(Decimal(str(magnitude)), default_step)
+
+
 def generate_object_creation_structure(
     efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"):
     dynamic_form_dict = {

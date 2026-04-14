@@ -1,4 +1,5 @@
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import _build_group_membership_row
 from model_builder.domain.services.group_membership_service import (
     apply_parent_group_memberships_from_form_data,
 )
@@ -44,11 +45,7 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
 
         return {
             "group_memberships": [
-                {
-                    "group_id": group.id,
-                    "group_name": group.name,
-                    "count": group.sub_group_counts[self.modeling_obj].value.magnitude,
-                }
+                _build_group_membership_row(group, group.sub_group_counts[self.modeling_obj].value.magnitude)
                 for group in sorted(parent_groups, key=lambda group: group.name)
             ],
             "available_groups_to_join": available_groups_to_join,

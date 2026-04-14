@@ -35,7 +35,7 @@ class TestEdgeDeviceBaseWeb:
         alpha = EdgeDeviceGroup("Alpha")
         beta = EdgeDeviceGroup("Beta")
         alpha.edge_device_counts[device] = SourceValue(2 * u.dimensionless)
-        beta.edge_device_counts[device] = SourceValue(5 * u.dimensionless)
+        beta.edge_device_counts[device] = SourceValue(0.3 * u.dimensionless)
 
         model_web = MagicMock()
         model_web.edge_device_groups = []
@@ -44,7 +44,7 @@ class TestEdgeDeviceBaseWeb:
         assert web_obj.get_edition_context_overrides() == {
             "group_memberships": [
                 {"group_id": alpha.id, "group_name": "Alpha", "count": 2.0},
-                {"group_id": beta.id, "group_name": "Beta", "count": 5.0},
+                {"group_id": beta.id, "group_name": "Beta", "count": 0.3},
             ],
             "available_groups_to_join": [],
         }

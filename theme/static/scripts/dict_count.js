@@ -34,9 +34,9 @@ function removeDictCountEntry(fieldId, objectId) {
 }
 
 function updateDictCountEntry(fieldId, objectId, rawValue) {
-    const parsed = parseInt(rawValue, 10);
+    const parsed = parseFloat(rawValue);
     const selectedMap = _getDictCountSelectedMap(fieldId);
-    if (!Number.isInteger(parsed) || parsed < 1) {
+    if (!Number.isFinite(parsed) || parsed < 0) {
         refreshDictCountField(fieldId);
         return;
     }
@@ -74,7 +74,7 @@ function refreshDictCountField(fieldId) {
             <tr>
                 <td class="width-70">${option.label}</td>
                 <td class="width-20">
-                    <input type="number" min="1" class="form-control"
+                    <input type="number" min="0" step="any" class="form-control"
                         value="${selectedMap[option.value]}"
                         onchange="event.stopPropagation();updateDictCountEntry('${fieldId}', '${option.value}', this.value)">
                 </td>

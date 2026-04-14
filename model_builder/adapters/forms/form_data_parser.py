@@ -14,23 +14,41 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.services.group_membership_service import PARENT_GROUP_MEMBERSHIPS_FIELD
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 
-def _parse_positive_integer(raw_value: Any, *, field_name: str, key_id: str) -> int:
-    """Parse a strictly positive integer value for a dict-count widget entry."""
+def parse_count(raw_value: Any, *, error_prefix: str) -> float:
+    """Parse a non-negative numeric count from raw form input."""
     try:
-        parsed = int(raw_value)
+        parsed = float(raw_value)
     except (TypeError, ValueError) as exc:
-        raise ValueError(f"{field_name}[{key_id}] must be an integer.") from exc
+        raise ValueError(f"{error_prefix} must be a number.") from exc
 
-    if parsed < 1:
-        raise ValueError(f"{field_name}[{key_id}] must be at least 1.")
-
-    if isinstance(raw_value, float) and not raw_value.is_integer():
-        raise ValueError(f"{field_name}[{key_id}] must be an integer.")
+    if parsed < 0:
+        raise ValueError(f"{error_prefix} must be positive.")
 
     return parsed
+
+
+def _parse_parent_group_memberships(raw_value: Any) -> Dict[str, float]:
+    """Parse the `parent_group_memberships` widget payload into a `{parent_id: count}` dict."""
+    if raw_value in (None, ""):
+        return {}
+    if isinstance(raw_value, str):
+        try:
+            parsed = json.loads(raw_value)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{PARENT_GROUP_MEMBERSHIPS_FIELD} must be valid JSON.") from exc
+    else:
+        parsed = raw_value
+    if not isinstance(parsed, dict):
+        raise ValueError(f"{PARENT_GROUP_MEMBERSHIPS_FIELD} must be a JSON object.")
+    return {
+        str(parent_id): parse_count(
+            count, error_prefix=f"{PARENT_GROUP_MEMBERSHIPS_FIELD}[{parent_id}]")
+        for parent_id, count in parsed.items()
+    }
 
 
 def _parse_explainable_object_dict_input(raw_value: Any, *, field_name: str) -> Dict[str, Dict[str, Any]]:
@@ -58,7 +76,7 @@ def _parse_explainable_object_dict_input(raw_value: Any, *, field_name: str) -> 
             normalized_value.setdefault("label", "no label")
         else:
             normalized_value = {
-                "value": _parse_positive_integer(explainable_value, field_name=field_name, key_id=key_id),
+                "value": parse_count(explainable_value, error_prefix=f"{field_name}[{key_id}]"),
                 "unit": "dimensionless",
                 "label": "no label",
             }
@@ -141,6 +159,8 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         elif key.endswith("_form_data") and isinstance(value, str):
             parsed_key, parsed_form = _parse_inline_form_data(key, value)
             parsed[parsed_key] = parsed_form
+        elif attr_key == PARENT_GROUP_MEMBERSHIPS_FIELD:
+            parsed[attr_key] = _parse_parent_group_memberships(value)
         elif attr_key in ["name", "id", "type_object_available", "efootprint_id_of_parent_to_link_to",
                           "csrfmiddlewaretoken", "recomputation"]:
             parsed[attr_key] = value

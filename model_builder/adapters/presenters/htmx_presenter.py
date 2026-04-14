@@ -263,8 +263,12 @@ class HtmxPresenter:
         )
 
     def _render_group_membership_section_oob_html(self, panel_object_id: str) -> str:
+        from model_builder.adapters.forms.form_context_builder import FormContextBuilder
         web_obj = self.model_web.get_web_object_from_efootprint_id(panel_object_id)
         context = {"object_to_edit": web_obj, **web_obj.get_edition_context_overrides()}
+        if context.get("group_memberships"):
+            context["group_memberships"] = FormContextBuilder.hydrate_group_memberships(
+                context["group_memberships"])
         section_html = render_to_string(
             "model_builder/side_panels/edit/group_membership_section.html", context)
         return f"<div hx-swap-oob='outerHTML:#group-membership-section-{panel_object_id}'>{section_html}</div>"

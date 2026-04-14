@@ -153,9 +153,8 @@ class TestParseFormData:
     @pytest.mark.parametrize(
         ("payload", "message"),
         [
-            ('{"group-1": "abc"}', "must be an integer"),
-            ('{"group-1": 0}', "must be at least 1"),
-            ('{"group-1": -1}', "must be at least 1"),
+            ('{"group-1": "abc"}', "must be a number"),
+            ('{"group-1": -1}', "must be positive"),
             ('["group-1"]', "must be a JSON object"),
             ('{bad json}', "must be valid JSON"),
         ],

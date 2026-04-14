@@ -105,9 +105,8 @@ class TestDictMutationViews:
     @pytest.mark.parametrize(
         ("raw_count", "message"),
         [
-            ("abc", "Count must be an integer."),
-            ("0", "Count must be at least 1."),
-            ("-1", "Count must be at least 1."),
+            ("abc", "Count must be a number."),
+            ("-1", "Count must be positive."),
         ],
     )
     def test_update_dict_count_rejects_invalid_count(self, client, default_system_repository, raw_count, message):
