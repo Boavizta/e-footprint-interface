@@ -8,26 +8,13 @@
         hx-disabled-elt="button"
         hx-on::after-request="closeAndEmptySidePanel()"
     >
-        {% include "model_builder/side_panels/add/add_form_content.html" %}
+        {% for form_section in form_sections %}
+            {% include "model_builder/side_panels/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
+        {% endfor %}
 
-        <div class="mb-3 accordion accordion-panel" id="accordion-edge-device-group-members">
-            <div class="accordion-item rounded-bottom-2" id="item-edge-device-group-members">
-                <h2 class="accordion-header rounded-bottom-2">
-                    <button class="accordion-button fs-3xl rounded-bottom-2" type="button"
-                            data-bs-toggle="collapse" data-bs-target="#collapse_edge_device_group_members"
-                            aria-expanded="true" aria-controls="collapse_edge_device_group_members">
-                        Group members
-                    </button>
-                </h2>
-                <div id="collapse_edge_device_group_members" class="accordion-collapse show">
-                    <div class="accordion-body">
-                        {% for field in dict_count_fields %}
-                            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% for field in dict_count_fields %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
+        {% endfor %}
     </form>
 
     <p class="mb-3 mt-4">

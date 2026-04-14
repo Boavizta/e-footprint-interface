@@ -8,39 +8,13 @@
           hx-disabled-elt="button"
           hx-on::after-request="closeAndEmptySidePanel()"
           id="sidePanelForm">
+        {% include "model_builder/side_panels/object_form_content.html" with object_type=object_to_edit.class_as_simple_str %}
+
+        {% for field in dict_count_fields %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
+        {% endfor %}
+
         <div class="accordion my-3" id="accordionAllAttributes">
-            <div class="accordion-item">
-                <h2 class="accordion-header accordion-header-panel">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseInputAttributes{{ object_to_edit.class_as_simple_str }}"
-                            aria-expanded="true" aria-controls="collapseInputAttributes">
-                        Edge device group attributes
-                    </button>
-                </h2>
-                <div id="collapseInputAttributes{{ object_to_edit.class_as_simple_str }}"
-                     class="accordion-collapse collapse show" data-bs-parent="#accordionAllAttributes">
-                    <div class="accordion-body row gy-2">
-                        {% include "model_builder/side_panels/object_form_content.html" with object_type=object_to_edit.class_as_simple_str %}
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header accordion-header-panel">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseEdgeDeviceGroupMembers"
-                            aria-expanded="false" aria-controls="collapseEdgeDeviceGroupMembers">
-                        Group members
-                    </button>
-                </h2>
-                <div id="collapseEdgeDeviceGroupMembers"
-                     class="accordion-collapse collapse" data-bs-parent="#accordionAllAttributes">
-                    <div class="accordion-body">
-                        {% for field in dict_count_fields %}
-                            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
             {% include "model_builder/side_panels/edit/calculated_attributes_section.html" %}
         </div>
     </form>
