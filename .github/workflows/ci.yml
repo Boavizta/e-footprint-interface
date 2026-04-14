@@ -30,38 +30,17 @@ jobs:
                   poetry run python manage.py makemigrations
                   poetry run python manage.py migrate
 
-            - name: Run Tests
-              run: poetry run python manage.py test
+            - name: Run unit and integration tests
+              run: poetry run pytest tests/unit_tests tests/integration
 
-            - name: Use Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20.8.1
-                  cache: "npm"
+            - name: Install Playwright browsers
+              run: poetry run playwright install --with-deps chromium
 
-            - name: Install dependencies
-              run: npm ci
+            - name: Start Django server
+              run: poetry run python manage.py runserver &
 
-            - name: E2E Tests
-              uses: cypress-io/github-action@v6
-              id: e2e-tests__old
-              with:
-                  browser: firefox
-                  config-file: cypress-test.config.ts
-                  start: npm start
+            - name: Wait for server to be ready
+              run: until nc -z localhost 8000; do sleep 1; done
 
-            - name: Generate test report
-              id: generate-e2e-report
-              if: always() && steps.e2e-tests__old.outcome == 'failure'
-              run: |
-                  mkdir cypress/screenshots || true
-                  npx mochawesome-merge ./cypress/results/mochawesome-report/*.json > tests-report.json
-                  npx marge tests-report.json -o cypress/reports/html
-                  cp -r cypress/screenshots cypress/reports/html/screenshots
-
-            - name: Upload Cypress report
-              uses: actions/upload-artifact@v4
-              if: always() && steps.generate-e2e-report.outcome == 'success'
-              with:
-                  name: Cypress report
-                  path: cypress/reports/html
+            - name: Run E2E tests
+              run: poetry run pytest tests/e2e --base-url http://localhost:8000
