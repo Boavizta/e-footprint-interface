@@ -255,8 +255,18 @@ class HtmxPresenter:
                 "edge-devices-list", self._render_ungrouped_edge_devices_html(), classes)
         )
 
-    def present_dict_mutation(self, recompute: bool = False) -> HttpResponse:
-        response = HttpResponse(self._render_edge_device_lists_oob_html())
+    def _render_group_membership_section_oob_html(self, panel_object_id: str) -> str:
+        web_obj = self.model_web.get_web_object_from_efootprint_id(panel_object_id)
+        context = {"object_to_edit": web_obj, **web_obj.get_edition_context_overrides()}
+        section_html = render_to_string(
+            "model_builder/side_panels/edit/group_membership_section.html", context)
+        return f"<div hx-swap-oob='outerHTML:#group-membership-section-{panel_object_id}'>{section_html}</div>"
+
+    def present_dict_mutation(self, recompute: bool = False, panel_object_id: str = None) -> HttpResponse:
+        body = self._render_edge_device_lists_oob_html()
+        if panel_object_id:
+            body += self._render_group_membership_section_oob_html(panel_object_id)
+        response = HttpResponse(body)
         response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
         if recompute:
             self._append_recomputation_html(response)

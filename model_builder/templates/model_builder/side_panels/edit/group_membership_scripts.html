@@ -1,11 +1,4 @@
 <script>
-    function refreshEditObjectPanel(objectId) {
-        htmx.ajax("GET", `/model_builder/open-edit-object-panel/${objectId}/`, {
-            target: "#sidePanel",
-            swap: "innerHTML"
-        });
-    }
-
     function addObjectToGroup(objectId) {
         const select = document.getElementById(`add-to-group-select-${objectId}`);
         if (!select || !select.value) {
@@ -17,6 +10,6 @@
         htmx.ajax("POST", `/model_builder/link-dict-entry/${groupId}/${objectId}/`, {
             swap: "none",
             values: values
-        }).then(() => refreshEditObjectPanel(objectId));
+        });
     }
 </script>

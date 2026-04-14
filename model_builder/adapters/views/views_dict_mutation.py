@@ -33,10 +33,11 @@ def _parse_count(raw_count: str) -> int:
     return count
 
 
-def _persist_and_present(request, model_web: ModelWeb):
+def _persist_and_present(request, model_web: ModelWeb, panel_object_id: str):
     model_web.persist_to_cache()
     recompute = bool(request.POST.get("recomputation"))
-    return HtmxPresenter(request, model_web).present_dict_mutation(recompute=recompute)
+    return HtmxPresenter(request, model_web).present_dict_mutation(
+        recompute=recompute, panel_object_id=panel_object_id)
 
 
 @render_exception_modal_if_error
@@ -45,7 +46,7 @@ def update_dict_count(request, parent_id, key_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     _parent_group, target_dict, key_obj = _get_group_dict_and_key(model_web, parent_id, key_id)
     target_dict[key_obj] = SourceValue(_parse_count(request.POST.get("count")) * u.dimensionless)
-    return _persist_and_present(request, model_web)
+    return _persist_and_present(request, model_web, panel_object_id=key_id)
 
 
 @render_exception_modal_if_error
@@ -54,7 +55,7 @@ def unlink_dict_entry(request, parent_id, key_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     _parent_group, target_dict, key_obj = _get_group_dict_and_key(model_web, parent_id, key_id)
     del target_dict[key_obj]
-    return _persist_and_present(request, model_web)
+    return _persist_and_present(request, model_web, panel_object_id=key_id)
 
 
 @render_exception_modal_if_error
@@ -67,4 +68,4 @@ def link_dict_entry(request, parent_id, key_id):
         raise ValueError("A group cannot be linked to itself or one of its descendants.")
 
     target_dict[key_obj] = SourceValue(1 * u.dimensionless)
-    return _persist_and_present(request, model_web)
+    return _persist_and_present(request, model_web, panel_object_id=key_id)
