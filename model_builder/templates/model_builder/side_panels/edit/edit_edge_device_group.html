@@ -1,6 +1,7 @@
 {% extends "model_builder/side_panels/edit/edit_panel__generic.html" %}
 
 {% block panel_body %}
+    {% include "model_builder/side_panels/edit/group_membership_section.html" %}
     <form class="my-3"
           autocomplete="off"
           hx-post="/model_builder/edit-object/{{ object_to_edit.efootprint_id }}/"
@@ -18,4 +19,8 @@
             {% include "model_builder/side_panels/edit/calculated_attributes_section.html" %}
         </div>
     </form>
+{% endblock %}
+
+{% block extra_scripts %}
+    {% include "model_builder/side_panels/edit/group_membership_scripts.html" %}
 {% endblock %}

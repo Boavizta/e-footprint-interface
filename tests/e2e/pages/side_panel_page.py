@@ -177,7 +177,6 @@ class SidePanelPage:
 
     def set_group_membership_count(self, group_name: str, count: str):
         """Update a group membership count from a device edit panel."""
-        self.expand_section("Group membership")
         row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
         field = row.locator("input[type='number']")
         with self.page.expect_response(lambda response: "/model_builder/update-dict-count/" in response.url):
@@ -192,7 +191,6 @@ class SidePanelPage:
 
     def remove_group_membership(self, group_name: str):
         """Remove a group membership from a device edit panel."""
-        self.expand_section("Group membership")
         row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
         with self.page.expect_response(lambda response: "/model_builder/unlink-dict-entry/" in response.url):
             row.locator("button.unlink-btn").click()

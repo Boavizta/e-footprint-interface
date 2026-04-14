@@ -1,0 +1,43 @@
+{% if group_memberships or available_groups_to_join %}
+    <div class="group-membership-section border rounded-2 p-3 mb-3">
+        <h6 class="mb-2"><b>Group membership</b></h6>
+        {% for membership in group_memberships %}
+            <div class="group-membership-row"
+                 data-group-membership-name="{{ membership.group_name }}">
+                <span class="group-membership-name">{{ membership.group_name }}</span>
+                <input type="number" min="1" step="1" value="{{ membership.count }}" name="count"
+                       class="count-inline-edit form-control form-control-sm"
+                       title="Count in {{ membership.group_name }}"
+                       hx-post="/model_builder/update-dict-count/{{ membership.group_id }}/{{ object_to_edit.efootprint_id }}/"
+                       hx-trigger="change"
+                       hx-swap="none"
+                       hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'
+                       hx-on::after-request="if (event.detail.successful) { refreshEditObjectPanel('{{ object_to_edit.efootprint_id }}'); }">
+                <button type="button"
+                        class="unlink-btn btn"
+                        title="Remove from {{ membership.group_name }}"
+                        hx-post="/model_builder/unlink-dict-entry/{{ membership.group_id }}/{{ object_to_edit.efootprint_id }}/"
+                        hx-swap="none"
+                        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'
+                        hx-on::after-request="if (event.detail.successful) { refreshEditObjectPanel('{{ object_to_edit.efootprint_id }}'); }">
+                    &times;
+                </button>
+            </div>
+        {% endfor %}
+        {% if available_groups_to_join %}
+            <div class="add-to-group-row d-flex align-items-center gap-2 mt-2">
+                <select id="add-to-group-select-{{ object_to_edit.efootprint_id }}"
+                        class="form-select form-select-sm flex-grow-1">
+                    {% for group in available_groups_to_join %}
+                        <option value="{{ group.efootprint_id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button"
+                        class="btn btn-sm btn-primary"
+                        onclick="addObjectToGroup('{{ object_to_edit.efootprint_id }}')">
+                    Add to group
+                </button>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

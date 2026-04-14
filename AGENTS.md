@@ -52,6 +52,12 @@ model_builder/
 
 - AI agents
   - Favor making all edits on the same file at once rather than step-by-step changes.
+  - **Never paper over a bug.** If you discover a bug while working on an unrelated task (e.g. the edit
+    panel missing a `name` attribute, a creation flow not refreshing a sibling list, a stale card after
+    mutation), do not work around it in test code or production code — no `page.reload()` to hide it,
+    no defensive branch to tolerate it, no renamed assertion to avoid triggering it. Stop and either
+    (a) fix it on the spot with a short comment if the fix is straightforward and in scope, or
+    (b) surface it to the developer and ask how to proceed. Quality over convenience, always.
   - **Always propose computationally efficient solutions**, especially for data processing and numerical operations:
     - Prefer vectorized NumPy operations over Python loops
     - Use single-pass algorithms (e.g., `np.bincount`) over multiple iterations

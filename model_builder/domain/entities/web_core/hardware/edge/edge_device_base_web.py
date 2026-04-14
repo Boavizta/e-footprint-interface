@@ -25,6 +25,12 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
         return "edge_device"
 
     def get_edition_context_overrides(self) -> dict:
+        parent_groups = self.modeling_obj._find_parent_groups()
+        parent_ids = {group.id for group in parent_groups}
+        available_to_join = sorted(
+            [group for group in self.model_web.edge_device_groups if group.efootprint_id not in parent_ids],
+            key=lambda group: group.name,
+        )
         return {
             "group_memberships": [
                 {
@@ -32,8 +38,9 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
                     "group_name": group.name,
                     "count": group.edge_device_counts[self.modeling_obj].value.magnitude,
                 }
-                for group in sorted(self.modeling_obj._find_parent_groups(), key=lambda group: group.name)
-            ]
+                for group in sorted(parent_groups, key=lambda group: group.name)
+            ],
+            "available_groups_to_join": available_to_join,
         }
 
     @classmethod

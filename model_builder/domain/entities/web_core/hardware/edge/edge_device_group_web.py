@@ -25,7 +25,30 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
             if group.efootprint_id not in ancestor_ids | {self.efootprint_id}
         ]
 
+        parent_groups = self.modeling_obj._find_parent_groups()
+        parent_ids = {group.id for group in parent_groups}
+        # A group can join another group X only if X is not self and self is not an ancestor of X
+        # (otherwise we'd create a cycle). Also exclude existing parents.
+        available_groups_to_join = sorted(
+            [
+                group for group in self.model_web.edge_device_groups
+                if group.efootprint_id != self.efootprint_id
+                and group.efootprint_id not in parent_ids
+                and self.modeling_obj not in group.modeling_obj._find_all_ancestor_groups()
+            ],
+            key=lambda group: group.name,
+        )
+
         return {
+            "group_memberships": [
+                {
+                    "group_id": group.id,
+                    "group_name": group.name,
+                    "count": group.sub_group_counts[self.modeling_obj].value.magnitude,
+                }
+                for group in sorted(parent_groups, key=lambda group: group.name)
+            ],
+            "available_groups_to_join": available_groups_to_join,
             "dict_count_fields": [
                 {
                     "attr_name": "sub_group_counts",
