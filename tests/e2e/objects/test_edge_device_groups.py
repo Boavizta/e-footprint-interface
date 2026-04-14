@@ -82,7 +82,7 @@ class TestEdgeDeviceGroups:
         group_card.should_exist()
 
         group_card.click_edit_button()
-        model_builder.side_panel.should_be_visible().expand_section("Group members")
+        model_builder.side_panel.should_be_visible()
         model_builder.side_panel.add_to_dict_count("EdgeDeviceGroup_edge_device_counts", device_name)
         model_builder.side_panel.submit_and_wait_for_close()
 
@@ -120,6 +120,22 @@ class TestEdgeDeviceGroups:
         expect(building_card.locator.locator("input[name='count']").nth(0)).to_have_value("2")
         expect(building_card.locator.locator("input[name='count']").nth(1)).to_have_value("3")
 
+        # Creating the group should immediately remove Rack A from the root list and the device from
+        # the ungrouped list — no page reload required.
+        expect(model_builder.page.locator("#edge-device-groups-list > div[id^='EdgeDeviceGroup-']")).to_have_count(1)
+        model_builder.ungrouped_edge_device_should_not_exist(existing_device_name)
+
+        # Deleting Building should promote Rack A back to the root list and restore the device to the
+        # ungrouped list without a page reload.
+        building_card.click_edit_button()
+        model_builder.side_panel.click_delete_button()
+        model_builder.side_panel.confirm_delete()
+
+        expect(model_builder.page.locator("#edge-device-groups-list").locator(
+            "div[id^='EdgeDeviceGroup-']").filter(has_text="Building")).to_have_count(0)
+        model_builder.get_edge_device_group_card(existing_group_name).should_exist()
+        model_builder.ungrouped_edge_device_should_exist(existing_device_name)
+
     def test_group_edit_panel_links_and_unlinks_members_live(self, group_edit_system_in_browser):
         model_builder = group_edit_system_in_browser["model_builder"]
         device_name = group_edit_system_in_browser["device_name"]
@@ -128,9 +144,8 @@ class TestEdgeDeviceGroups:
 
         building_card = model_builder.get_edge_device_group_card(group_name)
         building_card.should_exist().click_edit_button()
-        side_panel = model_builder.side_panel.should_be_visible().should_contain_text("Group members")
+        side_panel = model_builder.side_panel.should_be_visible()
 
-        side_panel.expand_section("Group members")
         side_panel.add_to_dict_count("EdgeDeviceGroup_sub_group_counts", sub_group_name, count="2")
         side_panel.add_to_dict_count("EdgeDeviceGroup_edge_device_counts", device_name, count="4")
         side_panel.submit_and_wait_for_close()
@@ -148,7 +163,6 @@ class TestEdgeDeviceGroups:
 
         building_card.click_edit_button()
         side_panel = model_builder.side_panel.should_be_visible()
-        side_panel.expand_section("Group members")
         side_panel.remove_from_dict_count("EdgeDeviceGroup_edge_device_counts", device_name)
         side_panel.remove_from_dict_count("EdgeDeviceGroup_sub_group_counts", sub_group_name)
         side_panel.submit_and_wait_for_close()

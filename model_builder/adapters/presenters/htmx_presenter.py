@@ -113,11 +113,16 @@ class HtmxPresenter:
         # Standalone object - render its card
         added_obj = self.model_web.get_web_object_from_efootprint_id(output.created_object_id)
 
-        response = render(
-            self.request,
-            f"model_builder/object_cards/{output.template_name}_card.html",
-            {"object": added_obj}
-        )
+        if output.created_object_type == "EdgeDeviceGroup":
+            # Re-render both edge lists so nested members are removed from the root/ungrouped lists and
+            # the new group card is inserted. The form's beforeend swap gets no primary content.
+            response = HttpResponse(self._render_edge_device_lists_oob_html())
+        else:
+            response = render(
+                self.request,
+                f"model_builder/object_cards/{output.template_name}_card.html",
+                {"object": added_obj}
+            )
 
         response["HX-Trigger-After-Settle"] = json.dumps({
             "resetLeaderLines": "",
@@ -179,16 +184,7 @@ class HtmxPresenter:
 
         html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
         if output.edited_object_type == "EdgeDeviceGroup":
-            html_updates += self._generate_oob_container_html(
-                "edge-device-groups-list",
-                self._render_root_edge_device_groups_html(),
-                "list-group d-flex flew-column w-75 ms-25",
-            )
-            html_updates += self._generate_oob_container_html(
-                "edge-devices-list",
-                self._render_ungrouped_edge_devices_html(),
-                "list-group d-flex flew-column w-75 ms-25",
-            )
+            html_updates += self._render_edge_device_lists_oob_html()
 
         # Re-render siblings whose "link existing" button just disappeared
         # (cascade delete during edit reduced count from 1 to 0)
@@ -250,19 +246,17 @@ class HtmxPresenter:
             {"model_web": self.model_web},
         )
 
-    def present_dict_mutation(self, recompute: bool = False) -> HttpResponse:
-        html = self._generate_oob_container_html(
-            "edge-device-groups-list",
-            self._render_root_edge_device_groups_html(),
-            "list-group d-flex flew-column w-75 ms-25",
-        )
-        html += self._generate_oob_container_html(
-            "edge-devices-list",
-            self._render_ungrouped_edge_devices_html(),
-            "list-group d-flex flew-column w-75 ms-25",
+    def _render_edge_device_lists_oob_html(self) -> str:
+        classes = "list-group d-flex flew-column w-75 ms-25"
+        return (
+            self._generate_oob_container_html(
+                "edge-device-groups-list", self._render_root_edge_device_groups_html(), classes)
+            + self._generate_oob_container_html(
+                "edge-devices-list", self._render_ungrouped_edge_devices_html(), classes)
         )
 
-        response = HttpResponse(html)
+    def present_dict_mutation(self, recompute: bool = False) -> HttpResponse:
+        response = HttpResponse(self._render_edge_device_lists_oob_html())
         response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
         if recompute:
             self._append_recomputation_html(response)
@@ -321,6 +315,9 @@ class HtmxPresenter:
                         html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
 
             return self._build_oob_response(html_updates, toast_and_highlight_data)
+        elif output.deleted_object_type == "EdgeDeviceGroup":
+            return self._build_oob_response(
+                self._render_edge_device_lists_oob_html(), toast_and_highlight_data)
         else:
             response = HttpResponse(status=204)
             response["HX-Trigger"] = json.dumps({
