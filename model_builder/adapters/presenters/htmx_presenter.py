@@ -113,7 +113,14 @@ class HtmxPresenter:
         # Standalone object - render its card
         added_obj = self.model_web.get_web_object_from_efootprint_id(output.created_object_id)
 
-        if output.created_object_type == "EdgeDeviceGroup":
+        # Edge devices/groups that were linked into parent groups at creation time must not be
+        # appended to the root list — re-render both edge lists instead so the card appears nested.
+        created_with_parent_membership = (
+            output.created_object_type in {"EdgeDeviceGroup", "EdgeDevice", "EdgeComputer", "EdgeAppliance"}
+            and bool(added_obj.modeling_obj._find_parent_groups())
+        )
+
+        if output.created_object_type == "EdgeDeviceGroup" or created_with_parent_membership:
             # Re-render both edge lists so nested members are removed from the root/ungrouped lists and
             # the new group card is inserted. The form's beforeend swap gets no primary content.
             response = HttpResponse(self._render_edge_device_lists_oob_html())

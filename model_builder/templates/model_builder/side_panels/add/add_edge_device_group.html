@@ -8,6 +8,10 @@
         hx-disabled-elt="button"
         hx-on::after-request="closeAndEmptySidePanel()"
     >
+        {% if parent_group_membership_field %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" with field=parent_group_membership_field %}
+        {% endif %}
+
         {% for form_section in form_sections %}
             {% include "model_builder/side_panels/object_form_content.html" with form_fields=form_section.fields form_fields_advanced=form_section.advanced_fields object_type=form_section.category %}
         {% endfor %}

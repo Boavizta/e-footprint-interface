@@ -1,4 +1,7 @@
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.domain.services.group_membership_service import (
+    apply_parent_group_memberships_from_form_data,
+)
 
 
 class EdgeDeviceGroupWeb(ModelingObjectWeb):
@@ -68,6 +71,19 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
                 },
             ],
         }
+
+    @classmethod
+    def get_creation_context_overrides(cls, model_web) -> dict:
+        # A new group has no descendants, so any existing group is a valid parent candidate.
+        return {
+            "available_groups_to_join": sorted(
+                model_web.edge_device_groups, key=lambda group: group.name),
+        }
+
+    @classmethod
+    def post_create(cls, added_obj, form_data, model_web):
+        apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
+        return None
 
     @classmethod
     def get_creation_prerequisites(cls, model_web):

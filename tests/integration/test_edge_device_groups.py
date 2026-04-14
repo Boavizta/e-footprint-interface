@@ -1,3 +1,5 @@
+import json
+
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
 
@@ -102,6 +104,46 @@ def test_updating_one_membership_count_preserves_other_group_memberships(default
     beta = model_web.get_efootprint_object_from_efootprint_id(beta_id, "EdgeDeviceGroup")
     assert alpha.edge_device_counts[device].value.magnitude == 5
     assert beta.edge_device_counts[device].value.magnitude == 3
+
+
+def test_creating_edge_device_with_parent_group_memberships_links_on_creation(default_system_repository):
+    alpha_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Alpha", "EdgeDeviceGroup"),
+    )
+    beta_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Beta", "EdgeDeviceGroup"),
+    )
+    post_data = create_post_data_from_class_default_values("Grouped Sensor", "EdgeDevice", components="")
+    post_data["parent_group_memberships"] = json.dumps({alpha_id: 2, beta_id: 4})
+
+    device_id = create_object(default_system_repository, post_data)
+
+    model_web = _model_web(default_system_repository)
+    device = model_web.get_efootprint_object_from_efootprint_id(device_id, "EdgeDevice")
+    alpha = model_web.get_efootprint_object_from_efootprint_id(alpha_id, "EdgeDeviceGroup")
+    beta = model_web.get_efootprint_object_from_efootprint_id(beta_id, "EdgeDeviceGroup")
+    assert alpha.edge_device_counts[device].value.magnitude == 2
+    assert beta.edge_device_counts[device].value.magnitude == 4
+    assert [d.efootprint_id for d in model_web.ungrouped_edge_devices] == []
+
+
+def test_creating_edge_device_group_with_parent_group_memberships_links_on_creation(default_system_repository):
+    root_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Root", "EdgeDeviceGroup"),
+    )
+    post_data = create_post_data_from_class_default_values("Child", "EdgeDeviceGroup")
+    post_data["parent_group_memberships"] = json.dumps({root_id: 3})
+
+    child_id = create_object(default_system_repository, post_data)
+
+    model_web = _model_web(default_system_repository)
+    root = model_web.get_efootprint_object_from_efootprint_id(root_id, "EdgeDeviceGroup")
+    child = model_web.get_efootprint_object_from_efootprint_id(child_id, "EdgeDeviceGroup")
+    assert root.sub_group_counts[child].value.magnitude == 3
+    assert [group.efootprint_id for group in model_web.root_edge_device_groups] == [root_id]
 
 
 def test_unlinking_device_from_multiple_groups_only_ungroups_after_last_membership(default_system_repository):

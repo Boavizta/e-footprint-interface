@@ -873,5 +873,9 @@
             "EdgeDeviceGroup"
         ],
         "label": "edge device counts"
+    },
+    "parent_group_memberships": {
+        "label": "Add to parent groups",
+        "tooltip": "Select the edge device groups this object should belong to upon creation."
     }
 }

@@ -11,6 +11,9 @@
         hx-vals="js:{
             {{ storage_type }}_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
         }">
+    {% if parent_group_membership_field %}
+        {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" with field=parent_group_membership_field %}
+    {% endif %}
     {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>
     <form id="formStorage" class="edge-computer-only">

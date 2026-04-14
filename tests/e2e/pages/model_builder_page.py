@@ -121,6 +121,11 @@ class ModelBuilderPage:
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-edge-device-group"))
         return self.side_panel
 
+    def click_add_edge_device(self):
+        """Click the 'Add edge device' button (triggers HTMX)."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-edge-device"))
+        return self.side_panel
+
     # --- Result panel ---
 
     def open_result_panel(self):

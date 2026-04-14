@@ -125,6 +125,34 @@ class TestEdgeDeviceGroups:
         expect(model_builder.page.locator("#edge-device-groups-list > div[id^='EdgeDeviceGroup-']")).to_have_count(1)
         model_builder.ungrouped_edge_device_should_not_exist(existing_device_name)
 
+        # Create a new edge device from the add panel and attach it to Building via
+        # parent_group_memberships. The new device should land inside Building, not in the ungrouped
+        # list.
+        new_device_name = "Rooftop Sensor"
+        side_panel = model_builder.click_add_edge_device()
+        model_builder.page.locator("#sidePanelForm").wait_for(state="visible")
+        side_panel.select_object_type("EdgeDevice")
+        side_panel.fill_field("EdgeDevice_name", new_device_name)
+        side_panel.add_to_dict_count("parent_group_memberships", "Building", count="2")
+        side_panel.submit_and_wait_for_close()
+
+        building_card.open_accordion()
+        building_card.get_nested_object_card("EdgeDevice", new_device_name).should_exist(
+            ).inline_count_should_equal("2")
+        model_builder.ungrouped_edge_device_should_not_exist(new_device_name)
+
+        # Create a new child group from the add panel and attach it to Building via
+        # parent_group_memberships. The new group should land inside Building, not at the root.
+        new_sub_group_name = "Mezzanine"
+        side_panel = model_builder.click_add_edge_device_group()
+        side_panel.fill_field("EdgeDeviceGroup_name", new_sub_group_name)
+        side_panel.add_to_dict_count("parent_group_memberships", "Building", count="1")
+        side_panel.submit_and_wait_for_close()
+
+        building_card.open_accordion()
+        building_card.get_nested_object_card("EdgeDeviceGroup", new_sub_group_name).should_exist()
+        expect(model_builder.page.locator("#edge-device-groups-list > div[id^='EdgeDeviceGroup-']")).to_have_count(1)
+
         # Deleting Building should promote Rack A back to the root list and restore the device to the
         # ungrouped list without a page reload.
         building_card.click_edit_button()

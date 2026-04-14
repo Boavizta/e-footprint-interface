@@ -96,6 +96,11 @@ class FormContextBuilder:
         if web_class and config and config.get("dict_count_fields"):
             prerequisites = web_class.get_creation_prerequisites(self.model_web)
             context["dict_count_fields"] = self._build_dict_count_fields(object_type, config, prerequisites)
+        if web_class and hasattr(web_class, "get_creation_context_overrides"):
+            overrides = web_class.get_creation_context_overrides(self.model_web)
+            if "available_groups_to_join" in overrides:
+                context["parent_group_membership_field"] = self._build_parent_group_membership_field(
+                    overrides["available_groups_to_join"])
         return context
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
@@ -169,6 +174,23 @@ class FormContextBuilder:
             hydrated_field.setdefault("input_type", "dict_count")
             hydrated_fields.append(hydrated_field)
         return hydrated_fields
+
+    @staticmethod
+    def _build_parent_group_membership_field(available_groups: list) -> dict | None:
+        if not available_groups:
+            return None
+        options = FormContextBuilder._build_select_options(available_groups)
+        attr_name = "parent_group_memberships"
+        return {
+            "web_id": attr_name,
+            "attr_name": attr_name,
+            "label": FieldUIConfigProvider.get_label(attr_name),
+            "tooltip": FieldUIConfigProvider.get_tooltip(attr_name),
+            "input_type": "dict_count",
+            "options": options,
+            "options_json": json.dumps(options),
+            "selected_json": json.dumps({}),
+        }
 
     @staticmethod
     def _hydrate_group_memberships(group_memberships: list[dict]) -> list[dict]:

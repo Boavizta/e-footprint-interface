@@ -4,6 +4,9 @@ from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.domain.services.group_membership_service import (
+    apply_parent_group_memberships_from_form_data,
+)
 
 
 class EdgeDeviceBaseWeb(ModelingObjectWeb):
@@ -23,6 +26,18 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     @property
     def template_name(self):
         return "edge_device"
+
+    @classmethod
+    def get_creation_context_overrides(cls, model_web) -> dict:
+        return {
+            "available_groups_to_join": sorted(
+                model_web.edge_device_groups, key=lambda group: group.name),
+        }
+
+    @classmethod
+    def post_create(cls, added_obj, form_data, model_web):
+        apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
+        return None
 
     def get_edition_context_overrides(self) -> dict:
         parent_groups = self.modeling_obj._find_parent_groups()
