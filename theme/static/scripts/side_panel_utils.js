@@ -1,6 +1,14 @@
 let formModified = false;
 let pendingRequest = null;
 
+function recomputationVals() {
+    let btnResultPanel = document.getElementById("btn-open-panel-result");
+    if (btnResultPanel && btnResultPanel.style.display === "none") {
+        return {recomputation: true};
+    }
+    return {};
+}
+
 function openSidePanel() {
     let sidePanel = document.getElementById("sidePanel");
     let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");

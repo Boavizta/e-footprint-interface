@@ -23,7 +23,7 @@
                         hx-post="/model_builder/link-dict-entry/{{ panel_id }}/"
                         hx-include="#add-to-group-select-{{ panel_id }}"
                         hx-swap="none"
-                        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
+                        hx-vals='js:{...recomputationVals()}'>
                     Add to group
                 </button>
             </div>
