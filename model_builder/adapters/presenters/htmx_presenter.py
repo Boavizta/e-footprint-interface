@@ -273,17 +273,6 @@ class HtmxPresenter:
             "model_builder/side_panels/edit/group_membership_section.html", context)
         return f"<div hx-swap-oob='outerHTML:#group-membership-section-{panel_object_id}'>{section_html}</div>"
 
-    def present_dict_mutation(self, recompute: bool = False, panel_object_id: str = None) -> HttpResponse:
-        body = self._render_edge_device_lists_oob_html()
-        if panel_object_id:
-            body += self._render_group_membership_section_oob_html(panel_object_id)
-        response = HttpResponse(body)
-        response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
-        if recompute:
-            self._append_recomputation_html(response)
-            response["HX-Trigger-After-Settle"] = json.dumps({"triggerResultRendering": ""})
-        return response
-
     def _build_oob_response(
         self, html: str, toast_data: dict, trigger_result_display: bool = False
     ) -> HttpResponse:
