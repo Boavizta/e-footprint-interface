@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.oob_region import OobRegion
 
 
 @dataclass
@@ -19,6 +20,7 @@ class EditObjectInput:
     """
     object_id: str
     form_data: Dict[str, Any]  # Pre-parsed form data (clean attribute names)
+    extra_oob_regions: List[OobRegion] = field(default_factory=list)
 
 
 @dataclass
@@ -32,6 +34,7 @@ class EditObjectOutput:
     mirrored_web_ids: List[str] = field(default_factory=list)
     mirrored_cards: List[Any] = field(default_factory=list)  # Web objects for HTML rendering
     name_only_change: bool = False
+    oob_regions: List[OobRegion] = field(default_factory=list)
 
 
 class EditObjectUseCase:
@@ -75,6 +78,8 @@ class EditObjectUseCase:
         edited_obj = edit_result.edited_object
 
         self.model_web.persist_to_cache()
+        oob_regions = list(edited_obj.edit_side_effects())
+        oob_regions.extend(input_data.extra_oob_regions)
         return EditObjectOutput(
             edited_object_id=edited_obj.efootprint_id,
             edited_object_name=edited_obj.name,
@@ -84,4 +89,5 @@ class EditObjectUseCase:
             mirrored_web_ids=[card.web_id for card in edited_obj.mirrored_cards],
             mirrored_cards=list(edited_obj.mirrored_cards),
             name_only_change=edit_result.name_only_change,
+            oob_regions=oob_regions,
         )

@@ -8,6 +8,7 @@ from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.application.use_cases.edit_object import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.oob_region import OobRegion
 
 
 def _load_group_and_key(model_web: ModelWeb, parent_id: str, key_id: str):
@@ -55,14 +56,14 @@ def _build_edit_form_data(parent_group, mutated_attr: str, mutated_key, new_coun
 
 def _run_edit_and_present(request, model_web: ModelWeb, parent_group, form_data: dict, panel_object_id: str):
     use_case = EditObjectUseCase(model_web)
-    output = use_case.execute(EditObjectInput(object_id=parent_group.id, form_data=form_data))
-    presenter = HtmxPresenter(request, model_web)
-    recompute = bool(request.POST.get("recomputation"))
-    response = presenter.present_edited_object(output, recompute=recompute)
     # Preserve the side-panel sync side-effect: if a child object's edit panel is currently
     # open, its group membership section needs to refresh too.
-    response.content += presenter._render_group_membership_section_oob_html(panel_object_id).encode("utf-8")
-    return response
+    extra_oob_regions = [OobRegion.make("group_membership_section", object_id=panel_object_id)]
+    output = use_case.execute(EditObjectInput(
+        object_id=parent_group.id, form_data=form_data, extra_oob_regions=extra_oob_regions))
+    presenter = HtmxPresenter(request, model_web)
+    recompute = bool(request.POST.get("recomputation"))
+    return presenter.present_edited_object(output, recompute=recompute)
 
 
 @render_exception_modal_if_error

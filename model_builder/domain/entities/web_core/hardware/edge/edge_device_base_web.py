@@ -47,6 +47,15 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
         apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
         return None
 
+    @classmethod
+    def create_side_effects(cls, added_obj, model_web):
+        from model_builder.domain.oob_region import CreateSideEffects, OobRegion
+        del model_web
+        if added_obj.modeling_obj._find_parent_groups():
+            return CreateSideEffects(
+                oob_regions=[OobRegion("edge_device_lists")], replaces_primary_render=True)
+        return CreateSideEffects()
+
     def get_edition_context_overrides(self) -> dict:
         parent_groups = self.modeling_obj._find_parent_groups()
         parent_ids = {group.id for group in parent_groups}

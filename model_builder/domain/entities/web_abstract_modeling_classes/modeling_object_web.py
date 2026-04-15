@@ -173,6 +173,23 @@ class ModelingObjectWeb:
         """
         return {}
 
+    @classmethod
+    def create_side_effects(cls, added_obj, model_web):
+        """Side-effect descriptors emitted after this object is created."""
+        del added_obj, model_web
+        from model_builder.domain.oob_region import CreateSideEffects
+        return CreateSideEffects()
+
+    def edit_side_effects(self):
+        """Side-effect OOB regions emitted after this object is edited."""
+        return []
+
+    @classmethod
+    def delete_side_effects(cls, web_obj, model_web):
+        """Side-effect OOB regions emitted after this object is deleted."""
+        del web_obj, model_web
+        return []
+
 
     @property
     def links_to(self):

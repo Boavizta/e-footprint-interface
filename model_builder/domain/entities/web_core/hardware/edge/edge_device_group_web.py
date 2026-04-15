@@ -59,6 +59,23 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
         apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
         return None
 
+    @classmethod
+    def create_side_effects(cls, added_obj, model_web):
+        from model_builder.domain.oob_region import CreateSideEffects, OobRegion
+        del added_obj, model_web
+        return CreateSideEffects(
+            oob_regions=[OobRegion("edge_device_lists")], replaces_primary_render=True)
+
+    def edit_side_effects(self):
+        from model_builder.domain.oob_region import OobRegion
+        return [OobRegion("edge_device_lists")]
+
+    @classmethod
+    def delete_side_effects(cls, web_obj, model_web):
+        from model_builder.domain.oob_region import OobRegion
+        del web_obj, model_web
+        return [OobRegion("edge_device_lists")]
+
     def _build_group_entry(self, obj, count):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 

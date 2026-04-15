@@ -9,6 +9,7 @@ from typing import Dict, Any, Optional, List
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.interfaces import ISystemRepository
+from model_builder.domain.oob_region import OobRegion
 
 
 @dataclass
@@ -40,6 +41,8 @@ class CreateObjectOutput:
     # For cases where a different object should be returned (e.g., server instead of service)
     override_object: Optional[Any] = None
     model_web: ModelWeb = None
+    oob_regions: List[OobRegion] = field(default_factory=list)
+    replaces_primary_render: bool = False
 
 
 class CreateObjectUseCase:
@@ -163,6 +166,9 @@ class CreateObjectUseCase:
 
             model_web.persist_to_cache()
 
+            # 9b. Side-effect descriptors (OOB DOM regions to refresh after the create)
+            side_effects = type(added_obj).create_side_effects(added_obj, model_web)
+
             # 10. Build output
             return CreateObjectOutput(
                 created_object_id=added_obj.efootprint_id,
@@ -176,7 +182,9 @@ class CreateObjectUseCase:
                 linked_parent_web_id=linked_parent_web_id,
                 linked_parent_mirrored_web_ids=linked_parent_mirrored_web_ids,
                 override_object=override_object,
-                model_web=model_web
+                model_web=model_web,
+                oob_regions=side_effects.oob_regions,
+                replaces_primary_render=side_effects.replaces_primary_render,
             )
         except Exception as e:
             if added_obj is not None:

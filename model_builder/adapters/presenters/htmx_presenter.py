@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
+from model_builder.adapters.presenters.oob_regions import render_oob_regions
 from model_builder.application.use_cases import CreateObjectOutput, EditObjectOutput, DeleteObjectOutput
 from model_builder.application.use_cases.delete_object import DeleteCheckResult
 
@@ -110,21 +111,11 @@ class HtmxPresenter:
                 self._append_recomputation_html(response)
             return response
 
-        # Standalone object - render its card
-        added_obj = self.model_web.get_web_object_from_efootprint_id(output.created_object_id)
-
-        # Edge devices/groups that were linked into parent groups at creation time must not be
-        # appended to the root list — re-render both edge lists instead so the card appears nested.
-        created_with_parent_membership = (
-            output.created_object_type in {"EdgeDeviceGroup", "EdgeDevice", "EdgeComputer", "EdgeAppliance"}
-            and bool(added_obj.modeling_obj._find_parent_groups())
-        )
-
-        if output.created_object_type == "EdgeDeviceGroup" or created_with_parent_membership:
-            # Re-render both edge lists so nested members are removed from the root/ungrouped lists and
-            # the new group card is inserted. The form's beforeend swap gets no primary content.
-            response = HttpResponse(self._render_edge_device_lists_oob_html())
+        # Standalone object - render its card (unless side-effects own the layout instead)
+        if output.replaces_primary_render:
+            response = HttpResponse("")
         else:
+            added_obj = self.model_web.get_web_object_from_efootprint_id(output.created_object_id)
             response = render(
                 self.request,
                 f"model_builder/object_cards/{output.template_name}_card.html",
@@ -140,6 +131,9 @@ class HtmxPresenter:
                 "action_type": "add_new_object"
             }
         })
+
+        if output.oob_regions:
+            response.content += render_oob_regions(self.model_web, output.oob_regions).encode("utf-8")
 
         if recompute:
             self._append_recomputation_html(response)
@@ -185,13 +179,15 @@ class HtmxPresenter:
 
         if output.name_only_change and not recompute:
             html_updates = self._generate_name_only_updates_html(output.mirrored_cards)
+            if output.oob_regions:
+                html_updates += render_oob_regions(self.model_web, output.oob_regions)
             response = HttpResponse(html_updates)
             response["HX-Trigger-After-Settle"] = json.dumps({"displayToastAndHighlightObjects": toast_and_highlight_data})
             return response
 
         html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
-        if output.edited_object_type == "EdgeDeviceGroup":
-            html_updates += self._render_edge_device_lists_oob_html()
+        if output.oob_regions:
+            html_updates += render_oob_regions(self.model_web, output.oob_regions)
 
         # Re-render siblings whose "link existing" button just disappeared
         # (cascade delete during edit reduced count from 1 to 0)
@@ -237,41 +233,6 @@ class HtmxPresenter:
                 f"</div>"
             )
         return html
-
-    def _generate_oob_container_html(self, target_id: str, content: str, classes: str) -> str:
-        return f"<div id='{target_id}' class='{classes}' hx-swap-oob='outerHTML:#{target_id}'>{content}</div>"
-
-    def _render_root_edge_device_groups_html(self) -> str:
-        return render_to_string(
-            "model_builder/object_cards/partials/root_edge_device_groups_list.html",
-            {"model_web": self.model_web},
-        )
-
-    def _render_ungrouped_edge_devices_html(self) -> str:
-        return render_to_string(
-            "model_builder/object_cards/partials/ungrouped_edge_devices_list.html",
-            {"model_web": self.model_web},
-        )
-
-    def _render_edge_device_lists_oob_html(self) -> str:
-        classes = "list-group d-flex flew-column w-75 ms-25"
-        return (
-            self._generate_oob_container_html(
-                "edge-device-groups-list", self._render_root_edge_device_groups_html(), classes)
-            + self._generate_oob_container_html(
-                "edge-devices-list", self._render_ungrouped_edge_devices_html(), classes)
-        )
-
-    def _render_group_membership_section_oob_html(self, panel_object_id: str) -> str:
-        from model_builder.adapters.forms.form_context_builder import FormContextBuilder
-        web_obj = self.model_web.get_web_object_from_efootprint_id(panel_object_id)
-        context = {"object_to_edit": web_obj, **web_obj.get_edition_context_overrides()}
-        if context.get("group_memberships"):
-            context["group_memberships"] = FormContextBuilder.hydrate_group_memberships(
-                context["group_memberships"])
-        section_html = render_to_string(
-            "model_builder/side_panels/edit/group_membership_section.html", context)
-        return f"<div hx-swap-oob='outerHTML:#group-membership-section-{panel_object_id}'>{section_html}</div>"
 
     def _build_oob_response(
         self, html: str, toast_data: dict, trigger_result_display: bool = False
@@ -324,10 +285,12 @@ class HtmxPresenter:
                         s["linkable_existing_count"] == 0 for s in sibling.child_sections):
                         html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
 
+            if output.oob_regions:
+                html_updates += render_oob_regions(self.model_web, output.oob_regions)
             return self._build_oob_response(html_updates, toast_and_highlight_data)
-        elif output.deleted_object_type == "EdgeDeviceGroup":
+        elif output.oob_regions:
             return self._build_oob_response(
-                self._render_edge_device_lists_oob_html(), toast_and_highlight_data)
+                render_oob_regions(self.model_web, output.oob_regions), toast_and_highlight_data)
         else:
             response = HttpResponse(status=204)
             response["HX-Trigger"] = json.dumps({

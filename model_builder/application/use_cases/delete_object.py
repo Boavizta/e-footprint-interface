@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.oob_region import OobRegion
 
 
 @dataclass
@@ -38,6 +39,7 @@ class DeleteObjectOutput:
     deleted_web_ids: List[str] = field(default_factory=list)
     # For list deletions, we need the edited containers to generate HTML in presenter
     edited_containers: List[Any] = field(default_factory=list)
+    oob_regions: List[OobRegion] = field(default_factory=list)
 
 
 class DeleteObjectUseCase:
@@ -124,6 +126,8 @@ class DeleteObjectUseCase:
 
         list_containers, attr_name_in_list_container = web_obj.list_containers_and_attr_name_in_list_container
 
+        oob_regions = type(web_obj).delete_side_effects(web_obj, self.model_web)
+
         if list_containers:
             # List deletion: remove from all list containers using domain service
             edit_service = EditService()
@@ -153,6 +157,7 @@ class DeleteObjectUseCase:
                 deleted_object_type=object_type,
                 was_list_deletion=True,
                 edited_containers=edited_containers,
+                oob_regions=oob_regions,
             )
         else:
             # Normal deletion
@@ -169,4 +174,5 @@ class DeleteObjectUseCase:
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
                 was_list_deletion=False,
+                oob_regions=oob_regions,
             )
