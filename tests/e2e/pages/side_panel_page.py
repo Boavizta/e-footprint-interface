@@ -178,22 +178,25 @@ class SidePanelPage:
     def set_group_membership_count(self, group_name: str, count: str):
         """Update a group membership count from a device edit panel."""
         row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
-        field = row.locator("input[type='number']")
-        with self.page.expect_response(lambda response: "/model_builder/update-dict-count/" in response.url):
+        field = row.locator("input[type='number']").first
+        hx_url = field.get_attribute("hx-post")
+        with self.page.expect_response(lambda r: hx_url in r.url):
             field.click()
             field.fill(count)
             field.press("Tab")
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request') === null",
-            timeout=2000,
-        )
+        # Wait for the OOB-swapped input to reflect the new value, then let HTMX
+        # finish its settleDelay (20 ms) so new elements are fully htmx.process()'d.
+        from playwright.sync_api import expect as pw_expect
+        pw_expect(self.panel.locator(f"[data-group-membership-name='{group_name}'] input[type='number']").first).to_have_value(count)
+        self.page.wait_for_timeout(20)
         return self
 
     def remove_group_membership(self, group_name: str):
         """Remove a group membership from a device edit panel."""
+        from tests.e2e.utils import click_and_wait_for_htmx
         row = self.panel.locator(f"[data-group-membership-name='{group_name}']").first
-        with self.page.expect_response(lambda response: "/model_builder/unlink-dict-entry/" in response.url):
-            row.locator("button.unlink-btn").click()
+        # click_and_wait_for_htmx includes a 20 ms wait for HTMX settleDelay before clicking.
+        click_and_wait_for_htmx(self.page, row.locator("button.unlink-btn").first)
         self.page.wait_for_function(
             "() => document.querySelector('.htmx-request') === null",
             timeout=2000,
