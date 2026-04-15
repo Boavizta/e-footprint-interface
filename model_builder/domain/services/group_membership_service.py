@@ -23,7 +23,7 @@ def apply_parent_group_memberships_from_form_data(added_obj, form_data: dict, mo
 
     member_obj = added_obj.modeling_obj
     for parent_id, count in memberships.items():
-        parent_group = model_web.get_efootprint_object_from_efootprint_id(parent_id, "EdgeDeviceGroup")
+        parent_group = model_web.flat_efootprint_objs_dict.get(parent_id)
         if not isinstance(parent_group, EdgeDeviceGroup):
             raise ValueError(f"Parent {parent_id} is not an EdgeDeviceGroup.")
         target_dict = _pick_target_dict(parent_group, member_obj)

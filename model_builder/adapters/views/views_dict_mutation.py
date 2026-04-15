@@ -12,11 +12,11 @@ from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 def _get_group_dict_and_key(model_web: ModelWeb, parent_id: str, key_id: str):
-    parent_group = model_web.get_efootprint_object_from_efootprint_id(parent_id, "EdgeDeviceGroup")
+    parent_group = model_web.flat_efootprint_objs_dict.get(parent_id)
     if not isinstance(parent_group, EdgeDeviceGroup):
         raise ValueError(f"Parent {parent_id} is not an EdgeDeviceGroup.")
 
-    key_obj = model_web.flat_efootprint_objs_dict[key_id]
+    key_obj = model_web.flat_efootprint_objs_dict.get(key_id)
     if isinstance(key_obj, EdgeDeviceGroup):
         return parent_group, parent_group.sub_group_counts, key_obj
     if isinstance(key_obj, EdgeDevice):
@@ -37,7 +37,8 @@ def update_dict_count(request, parent_id, key_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     _parent_group, target_dict, key_obj = _get_group_dict_and_key(model_web, parent_id, key_id)
     count = parse_count(request.POST.get("count"), error_prefix="Count")
-    target_dict[key_obj] = SourceValue(count * u.dimensionless)
+    existing = target_dict[key_obj]
+    target_dict[key_obj] = SourceValue(count * u.dimensionless, source=existing.source, label=existing.label)
     return _persist_and_present(request, model_web, panel_object_id=key_id)
 
 
