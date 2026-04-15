@@ -7,21 +7,7 @@
             <div class="group-membership-row"
                  data-group-membership-name="{{ membership.group_name }}">
                 <span class="group-membership-name">{{ membership.group_name }}</span>
-                <input type="number" min="0" step="{{ membership.step }}" value="{{ membership.count }}" name="count"
-                       class="count-inline-edit form-control form-control-sm"
-                       title="Count in {{ membership.group_name }}"
-                       hx-post="/model_builder/update-dict-count/{{ membership.group_id }}/{{ panel_id }}/"
-                       hx-trigger="change"
-                       hx-swap="none"
-                       hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
-                <button type="button"
-                        class="unlink-btn btn"
-                        title="Remove from {{ membership.group_name }}"
-                        hx-post="/model_builder/unlink-dict-entry/{{ membership.group_id }}/{{ panel_id }}/"
-                        hx-swap="none"
-                        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
-                    &times;
-                </button>
+                {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=membership.group_id entry_efootprint_id=panel_id entry_count=membership.count group_name=membership.group_name min_val=0 step=membership.step extra_class="" %}
             </div>
         {% endfor %}
         {% if available_groups_to_join %}

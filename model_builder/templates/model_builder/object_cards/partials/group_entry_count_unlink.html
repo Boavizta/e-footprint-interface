@@ -1,0 +1,15 @@
+<input type="number" min="{{ min_val }}" step="{{ step }}" value="{{ entry_count }}" name="count"
+       class="count-inline-edit form-control form-control-sm {{ extra_class }}"
+       title="Count in {{ group_name }}"
+       hx-post="/model_builder/update-dict-count/{{ group_efootprint_id }}/{{ entry_efootprint_id }}/"
+       hx-trigger="change"
+       hx-swap="none"
+       hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
+<button type="button"
+        class="unlink-btn btn {{ extra_class }}"
+        title="Remove from {{ group_name }}"
+        hx-post="/model_builder/unlink-dict-entry/{{ group_efootprint_id }}/{{ entry_efootprint_id }}/"
+        hx-swap="none"
+        hx-vals='js:{...(document.getElementById("btn-open-panel-result").style.display === "none" ? {recomputation: true} : {})}'>
+    &times;
+</button>

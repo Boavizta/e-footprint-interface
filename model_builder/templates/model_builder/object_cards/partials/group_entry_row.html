@@ -1,0 +1,79 @@
+{% load label_filters %}
+{# Parameters: entry, group, kind ("subgroup" | "edge_device" | "plain") #}
+{% with entry_count=entry.count|display_count %}
+{% if kind == "plain" %}
+<div id="{{ entry.object.web_id }}" class="group-entry d-flex align-items-center">
+    <button id="button-{{ entry.object.web_id }}"
+            class="btn btn-white text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0 ms-2"
+            type="button"
+            hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
+            hx-target="#sidePanel"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+            hx-disabled-elt="button"
+            _="
+                on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ entry.object.web_id }}
+                on mouseover remove .d-none from #edit-icon-{{ entry.object.web_id }}
+                on mouseout add .d-none to #edit-icon-{{ entry.object.web_id }}
+            "
+    >
+        {% include 'model_builder/components/button_card_header.html' with object_card=entry.object title_class="h8" %}
+    </button>
+    {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=group.efootprint_id entry_efootprint_id=entry.object.efootprint_id entry_count=entry_count group_name=group.name min_val=1 step=1 extra_class="me-2" %}
+</div>
+{% else %}
+<div id="{{ entry.object.web_id }}" class="group-entry{% if kind == 'subgroup' %} group-entry--subgroup{% endif %}">
+    <div class="accordion accordion-flush">
+        <div class="accordion-item">
+            <div class="accordion-header p-0 d-flex align-items-center">
+                <button type="button" class="chevron-btn btn btn-link text-black ms-2 p-0"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#flush-{{ entry.object.web_id }}"
+                        onclick="reverseIconAccordion('{{ entry.object.web_id }}')"
+                        aria-expanded="false"
+                        aria-controls="flush-{{ entry.object.web_id }}">
+                    <svg id="icon_accordion_{{ entry.object.web_id }}" xmlns="http://www.w3.org/2000/svg"
+                         width="14" height="14" fill="none" stroke="#9CA3AF" stroke-width="3"
+                         class="bi bi-chevron-right"
+                         viewBox="0 0 16 16">
+                        <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
+                    </svg>
+                </button>
+                <button id="button-{{ entry.object.web_id }}"
+                        class="btn btn-white ms-1 text-start d-flex flex-row justify-content-between align-items-center flex-grow-1 overflow-hidden position-relative min-w-0"
+                        type="button"
+                        hx-get="/model_builder/open-edit-object-panel/{{ entry.object.efootprint_id }}/"
+                        hx-target="#sidePanel"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        hx-disabled-elt="button"
+                        _="
+                            on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened to #{{ entry.object.web_id }}
+                            on mouseover remove .d-none from #edit-icon-{{ entry.object.web_id }}
+                            on mouseout add .d-none to #edit-icon-{{ entry.object.web_id }}
+                        "
+                >
+                    {% if kind == "subgroup" %}
+                        {% include 'model_builder/components/button_card_header.html' with object_card=entry.object title_class="h8 fw-normal" %}
+                    {% else %}
+                        {% include 'model_builder/components/button_card_header.html' with object_card=entry.object title_class="h8" %}
+                    {% endif %}
+                </button>
+                {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=group.efootprint_id entry_efootprint_id=entry.object.efootprint_id entry_count=entry_count group_name=group.name min_val=1 step=1 extra_class="me-2" %}
+            </div>
+            <div id="flush-{{ entry.object.web_id }}" class="accordion-collapse collapse">
+                <div class="accordion-body pt-2 pb-2 px-3">
+                    {% if kind == "subgroup" %}
+                        {% include 'model_builder/object_cards/partials/group_content.html' with group=entry.object %}
+                    {% else %}
+                        {% for component in entry.object.components %}
+                            {% include 'model_builder/object_cards/edge_component_card.html' with object=component %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endwith %}
