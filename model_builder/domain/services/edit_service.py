@@ -59,10 +59,12 @@ class EditService:
             if child not in accordion_children_after[first_mirrored_card]
         ]
 
-        # Delete orphaned children (those with no remaining containers)
+        # Delete orphaned children (those with no remaining containers), but only if the child
+        # is not allowed to live at the root level.
         had_deletions = False
         for child in removed_children:
-            if len(child.modeling_obj_containers) == 0:
+            if (len(child.modeling_obj_containers) == 0
+                    and child.gets_deleted_if_unique_mod_obj_container_gets_deleted):
                 child.self_delete()
                 had_deletions = True
 
