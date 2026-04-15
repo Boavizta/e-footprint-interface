@@ -46,17 +46,15 @@ class ObjectCard:
     def click_unlink_button(self):
         """Click the unlink button for a grouped entry (triggers HTMX)."""
         button = self.locator.locator("button.unlink-btn").first
-        hx_url = button.get_attribute("hx-post")
         button.scroll_into_view_if_needed()
-        if hx_url:
-            with self.locator.page.expect_response(lambda r: hx_url in r.url):
-                button.click(force=True)
-        else:
-            button.click(force=True)
+        # click_and_wait_for_htmx includes the 20 ms HTMX settleDelay wait.
+        click_and_wait_for_htmx(self.locator.page, button)
         return self
 
     def set_inline_count(self, value: str):
         """Update the inline count control for a grouped entry."""
+        # Wait for HTMX settleDelay so event listeners are registered on OOB-swapped inputs.
+        self.locator.page.wait_for_timeout(20)
         field = self.locator.locator("input[name='count']").first
         hx_url = field.get_attribute("hx-post")
         if hx_url:
