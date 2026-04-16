@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0] - 2026-04-16
+
+### Added
+- Edge device groups by upgrading to e-footprint version 19. This allows to put edge devices into groups with associated counts, along with the possibility of having sub groups. Useful for defining nested structures like for example a building with several floors, each floor having several rooms, and each room having several edge devices.
+
+### Changed
+- Improved leaderline logic so leaderlines now automatically resolve to the first visible parent accordion, in case the linked object is in a hidden accordion.
+- 
+
 ## [1.1.2] - 2026-04-02
 
 ### Added

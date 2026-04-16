@@ -38,6 +38,8 @@ npm run jest
 | `default_system_repository` | Repository with default data and calculated attributes computed |
 | `create_hourly_usage()` | Helper returning an `ExplainableHourlyQuantitiesFromFormInputs` for timeseries fields |
 
+Both `InMemorySystemRepository` and `SessionSystemRepository` support `interface_config` (in-RAM storage, merged on `save_data()`). Set `repository.interface_config = {...}` before `persist_to_cache()` to test config persistence.
+
 ## JS unit tests (`js_tests/`)
 
 Two existing files test pure math utilities (timeseries volume computation and display aggregation). Add new files here for JS logic that is complex enough to fail silently if broken and that doesn't require a real browser. The jsdom environment is sufficient for DOM manipulation helpers.

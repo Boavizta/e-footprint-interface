@@ -52,9 +52,7 @@ npm install jest --global
 
 Run test suites:
 ```shell
-# Python tests__old (soon to be deprecated)
-poetry run python manage.py test tests__old
-
+# Python tests (unit + integration + E2E; E2E requires running server)
 poetry run pytest tests -n 4 --base-url http://localhost:8000
 
 # JavaScript unit tests

@@ -70,6 +70,10 @@ Then parse them with:
   - “network energy footprint increases after increasing data transferred”
   - “emissions series is non-empty and non-zero for key categories”
 
+## Dict-based relationships (ExplainableObjectDict)
+
+For testing edge device groups and other dict-based relationships, use the dict mutation view functions directly or build dict-count form payloads. See existing tests in `test_edge_device_groups.py` for patterns.
+
 ## Style guardrails
 
 - Keep tests short, linear, and readable.
