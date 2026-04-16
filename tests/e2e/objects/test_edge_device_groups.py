@@ -217,3 +217,15 @@ class TestEdgeDeviceGroups:
         side_panel.remove_group_membership(group_name)
         model_builder.ungrouped_edge_device_should_exist(device_name)
         expect(rack_card.locator.locator("div[id^='EdgeDevice-']").filter(has_text=device_name)).to_have_count(0)
+
+    def test_create_group_rejects_cycle_when_parent_and_subgroup_overlap(self, edge_group_system_in_browser):
+        model_builder = edge_group_system_in_browser["model_builder"]
+        existing_group_name = edge_group_system_in_browser["group_name"]
+
+        side_panel = model_builder.click_add_edge_device_group()
+        side_panel.fill_field("EdgeDeviceGroup_name", "Cyclic Group")
+        side_panel.add_to_dict_count("parent_group_memberships", existing_group_name)
+        side_panel.add_to_dict_count("EdgeDeviceGroup_sub_group_counts", existing_group_name)
+        side_panel.submit()
+
+        model_builder.expect_error_modal("cannot be both a parent and a subgroup")
