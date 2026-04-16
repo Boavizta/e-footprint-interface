@@ -30,17 +30,19 @@ class TestResultsPanel:
         model_builder.close_result_panel()
         expect(page.locator("#lineChart")).not_to_be_visible()
 
-    def test_error_modal_when_model_incomplete(self, empty_model_builder: ModelBuilderPage):
-        """Error modal should appear when trying to calculate incomplete model."""
+    def test_results_button_disabled_when_model_incomplete(self, empty_model_builder: ModelBuilderPage):
+        """Results buttons should be disabled when the model is incomplete."""
         model_builder = empty_model_builder
         page = model_builder.page
 
-        # Try to open result panel on empty/incomplete model
-        page.locator("#btn-open-panel-result").click()
+        # Disabled state: no hx-get (so clicks are no-ops) + tooltip attr with the reason.
+        bar_button = page.locator("#btn-open-panel-result")
+        expect(bar_button).not_to_have_attribute("hx-get", "/model_builder/result-chart/")
+        expect(bar_button).to_have_attribute("data-bs-toggle", "tooltip")
 
-        # Error modal should appear with "Go back" button
-        go_back_button = page.locator("button").filter(has_text="Go back")
-        expect(go_back_button).to_be_attached()
+        toolbar_button = page.locator("#show-results-toolbar-btn")
+        expect(toolbar_button).not_to_have_attribute("hx-get", "/model_builder/result-chart/")
+        expect(toolbar_button).to_have_attribute("data-bs-toggle", "tooltip")
 
         # Result panel should NOT be visible
         expect(page.locator("#lineChart")).not_to_be_visible()

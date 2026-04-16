@@ -21,9 +21,11 @@ class RecurrentServerNeedWeb(ResourceNeedBaseWeb):
         return "resource_need_with_accordion"
 
     @classmethod
+    def can_create(cls, model_web: "ModelWeb") -> bool:
+        return bool(model_web.edge_devices)
+
+    @classmethod
     def get_creation_prerequisites(cls, model_web: "ModelWeb") -> None:
-        """Raise error if no edge devices exist in the model.
-        """
-        edge_devices = model_web.edge_devices
-        if not edge_devices:
-            raise ValueError("Please create an edge device before adding a recurrent server need")
+        """Raise error if no edge devices exist in the model."""
+        if not cls.can_create(model_web):
+            raise ValueError("Cannot create recurrent server need: no edge devices available.")

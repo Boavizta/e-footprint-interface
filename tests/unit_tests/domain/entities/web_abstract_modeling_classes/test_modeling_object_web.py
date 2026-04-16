@@ -450,8 +450,8 @@ class TestModelingObjectWeb:
         sections = wrapper.child_sections
 
         assert sections == [
-            {"type_str": "Foo", "children": foos, "attr_name": "foos", "linkable_existing_count": 0},
-            {"type_str": "Bar", "children": bars, "attr_name": "bars", "linkable_existing_count": 0},
+            {"type_str": "Foo", "children": foos, "attr_name": "foos", "linkable_existing_count": 0, "disabled": False, "constraint_key": ""},
+            {"type_str": "Bar", "children": bars, "attr_name": "bars", "linkable_existing_count": 0, "disabled": False, "constraint_key": ""},
         ]
 
     def test_child_object_types_str_and_type_str_validation(self):

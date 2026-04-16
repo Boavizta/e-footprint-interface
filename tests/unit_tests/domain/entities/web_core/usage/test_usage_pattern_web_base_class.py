@@ -11,6 +11,10 @@ class _UsagePatternWeb(UsagePatternWebBaseClass):
     attr_name_in_system = "usage_patterns"
     object_type_in_volume = "usage_journey"
 
+    @classmethod
+    def can_create(cls, model_web) -> bool:
+        return bool(model_web.usage_journeys)
+
 
 @dataclass
 class _StubModelingObject:
@@ -39,7 +43,7 @@ class TestUsagePatternWebBaseClass:
         model_web = MagicMock()
         model_web.usage_journeys = []
 
-        with pytest.raises(PermissionError):
+        with pytest.raises(ValueError):
             _UsagePatternWeb.get_creation_prerequisites(model_web)
 
     def test_get_creation_prerequisites_passes_with_journey(self):

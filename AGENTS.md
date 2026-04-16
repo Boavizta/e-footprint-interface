@@ -141,6 +141,23 @@ Specialized `ExplainableObject` subclasses that enhance e-footprint types:
 - `ExplainableRecurrentQuantitiesFromConstant` - Recurrent timeseries from constant values
 
 
+### Creation prerequisites and disabled UX
+
+Web classes that have prerequisites for creation define a `can_create(cls, model_web) -> bool` classmethod. It returns `True` when allowed, `False` when blocked. `get_creation_prerequisites` delegates to `can_create` and raises a generic error if blocked (last line of defence — the UI should have disabled the button before this point).
+
+`ModelWeb._build_creation_constraints()` iterates all registered web classes, deduplicates by MRO defining class, and returns a dict keyed by the defining class name (e.g. `"JobWeb"`, `"UsagePatternWeb"`, `"EdgeUsagePatternWeb"`, `"RecurrentServerNeedWeb"`, `"RecurrentEdgeDeviceNeedBaseWeb"`), plus a `"__results__"` sentinel entry from `SystemValidationService`. Values are `{"enabled": bool, "disabled": bool}` for class-based entries; the `__results__` entry additionally carries `reason` (live validation-error text). Static disabled-button tooltips live in `CONSTRAINT_MESSAGES` and are resolved at render time via the `constraint_tooltip` template filter — the domain never imports from adapters. This dict is stored at `model_web.creation_constraints` and recomputed after every mutation.
+
+**Constraint diff on mutation.** `ModelingObjectWeb.create_side_effects`, `edit_side_effects`, and `delete_side_effects` are instance methods (no args beyond `self`). They read `self.model_web` and delegate to the shared `self._recompute_constraints_and_emit_regions()` helper, which diffs old vs. new constraints and, when any flip:
+- Emits two OOB regions: `model_canvas` (re-renders `#model-canva` contents via `innerHTML`) and `results_buttons` (updates `#btn-open-panel-result` and `#show-results-toolbar-btn` via `outerHTML`)
+- Sets `model_web.constraint_changes` to a list of `(key, "locked"|"unlocked")` tuples
+
+Subclasses that override a `*_side_effects` hook (e.g. `EdgeDeviceGroupWeb`) must call `super()` first and then extend the returned region list, or the diff-based regions will be lost.
+
+**Toast notifications and tooltips.** `HtmxPresenter._constraint_toast_messages()` reads `model_web.constraint_changes`, looks up messages in `adapters/ui_config/constraint_messages.py` (`CONSTRAINT_MESSAGES`), and passes them as `constraint_messages` in the `displayToastAndHighlightObjects` event. The JS handler appends them to the action toast (e.g. "Server has been saved! — You can now add jobs"). `initModelBuilderMain` is added to `HX-Trigger-After-Settle` when the `model_canvas` OOB is emitted, to reinitialize Bootstrap tooltips, sortable lists, and leaderlines after the canvas swap. Each `CONSTRAINT_MESSAGES` entry has three keys: `"unlocked"` (toast when enabled), `"locked"` (toast when disabled), and `"tooltip"` (text shown on the disabled button). The keyset of `CONSTRAINT_MESSAGES` must match the keyset of `creation_constraints`; `tests/unit_tests/adapters/ui_config/test_constraint_messages_consistency.py` enforces this invariant.
+
+**Template integration.** `add_object_button.html` and `add_child_button.html` accept `disabled` and `disabled_reason` — disabled renders a non-interactive button with a Bootstrap tooltip. `child_sections` on `ModelingObjectWeb` exposes `constraint_key` (the defining-class name) for each section, and templates resolve the tooltip copy with `{{ section.constraint_key|constraint_tooltip }}`. The `__results__` entry is looked up in templates via the generic `get_item` filter (Django rejects the `__` prefix in dot syntax). For the Results buttons (`results_bar_button.html`, `show_results_toolbar_button.html`) the disabled-state tooltip uses the live `reason` string rather than the static copy, because validation errors are dynamic.
+
+
 ### Timeseries handling (important!)
 
 **Current approach:** Timeseries generation is handled by `ExplainableObject` subclasses registered to the base timeseries types:
@@ -250,9 +267,11 @@ Leaderlines use a "deepest visible anchor" pattern for target-side resolution: i
 - `python manage.py runserver` (see `INSTALL.md` for full setup)
 
 ### Running tests
-- Python: `poetry run pytest` or `python -m pytest`
-- E2E (requires running server): `poetry run pytest tests/e2e/ --base-url http://localhost:8000`
+- For best speed, run unit/integration tests first, then E2E in parallel:
+  1. `poetry run pytest tests --ignore=tests/e2e`
+  2. `poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000` (requires running server)
 - Jest: `npm run jest`
+- **Flakiness:** If a test fails on the first run but passes on retry, flag it explicitly to the user as a flaky test rather than silently re-running.
 
 ### Adding new ModelingObject classes
 **You should NOT need to create extension classes** - use base efootprint classes directly.

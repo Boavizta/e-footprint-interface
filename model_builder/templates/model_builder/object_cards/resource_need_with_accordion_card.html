@@ -45,7 +45,7 @@
                             {% endfor %}
                             <div id="add-{{ section.attr_name }}-to-{{ object.web_id }}"
                                  class="w-85 ms-15 px-0 py-0 d-flex justify-content-end position-relative">
-                                {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id linkable_existing_count=section.linkable_existing_count %}
+                                {% include 'model_builder/components/add_child_button.html' with type_str=section.type_str parent_efootprint_id=object.efootprint_id linkable_existing_count=section.linkable_existing_count disabled=section.disabled disabled_reason=section.constraint_key|constraint_tooltip %}
                             </div>
                         </div>
                     {% endwith %}

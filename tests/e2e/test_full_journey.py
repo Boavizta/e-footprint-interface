@@ -65,6 +65,12 @@ class TestFullJourney:
         expect(page.locator("div").filter(has_text=step_one).first).to_be_visible()
         expect(page.locator("div").filter(has_text=step_two).first).to_be_visible()
 
+        # --- Constraint assertion: no server yet, so the step's Add Job button is disabled ---
+        step_card_for_disabled_check = model_builder.get_object_card("UsageJourneyStep", step_one)
+        step_card_for_disabled_check.child_add_button_should_be_disabled("JobBase")
+        # Without a UsagePattern the Results button has no hx-get — it can't be clicked.
+        expect(page.locator("#btn-open-panel-result")).not_to_have_attribute("hx-get", "/model_builder/result-chart/")
+
         # --- Create server ---
         model_builder.click_add_server()
         side_panel.should_contain_text("Add new server")
@@ -120,6 +126,9 @@ class TestFullJourney:
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("UsagePattern", up_name)
 
+        # --- Constraint assertion: with a UsagePattern in place, the Results button must re-enable ---
+        expect(page.locator("#btn-open-panel-result")).to_have_attribute("hx-get", "/model_builder/result-chart/")
+
         # --- Delete unused UJ 2 ---
         uj_card_two = model_builder.get_object_card("UsageJourney", uj_name_two)
         uj_card_two.click_edit_button()
@@ -150,4 +159,7 @@ class TestFullJourney:
         side_panel.click_delete_button()
         side_panel.confirm_delete()
         model_builder.object_should_not_exist("UsagePattern", up_name)
+
+        # --- Constraint assertion: removing the only UsagePattern must flip Results back to disabled ---
+        expect(page.locator("#btn-open-panel-result")).not_to_have_attribute("hx-get", "/model_builder/result-chart/")
 

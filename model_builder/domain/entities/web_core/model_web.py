@@ -47,11 +47,14 @@ class ModelWeb:
                 self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
+            self.creation_constraints = self._build_creation_constraints()
             if self.system_data_source == "postgres":
                 self.persist_to_cache()
         else:
             self.system_data = raw_system_data
+            self.creation_constraints = {}
             logger.info(f"Empty system data so e-footprint modeling hasn’t been hydrated.")
+        self.constraint_changes = []
 
     def __getattr__(self, name):
         if name in ("system", "response_objs", "flat_efootprint_objs_dict", "initial_system_data_efootprint_version"):
@@ -87,6 +90,39 @@ class ModelWeb:
             data_with_calculated_attributes,
             data_without_calculated_attributes=data_without_calculated_attributes
         )
+
+    def _build_creation_constraints(self) -> dict:
+        """Snapshot of per-class creation gates plus __results__.
+
+        For class-based entries the dict carries only {"enabled", "disabled"} — tooltip
+        copy is resolved at render time via the `constraint_tooltip` template filter so
+        the domain never depends on adapter presentation strings. The special __results__
+        entry additionally carries `reason` (the live validation errors) because those
+        messages are computed here, not static copy.
+        """
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+        from model_builder.domain.services import SystemValidationService
+
+        constraints = {}
+        seen_defining_classes = set()
+        for web_class in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.values():
+            if not hasattr(web_class, "can_create"):
+                continue
+            defining_class = next(c for c in web_class.__mro__ if "can_create" in c.__dict__)
+            if defining_class in seen_defining_classes:
+                continue
+            seen_defining_classes.add(defining_class)
+            enabled = web_class.can_create(self)
+            constraints[defining_class.__name__] = {"enabled": enabled, "disabled": not enabled}
+
+        validation_result = SystemValidationService().validate_for_computation(self)
+        constraints["__results__"] = {
+            "enabled": validation_result.is_valid,
+            "disabled": not validation_result.is_valid,
+            "reason": "" if validation_result.is_valid
+                      else "\n\n".join(e.message for e in validation_result.errors),
+        }
+        return constraints
 
     def raise_incomplete_modeling_errors(self):
         """Validate system completeness and raise ValueError if incomplete."""

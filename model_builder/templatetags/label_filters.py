@@ -6,6 +6,7 @@ to user-friendly labels, keeping this logic out of domain entities.
 from django import template
 
 from model_builder.adapters.label_resolver import LabelResolver
+from model_builder.adapters.ui_config.constraint_messages import CONSTRAINT_MESSAGES
 
 register = template.Library()
 
@@ -75,6 +76,30 @@ def link_child_text(class_name: str) -> str:
         return ""
     label = LabelResolver.get_class_label(class_name).lower()
     return f"Link existing {label}"
+
+
+@register.filter
+def get_item(mapping, key):
+    """Look up `key` in `mapping`. Needed for keys Django's dot syntax rejects as private
+    (e.g. the `__results__` sentinel in `creation_constraints`).
+    """
+    if mapping is None:
+        return None
+    return mapping.get(key)
+
+
+@register.filter
+def constraint_tooltip(constraint_key: str) -> str:
+    """Resolve a constraint key (web class name) to its disabled-button tooltip text.
+
+    Usage: {{ constraint_key|constraint_tooltip }}
+
+    Keeps the presentation copy in adapters/ui_config while letting domain code
+    expose only the class name on the constraint snapshot.
+    """
+    if not constraint_key:
+        return ""
+    return CONSTRAINT_MESSAGES.get(constraint_key, {}).get("tooltip", "")
 
 
 @register.filter

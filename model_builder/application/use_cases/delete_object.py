@@ -126,8 +126,6 @@ class DeleteObjectUseCase:
 
         list_containers, attr_name_in_list_container = web_obj.list_containers_and_attr_name_in_list_container
 
-        oob_regions = type(web_obj).delete_side_effects(web_obj, self.model_web)
-
         if list_containers:
             # List deletion: remove from all list containers using domain service
             edit_service = EditService()
@@ -152,6 +150,8 @@ class DeleteObjectUseCase:
                 edited_containers.append(edit_result.edited_object)
 
             self.model_web.persist_to_cache()
+            # Call delete_side_effects after deletion so constraint diff reflects post-deletion state
+            oob_regions = web_obj.delete_side_effects()
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
@@ -170,6 +170,8 @@ class DeleteObjectUseCase:
             web_obj.self_delete()
 
             self.model_web.persist_to_cache()
+            # Call delete_side_effects after deletion so constraint diff reflects post-deletion state
+            oob_regions = web_obj.delete_side_effects()
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,

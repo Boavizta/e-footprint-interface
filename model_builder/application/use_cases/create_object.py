@@ -167,7 +167,7 @@ class CreateObjectUseCase:
             model_web.persist_to_cache()
 
             # 9b. Side-effect descriptors (OOB DOM regions to refresh after the create)
-            side_effects = type(added_obj).create_side_effects(added_obj, model_web)
+            side_effects = added_obj.create_side_effects()
 
             # 10. Build output
             return CreateObjectOutput(

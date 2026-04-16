@@ -173,22 +173,44 @@ class ModelingObjectWeb:
         """
         return {}
 
-    @classmethod
-    def create_side_effects(cls, added_obj, model_web):
+    def _recompute_constraints_and_emit_regions(self) -> list:
+        """Refresh `model_web.creation_constraints`; return OOB regions if anything flipped.
+
+        Mutates `model_web.constraint_changes` only when there's at least one flip, so the
+        presenter can surface one toast per flipped constraint. Used by all three side-effect
+        hooks so the diff-and-emit logic lives in exactly one place.
+        """
+        from model_builder.domain.oob_region import OobRegion
+
+        model_web = self.model_web
+        new_constraints = model_web._build_creation_constraints()
+        old_constraints = model_web.creation_constraints
+        changes = []
+        for key, value in new_constraints.items():
+            if key not in old_constraints:
+                continue
+            if old_constraints[key]["enabled"] != value["enabled"]:
+                changes.append((key, "unlocked" if value["enabled"] else "locked"))
+        model_web.creation_constraints = new_constraints
+        if not changes:
+            return []
+        model_web.constraint_changes = changes
+        return [OobRegion("model_canvas"), OobRegion("results_buttons")]
+
+    def create_side_effects(self):
         """Side-effect descriptors emitted after this object is created."""
-        del added_obj, model_web
         from model_builder.domain.oob_region import CreateSideEffects
-        return CreateSideEffects()
+        side_effects = CreateSideEffects()
+        side_effects.oob_regions.extend(self._recompute_constraints_and_emit_regions())
+        return side_effects
 
     def edit_side_effects(self):
         """Side-effect OOB regions emitted after this object is edited."""
-        return []
+        return self._recompute_constraints_and_emit_regions()
 
-    @classmethod
-    def delete_side_effects(cls, web_obj, model_web):
+    def delete_side_effects(self):
         """Side-effect OOB regions emitted after this object is deleted."""
-        del web_obj, model_web
-        return []
+        return self._recompute_constraints_and_emit_regions()
 
 
     @property
@@ -369,7 +391,10 @@ class ModelingObjectWeb:
     @property
     def child_sections(self):
         """Structured view of children grouped by their list attribute/type."""
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+
         init_signature = get_init_signature_params(self.efootprint_class)
+        constraints = getattr(self.model_web, "creation_constraints", {})
         sections = []
         for attr_name in self.list_attr_names:
             children = getattr(self, attr_name, []) or []
@@ -378,11 +403,23 @@ class ModelingObjectWeb:
             linked_ids = {child.efootprint_id for child in children}
             all_of_type = self.model_web.get_efootprint_objects_from_efootprint_type(child_type)
             linkable_existing_count = sum(1 for obj in all_of_type if obj.id not in linked_ids)
+
+            web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(child_type)
+            if web_class and hasattr(web_class, "can_create"):
+                defining_class = next(c for c in web_class.__mro__ if "can_create" in c.__dict__)
+                constraint_key = defining_class.__name__
+                disabled = not constraints.get(constraint_key, {}).get("enabled", True)
+            else:
+                constraint_key = ""
+                disabled = False
+
             sections.append({
                 "type_str": child_type,
                 "children": children,
                 "attr_name": attr_name,
                 "linkable_existing_count": linkable_existing_count,
+                "disabled": disabled,
+                "constraint_key": constraint_key,
             })
 
         return sections

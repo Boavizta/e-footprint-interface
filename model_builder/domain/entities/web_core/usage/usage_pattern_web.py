@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from efootprint.constants.sources import Sources
 from efootprint.builders.timeseries.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 
 from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import UsagePatternWebBaseClass
+
+if TYPE_CHECKING:
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class UsagePatternWeb(UsagePatternWebBaseClass):
@@ -13,6 +18,7 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
     }
     attr_name_in_system = "usage_patterns"
     object_type_in_volume = "usage_journey"
+
     hourly_quantities_from_growth_ui_config = {
         "initial_volume": {
             "label": "Initial number of usage journey starts",
@@ -41,3 +47,7 @@ class UsagePatternWeb(UsagePatternWebBaseClass):
             "devices": {"multiselect_to_single": True},
         },
     }
+
+    @classmethod
+    def can_create(cls, model_web: "ModelWeb") -> bool:
+        return bool(model_web.usage_journeys)

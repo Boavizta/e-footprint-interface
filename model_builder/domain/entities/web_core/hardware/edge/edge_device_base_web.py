@@ -29,11 +29,10 @@ class EdgeDeviceBaseWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
     def _parent_group_membership_dict(self) -> str:
         return "edge_device_counts"
 
-    @classmethod
-    def create_side_effects(cls, added_obj, model_web):
-        from model_builder.domain.oob_region import CreateSideEffects, OobRegion
-        del model_web
-        if added_obj.modeling_obj._find_parent_groups():
-            return CreateSideEffects(
-                oob_regions=[OobRegion("edge_device_lists")], replaces_primary_render=True)
-        return CreateSideEffects()
+    def create_side_effects(self):
+        from model_builder.domain.oob_region import OobRegion
+        side_effects = super().create_side_effects()
+        if self.modeling_obj._find_parent_groups():
+            side_effects.oob_regions.append(OobRegion("edge_device_lists"))
+            side_effects.replaces_primary_render = True
+        return side_effects

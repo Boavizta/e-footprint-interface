@@ -46,22 +46,24 @@ class EdgeDeviceGroupWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
             raise ValueError("A group cannot be both a parent and a subgroup of the same group.")
         return form_data
 
-    @classmethod
-    def create_side_effects(cls, added_obj, model_web):
-        from model_builder.domain.oob_region import CreateSideEffects, OobRegion
-        del added_obj, model_web
-        return CreateSideEffects(
-            oob_regions=[OobRegion("edge_device_lists")], replaces_primary_render=True)
+    def create_side_effects(self):
+        from model_builder.domain.oob_region import OobRegion
+        side_effects = super().create_side_effects()
+        side_effects.oob_regions.append(OobRegion("edge_device_lists"))
+        side_effects.replaces_primary_render = True
+        return side_effects
 
     def edit_side_effects(self):
         from model_builder.domain.oob_region import OobRegion
-        return [OobRegion("edge_device_lists")]
+        regions = super().edit_side_effects()
+        regions.append(OobRegion("edge_device_lists"))
+        return regions
 
-    @classmethod
-    def delete_side_effects(cls, web_obj, model_web):
+    def delete_side_effects(self):
         from model_builder.domain.oob_region import OobRegion
-        del web_obj, model_web
-        return [OobRegion("edge_device_lists")]
+        regions = super().delete_side_effects()
+        regions.append(OobRegion("edge_device_lists"))
+        return regions
 
     def _build_group_entry(self, obj, count):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object

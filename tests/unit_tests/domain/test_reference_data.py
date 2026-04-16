@@ -36,9 +36,10 @@ class TestsReferenceData(TestCase):
 
         def check_dict_equality_ignoring_ids(dict1, dict2):
             for subdict1, subdict2 in zip(list(dict1.values()), list(dict2.values())):
-                subdict1.pop("id", None)
-                subdict2.pop("id", None)
-                self.assertDictEqual(subdict1, subdict2)
+                self.assertDictEqual(
+                    {k: v for k, v in subdict1.items() if k != "id"},
+                    {k: v for k, v in subdict2.items() if k != "id"},
+                )
 
         check_dict_equality_ignoring_ids(network_archetypes, default_networks)
         check_dict_equality_ignoring_ids(hardware_archetypes, default_devices)

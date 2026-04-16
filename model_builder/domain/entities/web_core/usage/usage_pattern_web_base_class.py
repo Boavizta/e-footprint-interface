@@ -56,12 +56,11 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
     def get_creation_prerequisites(cls, model_web: "ModelWeb") -> dict:
         """Check prerequisites and return empty dict (no special data needed).
 
-        Raises PermissionError if prerequisites not met.
+        Raises ValueError if prerequisites not met (last line of defence — the UI
+        should have disabled the button before this point).
         """
-        if len(getattr(model_web, cls.object_type_in_volume + "s")) == 0:
-            raise PermissionError(
-                f"You need to have created at least one {cls.object_type_in_volume.replace('_', ' ')} "
-                f"to create a usage pattern.")
+        if not cls.can_create(model_web):
+            raise ValueError("Cannot create usage pattern: prerequisites not met.")
         return {}
 
     @classmethod

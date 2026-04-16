@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.0] - 2026-04-17
+
+### Added
+- Disabled-instead-of-error UX for gated Add buttons and Results. When a user tries to add an object that requires another object that hasn’t been created yet (for example, trying to add a job before creating any server), the Add button is now disabled and a tooltip explains why, instead of letting the user click on it and then raising an error. The same logic applies for the Results button when trying to compute a model that has missing required objects.
+
+### Fixed
+- Add missing "Add component" button and fix re-render for edge devices in groups. Edge devices inside edge device groups were missing the "Add component" button, and creating a component for a grouped device incorrectly replaced the group entry row with the standalone edge device card template. Now the group entry row includes the button, and EdgeComponentWeb declares create_side_effects that trigger a full edge_device_lists OOB re-render when the parent device is grouped.
+
 ## [1.2.0] - 2026-04-16
 
 ### Added

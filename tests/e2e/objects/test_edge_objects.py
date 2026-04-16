@@ -104,17 +104,9 @@ class TestEdgeObjects:
 
         edge_function_card = model_builder.get_object_card("EdgeFunction", edge_function_name)
 
-        # Try to add recurrent edge process before creating an edge device - should show error
-        edge_function_card.click_add_child_button("RecurrentEdgeDeviceNeed")
-        model_builder.expect_error_modal(
-            "Please create an edge device before adding a recurrent edge resource need")
-        model_builder.close_error_modal("model-builder-modal")
-
-        # Try to add a recurrent server need before creating an edge device - should show error
-        edge_function_card.click_add_child_button("RecurrentServerNeed")
-        model_builder.expect_error_modal(
-            "Please create an edge device before adding a recurrent server need")
-        model_builder.close_error_modal("model-builder-modal")
+        # Before creating an edge device, add-child buttons should be disabled
+        edge_function_card.child_add_button_should_be_disabled("RecurrentEdgeDeviceNeed")
+        edge_function_card.child_add_button_should_be_disabled("RecurrentServerNeed")
 
         # Create edge device
         click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
@@ -148,12 +140,9 @@ class TestEdgeObjects:
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("RecurrentServerNeed", recurrent_server_need_name)
 
-        # Try to add a job to the recurrent server need - should show error since no server
+        # Before adding a server, the "add job" button should be disabled
         recurrent_server_need_card = model_builder.get_object_card("RecurrentServerNeed", recurrent_server_need_name)
-        recurrent_server_need_card.click_add_job_button()
-        model_builder.expect_error_modal(
-            "Please go to the infrastructure section and create a server or external API before adding a job"
-        ).close_error_modal()
+        recurrent_server_need_card.child_add_button_should_be_disabled("JobBase")
 
         # Add a server
         model_builder.click_add_server()

@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from efootprint.constants.sources import Sources
 from efootprint.builders.timeseries.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 
 from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import UsagePatternWebBaseClass
+
+if TYPE_CHECKING:
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
@@ -23,3 +28,7 @@ class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
             ),
         },
     }
+
+    @classmethod
+    def can_create(cls, model_web: "ModelWeb") -> bool:
+        return bool(model_web.edge_usage_journeys)

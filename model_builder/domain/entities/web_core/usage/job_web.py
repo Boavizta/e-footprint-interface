@@ -33,17 +33,20 @@ class JobWeb(ResourceNeedBaseWeb):
         return self.server.web_id
 
     @classmethod
+    def can_create(cls, model_web: "ModelWeb") -> bool:
+        return bool(model_web.servers + model_web.external_apis)
+
+    @classmethod
     def get_creation_prerequisites(cls, model_web: "ModelWeb") -> dict:
         """Return raw domain data needed for form building.
 
         The adapter will transform this into form structures.
         No form field dictionaries here - just domain objects and relationships.
         """
+        if not cls.can_create(model_web):
+            raise ValueError("Cannot create job: no servers or external APIs available.")
         servers = model_web.servers
         external_apis = model_web.external_apis
-        if not servers + external_apis:
-            raise ValueError(
-                "Please go to the infrastructure section and create a server or external API before adding a job")
 
         # Compute all available job classes based on services and external APIs in system
         available_classes = {Job, GPUJob}

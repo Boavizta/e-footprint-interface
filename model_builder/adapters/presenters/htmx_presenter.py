@@ -10,7 +10,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
-from model_builder.adapters.presenters.oob_regions import render_oob_regions
+from model_builder.adapters.presenters.oob_regions import oob_regions_cover_all_cards, render_oob_regions
+from model_builder.adapters.ui_config.constraint_messages import CONSTRAINT_MESSAGES
 from model_builder.application.use_cases import CreateObjectOutput, EditObjectOutput, DeleteObjectOutput
 from model_builder.application.use_cases.delete_object import DeleteCheckResult
 
@@ -44,21 +45,27 @@ class HtmxPresenter:
             self._model_web = ModelWeb(SessionSystemRepository(self.request.session))
         return self._model_web
 
-    def _append_recomputation_html(self, response: HttpResponse) -> HttpResponse:
-        """Append result panel recomputation HTML to response if needed.
+    def _constraint_toast_messages(self) -> list[str]:
+        """Return toast messages for any constraint changes on the current model_web."""
+        changes = getattr(self._model_web, "constraint_changes", [])
+        return [
+            CONSTRAINT_MESSAGES[key][direction]
+            for key, direction in changes
+            if key in CONSTRAINT_MESSAGES
+        ]
 
-        Args:
-            response: The HTTP response to modify.
+    def _oob_response_setup(self, oob_regions) -> tuple[bool, dict, list[str]]:
+        """Compute (canvas_oob, extra_settle, constraint_messages) shared by every mutation response."""
+        canvas_oob = oob_regions_cover_all_cards(oob_regions)
+        extra_settle = {"initModelBuilderMain": ""} if canvas_oob else {}
+        return canvas_oob, extra_settle, self._constraint_toast_messages()
 
-        Returns:
-            The modified response with recomputation HTML appended.
-        """
+    def _recomputation_html(self) -> str:
+        """HTML for re-rendering the result panel as an OOB innerHTML swap."""
         refresh_content = render_to_string(
             "model_builder/result/result_panel.html", context={"model_web": self.model_web})
-        html_update = (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
-                      f"{refresh_content}</div>")
-        response.content += html_update.encode('utf-8')
-        return response
+        return (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
+                f"{refresh_content}</div>")
 
     def present_created_object(self, output: CreateObjectOutput, recompute: bool = False) -> HttpResponse:
         """Format a created object as an HTTP response.
@@ -70,34 +77,30 @@ class HtmxPresenter:
         Returns:
             HttpResponse with the rendered object card and HTMX triggers.
         """
+        canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
+
         if output.parent_was_linked:
             toast_and_highlight_data = {
                 "ids": output.mirrored_web_ids,
                 "name": output.created_object_name,
-                "action_type": "add_new_object"
+                "action_type": "add_new_object",
+                "constraint_messages": constraint_messages,
             }
 
-            if output.replaces_primary_render and output.oob_regions:
-                # OOB regions handle the full re-render (e.g. parent is inside an edge device group)
+            if canvas_oob or (output.replaces_primary_render and output.oob_regions):
+                # OOB regions handle the full re-render (parent inside edge device group, or canvas re-render)
                 html_updates = render_oob_regions(self.model_web, output.oob_regions)
             else:
-                # Parent was linked - generate HTML for all mirrored parent cards
                 parent_obj = self.model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
                 html_updates = self._generate_mirrored_cards_html(parent_obj.mirrored_cards)
+                html_updates += self._sibling_cards_with_link_flip(
+                    parent_obj.class_as_simple_str, {output.linked_parent_id}, target_count=1)
+                html_updates += render_oob_regions(self.model_web, output.oob_regions)
 
-                # Re-render siblings whose "link existing" button just appeared (count crossed 0→1)
-                for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_obj.class_as_simple_str):
-                    if sibling.efootprint_id != output.linked_parent_id and any(
-                        s["linkable_existing_count"] == 1 for s in sibling.child_sections):
-                        html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
-
-                if output.oob_regions:
-                    html_updates += render_oob_regions(self.model_web, output.oob_regions)
-
-            response = self._build_oob_response(html_updates, toast_and_highlight_data)
             if recompute:
-                self._append_recomputation_html(response)
-            return response
+                html_updates += self._recomputation_html()
+            return self._build_oob_response(html_updates, toast_and_highlight_data,
+                                            extra_settle_triggers=extra_settle)
 
         # Check if we should return a different object (e.g., server instead of service)
         if output.override_object:
@@ -107,15 +110,18 @@ class HtmxPresenter:
                 f"model_builder/object_cards/{override_obj.template_name}_card.html",
                 {"object": override_obj}
             )
-            response["HX-Trigger-After-Settle"] = json.dumps({
+            after_settle = {
                 "displayToastAndHighlightObjects": {
                     "ids": [override_obj.web_id],
                     "name": override_obj.name,
-                    "action_type": "add_new_object"
+                    "action_type": "add_new_object",
+                    "constraint_messages": constraint_messages,
                 }
-            })
+            }
+            after_settle.update(extra_settle)
+            response["HX-Trigger-After-Settle"] = json.dumps(after_settle)
             if recompute:
-                self._append_recomputation_html(response)
+                response.content += self._recomputation_html().encode("utf-8")
             return response
 
         # Standalone object - render its card (unless side-effects own the layout instead)
@@ -129,21 +135,23 @@ class HtmxPresenter:
                 {"object": added_obj}
             )
 
-        response["HX-Trigger-After-Settle"] = json.dumps({
+        after_settle = {
             "resetLeaderLines": "",
             "setAccordionListeners": {"accordionIds": [output.web_id]},
             "displayToastAndHighlightObjects": {
                 "ids": [output.web_id],
                 "name": output.created_object_name,
-                "action_type": "add_new_object"
+                "action_type": "add_new_object",
+                "constraint_messages": constraint_messages,
             }
-        })
+        }
+        after_settle.update(extra_settle)
+        response["HX-Trigger-After-Settle"] = json.dumps(after_settle)
 
-        if output.oob_regions:
-            response.content += render_oob_regions(self.model_web, output.oob_regions).encode("utf-8")
+        response.content += render_oob_regions(self.model_web, output.oob_regions).encode("utf-8")
 
         if recompute:
-            self._append_recomputation_html(response)
+            response.content += self._recomputation_html().encode("utf-8")
         return response
 
     def present_created_object_with_parent_link(
@@ -178,40 +186,38 @@ class HtmxPresenter:
         Returns:
             HttpResponse with the updated HTML and HTMX triggers.
         """
+        canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
+
         toast_and_highlight_data = {
             "ids": output.mirrored_web_ids,
             "name": output.edited_object_name,
-            "action_type": "edit_object"
+            "action_type": "edit_object",
+            "constraint_messages": constraint_messages,
         }
 
-        if output.name_only_change and not recompute:
-            html_updates = self._generate_name_only_updates_html(output.mirrored_cards)
-            if output.oob_regions:
-                html_updates += render_oob_regions(self.model_web, output.oob_regions)
-            response = HttpResponse(html_updates)
-            response["HX-Trigger-After-Settle"] = json.dumps({"displayToastAndHighlightObjects": toast_and_highlight_data})
-            return response
-
-        html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
-        if output.oob_regions:
+        if canvas_oob:
+            # Canvas innerHTML re-render covers all cards; OOB regions are the entire response
+            html_updates = render_oob_regions(self.model_web, output.oob_regions)
+        elif output.name_only_change and not recompute:
+            html_updates = (self._generate_name_only_updates_html(output.mirrored_cards)
+                            + render_oob_regions(self.model_web, output.oob_regions))
+            return self._build_oob_response(html_updates, toast_and_highlight_data,
+                                            extra_settle_triggers=extra_settle, reset_leaderlines=False)
+        else:
+            html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
+            # Re-render siblings whose "Link existing" button just disappeared
+            # (cascade delete during edit reduced linkable_existing_count from 1 to 0)
+            edited_ids = {card.efootprint_id for card in output.mirrored_cards}
+            html_updates += self._sibling_cards_with_link_flip(
+                output.edited_object_type, edited_ids, target_count=0)
             html_updates += render_oob_regions(self.model_web, output.oob_regions)
 
-        # Re-render siblings whose "link existing" button just disappeared
-        # (cascade delete during edit reduced count from 1 to 0)
-        edited_ids = {card.efootprint_id for card in output.mirrored_cards}
-        for sibling in self.model_web.get_web_objects_from_efootprint_type(output.edited_object_type):
-            if sibling.efootprint_id not in edited_ids and any(
-                s["linkable_existing_count"] == 0 for s in sibling.child_sections):
-                html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
-
         if recompute:
-            refresh_content = render_to_string(
-                "model_builder/result/result_panel.html", context={"model_web": self.model_web})
-            html_updates += (f"<div id='result-block' hx-swap-oob='innerHTML:#result-block'>"
-                            f"{refresh_content}</div>")
+            html_updates += self._recomputation_html()
             trigger_result_display = True
 
-        return self._build_oob_response(html_updates, toast_and_highlight_data, trigger_result_display)
+        return self._build_oob_response(html_updates, toast_and_highlight_data, trigger_result_display,
+                                        extra_settle_triggers=extra_settle)
 
     def _generate_name_only_updates_html(self, mirrored_cards) -> str:
         """Generate OOB innerHTML swaps targeting only the name element of each mirrored card.
@@ -222,6 +228,23 @@ class HtmxPresenter:
             f"<div hx-swap-oob='innerHTML:#name-{card.web_id}'>{card.name}</div>"
             for card in mirrored_cards
         )
+
+    def _sibling_cards_with_link_flip(
+        self, parent_type: str, excluded_ids: set, target_count: int
+    ) -> str:
+        """HTML for mirrored cards of siblings whose "Link existing" button just flipped.
+
+        A sibling is re-rendered when any of its child_sections has `linkable_existing_count`
+        equal to `target_count` — 1 after a link crosses 0→1 (button appears), 0 after an
+        edit/delete crosses 1→0 (button disappears).
+        """
+        html = ""
+        for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_type):
+            if sibling.efootprint_id in excluded_ids:
+                continue
+            if any(s["linkable_existing_count"] == target_count for s in sibling.child_sections):
+                html += self._generate_mirrored_cards_html(sibling.mirrored_cards)
+        return html
 
     def _generate_mirrored_cards_html(self, mirrored_cards) -> str:
         """Generate OOB swap HTML for a list of mirrored cards.
@@ -242,7 +265,8 @@ class HtmxPresenter:
         return html
 
     def _build_oob_response(
-        self, html: str, toast_data: dict, trigger_result_display: bool = False
+        self, html: str, toast_data: dict, trigger_result_display: bool = False,
+        extra_settle_triggers: dict = None, reset_leaderlines: bool = True,
     ) -> HttpResponse:
         """Build an HTTP response with OOB swap HTML and HTMX triggers.
 
@@ -250,15 +274,21 @@ class HtmxPresenter:
             html: The HTML content with hx-swap-oob divs.
             toast_data: Data for the toast notification (ids, name, action_type).
             trigger_result_display: Whether to trigger result chart display.
+            extra_settle_triggers: Optional extra keys for HX-Trigger-After-Settle.
+            reset_leaderlines: Whether to fire the immediate `resetLeaderLines` HX-Trigger.
+                Disable for updates that don't change layout (e.g. name-only edits).
 
         Returns:
             HttpResponse with appropriate HTMX headers.
         """
         response = HttpResponse(html)
-        response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
+        if reset_leaderlines:
+            response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
         after_settle_trigger = {"displayToastAndHighlightObjects": toast_data}
         if trigger_result_display:
             after_settle_trigger["triggerResultRendering"] = ""
+        if extra_settle_triggers:
+            after_settle_trigger.update(extra_settle_triggers)
         response["HX-Trigger-After-Settle"] = json.dumps(after_settle_trigger)
         return response
 
@@ -271,40 +301,40 @@ class HtmxPresenter:
         Returns:
             HttpResponse with HTMX triggers for UI updates.
         """
+        canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
+
         toast_and_highlight_data = {
             "ids": output.deleted_web_ids,
             "name": output.deleted_object_name,
-            "action_type": "delete_object"
+            "action_type": "delete_object",
+            "constraint_messages": constraint_messages,
         }
 
-        if output.was_list_deletion:
-            # Generate HTML for all edited containers' mirrored cards
-            html_updates = ""
-            for edited_container in output.edited_containers:
-                html_updates += self._generate_mirrored_cards_html(edited_container.mirrored_cards)
-
-            # Re-render siblings whose "link existing" button just disappeared (count crossed 1→0)
+        if output.was_list_deletion and not canvas_oob:
+            # Per-card outerHTML swaps for each edited container + siblings whose "Link existing"
+            # button just disappeared (linkable_existing_count crossed 1→0)
+            html_updates = "".join(
+                self._generate_mirrored_cards_html(c.mirrored_cards) for c in output.edited_containers)
             if output.edited_containers:
                 edited_ids = {c.efootprint_id for c in output.edited_containers}
-                parent_type = output.edited_containers[0].class_as_simple_str
-                for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_type):
-                    if sibling.efootprint_id not in edited_ids and any(
-                        s["linkable_existing_count"] == 0 for s in sibling.child_sections):
-                        html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
+                html_updates += self._sibling_cards_with_link_flip(
+                    output.edited_containers[0].class_as_simple_str, edited_ids, target_count=0)
+            html_updates += render_oob_regions(self.model_web, output.oob_regions)
+            return self._build_oob_response(html_updates, toast_and_highlight_data,
+                                            extra_settle_triggers=extra_settle)
 
-            if output.oob_regions:
-                html_updates += render_oob_regions(self.model_web, output.oob_regions)
-            return self._build_oob_response(html_updates, toast_and_highlight_data)
-        elif output.oob_regions:
+        if output.oob_regions:
+            # Either canvas_oob (covers all cards) or targeted regions (e.g. edge device lists)
             return self._build_oob_response(
-                render_oob_regions(self.model_web, output.oob_regions), toast_and_highlight_data)
-        else:
-            response = HttpResponse(status=204)
-            response["HX-Trigger"] = json.dumps({
-                "resetLeaderLines": "",
-                "displayToastAndHighlightObjects": toast_and_highlight_data
-            })
-            return response
+                render_oob_regions(self.model_web, output.oob_regions), toast_and_highlight_data,
+                extra_settle_triggers=extra_settle)
+
+        response = HttpResponse(status=204)
+        response["HX-Trigger"] = json.dumps({
+            "resetLeaderLines": "",
+            "displayToastAndHighlightObjects": toast_and_highlight_data
+        })
+        return response
 
     def present_delete_confirmation(
         self, check_result: DeleteCheckResult, web_obj, object_id: str

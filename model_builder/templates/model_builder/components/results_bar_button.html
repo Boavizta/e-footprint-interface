@@ -1,0 +1,32 @@
+{% load label_filters %}
+{% with results_constraint=model_web.creation_constraints|get_item:"__results__" %}
+{% if results_constraint.enabled %}
+<div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
+    {% if oob %}hx-swap-oob="outerHTML:#btn-open-panel-result"{% endif %}
+    hx-get="/model_builder/result-chart/"
+    hx-target="#result-block"
+    hx-swap="innerHTML"
+    hx-trigger="click"
+    hx-disabled-elt="button"
+>
+{% else %}
+<div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
+    {% if oob %}hx-swap-oob="outerHTML:#btn-open-panel-result"{% endif %}
+    style="opacity: 0.5; cursor: not-allowed;"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    title="{{ results_constraint.reason }}"
+>
+{% endif %}
+    <div class="row h-100 text-start align-items-center">
+        <div class="col-4">
+            <p class="h5 my-0 ms-3">Results</p>
+        </div>
+        <div class="col-4 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-chevron-compact-up" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M7.776 5.553a.5.5 0 0 1 .448 0l6 3a.5.5 0 1 1-.448.894L8 6.56 2.224 9.447a.5.5 0 1 1-.448-.894z"/>
+            </svg>
+        </div>
+    </div>
+</div>
+{% endwith %}

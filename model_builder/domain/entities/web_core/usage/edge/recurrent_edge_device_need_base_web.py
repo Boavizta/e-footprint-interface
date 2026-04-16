@@ -28,15 +28,19 @@ class RecurrentEdgeDeviceNeedBaseWeb(ResourceNeedBaseWeb):
     }
 
     @classmethod
+    def can_create(cls, model_web: "ModelWeb") -> bool:
+        return bool(model_web.edge_devices)
+
+    @classmethod
     def get_creation_prerequisites(cls, model_web: "ModelWeb") -> dict:
         """Return raw domain data needed for form building.
 
         The adapter will transform this into form structures.
         No form field dictionaries here - just domain objects and relationships.
         """
+        if not cls.can_create(model_web):
+            raise ValueError("Cannot create recurrent edge device need: no edge devices available.")
         edge_devices = model_web.edge_devices
-        if not edge_devices:
-            raise ValueError("Please create an edge device before adding a recurrent edge resource need")
 
         available_classes = [RecurrentEdgeProcess, RecurrentEdgeWorkload, RecurrentEdgeDeviceNeed]
 

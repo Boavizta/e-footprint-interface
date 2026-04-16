@@ -4,6 +4,16 @@ function initModelBuilderMain() {
     initGrabEffect();
     initHammer();
     initObjectCardTitleTooltips();
+    initDisabledButtonTooltips();
+}
+
+function initDisabledButtonTooltips(root = document) {
+    if (!window.bootstrap || !bootstrap.Tooltip) {
+        return;
+    }
+    root.querySelectorAll("[data-bs-toggle='tooltip']").forEach(element => {
+        bootstrap.Tooltip.getOrCreateInstance(element, { container: "body", trigger: "hover" });
+    });
 }
 
 function initObjectCardTitleTooltips(root = document) {
@@ -134,12 +144,19 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
 
     let actionType = event.detail["action_type"];
     let modelObjectName = event.detail["name"];
+    let constraintMessages = event.detail["constraint_messages"] || [];
+    let baseMessage;
     if (actionType === "delete_object"){
-        toastBody.innerHTML = `${modelObjectName} has been deleted!`;
+        baseMessage = `${modelObjectName} has been deleted!`;
     }else if( actionType === "edit_object") {
-        toastBody.innerHTML = `${modelObjectName} has been updated!`;
+        baseMessage = `${modelObjectName} has been updated!`;
     }else if( actionType === "add_new_object"){
-        toastBody.innerHTML = `${modelObjectName} has been saved!`;
+        baseMessage = `${modelObjectName} has been saved!`;
+    }
+    if (constraintMessages.length > 0) {
+        toastBody.innerHTML = baseMessage + " — " + constraintMessages.join(" — ");
+    } else {
+        toastBody.innerHTML = baseMessage;
     }
 
     event.detail["ids"].forEach((mirrorObjetWebId, index) => {
@@ -257,8 +274,34 @@ function restoreAccordionStateInFragment(serverResponse) {
 
 document.body.addEventListener('htmx:beforeSwap', function (evt) {
     const response = evt.detail.serverResponse;
-    if (!response || !response.includes("hx-swap-oob='outerHTML:")) return;
+    if (!response || !response.includes("hx-swap-oob='")) return;
     evt.detail.serverResponse = restoreAccordionStateInFragment(response);
+});
+
+// HTMX's `hx-disabled-elt="button"` is a plain CSS selector: it disables every
+// <button> in the document for the duration of the request and, on response,
+// unconditionally calls removeAttribute("disabled") on all of them — wiping the
+// real `disabled` from buttons that were genuinely disabled for UX reasons.
+// Snapshot pre-request state per XHR (WeakMap handles concurrent requests) and
+// re-apply after. Survivors of an OOB swap are restored; replaced elements are
+// disconnected and skipped so the server-rendered state wins.
+const disabledBeforeHtmxRequest = new WeakMap();
+
+document.body.addEventListener("htmx:beforeRequest", function (evt) {
+    const snapshot = new Set();
+    document.querySelectorAll("[disabled]").forEach(el => snapshot.add(el));
+    disabledBeforeHtmxRequest.set(evt.detail.xhr, snapshot);
+});
+
+document.body.addEventListener("htmx:afterRequest", function (evt) {
+    const snapshot = disabledBeforeHtmxRequest.get(evt.detail.xhr);
+    if (!snapshot) return;
+    snapshot.forEach(el => {
+        if (el.isConnected && !el.hasAttribute("disabled")) {
+            el.setAttribute("disabled", "");
+        }
+    });
+    disabledBeforeHtmxRequest.delete(evt.detail.xhr);
 });
 
 document.body.addEventListener("htmx:afterSettle", function (event) {

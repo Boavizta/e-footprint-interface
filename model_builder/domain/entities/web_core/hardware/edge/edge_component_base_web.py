@@ -27,11 +27,11 @@ class EdgeComponentWeb(ModelingObjectWeb):
             "hx_vals": {"efootprint_id_of_parent_to_link_to": context_data.get("efootprint_id_of_parent_to_link_to")},
         }
 
-    @classmethod
-    def create_side_effects(cls, added_obj, model_web):
-        from model_builder.domain.oob_region import CreateSideEffects, OobRegion
-        del model_web
-        parent_device = added_obj.modeling_obj.modeling_obj_containers[0]
+    def create_side_effects(self):
+        from model_builder.domain.oob_region import OobRegion
+        side_effects = super().create_side_effects()
+        parent_device = self.modeling_obj.modeling_obj_containers[0]
         if parent_device._find_parent_groups():
-            return CreateSideEffects(oob_regions=[OobRegion("edge_device_lists")], replaces_primary_render=True)
-        return CreateSideEffects()
+            side_effects.oob_regions.append(OobRegion("edge_device_lists"))
+            side_effects.replaces_primary_render = True
+        return side_effects

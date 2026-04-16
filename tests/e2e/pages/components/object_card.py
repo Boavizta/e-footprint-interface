@@ -43,6 +43,16 @@ class ObjectCard:
             self.open_accordion()
         click_and_wait_for_htmx(self.locator.page, button)
 
+    def child_add_button_should_be_disabled(self, child_type: str):
+        """Assert that the 'add child' button for a child type is disabled (no HTMX, has tooltip)."""
+        if not self.locator.locator("button[disabled]").first.is_visible():
+            self.open_accordion()
+        # Disabled button has no hx-get; enabled button does
+        expect(self.locator.locator(f"button[hx-get*='{child_type}']")).to_have_count(0)
+        # Tooltip attrs live on the wrapper span (Bootstrap tooltips don't fire on disabled buttons).
+        expect(self.locator.locator("span[data-bs-toggle='tooltip']").first).to_be_visible()
+        expect(self.locator.locator("span[data-bs-toggle='tooltip'] button[disabled]").first).to_be_visible()
+
     def click_unlink_button(self):
         """Click the unlink button for a grouped entry (triggers HTMX)."""
         button = self.locator.locator("button.unlink-btn").first
