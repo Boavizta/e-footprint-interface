@@ -71,22 +71,29 @@ class HtmxPresenter:
             HttpResponse with the rendered object card and HTMX triggers.
         """
         if output.parent_was_linked:
-            # Parent was linked - generate HTML for all mirrored parent cards
-            parent_obj = self.model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
-
-            html_updates = self._generate_mirrored_cards_html(parent_obj.mirrored_cards)
-
-            # Re-render siblings whose "link existing" button just appeared (count crossed 0→1)
-            for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_obj.class_as_simple_str):
-                if sibling.efootprint_id != output.linked_parent_id and any(
-                    s["linkable_existing_count"] == 1 for s in sibling.child_sections):
-                    html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
-
             toast_and_highlight_data = {
                 "ids": output.mirrored_web_ids,
                 "name": output.created_object_name,
                 "action_type": "add_new_object"
             }
+
+            if output.replaces_primary_render and output.oob_regions:
+                # OOB regions handle the full re-render (e.g. parent is inside an edge device group)
+                html_updates = render_oob_regions(self.model_web, output.oob_regions)
+            else:
+                # Parent was linked - generate HTML for all mirrored parent cards
+                parent_obj = self.model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
+                html_updates = self._generate_mirrored_cards_html(parent_obj.mirrored_cards)
+
+                # Re-render siblings whose "link existing" button just appeared (count crossed 0→1)
+                for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_obj.class_as_simple_str):
+                    if sibling.efootprint_id != output.linked_parent_id and any(
+                        s["linkable_existing_count"] == 1 for s in sibling.child_sections):
+                        html_updates += self._generate_mirrored_cards_html(sibling.mirrored_cards)
+
+                if output.oob_regions:
+                    html_updates += render_oob_regions(self.model_web, output.oob_regions)
+
             response = self._build_oob_response(html_updates, toast_and_highlight_data)
             if recompute:
                 self._append_recomputation_html(response)

@@ -69,6 +69,21 @@
                         {% for component in entry.object.components %}
                             {% include 'model_builder/object_cards/edge_component_card.html' with object=component %}
                         {% endfor %}
+                        <button
+                            id="add-component-to-{{ entry.object.web_id }}"
+                            class="btn btn-white text-start d-flex flex-row justify-content-between w-100 position-relative border-2"
+                            hx-get="/model_builder/open-create-object-panel/EdgeComponent/"
+                            hx-target="#sidePanel"
+                            hx-trigger="click"
+                            hx-swap="innerHTML"
+                            hx-disabled-elt="button"
+                            hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ entry.object.efootprint_id }}"}'
+                            _="on click removeAllOpenedObjectsHighlights()"
+                            >
+                                <p class='h8 mb-0 text-break text-addition'>
+                                    Add component
+                                </p>
+                        </button>
                     {% endif %}
                 </div>
             </div>
