@@ -81,15 +81,8 @@ def create_efootprint_obj_from_parsed_data(
         elif (annotation_origin is not None and isinstance(annotation_origin, type)
               and issubclass(annotation_origin, ExplainableObjectDict)) or (
                 isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)):
-            explainable_dict = ExplainableObjectDict()
-            for key_id, explainable_value_dict in value.items():
-                if key_id not in model_web.flat_efootprint_objs_dict:
-                    raise ValueError(f"Unknown modeling object id '{key_id}' in {attr_name}.")
-                explainable_value = ExplainableObject.from_json_dict(explainable_value_dict)
-                if explainable_value.source is None:
-                    explainable_value.source = Sources.USER_DATA
-                explainable_dict[model_web.flat_efootprint_objs_dict[key_id]] = explainable_value
-            obj_creation_kwargs[attr_name] = explainable_dict
+            obj_creation_kwargs[attr_name] = ExplainableObjectDict(
+                _build_explainable_object_dict_entries(value, model_web, attr_name))
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
             obj_to_add = model_web.get_efootprint_object_from_efootprint_id(value, mod_obj_attribute_object_type_str)
