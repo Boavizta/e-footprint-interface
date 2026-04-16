@@ -4,20 +4,10 @@ from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.domain.services.group_membership_service import (
-    apply_parent_group_memberships_from_form_data,
-)
+from model_builder.domain.entities.web_core.hardware.edge.edge_group_member_mixin import EdgeGroupMemberMixin
 
 
-def _build_group_membership_row(group, magnitude) -> dict:
-    return {
-        "group_id": group.id,
-        "group_name": group.name,
-        "count": magnitude,
-    }
-
-
-class EdgeDeviceBaseWeb(ModelingObjectWeb):
+class EdgeDeviceBaseWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
     """Base web wrapper for EdgeDevice and its subclasses (EdgeComputer, EdgeAppliance)."""
     add_template = "add_edge_device.html"
     attributes_to_skip_in_forms = ["storage"]
@@ -35,17 +25,9 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
     def template_name(self):
         return "edge_device"
 
-    @classmethod
-    def get_creation_context_overrides(cls, model_web) -> dict:
-        return {
-            "available_groups_to_join": sorted(
-                model_web.edge_device_groups, key=lambda group: group.name),
-        }
-
-    @classmethod
-    def post_create(cls, added_obj, form_data, model_web):
-        apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
-        return None
+    @property
+    def _parent_group_membership_dict(self) -> str:
+        return "edge_device_counts"
 
     @classmethod
     def create_side_effects(cls, added_obj, model_web):
@@ -55,27 +37,3 @@ class EdgeDeviceBaseWeb(ModelingObjectWeb):
             return CreateSideEffects(
                 oob_regions=[OobRegion("edge_device_lists")], replaces_primary_render=True)
         return CreateSideEffects()
-
-    def get_edition_context_overrides(self) -> dict:
-        parent_groups = self.modeling_obj._find_parent_groups()
-        parent_ids = {group.id for group in parent_groups}
-        available_to_join = sorted(
-            [group for group in self.model_web.edge_device_groups if group.efootprint_id not in parent_ids],
-            key=lambda group: group.name,
-        )
-        return {
-            "group_memberships": [
-                _build_group_membership_row(group, group.edge_device_counts[self.modeling_obj].value.magnitude)
-                for group in sorted(parent_groups, key=lambda group: group.name)
-            ],
-            "available_groups_to_join": available_to_join,
-        }
-
-    @classmethod
-    def pre_delete(cls, web_obj, model_web):
-        """Remove device references from parent groups before deletion."""
-        del model_web
-        efp_obj = web_obj.modeling_obj
-        for parent_dict in list(efp_obj.explainable_object_dicts_containers):
-            if efp_obj in parent_dict:
-                del parent_dict[efp_obj]

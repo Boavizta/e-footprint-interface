@@ -1,12 +1,9 @@
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
-from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import _build_group_membership_row
-from model_builder.domain.services.group_membership_service import (
-    PARENT_GROUP_MEMBERSHIPS_FIELD,
-    apply_parent_group_memberships_from_form_data,
-)
+from model_builder.domain.entities.web_core.hardware.edge.edge_group_member_mixin import EdgeGroupMemberMixin
+from model_builder.domain.services.group_membership_service import PARENT_GROUP_MEMBERSHIPS_FIELD
 
 
-class EdgeDeviceGroupWeb(ModelingObjectWeb):
+class EdgeDeviceGroupWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
     add_template = "add_edge_device_group.html"
     edit_template = "edit_edge_device_group.html"
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
@@ -16,44 +13,29 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
     def template_name(self):
         return "edge_device_group"
 
+    @property
+    def _parent_group_membership_dict(self) -> str:
+        return "sub_group_counts"
+
+    def _ancestor_ids(self) -> set:
+        return {group.id for group in self.modeling_obj._find_all_ancestor_groups()}
+
+    def get_edition_context_overrides(self) -> dict:
+        context = super().get_edition_context_overrides()
+        # A group cannot join itself or one of its descendants (cycle prevention).
+        ancestor_ids = self._ancestor_ids()
+        context["available_groups_to_join"] = [
+            g for g in context["available_groups_to_join"]
+            if g.efootprint_id != self.efootprint_id and g.efootprint_id not in ancestor_ids
+        ]
+        return context
+
     def filter_dict_count_options(self, attr_name, available_options):
         options = super().filter_dict_count_options(attr_name, available_options)
         if attr_name != "sub_group_counts":
             return options
         # Exclude ancestors: picking an ancestor as a sub-group would create a cycle.
-        ancestor_ids = {group.id for group in self.modeling_obj._find_all_ancestor_groups()}
-        return [obj for obj in options if obj.efootprint_id not in ancestor_ids]
-
-    def get_edition_context_overrides(self) -> dict:
-        parent_groups = self.modeling_obj._find_parent_groups()
-        parent_ids = {group.id for group in parent_groups}
-        # A group can join another group X only if X is not self and self is not an ancestor of X
-        # (otherwise we'd create a cycle). Also exclude existing parents.
-        available_groups_to_join = sorted(
-            [
-                group for group in self.model_web.edge_device_groups
-                if group.efootprint_id != self.efootprint_id
-                and group.efootprint_id not in parent_ids
-                and self.modeling_obj not in group.modeling_obj._find_all_ancestor_groups()
-            ],
-            key=lambda group: group.name,
-        )
-
-        return {
-            "group_memberships": [
-                _build_group_membership_row(group, group.sub_group_counts[self.modeling_obj].value.magnitude)
-                for group in sorted(parent_groups, key=lambda group: group.name)
-            ],
-            "available_groups_to_join": available_groups_to_join,
-        }
-
-    @classmethod
-    def get_creation_context_overrides(cls, model_web) -> dict:
-        # A new group has no descendants, so any existing group is a valid parent candidate.
-        return {
-            "available_groups_to_join": sorted(
-                model_web.edge_device_groups, key=lambda group: group.name),
-        }
+        return [obj for obj in options if obj.efootprint_id not in self._ancestor_ids()]
 
     @classmethod
     def pre_create(cls, form_data, model_web):
@@ -63,11 +45,6 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
         if overlap:
             raise ValueError("A group cannot be both a parent and a subgroup of the same group.")
         return form_data
-
-    @classmethod
-    def post_create(cls, added_obj, form_data, model_web):
-        apply_parent_group_memberships_from_form_data(added_obj, form_data, model_web)
-        return None
 
     @classmethod
     def create_side_effects(cls, added_obj, model_web):
@@ -101,12 +78,3 @@ class EdgeDeviceGroupWeb(ModelingObjectWeb):
     @property
     def edge_device_entries(self):
         return [self._build_group_entry(device, count) for device, count in self.modeling_obj.edge_device_counts.items()]
-
-    @classmethod
-    def pre_delete(cls, web_obj, model_web):
-        """Remove group references from parent groups before deletion."""
-        del model_web
-        efp_obj = web_obj.modeling_obj
-        for parent_dict in list(efp_obj.explainable_object_dicts_containers):
-            if efp_obj in parent_dict:
-                del parent_dict[efp_obj]
