@@ -123,9 +123,16 @@ class FormContextBuilder:
 
         strategy = strategy_class(self.model_web)
         context = strategy.build_edition_context(obj_to_edit, config)
-        context.update(obj_to_edit.get_edition_context_overrides())
+        context.update(self.build_group_membership_section_context(obj_to_edit))
+        return context
+
+    @staticmethod
+    def build_group_membership_section_context(web_obj: "ModelingObjectWeb") -> dict:
+        """Build the group membership part of an edition context for a web object."""
+        context = {"object_to_edit": web_obj, **web_obj.get_edition_context_overrides()}
         if context.get("group_memberships"):
-            context["group_memberships"] = self.hydrate_group_memberships(context["group_memberships"])
+            context["group_memberships"] = FormContextBuilder.hydrate_group_memberships(
+                context["group_memberships"])
         return context
 
     @staticmethod

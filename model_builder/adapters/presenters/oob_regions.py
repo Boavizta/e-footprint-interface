@@ -34,10 +34,7 @@ def _render_group_membership_section(model_web, params) -> str:
 
     object_id = params["object_id"]
     web_obj = model_web.get_web_object_from_efootprint_id(object_id)
-    context = {"object_to_edit": web_obj, **web_obj.get_edition_context_overrides()}
-    if context.get("group_memberships"):
-        context["group_memberships"] = FormContextBuilder.hydrate_group_memberships(
-            context["group_memberships"])
+    context = FormContextBuilder.build_group_membership_section_context(web_obj)
     section_html = render_to_string(
         "model_builder/side_panels/edit/group_membership_section.html", context)
     return f"<div hx-swap-oob='outerHTML:#group-membership-section-{object_id}'>{section_html}</div>"
