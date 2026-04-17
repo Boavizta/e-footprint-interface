@@ -819,7 +819,7 @@
         ],
         "label": "power per unit",
         "is_advanced_parameter": true,
-        "step": 1
+        "step": 0.1
     },
     "idle_power_per_unit": {
         "modeling_obj_containers": [
@@ -829,7 +829,7 @@
         ],
         "label": "idle power per unit",
         "is_advanced_parameter": true,
-        "step": 1
+        "step": 0.1
     },
     "ram_per_unit": {
         "modeling_obj_containers": [
