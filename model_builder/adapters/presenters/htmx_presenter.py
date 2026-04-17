@@ -198,11 +198,6 @@ class HtmxPresenter:
         if canvas_oob or output.replaces_primary_render:
             # OOB regions cover all relevant cards; skip per-card mirrored-card swaps
             html_updates = render_oob_regions(self.model_web, output.oob_regions)
-        elif output.name_only_change and not recompute:
-            html_updates = (self._generate_name_only_updates_html(output.mirrored_cards)
-                            + render_oob_regions(self.model_web, output.oob_regions))
-            return self._build_oob_response(html_updates, toast_and_highlight_data,
-                                            extra_settle_triggers=extra_settle, reset_leaderlines=False)
         else:
             html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
             # Re-render siblings whose "Link existing" button just disappeared
@@ -218,16 +213,6 @@ class HtmxPresenter:
 
         return self._build_oob_response(html_updates, toast_and_highlight_data, trigger_result_display,
                                         extra_settle_triggers=extra_settle)
-
-    def _generate_name_only_updates_html(self, mirrored_cards) -> str:
-        """Generate OOB innerHTML swaps targeting only the name element of each mirrored card.
-
-        Used for name-only edits to avoid full card re-renders, preserving accordion state.
-        """
-        return "".join(
-            f"<div hx-swap-oob='innerHTML:#name-{card.web_id}'>{card.name}</div>"
-            for card in mirrored_cards
-        )
 
     def _sibling_cards_with_link_flip(
         self, parent_type: str, excluded_ids: set, target_count: int
@@ -266,24 +251,11 @@ class HtmxPresenter:
 
     def _build_oob_response(
         self, html: str, toast_data: dict, trigger_result_display: bool = False,
-        extra_settle_triggers: dict = None, reset_leaderlines: bool = True,
+        extra_settle_triggers: dict = None,
     ) -> HttpResponse:
-        """Build an HTTP response with OOB swap HTML and HTMX triggers.
-
-        Args:
-            html: The HTML content with hx-swap-oob divs.
-            toast_data: Data for the toast notification (ids, name, action_type).
-            trigger_result_display: Whether to trigger result chart display.
-            extra_settle_triggers: Optional extra keys for HX-Trigger-After-Settle.
-            reset_leaderlines: Whether to fire the immediate `resetLeaderLines` HX-Trigger.
-                Disable for updates that don't change layout (e.g. name-only edits).
-
-        Returns:
-            HttpResponse with appropriate HTMX headers.
-        """
+        """Build an HTTP response with OOB swap HTML and HTMX triggers."""
         response = HttpResponse(html)
-        if reset_leaderlines:
-            response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
+        response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
         after_settle_trigger = {"displayToastAndHighlightObjects": toast_data}
         if trigger_result_display:
             after_settle_trigger["triggerResultRendering"] = ""

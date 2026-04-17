@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 class EditResult:
     """Result of editing an object with cascade cleanup."""
     edited_object: "ModelingObjectWeb"
-    name_only_change: bool
 
 
 class EditService:
@@ -45,7 +44,7 @@ class EditService:
             accordion_children_before[mirrored_card] = copy(mirrored_card.accordion_children)
 
         # Perform the edit (form_data is already parsed by adapter)
-        edited_obj, had_non_name_changes, name_changed = edit_object_from_parsed_data(form_data, obj_to_edit)
+        edited_obj, *_ = edit_object_from_parsed_data(form_data, obj_to_edit)
 
         # Capture accordion children after edit
         accordion_children_after = {}
@@ -61,12 +60,9 @@ class EditService:
 
         # Delete orphaned children (those with no remaining containers), but only if the child
         # is not allowed to live at the root level.
-        had_deletions = False
         for child in removed_children:
             if (len(child.modeling_obj_containers) == 0
                     and child.gets_deleted_if_unique_mod_obj_container_gets_deleted):
                 child.self_delete()
-                had_deletions = True
 
-        name_only_change = name_changed and not had_non_name_changes and not had_deletions
-        return EditResult(edited_object=edited_obj, name_only_change=name_only_change)
+        return EditResult(edited_object=edited_obj)

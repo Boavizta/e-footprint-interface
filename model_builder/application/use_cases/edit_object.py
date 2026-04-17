@@ -33,7 +33,6 @@ class EditObjectOutput:
     web_id: str
     mirrored_web_ids: List[str] = field(default_factory=list)
     mirrored_cards: List[Any] = field(default_factory=list)  # Web objects for HTML rendering
-    name_only_change: bool = False
     replaces_primary_render: bool = False
     oob_regions: List[OobRegion] = field(default_factory=list)
 
@@ -90,7 +89,6 @@ class EditObjectUseCase:
             web_id=edited_obj.web_id,
             mirrored_web_ids=[card.web_id for card in edited_obj.mirrored_cards],
             mirrored_cards=list(edited_obj.mirrored_cards),
-            name_only_change=edit_result.name_only_change,
             replaces_primary_render=edit_side_effects.replaces_primary_render,
             oob_regions=oob_regions,
         )
