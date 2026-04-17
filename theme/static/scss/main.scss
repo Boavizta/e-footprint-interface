@@ -1,5 +1,7 @@
 // Import Bootstrap from node
 @use "../../../node_modules/bootstrap/scss/bootstrap" as *;
+// Self-hosted Inter font (replaces Google Fonts CDN)
+@use "inter";
 // import custom scss from static
 @use "custom";
 @use "sankey";

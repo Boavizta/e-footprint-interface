@@ -26,8 +26,69 @@ from tests.e2e.pages import ModelBuilderPage
 DEFAULT_BASE_URL = "http://localhost:8000"
 
 
+def _attach_slow_request_logger(page: Page, threshold_ms: float = 500.0, test_name: str = "") -> None:
+    """Log slow requests, real network errors, and a recent-request dump on nav timeouts.
+
+    Disabled by default; set E2E_REQUEST_LOG=1 to enable when debugging flakiness.
+
+    - `[SLOW  Nms]`   request completed but took >= threshold_ms
+    - `[NETERR]`      genuine network error (not teardown-cancel ERR_ABORTED/ERR_FAILED)
+    - `[PENDING]`     request still in flight when the test ended or a goto timed out
+    - `[RECENT]`      rolling snapshot of the last ~40 requests (printed on nav timeout)
+    """
+    import os
+    import time
+    from collections import deque
+
+    if os.environ.get("E2E_REQUEST_LOG", "0") != "1":
+        return
+
+    tag = f"[{test_name}] " if test_name else ""
+    recent = deque(maxlen=40)       # (t_start, method, url, status)
+    inflight: dict = {}             # url -> t_start
+
+    def on_request(request):
+        t = time.monotonic()
+        inflight[request.url] = t
+        recent.append((t, request.method, request.url, "start"))
+
+    def on_finished(request):
+        inflight.pop(request.url, None)
+        try:
+            timing = request.timing
+            duration = timing.get("responseEnd", -1) if timing else -1
+            recent.append((time.monotonic(), request.method, request.url, f"done {duration:.0f}ms"))
+            if duration is not None and duration >= threshold_ms:
+                print(f"{tag}[SLOW {duration:7.0f} ms] {request.method} {request.url}", flush=True)
+        except Exception as exc:
+            print(f"{tag}[timing err] {request.url}: {exc}", flush=True)
+
+    def on_failed(request):
+        inflight.pop(request.url, None)
+        failure = (request.failure or "")
+        recent.append((time.monotonic(), request.method, request.url, f"fail {failure}"))
+        # ERR_ABORTED / ERR_FAILED are almost always teardown-cancel noise — skip them.
+        if "ERR_ABORTED" in failure or "ERR_FAILED" in failure:
+            return
+        print(f"{tag}[NETERR] {request.method} {request.url} — {failure}", flush=True)
+
+    def dump_recent(reason: str):
+        now = time.monotonic()
+        print(f"{tag}[RECENT] dump on {reason}:", flush=True)
+        for t, method, url, status in list(recent)[-20:]:
+            print(f"{tag}  t-{now - t:5.2f}s {method} {status} {url}", flush=True)
+        for url, t in list(inflight.items()):
+            print(f"{tag}[PENDING {now - t:5.2f}s] {url}", flush=True)
+
+    page.on("request", on_request)
+    page.on("requestfinished", on_finished)
+    page.on("requestfailed", on_failed)
+    # Expose the dump so the page-object goto can call it on TimeoutError.
+    page._e2e_dump_recent = dump_recent  # type: ignore[attr-defined]
+
+
 @pytest.fixture
-def model_builder_page(page: Page, base_url: str) -> ModelBuilderPage:
+def model_builder_page(page: Page, base_url: str, request) -> ModelBuilderPage:
     """Create a ModelBuilderPage instance configured for the test server.
 
     This fixture provides a page object ready for testing. The base_url
@@ -37,6 +98,7 @@ def model_builder_page(page: Page, base_url: str) -> ModelBuilderPage:
     - Environment variable PYTEST_BASE_URL
     """
     page.set_default_timeout(5000)  # 5 second default timeout for HTMX/UI updates under suite load
+    _attach_slow_request_logger(page, test_name=request.node.name)
     server_url = base_url or DEFAULT_BASE_URL
 
     # Override goto to use server URL for relative paths
@@ -45,7 +107,13 @@ def model_builder_page(page: Page, base_url: str) -> ModelBuilderPage:
     def goto_with_base(url: str, **kwargs):
         if url.startswith("/"):
             url = f"{server_url}{url}"
-        return original_goto(url, **kwargs)
+        try:
+            return original_goto(url, **kwargs)
+        except Exception:
+            dumper = getattr(page, "_e2e_dump_recent", None)
+            if dumper:
+                dumper(f"goto({url}) exception")
+            raise
 
     page.goto = goto_with_base
     return ModelBuilderPage(page)

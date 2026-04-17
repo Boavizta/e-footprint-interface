@@ -6,7 +6,6 @@
         <meta charset="UTF-8" />
         <title>e-footprint</title>
         <link rel="stylesheet" href="{% static 'css/bs_main.css' %}" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="icon" type="image/x-icon" href="/static/icons/sidenav/e-footprint-logo.svg" />
         <link rel="stylesheet" href="{% static 'css/flatpickr.min.css' %}" />
         <script src="{% static 'scripts/external_librairies/bootstrap.bundle.min.js' %}"></script>
@@ -21,7 +20,7 @@
         <script src="{% static 'scripts/external_librairies/chart_js_plugin_zoom.min.js' %}"></script>
         <script src="{% static 'scripts/external_librairies/flatpickr.min.js' %}"></script>
         <script src="{% static 'scripts/usage_pattern_timeseries.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js"></script>
+        <script src="{% static 'scripts/external_librairies/echarts.min.js' %}"></script>
     </head>
 
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
