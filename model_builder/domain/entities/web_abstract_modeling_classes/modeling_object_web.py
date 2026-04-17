@@ -205,8 +205,11 @@ class ModelingObjectWeb:
         return side_effects
 
     def edit_side_effects(self):
-        """Side-effect OOB regions emitted after this object is edited."""
-        return self._recompute_constraints_and_emit_regions()
+        """Side-effect descriptors emitted after this object is edited."""
+        from model_builder.domain.oob_region import EditSideEffects
+        side_effects = EditSideEffects()
+        side_effects.oob_regions.extend(self._recompute_constraints_and_emit_regions())
+        return side_effects
 
     def delete_side_effects(self):
         """Side-effect OOB regions emitted after this object is deleted."""

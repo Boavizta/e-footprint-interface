@@ -115,7 +115,7 @@
                 "unit": "W",
                 "default": "15",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "0.1"
             },
             {
                 "web_id": "EdgeCPUComponent_idle_power_per_unit",
@@ -130,7 +130,7 @@
                 "unit": "W",
                 "default": "3",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "0.1"
             },
             {
                 "web_id": "EdgeCPUComponent_base_compute_consumption",
@@ -236,7 +236,7 @@
                 "unit": "W",
                 "default": "10",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "0.1"
             },
             {
                 "web_id": "EdgeRAMComponent_idle_power_per_unit",
@@ -251,7 +251,7 @@
                 "unit": "W",
                 "default": "2",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "0.1"
             },
             {
                 "web_id": "EdgeRAMComponent_base_ram_consumption",
@@ -433,7 +433,7 @@
                 "unit": "W",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "0.1"
             },
             {
                 "web_id": "EdgeWorkloadComponent_idle_power_per_unit",
@@ -448,7 +448,7 @@
                 "unit": "W",
                 "default": "5",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "0.1"
             }
         ]
     }

@@ -1,4 +1,5 @@
 """E2E tests for edge device groups."""
+import re
 from copy import deepcopy
 
 import pytest
@@ -67,6 +68,28 @@ def grouped_device_system_in_browser(model_builder_page: ModelBuilderPage):
         "model_builder": model_builder_page,
         "device_name": device.name,
         "group_name": rack.name,
+    }
+
+
+@pytest.fixture
+def nested_group_with_device_in_browser(model_builder_page: ModelBuilderPage):
+    device = EdgeDevice.from_defaults("Floor Sensor", components=[])
+    inner = EdgeDeviceGroup("Inner Group")
+    outer = EdgeDeviceGroup(
+        "Outer Group",
+        sub_group_counts={inner: SourceValue(1 * u.dimensionless)},
+        edge_device_counts={device: SourceValue(3 * u.dimensionless)},
+    )
+
+    system_data = deepcopy(EMPTY_SYSTEM_DICT)
+    add_only_update(system_data, system_to_json(outer, save_calculated_attributes=False))
+    load_system_dict_into_browser(model_builder_page, system_data)
+
+    return {
+        "model_builder": model_builder_page,
+        "device_name": device.name,
+        "inner_group_name": inner.name,
+        "outer_group_name": outer.name,
     }
 
 
@@ -217,6 +240,36 @@ class TestEdgeDeviceGroups:
         side_panel.remove_group_membership(group_name)
         model_builder.ungrouped_edge_device_should_exist(device_name)
         expect(rack_card.locator.locator("div[id^='EdgeDevice-']").filter(has_text=device_name)).to_have_count(0)
+
+    def test_editing_grouped_device_preserves_nested_row_markup(self, nested_group_with_device_in_browser):
+        """A non-name edit of a grouped device must keep its group-entry markup.
+
+        The buggy edit path does an outerHTML OOB swap of the device's mirrored card and
+        renders the standalone `edge_device_with_accordion_card.html` template, replacing
+        the nested `group_entry_row` markup — count input and unlink button included. The
+        name-only fast path only rewrites `#name-<web_id>` in place and therefore hides the
+        bug, so this test deliberately changes a scalar field (`lifespan`) to force the full
+        card re-render.
+        """
+        model_builder = nested_group_with_device_in_browser["model_builder"]
+        device_name = nested_group_with_device_in_browser["device_name"]
+        outer_name = nested_group_with_device_in_browser["outer_group_name"]
+
+        outer_card = model_builder.get_edge_device_group_card(outer_name)
+        outer_card.open_accordion()
+
+        grouped_device_row = outer_card.get_nested_object_card("EdgeDevice", device_name)
+        grouped_device_row.should_exist().click_edit_button()
+        model_builder.side_panel.should_be_visible()
+        model_builder.side_panel.fill_field("EdgeDevice_lifespan", "4")
+        model_builder.side_panel.submit_and_wait_for_close()
+
+        refreshed_device_row = outer_card.get_nested_object_card("EdgeDevice", device_name)
+        refreshed_device_row.should_exist()
+        expect(refreshed_device_row.locator).to_have_class(re.compile(r"\bgroup-entry\b"))
+        device_header = refreshed_device_row.locator.locator(".accordion-header").first
+        expect(device_header.locator("input[name='count']")).to_have_count(1)
+        expect(device_header.locator("button.unlink-btn")).to_have_count(1)
 
     def test_create_group_rejects_cycle_when_parent_and_subgroup_overlap(self, edge_group_system_in_browser):
         model_builder = edge_group_system_in_browser["model_builder"]

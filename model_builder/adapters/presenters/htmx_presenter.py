@@ -195,8 +195,8 @@ class HtmxPresenter:
             "constraint_messages": constraint_messages,
         }
 
-        if canvas_oob:
-            # Canvas innerHTML re-render covers all cards; OOB regions are the entire response
+        if canvas_oob or output.replaces_primary_render:
+            # OOB regions cover all relevant cards; skip per-card mirrored-card swaps
             html_updates = render_oob_regions(self.model_web, output.oob_regions)
         elif output.name_only_change and not recompute:
             html_updates = (self._generate_name_only_updates_html(output.mirrored_cards)

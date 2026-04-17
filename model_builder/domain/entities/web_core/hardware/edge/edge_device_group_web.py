@@ -55,9 +55,10 @@ class EdgeDeviceGroupWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
 
     def edit_side_effects(self):
         from model_builder.domain.oob_region import OobRegion
-        regions = super().edit_side_effects()
-        regions.append(OobRegion("edge_device_lists"))
-        return regions
+        side_effects = super().edit_side_effects()
+        side_effects.oob_regions.append(OobRegion("edge_device_lists"))
+        side_effects.replaces_primary_render = True
+        return side_effects
 
     def delete_side_effects(self):
         from model_builder.domain.oob_region import OobRegion

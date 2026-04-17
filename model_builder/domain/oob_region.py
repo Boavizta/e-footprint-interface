@@ -26,3 +26,9 @@ class OobRegion:
 class CreateSideEffects:
     oob_regions: List[OobRegion] = field(default_factory=list)
     replaces_primary_render: bool = False
+
+
+@dataclass
+class EditSideEffects:
+    oob_regions: List[OobRegion] = field(default_factory=list)
+    replaces_primary_render: bool = False
