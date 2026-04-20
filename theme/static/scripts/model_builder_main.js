@@ -3,7 +3,7 @@ function initModelBuilderMain() {
     initSortableObjectCards();
     initGrabEffect();
     initHammer();
-    initObjectCardTitleTooltips();
+    initTruncatedTextTooltips();
     initDisabledButtonTooltips();
 }
 
@@ -16,15 +16,15 @@ function initDisabledButtonTooltips(root = document) {
     });
 }
 
-function initObjectCardTitleTooltips(root = document) {
+function initTruncatedTextTooltips(root = document) {
     if (!window.bootstrap || !bootstrap.Tooltip) {
         return;
     }
 
-    root.querySelectorAll(".object-card-title-tooltip[data-bs-toggle='tooltip']").forEach(element => {
+    root.querySelectorAll(".truncated-text-tooltip[data-bs-toggle='tooltip']").forEach(element => {
         if (element.dataset.tooltipTruncationListenerAdded !== "true") {
             element.addEventListener("show.bs.tooltip", event => {
-                if (!isTextTruncated(element)) {
+                if (!isTextTruncated(element) && !hasDifferentTooltipLabel(element)) {
                     event.preventDefault();
                 }
             });
@@ -41,6 +41,12 @@ function initObjectCardTitleTooltips(root = document) {
 
 function isTextTruncated(element) {
     return element.scrollWidth > element.clientWidth;
+}
+
+function hasDifferentTooltipLabel(element) {
+    const tooltipText = (element.dataset.bsTitle || element.getAttribute("title") || "").trim();
+    const visibleText = (element.textContent || "").trim();
+    return tooltipText !== "" && visibleText !== "" && tooltipText !== visibleText;
 }
 
 function initSortableObjectCards() {
@@ -230,7 +236,7 @@ function updateScrollButtons(){
 
 document.addEventListener("DOMContentLoaded", () => {
     const wrapper = document.getElementById("model-canva-scrollable-area");
-    initObjectCardTitleTooltips();
+    initTruncatedTextTooltips();
     if (!wrapper) return;
     wrapper.addEventListener("scroll", updateScrollButtons);
     updateScrollButtons();
@@ -305,5 +311,5 @@ document.body.addEventListener("htmx:afterRequest", function (evt) {
 });
 
 document.body.addEventListener("htmx:afterSettle", function (event) {
-    initObjectCardTitleTooltips(event.detail.elt);
+    initTruncatedTextTooltips(event.detail.elt);
 });

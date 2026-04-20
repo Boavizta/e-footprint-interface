@@ -251,6 +251,9 @@ When OOB card swaps re-render a card, accordion open/close state is preserved au
 ### Leaderline target resolution
 Leaderlines use a "deepest visible anchor" pattern for target-side resolution: if the target element is hidden inside a collapsed accordion, the line ends on the nearest visible `.leaderline-anchor` ancestor instead. Lines are rebuilt broadly on `shown.bs.collapse` / `hidden.bs.collapse` events. Source-side semantics are unchanged.
 
+### Truncated-text tooltip pattern
+Any element with `.truncated-text-tooltip` + `text-truncate min-w-0` + Bootstrap tooltip attrs gets a tooltip that fires when either (a) the text is visually truncated, or (b) the visible text differs from the tooltip text. The latter covers shortened/compact labels (e.g. `add_child_button.html` with `compact=True` inside labeled sections, where the button shows "Add" / "Link existing" but the tooltip reveals the full child type). Initialized by `initTruncatedTextTooltips` in `model_builder_main.js` and re-run on `htmx:afterSettle` for swapped fragments.
+
 
 ## Typical request lifecycle
 

@@ -1,7 +1,8 @@
 {% load static label_filters %}
+{% with add_label=type_str|add_child_text link_label=type_str|link_child_text %}
 {% if disabled %}
 {# Bootstrap tooltips don't fire on disabled buttons (no pointer events), so wrap in a span. #}
-<span class="flex-grow-1 d-inline-block position-relative"
+<span class="flex-grow-1 min-w-0 d-inline-block position-relative"
       data-bs-toggle="tooltip"
       data-bs-placement="top"
       title="{{ disabled_reason }}"
@@ -11,14 +12,14 @@
         style="pointer-events: none;"
         disabled
 >
-    <p class='h8 mb-0 text-break text-addition px-1'>
-        {{ type_str|add_child_text }}
+    <p class="h8 mb-0 text-truncate min-w-0 text-addition px-1">
+        {% if compact %}Add{% else %}{{ add_label }}{% endif %}
     </p>
 </button>
 </span>
 {% else %}
 <button
-        class="btn btn-white text-end flex-grow-1 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
+        class="btn btn-white text-end flex-grow-1 min-w-0 d-flex flex-row justify-content-end align-items-center rounded-start-2 rounded-end-0 border-2 border-end-0 position-relative"
         hx-get="/model_builder/open-create-object-panel/{{ type_str }}/"
         hx-target="#sidePanel"
         hx-trigger="click"
@@ -27,15 +28,18 @@
         hx-disabled-elt="button"
         _="on click removeAllOpenedObjectsHighlights()"
 >
-    <p class='h8 mb-0 text-break text-addition px-1'>
-        {{ type_str|add_child_text }}
+    <p class="h8 mb-0 text-truncate min-w-0 text-addition px-1 truncated-text-tooltip"
+       data-bs-toggle="tooltip"
+       data-bs-placement="top"
+       data-bs-title="{{ add_label }}">
+        {% if compact %}Add{% else %}{{ add_label }}{% endif %}
     </p>
 </button>
 {% endif %}
 {% if linkable_existing_count %}
 <span class="vr"></span>
 <button
-        class="btn btn-white text-end d-flex flex-row align-items-center rounded-start-0 rounded-end-0 border-2 border-end-0"
+        class="btn btn-white text-end min-w-0 d-flex flex-row align-items-center rounded-start-0 rounded-end-0 border-2 border-end-0"
         hx-get="/model_builder/open-link-existing-panel/{{ parent_efootprint_id }}/{{ type_str }}/"
         hx-target="#sidePanel"
         hx-trigger="click"
@@ -43,8 +47,11 @@
         hx-disabled-elt="button"
         _="on click removeAllOpenedObjectsHighlights()"
 >
-    <p class='h8 mb-0 text-break text-secondary px-1'>
-        {{ type_str|link_child_text }}
+    <p class="h8 mb-0 text-truncate min-w-0 text-secondary px-1 truncated-text-tooltip"
+       data-bs-toggle="tooltip"
+       data-bs-placement="top"
+       data-bs-title="{{ link_label }}">
+        {% if compact %}Link existing{% else %}{{ link_label }}{% endif %}
     </p>
 </button>
 {% endif %}
@@ -59,6 +66,7 @@
          hx-disabled-elt="button"
          _="on click removeAllOpenedObjectsHighlights()"
     >
-    <span class="visually-hidden">{{ type_str|add_child_text }}</span>
+    <span class="visually-hidden">{{ add_label }}</span>
 </span>
 {% endif %}
+{% endwith %}
