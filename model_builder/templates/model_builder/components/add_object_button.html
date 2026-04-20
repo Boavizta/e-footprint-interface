@@ -1,7 +1,7 @@
 {% load static %}
 {% if disabled %}
 {# Bootstrap tooltips don't fire on disabled buttons (no pointer events), so wrap in a span. #}
-<span class="{{ btn_extra_classes }} d-inline-block"
+<span class="{{ btn_extra_classes }} d-block"
       data-bs-toggle="tooltip"
       data-bs-placement="top"
       title="{{ disabled_reason }}"

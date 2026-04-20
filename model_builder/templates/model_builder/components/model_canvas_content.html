@@ -33,7 +33,7 @@
 <div class="equal-width p-2">
     <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container">
         <h5><b>Infrastructure</b></h5>
-        <div class="d-grid gap-1 mb-3" style="grid-template-columns: 1fr 1fr;">
+        <div class="d-grid gap-1 mb-3" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);">
             {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-server" hx_url="/model_builder/open-create-object-panel/ServerBase/" label="Add server" btn_extra_classes="" %}
             {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-external-api" hx_url="/model_builder/open-create-object-panel/ExternalAPI/" label="Add external API" btn_extra_classes="" %}
             {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device" hx_url="/model_builder/open-create-object-panel/EdgeDeviceBase/" label="Add edge device" btn_extra_classes="" %}
