@@ -32,7 +32,7 @@ poetry self add poetry-plugin-export
 
 ```shell
 poetry export -f requirements.txt --without-hashes -o requirements.txt 
-poetry export -f requirements.txt --without-hashes --dev -o requirements-dev.txt 
+poetry export -f requirements.txt --without-hashes --only dev -o requirements-dev.txt 
 ```
 
 **Note**: Clever Cloud deploys using Docker, which installs dependencies via `poetry install` in the Dockerfile. No need to generate `requirements.txt`.

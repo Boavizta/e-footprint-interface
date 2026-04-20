@@ -143,7 +143,7 @@
                 },
                 "input_type": "explainable_quantity",
                 "unit": "cpu_core",
-                "default": "0.1",
+                "default": "0",
                 "can_be_negative": false,
                 "step": "0.1"
             }
