@@ -12,7 +12,7 @@
         disabled
 >
     <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto" width="16px" height="16px" alt="add icon" />
-    <p class="mb-0 text-addition">{{ label }}</p>
+    {% include 'model_builder/components/truncating_text.html' with visible_text=label extra_classes="text-addition" %}
 </button>
 </span>
 {% else %}
@@ -26,6 +26,6 @@
         _="on click removeAllOpenedObjectsHighlights()"
 >
     <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto" width="16px" height="16px" alt="add icon" />
-    <p class="mb-0 text-addition">{{ label }}</p>
+    {% include 'model_builder/components/truncating_text.html' with visible_text=label extra_classes="text-addition" %}
 </button>
 {% endif %}

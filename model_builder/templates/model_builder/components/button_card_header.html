@@ -1,10 +1,4 @@
-<p class="{{ title_class|default:'h6' }} mb-0 flex-grow-1 text-truncate min-w-0 truncated-text-tooltip"
-   id="name-{{ object_card.web_id }}"
-   data-bs-toggle="tooltip"
-   data-bs-placement="top"
-   data-bs-title="{{ object_card.name }}">
-    {{ object_card.name }}
-</p>
+{% include 'model_builder/components/truncating_text.html' with visible_text=object_card.name extra_classes=title_class|default:"h6"|add:" flex-grow-1" %}
 
 <span class="d-none position-absolute top-50 end-0 translate-middle-y badge rounded-circle badge-gray-100
 text-black z-3 p-1 me-2"

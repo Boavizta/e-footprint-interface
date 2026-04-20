@@ -31,12 +31,7 @@
     {% if compact %}
     <p class="h8 mb-0 text-truncate min-w-0 text-addition px-1">Add</p>
     {% else %}
-    <p class="h8 mb-0 text-truncate min-w-0 text-addition px-1 truncated-text-tooltip"
-       data-bs-toggle="tooltip"
-       data-bs-placement="top"
-       data-bs-title="{{ add_label }}">
-        {{ add_label }}
-    </p>
+    {% include 'model_builder/components/truncating_text.html' with visible_text=add_label extra_classes="h8 text-addition px-1" %}
     {% endif %}
 </button>
 {% endif %}
@@ -54,12 +49,7 @@
     {% if compact %}
     <p class="h8 mb-0 text-truncate min-w-0 text-secondary px-1">Link existing</p>
     {% else %}
-    <p class="h8 mb-0 text-truncate min-w-0 text-secondary px-1 truncated-text-tooltip"
-       data-bs-toggle="tooltip"
-       data-bs-placement="top"
-       data-bs-title="{{ link_label }}">
-        {{ link_label }}
-    </p>
+    {% include 'model_builder/components/truncating_text.html' with visible_text=link_label extra_classes="h8 text-secondary px-1" %}
     {% endif %}
 </button>
 {% endif %}

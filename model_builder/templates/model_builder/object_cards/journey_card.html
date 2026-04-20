@@ -33,7 +33,7 @@
                     {% for child in object.accordion_children %}
                         {% include 'model_builder/object_cards/'|add:object.child_template_name|add:'_card.html' with object=child %}
                     {% endfor %}
-                    <div id="add-step-to-{{ object.web_id }}" class="d-flex custom-ms-4 mt-3 mb-2
+                    <div id="add-step-to-{{ object.web_id }}" class="d-flex custom-ms-4 mt-3 mb-2 min-w-0
                     align-items-center move"
                         hx-get="/model_builder/open-create-object-panel/{{ object.child_object_type_str }}"
                         hx-target="#sidePanel"
@@ -44,11 +44,9 @@
                          _="on click removeAllOpenedObjectsHighlights()"
                     >
                         <img src="{% static 'icons/circle_add_icon.svg' %}" class="cursor" width="16" height="16" id="icon-add-step-to-{{ object.web_id }}">
-                        <div class="mb-0 ms-2 ps-1 d-flex align-items-center cursor">
+                        <div class="mb-0 ms-2 ps-1 min-w-0 d-flex align-items-center cursor">
                             <img src="{% static 'icons/add-gray-icon.svg' %}"  width="16" height="16">
-                            <div class="h8 mb-0 ms-2 ps-2 text-addition">
-                                {{ object.child_object_type_str|add_child_text }}
-                            </div>
+                            {% include 'model_builder/components/truncating_text.html' with visible_text=object.child_object_type_str|add_child_text extra_classes="h8 ms-2 ps-2 text-addition" %}
                         </div>
                     </div>
                 </div>

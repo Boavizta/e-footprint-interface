@@ -252,7 +252,7 @@ When OOB card swaps re-render a card, accordion open/close state is preserved au
 Leaderlines use a "deepest visible anchor" pattern for target-side resolution: if the target element is hidden inside a collapsed accordion, the line ends on the nearest visible `.leaderline-anchor` ancestor instead. Lines are rebuilt broadly on `shown.bs.collapse` / `hidden.bs.collapse` events. Source-side semantics are unchanged.
 
 ### Truncated-text tooltip pattern
-Any element with `.truncated-text-tooltip` + `text-truncate min-w-0` + Bootstrap tooltip attrs gets a tooltip that fires only when the text is visually truncated. Initialized by `initTruncatedTextTooltips` in `model_builder_main.js` and re-run on `htmx:afterSettle` for swapped fragments. For compact labels (e.g. `add_child_button.html` with `compact=True` inside labeled sections), omit the tooltip entirely — the surrounding section header already names the type.
+Use the `components/truncating_text.html` partial for any text that should ellipsize and reveal the full string on hover. It emits a `<p>` with `.truncated-text-tooltip` + `text-truncate min-w-0` + Bootstrap tooltip attrs; `initTruncatedTextTooltips` in `model_builder_main.js` (re-run on `htmx:afterSettle`) only shows the tooltip when the text is actually truncated. Params: `visible_text`, optional `full_text` (defaults to visible), `extra_classes`. Caveat: flex ancestors must allow the element to shrink (`min-w-0` along the chain) or truncation won't trigger. For compact labels (e.g. `add_child_button.html` with `compact=True` inside labeled sections), skip the partial and emit a plain `<p>` — the surrounding section header already names the type.
 
 
 ## Typical request lifecycle
