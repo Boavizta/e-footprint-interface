@@ -28,12 +28,16 @@
         hx-disabled-elt="button"
         _="on click removeAllOpenedObjectsHighlights()"
 >
+    {% if compact %}
+    <p class="h8 mb-0 text-truncate min-w-0 text-addition px-1">Add</p>
+    {% else %}
     <p class="h8 mb-0 text-truncate min-w-0 text-addition px-1 truncated-text-tooltip"
        data-bs-toggle="tooltip"
        data-bs-placement="top"
        data-bs-title="{{ add_label }}">
-        {% if compact %}Add{% else %}{{ add_label }}{% endif %}
+        {{ add_label }}
     </p>
+    {% endif %}
 </button>
 {% endif %}
 {% if linkable_existing_count %}
@@ -47,12 +51,16 @@
         hx-disabled-elt="button"
         _="on click removeAllOpenedObjectsHighlights()"
 >
+    {% if compact %}
+    <p class="h8 mb-0 text-truncate min-w-0 text-secondary px-1">Link existing</p>
+    {% else %}
     <p class="h8 mb-0 text-truncate min-w-0 text-secondary px-1 truncated-text-tooltip"
        data-bs-toggle="tooltip"
        data-bs-placement="top"
        data-bs-title="{{ link_label }}">
-        {% if compact %}Link existing{% else %}{{ link_label }}{% endif %}
+        {{ link_label }}
     </p>
+    {% endif %}
 </button>
 {% endif %}
 {% if not disabled %}

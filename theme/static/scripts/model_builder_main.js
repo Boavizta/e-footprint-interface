@@ -24,7 +24,7 @@ function initTruncatedTextTooltips(root = document) {
     root.querySelectorAll(".truncated-text-tooltip[data-bs-toggle='tooltip']").forEach(element => {
         if (element.dataset.tooltipTruncationListenerAdded !== "true") {
             element.addEventListener("show.bs.tooltip", event => {
-                if (!isTextTruncated(element) && !hasDifferentTooltipLabel(element)) {
+                if (!isTextTruncated(element)) {
                     event.preventDefault();
                 }
             });
@@ -41,12 +41,6 @@ function initTruncatedTextTooltips(root = document) {
 
 function isTextTruncated(element) {
     return element.scrollWidth > element.clientWidth;
-}
-
-function hasDifferentTooltipLabel(element) {
-    const tooltipText = (element.dataset.bsTitle || element.getAttribute("title") || "").trim();
-    const visibleText = (element.textContent || "").trim();
-    return tooltipText !== "" && visibleText !== "" && tooltipText !== visibleText;
 }
 
 function initSortableObjectCards() {
