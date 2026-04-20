@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.1] - 2026-04-20
+
+### Fixed
+- Edit of grouped edge device / sub-group preserves nested row markup.
+- Drop name-only fast path — leaderlines now always reset on edit.
+- Add leaderline link metadata to recurrent_edge_component_need_card.html, so their leaderlines to edge device components can be drawn.
+
+### Changed
+- Set power per unit and idle power per unit steps to 0.1 for edge components.
+- Truncate child Add/Link existing buttons and drop redundant object name inside labeled sections.
+
 ## [1.3.0] - 2026-04-17
 
 ### Added

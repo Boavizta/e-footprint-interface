@@ -53,7 +53,9 @@ npm install jest --global
 Run test suites:
 ```shell
 # Python tests (unit + integration + E2E; E2E requires running server)
-poetry run pytest tests -n 4 --base-url http://localhost:8000
+# -n indicates number of parallel workers for pytest-xdist
+poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000
+poetry run pytest tests --ignore=tests/e2e
 
 # JavaScript unit tests
 jest
