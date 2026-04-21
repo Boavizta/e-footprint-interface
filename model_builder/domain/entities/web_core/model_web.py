@@ -10,7 +10,8 @@ from efootprint import __version__ as efootprint_version
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
 from model_builder.domain.interfaces import ISystemRepository
-from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
+from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
+    ExplainableObjectWeb, ExplainableQuantityWeb)
 from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
 
@@ -198,7 +199,7 @@ class ModelWeb:
         web_explainable_quantities = []
         for efootprint_object in self.flat_efootprint_objs_dict.values():
             web_explainable_quantities += [
-                ExplainableObjectWeb(explainable_object, self)
+                ExplainableQuantityWeb(explainable_object, self)
                 for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
 
         return web_explainable_quantities
