@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Source metadata — side panel mockup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    --panel-bg: #ffffff;
+    --panel-border: #e9ecef;
+    --stage-bg: #eef1f5;
+    --muted: #6c757d;
+    --faint: #adb5bd;
+
+    --conf-none-bg: #f1f3f5;
+    --conf-none-fg: #868e96;
+
+    --conf-low-bg: #fdecea;
+    --conf-low-fg: #b42318;
+    --conf-low-dot: #e03131;
+
+    --conf-med-bg: #fff4db;
+    --conf-med-fg: #8a5a00;
+    --conf-med-dot: #e8a93a;
+
+    --conf-high-bg: #e4f5ec;
+    --conf-high-fg: #087443;
+    --conf-high-dot: #12a25c;
+
+    --accent: #2f6fed;
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--stage-bg);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1f2328;
+  }
+
+  .stage {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 100vh;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .caption {
+    max-width: 420px;
+    padding: 24px;
+    color: #495057;
+    font-size: 14px;
+    line-height: 1.55;
+    align-self: flex-start;
+  }
+  .caption h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-bottom: 12px;
+  }
+  .caption code {
+    background: #e9ecef;
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #212529;
+    font-size: 12px;
+  }
+
+  /* ===== Side panel shell ===== */
+  .side-panel {
+    width: 560px;
+    background: var(--panel-bg);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.10);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 48px);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--panel-border);
+    background: #fafbfc;
+  }
+  .panel-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2328;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-header .object-tag {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .panel-header .btn-close { opacity: 0.5; }
+
+  .panel-body {
+    padding: 22px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .panel-footer {
+    padding: 14px 22px;
+    border-top: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    background: #fafbfc;
+  }
+
+  /* ===== Field group ===== */
+  .field-group {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f1f3f5;
+  }
+  .field-group:last-of-type { border-bottom: none; }
+
+  .field-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #24292f;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-label .bi-info-circle {
+    color: var(--faint);
+    font-size: 12px;
+    cursor: help;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-row .input-group { flex: 1; }
+  .input-row .form-control {
+    font-size: 14px;
+    padding: 7px 10px;
+    border-color: #dee2e6;
+  }
+  .input-row .input-group-text {
+    background: #f8f9fa;
+    color: var(--muted);
+    font-size: 12px;
+    border-color: #dee2e6;
+  }
+
+  /* ===== Confidence badge ===== */
+  .confidence-wrap {
+    position: relative;
+  }
+
+  .confidence-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: 6px;
+    line-height: 1.2;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.12s ease;
+  }
+  .confidence-badge:hover { filter: brightness(0.97); }
+  .confidence-badge .bi-chevron-down {
+    font-size: 10px;
+    opacity: 0.6;
+  }
+
+  /* Level indicator: three ascending bars */
+  .bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 11px;
+  }
+  .bars > i {
+    display: inline-block;
+    width: 3px;
+    border-radius: 1px;
+    background: currentColor;
+    opacity: 0.22;
+  }
+  .bars > i:nth-child(1) { height: 4px; }
+  .bars > i:nth-child(2) { height: 7px; }
+  .bars > i:nth-child(3) { height: 10px; }
+  .bars-low    > i:nth-child(1) { opacity: 1; }
+  .bars-medium > i:nth-child(1),
+  .bars-medium > i:nth-child(2) { opacity: 1; }
+  .bars-high   > i { opacity: 1; }
+
+  .conf-none {
+    background: var(--conf-none-bg);
+    color: var(--conf-none-fg);
+  }
+  .conf-low {
+    background: var(--conf-low-bg);
+    color: var(--conf-low-fg);
+  }
+  .conf-medium {
+    background: var(--conf-med-bg);
+    color: var(--conf-med-fg);
+  }
+  .conf-high {
+    background: var(--conf-high-bg);
+    color: var(--conf-high-fg);
+  }
+
+  .confidence-just-reset {
+    animation: resetPulse 1.4s ease-out 1;
+  }
+  @keyframes resetPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(224, 49, 49, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(224, 49, 49, 0); }
+  }
+
+  /* Confidence popover */
+  .confidence-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+    padding: 4px;
+    min-width: 140px;
+    z-index: 40;
+    display: none;
+  }
+  .confidence-menu.open { display: block; }
+  .confidence-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    color: #1f2328;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .confidence-menu .menu-item:hover { background: #f1f3f5; }
+  .confidence-menu .menu-header {
+    padding: 8px 10px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid #f1f3f5;
+    margin-bottom: 4px;
+  }
+  .confidence-menu .menu-item .bars { margin-right: 2px; }
+  .confidence-menu .menu-item[data-level=high]   .bars { color: var(--conf-high-fg); }
+  .confidence-menu .menu-item[data-level=medium] .bars { color: var(--conf-med-fg); }
+  .confidence-menu .menu-item[data-level=low]    .bars { color: var(--conf-low-fg); }
+  .confidence-menu .menu-item[data-level=none]   .bars { color: var(--conf-none-fg); }
+  .confidence-menu .menu-divider {
+    height: 1px;
+    background: #f1f3f5;
+    margin: 4px 2px;
+  }
+  .confidence-menu .menu-item .check {
+    margin-left: auto;
+    color: var(--accent);
+    font-size: 12px;
+    display: none;
+  }
+  .confidence-menu .menu-item.selected .check { display: inline; }
+
+  /* ===== Source + comment line ===== */
+  .source-comment {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .source-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-left: -4px;
+    transition: background 0.12s ease;
+  }
+  .source-line:hover { background: #f1f3f5; color: #212529; }
+  .source-line a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .source-line a:hover { text-decoration: underline; }
+  .source-line .bi-pencil-fill {
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    margin-left: 2px;
+  }
+  .source-line:hover .bi-pencil-fill { opacity: 0.55; }
+
+  .comment-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #495057;
+    margin-top: 4px;
+    font-style: italic;
+    max-width: 100%;
+    cursor: pointer;
+  }
+  .comment-line .bi {
+    color: var(--faint);
+    font-size: 11px;
+    font-style: normal;
+    flex-shrink: 0;
+  }
+  .comment-line .comment-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .comment-line.expanded .comment-text {
+    white-space: normal;
+    overflow: visible;
+  }
+
+  /* ===== Inline source + comment editor ===== */
+  .source-editor {
+    margin-top: 10px;
+    background: #f8f9fb;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 14px;
+    display: none;
+    animation: slideDown 0.18s ease-out;
+  }
+  .source-editor.open { display: block; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .source-editor .editor-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .source-editor .form-select,
+  .source-editor .form-control {
+    font-size: 13px;
+    padding: 6px 10px;
+    border-color: #dee2e6;
+    background-color: white;
+  }
+  .source-editor .custom-fields {
+    display: none;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-left: 2px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+  }
+  .source-editor .custom-fields.open { display: block; }
+  .source-editor .custom-fields .form-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+
+  .collision-notice {
+    display: none;
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #fff8e1;
+    border: 1px solid #ffe29a;
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: #7a5200;
+    line-height: 1.4;
+  }
+  .collision-notice.visible { display: block; }
+  .collision-notice strong { color: #6b4200; }
+
+  .editor-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .editor-actions .btn {
+    font-size: 12px;
+    padding: 5px 14px;
+  }
+
+  /* Small tweaks */
+  .btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+  .btn-primary:hover {
+    background-color: #1f5fd1;
+    border-color: #1f5fd1;
+  }
+  .btn-outline-secondary { font-weight: 500; }
+</style>
+</head>
+
+<body>
+<div class="stage">
+
+  <aside class="caption">
+    <h1>Source metadata — side panel mockup</h1>
+    <p>
+      Try it: click a confidence badge on the right of any input to set
+      <code>low</code>/<code>medium</code>/<code>high</code>, click a source
+      line to open the source+comment editor, or change an input's value — the
+      confidence resets (pulses red) while the comment persists.
+    </p>
+    <p>
+      In the source editor, "Custom source…" reveals the name + link fields.
+      Typing a name that collides with a canonical source (e.g.
+      <em>ADEME study — Base Empreinte</em>) shows the quiet notice described
+      in §4.
+    </p>
+    <p class="text-muted" style="font-size: 12px;">
+      Standalone mockup — all interactions are client-side only.
+    </p>
+  </aside>
+
+  <section class="side-panel">
+
+    <header class="panel-header">
+      <h2>
+        Edit server
+        <span class="object-tag">BoaviztaCloudServer</span>
+      </h2>
+      <button class="btn-close" aria-label="Close"></button>
+    </header>
+
+    <div class="panel-body">
+
+      <!-- ============================================================= -->
+      <!-- FIELD 1 — RAM (medium confidence, ADEME source, with comment) -->
+      <!-- ============================================================= -->
+      <div class="field-group" data-field="ram">
+        <label class="field-label" for="ram">
+          RAM
+          <i class="bi bi-info-circle" title="Server RAM used for this modeling"></i>
+        </label>
+
+        <div class="input-row" style="position: relative;">
+          <div class="input-group">
+            <input type="number" class="form-control" id="ram"
+                   value="32" step="1" data-default-value="32">
+            <span class="input-group-text">GB</span>
+          </div>
+
+          <!-- Confidence badge -->
+          <div class="confidence-wrap">
+            <button type="button" class="confidence-badge conf-medium"
+                    data-level="medium"
+                    title="Set confidence level"
+                    onclick="toggleConfidenceMenu(this)">
+              <span class="bars bars-medium"><i></i><i></i><i></i></span>
+              <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="confidence-menu">
+              <div class="menu-header">Set confidence level</div>
+              <div class="menu-item" data-level="high"
+                   onclick="setConfidence(this, 'high')">
+                <span class="bars bars-high"><i></i><i></i><i></i></span>
+                High
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-item selected" data-level="medium"
+                   onclick="setConfidence(this, 'medium')">
+                <span class="bars bars-medium"><i></i><i></i><i></i></span>
+                Medium
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-item" data-level="low"
+                   onclick="setConfidence(this, 'low')">
+                <span class="bars bars-low"><i></i><i></i><i></i></span>
+                Low
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-divider"></div>
+              <div class="menu-item" data-level="none"
+                   onclick="setConfidence(this, 'none')">
+                <span class="bars"><i></i><i></i><i></i></span>
+                Not set
+                <i class="bi bi-check2 check"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source + comment line -->
+        <div class="source-comment">
+          <div class="source-line" onclick="openSourceEditor('ram')">
+            <i class="bi bi-link-45deg"></i>
+            <span>Source:&nbsp;</span>
+            <a href="#" onclick="event.stopPropagation(); event.preventDefault();">
+              ADEME study — Base Empreinte
+            </a>
+            <i class="bi bi-pencil-fill"></i>
+          </div>
+          <div class="comment-line" onclick="this.classList.toggle('expanded')"
+               title="Click to expand">
+            <i class="bi bi-chat-quote"></i>
+            <span class="comment-text">
+              Cross-checked against internal audit 2025-Q4; value held stable over last 3 procurement cycles.
+            </span>
+          </div>
+        </div>
+
+        <!-- Inline editor (hidden by default) -->
+        <div class="source-editor" id="editor-ram">
+          <label class="editor-label">Source</label>
+          <select class="form-select" onchange="handleSourceSelect(this, 'ram')">
+            <option value="ademe" selected>ADEME study — Base Empreinte</option>
+            <option value="ren-shift">The Shift Project — REN study</option>
+            <option value="user-data">user data</option>
+            <option value="hypothesis">e-footprint hypothesis</option>
+            <option value="custom">Custom source…</option>
+          </select>
+
+          <div class="custom-fields" id="custom-fields-ram">
+            <div class="mb-2">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control form-control-sm"
+                     placeholder="e.g. Internal benchmark 2025-Q4"
+                     oninput="checkCollision(this, 'ram')">
+            </div>
+            <div>
+              <label class="form-label">Link (optional)</label>
+              <input type="url" class="form-control form-control-sm"
+                     placeholder="https://…">
+            </div>
+            <div class="collision-notice" id="collision-ram">
+              <strong>A canonical source with this name already exists.</strong>
+              If you want to reuse it, pick it from the dropdown instead — this
+              entry will be kept as a separate source.
+            </div>
+          </div>
+
+          <label class="editor-label mt-3">Comment</label>
+          <textarea class="form-control" rows="3"
+                    placeholder="Add a note — why this source, any caveats, audit trail…"
+          >Cross-checked against internal audit 2025-Q4; value held stable over last 3 procurement cycles.</textarea>
+
+          <div class="editor-actions">
+            <button class="btn btn-outline-secondary btn-sm"
+                    onclick="closeSourceEditor('ram')">Cancel</button>
+            <button class="btn btn-primary btn-sm"
+                    onclick="closeSourceEditor('ram')">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================= -->
+      <!-- FIELD 2 — CPU cores (high confidence, custom source)          -->
+      <!-- ============================================================= -->
+      <div class="field-group" data-field="cores">
+        <label class="field-label" for="cores">CPU cores</label>
+
+        <div class="input-row">
+          <div class="input-group">
+            <input type="number" class="form-control" id="cores"
+                   value="16" step="1" data-default-value="16">
+            <span class="input-group-text">core</span>
+          </div>
+
+          <div class="confidence-wrap">
+            <button type="button" class="confidence-badge conf-high"
+                    data-level="high"
+                    title="Set confidence level"
+                    onclick="toggleConfidenceMenu(this)">
+              <span class="bars bars-high"><i></i><i></i><i></i></span>
+              <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="confidence-menu">
+              <div class="menu-header">Set confidence level</div>
+              <div class="menu-item selected" data-level="high"
+                   onclick="setConfidence(this, 'high')">
+                <span class="bars bars-high"><i></i><i></i><i></i></span>
+                High
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-item" data-level="medium"
+                   onclick="setConfidence(this, 'medium')">
+                <span class="bars bars-medium"><i></i><i></i><i></i></span>
+                Medium
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-item" data-level="low"
+                   onclick="setConfidence(this, 'low')">
+                <span class="bars bars-low"><i></i><i></i><i></i></span>
+                Low
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-divider"></div>
+              <div class="menu-item" data-level="none"
+                   onclick="setConfidence(this, 'none')">
+                <span class="bars"><i></i><i></i><i></i></span>
+                Not set
+                <i class="bi bi-check2 check"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="source-comment">
+          <div class="source-line" onclick="openSourceEditor('cores')">
+            <i class="bi bi-link-45deg"></i>
+            <span>Source:&nbsp;</span>
+            <a href="#" onclick="event.stopPropagation(); event.preventDefault();">
+              Internal procurement record
+            </a>
+            <i class="bi bi-pencil-fill"></i>
+          </div>
+        </div>
+
+        <div class="source-editor" id="editor-cores">
+          <label class="editor-label">Source</label>
+          <select class="form-select" onchange="handleSourceSelect(this, 'cores')">
+            <option value="ademe">ADEME study — Base Empreinte</option>
+            <option value="ren-shift">The Shift Project — REN study</option>
+            <option value="user-data">user data</option>
+            <option value="hypothesis">e-footprint hypothesis</option>
+            <option value="custom" selected>Custom source…</option>
+          </select>
+
+          <div class="custom-fields open" id="custom-fields-cores">
+            <div class="mb-2">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control form-control-sm"
+                     value="Internal procurement record"
+                     oninput="checkCollision(this, 'cores')">
+            </div>
+            <div>
+              <label class="form-label">Link (optional)</label>
+              <input type="url" class="form-control form-control-sm"
+                     placeholder="https://…">
+            </div>
+            <div class="collision-notice" id="collision-cores">
+              <strong>A canonical source with this name already exists.</strong>
+              If you want to reuse it, pick it from the dropdown instead — this
+              entry will be kept as a separate source.
+            </div>
+          </div>
+
+          <label class="editor-label mt-3">Comment</label>
+          <textarea class="form-control" rows="3"
+                    placeholder="Add a note — why this source, any caveats, audit trail…"></textarea>
+
+          <div class="editor-actions">
+            <button class="btn btn-outline-secondary btn-sm"
+                    onclick="closeSourceEditor('cores')">Cancel</button>
+            <button class="btn btn-primary btn-sm"
+                    onclick="closeSourceEditor('cores')">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================= -->
+      <!-- FIELD 3 — idle power (unset confidence, user data)            -->
+      <!-- ============================================================= -->
+      <div class="field-group" data-field="idle">
+        <label class="field-label" for="idle">
+          Idle power ratio
+          <i class="bi bi-info-circle" title="Idle-to-peak power ratio"></i>
+        </label>
+
+        <div class="input-row">
+          <div class="input-group">
+            <input type="number" class="form-control" id="idle"
+                   value="0.15" step="0.01" data-default-value="0.15">
+          </div>
+
+          <div class="confidence-wrap">
+            <button type="button" class="confidence-badge conf-none"
+                    data-level="none"
+                    title="Set confidence level"
+                    onclick="toggleConfidenceMenu(this)">
+              <span class="bars"><i></i><i></i><i></i></span>
+              <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="confidence-menu">
+              <div class="menu-header">Set confidence level</div>
+              <div class="menu-item" data-level="high"
+                   onclick="setConfidence(this, 'high')">
+                <span class="bars bars-high"><i></i><i></i><i></i></span>
+                High
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-item" data-level="medium"
+                   onclick="setConfidence(this, 'medium')">
+                <span class="bars bars-medium"><i></i><i></i><i></i></span>
+                Medium
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-item" data-level="low"
+                   onclick="setConfidence(this, 'low')">
+                <span class="bars bars-low"><i></i><i></i><i></i></span>
+                Low
+                <i class="bi bi-check2 check"></i>
+              </div>
+              <div class="menu-divider"></div>
+              <div class="menu-item selected" data-level="none"
+                   onclick="setConfidence(this, 'none')">
+                <span class="bars"><i></i><i></i><i></i></span>
+                Not set
+                <i class="bi bi-check2 check"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="source-comment">
+          <div class="source-line" onclick="openSourceEditor('idle')">
+            <i class="bi bi-link-45deg"></i>
+            <span>Source:&nbsp;</span>
+            <a href="#" onclick="event.stopPropagation(); event.preventDefault();">
+              user data
+            </a>
+            <i class="bi bi-pencil-fill"></i>
+          </div>
+        </div>
+
+        <div class="source-editor" id="editor-idle">
+          <label class="editor-label">Source</label>
+          <select class="form-select" onchange="handleSourceSelect(this, 'idle')">
+            <option value="ademe">ADEME study — Base Empreinte</option>
+            <option value="ren-shift">The Shift Project — REN study</option>
+            <option value="user-data" selected>user data</option>
+            <option value="hypothesis">e-footprint hypothesis</option>
+            <option value="custom">Custom source…</option>
+          </select>
+
+          <div class="custom-fields" id="custom-fields-idle">
+            <div class="mb-2">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control form-control-sm"
+                     oninput="checkCollision(this, 'idle')">
+            </div>
+            <div>
+              <label class="form-label">Link (optional)</label>
+              <input type="url" class="form-control form-control-sm"
+                     placeholder="https://…">
+            </div>
+            <div class="collision-notice" id="collision-idle">
+              <strong>A canonical source with this name already exists.</strong>
+              If you want to reuse it, pick it from the dropdown instead — this
+              entry will be kept as a separate source.
+            </div>
+          </div>
+
+          <label class="editor-label mt-3">Comment</label>
+          <textarea class="form-control" rows="3"
+                    placeholder="Add a note — why this source, any caveats, audit trail…"></textarea>
+
+          <div class="editor-actions">
+            <button class="btn btn-outline-secondary btn-sm"
+                    onclick="closeSourceEditor('idle')">Cancel</button>
+            <button class="btn btn-primary btn-sm"
+                    onclick="closeSourceEditor('idle')">Save</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="panel-footer">
+      <button class="btn btn-outline-secondary btn-sm">Cancel</button>
+      <button class="btn btn-primary btn-sm">Save</button>
+    </footer>
+
+  </section>
+</div>
+
+<script>
+  const CANONICAL_NAMES = [
+    "ADEME study — Base Empreinte",
+    "The Shift Project — REN study",
+    "user data",
+    "e-footprint hypothesis",
+  ];
+
+
+  function closeAllMenus(exceptBtn) {
+    document.querySelectorAll(".confidence-menu.open").forEach(m => {
+      if (!exceptBtn || m !== exceptBtn.nextElementSibling) m.classList.remove("open");
+    });
+  }
+
+  function toggleConfidenceMenu(btn) {
+    const menu = btn.nextElementSibling;
+    const wasOpen = menu.classList.contains("open");
+    closeAllMenus();
+    if (!wasOpen) menu.classList.add("open");
+  }
+
+  function setConfidence(menuItem, level) {
+    const menu = menuItem.closest(".confidence-menu");
+    const btn = menu.previousElementSibling;
+    applyConfidenceToBadge(btn, level);
+
+    menu.querySelectorAll(".menu-item").forEach(i => i.classList.remove("selected"));
+    menuItem.classList.add("selected");
+    menu.classList.remove("open");
+  }
+
+  function applyConfidenceToBadge(btn, level) {
+    btn.classList.remove("conf-none", "conf-low", "conf-medium", "conf-high");
+    btn.classList.add("conf-" + level);
+    btn.dataset.level = level;
+
+    const bars = btn.querySelector(".bars");
+    bars.classList.remove("bars-low", "bars-medium", "bars-high");
+    if (level !== "none") bars.classList.add("bars-" + level);
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".confidence-badge") && !e.target.closest(".confidence-menu")) {
+      closeAllMenus();
+    }
+  });
+
+  /* Source editor open/close */
+  function openSourceEditor(fieldId) {
+    document.querySelectorAll(".source-editor.open").forEach(ed => {
+      if (ed.id !== "editor-" + fieldId) ed.classList.remove("open");
+    });
+    document.getElementById("editor-" + fieldId).classList.toggle("open");
+  }
+
+  function closeSourceEditor(fieldId) {
+    document.getElementById("editor-" + fieldId).classList.remove("open");
+  }
+
+  function handleSourceSelect(select, fieldId) {
+    const custom = document.getElementById("custom-fields-" + fieldId);
+    if (select.value === "custom") custom.classList.add("open");
+    else custom.classList.remove("open");
+  }
+
+  function checkCollision(input, fieldId) {
+    const notice = document.getElementById("collision-" + fieldId);
+    const typed = input.value.trim().toLowerCase();
+    const hit = typed.length > 0 && CANONICAL_NAMES.some(
+      n => n.toLowerCase() === typed
+    );
+    notice.classList.toggle("visible", hit);
+  }
+
+  /* Value-change → confidence reset (comment persists) */
+  document.querySelectorAll(".field-group").forEach(group => {
+    const input = group.querySelector("input[type=number]");
+    if (!input) return;
+    input.addEventListener("input", () => {
+      if (input.value === input.dataset.defaultValue) return;
+      const badge = group.querySelector(".confidence-badge");
+      if (!badge || badge.dataset.level === "none") return;
+
+      applyConfidenceToBadge(badge, "none");
+      const menu = badge.nextElementSibling;
+      menu.querySelectorAll(".menu-item").forEach(i => i.classList.remove("selected"));
+      menu.querySelector("[data-level=none]").classList.add("selected");
+
+      badge.classList.add("confidence-just-reset");
+      setTimeout(() => badge.classList.remove("confidence-just-reset"), 1400);
+      input.dataset.defaultValue = input.value;
+    });
+  });
+</script>
+
+</body>
+</html>
