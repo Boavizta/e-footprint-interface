@@ -82,20 +82,22 @@ Behavior:
 - **Single-builder case:** if only one builder is registered for the explainable type (currently all `ExplainableHourlyQuantities` fields), the selector is hidden and the field renders exactly as today. This keeps the hourly UX unchanged.
 - **Switching preserves per-builder state:** when the user switches from *Constant value* to *Weekly pattern* and back, each builder's inputs retain whatever the user had typed, so exploring options is lossless. Only the selected builder's inputs are submitted on save.
 - **Initial selection:** when opening an existing attribute, the selector defaults to the builder that matches the current stored value. When creating a new object, the selector defaults to the builder used by the attribute's default value (today this is the constant builder everywhere).
+- **Cancelling or closing the panel** discards all in-flight builder state (both the selected builder's inputs and any draft the other builder held). The interface's existing unsaved-changes confirmation fires if any input has changed since the panel was opened.
 
 ## 5. Form UX of the weekly-pattern sub-form
 
 Layout of the sub-form when *Weekly pattern* is selected:
 
 - **Header**: the field's unit, displayed once (read-only) — e.g. `Unit: concurrent`.
-- **Profiles area**: a vertical list of **profile cards**. Each card contains:
+- **Profiles area**: a vertical list of **profile cards**, displayed in creation order (not reorderable). The two defaulted profiles always appear as "weekday" then "weekend"; user-added profiles append at the bottom. Each card contains:
     - Profile **name** input.
-    - **Day assignment checkboxes** (Mon..Sun). A day checked on this profile is automatically uncheckable on other profiles (single-assignment invariant).
+    - **Day assignment checkboxes** (Mon..Sun). Checking a day on this profile automatically unchecks it on whichever other profile currently owns it (stealing semantics, single-assignment invariant).
     - **Baseline** numeric input (default `0`).
-    - **Ranges** list: rows of `[ start_hour ] – [ end_hour ] : [ value ]` with a per-row remove button, plus an **Add range** button that appends a new row pre-filled with sensible defaults.
-    - A **Remove profile** button (disabled when only one profile remains).
+    - **Ranges** list: rows of `[ start_hour ] – [ end_hour ] : [ value ]` with a per-row remove button, kept sorted by `start_hour` in the UI. Edits to any field are validated on commit (blur of the input): if the edit violates §6.4 (bounds) or §6.5 (no overlap with other ranges in the same profile), an inline error is shown on the offending inputs and the row stays visually in place; on valid commit, the row is repositioned to its chronological slot if its `start_hour` changed. The **Add range** button pre-fills a new row with the first free `[start, end)` gap of ≥ 1 hour and `value = 0`; it is disabled when existing ranges already cover the full 24 hours (no gap to pre-fill, so no new range is possible).
+    - A **Remove profile** button (disabled when only one profile remains). Removing a profile leaves its days unassigned; the form blocks save until every day is reassigned to a remaining profile.
 - **Add profile** button below the list (disabled when 7 profiles are already defined).
 - Small helper text describing the semantics, comparable to today's constant builder helper ("This pattern repeats every week; each hour of each day takes the value of its profile's baseline unless overridden by a range.").
+- All labels (day names Mon..Sun, builder labels, helper text) are in English, consistent with the rest of the interface.
 
 ### Defaults on first open
 
@@ -111,11 +113,11 @@ This choice matches the most common real-world pattern and means the degenerate 
 The form refuses to save if any of the following is violated:
 
 1. **Profile count:** between 1 and 7 profiles inclusive.
-2. **Unique profile names:** no two profiles share the same name. Profile names are non-empty strings.
+2. **Unique profile names:** no two profiles share the same name (comparison is case-sensitive). Profile names are non-empty strings.
 3. **Full day coverage:** each of Mon, Tue, Wed, Thu, Fri, Sat, Sun is checked on **exactly one** profile — no unassigned day, no double-assigned day.
 4. **Time range bounds:** for each range, `0 ≤ start_hour < end_hour ≤ 24`, with `start_hour` and `end_hour` integers.
 5. **No overlapping ranges within a profile:** within a given profile, ranges must be pairwise disjoint. Ranges across different profiles are independent.
-6. **Numeric values:** baseline and range values are valid numbers in the field's unit.
+6. **Numeric values:** baseline and range values are valid numbers in the field's unit. If the attribute's `can_be_negative` metadata is `False`, each baseline and each range value must satisfy `value ≥ 0` (zero allowed). Input-level enforcement is sufficient since ranges only overwrite baselines — no post-composition sweep of the 168-hour array is needed.
 
 Validation errors are surfaced inline on the offending profile/range, consistently with other form fields.
 
@@ -128,9 +130,9 @@ For each of the 7 days of the week, given its assigned profile `P`:
 1. The 24 hourly values of that day are initialized to `P.baseline`.
 2. For each range `(start, end, value)` in `P.ranges`, every hour `h` such that `start ≤ h < end` is set to `value`.
 
-Because ranges within a profile are validated to be disjoint, order of application does not matter.
+Because ranges within a profile are validated to be disjoint, order of application does not matter. Profiles with zero days assigned never appear in the day iteration: they contribute no hours to the output but are preserved as authored in both form state and persistence.
 
-The result is a 168-element array, stored/served exactly like the array produced by `FromConstant` today (same unit handling, same lazy evaluation pattern, same downstream consumers).
+The result is a 168-element array, stored/served exactly like the array produced by `FromConstant` today (same unit handling, same lazy evaluation pattern, same downstream consumers). The builder's authored state (profiles, day assignments, baselines, ranges) round-trips through the system JSON download/upload mechanism the same way `FromConstant`'s authored state does. Textual summaries of the attribute outside the edit panel fall back to `ExplainableRecurrentQuantities.__str__`.
 
 ## 8. Relationship with `ExplainableRecurrentQuantitiesFromConstant`
 

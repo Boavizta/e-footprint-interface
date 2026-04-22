@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Pattern Builder — UX Mockup</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --text-soft: #9ca3af;
+      --bg: #f5f6f8;
+      --bg-subtle: #f9fafb;
+      --bg-hover: #f3f4f6;
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+      --warning-bg: #fffbeb;
+      --warning-border: #fcd34d;
+      --warning-text: #92400e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 1fr 520px;
+      gap: 40px;
+      padding: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: 100vh;
+      align-items: start;
+    }
+
+    .notes {
+      max-width: 560px;
+      position: sticky;
+      top: 40px;
+    }
+
+    .notes h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+
+    .notes .lead {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin: 0 0 24px;
+    }
+
+    .notes h3 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 24px 0 10px;
+    }
+
+    .notes ul {
+      margin: 0 0 16px;
+      padding-left: 20px;
+      color: #374151;
+    }
+
+    .notes li { margin-bottom: 8px; font-size: 13px; }
+    .notes li em { color: var(--primary); font-style: normal; font-weight: 500; }
+    .notes code {
+      background: var(--bg-hover);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #1f2937;
+    }
+
+    .footnote {
+      font-size: 12px;
+      color: var(--text-soft);
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      margin-top: 24px;
+    }
+
+    /* Side panel */
+    .side-panel {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 40px;
+      max-height: calc(100vh - 80px);
+      overflow: hidden;
+    }
+
+    .sp-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sp-header h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0;
+      flex: 1;
+    }
+
+    .sp-header h2 .attr-name { color: var(--text-muted); font-weight: 400; }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .icon-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+    .sp-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .sp-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: white;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .btn-secondary { background: white; border-color: var(--border-strong); color: #374151; }
+    .btn-secondary:hover { background: var(--bg-subtle); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* Builder selector */
+    .builder-selector { margin-bottom: 20px; }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .tab-group {
+      display: flex;
+      background: var(--bg-hover);
+      border-radius: 8px;
+      padding: 3px;
+    }
+    .tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4b5563;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .tab.active {
+      background: white;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Unit header */
+    .unit-header {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #374151;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .unit-header .unit-value {
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .helper-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    /* Validation banner */
+    .validation-banner {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning-text);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .validation-banner i { font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+
+    /* Profile card */
+    .profile-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      background: white;
+      transition: border-color 0.15s;
+    }
+    .profile-card.has-error { border-color: #fca5a5; }
+
+    .profile-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .profile-name-input {
+      flex: 1;
+      border: 1px solid transparent;
+      padding: 5px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 5px;
+      background: var(--bg-subtle);
+      color: var(--text);
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .profile-name-input:hover { background: var(--bg-hover); }
+    .profile-name-input:focus {
+      background: white;
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+    .profile-name-input.error { border-color: var(--danger); background: var(--danger-bg); }
+
+    .btn-remove-profile {
+      background: none;
+      border: none;
+      color: var(--text-soft);
+      cursor: pointer;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .btn-remove-profile:hover:not(:disabled) { background: var(--danger-bg); color: var(--danger); }
+    .btn-remove-profile:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .inline-error {
+      font-size: 11px;
+      color: var(--danger);
+      margin-top: -6px;
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
+
+    /* Day pills */
+    .days-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+    .day-pill {
+      text-align: center;
+      padding: 6px 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.12s;
+      background: white;
+      user-select: none;
+    }
+    .day-pill:hover { border-color: var(--text-soft); color: #374151; }
+    .day-pill.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .day-pill input { display: none; }
+
+    /* Baseline */
+    .baseline-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .baseline-row label {
+      font-size: 12px;
+      color: #374151;
+      font-weight: 500;
+      min-width: 68px;
+    }
+    .num-input {
+      padding: 5px 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      text-align: right;
+      font-family: inherit;
+    }
+    .num-input:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+    .num-input.error { border-color: var(--danger); background: var(--danger-bg); }
+    .baseline-row .num-input { flex: 0 0 80px; }
+    .baseline-row .unit-chip { font-size: 12px; color: var(--text-muted); }
+
+    /* Ranges */
+    .ranges-section {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .range-row {
+      display: grid;
+      grid-template-columns: 62px 14px 62px 14px 78px 1fr 24px;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 4px;
+      padding: 3px 0;
+    }
+    .range-row .sep { color: var(--text-soft); font-size: 12px; text-align: center; }
+    .range-row .num-input {
+      width: 100%;
+      padding: 4px 6px;
+      font-size: 12px;
+    }
+    .range-row .unit-chip {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .range-row .btn-remove-range {
+      background: none;
+      border: none;
+      color: var(--text-soft);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .range-row .btn-remove-range:hover { background: var(--danger-bg); color: var(--danger); }
+
+    .range-error {
+      font-size: 11px;
+      color: var(--danger);
+      padding: 2px 4px 6px;
+      grid-column: 1 / -1;
+    }
+
+    .btn-add-range {
+      background: none;
+      border: 1px dashed var(--border-strong);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 6px;
+      transition: all 0.12s;
+      font-family: inherit;
+    }
+    .btn-add-range:hover:not(:disabled) {
+      border-color: var(--text-soft);
+      color: var(--text);
+      background: var(--bg-subtle);
+    }
+    .btn-add-range:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-add-range i { margin-right: 5px; }
+
+    .btn-add-profile {
+      background: white;
+      border: 1px dashed var(--border-strong);
+      color: #374151;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 6px;
+      transition: all 0.12s;
+      font-family: inherit;
+    }
+    .btn-add-profile:hover:not(:disabled) {
+      border-color: var(--text-muted);
+      background: var(--bg-subtle);
+    }
+    .btn-add-profile:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-add-profile i { margin-right: 6px; }
+
+    .constant-form .num-input {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 14px;
+      text-align: left;
+    }
+    .constant-form .input-suffix {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .constant-form .input-suffix .unit-chip {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+    }
+
+    /* Mockup banner at top */
+    .mockup-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #1f2937;
+      color: white;
+      padding: 6px 16px;
+      font-size: 11px;
+      text-align: center;
+      z-index: 100;
+      letter-spacing: 0.04em;
+    }
+    .mockup-banner strong { color: #fbbf24; }
+    body { padding-top: 28px; }
+
+    /* Flash highlight on range reorder */
+    @keyframes flash-bg {
+      0% { background: rgba(15, 118, 110, 0.15); }
+      100% { background: transparent; }
+    }
+    .range-row.flash { animation: flash-bg 0.6s ease-out; }
+  </style>
+</head>
+<body>
+  <div class="mockup-banner">
+    <strong>UX MOCKUP</strong> · Weekly-pattern builder for <code style="color:#fbbf24">ExplainableRecurrentQuantities</code> · interactive prototype, not production code
+  </div>
+
+  <div class="page">
+    <aside class="notes">
+      <h1>Weekly Pattern Builder</h1>
+      <p class="lead">
+        New builder for <code>ExplainableRecurrentQuantities</code> fields — lets users describe a 168-hour weekly
+        quantity as <strong>day profiles</strong> with <strong>baselines + ranges</strong>, instead of a single constant.
+      </p>
+
+      <h3>Try the interactions</h3>
+      <ul>
+        <li>Toggle <em>Constant value</em> ↔ <em>Weekly pattern</em> at the top — each builder's inputs are preserved while switching.</li>
+        <li>Click a day on one profile — it <em>steals</em> the day from whichever profile previously owned it.</li>
+        <li>Edit a range's start hour so it overlaps another range, then click elsewhere — inline error appears, row stays where it is.</li>
+        <li>Edit a range so it moves chronologically (e.g. 07–12 → 19–22), then blur — the row auto-reorders into its slot.</li>
+        <li>Click <em>Add range</em> — pre-filled with the first free slot. When the 24 hours are fully covered, the button disables.</li>
+        <li>Click <em>Add profile</em> — appends a new empty profile. Steal days from existing profiles to populate it.</li>
+        <li>Remove a profile that owns days — those days become unassigned and <em>Save</em> is blocked until reassigned.</li>
+        <li>Type a negative number into a baseline or range value — refused because <code>can_be_negative = False</code> on this attribute.</li>
+      </ul>
+
+      <h3>Not in this mockup</h3>
+      <ul>
+        <li>Live 168-hour chart preview (deferred to a later iteration — current read-only chart keeps working after save).</li>
+        <li>Drag-and-drop timeline / painted 7×24 grid (out of scope for V1).</li>
+        <li>CSV import, sub-hour granularity, cross-profile templates.</li>
+      </ul>
+
+      <p class="footnote">
+        Attribute in this demo: <code>ram_needed_per_job</code>, unit <code>concurrent</code>, <code>can_be_negative = False</code>.
+      </p>
+    </aside>
+
+    <div class="side-panel" id="side-panel">
+      <header class="sp-header">
+        <button class="icon-btn" title="Back"><i class="bi bi-chevron-left"></i></button>
+        <h2>Edit <span class="attr-name">· RAM needed per job</span></h2>
+        <button class="icon-btn" title="Close"><i class="bi bi-x-lg"></i></button>
+      </header>
+
+      <div class="sp-body" id="sp-body"><!-- rendered by JS --></div>
+
+      <footer class="sp-footer">
+        <button class="btn btn-secondary" id="btn-cancel">Cancel</button>
+        <button class="btn btn-primary" id="btn-save" disabled>Save</button>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------- State ----------------------------
+
+    let idCounter = 0;
+    const nid = () => 'id-' + (++idCounter);
+
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    const state = {
+      selectedBuilder: 'weekly_pattern', // 'constant' | 'weekly_pattern'
+      unit: 'concurrent',
+      canBeNegative: false,
+      constantBuilder: { value: 10 },
+      weeklyPatternBuilder: {
+        profiles: [
+          {
+            id: nid(),
+            name: 'weekday',
+            days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            baseline: 0,
+            ranges: [
+              { id: nid(), start: 7,  end: 12, value: 60 },
+              { id: nid(), start: 12, end: 14, value: 40 },
+              { id: nid(), start: 14, end: 18, value: 80 },
+              { id: nid(), start: 18, end: 22, value: 20 }
+            ]
+          },
+          {
+            id: nid(),
+            name: 'weekend',
+            days: ['Sat', 'Sun'],
+            baseline: 5,
+            ranges: [
+              { id: nid(), start: 10, end: 20, value: 30 }
+            ]
+          }
+        ]
+      }
+    };
+
+    // Ranges that should flash once after next render (after reorder)
+    let flashRangeIds = new Set();
+
+    // ---------------------------- Validation ----------------------------
+
+    function getProfileNameError(profile) {
+      if (!profile.name.trim()) return 'Name is required.';
+      const dupes = state.weeklyPatternBuilder.profiles.filter(p => p.name === profile.name);
+      if (dupes.length > 1) return 'Name must be unique (case-sensitive).';
+      return null;
+    }
+
+    function getBaselineError(profile) {
+      if (!Number.isFinite(profile.baseline)) return 'Baseline must be a number.';
+      if (!state.canBeNegative && profile.baseline < 0) return 'Value cannot be negative.';
+      return null;
+    }
+
+    function getRangeErrors(profile, range, idx) {
+      const fields = [];
+      let message = null;
+      const startOk = Number.isInteger(range.start) && range.start >= 0 && range.start <= 23;
+      const endOk   = Number.isInteger(range.end)   && range.end   >= 1 && range.end   <= 24;
+      if (!startOk) { fields.push('start'); message = 'Start hour must be an integer in 0–23.'; }
+      if (!endOk)   { fields.push('end');   message = message || 'End hour must be an integer in 1–24.'; }
+      if (startOk && endOk && range.start >= range.end) {
+        fields.push('start', 'end');
+        message = 'Start must be strictly less than end.';
+      }
+      if (startOk && endOk && range.start < range.end) {
+        for (let i = 0; i < profile.ranges.length; i++) {
+          if (i === idx) continue;
+          const other = profile.ranges[i];
+          if (range.start < other.end && range.end > other.start) {
+            fields.push('start', 'end');
+            message = `Overlaps with ${String(other.start).padStart(2,'0')}:00–${String(other.end).padStart(2,'0')}:00.`;
+            break;
+          }
+        }
+      }
+      if (!state.canBeNegative && Number.isFinite(range.value) && range.value < 0) {
+        fields.push('value');
+        message = message || 'Value cannot be negative.';
+      }
+      if (!Number.isFinite(range.value)) {
+        fields.push('value');
+        message = message || 'Value must be a number.';
+      }
+      return fields.length ? { fields: [...new Set(fields)], message } : null;
+    }
+
+    function getUnassignedDays() {
+      const assigned = new Set();
+      for (const p of state.weeklyPatternBuilder.profiles) {
+        for (const d of p.days) assigned.add(d);
+      }
+      return DAYS.filter(d => !assigned.has(d));
+    }
+
+    function hasAnyErrors() {
+      if (state.selectedBuilder === 'constant') {
+        if (!Number.isFinite(state.constantBuilder.value)) return true;
+        if (!state.canBeNegative && state.constantBuilder.value < 0) return true;
+        return false;
+      }
+      if (getUnassignedDays().length > 0) return true;
+      for (const p of state.weeklyPatternBuilder.profiles) {
+        if (getProfileNameError(p)) return true;
+        if (getBaselineError(p)) return true;
+        for (let i = 0; i < p.ranges.length; i++) {
+          if (getRangeErrors(p, p.ranges[i], i)) return true;
+        }
+      }
+      return false;
+    }
+
+    // ---------------------------- Range helpers ----------------------------
+
+    function findFirstFreeSlot(ranges) {
+      const sorted = [...ranges].sort((a, b) => a.start - b.start);
+      if (sorted.length === 0) return { start: 8, end: 18 };
+      if (sorted[0].start > 0) return { start: 0, end: sorted[0].start };
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (sorted[i].end < sorted[i+1].start) {
+          return { start: sorted[i].end, end: sorted[i+1].start };
+        }
+      }
+      if (sorted[sorted.length-1].end < 24) {
+        return { start: sorted[sorted.length-1].end, end: 24 };
+      }
+      return null;
+    }
+
+    function isDayFullyCovered(ranges) {
+      return findFirstFreeSlot(ranges) === null;
+    }
+
+    function sortRangesInPlace(profile) {
+      profile.ranges.sort((a, b) => a.start - b.start);
+    }
+
+    // ---------------------------- Render ----------------------------
+
+    function render() {
+      const activeDesc = captureFocus();
+      const body = document.getElementById('sp-body');
+      body.innerHTML = `
+        <div class="builder-selector">
+          <span class="field-label">Value</span>
+          <div class="tab-group" role="tablist">
+            <button class="tab ${state.selectedBuilder === 'constant' ? 'active' : ''}" data-builder="constant">Constant value</button>
+            <button class="tab ${state.selectedBuilder === 'weekly_pattern' ? 'active' : ''}" data-builder="weekly_pattern">Weekly pattern</button>
+          </div>
+        </div>
+        ${state.selectedBuilder === 'constant' ? renderConstantForm() : renderWeeklyForm()}
+      `;
+      body.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => switchBuilder(tab.dataset.builder));
+      });
+      if (state.selectedBuilder === 'constant') wireConstantForm();
+      else wireWeeklyForm();
+
+      // Flash rows that just reordered
+      flashRangeIds.forEach(rid => {
+        const row = document.querySelector(`.range-row[data-range-id="${rid}"]`);
+        if (row) row.classList.add('flash');
+      });
+      flashRangeIds.clear();
+
+      restoreFocus(activeDesc);
+      updateSaveButton();
+    }
+
+    function renderConstantForm() {
+      const val = state.constantBuilder.value;
+      const invalid = !state.canBeNegative && val < 0;
+      return `
+        <div class="constant-form">
+          <span class="field-label">Value</span>
+          <div class="input-suffix">
+            <input type="number" class="num-input ${invalid ? 'error' : ''}" id="constant-value"
+                   value="${val}" ${state.canBeNegative ? '' : 'min="0"'} step="any">
+            <span class="unit-chip">${state.unit}</span>
+          </div>
+          ${invalid ? `<div class="inline-error" style="margin-top:6px;">Value cannot be negative (can_be_negative is False on this attribute).</div>` : ''}
+          <p class="helper-text" style="margin-top:10px;">The same value is used for all 168 hours of the week.</p>
+        </div>
+      `;
+    }
+
+    function renderWeeklyForm() {
+      const unassigned = getUnassignedDays();
+      const profiles = state.weeklyPatternBuilder.profiles;
+      return `
+        <div class="unit-header">
+          <span>Unit</span>
+          <span class="unit-value">${state.unit}</span>
+        </div>
+        <p class="helper-text">
+          This pattern repeats every week. Each hour of each day takes its profile's baseline
+          unless overridden by a range.
+        </p>
+        ${unassigned.length ? `
+          <div class="validation-banner">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>
+              <strong>${unassigned.length} day${unassigned.length > 1 ? 's' : ''} unassigned:</strong>
+              ${unassigned.join(', ')}. Assign ${unassigned.length > 1 ? 'them' : 'it'} to a profile before saving.
+            </div>
+          </div>
+        ` : ''}
+        <div class="profiles-container">
+          ${profiles.map(renderProfileCard).join('')}
+        </div>
+        <button class="btn-add-profile" id="btn-add-profile" ${profiles.length >= 7 ? 'disabled' : ''}>
+          <i class="bi bi-plus-lg"></i>Add profile${profiles.length >= 7 ? ' (max 7 reached)' : ''}
+        </button>
+      `;
+    }
+
+    function renderProfileCard(profile) {
+      const canRemove = state.weeklyPatternBuilder.profiles.length > 1;
+      const nameErr = getProfileNameError(profile);
+      const baselineErr = getBaselineError(profile);
+      const dayFull = isDayFullyCovered(profile.ranges);
+      const hasAnyError = !!nameErr || !!baselineErr ||
+        profile.ranges.some((r, i) => getRangeErrors(profile, r, i));
+
+      return `
+        <div class="profile-card ${hasAnyError ? 'has-error' : ''}" data-profile-id="${profile.id}">
+          <div class="profile-card-header">
+            <input type="text" class="profile-name-input ${nameErr ? 'error' : ''}"
+                   value="${escapeHtml(profile.name)}" placeholder="Profile name">
+            <button class="btn-remove-profile" ${canRemove ? '' : 'disabled'} title="${canRemove ? 'Remove profile' : 'At least one profile is required'}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+          ${nameErr ? `<div class="inline-error">${nameErr}</div>` : ''}
+
+          <span class="field-label">Days</span>
+          <div class="days-row">
+            ${DAYS.map(day => `
+              <div class="day-pill ${profile.days.includes(day) ? 'active' : ''}" data-day="${day}">${day}</div>
+            `).join('')}
+          </div>
+
+          <div class="baseline-row">
+            <label>Baseline</label>
+            <input type="number" class="num-input baseline-input ${baselineErr ? 'error' : ''}"
+                   value="${profile.baseline}" ${state.canBeNegative ? '' : 'min="0"'} step="any">
+            <span class="unit-chip">${state.unit}</span>
+          </div>
+          ${baselineErr ? `<div class="inline-error" style="margin-bottom:10px;">${baselineErr}</div>` : ''}
+
+          <div class="ranges-section">
+            <span class="field-label" style="margin-bottom:8px;">Ranges</span>
+            ${profile.ranges.map((r, i) => renderRangeRow(profile, r, i)).join('')}
+            <button class="btn-add-range" ${dayFull ? 'disabled' : ''}
+                    title="${dayFull ? 'All 24 hours are already covered by existing ranges' : 'Add a new range'}">
+              <i class="bi bi-plus-lg"></i>${dayFull ? 'Day fully covered' : 'Add range'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRangeRow(profile, range, idx) {
+      const errs = getRangeErrors(profile, range, idx);
+      const errField = f => (errs && errs.fields.includes(f)) ? 'error' : '';
+      return `
+        <div class="range-row" data-range-id="${range.id}">
+          <input type="number" class="num-input range-start ${errField('start')}"
+                 value="${range.start}" min="0" max="23" step="1">
+          <span class="sep">–</span>
+          <input type="number" class="num-input range-end ${errField('end')}"
+                 value="${range.end}" min="1" max="24" step="1">
+          <span class="sep">:</span>
+          <input type="number" class="num-input range-value ${errField('value')}"
+                 value="${range.value}" ${state.canBeNegative ? '' : 'min="0"'} step="any">
+          <span class="unit-chip">${state.unit}</span>
+          <button class="btn-remove-range" title="Remove range"><i class="bi bi-x-lg"></i></button>
+          ${errs ? `<div class="range-error"><i class="bi bi-exclamation-circle"></i> ${errs.message}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // ---------------------------- Wiring ----------------------------
+
+    function wireConstantForm() {
+      const input = document.getElementById('constant-value');
+      input.addEventListener('input', e => {
+        state.constantBuilder.value = parseFloat(e.target.value);
+        if (isNaN(state.constantBuilder.value)) state.constantBuilder.value = 0;
+        updateSaveButton();
+        // Toggle inline error without full re-render
+        const invalid = !state.canBeNegative && state.constantBuilder.value < 0;
+        input.classList.toggle('error', invalid);
+      });
+    }
+
+    function wireWeeklyForm() {
+      const addBtn = document.getElementById('btn-add-profile');
+      if (addBtn) addBtn.addEventListener('click', addProfile);
+
+      state.weeklyPatternBuilder.profiles.forEach(profile => {
+        const card = document.querySelector(`.profile-card[data-profile-id="${profile.id}"]`);
+
+        // Profile name — update live, re-render on blur so duplicate errors surface
+        const nameInput = card.querySelector('.profile-name-input');
+        nameInput.addEventListener('input', e => {
+          profile.name = e.target.value;
+          updateSaveButton();
+        });
+        nameInput.addEventListener('blur', () => render());
+
+        // Remove profile
+        card.querySelector('.btn-remove-profile').addEventListener('click', () => {
+          if (state.weeklyPatternBuilder.profiles.length <= 1) return;
+          state.weeklyPatternBuilder.profiles =
+            state.weeklyPatternBuilder.profiles.filter(p => p.id !== profile.id);
+          render();
+        });
+
+        // Day pills
+        card.querySelectorAll('.day-pill').forEach(pill => {
+          pill.addEventListener('click', () => toggleDay(profile.id, pill.dataset.day));
+        });
+
+        // Baseline
+        const baselineInput = card.querySelector('.baseline-input');
+        baselineInput.addEventListener('input', e => {
+          profile.baseline = parseFloat(e.target.value);
+          if (isNaN(profile.baseline)) profile.baseline = 0;
+          updateSaveButton();
+        });
+        baselineInput.addEventListener('blur', () => render());
+
+        // Ranges
+        profile.ranges.forEach((range, idx) => {
+          const row = card.querySelector(`.range-row[data-range-id="${range.id}"]`);
+          if (!row) return;
+          const startI = row.querySelector('.range-start');
+          const endI   = row.querySelector('.range-end');
+          const valI   = row.querySelector('.range-value');
+
+          startI.addEventListener('input', e => { range.start = parseInt(e.target.value, 10); if (isNaN(range.start)) range.start = 0; updateSaveButton(); });
+          endI.addEventListener('input',   e => { range.end   = parseInt(e.target.value, 10); if (isNaN(range.end))   range.end   = 0; updateSaveButton(); });
+          valI.addEventListener('input',   e => { range.value = parseFloat(e.target.value);   if (isNaN(range.value)) range.value = 0; updateSaveButton(); });
+
+          const commit = () => {
+            const i = profile.ranges.indexOf(range);
+            const err = getRangeErrors(profile, range, i);
+            if (!err) {
+              const before = profile.ranges.map(r => r.id).join(',');
+              sortRangesInPlace(profile);
+              const after = profile.ranges.map(r => r.id).join(',');
+              if (before !== after) flashRangeIds.add(range.id);
+            }
+            render();
+          };
+          startI.addEventListener('blur', commit);
+          endI.addEventListener('blur', commit);
+          valI.addEventListener('blur', commit);
+
+          row.querySelector('.btn-remove-range').addEventListener('click', () => {
+            profile.ranges = profile.ranges.filter(r => r.id !== range.id);
+            render();
+          });
+        });
+
+        // Add range
+        const addRangeBtn = card.querySelector('.btn-add-range');
+        addRangeBtn.addEventListener('click', () => {
+          const slot = findFirstFreeSlot(profile.ranges);
+          if (!slot) return;
+          profile.ranges.push({ id: nid(), start: slot.start, end: slot.end, value: 0 });
+          sortRangesInPlace(profile);
+          render();
+        });
+      });
+    }
+
+    function switchBuilder(type) {
+      if (type === state.selectedBuilder) return;
+      state.selectedBuilder = type;
+      render();
+    }
+
+    function toggleDay(profileId, day) {
+      const profile = state.weeklyPatternBuilder.profiles.find(p => p.id === profileId);
+      if (profile.days.includes(day)) {
+        profile.days = profile.days.filter(d => d !== day);
+      } else {
+        // Stealing semantics — remove from any other profile that currently owns it
+        for (const p of state.weeklyPatternBuilder.profiles) {
+          if (p.id !== profileId) p.days = p.days.filter(d => d !== day);
+        }
+        profile.days.push(day);
+      }
+      render();
+    }
+
+    function addProfile() {
+      if (state.weeklyPatternBuilder.profiles.length >= 7) return;
+      state.weeklyPatternBuilder.profiles.push({
+        id: nid(),
+        name: uniqueNewName(),
+        days: [],
+        baseline: 0,
+        ranges: []
+      });
+      render();
+    }
+
+    function uniqueNewName() {
+      let i = state.weeklyPatternBuilder.profiles.length + 1;
+      while (true) {
+        const n = `profile ${i}`;
+        if (!state.weeklyPatternBuilder.profiles.find(p => p.name === n)) return n;
+        i++;
+      }
+    }
+
+    function updateSaveButton() {
+      document.getElementById('btn-save').disabled = hasAnyErrors();
+    }
+
+    // ---------------------------- Focus preservation ----------------------------
+
+    function captureFocus() {
+      const el = document.activeElement;
+      if (!el || el === document.body) return null;
+      const selStart = el.selectionStart, selEnd = el.selectionEnd;
+      const rangeId = el.closest('[data-range-id]')?.dataset.rangeId;
+      const profileId = el.closest('[data-profile-id]')?.dataset.profileId;
+      const cls = [...el.classList].find(c =>
+        c === 'profile-name-input' || c === 'baseline-input' ||
+        c === 'range-start' || c === 'range-end' || c === 'range-value'
+      );
+      if (!cls) return null;
+      return { cls, rangeId, profileId, selStart, selEnd };
+    }
+
+    function restoreFocus(desc) {
+      if (!desc) return;
+      let sel;
+      if (desc.rangeId) sel = `[data-range-id="${desc.rangeId}"] .${desc.cls}`;
+      else if (desc.profileId) sel = `[data-profile-id="${desc.profileId}"] .${desc.cls}`;
+      else sel = `.${desc.cls}`;
+      const el = document.querySelector(sel);
+      if (el) {
+        el.focus();
+        if (desc.selStart != null && el.setSelectionRange) {
+          try { el.setSelectionRange(desc.selStart, desc.selEnd); } catch (_) {}
+        }
+      }
+    }
+
+    // ---------------------------- Misc ----------------------------
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    document.getElementById('btn-save').addEventListener('click', () => {
+      const payload = state.selectedBuilder === 'constant'
+        ? { builder: 'constant', value: state.constantBuilder.value, unit: state.unit }
+        : {
+            builder: 'weekly_pattern',
+            unit: state.unit,
+            profiles: state.weeklyPatternBuilder.profiles.map(p => ({
+              name: p.name, days: p.days, baseline: p.baseline,
+              ranges: p.ranges.map(r => ({ start: r.start, end: r.end, value: r.value }))
+            }))
+          };
+      alert('Save clicked. Payload that would be submitted:\n\n' + JSON.stringify(payload, null, 2));
+    });
+
+    document.getElementById('btn-cancel').addEventListener('click', () => {
+      alert('Cancel clicked.\n\nIn the real form, this discards in-flight state for both builders, firing the existing unsaved-changes confirmation if any input has changed since the panel was opened.');
+    });
+
+    render();
+  </script>
+</body>
+</html>
