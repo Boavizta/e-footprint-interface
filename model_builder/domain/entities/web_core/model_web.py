@@ -42,10 +42,11 @@ class ModelWeb:
             raw_system_data, self.system_data_source = self.repository.get_system_data_with_source()
         if raw_system_data is not None:
             self.initial_system_data_efootprint_version = raw_system_data.get("efootprint_version")
-            self.system_data = self.repository.upgrade_system_data(raw_system_data)
+            interface_upgraded_system_data = self.repository.upgrade_system_data(raw_system_data)
             start = perf_counter()
-            self.response_objs, self.flat_efootprint_objs_dict = json_to_system(
-                self.system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+            self.response_objs, self.flat_efootprint_objs_dict, self.system_data = json_to_system(
+                interface_upgraded_system_data, launch_system_computations=True,
+                efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
             self.creation_constraints = self._build_creation_constraints()

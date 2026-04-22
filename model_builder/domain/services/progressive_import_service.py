@@ -4,7 +4,6 @@ This service handles the import of e-footprint system data from JSON,
 computing calculated attributes progressively and checking size limits
 to fail fast if a model exceeds the maximum allowed size.
 """
-from copy import deepcopy
 from time import perf_counter
 from typing import Dict, Any
 
@@ -52,32 +51,31 @@ class ProgressiveImportService:
         Raises:
             PayloadSizeLimitExceeded: If cumulative JSON size exceeds max_payload_size_mb.
         """
-        copied_system_data = deepcopy(system_data)
-        response_objs, flat_efootprint_objs_dict = json_to_system(
-            copied_system_data, launch_system_computations=False,
+        response_objs, flat_efootprint_objs_dict, upgraded_system_data = json_to_system(
+            system_data, launch_system_computations=False,
             efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
 
-        copied_system_data["efootprint_version"] = efootprint_version
+        upgraded_system_data["efootprint_version"] = efootprint_version
         size_tracker = {"json_size": 0}
 
         self._patch_objects_for_progressive_computation(
-            flat_efootprint_objs_dict, copied_system_data, size_tracker)
+            flat_efootprint_objs_dict, upgraded_system_data, size_tracker)
 
         system = next(iter(response_objs["System"].values()))
         system.after_init()
 
-        self._compute_remaining_objects(flat_efootprint_objs_dict, copied_system_data, size_tracker)
+        self._compute_remaining_objects(flat_efootprint_objs_dict, upgraded_system_data, size_tracker)
 
         # Reserialize all objects to ensure final calculation graph is captured
         start = perf_counter()
         for efootprint_object in flat_efootprint_objs_dict.values():
             del efootprint_object.__dict__["saved_to_json"]
-            copied_system_data[efootprint_object.class_as_simple_str][efootprint_object.id] = \
+            upgraded_system_data[efootprint_object.class_as_simple_str][efootprint_object.id] = \
                 efootprint_object.to_json(save_calculated_attributes=True)
         elapsed_ms = (perf_counter() - start) * 1000
         logger.info(f"Reserialized all objects to finalize system data in {round(elapsed_ms, 1)} ms.")
 
-        return copied_system_data
+        return upgraded_system_data
 
     def _patch_objects_for_progressive_computation(
             self, flat_efootprint_objs_dict: Dict[str, Any], system_data: Dict[str, Any],

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.3] - 2026-04-22
+
+### Fixed
+- Use upgraded system_dict returned by json_to_system. json_to_system now returns the upgraded system dict as a third value. Consume it in ModelWeb and ProgressiveImportService so class keys added by e-footprint migrations (e.g. RecurrentEdgeStorageNeed from v16->v17)are visible to code that indexes system_data by class name. Fixes KeyError on uploading pre-v17 JSON files that contain storage needs.
+
 ## [1.3.2] - 2026-04-22
 
 ### Fixed

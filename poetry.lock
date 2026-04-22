@@ -1091,14 +1091,14 @@ opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-
 
 [[package]]
 name = "efootprint"
-version = "20.0.0"
+version = "20.0.1"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-20.0.0-py3-none-any.whl", hash = "sha256:b6203a55bb7377ac5aa54317622ec675d3160d8e23dcff68f35c2a84d0e09bf6"},
-    {file = "efootprint-20.0.0.tar.gz", hash = "sha256:f0232f6568bb98225fe8b45494de07fb4b6d0a98efa2f1ed23d12d08a74a4884"},
+    {file = "efootprint-20.0.1-py3-none-any.whl", hash = "sha256:a8f3e9bf798043d337af9c98b7b063c19a7583982599db9e2cd4f7f2ed19b5b5"},
+    {file = "efootprint-20.0.1.tar.gz", hash = "sha256:29fa4710f6df94f1f14aa53a20cb3c4f503b185e9945626cdaef7a20f94d4dd3"},
 ]
 
 [package.dependencies]
@@ -4522,4 +4522,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "a80df28bf7658b15754b078052687a70545ec1b477369f31f9987e5a5518e946"
+content-hash = "d55c2b618b91729033cb32dd2c6493ba06598e72de4f269045d8eaacd8e4e193"
