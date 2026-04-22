@@ -1,13 +1,14 @@
 # Source metadata — feature spec
 
-Let users attach two pieces of metadata to any `ExplainableObject` in the e-footprint
-model:
+Let users attach two pieces of metadata to user-editable inputs in the
+e-footprint model:
 
 - **Confidence level** — `low`, `medium`, `high`, or unset (default).
 - **Comment** — free-form text.
 
 Both are per-value annotations, authored by the user in the interface, and travel
-with the value through serialization, export, and display.
+with the value through serialization, export, and display. Calculated (derived)
+values are intentionally excluded — see §1.
 
 Related work: this spec also introduces **source editing** in the interface —
 previously the source line was read-only. See §4.
@@ -20,8 +21,6 @@ previously the source line was read-only. See §4.
 
 - Confidence and comment on **user-editable inputs** (numerical, string, timezone,
   form-input timeseries).
-- Comment on **calculated (derived) values**, authored manually. No confidence on
-  calculated values.
 - Source editing from the interface (name + link), bundled into the same editor as
   the comment.
 - Persistence round-trip (session, download, upload).
@@ -29,8 +28,12 @@ previously the source line was read-only. See §4.
 
 ### Out of scope
 
-- Auto-derived confidence on calculated values (e.g. worst-of-ancestors). Not ruled
-  out for the future.
+- Metadata (confidence or comment) on **calculated (derived) values**. They're
+  audit artifacts; the user's judgement belongs on the inputs that feed them.
+  Carrying comments across recomputation would require a non-trivial hook in
+  `ModelingUpdate` to transfer state across `ExplainableObject` swaps, and the
+  payoff doesn't justify it. Not ruled out for the future.
+- Auto-derived confidence on calculated values (e.g. worst-of-ancestors).
 - Confidence / comment on canonical `Sources` singletons themselves. Those remain
   origin identifiers only.
 - Bulk-editing metadata across many values at once.
@@ -49,8 +52,11 @@ New attributes on `ExplainableObject`:
 
 | Attribute | Type | Default | Notes |
 |---|---|---|---|
-| `confidence` | `Literal["low", "medium", "high"] \| None` | `None` | Only meaningful on inputs. For calculated values, always `None`. |
-| `comment` | `str \| None` | `None` | Free-form text. No length limit enforced in the data model. |
+| `confidence` | `Literal["low", "medium", "high"] \| None` | `None` | Set only on inputs. |
+| `comment` | `str \| None` | `None` | Set only on inputs. No length limit enforced in the data model. |
+
+Both attributes live on the `ExplainableObject` base class (default `None`) but
+are only user-settable on inputs; they stay `None` on calculated values.
 
 `Source` itself is unchanged.
 
@@ -88,18 +94,25 @@ know that they land on different objects internally (`Source` vs
 `ExplainableObject.comment`).
 
 **Editor shape:**
-- A source picker: dropdown of canonical Sources (`ADEME_STUDY`, `BASE_ADEME_V19`,
-  etc.), plus a "custom" option. Selecting "custom" reveals name + optional link
-  fields.
+- A source picker: dropdown of `Source` instances **already referenced by at
+  least one `ExplainableObject` in the current modeling**, plus
+  `Sources.USER_DATA` and `Sources.HYPOTHESIS` appended if not naturally present
+  (so the two sentinel origins are always available). Plus a "custom" option
+  that reveals name + optional link fields.
 - A comment textarea below.
 - Save + cancel actions.
+
+The dropdown is **not** a canonical list shared across modelings — it's derived
+from the current system's own sources. This keeps the picker scoped to sources
+the user has already chosen to cite, and avoids dumping the full `Sources`
+registry on them.
 
 **Display when a comment is set:** below the source line, always visible, on one
 expandable line using the existing truncating-text-tooltip pattern
 (`components/truncating_text.html`). Click to expand to full text.
 
-Picking a canonical source does **not** pull in author-side metadata; confidence
-and comment remain per-value on the `ExplainableObject`.
+Picking a source from the dropdown does **not** pull in author-side metadata;
+confidence and comment remain per-value on the `ExplainableObject`.
 
 ---
 
@@ -110,25 +123,18 @@ Today the source line in the interface is read-only — it just displays
 the default. With this spec, the source line becomes user-editable via the editor
 described in §3b.
 
-A freshly picked canonical source pins the value's `.source` to that canonical
-`Source` instance. Free-entry creates a new `Source` on the value.
+Picking from the dropdown pins the value's `.source` to the selected `Source`
+instance (the same Python object already used elsewhere in the modeling, or one
+of the two sentinels). Free-entry creates a new `Source` on the value.
+
+**Free-entry that collides with a canonical `Sources.*` name** — kept as a
+distinct `Source` instance, with a quiet notice in the editor ("A canonical
+source with this name already exists — if you want to use it, pick it from the
+dropdown instead."). No auto-snap; the user stays in control.
 
 ---
 
-## 5. Form UI — calculated values
-
-Calculated (derived) values are not edited as form inputs. Users annotate them via:
-
-- **Source table row** — each row gains a comment-edit affordance. Same editor as
-  inputs, but the confidence control is not shown for calculated rows.
-- **Calculated attribute explanation panel** — the side panel that explains a
-  calculated attribute gains a comment-edit affordance.
-
-Confidence is not settable on calculated values.
-
----
-
-## 6. Source table
+## 5. Source table
 
 `source_table.html` gains two new columns, inserted after the existing "Source"
 column:
@@ -138,12 +144,13 @@ column:
 | Confidence | Badge (`low`/`medium`/`high`) or empty. |
 | Comment | Truncating-text-tooltip. Click expands inline. |
 
-Each row is clickable (or has an explicit edit affordance) to open the
-source+comment editor inline.
+Each row for an **input** is clickable (or has an explicit edit affordance) to
+open the source+comment editor inline. Rows for calculated values render both
+new columns as empty and are not editable.
 
 ---
 
-## 7. Export
+## 6. Export
 
 The "Export to xlsx" download gains two new columns — `confidence` and
 `comment` — populated from the underlying `ExplainableObject`.
@@ -153,7 +160,7 @@ new fields via the existing `ModelWeb.to_json` persistence path.
 
 ---
 
-## 8. Persistence
+## 7. Persistence
 
 ### Library-side (`ExplainableObject.to_json` / `from_json_dict`)
 
@@ -170,38 +177,63 @@ Two new optional fields in the JSON payload for every explainable object:
 ```
 
 Both fields are omitted when `None`. Loading an old JSON without the fields
-populates them as `None` — no migration strictly required for the data shape, but
-the system version should bump so the upgrade handler is a clean no-op checkpoint
-(see `e-footprint/efootprint/api_utils/version_upgrade_handlers.py`).
+populates them as `None` — the data shape change is purely additive and fully
+backward-compatible, so no migration and no version bump are required.
 
 ### Interface-side
 
 No change to `interface_config` — the new fields live inside the system data,
 carried by the efootprint serialization layer.
 
+### Source deduplication on load — **must be resolved at implementation plan time**
+
+In Python, many `ExplainableObject`s can (and normally do) share the same
+`Source` instance by reference. At JSON serialization time each object writes
+its source inline as `{"name": ..., "link": ...}`, so the download/upload
+round-trip currently **loses object identity**: reloading a system produces N
+distinct `Source` instances that merely happen to be equal by `name`/`link`.
+
+This is not a new problem, but the source picker in §3b makes it visible — a
+naive "list all sources used in the modeling" would return duplicates, and the
+source table and xlsx export already walk sources with the same silent
+duplication.
+
+**Direction to pursue (to be confirmed during implementation planning):** fix
+this at the deserializer rather than per-consumer. Thread a
+`(name, link) → Source` registry through the JSON load path (e.g.
+`json_to_system` / `ExplainableObject.from_json_dict`), seeded with the
+`Sources.*` canonical singletons so reloaded data also re-identifies with the
+Python constants. Each `from_json_dict` consults the registry before minting a
+new `Source`. This restores the runtime invariant in one place and every
+consumer — picker, source table, export — gets dedup for free.
+
+The alternative (dedupe only when building the picker) is a symptom-level fix
+and leaves the same duplication in every other consumer. Not recommended.
+
+The implementation plan must explicitly commit to an approach and specify:
+
+- where in the load path the registry is held and how it's scoped (per-load
+  call, not a module global);
+- whether canonical `Sources.*` singletons seed the registry (recommended: yes);
+- the dedup key — `(name, link)` — and its handling of `None` links;
+- test coverage that proves identity is restored across a full
+  `to_json` → `from_json_dict` round-trip for sources shared across multiple
+  `ExplainableObject`s.
+
 ---
 
-## 9. Open questions (to resolve at implementation time)
+## 8. Open questions (to resolve at implementation time)
 
 - **Confidence badge visual design** — color palette per level, icon vs text-only.
   Minor; decide when the first widget is rendered.
 - **Source editor form shape** — inline popover under the source line vs
   side-panel modal. The truncating comment line wants something non-modal.
-- **Carry-over of comments on calculated value recomputation** — when a calculated
-  attribute is recomputed, a new `ExplainableObject` replaces the old one. The
-  user's comment must survive that swap. Needs a hook in `ModelingUpdate` (or on
-  the calculated-attribute update path) to transfer `comment` from the previous
-  `ExplainableObject` to the new one. Confidence does not apply here.
 - **Comment length cap in the UI** — no cap in the data model, but the textarea
   may want a soft cap (e.g. 2 000 chars) for layout sanity.
-- **Free-entry canonical collision** — if a user types a free-form name that
-  matches a canonical source's `name`, should we auto-snap to the canonical
-  instance or keep it as a distinct `Source`? Recommend: distinct, with a quiet
-  notice.
 
 ---
 
-## 10. Touchpoints (non-exhaustive)
+## 9. Touchpoints (non-exhaustive)
 
 ### e-footprint (library)
 
@@ -209,8 +241,6 @@ carried by the efootprint serialization layer.
   `ExplainableObject.__init__`, `to_json`, `from_json_dict`. Also fix the
   hand-rolled source dict at the existing `to_json` site — call
   `self.source.to_json()` instead of inlining `{"name": ..., "link": ...}`.
-- `efootprint/api_utils/version_upgrade_handlers.py` — version bump + no-op
-  handler.
 - Tests covering serialization round-trip, copy semantics, and edit-behavior (see
   §2).
 
@@ -230,8 +260,8 @@ carried by the efootprint serialization layer.
     confidence badge slot.
   - A new partial for the confidence badge + its select dropdown.
   - A new partial for the source+comment editor.
-  - `result/source_table.html` — two new columns, row edit affordance.
-  - Calculated-attribute explanation panels — comment edit affordance.
+  - `result/source_table.html` — two new columns, row edit affordance on input
+    rows only.
 - xlsx export view — add the two columns.
 - Playwright E2E coverage for: set confidence, set comment, edit source, edit
   value with metadata present (confidence resets, comment persists), round-trip
@@ -239,7 +269,7 @@ carried by the efootprint serialization layer.
 
 ---
 
-## 11. Resuming from cold context
+## 10. Resuming from cold context
 
 1. Read this file end to end.
 2. Read `01-implementation-plan.md` (to be written) for ordered steps and test
