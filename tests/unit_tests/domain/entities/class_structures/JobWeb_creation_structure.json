@@ -94,7 +94,7 @@
                     "link": null
                 },
                 "input_type": "explainable_quantity",
-                "unit": "kB",
+                "unit": "kB_stored",
                 "default": "100",
                 "can_be_negative": false,
                 "step": "1"
@@ -215,7 +215,7 @@
                     "link": null
                 },
                 "input_type": "explainable_quantity",
-                "unit": "kB",
+                "unit": "kB_stored",
                 "default": "100",
                 "can_be_negative": false,
                 "step": "1"
@@ -349,7 +349,7 @@
                     "link": null
                 },
                 "input_type": "explainable_quantity",
-                "unit": "MB",
+                "unit": "MB_stored",
                 "default": "0",
                 "can_be_negative": false,
                 "step": "1"

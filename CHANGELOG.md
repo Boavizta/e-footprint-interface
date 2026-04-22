@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.2] - 2026-04-22
+
+### Fixed
+- Render Value column in Sources tab by wrapping explainable quantities as ExplainableQuantityWeb.
+- Let Infrastructure add buttons shrink and truncate on narrow viewports.
+- Upgrade to e-footprint 20.0.0 for better handling of information units: bits, bits of ram and bits of storage are now distinct, and units like kWh/GB_stored are now stable instead of collapsing to kWh/10^9.
+
 ## [1.3.1] - 2026-04-20
 
 ### Fixed

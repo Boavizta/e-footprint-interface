@@ -63,7 +63,7 @@ def test_edit_server_updates_nested_storage(default_system_repository):
         "Updated Storage",
         "Storage",
         carbon_footprint_fabrication_per_storage_capacity="160.0",
-        carbon_footprint_fabrication_per_storage_capacity__unit=str(u.kg / u.TB),
+        carbon_footprint_fabrication_per_storage_capacity__unit=str(u.kg / u.TB_stored),
     )
 
     edit_object(

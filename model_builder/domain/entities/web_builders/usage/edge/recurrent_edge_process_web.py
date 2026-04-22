@@ -14,6 +14,6 @@ class RecurrentEdgeProcessWeb(RecurrentEdgeDeviceNeedBaseWeb):
             {"constant_value": 1, "constant_unit": "GB_ram"}, source=Sources.HYPOTHESIS
         ),
         "recurrent_storage_needed": ExplainableRecurrentQuantitiesFromConstant(
-            {"constant_value": 0, "constant_unit": "GB"}, source=Sources.HYPOTHESIS
+            {"constant_value": 0, "constant_unit": "GB_stored"}, source=Sources.HYPOTHESIS
         )
     }

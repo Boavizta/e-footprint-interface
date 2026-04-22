@@ -104,7 +104,7 @@
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
                     "constant_value": "0",
-                    "constant_unit": "GB"
+                    "constant_unit": "GB_stored"
                 }
             }
         ],
