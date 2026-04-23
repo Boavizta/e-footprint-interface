@@ -10,8 +10,7 @@ from efootprint import __version__ as efootprint_version
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
 from model_builder.domain.interfaces import ISystemRepository
-from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
-    ExplainableObjectWeb, ExplainableQuantityWeb)
+from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableQuantityWeb
 from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
 
 
@@ -196,14 +195,15 @@ class ModelWeb:
         return wrap_efootprint_object(efootprint_object, self)
 
     @property
-    def web_explainable_quantities(self):
-        web_explainable_quantities = []
+    def web_explainable_quantities_sources(self):
+        web_explainable_quantities_sources = []
         for efootprint_object in self.flat_efootprint_objs_dict.values():
-            web_explainable_quantities += [
+            web_explainable_quantities_sources += [
                 ExplainableQuantityWeb(explainable_object, self)
-                for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()]
+                for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()
+                if explainable_object.source is not None]
 
-        return web_explainable_quantities
+        return web_explainable_quantities_sources
 
     @property
     def storages(self):

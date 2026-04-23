@@ -217,24 +217,19 @@ def download_sources(request):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     sources = []
 
-    for efootprint_object in model_web.flat_efootprint_objs_dict.values():
-        for attr_name, attr_value in get_instance_attributes(efootprint_object, ExplainableQuantity).items():
-            source = attr_value.source
-            web_efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_object.id)
-            web_attr_value = ObjectLinkedToModelingObjWeb(attr_value, model_web)
-            if attr_name in efootprint_object.calculated_attributes_without_validations:
-                source = Source("Computed", "")
-            display_value = format_quantity_for_display(attr_value.value)
+    for web_explainable_quantity_source in model_web.web_explainable_quantities_sources:
+        display_value = format_quantity_for_display(web_explainable_quantity_source.value)
+        source = web_explainable_quantity_source.source
 
-            sources.append([
-                LabelResolver.get_field_label(web_attr_value.attr_name_web),
-                web_efootprint_object.name,
-                LabelResolver.get_class_label(web_efootprint_object.class_as_simple_str),
-                display_value.magnitude,
-                human_readable_unit(display_value.units),
-                source.name if source else "",
-                source.link if source else "",
-            ])
+        sources.append([
+            LabelResolver.get_field_label(web_explainable_quantity_source.attr_name_web),
+            web_explainable_quantity_source.modeling_obj_container.name,
+            LabelResolver.get_class_label(web_explainable_quantity_source.modeling_obj_container.class_as_simple_str),
+            display_value.magnitude,
+            human_readable_unit(display_value.units),
+            source.name if source else "",
+            source.link if source else "",
+        ])
 
     wb = Workbook()
     ws = wb.active
