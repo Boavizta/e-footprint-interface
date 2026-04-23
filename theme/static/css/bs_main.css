@@ -12334,30 +12334,52 @@ input:disabled {
   cursor: pointer;
 }
 
-/* Source table — compact on mobile, auto on desktop */
+/* Source table — fixed column widths with truncation */
+.source-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.source-table .source-col-name {
+  width: 20%;
+}
+.source-table .source-col-attr {
+  width: 30%;
+}
+.source-table .source-col-type {
+  width: 11%;
+}
+.source-table .source-col-value {
+  width: 7%;
+  text-align: center;
+}
+.source-table .source-col-unit {
+  width: 7%;
+  text-align: center;
+}
+.source-table .source-col-source {
+  width: 25%;
+}
+
 @media (max-width: 1199.9px) {
   .source-table {
-    table-layout: fixed;
-    width: 100%;
     font-size: 12px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
   }
   .source-table th, .source-table td {
     padding: 4px 6px;
   }
   .source-table .source-col-name {
-    width: 30%;
+    width: 20%;
   }
   .source-table .source-col-attr {
-    width: 20%;
+    width: 30%;
   }
   .source-table .source-col-value {
     width: 12%;
-    text-align: right;
+    text-align: center;
   }
   .source-table .source-col-unit {
     width: 13%;
+    text-align: center;
   }
   .source-table .source-col-source {
     width: 25%;
