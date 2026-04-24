@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.4] - 2026-04-27
+
+### Fixed
+- Upgrade to e-footprint 20.0.2 to fix upgrade_version_19_to_20 to handle Network’s bandwidth_energy_intensity and Storage’s carbon_footprint_fabrication_per_storage_capacity.
+- Filter to only explainable quantities with source in Sources table.
+- Change from re-rendering cards to re-rendering top parent cards, to make sure that rendering is always rightly done, because some cards’ rendering depend on their parents.
+
+### Changed
+- Truncate text on sources table to keep rows on one line.
+
 ## [1.3.3] - 2026-04-22
 
 ### Fixed

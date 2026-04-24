@@ -92,9 +92,10 @@ class HtmxPresenter:
                 html_updates = render_oob_regions(self.model_web, output.oob_regions)
             else:
                 parent_obj = self.model_web.get_web_object_from_efootprint_id(output.linked_parent_id)
-                html_updates = self._generate_mirrored_cards_html(parent_obj.mirrored_cards)
-                html_updates += self._sibling_cards_with_link_flip(
+                cards_to_refresh = list(parent_obj.mirrored_cards)
+                cards_to_refresh += self._link_flipped_sibling_cards(
                     parent_obj.class_as_simple_str, {output.linked_parent_id}, target_count=1)
+                html_updates = self._render_top_parent_cards(cards_to_refresh)
                 html_updates += render_oob_regions(self.model_web, output.oob_regions)
 
             if recompute:
@@ -199,12 +200,13 @@ class HtmxPresenter:
             # OOB regions cover all relevant cards; skip per-card mirrored-card swaps
             html_updates = render_oob_regions(self.model_web, output.oob_regions)
         else:
-            html_updates = self._generate_mirrored_cards_html(output.mirrored_cards)
-            # Re-render siblings whose "Link existing" button just disappeared
+            cards_to_refresh = list(output.mirrored_cards)
+            # Include siblings whose "Link existing" button just disappeared
             # (cascade delete during edit reduced linkable_existing_count from 1 to 0)
             edited_ids = {card.efootprint_id for card in output.mirrored_cards}
-            html_updates += self._sibling_cards_with_link_flip(
+            cards_to_refresh += self._link_flipped_sibling_cards(
                 output.edited_object_type, edited_ids, target_count=0)
+            html_updates = self._render_top_parent_cards(cards_to_refresh)
             html_updates += render_oob_regions(self.model_web, output.oob_regions)
 
         if recompute:
@@ -214,40 +216,41 @@ class HtmxPresenter:
         return self._build_oob_response(html_updates, toast_and_highlight_data, trigger_result_display,
                                         extra_settle_triggers=extra_settle)
 
-    def _sibling_cards_with_link_flip(
+    def _link_flipped_sibling_cards(
         self, parent_type: str, excluded_ids: set, target_count: int
-    ) -> str:
-        """HTML for mirrored cards of siblings whose "Link existing" button just flipped.
+    ) -> list:
+        """Mirrored cards of siblings whose "Link existing" button just flipped.
 
-        A sibling is re-rendered when any of its child_sections has `linkable_existing_count`
+        A sibling is picked up when any of its child_sections has `linkable_existing_count`
         equal to `target_count` — 1 after a link crosses 0→1 (button appears), 0 after an
         edit/delete crosses 1→0 (button disappears).
         """
-        html = ""
+        cards = []
         for sibling in self.model_web.get_web_objects_from_efootprint_type(parent_type):
             if sibling.efootprint_id in excluded_ids:
                 continue
             if any(s["linkable_existing_count"] == target_count for s in sibling.child_sections):
-                html += self._generate_mirrored_cards_html(sibling.mirrored_cards)
-        return html
+                cards.extend(sibling.mirrored_cards)
+        return cards
 
-    def _generate_mirrored_cards_html(self, mirrored_cards) -> str:
-        """Generate OOB swap HTML for a list of mirrored cards.
+    def _render_top_parent_cards(self, cards) -> str:
+        """Render each card's top-level ancestor as an OOB outerHTML swap, deduplicated.
 
-        Args:
-            mirrored_cards: List of web objects representing mirrored cards.
-
-        Returns:
-            HTML string with hx-swap-oob divs for each card.
+        Child card templates (e.g. resource_need_card.html) rely on `title_class` and other
+        context passed down by the parent template, so re-rendering them standalone produces
+        styling bugs. Walking up to `top_parent` and rendering the full subtree keeps all
+        parent-provided context intact; accordion state is preserved on swap.
         """
-        html = ""
-        for card in mirrored_cards:
-            html += (
-                f"<div hx-swap-oob='outerHTML:#{card.web_id}'>"
-                f"{render_to_string(f'model_builder/object_cards/{card.template_name}_card.html', {'object': card})}"
-                f"</div>"
-            )
-        return html
+        top_parents = {}
+        for card in cards:
+            top = card.top_parent
+            top_parents.setdefault(top.web_id, top)
+        return "".join(
+            f"<div hx-swap-oob='outerHTML:#{top.web_id}'>"
+            f"{render_to_string(f'model_builder/object_cards/{top.template_name}_card.html', {'object': top})}"
+            f"</div>"
+            for top in top_parents.values()
+        )
 
     def _build_oob_response(
         self, html: str, toast_data: dict, trigger_result_display: bool = False,
@@ -283,14 +286,14 @@ class HtmxPresenter:
         }
 
         if output.was_list_deletion and not canvas_oob:
-            # Per-card outerHTML swaps for each edited container + siblings whose "Link existing"
-            # button just disappeared (linkable_existing_count crossed 1→0)
-            html_updates = "".join(
-                self._generate_mirrored_cards_html(c.mirrored_cards) for c in output.edited_containers)
+            # Re-render the top-level ancestor of each edited container + siblings whose
+            # "Link existing" button just disappeared (linkable_existing_count crossed 1→0)
+            cards_to_refresh = [mirror for c in output.edited_containers for mirror in c.mirrored_cards]
             if output.edited_containers:
                 edited_ids = {c.efootprint_id for c in output.edited_containers}
-                html_updates += self._sibling_cards_with_link_flip(
+                cards_to_refresh += self._link_flipped_sibling_cards(
                     output.edited_containers[0].class_as_simple_str, edited_ids, target_count=0)
+            html_updates = self._render_top_parent_cards(cards_to_refresh)
             html_updates += render_oob_regions(self.model_web, output.oob_regions)
             return self._build_oob_response(html_updates, toast_and_highlight_data,
                                             extra_settle_triggers=extra_settle)
