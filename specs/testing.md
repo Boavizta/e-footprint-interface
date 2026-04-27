@@ -115,7 +115,7 @@ Each test should cover a **distinct user workflow**. Avoid redundant tests that 
 
 ### Test data: programmatic fixtures
 
-Build test data using efootprint classes, not JSON files (constitution §3.6).
+Build test data using efootprint classes, not JSON files. Use `from_defaults()` where available.
 
 ```python
 @pytest.fixture
@@ -146,7 +146,7 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 
 ### HTMX interactions
 
-Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks (constitution §3.8). This handles waiting for the HTTP response.
+Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. This handles waiting for the HTTP response — don't write raw Playwright clicks for HTMX flows.
 
 ### Test structure
 

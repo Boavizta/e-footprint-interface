@@ -18,7 +18,7 @@ These are the strong preferences and patterns the project follows. They are soft
 - **Views are thin adapters.** They map request to use case input, call the use case, format response via the presenter. No business logic in views.
 - **Templates are small composable partials.** See `model_builder/templates/model_builder/...` for the pattern.
 - **Session is authoritative for the current modeling system.** Every request reconstructs `ModelWeb` from the repository.
-- **No domain-layer imports of Django, HTMX, or other presentation concerns** (constitution §3.4).
+- **No domain-layer imports of Django, HTMX, or other presentation concerns** (constitution §1.1).
 
 ### JavaScript
 
@@ -53,10 +53,10 @@ For data and array operations:
 
 See `testing.md` for the full testing guide. Highlights:
 
-- Use `create_mod_obj_mock` from `tests.utils` instead of raw `MagicMock` (constitution §3.5).
-- Build E2E fixtures with efootprint classes and `from_defaults()`, not JSON files (constitution §3.6).
-- Use `click_and_wait_for_htmx()` for HTMX-triggered E2E clicks (constitution §3.8).
-- Form data parsing happens in `adapters/forms/`, never in domain (constitution §3.7).
+- Use `create_mod_obj_mock` from `tests.utils` instead of raw `MagicMock` when mocking `ModelingObject` subclasses; prefer real `ExplainableObject` / `ExplainableQuantity` instances when possible.
+- Build E2E fixtures with efootprint classes and `from_defaults()`, not JSON files.
+- Use `click_and_wait_for_htmx()` for HTMX-triggered E2E clicks; don't write raw Playwright clicks for HTMX flows.
+- Form data parsing happens in `adapters/forms/`, never in domain. The domain receives parsed dicts.
 
 ## Flakiness
 

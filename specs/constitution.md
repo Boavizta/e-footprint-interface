@@ -13,9 +13,9 @@ These are the project's immutable rules. They must be respected by every code ch
 
 ## 2. Quality gates (a change is not ready until)
 
-1. Full pytest suite passes: `tests/unit_tests`, `tests/integration`, `tests/e2e`.
-2. Jest passes (`npm run jest`).
-3. UI changes have been opened in a real browser and the affected flow exercised manually. Type-checking and tests verify code correctness, not feature correctness.
+1. Important changes have been tested. Reserve Playwright E2E tests for critical flows and high-risk changes; cover other logic with unit and integration tests.
+2. Full pytest suite passes: `tests/unit_tests`, `tests/integration`, `tests/e2e`.
+3. Jest passes (`npm run jest`).
 4. `pyproject.toml` and `poetry.lock` reference `efootprint` from PyPI (not a local editable path) before any commit reaches `main`. Enforced by a pyproject.toml-parsing test.
 5. If Django models change, a migration file is committed.
 6. `CHANGELOG.md` entry added.
@@ -25,11 +25,8 @@ These are the project's immutable rules. They must be respected by every code ch
 1. **Never paper over a bug.** If you discover unrelated bad behaviour while working on a task — a stale card after mutation, a missing form attribute, a brittle assertion — fix it on the spot or surface it explicitly. Never hide it with a `page.reload()`, a defensive branch, or a renamed test.
 2. **Never skip hooks (`--no-verify`)** unless explicitly authorized.
 3. **Ask before destructive operations** (force pushes, branch deletions, hard resets).
-4. **No domain-layer imports of Django, HTMX, or other presentation concerns.** Template names, CSS classes, and HTMX attributes belong in adapters or templates, never in domain entities. (Pre-existing pragmatic exceptions are catalogued in `archives/decisions/clean_architecture_assessment.md`; new code does not extend that list.)
-5. **Use `create_mod_obj_mock` from `tests.utils`** when mocking `ModelingObject` subclasses. Use real `ExplainableObject` / `ExplainableQuantity` instances when possible.
-6. **Build E2E fixtures with efootprint classes, not JSON files.** Use `from_defaults()` where available.
-7. **Form data parsing happens in `adapters/forms/`, never in domain.** The domain receives parsed dicts.
-8. **Use `click_and_wait_for_htmx()` for HTMX-triggered E2E clicks.** Don't write raw Playwright clicks for HTMX flows.
+
+Other coding-style, layering, and testing rules live in `architecture.md`, `conventions.md`, and `testing.md`.
 
 ## 4. Out of scope (rejected by default)
 

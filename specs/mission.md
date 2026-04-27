@@ -9,7 +9,7 @@ The interface wraps the e-footprint library through a Clean Architecture: the do
 ## Audience
 
 - **Primary: non-technical product person.** Must be usable with zero Python, zero modeling background. Tone, vocabulary, and defaults are tuned for this user first.
-- **Secondary: technical users** (engineers, e-footprint owners). They should sense that depth and customization exist beneath the surface, and drop into it without friction.
+- **Secondary: technical users** (engineers, architects). They should sense that depth and customization exist beneath the surface, and drop into it without friction.
 - **Industrial users** modeling edge fleets and mixed web/edge systems.
 
 Guiding principle: *no one left behind, depth available on demand.* Every profile in a product team should be able to use the tool.

@@ -87,7 +87,7 @@ Notable:
 ### Adapters
 
 - **`adapters/repositories/session_system_repository.py`** — loads/saves system from Django session. Holds `interface_config` in RAM and merges it on `save_data()`.
-- **`adapters/forms/form_data_parser.py`** — parses HTTP form data before passing to use cases (constitution §3.7: parsing happens here, never in domain).
+- **`adapters/forms/form_data_parser.py`** — parses HTTP form data before passing to use cases. Parsing happens here, never in domain — the domain receives parsed dicts.
 - **`adapters/forms/form_field_generator.py`** — form field generation utilities. Includes `generate_select_multiple_field()` as a standalone reusable helper.
 - **`adapters/presenters/htmx_presenter.py`** — formats use case outputs as HTMX responses.
 - **`adapters/ui_config/`** — provides UI configuration (class labels, field metadata).

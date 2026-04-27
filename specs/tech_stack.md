@@ -18,7 +18,6 @@
 | **django-browser-reload** | Auto-reload during dev. | `^1.12.1` |
 | **gunicorn** | WSGI server in production. | `^23` |
 | **redis** | Session/cache backend (production). | `^5.0` |
-| **psutil** | Memory monitoring (memory leak instrumentation). | `^7` |
 | **openpyxl** | xlsx export of source tables. | `^3` |
 | **orjson** | Fast JSON for system snapshots. | `^3.11` |
 
