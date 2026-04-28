@@ -106,9 +106,9 @@ On the interface, the existing `source.html` partial — today a client-side lab
 
 No constitutional amendment needed.
 
-## 7. Open questions
+## 7. Resolved
 
-- **Sentinel id values.** Recommendation: `id="user_data"` for `Sources.USER_DATA` and `id="hypothesis"` for `Sources.HYPOTHESIS`. Short, readable, unambiguous. Confirm before tasks — once shipped these become part of the on-disk schema.
-- **Sentinel emit rule.** Recommendation: emit `Sources.USER_DATA` / `Sources.HYPOTHESIS` in the top-level `"Sources"` block only when referenced.
-- **Empty-string link normalisation.** Recommendation: normalise empty-string `link` to `None` at `Source.__init__` so equality comparisons are unambiguous.
-- **Free-entry collision UX.** Spec §4 says "kept as a distinct `Source` instance, with a quiet notice". The plan keeps that exactly — confirm we are not auto-snapping silently.
+- **Sentinel id values.** `id="user_data"` for `Sources.USER_DATA`, `id="hypothesis"` for `Sources.HYPOTHESIS`. Part of the on-disk schema; pinned by a unit test.
+- **Sentinel emit rule.** Emit in the top-level `"Sources"` block only when referenced.
+- **Empty-string link normalisation.** Empty-string `link` is normalised to `None` in `Source.__init__`.
+- **Free-entry collision UX.** Per spec §4 — kept as a distinct `Source` instance, quiet notice in the editor, no auto-snap.
