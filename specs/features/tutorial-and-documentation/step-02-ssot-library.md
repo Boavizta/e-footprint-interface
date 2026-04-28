@@ -42,9 +42,6 @@ Special cases to handle:
 For each entry in the class's `calculated_attributes` property, assert that the corresponding `update_<attr>` method exists and has a non-empty `__doc__`. Note: `calculated_attributes` is a property, not a class attribute, so it must be called on an instance or read carefully. Since instantiation requires valid arguments, the approach is:
 - Iterate over concrete classes.
 - For each class, get its `calculated_attributes` by introspecting `update_<attr>` methods directly: scan the MRO for methods matching `update_<attr_name>` and check their docstrings.
-- Alternative: construct a minimal instance using `default_values` and a docs_case fixture if needed. The reference generator already does this via `docs_case.py` — the same pattern can be reused. Discuss with author which approach is preferred.
-
-**Recommended approach:** Use the existing `docs_case.py` instances (already constructed for the reference generator) where available, and fall back to MRO method scanning for classes not represented in docs_case. The MRO approach is simpler and does not require instantiation:
 
 ```python
 for attr_name in calculated_attr_names:
