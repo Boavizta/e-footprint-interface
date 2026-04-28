@@ -14,6 +14,7 @@ from model_builder.domain.object_factory import edit_object_from_parsed_data
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 
 
+@render_exception_modal_if_error
 @time_it
 def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(SessionSystemRepository(request.session))
@@ -101,6 +102,7 @@ def open_link_existing_panel(request, parent_id, child_type_str):
     return http_response
 
 
+@render_exception_modal_if_error
 def open_panel_system_name(request):
     repository = SessionSystemRepository(request.session)
     system_data = repository.get_system_data()
