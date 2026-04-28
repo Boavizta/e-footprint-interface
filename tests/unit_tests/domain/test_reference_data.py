@@ -49,19 +49,25 @@ class TestsReferenceData(TestCase):
 if __name__ == "__main__":
     import os as script_os
     domain_ref_dir = script_os.path.join(
-        script_os.path.dirname(__file__), "..", "model_builder", "domain", "reference_data")
+        script_os.path.dirname(__file__), "..", "..", "..", "model_builder", "domain", "reference_data")
 
-    def recompute_default_countries():
-        efootprint_countries = []
-        for attr_value in vars(Countries).values():
-            if callable(attr_value):
-                efootprint_countries.append(attr_value())
-
+    def recompute_default_object_json_files(efootprint_object_list, filename):
         json_dump = {}
-        for elt in efootprint_countries:
+        for elt in efootprint_object_list:
             json_dump[elt.id] = elt.to_json()
 
-        with open(script_os.path.join(domain_ref_dir, "default_countries.json"), "w") as f:
+        with open(script_os.path.join(domain_ref_dir, filename), "w") as f:
             json.dump(json_dump, f, indent=4)
 
-    recompute_default_countries()
+
+    efootprint_countries = []
+    for attr_value in vars(Countries).values():
+        if callable(attr_value):
+            efootprint_countries.append(attr_value())
+    recompute_default_object_json_files(efootprint_countries, "default_countries.json")
+
+    efootprint_devices = [Device.laptop(), Device.smartphone()]
+    recompute_default_object_json_files(efootprint_devices, "default_devices.json")
+
+    efootprint_networks = [archetype() for archetype in Network.archetypes()]
+    recompute_default_object_json_files(efootprint_networks, "default_networks.json")
