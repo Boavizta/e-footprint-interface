@@ -35,10 +35,6 @@
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -60,10 +56,6 @@
                 "attr_name": "bits_per_pixel",
                 "label": "bits per pixel",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -85,10 +77,6 @@
                 "attr_name": "static_delivery_cpu_cost",
                 "label": "static delivery cpu cost",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -110,10 +98,6 @@
                 "attr_name": "ram_buffer_per_user",
                 "label": "RAM buffer per user",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

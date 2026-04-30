@@ -67,10 +67,6 @@
                 "attr_name": "recurrent_compute_needed",
                 "label": "recurrent compute needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -92,10 +88,6 @@
                 "attr_name": "recurrent_ram_needed",
                 "label": "recurrent ram needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -117,10 +109,6 @@
                 "attr_name": "recurrent_storage_needed",
                 "label": "recurrent storage needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -157,10 +145,6 @@
                 "attr_name": "recurrent_workload",
                 "label": "recurrent workload",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

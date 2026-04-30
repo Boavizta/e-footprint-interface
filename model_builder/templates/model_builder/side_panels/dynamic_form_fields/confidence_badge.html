@@ -1,0 +1,48 @@
+{% with confidence=field.metadata.confidence|default:"none" %}
+<div class="confidence-wrap" data-field-id="{{ field.web_id }}">
+    <button type="button"
+            class="confidence-badge conf-{{ confidence }}"
+            data-level="{{ confidence }}"
+            data-action="toggle-confidence-menu"
+            title="Set confidence level">
+        <span class="bars {% if confidence != 'none' %}bars-{{ confidence }}{% endif %}"><i></i><i></i><i></i></span>
+        <i class="bi bi-chevron-down"></i>
+    </button>
+    <div class="confidence-menu">
+        <div class="menu-header">Set confidence level</div>
+        <div class="menu-item {% if confidence == 'high' %}selected{% endif %}"
+             data-level="high"
+             data-action="set-confidence">
+            <span class="bars bars-high"><i></i><i></i><i></i></span>
+            High
+            <i class="bi bi-check2 check"></i>
+        </div>
+        <div class="menu-item {% if confidence == 'medium' %}selected{% endif %}"
+             data-level="medium"
+             data-action="set-confidence">
+            <span class="bars bars-medium"><i></i><i></i><i></i></span>
+            Medium
+            <i class="bi bi-check2 check"></i>
+        </div>
+        <div class="menu-item {% if confidence == 'low' %}selected{% endif %}"
+             data-level="low"
+             data-action="set-confidence">
+            <span class="bars bars-low"><i></i><i></i><i></i></span>
+            Low
+            <i class="bi bi-check2 check"></i>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="menu-item {% if confidence == 'none' %}selected{% endif %}"
+             data-level="none"
+             data-action="set-confidence">
+            <span class="bars"><i></i><i></i><i></i></span>
+            Not set
+            <i class="bi bi-check2 check"></i>
+        </div>
+    </div>
+    <input type="hidden"
+           name="{{ field.web_id }}__confidence"
+           id="{{ field.web_id }}__confidence"
+           value="{% if field.metadata.confidence %}{{ field.metadata.confidence }}{% endif %}">
+</div>
+{% endwith %}

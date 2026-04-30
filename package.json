@@ -8,7 +8,8 @@
         "watch": "npx sass --watch theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss",
         "build:result-charts": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --minify --outfile=theme/static/bundles/result_charts.js",
         "build:result-charts:dev": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --outfile=theme/static/bundles/result_charts.js",
-        "jest": "jest"
+        "build:js-test-fixtures": "poetry run python js_tests/build_fixtures.py",
+        "jest": "npm run build:js-test-fixtures && jest"
     },
     "devDependencies": {
         "@types/node": "^20.12",

@@ -27,7 +27,7 @@ document.addEventListener("initDynamicForm", function () {
                     );
                 }
                 itemToHide.classList.add('d-none');
-                itemToHide.querySelectorAll('input, select').forEach(function(input) {
+                itemToHide.querySelectorAll('input[name], select[name]').forEach(function(input) {
                     input.required = false;
                     input.disabled = true;
                 });
@@ -49,7 +49,10 @@ document.addEventListener("initDynamicForm", function () {
             );
         }
         itemToShow.classList.remove('d-none');
-        itemToShow.querySelectorAll('input, select').forEach(function(input) {
+        // Only flip name-bearing controls: nameless inputs (e.g. source-editor scratch
+        // fields) are UI helpers that never submit, and marking them `required` blocks
+        // the form because hidden invalid controls can't be focused.
+        itemToShow.querySelectorAll('input[name], select[name]').forEach(function(input) {
             input.required = true;
             input.disabled = false;
         });
@@ -186,49 +189,11 @@ function checkCurrentValueVsDefaultValue(input) {
 }
 
 
-function updateSource(inputId) {
-    let input = document.getElementById(inputId);
-
-    if (input.dataset.sourceAttributeToSkip && input.dataset.sourceAttributeToSkip !== '') {
-        return;
-    }
-
-    let sourceDiv = document.getElementById("source-" + input.id);
-    if (input.dataset.staticSource) {
-        if(input.dataset.sourceUrl && input.dataset.sourceUrl !== '' && input.dataset.sourceUrl !== 'None'){
-            sourceDiv.innerHTML = `Source: <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
-        }else{
-            sourceDiv.innerHTML = `Source: ${input.dataset.defaultName}`
-        }
-        return;
-    }
-
-    if(input.dataset.defaultValue === '' && input.value === ''){
-        sourceDiv.innerHTML = "";
-        return;
-    }
-
-    let isSameAsDefault = checkCurrentValueVsDefaultValue(input);
-    let displayDefaultSource;
-
-    let associatedUnitId = input.dataset.associatedUnitId;
-    if (!associatedUnitId) {
-        displayDefaultSource = isSameAsDefault;
-    }else{
-        let associatedUnit = document.getElementById(associatedUnitId);
-        let associatedUnitIsSameAsDefault = checkCurrentValueVsDefaultValue(associatedUnit);
-        displayDefaultSource = isSameAsDefault && associatedUnitIsSameAsDefault;
-    }
-
-    if (displayDefaultSource) {
-        if(input.dataset.sourceUrl && input.dataset.sourceUrl !== '' && input.dataset.sourceUrl !== 'None'){
-            sourceDiv.innerHTML = `Source: <a target="_blank" class="sources-label" href="${input.dataset.sourceUrl}">${input.dataset.defaultName}</a>`
-        }else{
-            sourceDiv.innerHTML = `Source: ${input.dataset.defaultName}`
-        }
-    }else{
-        sourceDiv.innerHTML = "Source: user data";
-    }
+function onInputValueChange(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (checkCurrentValueVsDefaultValue(input)) return;
+    input.dispatchEvent(new CustomEvent("source-metadata:value-changed", { bubbles: true }));
 }
 
 function addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption(){

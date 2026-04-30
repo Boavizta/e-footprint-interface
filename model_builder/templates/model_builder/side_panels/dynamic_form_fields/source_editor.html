@@ -1,0 +1,54 @@
+{% with metadata=field.metadata %}
+<div class="source-editor"
+     id="editor-{{ field.web_id }}"
+     data-field-id="{{ field.web_id }}">
+    <label class="editor-label">Source</label>
+    <select class="form-select form-select-sm source-editor-select"
+            data-action="source-select-change">
+        {% for available in metadata.available_sources %}
+            <option value="{{ available.id }}"
+                    data-name="{{ available.name }}"
+                    data-link="{{ available.link|default:'' }}"
+                    {% if metadata.source.id == available.id %}selected{% endif %}>
+                {{ available.name }}
+            </option>
+        {% endfor %}
+        <option value="__custom__">Custom source…</option>
+    </select>
+
+    <div class="custom-fields" id="custom-fields-{{ field.web_id }}">
+        <div class="mb-2">
+            <label class="form-label">Name</label>
+            <input type="text"
+                   class="form-control form-control-sm source-editor-custom-name"
+                   data-action="check-source-collision"
+                   placeholder="e.g. Internal benchmark 2025-Q4">
+        </div>
+        <div>
+            <label class="form-label">Link (optional)</label>
+            <input type="url"
+                   class="form-control form-control-sm source-editor-custom-link"
+                   placeholder="https://…">
+        </div>
+        <div class="collision-notice" id="collision-{{ field.web_id }}">
+            <strong>A canonical source with this name already exists.</strong>
+            If you want to reuse it, pick it from the dropdown instead — this entry will be kept as a separate source.
+        </div>
+    </div>
+
+    <label class="editor-label mt-3">Comment</label>
+    <textarea class="form-control source-editor-comment"
+              rows="3"
+              maxlength="2000"
+              placeholder="Add a note — why this source, any caveats, audit trail…"></textarea>
+
+    <div class="editor-actions">
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm"
+                data-action="cancel-source-editor">Cancel</button>
+        <button type="button"
+                class="btn btn-primary btn-sm"
+                data-action="apply-source-editor">Apply</button>
+    </div>
+</div>
+{% endwith %}

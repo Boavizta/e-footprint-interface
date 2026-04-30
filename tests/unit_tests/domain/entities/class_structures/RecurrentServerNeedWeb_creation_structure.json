@@ -71,10 +71,6 @@
                 "attr_name": "recurrent_volume_per_edge_device",
                 "label": "recurrent volume per edge device",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

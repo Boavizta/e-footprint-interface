@@ -74,10 +74,6 @@
                 "attr_name": "output_token_count",
                 "label": "output token count",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -114,10 +110,6 @@
                 "attr_name": "data_transferred",
                 "label": "data transferred",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -139,10 +131,6 @@
                 "attr_name": "data_stored",
                 "label": "data stored",
                 "tooltip": "Data stored in the server\u2019s storage.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -164,10 +152,6 @@
                 "attr_name": "request_duration",
                 "label": "request duration",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -191,10 +175,6 @@
                 "attr_name": "compute_needed",
                 "label": "compute needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -216,10 +196,6 @@
                 "attr_name": "ram_needed",
                 "label": "RAM needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -255,10 +231,6 @@
                 "attr_name": "data_transferred",
                 "label": "data transferred",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -280,10 +252,6 @@
                 "attr_name": "data_stored",
                 "label": "data stored",
                 "tooltip": "Data stored in the server\u2019s storage.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -305,10 +273,6 @@
                 "attr_name": "request_duration",
                 "label": "request duration",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -332,10 +296,6 @@
                 "attr_name": "compute_needed",
                 "label": "compute needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -357,10 +317,6 @@
                 "attr_name": "ram_needed",
                 "label": "RAM needed",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -396,10 +352,6 @@
                 "attr_name": "resolution",
                 "label": "resolution",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -449,10 +401,6 @@
                 "attr_name": "video_duration",
                 "label": "video duration",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -474,10 +422,6 @@
                 "attr_name": "data_stored",
                 "label": "data stored",
                 "tooltip": "Data stored in the server\u2019s storage.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -501,10 +445,6 @@
                 "attr_name": "refresh_rate",
                 "label": "refresh rate",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

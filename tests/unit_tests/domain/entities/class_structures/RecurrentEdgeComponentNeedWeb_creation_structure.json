@@ -51,10 +51,6 @@
                 "attr_name": "recurrent_need",
                 "label": "recurrent need",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

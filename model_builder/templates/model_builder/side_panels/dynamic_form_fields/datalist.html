@@ -6,15 +6,13 @@
     autocomplete="off"
     {% if field.selected %}value="{{ field.selected }}"{% endif %}
     {% if object_to_edit %}
-    _="on focusout if my value is empty set my value to my @data-default-value then updateSource(@id)"
+    _="on focusout if my value is empty set my value to my @data-default-value then onInputValueChange(@id)"
     {% else %}
     _="on mousedown set my value to ''
-          on focusout if my value is empty set my value to my @data-default-value then updateSource(@id)"
+          on focusout if my value is empty set my value to my @data-default-value then onInputValueChange(@id)"
     {% endif %}
     data-default-value="{{ field.default }}"
-    data-default-name="{{ field.source.name }}"
-    data-source-url="{{ field.source.link }}"
-    oninput="updateSource(this.id);tagFormAsModified()"
+    oninput="onInputValueChange(this.id);tagFormAsModified()"
     required
 >
 <datalist id="datalist_{{ field.web_id }}">

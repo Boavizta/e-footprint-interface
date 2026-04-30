@@ -134,6 +134,8 @@ Two repos involved. Tasks 1–2 land in `e-footprint` (library, PyPI). Tasks 3�
 
 ## Task 5 — Interface: confidence badge + source editor templates + JS widget; rewrite `source.html`
 
+**Status:** Done.
+
 **Goal:** Surface the new metadata in the input form. Confidence badge inline right of the input/unit; source line becomes server-rendered and clickable, opening an inline editor for source + comment. Hidden inputs piggyback on the existing edit form's Save button.
 
 **Files touched:**

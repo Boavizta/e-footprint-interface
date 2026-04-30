@@ -33,10 +33,6 @@
                 "attr_name": "storage_capacity",
                 "label": "capacity per storage unit",
                 "tooltip": "The number of storage units will automatically adapt to data storage requirements.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -58,10 +54,6 @@
                 "attr_name": "data_replication_factor",
                 "label": "data replication factor",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -83,10 +75,6 @@
                 "attr_name": "data_storage_duration",
                 "label": "data storage duration",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -108,10 +96,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -135,10 +119,6 @@
                 "attr_name": "carbon_footprint_fabrication_per_storage_capacity",
                 "label": "carbon footprint fabrication per storage capacity",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -160,10 +140,6 @@
                 "attr_name": "base_storage_need",
                 "label": "base storage need",
                 "tooltip": "Initial amount of data stored, prior to this use case.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

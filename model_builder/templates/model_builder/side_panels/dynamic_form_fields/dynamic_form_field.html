@@ -1,7 +1,14 @@
 <div id="field-group-{{ field.web_id }}" class="mb-3">
     {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
-    {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
-    {% if field.source %}
-        {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_id=field.web_id %}
+    {% if field.metadata.source %}
+        <div class="input-row d-flex align-items-center gap-2">
+            <div class="flex-grow-1">
+                {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
+            </div>
+            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" %}
+        </div>
+        {% include "model_builder/side_panels/dynamic_form_fields/source.html" %}
+    {% else %}
+        {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
     {% endif %}
 </div>

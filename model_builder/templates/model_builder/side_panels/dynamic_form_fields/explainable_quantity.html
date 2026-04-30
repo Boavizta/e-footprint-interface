@@ -8,11 +8,9 @@
            step="{{ field.step }}"
            placeholder="Enter value"
            required
-        {% if field.source %}
+        {% if field.metadata.source %}
            data-default-value="{{ field.default }}"
-           data-default-name="{{ field.source.name }}"
-           data-source-url="{{ field.source.link }}"
-           oninput="updateSource(this.id);tagFormAsModified();"
+           oninput="onInputValueChange(this.id);tagFormAsModified();"
         {% endif %}
         {% if not field.can_be_negative %}
            min="0"

@@ -1,9 +1,4 @@
-<div id="{{ field.web_id }}" class="border rounded-3 bg-light-subtle p-3"
-    {% if field.source %}
-           data-default-value="{{ field.default }}"
-           data-default-name="{{ field.source.name }}"
-           data-source-url="{{ field.source.link }}"
-     {% endif %}>
+<div id="{{ field.web_id }}" class="border rounded-3 bg-light-subtle p-3">
     <p class="mb-2 text-muted small">
         This recurrent timeseries has been created with the e-footprint Python library and is not editable in the web interface yet.
     </p>

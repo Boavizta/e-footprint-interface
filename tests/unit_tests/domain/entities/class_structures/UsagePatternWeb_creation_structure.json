@@ -105,10 +105,6 @@
                 "attr_name": "hourly_usage_journey_starts",
                 "label": "hourly number of usage journey starts",
                 "tooltip": false,
-                "source": {
-                    "name": "user data",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

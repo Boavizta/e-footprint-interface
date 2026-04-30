@@ -87,10 +87,6 @@
                 "attr_name": "hourly_edge_usage_journey_starts",
                 "label": "hourly edge usage journey starts",
                 "tooltip": false,
-                "source": {
-                    "name": "user data",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

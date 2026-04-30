@@ -41,10 +41,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -66,10 +62,6 @@
                 "attr_name": "ram",
                 "label": "RAM",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -91,10 +83,6 @@
                 "attr_name": "compute",
                 "label": "compute",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -118,10 +106,6 @@
                 "attr_name": "carbon_footprint_fabrication",
                 "label": "carbon footprint fabrication",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -143,10 +127,6 @@
                 "attr_name": "power",
                 "label": "power",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -168,10 +148,6 @@
                 "attr_name": "idle_power",
                 "label": "idle power",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -193,10 +169,6 @@
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -218,10 +190,6 @@
                 "attr_name": "base_compute_consumption",
                 "label": "base compute consumption",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -257,10 +225,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -284,10 +248,6 @@
                 "attr_name": "carbon_footprint_fabrication",
                 "label": "carbon footprint fabrication",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -309,10 +269,6 @@
                 "attr_name": "power",
                 "label": "power",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -334,10 +290,6 @@
                 "attr_name": "idle_power",
                 "label": "idle power",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -373,10 +325,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -400,10 +348,6 @@
                 "attr_name": "structure_carbon_footprint_fabrication",
                 "label": "structure carbon footprint fabrication",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

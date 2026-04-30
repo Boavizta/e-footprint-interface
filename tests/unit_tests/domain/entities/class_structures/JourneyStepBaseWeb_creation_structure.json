@@ -33,10 +33,6 @@
                 "attr_name": "user_time_spent",
                 "label": "time spent by user",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

@@ -24,6 +24,8 @@ These are the strong preferences and patterns the project follows. They are soft
 
 - **Vanilla JS + small helpers only.** Keep logic minimal; prefer progressive enhancement.
 - **Use HTMX attributes for partial updates** rather than large custom JS.
+- **New JS modules wrap their internals in an IIFE and dispatch via `data-action`**. Templates declare intent (`data-action="open-source-editor"`); a single delegated listener in the module switches on the action and dispatches to a module-private function. Rationale: keeps `window` clean (no per-widget globals to collide or accidentally expose), survives HTMX swaps with no rebinding (the listener is on `document`), and is compatible with strict CSP later (no inline JS to allow). When two modules need to talk, prefer a custom DOM event over a shared global. See `theme/static/scripts/source_metadata.js` for the reference pattern. Older modules using inline `onclick=` keep working; migrate boy-scout style when you're already touching one.
+- **UI-only inputs inside form sections must omit the `name` attribute.** `dynamic_forms.js#displayOnlyActiveForm` only flips `required`/`disabled` on `input[name]`/`select[name]`. Nameless controls (e.g. the source editor's custom-source scratch fields) never submit, so marking them required would only block the form — hidden invalid controls can't be focused, which silently aborts HTMX submission.
 
 ### Tests
 

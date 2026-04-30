@@ -1113,3 +1113,141 @@ input:disabled{
     border-color: var(--gray-400);
   }
 }
+
+/* ===== Source metadata widgets ===== */
+:root {
+  --conf-none-bg: #f1f3f5;
+  --conf-none-fg: #868e96;
+  --conf-low-bg: #fdecea;
+  --conf-low-fg: #b42318;
+  --conf-med-bg: #fff4db;
+  --conf-med-fg: #8a5a00;
+  --conf-high-bg: #e4f5ec;
+  --conf-high-fg: #087443;
+  --source-accent: #2f6fed;
+}
+
+.confidence-wrap { position: relative; }
+
+.confidence-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 9px; border-radius: 6px; line-height: 1.2;
+  cursor: pointer; border: 1px solid transparent;
+  white-space: nowrap; user-select: none;
+  transition: all 0.12s ease;
+  background: transparent;
+}
+.confidence-badge:hover { filter: brightness(0.97); }
+.confidence-badge .bi-chevron-down { font-size: 10px; opacity: 0.6; }
+
+.bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; }
+.bars > i {
+  display: inline-block; width: 3px; border-radius: 1px;
+  background: currentColor; opacity: 0.22;
+}
+.bars > i:nth-child(1) { height: 4px; }
+.bars > i:nth-child(2) { height: 7px; }
+.bars > i:nth-child(3) { height: 10px; }
+.bars-low > i:nth-child(1) { opacity: 1; }
+.bars-medium > i:nth-child(1),
+.bars-medium > i:nth-child(2) { opacity: 1; }
+.bars-high > i { opacity: 1; }
+
+.conf-none { background: var(--conf-none-bg); color: var(--conf-none-fg); }
+.conf-low { background: var(--conf-low-bg); color: var(--conf-low-fg); }
+.conf-medium { background: var(--conf-med-bg); color: var(--conf-med-fg); }
+.conf-high { background: var(--conf-high-bg); color: var(--conf-high-fg); }
+
+.confidence-just-reset { animation: resetPulse 1.4s ease-out 1; }
+@keyframes resetPulse {
+  0% { box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(224, 49, 49, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(224, 49, 49, 0); }
+}
+
+.confidence-menu {
+  position: absolute; top: calc(100% + 4px); right: 0;
+  background: white; border: 1px solid #dee2e6; border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+  padding: 4px; min-width: 140px; z-index: 40; display: none;
+}
+.confidence-menu.open { display: block; }
+.confidence-menu .menu-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; font-size: 13px; color: #1f2328;
+  border-radius: 4px; cursor: pointer;
+}
+.confidence-menu .menu-item:hover { background: #f1f3f5; }
+.confidence-menu .menu-header {
+  padding: 8px 10px 6px; font-size: 12px; font-weight: 600;
+  color: #6c757d; border-bottom: 1px solid #f1f3f5; margin-bottom: 4px;
+}
+.confidence-menu .menu-item .bars { margin-right: 2px; }
+.confidence-menu .menu-item[data-level=high] .bars { color: var(--conf-high-fg); }
+.confidence-menu .menu-item[data-level=medium] .bars { color: var(--conf-med-fg); }
+.confidence-menu .menu-item[data-level=low] .bars { color: var(--conf-low-fg); }
+.confidence-menu .menu-item[data-level=none] .bars { color: var(--conf-none-fg); }
+.confidence-menu .menu-divider { height: 1px; background: #f1f3f5; margin: 4px 2px; }
+.confidence-menu .menu-item .check {
+  margin-left: auto; color: var(--source-accent); font-size: 12px; display: none;
+}
+.confidence-menu .menu-item.selected .check { display: inline; }
+
+/* Source + comment line */
+.source-comment { margin-top: 6px; font-size: 12px; line-height: 1.5; }
+.source-line {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: #6c757d; cursor: pointer; border-radius: 4px;
+  padding: 2px 4px; margin-left: -4px;
+  transition: background 0.12s ease;
+}
+.source-line:hover { background: #f1f3f5; color: #212529; }
+.source-line .bi-pencil-fill {
+  font-size: 10px; opacity: 0; transition: opacity 0.12s ease; margin-left: 2px;
+}
+.source-line:hover .bi-pencil-fill { opacity: 0.55; }
+
+.comment-line {
+  display: flex; align-items: center; gap: 6px;
+  color: #495057; margin-top: 4px; font-style: italic;
+  max-width: 100%; cursor: pointer;
+}
+.comment-line .bi { color: #adb5bd; font-size: 11px; font-style: normal; flex-shrink: 0; }
+// Undo .text-truncate when the user clicks to expand. overflow-wrap: anywhere
+// lets the browser break inside long unbreakable strings (URLs, identifiers)
+// so the line never overflows the side panel.
+.comment-line.expanded { align-items: flex-start; }
+.comment-line.expanded .comment-text {
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+/* Inline source editor */
+.source-editor {
+  margin-top: 10px; background: #f8f9fb;
+  border: 1px solid #dee2e6; border-radius: 8px;
+  padding: 14px; display: none;
+}
+.source-editor.open { display: block; }
+.source-editor .editor-label {
+  font-size: 12px; font-weight: 500; color: #495057;
+  margin-bottom: 4px; display: block;
+}
+.source-editor .custom-fields {
+  display: none; margin-top: 8px; padding: 10px 12px;
+  border-left: 2px solid #dee2e6; background: white; border-radius: 4px;
+}
+.source-editor .custom-fields.open { display: block; }
+
+.collision-notice {
+  display: none; margin-top: 8px; padding: 8px 10px;
+  background: #fff8e1; border: 1px solid #ffe29a;
+  border-radius: 6px; font-size: 11.5px; color: #7a5200; line-height: 1.4;
+}
+.collision-notice.visible { display: block; }
+.collision-notice strong { color: #6b4200; }
+
+.editor-actions {
+  margin-top: 12px; display: flex; justify-content: flex-end; gap: 6px;
+}

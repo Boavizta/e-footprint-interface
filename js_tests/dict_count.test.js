@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const {
     addDictCountEntry,
     removeDictCountEntry,
@@ -11,75 +14,73 @@ global.convertStringLikeJsonToRealJsonFromElementWeb = (elementId) => {
 };
 global.tagFormAsModified = jest.fn();
 
-function renderField() {
-    document.body.innerHTML = `
-        <table id="objects-already-selected-for-EdgeDeviceGroup_edge_device_counts"></table>
-        <select id="select-new-object-EdgeDeviceGroup_edge_device_counts">
-            <option value="device-1">Device 1</option>
-            <option value="device-2">Device 2</option>
-        </select>
-        <button id="add-btn-EdgeDeviceGroup_edge_device_counts" type="button"></button>
-        <div id="selected_data_EdgeDeviceGroup_edge_device_counts" data-json="{}"></div>
-        <div id="available_data_EdgeDeviceGroup_edge_device_counts"
-             data-json='[{"value":"device-1","label":"Device 1"},{"value":"device-2","label":"Device 2"}]'></div>
-        <input type="hidden" id="EdgeDeviceGroup_edge_device_counts" value="">
-    `;
+const FIELD_ID = "EdgeDeviceGroup_edge_device_counts";
+const FIXTURES_DIR = path.join(__dirname, "fixtures");
+
+function loadFixture(name) {
+    const file = path.join(FIXTURES_DIR, `${name}.html`);
+    if (!fs.existsSync(file)) {
+        throw new Error(
+            `Fixture "${name}" not found at ${file}. Run \`poetry run python js_tests/build_fixtures.py\` (or \`npm run jest\` which chains it).`
+        );
+    }
+    return fs.readFileSync(file, "utf8");
 }
 
 beforeEach(() => {
-    renderField();
+    document.body.innerHTML = loadFixture("dict_count_two_options_empty");
     global.tagFormAsModified.mockClear();
-    refreshDictCountField("EdgeDeviceGroup_edge_device_counts");
+    refreshDictCountField(FIELD_ID);
 });
 
 test("adding an entry removes it from the dropdown and inserts a row with count 1", () => {
-    document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-1";
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
 
-    addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
+    addDictCountEntry(FIELD_ID);
 
-    expect(document.getElementById("EdgeDeviceGroup_edge_device_counts").value).toBe('{"device-1":1}');
-    expect(document.getElementById("objects-already-selected-for-EdgeDeviceGroup_edge_device_counts").textContent)
+    expect(document.getElementById(FIELD_ID).value).toBe('{"device-1":1}');
+    expect(document.getElementById(`objects-already-selected-for-${FIELD_ID}`).textContent)
         .toContain("Device 1");
-    expect([...document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").options].map((opt) => opt.value))
+    expect([...document.getElementById(`select-new-object-${FIELD_ID}`).options].map((opt) => opt.value))
         .toEqual(["device-2"]);
 });
 
 test("editing a count updates the hidden JSON field", () => {
-    document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-1";
-    addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
+    addDictCountEntry(FIELD_ID);
 
-    updateDictCountEntry("EdgeDeviceGroup_edge_device_counts", "device-1", "4");
+    updateDictCountEntry(FIELD_ID, "device-1", "4");
 
-    expect(document.getElementById("EdgeDeviceGroup_edge_device_counts").value).toBe('{"device-1":4}');
+    expect(document.getElementById(FIELD_ID).value).toBe('{"device-1":4}');
 });
 
 test("removing an entry adds it back to the dropdown", () => {
-    document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-1";
-    addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
+    addDictCountEntry(FIELD_ID);
 
-    removeDictCountEntry("EdgeDeviceGroup_edge_device_counts", "device-1");
+    removeDictCountEntry(FIELD_ID, "device-1");
 
-    expect(document.getElementById("EdgeDeviceGroup_edge_device_counts").value).toBe("{}");
-    expect([...document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").options].map((opt) => opt.value))
+    expect(document.getElementById(FIELD_ID).value).toBe("{}");
+    expect([...document.getElementById(`select-new-object-${FIELD_ID}`).options].map((opt) => opt.value))
         .toEqual(["device-1", "device-2"]);
 });
 
 test("duplicate entries cannot be added because selected entries disappear from the dropdown", () => {
-    document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-1";
-    addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
+    addDictCountEntry(FIELD_ID);
 
-    expect([...document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").options].map((opt) => opt.value))
+    expect([...document.getElementById(`select-new-object-${FIELD_ID}`).options].map((opt) => opt.value))
         .toEqual(["device-2"]);
 });
 
 test("the hidden JSON payload stays in sync after multiple add remove edit operations", () => {
-    document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-1";
-    addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
-    document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-2";
-    addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
+    addDictCountEntry(FIELD_ID);
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-2";
+    addDictCountEntry(FIELD_ID);
 
-    updateDictCountEntry("EdgeDeviceGroup_edge_device_counts", "device-2", "5");
-    removeDictCountEntry("EdgeDeviceGroup_edge_device_counts", "device-1");
+    updateDictCountEntry(FIELD_ID, "device-2", "5");
+    removeDictCountEntry(FIELD_ID, "device-1");
 
-    expect(document.getElementById("EdgeDeviceGroup_edge_device_counts").value).toBe('{"device-2":5}');
+    expect(document.getElementById(FIELD_ID).value).toBe('{"device-2":5}');
 });

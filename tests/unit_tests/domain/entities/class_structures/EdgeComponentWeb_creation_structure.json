@@ -45,10 +45,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -70,10 +66,6 @@
                 "attr_name": "compute_per_unit",
                 "label": "compute per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -95,10 +87,6 @@
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -122,10 +110,6 @@
                 "attr_name": "carbon_footprint_fabrication_per_unit",
                 "label": "carbon footprint fabrication per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -147,10 +131,6 @@
                 "attr_name": "power_per_unit",
                 "label": "power per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -172,10 +152,6 @@
                 "attr_name": "idle_power_per_unit",
                 "label": "idle power per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -197,10 +173,6 @@
                 "attr_name": "base_compute_consumption",
                 "label": "base compute consumption",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -236,10 +208,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -261,10 +229,6 @@
                 "attr_name": "ram_per_unit",
                 "label": "ram per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -286,10 +250,6 @@
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -313,10 +273,6 @@
                 "attr_name": "carbon_footprint_fabrication_per_unit",
                 "label": "carbon footprint fabrication per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -338,10 +294,6 @@
                 "attr_name": "power_per_unit",
                 "label": "power per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -363,10 +315,6 @@
                 "attr_name": "idle_power_per_unit",
                 "label": "idle power per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -388,10 +336,6 @@
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -427,10 +371,6 @@
                 "attr_name": "storage_capacity_per_unit",
                 "label": "storage capacity per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -452,10 +392,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -477,10 +413,6 @@
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -504,10 +436,6 @@
                 "attr_name": "carbon_footprint_fabrication_per_storage_capacity",
                 "label": "carbon footprint fabrication per storage capacity",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -529,10 +457,6 @@
                 "attr_name": "base_storage_need",
                 "label": "base storage need",
                 "tooltip": "Initial amount of data stored, prior to this use case.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -568,10 +492,6 @@
                 "attr_name": "lifespan",
                 "label": "lifespan",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -593,10 +513,6 @@
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -620,10 +536,6 @@
                 "attr_name": "carbon_footprint_fabrication_per_unit",
                 "label": "carbon footprint fabrication per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -645,10 +557,6 @@
                 "attr_name": "power_per_unit",
                 "label": "power per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -670,10 +578,6 @@
                 "attr_name": "idle_power_per_unit",
                 "label": "idle power per unit",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

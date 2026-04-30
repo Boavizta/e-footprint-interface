@@ -247,7 +247,6 @@ def generate_dynamic_form(
             })
         else:
             default = default_values[attr_name]
-            source_json = {"name":default.source.name, "link":default.source.link} if default.source else None
             metadata = {
                 "confidence": default.confidence,
                 "comment": default.comment,
@@ -258,7 +257,7 @@ def generate_dynamic_form(
                 } if default.source else None,
                 "available_sources": available_sources,
             }
-            structure_field.update({"source": source_json, "metadata": metadata})
+            structure_field.update({"metadata": metadata})
             if issubclass(annotation, ExplainableQuantity):
                 default_value_decimal = Decimal(str(default.magnitude))
                 default_value = _format_decimal_for_number_input(default_value_decimal)

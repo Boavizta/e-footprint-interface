@@ -168,9 +168,11 @@ Domain computation correctness (carbon math, Sankey flow values, timeseries gene
 
 ## JS unit tests (`js_tests/`)
 
-Two existing files test pure math utilities. Add new files here for JS logic that is complex enough to fail silently if broken and that doesn't require a real browser. The jsdom environment is sufficient for DOM manipulation helpers.
+Add files here for JS logic that is complex enough to fail silently if broken and that doesn't require a real browser. The jsdom environment is sufficient for DOM manipulation helpers.
 
 Run with `npm run jest`. Jest config is in `package.json` (`"testEnvironment": "jsdom"`).
+
+When a test exercises JS that manipulates a real Django partial, do **not** hand-roll the markup in JS — declare a named case in `js_tests/build_fixtures.py` (`CASES`) and `mount("<fixture-name>")` from the test. The npm `jest` script renders `js_tests/fixtures/*.html` from the actual templates before running jest, so a class rename or attribute change in the template fails its tests instead of silently drifting. Generated fixtures are gitignored. See `source_metadata.test.js` for the pattern.
 
 ## Flakiness
 

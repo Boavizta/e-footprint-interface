@@ -33,10 +33,6 @@
                 "attr_name": "provider",
                 "label": "provider",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -82,10 +78,6 @@
                 "attr_name": "model_name",
                 "label": "model name",
                 "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
                 "metadata": {
                     "confidence": null,
                     "comment": null,

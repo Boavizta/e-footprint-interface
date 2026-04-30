@@ -1,4 +1,49 @@
-<div class="form-text fs-xl" id="source-{{ source_id }}"
-     _="on load updateSource('{{ source_id }}')"
->
+{% with metadata=field.metadata %}
+<div class="source-comment" id="source-{{ field.web_id }}" data-field-id="{{ field.web_id }}">
+    <div class="source-line"
+         data-action="open-source-editor"
+         role="button"
+         tabindex="0">
+        <i class="bi bi-link-45deg"></i>
+        <span>Source:&nbsp;</span>
+        <span class="source-name-display">
+            {% if metadata.source.link %}
+                <a href="{{ metadata.source.link }}"
+                   target="_blank"
+                   class="sources-label"
+                   onclick="event.stopPropagation();">{{ metadata.source.name }}</a>
+            {% else %}
+                <span class="sources-label">{{ metadata.source.name|default:"" }}</span>
+            {% endif %}
+        </span>
+        <i class="bi bi-pencil-fill"></i>
+    </div>
+    <div class="comment-line {% if not metadata.comment %}d-none{% endif %}"
+         data-action="toggle-comment-expand"
+         role="button"
+         tabindex="0"
+         title="Click to expand">
+        <i class="bi bi-chat-quote"></i>
+        {% include "model_builder/components/truncating_text.html" with visible_text=metadata.comment full_text=metadata.comment extra_classes="comment-text" %}
+    </div>
+
+    <input type="hidden"
+           name="{{ field.web_id }}__source_id"
+           id="{{ field.web_id }}__source_id"
+           value="{{ metadata.source.id|default:'' }}">
+    <input type="hidden"
+           name="{{ field.web_id }}__source_name"
+           id="{{ field.web_id }}__source_name"
+           value="{{ metadata.source.name|default:'' }}">
+    <input type="hidden"
+           name="{{ field.web_id }}__source_link"
+           id="{{ field.web_id }}__source_link"
+           value="{{ metadata.source.link|default:'' }}">
+    <input type="hidden"
+           name="{{ field.web_id }}__comment"
+           id="{{ field.web_id }}__comment"
+           value="{{ metadata.comment|default:'' }}">
+
+    {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" %}
 </div>
+{% endwith %}
