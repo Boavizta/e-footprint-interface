@@ -10,7 +10,7 @@ Use adapters/forms/form_data_parser.py to parse HTTP form data before calling th
 from copy import copy, deepcopy
 from typing import Any, Dict, List, get_origin, get_args, TYPE_CHECKING
 
-from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
@@ -35,6 +35,55 @@ def _build_explainable_object_dict_entries(value: Dict[str, Any], model_web: "Mo
         explainable_obj.source = Sources.USER_DATA
         entries[model_web.flat_efootprint_objs_dict[key_id]] = explainable_obj
     return entries
+
+
+def _apply_metadata(
+    explainable_object: ExplainableObject,
+    parsed_value: Dict[str, Any],
+    available_sources: list,
+    pending_sources: Dict[str, Any],
+) -> None:
+    """Set source, confidence, and comment on an ExplainableObject from parsed form data.
+
+    parsed_value must be a dict (the structured output of parse_form_data for this attribute).
+    pending_sources is a per-submission dict shared across all _apply_metadata calls in the
+    same create/edit invocation. It is keyed by the client-submitted source id and lets two
+    fields submitting the same new (unknown) id resolve to the *same* Source instance.
+    Source resolution order:
+      1. available_sources (model's existing sources, matched by id)
+      2. pending_sources (new sources created earlier in the same submission, matched by id)
+      3. Mint a new Source, using the submitted id so the same id resolves to the same instance
+         within one submission (enables same-form cross-field source sharing).
+    When no id is submitted (legacy / no-JS fallback): mint from name+link without dedup.
+    Confidence: carry submitted value; None if absent or invalid (client clears it on value change).
+    Comment: always carry submitted value (None if empty/absent).
+    """
+    source_dict = parsed_value.get("source")
+    if source_dict:
+        source_id = source_dict.get("id") or None
+        source_name = source_dict.get("name") or ""
+        source_link = source_dict.get("link") or None
+        if source_id:
+            matched = next((s for s in available_sources if s.id == source_id), None)
+            if matched is not None:
+                explainable_object.source = matched
+            else:
+                if source_id not in pending_sources:
+                    pending_sources[source_id] = Source(source_name, source_link, id=source_id)
+                explainable_object.source = pending_sources[source_id]
+        elif source_name:
+            explainable_object.source = Source(source_name, source_link)
+        else:
+            explainable_object.source = Sources.USER_DATA
+    else:
+        explainable_object.source = Sources.USER_DATA
+
+    raw_confidence = parsed_value.get("confidence")
+    explainable_object.confidence = (
+        raw_confidence if raw_confidence in ("low", "medium", "high") else None
+    )
+
+    explainable_object.comment = parsed_value.get("comment") or None
 
 
 def create_efootprint_obj_from_parsed_data(
@@ -62,6 +111,8 @@ def create_efootprint_obj_from_parsed_data(
         default_values[default_web_attr] = copy(corresponding_web_class.default_values[default_web_attr])
 
     obj_creation_kwargs = {}
+    available_sources = model_web.available_sources
+    pending_sources: Dict[str, Source] = {}
 
     for attr_name, value in parsed_data.items():
         if attr_name == "name":
@@ -89,15 +140,7 @@ def create_efootprint_obj_from_parsed_data(
             obj_creation_kwargs[attr_name] = obj_to_add
         elif issubclass(annotation, ExplainableObject):
             explainable_object = ExplainableObject.from_json_dict(value)
-            if attr_name in default_values:
-                default_value = default_values[attr_name]
-                if (# form inputs are tested directly because default values might have missing fields
-                    (hasattr(default_value, "form_inputs")
-                     and default_value.form_inputs != explainable_object.form_inputs)
-                    or default_values[attr_name] != explainable_object):
-                    explainable_object.source = Sources.USER_DATA
-            else:
-                explainable_object.source = default_values[attr_name].source
+            _apply_metadata(explainable_object, value, available_sources, pending_sources)
             obj_creation_kwargs[attr_name] = explainable_object
 
     return new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
@@ -117,6 +160,8 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
         Tuple of (edited_object, had_non_name_changes: bool, name_changed: bool)
     """
     model_web = obj_to_edit.model_web
+    available_sources = model_web.available_sources
+    pending_sources: Dict[str, Source] = {}
     init_sig_params = get_init_signature_params(obj_to_edit.efootprint_class)
 
     changes_list = []
@@ -171,9 +216,22 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
         if issubclass(annotation, ExplainableObject):
             new_value = ExplainableObject.from_json_dict(value)
             new_value.set_label(current_value.label)
-            new_value.source = Sources.USER_DATA
-            if new_value != current_value:
+            value_changed = new_value != current_value
+            _apply_metadata(new_value, value, available_sources, pending_sources)
+            if value_changed:
                 changes_list.append([current_value, new_value])
+            else:
+                # ModelingUpdate skips same-value changes; apply metadata directly since
+                # confidence/comment/source don't affect calculations.
+                metadata_changed = (
+                    new_value.source is not current_value.source
+                    or new_value.confidence != current_value.confidence
+                    or new_value.comment != current_value.comment
+                )
+                if metadata_changed:
+                    current_value.source = new_value.source
+                    current_value.confidence = new_value.confidence
+                    current_value.comment = new_value.comment
 
     if changes_list:
         ModelingUpdate(changes_list, compute_previous_system_footprints=False)

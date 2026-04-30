@@ -87,3 +87,51 @@ class TestModelWeb(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestAvailableSources:
+    """Tests for ModelWeb.available_sources property."""
+
+    def test_sentinels_always_present(self, minimal_model_web):
+        from efootprint.abstract_modeling_classes.source_objects import Sources
+        sources = minimal_model_web.available_sources
+        source_ids = [s.id for s in sources]
+        assert Sources.USER_DATA.id in source_ids
+        assert Sources.HYPOTHESIS.id in source_ids
+
+    def test_returns_deduplicated_sources(self, minimal_model_web):
+        sources = minimal_model_web.available_sources
+        ids = [s.id for s in sources]
+        assert len(ids) == len(set(ids))
+
+    def test_sorted_by_name(self, minimal_model_web):
+        sources = minimal_model_web.available_sources
+        names = [s.name for s in sources]
+        assert names == sorted(names)
+
+    def test_sentinel_is_same_python_instance(self, minimal_model_web):
+        from efootprint.abstract_modeling_classes.source_objects import Sources
+        sources = minimal_model_web.available_sources
+        user_data = next(s for s in sources if s.id == Sources.USER_DATA.id)
+        assert user_data is Sources.USER_DATA
+
+    def test_available_sources_includes_sources_from_explainable_object_dict(self, minimal_model_web):
+        from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
+        from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+
+        custom_source = Source("Dict Element Source", "https://dict.example.com")
+
+        target_obj = None
+        for obj in minimal_model_web.flat_efootprint_objs_dict.values():
+            for attr_val in obj.__dict__.values():
+                if isinstance(attr_val, ExplainableObjectDict) and len(attr_val) > 0:
+                    target_obj = obj
+                    target_eod = attr_val
+                    break
+            if target_obj:
+                break
+
+        assert target_obj is not None, "No non-empty ExplainableObjectDict found in minimal model"
+        next(iter(target_eod.values())).source = custom_source
+
+        assert custom_source.id in [s.id for s in minimal_model_web.available_sources]

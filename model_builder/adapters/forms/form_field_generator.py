@@ -189,6 +189,7 @@ def generate_dynamic_form(
 
     attributes_that_can_have_negative_values = efootprint_class.attributes_that_can_have_negative_values()
     corresponding_web_class = get_corresponding_web_class(efootprint_class)
+    available_sources = [{"id": s.id, "name": s.name, "link": s.link} for s in model_web.available_sources]
     for attr_name in init_sig_params.keys():
         if attr_name in corresponding_web_class.attributes_to_skip_in_forms + ["self"]:
             continue
@@ -247,7 +248,17 @@ def generate_dynamic_form(
         else:
             default = default_values[attr_name]
             source_json = {"name":default.source.name, "link":default.source.link} if default.source else None
-            structure_field.update({"source": source_json})
+            metadata = {
+                "confidence": default.confidence,
+                "comment": default.comment,
+                "source": {
+                    "id": default.source.id,
+                    "name": default.source.name,
+                    "link": default.source.link,
+                } if default.source else None,
+                "available_sources": available_sources,
+            }
+            structure_field.update({"source": source_json, "metadata": metadata})
             if issubclass(annotation, ExplainableQuantity):
                 default_value_decimal = Decimal(str(default.magnitude))
                 default_value = _format_decimal_for_number_input(default_value_decimal)

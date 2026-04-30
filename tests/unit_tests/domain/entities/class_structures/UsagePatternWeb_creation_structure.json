@@ -109,13 +109,17 @@
                     "name": "user data",
                     "link": null
                 },
-                "input_type": "hourly_quantities_from_growth",
-                "subfields_ui_config": {
-                    "initial_volume": {
-                        "label": "Initial number of usage journey starts",
-                        "tooltip": "The number of usage journeys started in the chosen period at the beginning of the projection."
-                    }
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "user_data",
+                        "name": "user data",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
+                "input_type": "hourly_quantities_from_growth",
                 "default": {
                     "start_date": "2025-01-01",
                     "modeling_duration_value": "3",
@@ -124,6 +128,12 @@
                     "net_growth_rate_timespan": "year",
                     "initial_volume": null,
                     "initial_volume_timespan": "month"
+                },
+                "subfields_ui_config": {
+                    "initial_volume": {
+                        "label": "Initial number of usage journey starts",
+                        "tooltip": "The number of usage journeys started in the chosen period at the beginning of the projection."
+                    }
                 }
             }
         ],

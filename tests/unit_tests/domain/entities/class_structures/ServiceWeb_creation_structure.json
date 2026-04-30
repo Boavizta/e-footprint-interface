@@ -35,13 +35,23 @@
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
                 "tooltip": false,
-                "default": "2",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "GB_ram",
+                "default": "2",
                 "can_be_negative": false,
                 "step": "0.1"
             },
@@ -50,13 +60,23 @@
                 "attr_name": "bits_per_pixel",
                 "label": "bits per pixel",
                 "tooltip": false,
-                "default": "0.1",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "bit",
+                "default": "0.1",
                 "can_be_negative": false,
                 "step": "0.1"
             },
@@ -65,13 +85,23 @@
                 "attr_name": "static_delivery_cpu_cost",
                 "label": "static delivery cpu cost",
                 "tooltip": false,
-                "default": "4",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "cpu_core\u00b7s/GB",
+                "default": "4",
                 "can_be_negative": false,
                 "step": "0.1"
             },
@@ -80,13 +110,23 @@
                 "attr_name": "ram_buffer_per_user",
                 "label": "RAM buffer per user",
                 "tooltip": false,
-                "default": "50",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "MB_ram",
+                "default": "50",
                 "can_be_negative": false,
                 "step": "0.1"
             }

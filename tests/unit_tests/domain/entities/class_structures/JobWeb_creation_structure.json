@@ -38,10 +38,6 @@
                 "label": "Available job types",
                 "options": [
                     {
-                        "label": "GPU job",
-                        "value": "GPUJob"
-                    },
-                    {
                         "label": "Gen AI Job",
                         "value": "EcoLogitsGenAIExternalAPIJob"
                     },
@@ -50,101 +46,14 @@
                         "value": "Job"
                     },
                     {
+                        "label": "GPU job",
+                        "value": "GPUJob"
+                    },
+                    {
                         "label": "Video streaming job",
                         "value": "VideoStreamingJob"
                     }
                 ]
-            }
-        ]
-    },
-    {
-        "category": "GPUJob",
-        "header": "GPU job creation",
-        "fields": [
-            {
-                "web_id": "GPUJob_name",
-                "attr_name": "name",
-                "label": "name",
-                "tooltip": false,
-                "input_type": "str",
-                "default": "GPU job 1"
-            },
-            {
-                "web_id": "GPUJob_data_transferred",
-                "attr_name": "data_transferred",
-                "label": "data transferred",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "explainable_quantity",
-                "unit": "kB",
-                "default": "150",
-                "can_be_negative": false,
-                "step": "1"
-            },
-            {
-                "web_id": "GPUJob_data_stored",
-                "attr_name": "data_stored",
-                "label": "data stored",
-                "tooltip": "Data stored in the server\u2019s storage.",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "explainable_quantity",
-                "unit": "kB_stored",
-                "default": "100",
-                "can_be_negative": false,
-                "step": "1"
-            },
-            {
-                "web_id": "GPUJob_request_duration",
-                "attr_name": "request_duration",
-                "label": "request duration",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "explainable_quantity",
-                "unit": "s",
-                "default": "1",
-                "can_be_negative": false,
-                "step": "0.1"
-            }
-        ],
-        "advanced_fields": [
-            {
-                "web_id": "GPUJob_compute_needed",
-                "attr_name": "compute_needed",
-                "label": "compute needed",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "explainable_quantity",
-                "unit": "gpu",
-                "default": "1",
-                "can_be_negative": false,
-                "step": "0.1"
-            },
-            {
-                "web_id": "GPUJob_ram_needed",
-                "attr_name": "ram_needed",
-                "label": "RAM needed",
-                "tooltip": false,
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                },
-                "input_type": "explainable_quantity",
-                "unit": "MB_ram",
-                "default": "50",
-                "can_be_negative": false,
-                "step": "1"
             }
         ]
     },
@@ -168,6 +77,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "dimensionless",
@@ -199,6 +118,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "kB",
                 "default": "150",
@@ -214,6 +143,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "kB_stored",
                 "default": "100",
@@ -228,6 +167,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "s",
@@ -246,6 +195,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "cpu_core",
                 "default": "0.1",
@@ -260,6 +219,157 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "MB_ram",
+                "default": "50",
+                "can_be_negative": false,
+                "step": "1"
+            }
+        ]
+    },
+    {
+        "category": "GPUJob",
+        "header": "GPU job creation",
+        "fields": [
+            {
+                "web_id": "GPUJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": false,
+                "input_type": "str",
+                "default": "GPU job 1"
+            },
+            {
+                "web_id": "GPUJob_data_transferred",
+                "attr_name": "data_transferred",
+                "label": "data transferred",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "kB",
+                "default": "150",
+                "can_be_negative": false,
+                "step": "1"
+            },
+            {
+                "web_id": "GPUJob_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Data stored in the server\u2019s storage.",
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "kB_stored",
+                "default": "100",
+                "can_be_negative": false,
+                "step": "1"
+            },
+            {
+                "web_id": "GPUJob_request_duration",
+                "attr_name": "request_duration",
+                "label": "request duration",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "s",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "0.1"
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "GPUJob_compute_needed",
+                "attr_name": "compute_needed",
+                "label": "compute needed",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "gpu",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "0.1"
+            },
+            {
+                "web_id": "GPUJob_ram_needed",
+                "attr_name": "ram_needed",
+                "label": "RAM needed",
+                "tooltip": false,
+                "source": {
+                    "name": "e-footprint hypothesis",
+                    "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "MB_ram",
@@ -289,6 +399,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "default": "1080p (1920 x 1080)",
                 "input_type": "select_str_input",
@@ -333,6 +453,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "h",
                 "default": "1",
@@ -347,6 +477,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "MB_stored",
@@ -364,6 +504,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "1/s",

@@ -107,6 +107,20 @@ from the current system's own sources. This keeps the picker scoped to sources
 the user has already chosen to cite, and avoids dumping the full `Sources`
 registry on them.
 
+**Same-form cross-field source sharing.** `available_sources` is server-rendered
+at form load, so a custom source created in one field's editor is not in the
+other fields' server-rendered dropdowns by default. To let users reuse a
+freshly-minted source across siblings within the same submission:
+
+- The client generates a stable id (e.g. 6-char random hex) at "Apply" time and
+  writes it into the field's hidden `__source_id` input. It also injects the new
+  source into the in-memory option list of every other source `<select>` in the
+  same form, so siblings can pick it before Save.
+- The server receives the same client-generated id from each field that picked
+  the new source, and `_apply_metadata` deduplicates within the submission via a
+  `pending_sources` dict keyed by that id, ensuring all fields end up referencing
+  the *same* `Source` instance.
+
 **Display when a comment is set:** below the source line, always visible, on one
 expandable line using the existing truncating-text-tooltip pattern
 (`components/truncating_text.html`). Click to expand to full text.

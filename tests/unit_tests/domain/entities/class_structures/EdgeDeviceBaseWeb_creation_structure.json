@@ -45,6 +45,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
@@ -60,6 +70,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "default": "8",
@@ -74,6 +94,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "cpu_core",
@@ -92,6 +122,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "kg",
                 "default": "60",
@@ -106,6 +146,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "W",
@@ -122,6 +172,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "5",
@@ -137,6 +197,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "GB_ram",
                 "default": "1",
@@ -151,6 +221,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "cpu_core",
@@ -181,6 +261,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
@@ -198,6 +288,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "kg",
                 "default": "100",
@@ -213,6 +313,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "W",
                 "default": "50",
@@ -227,6 +337,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "W",
@@ -257,6 +377,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "explainable_quantity",
                 "unit": "yr",
                 "default": "6",
@@ -273,6 +403,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "input_type": "explainable_quantity",
                 "unit": "kg",

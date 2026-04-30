@@ -33,13 +33,23 @@
                 "attr_name": "user_time_spent",
                 "label": "time spent by user",
                 "tooltip": false,
-                "input_type": "explainable_quantity",
-                "unit": "min",
-                "default": "1",
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "min",
+                "default": "1",
                 "can_be_negative": false,
                 "step": "0.1"
             },

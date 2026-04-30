@@ -98,6 +98,7 @@ Notable:
 
 - `create_efootprint_obj_from_parsed_data()` — creates efootprint objects from pre-parsed form data. Supports both list-based (`List[ChildType]`) and dict-based (`ExplainableObjectDict`) constructor parameters.
 - `edit_object_from_parsed_data()` — handles object updates via `ModelingUpdate`.
+- `_apply_metadata(obj, parsed_value, available_sources, pending_sources)` — sets `source`, `confidence`, and `comment` on any `ExplainableObject` from the parsed form dict. Called per-attribute in both create and edit paths. Source resolution order: (1) `available_sources` matched by id (model's existing sources), (2) `pending_sources` matched by id (sources just minted earlier in the same submission), (3) mint a new `Source(name, link, id=submitted_id)` and stash it in `pending_sources`. `pending_sources` is a per-submission dict shared across all calls within one create/edit invocation — this lets two fields submitting the same client-generated id resolve to the same `Source` instance (same-form cross-field source sharing). Confidence carries whatever the form submitted (`None` if absent or invalid); the client clears `__confidence` on value change, so the server simply honors what it receives. `available_sources` is pre-computed once per request and passed in to avoid O(n×m) recomputation inside the per-attribute loop.
 
 ### Extension mechanism
 

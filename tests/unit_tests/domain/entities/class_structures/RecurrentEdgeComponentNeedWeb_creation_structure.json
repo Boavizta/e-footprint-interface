@@ -55,6 +55,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "input_type": "recurrent_quantities_from_constant",
                 "default": {
                     "constant_value": "1.0",

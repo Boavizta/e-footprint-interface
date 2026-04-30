@@ -153,6 +153,21 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
                 raise ValueError(f"Received unit field for unknown quantity {base_attr} in {object_type} form data.")
             parsed[base_attr]["value"] = float(parsed[base_attr]["value"])
             parsed[base_attr]["unit"] = value
+        elif attr_key.endswith("__confidence"):
+            base_attr = attr_key[:-len("__confidence")]
+            parsed.setdefault(base_attr, {})["confidence"] = value if value else None
+        elif attr_key.endswith("__comment"):
+            base_attr = attr_key[:-len("__comment")]
+            parsed.setdefault(base_attr, {})["comment"] = value if value else None
+        elif attr_key.endswith("__source_id"):
+            base_attr = attr_key[:-len("__source_id")]
+            parsed.setdefault(base_attr, {}).setdefault("source", {})["id"] = value if value else None
+        elif attr_key.endswith("__source_name"):
+            base_attr = attr_key[:-len("__source_name")]
+            parsed.setdefault(base_attr, {}).setdefault("source", {})["name"] = value if value else None
+        elif attr_key.endswith("__source_link"):
+            base_attr = attr_key[:-len("__source_link")]
+            parsed.setdefault(base_attr, {}).setdefault("source", {})["link"] = value if value else None
         elif "__" in attr_key:
             base_attr, field_name = attr_key.split("__", 1)
             if base_attr not in parsed:

@@ -168,3 +168,107 @@ class TestParseFormData:
 
         with pytest.raises(ValueError, match=message):
             parse_form_data(form_data, "EdgeDeviceGroup")
+
+
+class TestMetadataSuffixes:
+    """Tests for the five reserved metadata suffixes."""
+
+    def test_parses_confidence_suffix(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__confidence": "medium",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["confidence"] == "medium"
+
+    def test_empty_confidence_becomes_none(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__confidence": "",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["confidence"] is None
+
+    def test_parses_comment_suffix(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__comment": "cross-checked with audit",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["comment"] == "cross-checked with audit"
+
+    def test_empty_comment_becomes_none(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__comment": "",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["comment"] is None
+
+    def test_parses_source_id_suffix(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__source_id": "abc123",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["source"]["id"] == "abc123"
+
+    def test_parses_source_name_suffix(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__source_name": "My Source",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["source"]["name"] == "My Source"
+
+    def test_parses_source_link_suffix(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__source_link": "https://example.com",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["source"]["link"] == "https://example.com"
+
+    def test_empty_source_link_becomes_none(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__source_link": "",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["source"]["link"] is None
+
+    def test_all_five_metadata_suffixes_together(self):
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__confidence": "high",
+            "Server_compute__comment": "verified",
+            "Server_compute__source_id": "src1",
+            "Server_compute__source_name": "ADEME 2024",
+            "Server_compute__source_link": "https://ademe.fr",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"]["value"] == 4.0
+        assert result["compute"]["unit"] == "core"
+        assert result["compute"]["confidence"] == "high"
+        assert result["compute"]["comment"] == "verified"
+        assert result["compute"]["source"] == {"id": "src1", "name": "ADEME 2024", "link": "https://ademe.fr"}
+
+    def test_metadata_suffixes_do_not_go_into_form_inputs(self):
+        """Metadata suffixes must not fall through to the generic __ → form_inputs branch."""
+        form_data = {
+            "UsagePattern_hourly_usage_journey_starts__start_date": "2025-01-01",
+            "UsagePattern_hourly_usage_journey_starts__confidence": "low",
+            "UsagePattern_name": "test",
+        }
+        result = parse_form_data(form_data, "UsagePattern")
+        assert "confidence" not in result["hourly_usage_journey_starts"].get("form_inputs", {})
+        assert result["hourly_usage_journey_starts"]["confidence"] == "low"

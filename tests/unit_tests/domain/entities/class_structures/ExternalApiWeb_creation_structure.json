@@ -37,6 +37,16 @@
                     "name": "e-footprint hypothesis",
                     "link": null
                 },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
                 "default": "anthropic",
                 "input_type": "select_str_input",
                 "selected": "anthropic",
@@ -75,6 +85,16 @@
                 "source": {
                     "name": "e-footprint hypothesis",
                     "link": null
+                },
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
                 },
                 "default": "claude-opus-4-5",
                 "input_type": "datalist",

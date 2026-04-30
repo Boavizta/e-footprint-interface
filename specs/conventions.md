@@ -49,6 +49,18 @@ For data and array operations:
 - If you notice that the AGENTS.md or specs/ files are missing important information that would allow for less context gathering in developments, propose improvements.
 - Whenever you implement or change a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), proactively check whether `architecture.md`, `conventions.md`, or `testing.md` should be updated and propose the changes.
 
+## Form field metadata suffixes
+
+Five reserved suffixes are recognised by `form_data_parser.parse_form_data` **before** the generic `__` → `form_inputs` branch:
+
+- `__confidence` — `"low"` / `"medium"` / `"high"` or empty (→ `None`)
+- `__comment` — free-form text or empty (→ `None`)
+- `__source_id` — id of an existing `Source`; empty means custom entry
+- `__source_name` — source name (used when id is absent or unknown to mint a new `Source`)
+- `__source_link` — source URL (optional, paired with `__source_name`)
+
+These map into `parsed[attr]["confidence"]`, `parsed[attr]["comment"]`, and `parsed[attr]["source"]["id/name/link"]`. Checking them before the generic branch prevents them from landing in `form_inputs`.
+
 ## Test conventions
 
 See `testing.md` for the full testing guide. Highlights:

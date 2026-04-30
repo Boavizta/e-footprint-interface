@@ -5,6 +5,7 @@ from efootprint.abstract_modeling_classes.explainable_object_base_class import E
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
+from efootprint.abstract_modeling_classes.source_objects import Sources
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
@@ -232,6 +233,22 @@ class ModelWeb:
                 if explainable_object.source is not None]
 
         return web_explainable_quantities_sources
+
+    @property
+    def available_sources(self):
+        """Distinct Source instances referenced across the model, plus USER_DATA and HYPOTHESIS sentinels."""
+        sources_by_id = {}
+        for efootprint_obj in self.flat_efootprint_objs_dict.values():
+            for attr_val in get_instance_attributes(efootprint_obj, ExplainableObject).values():
+                if attr_val.source is not None:
+                    sources_by_id.setdefault(attr_val.source.id, attr_val.source)
+            for attr_dict in get_instance_attributes(efootprint_obj, ExplainableObjectDict).values():
+                for elt in attr_dict.values():
+                    if isinstance(elt, ExplainableObject) and elt.source is not None:
+                        sources_by_id.setdefault(elt.source.id, elt.source)
+        for sentinel in (Sources.USER_DATA, Sources.HYPOTHESIS):
+            sources_by_id.setdefault(sentinel.id, sentinel)
+        return sorted(sources_by_id.values(), key=lambda s: s.name)
 
     @property
     def storages(self):
