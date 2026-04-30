@@ -1,5 +1,12 @@
 {
-    "efootprint_version": "20.0.2",
+    "efootprint_version": "21.0.0",
+    "Sources": {
+        "hypothesis": {
+            "id": "hypothesis",
+            "name": "e-footprint hypothesis",
+            "link": null
+        }
+    },
     "System": {
         "uuid-system-1": {
             "name": "My system",
@@ -23,10 +30,7 @@
                 "label": "Time spent on My first usage journey step from hypothesis",
                 "value": 1.0,
                 "unit": "minute",
-                "source": {
-                    "name": "e-footprint hypothesis",
-                    "link": null
-                }
+                "source": "hypothesis"
             },
             "jobs": []
         }

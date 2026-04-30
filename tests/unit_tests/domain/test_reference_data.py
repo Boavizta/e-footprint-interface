@@ -2,6 +2,8 @@ import os
 import json
 from unittest import TestCase
 
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint.constants.countries import Countries
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
@@ -34,12 +36,14 @@ class TestsReferenceData(TestCase):
         default_devices = DEFAULT_DEVICES
         default_countries = DEFAULT_COUNTRIES
 
+        def strip_volatile_keys(d):
+            if isinstance(d, dict):
+                return {k: strip_volatile_keys(v) for k, v in d.items() if k not in ("id", "source")}
+            return d
+
         def check_dict_equality_ignoring_ids(dict1, dict2):
             for subdict1, subdict2 in zip(list(dict1.values()), list(dict2.values())):
-                self.assertDictEqual(
-                    {k: v for k, v in subdict1.items() if k != "id"},
-                    {k: v for k, v in subdict2.items() if k != "id"},
-                )
+                self.assertDictEqual(strip_volatile_keys(subdict1), strip_volatile_keys(subdict2))
 
         check_dict_equality_ignoring_ids(network_archetypes, default_networks)
         check_dict_equality_ignoring_ids(hardware_archetypes, default_devices)
@@ -53,8 +57,13 @@ if __name__ == "__main__":
 
     def recompute_default_object_json_files(efootprint_object_list, filename):
         json_dump = {}
+        sources_dict = {}
         for elt in efootprint_object_list:
             json_dump[elt.id] = elt.to_json()
+            for attr_val in get_instance_attributes(elt, ExplainableObject).values():
+                if attr_val.source is not None and attr_val.source.id not in sources_dict:
+                    sources_dict[attr_val.source.id] = attr_val.source.to_json()
+        json_dump["Sources"] = sources_dict
 
         with open(script_os.path.join(domain_ref_dir, filename), "w") as f:
             json.dump(json_dump, f, indent=4)

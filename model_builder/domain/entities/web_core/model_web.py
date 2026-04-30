@@ -1,6 +1,8 @@
 from copy import deepcopy
 from time import perf_counter
 
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.api_utils.json_to_system import json_to_system
@@ -15,12 +17,22 @@ from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_objec
 
 
 from model_builder.domain.exceptions import SessionExpiredError
-from model_builder.domain.reference_data import DEFAULT_NETWORKS, DEFAULT_DEVICES, DEFAULT_COUNTRIES
+from model_builder.domain.reference_data import (
+    DEFAULT_NETWORKS, DEFAULT_NETWORKS_SOURCES,
+    DEFAULT_DEVICES, DEFAULT_DEVICES_SOURCES,
+    DEFAULT_COUNTRIES, DEFAULT_COUNTRIES_SOURCES,
+)
 
 DEFAULT_OBJECTS_CLASS_MAPPING = {
     "Network": lambda: deepcopy(DEFAULT_NETWORKS),
     "Device": lambda: deepcopy(DEFAULT_DEVICES),
     "Country": lambda: deepcopy(DEFAULT_COUNTRIES),
+}
+
+DEFAULT_SOURCES_CLASS_MAPPING = {
+    "Network": lambda: DEFAULT_NETWORKS_SOURCES,
+    "Device": lambda: DEFAULT_DEVICES_SOURCES,
+    "Country": lambda: DEFAULT_COUNTRIES_SOURCES,
 }
 
 
@@ -71,12 +83,26 @@ class ModelWeb:
         :param save_calculated_attributes: If True, calculated attributes will be included in the serialization.
         :return: JSON representation of the system data.
         """
-        output_json = {"efootprint_version": efootprint_version}
+        sources_by_id = {}
+        modeling_blocks = {}
         for efootprint_obj in self.flat_efootprint_objs_dict.values():
-            if efootprint_obj.class_as_simple_str not in output_json:
-                output_json[efootprint_obj.class_as_simple_str] = {}
-            output_json[efootprint_obj.class_as_simple_str][efootprint_obj.id] = efootprint_obj.to_json(
+            obj_type = efootprint_obj.class_as_simple_str
+            if obj_type not in modeling_blocks:
+                modeling_blocks[obj_type] = {}
+            modeling_blocks[obj_type][efootprint_obj.id] = efootprint_obj.to_json(
                 save_calculated_attributes=save_calculated_attributes)
+            for attr_val in efootprint_obj.__dict__.values():
+                if isinstance(attr_val, ExplainableObject) and attr_val.source is not None:
+                    sources_by_id.setdefault(attr_val.source.id, attr_val.source)
+                elif isinstance(attr_val, ExplainableObjectDict):
+                    for elt in attr_val.values():
+                        if isinstance(elt, ExplainableObject) and elt.source is not None:
+                            sources_by_id.setdefault(elt.source.id, elt.source)
+
+        output_json = {"efootprint_version": efootprint_version}
+        if sources_by_id:
+            output_json["Sources"] = {sid: src.to_json() for sid, src in sorted(sources_by_id.items())}
+        output_json.update(modeling_blocks)
 
         return output_json
 
@@ -133,10 +159,10 @@ class ModelWeb:
         result.raise_if_invalid()
 
     @staticmethod
-    def _efootprint_object_from_json(json_input: dict, object_type: str):
+    def _efootprint_object_from_json(json_input: dict, object_type: str, sources_dict: dict | None = None):
         efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
         efootprint_object, expl_obj_dicts_to_create_after_objects_creation = efootprint_class.from_json_dict(
-            json_input, {}, False, False)
+            json_input, {}, False, False, sources_dict=sources_dict)
         assert len(expl_obj_dicts_to_create_after_objects_creation) == 0, \
             f"{object_type} object {efootprint_object.id} has explainable objects to create after objects creation"
         efootprint_object.after_init()
@@ -146,8 +172,9 @@ class ModelWeb:
     def get_efootprint_objects_from_efootprint_type(self, obj_type):
         output_list = []
         if obj_type in DEFAULT_OBJECTS_CLASS_MAPPING:
+            sources_dict = DEFAULT_SOURCES_CLASS_MAPPING[obj_type]()
             for json_input in DEFAULT_OBJECTS_CLASS_MAPPING[obj_type]().values():
-                output_list.append(self._efootprint_object_from_json(json_input, obj_type))
+                output_list.append(self._efootprint_object_from_json(json_input, obj_type, sources_dict))
 
         obj_type_class = MODELING_OBJECT_CLASSES_DICT.get(obj_type, None)
         if obj_type_class is None:
@@ -171,7 +198,8 @@ class ModelWeb:
             efootprint_object = self.flat_efootprint_objs_dict[efootprint_id]
         else:
             web_object_json = DEFAULT_OBJECTS_CLASS_MAPPING[object_type]()[efootprint_id]
-            efootprint_object = self._efootprint_object_from_json(web_object_json, object_type)
+            sources_dict = DEFAULT_SOURCES_CLASS_MAPPING[object_type]()
+            efootprint_object = self._efootprint_object_from_json(web_object_json, object_type, sources_dict)
             web_object = self.add_new_efootprint_object_to_system(efootprint_object)
             logger.info(f"Object {web_object.name} created from default object and added to system data.")
 

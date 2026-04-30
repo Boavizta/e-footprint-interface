@@ -1,82 +1,75 @@
 {
-    "4b06f5": {
+    "435f6a": {
         "name": "Default laptop",
-        "id": "4b06f5",
+        "id": "435f6a",
         "carbon_footprint_fabrication": {
             "value": 156.0,
             "unit": "kilogram",
             "label": "Carbon footprint fabrication",
-            "source": {
-                "name": "Base ADEME_V19",
-                "link": "https://data.ademe.fr/datasets/base-carbone(r)"
-            }
+            "source": "8bffc1"
         },
         "power": {
             "value": 50.0,
             "unit": "watt",
             "label": "Power",
-            "source": {
-                "name": "e-footprint hypothesis",
-                "link": null
-            }
+            "source": "hypothesis"
         },
         "lifespan": {
             "value": 6.0,
             "unit": "year",
             "label": "Lifespan",
-            "source": {
-                "name": "e-footprint hypothesis",
-                "link": null
-            }
+            "source": "hypothesis"
         },
         "fraction_of_usage_time": {
             "value": 7.0,
             "unit": "hour / day",
             "label": "Fraction of usage time",
-            "source": {
-                "name": "DATA.AI - STATE OF MOBILE",
-                "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
-            }
+            "source": "318f49"
         }
     },
-    "807991": {
+    "462461": {
         "name": "Default smartphone",
-        "id": "807991",
+        "id": "462461",
         "carbon_footprint_fabrication": {
             "value": 30.0,
             "unit": "kilogram",
             "label": "Carbon footprint fabrication",
-            "source": {
-                "name": "Base ADEME_V19",
-                "link": "https://data.ademe.fr/datasets/base-carbone(r)"
-            }
+            "source": "8bffc1"
         },
         "power": {
             "value": 1.0,
             "unit": "watt",
             "label": "Power",
-            "source": {
-                "name": "e-footprint hypothesis",
-                "link": null
-            }
+            "source": "hypothesis"
         },
         "lifespan": {
             "value": 3.0,
             "unit": "year",
             "label": "Lifespan",
-            "source": {
-                "name": "e-footprint hypothesis",
-                "link": null
-            }
+            "source": "hypothesis"
         },
         "fraction_of_usage_time": {
             "value": 3.6,
             "unit": "hour / day",
             "label": "Fraction of usage time",
-            "source": {
-                "name": "DATA.AI - STATE OF MOBILE",
-                "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
-            }
+            "source": "318f49"
+        }
+    },
+    "Sources": {
+        "8bffc1": {
+            "id": "8bffc1",
+            "name": "Base ADEME_V19",
+            "link": "https://data.ademe.fr/datasets/base-carbone(r)"
+        },
+        "hypothesis": {
+            "id": "hypothesis",
+            "name": "e-footprint hypothesis",
+            "link": null
+        },
+        "318f49": {
+            "id": "318f49",
+            "name": "DATA.AI - STATE OF MOBILE",
+            "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
         }
     }
 }

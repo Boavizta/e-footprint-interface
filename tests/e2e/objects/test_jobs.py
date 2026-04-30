@@ -18,6 +18,7 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.utils import add_only_update
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -49,10 +50,8 @@ def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage):
     server = Server.from_defaults("Test Server", storage=storage)
     service = VideoStreaming.from_defaults("Test Service", server=server)
 
-    # Add orphaned objects to the system dict
-    system_dict["Storage"] = {storage.id: storage.to_json(save_calculated_attributes=False)}
-    system_dict["Server"] = {server.id: server.to_json(save_calculated_attributes=False)}
-    system_dict["VideoStreaming"] = {service.id: service.to_json(save_calculated_attributes=False)}
+    # Add orphaned objects to the system dict (service links server → storage, so one call covers all three)
+    add_only_update(system_dict, system_to_json(service, save_calculated_attributes=False))
 
     return load_system_dict_into_browser(model_builder_page, system_dict)
 
