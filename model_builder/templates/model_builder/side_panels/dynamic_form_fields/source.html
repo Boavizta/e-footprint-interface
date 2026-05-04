@@ -30,22 +30,5 @@ source_meta_source (obj with .link/.name/.id), source_meta_comment, source_meta_
         {% include "model_builder/components/truncating_text.html" with visible_text=source_meta_comment full_text=source_meta_comment extra_classes="comment-text" %}
     </div>
 
-    <input type="hidden"
-           name="{{ source_name_prefix }}__source_id"
-           id="{{ source_dom_id }}__source_id"
-           value="{{ source_meta_source.id|default:'' }}">
-    <input type="hidden"
-           name="{{ source_name_prefix }}__source_name"
-           id="{{ source_dom_id }}__source_name"
-           value="{{ source_meta_source.name|default:'' }}">
-    <input type="hidden"
-           name="{{ source_name_prefix }}__source_link"
-           id="{{ source_dom_id }}__source_link"
-           value="{{ source_meta_source.link|default:'' }}">
-    <input type="hidden"
-           name="{{ source_name_prefix }}__comment"
-           id="{{ source_dom_id }}__comment"
-           value="{{ source_meta_comment|default:'' }}">
-
-    {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" with source_editor_id=source_dom_id source_meta_available=source_meta_available source_meta_current_id=source_meta_source.id %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" with source_editor_id=source_dom_id source_editor_name_prefix=source_name_prefix source_meta_available=source_meta_available source_meta_current_id=source_meta_source.id source_meta_current_name=source_meta_source.name source_meta_current_link=source_meta_source.link source_meta_current_comment=source_meta_comment %}
 </div>

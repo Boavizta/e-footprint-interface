@@ -11,9 +11,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from openpyxl import Workbook
-from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
-from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
 from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
@@ -30,7 +27,6 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     prepare_hourly_quantity_data,
     prepare_recurrent_quantity_data,
 )
-from model_builder.domain.entities.web_abstract_modeling_classes.object_linked_to_modeling_obj_web import ObjectLinkedToModelingObjWeb
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.domain.services import ProgressiveImportService

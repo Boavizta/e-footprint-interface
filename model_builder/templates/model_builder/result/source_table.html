@@ -30,6 +30,7 @@
                 {% for explainable_quantity in model_web.web_explainable_quantities_sources %}
                 {% with is_calculated=explainable_quantity.is_calculated %}
                 {% with field_name_prefix=explainable_quantity.modeling_obj_container.class_as_simple_str|add:"_"|add:explainable_quantity.attr_name_in_mod_obj_container %}
+                {% url 'edit-object' explainable_quantity.modeling_obj_container.efootprint_id as edit_object_url %}
                 <tr>
                     <th scope="row" class="source-col-name">
                         {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.label|capfirst %}
@@ -65,7 +66,6 @@
                     </td>
                     <td class="source-col-confidence">
                         {% if not is_calculated %}
-                            {% url 'edit-object' explainable_quantity.modeling_obj_container.efootprint_id as edit_object_url %}
                             {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_autosave_refresh_url=source_table_url %}
                         {% endif %}
                     </td>

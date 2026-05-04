@@ -13,6 +13,7 @@ const {
     resetConfidenceForField,
     swapHypothesisToUserDataForField,
     autosaveConfidence,
+    initInFormSourceEditorsIn,
 } = require("../theme/static/scripts/source_metadata.js");
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures");
@@ -29,6 +30,13 @@ function loadFixture(name) {
 
 function mount(name) {
     document.body.innerHTML = `<form>${loadFixture(name)}</form>`;
+}
+
+// Row-editor fixtures already include their own <form>; the HTML parser silently drops a nested
+// <form>, so we mount them straight into a stand-in for the .collapse wrapper that hosts them
+// in production.
+function mountRowEditor(name) {
+    document.body.innerHTML = `<div class="collapse show" id="row-editor-row1">${loadFixture(name)}</div>`;
 }
 
 global.tagFormAsModified = jest.fn();
@@ -312,6 +320,80 @@ test("setConfidence on a wrap with autosave attrs POSTs only the new confidence,
     expect(document.getElementById("row1__confidence").value).toBe("high");
 
     delete global.htmx;
+});
+
+/* ===== In-form source editor (source-table row) ===== */
+
+test("applySourceEditor in row form mode writes hidden inputs and triggers form submit (no manual POST)", () => {
+    mountRowEditor("row_editor_listed_user_data");
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "src1";
+    editor.querySelector(".source-editor-comment").value = "vetted";
+    global.htmx = {trigger: jest.fn(), ajax: jest.fn()};
+
+    applySourceEditor("row1_row");
+
+    expect(document.getElementById("row1_row__source_id").value).toBe("src1");
+    expect(document.getElementById("row1_row__source_name").value).toBe("ADEME 2024");
+    expect(document.getElementById("row1_row__source_link").value).toBe("https://ademe.fr");
+    expect(document.getElementById("row1_row__comment").value).toBe("vetted");
+    expect(global.htmx.trigger).toHaveBeenCalledWith(
+        document.querySelector("form[data-action='source-table-row-edit']"), "submit");
+    expect(global.htmx.ajax).not.toHaveBeenCalled();
+    delete global.htmx;
+});
+
+test("applySourceEditor in row form mode + custom source mints fresh id when prior was a listed source", () => {
+    mountRowEditor("row_editor_listed_src1");
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "__custom__";
+    editor.querySelector(".source-editor-custom-name").value = "Internal";
+    editor.querySelector(".source-editor-custom-link").value = "https://x";
+    global.htmx = {trigger: jest.fn()};
+
+    applySourceEditor("row1_row");
+
+    const newId = document.getElementById("row1_row__source_id").value;
+    expect(newId).toMatch(/^[0-9a-f]{6}$/);
+    expect(newId).not.toBe("src1");
+    expect(document.getElementById("row1_row__source_name").value).toBe("Internal");
+    expect(document.getElementById("row1_row__source_link").value).toBe("https://x");
+    delete global.htmx;
+});
+
+test("applySourceEditor in row form mode + custom source reuses prior id when still editing the same custom source", () => {
+    mountRowEditor("row_editor_unlisted_custom");
+    initInFormSourceEditorsIn(); // editor needs to be in __custom__ mode to read the prior id correctly
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-custom-name").value = "Internal v2";
+    global.htmx = {trigger: jest.fn()};
+
+    applySourceEditor("row1_row");
+
+    expect(document.getElementById("row1_row__source_id").value).toBe("abc123");
+    delete global.htmx;
+});
+
+test("initInFormSourceEditorsIn flips the select to __custom__ and prefills name/link when prior source isn't listed", () => {
+    mountRowEditor("row_editor_unlisted_custom");
+
+    initInFormSourceEditorsIn();
+
+    const editor = document.getElementById("editor-row1_row");
+    expect(editor.querySelector(".source-editor-select").value).toBe("__custom__");
+    expect(document.getElementById("custom-fields-row1_row").classList.contains("open")).toBe(true);
+    expect(editor.querySelector(".source-editor-custom-name").value).toBe("Internal");
+    expect(editor.querySelector(".source-editor-custom-link").value).toBe("");
+});
+
+test("initInFormSourceEditorsIn keeps the listed source selected and the custom-fields panel hidden when prior id matches", () => {
+    mountRowEditor("row_editor_listed_src1");
+
+    initInFormSourceEditorsIn();
+
+    const editor = document.getElementById("editor-row1_row");
+    expect(editor.querySelector(".source-editor-select").value).toBe("src1");
+    expect(document.getElementById("custom-fields-row1_row").classList.contains("open")).toBe(false);
 });
 
 test("autosaveConfidence on a 'none' selection sends an empty confidence string", async () => {

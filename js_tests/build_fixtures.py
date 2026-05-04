@@ -97,6 +97,57 @@ def render_metadata_field(field_ctx):
 
 
 # ---------------------------------------------------------------------------
+# source_metadata.test.js — source_table_row_editor.html (in-form source editor)
+# ---------------------------------------------------------------------------
+
+ROW_EDITOR_AVAILABLE = [SRC1, USER_DATA]
+
+
+def row_editor(prior_source, prior_comment="", available_sources=ROW_EDITOR_AVAILABLE):
+    return {
+        "prior_source": prior_source,
+        "prior_comment": prior_comment,
+        "available_sources": list(available_sources),
+    }
+
+
+ROW_EDITOR_CASES = {
+    # priorId is in the available list (sentinel) — init keeps the select on it.
+    "row_editor_listed_user_data": row_editor(prior_source=USER_DATA),
+    # priorId is in the available list (a known source) — init keeps the select on it.
+    "row_editor_listed_src1": row_editor(prior_source=SRC1),
+    # priorId isn't in the available list — init flips the select to __custom__ + prefills name/link.
+    "row_editor_unlisted_custom": row_editor(
+        prior_source={"id": "abc123", "name": "Internal", "link": ""}),
+}
+
+
+def render_row_editor(case_ctx):
+    from types import SimpleNamespace
+
+    src = case_ctx["prior_source"]
+    eq = SimpleNamespace(
+        web_id="row1",
+        comment=case_ctx["prior_comment"],
+        source=SimpleNamespace(id=src["id"], name=src["name"], link=src["link"]),
+        modeling_obj_container=SimpleNamespace(efootprint_id="obj1"),
+    )
+    return render_to_string(
+        "model_builder/result/source_table_row_editor.html",
+        {
+            "eq": eq,
+            "field_name_prefix": "Server_compute",
+            "available_sources": [
+                SimpleNamespace(id=s["id"], name=s["name"], link=s["link"])
+                for s in case_ctx["available_sources"]
+            ],
+            "edit_object_url": "/edit/obj1/",
+            "source_table_url": "/source-table/",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # dict_count.test.js — dict_count.html
 # ---------------------------------------------------------------------------
 
@@ -134,6 +185,7 @@ def render_dict_count(field_ctx):
 
 GROUPS = [
     (SOURCE_METADATA_CASES, render_metadata_field),
+    (ROW_EDITOR_CASES, render_row_editor),
     (DICT_COUNT_CASES, render_dict_count),
 ]
 

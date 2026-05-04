@@ -200,10 +200,27 @@
         _hiddenInput(fieldId, "source_link").value = sourceLink;
         _hiddenInput(fieldId, "comment").value = comment.value;
 
-        _updateSourceDisplay(fieldId, sourceName, sourceLink, comment.value);
+        // In the source-table row editor, Apply also submits the wrapping form (one click ships
+        // the change). In the side panel, the editor lives inside a much bigger form — leave
+        // submission to the user's Save click.
+        const rowForm = editor.closest("form[data-action='source-table-row-edit']");
+        if (rowForm) {
+            htmx.trigger(rowForm, "submit");
+            return;
+        }
 
+        _updateSourceDisplay(fieldId, sourceName, sourceLink, comment.value);
         editor.classList.remove("open");
         if (typeof tagFormAsModified === "function") tagFormAsModified();
+    }
+
+    /* Each freshly-rendered in-form source editor (table row editor) needs the select / custom
+       fields synced to its hidden inputs — same job _populateEditorFromHidden does on each
+       openSourceEditor call in the side panel, but the table editor is rendered already-open. */
+    function initInFormSourceEditorsIn(root) {
+        (root || document).querySelectorAll(
+            "form[data-action='source-table-row-edit'] .source-editor"
+        ).forEach(editor => _populateEditorFromHidden(editor.dataset.fieldId));
     }
 
     function handleSourceSelect(select, fieldId) {
@@ -371,9 +388,16 @@
         }
     });
 
+    /* Pick up freshly-rendered in-form source editors after the source table reloads
+       (and once on initial DOMContentLoaded for the no-htmx case). Idempotent. */
+    document.addEventListener("htmx:load", e => initInFormSourceEditorsIn(e.target));
+    document.addEventListener("DOMContentLoaded", () => initInFormSourceEditorsIn());
+
+    /* After the row form's POST succeeds, refresh the source table — the re-render
+       collapses the row that submitted (no `show` class on the new markup). */
     document.addEventListener("htmx:afterRequest", e => {
         if (!e.detail.successful) return;
-        const form = e.target.closest("[data-action='source-table-row-save']");
+        const form = e.target.closest("form[data-action='source-table-row-edit']");
         if (!form) return;
         htmx.ajax("GET", form.dataset.sourceTableUrl, {target: "#source-block", swap: "innerHTML"});
     });
@@ -395,6 +419,7 @@
             handleSourceSelect, checkCollision,
             resetConfidenceForField, swapHypothesisToUserDataForField,
             autosaveConfidence,
+            initInFormSourceEditorsIn,
         };
     }
 })();

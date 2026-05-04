@@ -1,22 +1,10 @@
-{# Variables expected: eq (ExplainableQuantityWeb), field_name_prefix (str), available_sources (list) #}
-{% with eq_web_id=eq.web_id %}
-<div class="p-3">
-    <form hx-post="{% url 'edit-object' eq.modeling_obj_container.efootprint_id %}"
-          hx-swap="none"
-          data-action="source-table-row-save"
-          data-source-table-url="{% url 'source-table' %}">
-
-        {% comment %}Confidence is edited inline via the table-cell badge (autosaves on click).
-        _apply_metadata patches in place, so omitting it from this form's save is safe.{% endcomment %}
-        {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_dom_id=eq_web_id source_name_prefix=field_name_prefix source_meta_source=eq.source source_meta_comment=eq.comment source_meta_available=available_sources %}
-
-        <div class="d-flex gap-2 justify-content-end mt-3">
-            <button type="button"
-                    class="btn btn-outline-secondary btn-sm"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#row-editor-{{ eq_web_id }}">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-sm">Save</button>
-        </div>
-    </form>
-</div>
-{% endwith %}
+{% comment %}
+Variables expected: eq (ExplainableQuantityWeb), field_name_prefix (str), available_sources (list). edit_object_url and source_table_url come from the parent source_table.html context. Source/comment edit for one source-table row: a real HTMX form wrapping the source editor. Apply writes hidden inputs (applySourceEditor) and the form posts; on success the row collapses (table refresh re-renders it closed). Confidence is edited inline via the badge.
+{% endcomment %}
+<form class="p-3"
+      hx-post="{{ edit_object_url }}"
+      hx-swap="none"
+      data-action="source-table-row-edit"
+      data-source-table-url="{{ source_table_url }}">
+    {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" with source_editor_id=eq.web_id|add:"_row" source_editor_name_prefix=field_name_prefix source_meta_available=available_sources source_meta_current_id=eq.source.id source_meta_current_name=eq.source.name source_meta_current_link=eq.source.link source_meta_current_comment=eq.comment source_editor_open=True source_editor_cancel_target="row-editor-"|add:eq.web_id %}
+</form>

@@ -1,9 +1,16 @@
 {% comment %}
-Context variables expected in scope:
-  source_editor_id       — unique string id prefix for DOM elements
-  source_meta_available  — list of Source objects available for picking
-  source_meta_current_id — id of the currently selected source (string or None)
-  source_editor_open     — if truthy, adds the 'open' class so the editor renders visible (optional)
+Context variables:
+  source_editor_id          — unique string id prefix for DOM elements
+  source_editor_name_prefix — form name prefix for hidden inputs (e.g. "Server_compute")
+  source_meta_available     — list of Source objects available for picking
+  source_meta_current_id    — id of the currently selected source (string or None)
+  source_meta_current_name  — name of the current source (string)
+  source_meta_current_link  — link of the current source (string or None)
+  source_meta_current_comment — current comment (string or None)
+  source_editor_open        — if truthy, adds the 'open' class so the editor renders visible (optional)
+  source_editor_cancel_target — id (no '#') of a Bootstrap collapse to hide on Cancel. When set,
+                                Cancel uses data-bs-toggle/data-bs-target instead of the JS
+                                cancel-source-editor handler (used by the source-table row form).
 {% endcomment %}
 <div class="source-editor{% if source_editor_open %} open{% endif %}"
      id="editor-{{ source_editor_id }}"
@@ -46,12 +53,27 @@ Context variables expected in scope:
     <textarea class="form-control source-editor-comment"
               rows="3"
               maxlength="2000"
-              placeholder="Add a note — why this source, any caveats, audit trail…"></textarea>
+              placeholder="Add a note — why this source, any caveats, audit trail…">{{ source_meta_current_comment|default:'' }}</textarea>
+
+    {% comment %}Hidden inputs ride whatever form wraps the editor (or just the side panel form).
+    Apply (applySourceEditor) overwrites them with the resolved selection on click.{% endcomment %}
+    <input type="hidden" name="{{ source_editor_name_prefix }}__source_id"
+           id="{{ source_editor_id }}__source_id" value="{{ source_meta_current_id|default:'' }}">
+    <input type="hidden" name="{{ source_editor_name_prefix }}__source_name"
+           id="{{ source_editor_id }}__source_name" value="{{ source_meta_current_name|default:'' }}">
+    <input type="hidden" name="{{ source_editor_name_prefix }}__source_link"
+           id="{{ source_editor_id }}__source_link" value="{{ source_meta_current_link|default:'' }}">
+    <input type="hidden" name="{{ source_editor_name_prefix }}__comment"
+           id="{{ source_editor_id }}__comment" value="{{ source_meta_current_comment|default:'' }}">
 
     <div class="editor-actions">
         <button type="button"
                 class="btn btn-outline-secondary btn-sm"
-                data-action="cancel-source-editor">Cancel</button>
+                {% if source_editor_cancel_target %}
+                data-bs-toggle="collapse" data-bs-target="#{{ source_editor_cancel_target }}"
+                {% else %}
+                data-action="cancel-source-editor"
+                {% endif %}>Cancel</button>
         <button type="button"
                 class="btn btn-primary btn-sm"
                 data-action="apply-source-editor">Apply</button>
