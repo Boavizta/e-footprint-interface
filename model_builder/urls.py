@@ -41,6 +41,7 @@ urlpatterns = [
          name="display-calculus-graph-from-dict"),
     path("graph/<cache_key>", model_builder.adapters.views.views.get_calculus_graph, name="get-graph"),
     path("download-sources/", views.download_sources, name="download-sources"),
+    path("source-table/", views.source_table, name="source-table"),
     path("open-panel-system-name/", model_builder.adapters.views.views_edition.open_panel_system_name,
          name="open-panel-system-name"),
     path("save-system-name/", model_builder.adapters.views.views_edition.save_system_name, name="save-system-name"),

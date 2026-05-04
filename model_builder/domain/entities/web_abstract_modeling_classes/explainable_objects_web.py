@@ -75,6 +75,13 @@ class ExplainableObjectWeb(ObjectLinkedToModelingObjWeb):
             return human_readable_unit(self.efootprint_object.display_unit)
         return ""
 
+    @property
+    def is_calculated(self):
+        container = self.efootprint_object.modeling_obj_container
+        if container is None:
+            return False
+        return self.efootprint_object.attr_name_in_mod_obj_container in container.calculated_attributes
+
 
 class ExplainableQuantityWeb(ExplainableObjectWeb):
     @property

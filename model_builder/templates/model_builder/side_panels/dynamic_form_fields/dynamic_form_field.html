@@ -5,9 +5,9 @@
             <div class="flex-grow-1">
                 {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
             </div>
-            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" %}
+            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=field.web_id conf_name_prefix=field.web_id conf_current=field.metadata.confidence %}
         </div>
-        {% include "model_builder/side_panels/dynamic_form_fields/source.html" %}
+        {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_dom_id=field.web_id source_name_prefix=field.web_id source_meta_source=field.metadata.source source_meta_comment=field.metadata.comment source_meta_available=field.metadata.available_sources %}
     {% else %}
         {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
     {% endif %}

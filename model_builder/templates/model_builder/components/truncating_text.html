@@ -1,6 +1,6 @@
+{% with tooltip_text=full_text|default:visible_text %}
 <p class="mb-0 text-truncate min-w-0 truncated-text-tooltip {{ extra_classes }}"
-   data-bs-toggle="tooltip"
-   data-bs-placement="top"
-   data-bs-title="{{ full_text|default:visible_text }}">
+   {% if tooltip_text %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ tooltip_text }}"{% endif %}>
     {{ visible_text }}
 </p>
+{% endwith %}

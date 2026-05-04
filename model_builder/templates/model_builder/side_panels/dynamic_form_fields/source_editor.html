@@ -1,22 +1,28 @@
-{% with metadata=field.metadata %}
-<div class="source-editor"
-     id="editor-{{ field.web_id }}"
-     data-field-id="{{ field.web_id }}">
+{% comment %}
+Context variables expected in scope:
+  source_editor_id       — unique string id prefix for DOM elements
+  source_meta_available  — list of Source objects available for picking
+  source_meta_current_id — id of the currently selected source (string or None)
+  source_editor_open     — if truthy, adds the 'open' class so the editor renders visible (optional)
+{% endcomment %}
+<div class="source-editor{% if source_editor_open %} open{% endif %}"
+     id="editor-{{ source_editor_id }}"
+     data-field-id="{{ source_editor_id }}">
     <label class="editor-label">Source</label>
     <select class="form-select form-select-sm source-editor-select"
             data-action="source-select-change">
-        {% for available in metadata.available_sources %}
+        {% for available in source_meta_available %}
             <option value="{{ available.id }}"
                     data-name="{{ available.name }}"
                     data-link="{{ available.link|default:'' }}"
-                    {% if metadata.source.id == available.id %}selected{% endif %}>
+                    {% if source_meta_current_id == available.id %}selected{% endif %}>
                 {{ available.name }}
             </option>
         {% endfor %}
         <option value="__custom__">Custom source…</option>
     </select>
 
-    <div class="custom-fields" id="custom-fields-{{ field.web_id }}">
+    <div class="custom-fields" id="custom-fields-{{ source_editor_id }}">
         <div class="mb-2">
             <label class="form-label">Name</label>
             <input type="text"
@@ -30,7 +36,7 @@
                    class="form-control form-control-sm source-editor-custom-link"
                    placeholder="https://…">
         </div>
-        <div class="collision-notice" id="collision-{{ field.web_id }}">
+        <div class="collision-notice" id="collision-{{ source_editor_id }}">
             <strong>A canonical source with this name already exists.</strong>
             If you want to reuse it, pick it from the dropdown instead — this entry will be kept as a separate source.
         </div>
@@ -51,4 +57,3 @@
                 data-action="apply-source-editor">Apply</button>
     </div>
 </div>
-{% endwith %}

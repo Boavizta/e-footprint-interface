@@ -272,3 +272,23 @@ class TestMetadataSuffixes:
         result = parse_form_data(form_data, "UsagePattern")
         assert "confidence" not in result["hourly_usage_journey_starts"].get("form_inputs", {})
         assert result["hourly_usage_journey_starts"]["confidence"] == "low"
+
+    def test_metadata_only_submission_sets_flag(self):
+        """Only metadata suffixes with no value key → _metadata_only True on the parsed attribute."""
+        form_data = {
+            "Server_compute__confidence": "high",
+            "Server_compute__comment": "verified",
+            "Server_compute__source_id": "src1",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert result["compute"].get("_metadata_only") is True
+
+    def test_value_plus_metadata_does_not_set_flag(self):
+        """Value + metadata suffixes → no _metadata_only flag."""
+        form_data = {
+            "Server_compute": "4",
+            "Server_compute__unit": "core",
+            "Server_compute__confidence": "high",
+        }
+        result = parse_form_data(form_data, "Server")
+        assert "_metadata_only" not in result["compute"]

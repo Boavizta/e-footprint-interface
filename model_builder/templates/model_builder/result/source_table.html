@@ -20,10 +20,15 @@
                     <th scope="col" class="source-col-value">Value</th>
                     <th scope="col" class="source-col-unit">Unit</th>
                     <th scope="col" class="source-col-source">Source</th>
+                    <th scope="col" class="source-col-confidence">Confidence</th>
+                    <th scope="col" class="source-col-comment">Comment</th>
+                    <th scope="col" class="source-col-edit"></th>
                 </tr>
             </thead>
             <tbody class="text-start">
                 {% for explainable_quantity in model_web.web_explainable_quantities_sources %}
+                {% with is_calculated=explainable_quantity.is_calculated %}
+                {% with field_name_prefix=explainable_quantity.modeling_obj_container.class_as_simple_str|add:"_"|add:explainable_quantity.attr_name_in_mod_obj_container %}
                 <tr>
                     <th scope="row" class="source-col-name">
                         {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.label|capfirst %}
@@ -50,14 +55,48 @@
                             {% else %}
                                 {{ explainable_quantity.source.name }}
                             {% endif %}
-                            {% if explainable_quantity.attr_name_in_mod_obj_container in explainable_quantity.modeling_obj_container.calculated_attributes %}
+                            {% if is_calculated %}
                                 <a href="{% url 'display-calculus-graph' explainable_quantity.modeling_obj_container.efootprint_id explainable_quantity.attr_name_in_mod_obj_container %}" target="_blank">
                                 (see graph)
                                 </a>
                             {% endif %}
                         </p>
                     </td>
+                    <td class="source-col-confidence">
+                        {% if not is_calculated and explainable_quantity.confidence %}
+                            <span class="confidence-table-badge conf-{{ explainable_quantity.confidence }}">
+                                {{ explainable_quantity.confidence|capfirst }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="source-col-comment">
+                        {% if not is_calculated and explainable_quantity.comment %}
+                            {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.comment %}
+                        {% endif %}
+                    </td>
+                    <td class="source-col-edit">
+                        {% if not is_calculated %}
+                            <button type="button"
+                                    class="btn btn-sm btn-link p-0 source-table-edit-btn"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#row-editor-{{ explainable_quantity.web_id }}"
+                                    aria-expanded="false">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        {% endif %}
+                    </td>
                 </tr>
+                {% if not is_calculated %}
+                <tr class="source-table-editor-row">
+                    <td colspan="9" class="p-0">
+                        <div id="row-editor-{{ explainable_quantity.web_id }}" class="collapse">
+                            {% include 'model_builder/result/source_table_row_editor.html' with eq=explainable_quantity available_sources=model_web.available_sources field_name_prefix=field_name_prefix %}
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endwith %}
+                {% endwith %}
                 {% endfor %}
             </tbody>
         </table>

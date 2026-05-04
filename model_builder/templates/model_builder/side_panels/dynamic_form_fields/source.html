@@ -1,5 +1,8 @@
-{% with metadata=field.metadata %}
-<div class="source-comment" id="source-{{ field.web_id }}" data-field-id="{{ field.web_id }}">
+{% comment %}
+Context vars: source_dom_id (DOM id prefix), source_name_prefix (form name prefix),
+source_meta_source (obj with .link/.name/.id), source_meta_comment, source_meta_available
+{% endcomment %}
+<div class="source-comment" id="source-{{ source_dom_id }}" data-field-id="{{ source_dom_id }}">
     <div class="source-line"
          data-action="open-source-editor"
          role="button"
@@ -7,43 +10,42 @@
         <i class="bi bi-link-45deg"></i>
         <span>Source:&nbsp;</span>
         <span class="source-name-display">
-            {% if metadata.source.link %}
-                <a href="{{ metadata.source.link }}"
+            {% if source_meta_source.link %}
+                <a href="{{ source_meta_source.link }}"
                    target="_blank"
                    class="sources-label"
-                   onclick="event.stopPropagation();">{{ metadata.source.name }}</a>
+                   onclick="event.stopPropagation();">{{ source_meta_source.name }}</a>
             {% else %}
-                <span class="sources-label">{{ metadata.source.name|default:"" }}</span>
+                <span class="sources-label">{{ source_meta_source.name|default:"" }}</span>
             {% endif %}
         </span>
         <i class="bi bi-pencil-fill"></i>
     </div>
-    <div class="comment-line {% if not metadata.comment %}d-none{% endif %}"
+    <div class="comment-line {% if not source_meta_comment %}d-none{% endif %}"
          data-action="toggle-comment-expand"
          role="button"
          tabindex="0"
          title="Click to expand">
         <i class="bi bi-chat-quote"></i>
-        {% include "model_builder/components/truncating_text.html" with visible_text=metadata.comment full_text=metadata.comment extra_classes="comment-text" %}
+        {% include "model_builder/components/truncating_text.html" with visible_text=source_meta_comment full_text=source_meta_comment extra_classes="comment-text" %}
     </div>
 
     <input type="hidden"
-           name="{{ field.web_id }}__source_id"
-           id="{{ field.web_id }}__source_id"
-           value="{{ metadata.source.id|default:'' }}">
+           name="{{ source_name_prefix }}__source_id"
+           id="{{ source_dom_id }}__source_id"
+           value="{{ source_meta_source.id|default:'' }}">
     <input type="hidden"
-           name="{{ field.web_id }}__source_name"
-           id="{{ field.web_id }}__source_name"
-           value="{{ metadata.source.name|default:'' }}">
+           name="{{ source_name_prefix }}__source_name"
+           id="{{ source_dom_id }}__source_name"
+           value="{{ source_meta_source.name|default:'' }}">
     <input type="hidden"
-           name="{{ field.web_id }}__source_link"
-           id="{{ field.web_id }}__source_link"
-           value="{{ metadata.source.link|default:'' }}">
+           name="{{ source_name_prefix }}__source_link"
+           id="{{ source_dom_id }}__source_link"
+           value="{{ source_meta_source.link|default:'' }}">
     <input type="hidden"
-           name="{{ field.web_id }}__comment"
-           id="{{ field.web_id }}__comment"
-           value="{{ metadata.comment|default:'' }}">
+           name="{{ source_name_prefix }}__comment"
+           id="{{ source_dom_id }}__comment"
+           value="{{ source_meta_comment|default:'' }}">
 
-    {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" %}
+    {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" with source_editor_id=source_dom_id source_meta_available=source_meta_available source_meta_current_id=source_meta_source.id %}
 </div>
-{% endwith %}

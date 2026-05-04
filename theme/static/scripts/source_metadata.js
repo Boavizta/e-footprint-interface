@@ -332,6 +332,13 @@
         }
     });
 
+    document.addEventListener("htmx:afterRequest", e => {
+        if (!e.detail.successful) return;
+        const form = e.target.closest("[data-action='source-table-row-save']");
+        if (!form) return;
+        htmx.ajax("GET", form.dataset.sourceTableUrl, {target: "#source-block", swap: "innerHTML"});
+    });
+
     /* Cross-module hook: dynamic_forms.js fires this when an input value changes,
        so we can react without sharing globals. Two reactions today: clear the
        confidence badge (per-value judgement) and swap the source from the

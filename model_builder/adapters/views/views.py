@@ -259,6 +259,13 @@ def download_sources(request):
 
     return response
 
+
+@time_it
+def source_table(request):
+    model_web = ModelWeb(SessionSystemRepository(request.session))
+    return render(request, "model_builder/result/source_table.html", {"model_web": model_web})
+
+
 @time_it
 def get_explainable_hourly_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):

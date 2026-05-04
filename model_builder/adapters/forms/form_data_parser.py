@@ -18,6 +18,9 @@ from model_builder.domain.services.group_membership_service import PARENT_GROUP_
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 
+_METADATA_ONLY_KEYS = frozenset({"confidence", "comment", "source"})
+
+
 def parse_count(raw_value: Any, *, error_prefix: str) -> float:
     """Parse a non-negative numeric count from raw form input."""
     try:
@@ -200,6 +203,10 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             parsed[attr_key] = {"value": value, "label": "no label"}
         else:
             raise ValueError(f"Unable to parse {attr_key} in {object_type} form data.")
+
+    for attr_value in parsed.values():
+        if isinstance(attr_value, dict) and attr_value and attr_value.keys() <= _METADATA_ONLY_KEYS:
+            attr_value["_metadata_only"] = True
 
     return parsed
 

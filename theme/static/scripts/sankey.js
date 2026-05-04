@@ -276,9 +276,11 @@ document.body.addEventListener('htmx:afterSettle', function(event) {
             lastCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
-    // Initialise Bootstrap tooltips for any newly inserted help icons
+    // Initialise Bootstrap tooltips for any newly inserted help icons.
+    // Skip elements without a title — Bootstrap 5 throws when title resolves to null.
     if (el && window.bootstrap && bootstrap.Tooltip) {
         el.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(tooltipEl) {
+            if (!tooltipEl.getAttribute('data-bs-title') && !tooltipEl.getAttribute('title')) return;
             bootstrap.Tooltip.getOrCreateInstance(tooltipEl);
         });
     }

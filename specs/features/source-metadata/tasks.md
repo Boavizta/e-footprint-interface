@@ -162,6 +162,8 @@ Two repos involved. Tasks 1–2 land in `e-footprint` (library, PyPI). Tasks 3�
 
 ## Task 6 — Interface: source table — two new columns + row edit affordance
 
+**Status:** Done.
+
 **Goal:** Add `Confidence` and `Comment` columns to `source_table.html`. Inputs get an inline edit affordance that reuses the source/comment editor from Task 5; calculated rows render both columns empty and non-editable.
 
 **Files touched:**

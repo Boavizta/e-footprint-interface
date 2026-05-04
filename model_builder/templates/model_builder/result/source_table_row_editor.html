@@ -1,0 +1,22 @@
+{# Variables expected: eq (ExplainableQuantityWeb), field_name_prefix (str), available_sources (list) #}
+{% with eq_web_id=eq.web_id %}
+<div class="p-3">
+    <form hx-post="{% url 'edit-object' eq.modeling_obj_container.efootprint_id %}"
+          hx-swap="none"
+          data-action="source-table-row-save"
+          data-source-table-url="{% url 'source-table' %}">
+
+        {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=eq_web_id conf_name_prefix=field_name_prefix conf_current=eq.confidence %}
+
+        {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_dom_id=eq_web_id source_name_prefix=field_name_prefix source_meta_source=eq.source source_meta_comment=eq.comment source_meta_available=available_sources %}
+
+        <div class="d-flex gap-2 justify-content-end mt-3">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#row-editor-{{ eq_web_id }}">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        </div>
+    </form>
+</div>
+{% endwith %}

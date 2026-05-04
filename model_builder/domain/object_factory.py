@@ -214,6 +214,9 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
             continue
 
         if issubclass(annotation, ExplainableObject):
+            if value.get("_metadata_only"):
+                _apply_metadata(current_value, value, available_sources, pending_sources)
+                continue
             new_value = ExplainableObject.from_json_dict(value)
             new_value.set_label(current_value.label)
             value_changed = new_value != current_value

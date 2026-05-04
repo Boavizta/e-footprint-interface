@@ -296,3 +296,19 @@ class TestApplyMetadata:
         }
         edit_object_from_parsed_data(parsed, server_web)
         assert server_web.modeling_obj.compute.confidence == "low"
+
+    def test_edit_metadata_only_flag_applies_metadata_to_existing_object(self, minimal_model_web):
+        """_metadata_only flag applies metadata directly to the current ExplainableObject instance."""
+        server_web = minimal_model_web.get_web_objects_from_efootprint_type("Server")[0]
+        original_compute = server_web.modeling_obj.compute
+        parsed = {
+            "compute": {
+                "confidence": "high",
+                "comment": "from source table editor",
+                "_metadata_only": True,
+            },
+        }
+        edit_object_from_parsed_data(parsed, server_web)
+        assert server_web.modeling_obj.compute is original_compute
+        assert server_web.modeling_obj.compute.confidence == "high"
+        assert server_web.modeling_obj.compute.comment == "from source table editor"

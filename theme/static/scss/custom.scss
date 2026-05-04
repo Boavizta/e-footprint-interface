@@ -469,12 +469,15 @@ input:disabled{
     table-layout: fixed;
     width: 100%;
 
-    .source-col-name { width: 20%; }
-    .source-col-attr { width: 30%; }
-    .source-col-type { width: 11%; }
+    .source-col-name { width: 17%; }
+    .source-col-attr { width: 20%; }
+    .source-col-type { width: 9%; }
     .source-col-value { width: 7%; text-align: center; }
     .source-col-unit { width: 7%; text-align: center; }
-    .source-col-source { width: 25%; }
+    .source-col-source { width: 14%; }
+    .source-col-confidence { width: 8%; }
+    .source-col-comment { width: 13%; }
+    .source-col-edit { width: 5%; text-align: center; }
 }
 
 @media (max-width: 1199.9px) {
@@ -482,13 +485,26 @@ input:disabled{
         font-size: 12px;
 
         th, td { padding: 4px 6px; }
-        .source-col-name { width: 20%; }
-        .source-col-attr { width: 30%; }
-        .source-col-value { width: 12%; text-align: center; }
-        .source-col-unit { width: 13%; text-align: center; }
-        .source-col-source { width: 25%; }
+        .source-col-name { width: 18%; }
+        .source-col-attr { width: 22%; }
+        .source-col-value { width: 8%; text-align: center; }
+        .source-col-unit { width: 8%; text-align: center; }
+        .source-col-source { width: 14%; }
+        .source-col-confidence { width: 9%; }
+        .source-col-comment { width: 13%; }
+        .source-col-edit { width: 8%; text-align: center; }
     }
 }
+
+.confidence-table-badge {
+    display: inline-block; border-radius: 4px;
+    padding: 1px 6px; font-size: 11px; font-weight: 500;
+}
+
+.source-table-edit-btn { color: #6c757d; opacity: 0.6; }
+.source-table-edit-btn:hover { opacity: 1; }
+
+.source-table-editor-row td { background: #f8f9fb; }
 
 /* Result panel inner layout */
 #result-block > div {
