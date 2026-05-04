@@ -29,6 +29,10 @@
             </button>
             <button
                 class="bg-transparent header-btn-result p-2 fs-3xl me-2 header-btn-result-sources-desktop"
+                hx-get="{% url 'source-table' %}"
+                hx-target="#source-block"
+                hx-swap="innerHTML"
+                hx-trigger="click once"
                 _="on click
                             repeat for button in .result-active
                                 remove .result-active from button
@@ -63,6 +67,10 @@
         </button>
         <button
             class="bg-transparent header-btn-result p-2 fs-3xl me-2 header-btn-result-sources-mobile"
+            hx-get="{% url 'source-table' %}"
+            hx-target="#source-block"
+            hx-swap="innerHTML"
+            hx-trigger="click once"
             _="on click
                         repeat for button in .result-active
                             remove .result-active from button
@@ -87,7 +95,7 @@
         {% include 'model_builder/result/result_graph.html' %}
         {% include 'model_builder/result/sankey_section.html' %}
     </div>
-    <div id="source-block" class="col d-none w-100 px-0 py-2">{% include 'model_builder/result/source_table.html' %}</div>
+    <div id="source-block" class="col d-none w-100 px-0 py-2"></div>
 </div>
 
 <script>
