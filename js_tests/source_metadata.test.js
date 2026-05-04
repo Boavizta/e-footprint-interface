@@ -3,6 +3,7 @@ const path = require("path");
 
 const {
     applyConfidenceToBadge,
+    toggleConfidenceMenu,
     setConfidence,
     openSourceEditor,
     cancelSourceEditor,
@@ -11,6 +12,7 @@ const {
     checkCollision,
     resetConfidenceForField,
     swapHypothesisToUserDataForField,
+    autosaveConfidence,
 } = require("../theme/static/scripts/source_metadata.js");
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures");
@@ -224,6 +226,111 @@ test("value-changed event resets confidence and swaps hypothesis → user_data i
 
     expect(document.getElementById("Compute_cpu_cores__confidence").value).toBe("");
     expect(document.getElementById("Compute_cpu_cores__source_id").value).toBe("user_data");
+});
+
+test("toggleConfidenceMenu adds .menu-up when the badge sits near the bottom of #source-block", () => {
+    document.body.innerHTML = `
+        <div id="source-block">
+            <div class="confidence-wrap">
+                <button class="confidence-badge"></button>
+                <div class="confidence-menu"></div>
+            </div>
+        </div>`;
+    const block = document.getElementById("source-block");
+    const btn = document.querySelector(".confidence-badge");
+    const menu = document.querySelector(".confidence-menu");
+    // Badge bottom (90) + 200px estimate (290) overflows container bottom (100) → flip up.
+    block.getBoundingClientRect = () => ({bottom: 100});
+    btn.getBoundingClientRect = () => ({bottom: 90});
+
+    toggleConfidenceMenu(btn);
+
+    expect(menu.classList.contains("menu-up")).toBe(true);
+    expect(menu.classList.contains("open")).toBe(true);
+});
+
+test("toggleConfidenceMenu does NOT flip when there's room below", () => {
+    document.body.innerHTML = `
+        <div id="source-block">
+            <div class="confidence-wrap">
+                <button class="confidence-badge menu-up"></button>
+                <div class="confidence-menu menu-up"></div>
+            </div>
+        </div>`;
+    const block = document.getElementById("source-block");
+    const btn = document.querySelector(".confidence-badge");
+    const menu = document.querySelector(".confidence-menu");
+    // Plenty of room (containerBottom 1000, badge bottom 50): flip-up class must be cleared.
+    block.getBoundingClientRect = () => ({bottom: 1000});
+    btn.getBoundingClientRect = () => ({bottom: 50});
+
+    toggleConfidenceMenu(btn);
+
+    expect(menu.classList.contains("menu-up")).toBe(false);
+});
+
+test("setConfidence on a wrap with autosave attrs POSTs only the new confidence, then refreshes #source-block", async () => {
+    document.body.innerHTML = `
+        <div class="confidence-wrap" data-field-id="row1"
+             data-autosave-url="/edit/obj1/"
+             data-autosave-refresh-url="/source-table/">
+            <button class="confidence-badge conf-none" data-level="none">
+                <span class="bars"><i></i><i></i><i></i></span>
+            </button>
+            <div class="confidence-menu">
+                <div class="menu-item" data-level="high" data-action="set-confidence"></div>
+            </div>
+            <input type="hidden" name="Server_ram__confidence" id="row1__confidence" value="">
+        </div>`;
+
+    const ajaxCalls = [];
+    global.htmx = {
+        ajax: jest.fn((method, url, opts) => {
+            ajaxCalls.push({method, url, opts});
+            return Promise.resolve();
+        }),
+    };
+
+    const highItem = document.querySelector('[data-level="high"]');
+    setConfidence(highItem, "high");
+    await Promise.resolve(); // let the .then() chain flush
+
+    expect(global.tagFormAsModified).not.toHaveBeenCalled();
+    expect(ajaxCalls[0]).toEqual({
+        method: "POST",
+        url: "/edit/obj1/",
+        opts: {
+            values: {"Server_ram__confidence": "high"},
+            swap: "none",
+        },
+    });
+    expect(ajaxCalls[1]).toEqual({
+        method: "GET",
+        url: "/source-table/",
+        opts: {target: "#source-block", swap: "innerHTML"},
+    });
+    expect(document.getElementById("row1__confidence").value).toBe("high");
+
+    delete global.htmx;
+});
+
+test("autosaveConfidence on a 'none' selection sends an empty confidence string", async () => {
+    document.body.innerHTML = `
+        <div class="confidence-wrap" data-field-id="row2"
+             data-autosave-url="/edit/objX/">
+            <input type="hidden" name="X_attr__confidence" value="high">
+        </div>`;
+    const wrap = document.querySelector(".confidence-wrap");
+    global.htmx = { ajax: jest.fn(() => Promise.resolve()) };
+
+    autosaveConfidence(wrap, "");
+    await Promise.resolve();
+
+    expect(global.htmx.ajax).toHaveBeenCalledWith(
+        "POST", "/edit/objX/",
+        expect.objectContaining({values: expect.objectContaining({"X_attr__confidence": ""})})
+    );
+    delete global.htmx;
 });
 
 test("checkCollision flags a typed name that matches a listed source (case-insensitive)", () => {

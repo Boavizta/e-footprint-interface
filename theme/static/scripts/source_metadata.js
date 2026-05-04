@@ -48,7 +48,25 @@
         const menu = btn.nextElementSibling;
         const wasOpen = menu.classList.contains("open");
         closeAllConfidenceMenus();
-        if (!wasOpen) menu.classList.add("open");
+        if (!wasOpen) {
+            positionConfidenceMenu(btn, menu);
+            menu.classList.add("open");
+        }
+    }
+
+    /* Flip the dropdown above the badge if the row is too close to the bottom of its
+       scroll container — otherwise the menu gets clipped (#source-block has overflow-y: auto). */
+    function positionConfidenceMenu(btn, menu) {
+        menu.classList.remove("menu-up");
+        const btnRect = btn.getBoundingClientRect();
+        const scroller = btn.closest("#source-block");
+        const containerBottom = scroller
+            ? scroller.getBoundingClientRect().bottom
+            : window.innerHeight;
+        const MENU_HEIGHT_ESTIMATE = 200;
+        if (btnRect.bottom + MENU_HEIGHT_ESTIMATE > containerBottom) {
+            menu.classList.add("menu-up");
+        }
     }
 
     function setConfidence(menuItem, level) {
@@ -62,9 +80,30 @@
 
         const fieldId = wrap.dataset.fieldId;
         const hidden = _hiddenInput(fieldId, "confidence");
-        if (hidden) hidden.value = (level === "none") ? "" : level;
+        const stored = (level === "none") ? "" : level;
+        if (hidden) hidden.value = stored;
 
-        if (typeof tagFormAsModified === "function") tagFormAsModified();
+        if (wrap.dataset.autosaveUrl) {
+            autosaveConfidence(wrap, stored);
+        } else if (typeof tagFormAsModified === "function") {
+            tagFormAsModified();
+        }
+    }
+
+    /* Inline (no-form) confidence edit: POST just the new confidence field.
+       _apply_metadata patches in place, so source/comment aren't touched. */
+    function autosaveConfidence(wrap, confidenceValue) {
+        const hidden = wrap.querySelector('input[type="hidden"]');
+        if (!hidden || !hidden.name) return;
+        const ds = wrap.dataset;
+        htmx.ajax("POST", ds.autosaveUrl,
+            {values: {[hidden.name]: confidenceValue}, swap: "none"})
+            .then(() => {
+                if (ds.autosaveRefreshUrl) {
+                    htmx.ajax("GET", ds.autosaveRefreshUrl,
+                        {target: "#source-block", swap: "innerHTML"});
+                }
+            });
     }
 
     function resetConfidenceForField(inputId) {
@@ -355,6 +394,7 @@
             openSourceEditor, cancelSourceEditor, applySourceEditor,
             handleSourceSelect, checkCollision,
             resetConfidenceForField, swapHypothesisToUserDataForField,
+            autosaveConfidence,
         };
     }
 })();

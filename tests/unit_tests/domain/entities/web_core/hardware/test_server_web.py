@@ -82,6 +82,16 @@ class TestServerWeb:
 
     # --- pre_edit ---
 
+    def test_pre_edit_skips_storage_when_form_data_omits_it(self, minimal_model_web):
+        """Partial edits (e.g. inline confidence autosave) don't include _parsed_Storage."""
+        os.environ["RAISE_EXCEPTIONS"] = "True"
+        server_web = minimal_model_web.servers[0]
+        original_storage_name = server_web.storage.name
+
+        server_web.pre_edit({"compute": {"confidence": "high"}})
+
+        assert server_web.storage.name == original_storage_name
+
     def test_pre_edit_updates_storage(self, minimal_model_web):
         """pre_edit updates the server's storage object.
 

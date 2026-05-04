@@ -20742,14 +20742,6 @@ input:disabled {
     text-align: center;
   }
 }
-.confidence-table-badge {
-  display: inline-block;
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-size: 11px;
-  font-weight: 500;
-}
-
 .source-table-edit-btn {
   color: #6c757d;
   opacity: 0.6;
@@ -22781,6 +22773,11 @@ input:disabled {
   display: block;
 }
 
+.confidence-menu.menu-up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
 .confidence-menu .menu-item {
   display: flex;
   align-items: center;
@@ -23308,3 +23305,5 @@ input:disabled {
   color: #4a90d9;
   background: #f0f6ff;
 }
+
+/*# sourceMappingURL=bs_main.css.map */

@@ -182,19 +182,38 @@ class TestApplyMetadata:
         assert obj.source.name == "Custom No Id"
         assert obj.source.link == "https://ex.com"
 
-    def test_defaults_to_user_data_when_no_source_in_parsed(self, minimal_model_web):
+    def test_omitting_source_leaves_existing_value_untouched(self, minimal_model_web):
+        """Patch semantics: missing 'source' key preserves the current source."""
         obj = self._make_explainable_obj()
+        existing = minimal_model_web.available_sources[0]
+        obj.source = existing
         _apply_metadata(obj, {"value": "x"}, minimal_model_web.available_sources, {})
-        assert obj.source is Sources.USER_DATA
+        assert obj.source is existing
 
     def test_sets_confidence_from_parsed(self, minimal_model_web):
         obj = self._make_explainable_obj()
         _apply_metadata(obj, {"value": "x", "confidence": "medium"}, minimal_model_web.available_sources, {})
         assert obj.confidence == "medium"
 
-    def test_confidence_none_when_absent(self, minimal_model_web):
+    def test_omitting_confidence_leaves_existing_value_untouched(self, minimal_model_web):
+        """Patch semantics: missing 'confidence' key preserves the current confidence."""
         obj = self._make_explainable_obj()
+        obj.confidence = "high"
         _apply_metadata(obj, {"value": "x"}, minimal_model_web.available_sources, {})
+        assert obj.confidence == "high"
+
+    def test_omitting_comment_leaves_existing_value_untouched(self, minimal_model_web):
+        """Patch semantics: missing 'comment' key preserves the current comment."""
+        obj = self._make_explainable_obj()
+        obj.comment = "kept"
+        _apply_metadata(obj, {"value": "x"}, minimal_model_web.available_sources, {})
+        assert obj.comment == "kept"
+
+    def test_explicit_empty_confidence_clears_it(self, minimal_model_web):
+        """Sending the key with an empty/invalid value still clears (distinguishes patch from no-op)."""
+        obj = self._make_explainable_obj()
+        obj.confidence = "high"
+        _apply_metadata(obj, {"value": "x", "confidence": None}, minimal_model_web.available_sources, {})
         assert obj.confidence is None
 
     def test_honors_explicitly_submitted_confidence_even_when_value_changed(self, minimal_model_web):

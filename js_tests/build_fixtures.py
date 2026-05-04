@@ -72,14 +72,26 @@ SOURCE_METADATA_CASES = {
 
 
 def render_metadata_field(field_ctx):
+    web_id = field_ctx["web_id"]
+    metadata = field_ctx["metadata"]
     return (
         render_to_string(
             "model_builder/side_panels/dynamic_form_fields/confidence_badge.html",
-            {"field": field_ctx},
+            {
+                "conf_dom_id": web_id,
+                "conf_name_prefix": web_id,
+                "conf_current": metadata["confidence"],
+            },
         )
         + render_to_string(
             "model_builder/side_panels/dynamic_form_fields/source.html",
-            {"field": field_ctx},
+            {
+                "source_dom_id": web_id,
+                "source_name_prefix": web_id,
+                "source_meta_source": metadata["source"],
+                "source_meta_comment": metadata["comment"],
+                "source_meta_available": metadata["available_sources"],
+            },
         )
     )
 

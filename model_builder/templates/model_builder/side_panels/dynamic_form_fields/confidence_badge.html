@@ -1,6 +1,13 @@
-{# Context vars: conf_dom_id (DOM id prefix), conf_name_prefix (form name prefix), conf_current (current level or None) #}
+{% comment %}
+Context vars: conf_dom_id (DOM id prefix), conf_name_prefix (form name prefix), conf_current (current level or None).
+Optional autosave context — when set, a click on a menu item POSTs the new confidence to conf_autosave_url and refreshes the host region at conf_autosave_refresh_url. _apply_metadata patches in place, so omitting source/comment leaves them untouched.
+{% endcomment %}
 {% with conf_level=conf_current|default:"none" %}
-<div class="confidence-wrap" data-field-id="{{ conf_dom_id }}">
+<div class="confidence-wrap" data-field-id="{{ conf_dom_id }}"
+     {% if conf_autosave_url %}
+     data-autosave-url="{{ conf_autosave_url }}"
+     data-autosave-refresh-url="{{ conf_autosave_refresh_url }}"
+     {% endif %}>
     <button type="button"
             class="confidence-badge conf-{{ conf_level }}"
             data-level="{{ conf_level }}"

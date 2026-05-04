@@ -53,9 +53,12 @@ class ServerWeb(ModelingObjectWeb):
         """Edit storage before editing server.
 
         Note: form_data is pre-parsed by the adapter layer. Nested storage data
-        is available under _parsed_Storage key.
+        is available under _parsed_Storage key. Partial edits (e.g. inline
+        confidence autosave from the source table) omit it; skip in that case.
         """
         parsed_storage = form_data.get("_parsed_Storage")
+        if parsed_storage is None:
+            return
         edit_object_from_parsed_data(parsed_storage, self.storage)
 
     @classmethod

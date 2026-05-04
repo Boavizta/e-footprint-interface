@@ -60,3 +60,15 @@ class TestEdgeComputerWeb:
             web_obj.pre_edit({"_parsed_EdgeStorage": {"name": "Storage"}})
 
         edit_mock.assert_called_once_with({"name": "Storage"}, modeling_obj.storage)
+
+    def test_pre_edit_skips_storage_when_form_data_omits_it(self):
+        """Partial edits (e.g. inline confidence autosave) don't include _parsed_EdgeStorage."""
+        modeling_obj = SimpleNamespace(storage=MagicMock())
+        web_obj = EdgeComputerWeb(modeling_obj, MagicMock())
+
+        with patch(
+            "model_builder.domain.entities.web_builders.hardware.edge.edge_computer_web.edit_object_from_parsed_data"
+        ) as edit_mock:
+            web_obj.pre_edit({"compute": {"confidence": "high"}})
+
+        edit_mock.assert_not_called()

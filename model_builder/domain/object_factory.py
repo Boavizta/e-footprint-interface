@@ -43,23 +43,27 @@ def _apply_metadata(
     available_sources: list,
     pending_sources: Dict[str, Any],
 ) -> None:
-    """Set source, confidence, and comment on an ExplainableObject from parsed form data.
+    """Patch source/confidence/comment on an ExplainableObject from parsed form data.
 
-    parsed_value must be a dict (the structured output of parse_form_data for this attribute).
+    Patch semantics: only keys present in parsed_value are modified; missing keys leave
+    the existing value untouched. This lets partial edits (e.g. the inline confidence
+    autosave from the source table) ship a single field without clearing the others.
+
     pending_sources is a per-submission dict shared across all _apply_metadata calls in the
     same create/edit invocation. It is keyed by the client-submitted source id and lets two
     fields submitting the same new (unknown) id resolve to the *same* Source instance.
-    Source resolution order:
+    Source resolution order (when "source" is present):
       1. available_sources (model's existing sources, matched by id)
       2. pending_sources (new sources created earlier in the same submission, matched by id)
       3. Mint a new Source, using the submitted id so the same id resolves to the same instance
          within one submission (enables same-form cross-field source sharing).
     When no id is submitted (legacy / no-JS fallback): mint from name+link without dedup.
-    Confidence: carry submitted value; None if absent or invalid (client clears it on value change).
-    Comment: always carry submitted value (None if empty/absent).
+    Empty/missing source name+id falls back to Sources.USER_DATA.
+    Confidence: only "low"/"medium"/"high" kept; anything else becomes None.
+    Comment: empty string normalised to None.
     """
-    source_dict = parsed_value.get("source")
-    if source_dict:
+    if "source" in parsed_value:
+        source_dict = parsed_value["source"] or {}
         source_id = source_dict.get("id") or None
         source_name = source_dict.get("name") or ""
         source_link = source_dict.get("link") or None
@@ -75,15 +79,15 @@ def _apply_metadata(
             explainable_object.source = Source(source_name, source_link)
         else:
             explainable_object.source = Sources.USER_DATA
-    else:
-        explainable_object.source = Sources.USER_DATA
 
-    raw_confidence = parsed_value.get("confidence")
-    explainable_object.confidence = (
-        raw_confidence if raw_confidence in ("low", "medium", "high") else None
-    )
+    if "confidence" in parsed_value:
+        raw_confidence = parsed_value["confidence"]
+        explainable_object.confidence = (
+            raw_confidence if raw_confidence in ("low", "medium", "high") else None
+        )
 
-    explainable_object.comment = parsed_value.get("comment") or None
+    if "comment" in parsed_value:
+        explainable_object.comment = parsed_value["comment"] or None
 
 
 def create_efootprint_obj_from_parsed_data(

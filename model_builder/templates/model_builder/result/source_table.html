@@ -1,4 +1,5 @@
 {% load label_filters %}
+{% url 'source-table' as source_table_url %}
 <div class="col-12 my-5 mx-auto spinner-border spinner-result-chart d-none" role="status">
     <span class="visually-hidden">Loading...</span>
 </div>
@@ -63,10 +64,9 @@
                         </p>
                     </td>
                     <td class="source-col-confidence">
-                        {% if not is_calculated and explainable_quantity.confidence %}
-                            <span class="confidence-table-badge conf-{{ explainable_quantity.confidence }}">
-                                {{ explainable_quantity.confidence|capfirst }}
-                            </span>
+                        {% if not is_calculated %}
+                            {% url 'edit-object' explainable_quantity.modeling_obj_container.efootprint_id as edit_object_url %}
+                            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_autosave_refresh_url=source_table_url %}
                         {% endif %}
                     </td>
                     <td class="source-col-comment">
