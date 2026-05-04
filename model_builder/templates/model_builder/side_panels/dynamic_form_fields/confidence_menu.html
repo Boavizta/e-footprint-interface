@@ -1,0 +1,32 @@
+<div class="confidence-menu">
+    <div class="menu-header">Set confidence level</div>
+    <div class="menu-item {% if conf_level == 'high' %}selected{% endif %}"
+         data-level="high"
+         data-action="set-confidence">
+        <span class="bars bars-high"><i></i><i></i><i></i></span>
+        High
+        <i class="bi bi-check2 check"></i>
+    </div>
+    <div class="menu-item {% if conf_level == 'medium' %}selected{% endif %}"
+         data-level="medium"
+         data-action="set-confidence">
+        <span class="bars bars-medium"><i></i><i></i><i></i></span>
+        Medium
+        <i class="bi bi-check2 check"></i>
+    </div>
+    <div class="menu-item {% if conf_level == 'low' %}selected{% endif %}"
+         data-level="low"
+         data-action="set-confidence">
+        <span class="bars bars-low"><i></i><i></i><i></i></span>
+        Low
+        <i class="bi bi-check2 check"></i>
+    </div>
+    <div class="menu-divider"></div>
+    <div class="menu-item {% if conf_level == 'none' %}selected{% endif %}"
+         data-level="none"
+         data-action="set-confidence">
+        <span class="bars"><i></i><i></i><i></i></span>
+        Not set
+        <i class="bi bi-check2 check"></i>
+    </div>
+</div>

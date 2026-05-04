@@ -45,13 +45,33 @@
     }
 
     function toggleConfidenceMenu(btn) {
-        const menu = btn.nextElementSibling;
+        const menu = ensureConfidenceMenu(btn);
+        if (!menu) return;
         const wasOpen = menu.classList.contains("open");
         closeAllConfidenceMenus();
         if (!wasOpen) {
             positionConfidenceMenu(btn, menu);
             menu.classList.add("open");
         }
+    }
+
+    function ensureConfidenceMenu(btn) {
+        if (btn.nextElementSibling?.classList?.contains("confidence-menu")) {
+            return btn.nextElementSibling;
+        }
+        const level = btn.dataset.level || "none";
+        const template = document.getElementById("source-table-confidence-menu-template");
+        if (!template) return null;
+        const menu = template.content.firstElementChild.cloneNode(true);
+        syncConfidenceMenuSelection(menu, level);
+        btn.insertAdjacentElement("afterend", menu);
+        return menu;
+    }
+
+    function syncConfidenceMenuSelection(menu, level) {
+        menu.querySelectorAll(".menu-item").forEach(item => {
+            item.classList.toggle("selected", item.dataset.level === level);
+        });
     }
 
     /* Flip the dropdown above the badge if the row is too close to the bottom of its

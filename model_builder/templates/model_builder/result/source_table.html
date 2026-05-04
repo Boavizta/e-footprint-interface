@@ -1,5 +1,8 @@
 {% load label_filters %}
 {% url 'source-table' as source_table_url %}
+<template id="source-table-confidence-menu-template">
+    {% include "model_builder/side_panels/dynamic_form_fields/confidence_menu.html" with conf_level="none" %}
+</template>
 <div class="col-12 my-5 mx-auto spinner-border spinner-result-chart d-none" role="status">
     <span class="visually-hidden">Loading...</span>
 </div>
@@ -66,7 +69,7 @@
                     </td>
                     <td class="source-col-confidence">
                         {% if not is_calculated %}
-                            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_autosave_refresh_url=source_table_url %}
+                            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_autosave_refresh_url=source_table_url conf_omit_menu=True %}
                         {% endif %}
                     </td>
                     <td class="source-col-comment">
@@ -76,8 +79,13 @@
                     </td>
                     <td class="source-col-edit">
                         {% if not is_calculated %}
+                            {% url 'source-table-row-editor' explainable_quantity.modeling_obj_container.efootprint_id explainable_quantity.attr_name_in_mod_obj_container as row_editor_url %}
                             <button type="button"
                                     class="btn btn-sm btn-link p-0 source-table-edit-btn"
+                                    hx-get="{{ row_editor_url }}"
+                                    hx-target="#row-editor-{{ explainable_quantity.web_id }}"
+                                    hx-swap="innerHTML"
+                                    hx-trigger="click once"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#row-editor-{{ explainable_quantity.web_id }}"
                                     aria-expanded="false">
@@ -89,9 +97,7 @@
                 {% if not is_calculated %}
                 <tr class="source-table-editor-row">
                     <td colspan="9" class="p-0">
-                        <div id="row-editor-{{ explainable_quantity.web_id }}" class="collapse">
-                            {% include 'model_builder/result/source_table_row_editor.html' with eq=explainable_quantity available_sources=model_web.available_sources field_name_prefix=field_name_prefix %}
-                        </div>
+                        <div id="row-editor-{{ explainable_quantity.web_id }}" class="collapse"></div>
                     </td>
                 </tr>
                 {% endif %}

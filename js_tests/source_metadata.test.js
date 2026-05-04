@@ -277,6 +277,34 @@ test("toggleConfidenceMenu does NOT flip when there's room below", () => {
     expect(menu.classList.contains("menu-up")).toBe(false);
 });
 
+test("toggleConfidenceMenu clones the shared template when the badge has no inline menu", () => {
+    document.body.innerHTML = `
+        <template id="source-table-confidence-menu-template">
+            <div class="confidence-menu">
+                <div class="menu-item" data-level="high" data-action="set-confidence"></div>
+                <div class="menu-item" data-level="medium" data-action="set-confidence"></div>
+                <div class="menu-item" data-level="low" data-action="set-confidence"></div>
+                <div class="menu-item selected" data-level="none" data-action="set-confidence"></div>
+            </div>
+        </template>
+        <div id="source-block">
+            <div class="confidence-wrap">
+                <button class="confidence-badge" data-level="medium"></button>
+            </div>
+        </div>`;
+    const btn = document.querySelector(".confidence-badge");
+    document.getElementById("source-block").getBoundingClientRect = () => ({bottom: 1000});
+    btn.getBoundingClientRect = () => ({bottom: 50});
+
+    toggleConfidenceMenu(btn);
+
+    const menus = document.querySelectorAll(".confidence-wrap > .confidence-menu");
+    expect(menus.length).toBe(1);
+    expect(menus[0].classList.contains("open")).toBe(true);
+    expect(menus[0].querySelector('[data-level="medium"]').classList.contains("selected")).toBe(true);
+    expect(menus[0].querySelector('[data-level="none"]').classList.contains("selected")).toBe(false);
+});
+
 test("setConfidence on a wrap with autosave attrs POSTs only the new confidence, then refreshes #source-block", async () => {
     document.body.innerHTML = `
         <div class="confidence-wrap" data-field-id="row1"

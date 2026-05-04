@@ -7,7 +7,7 @@ import json
 import os
 import gc
 
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from openpyxl import Workbook
@@ -260,6 +260,27 @@ def download_sources(request):
 def source_table(request):
     model_web = ModelWeb(SessionSystemRepository(request.session))
     return render(request, "model_builder/result/source_table.html", {"model_web": model_web})
+
+
+@time_it
+def source_table_row_editor(request, object_id: str, attr_name: str):
+    model_web = ModelWeb(SessionSystemRepository(request.session))
+    obj = model_web.get_web_object_from_efootprint_id(object_id)
+    try:
+        explainable_quantity = getattr(obj, attr_name)
+    except AttributeError as exc:
+        raise Http404("Unknown source-table row.") from exc
+    if getattr(explainable_quantity, "is_calculated", True):
+        raise Http404("Only editable source-table rows have row editors.")
+    field_name_prefix = f"{obj.class_as_simple_str}_{attr_name}"
+
+    return render(request, "model_builder/result/source_table_row_editor.html", {
+        "eq": explainable_quantity,
+        "available_sources": model_web.available_sources,
+        "field_name_prefix": field_name_prefix,
+        "edit_object_url": reverse("edit-object", kwargs={"object_id": object_id}),
+        "source_table_url": reverse("source-table"),
+    })
 
 
 @time_it

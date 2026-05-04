@@ -42,6 +42,8 @@ urlpatterns = [
     path("graph/<cache_key>", model_builder.adapters.views.views.get_calculus_graph, name="get-graph"),
     path("download-sources/", views.download_sources, name="download-sources"),
     path("source-table/", views.source_table, name="source-table"),
+    path("source-table-row-editor/<object_id>/<str:attr_name>/", views.source_table_row_editor,
+         name="source-table-row-editor"),
     path("open-panel-system-name/", model_builder.adapters.views.views_edition.open_panel_system_name,
          name="open-panel-system-name"),
     path("save-system-name/", model_builder.adapters.views.views_edition.save_system_name, name="save-system-name"),

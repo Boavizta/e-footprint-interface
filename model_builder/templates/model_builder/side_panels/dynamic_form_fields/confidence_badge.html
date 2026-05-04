@@ -16,38 +16,9 @@ Optional autosave context — when set, a click on a menu item POSTs the new con
         <span class="bars {% if conf_level != 'none' %}bars-{{ conf_level }}{% endif %}"><i></i><i></i><i></i></span>
         <i class="bi bi-chevron-down"></i>
     </button>
-    <div class="confidence-menu">
-        <div class="menu-header">Set confidence level</div>
-        <div class="menu-item {% if conf_level == 'high' %}selected{% endif %}"
-             data-level="high"
-             data-action="set-confidence">
-            <span class="bars bars-high"><i></i><i></i><i></i></span>
-            High
-            <i class="bi bi-check2 check"></i>
-        </div>
-        <div class="menu-item {% if conf_level == 'medium' %}selected{% endif %}"
-             data-level="medium"
-             data-action="set-confidence">
-            <span class="bars bars-medium"><i></i><i></i><i></i></span>
-            Medium
-            <i class="bi bi-check2 check"></i>
-        </div>
-        <div class="menu-item {% if conf_level == 'low' %}selected{% endif %}"
-             data-level="low"
-             data-action="set-confidence">
-            <span class="bars bars-low"><i></i><i></i><i></i></span>
-            Low
-            <i class="bi bi-check2 check"></i>
-        </div>
-        <div class="menu-divider"></div>
-        <div class="menu-item {% if conf_level == 'none' %}selected{% endif %}"
-             data-level="none"
-             data-action="set-confidence">
-            <span class="bars"><i></i><i></i><i></i></span>
-            Not set
-            <i class="bi bi-check2 check"></i>
-        </div>
-    </div>
+    {% if not conf_omit_menu %}
+        {% include "model_builder/side_panels/dynamic_form_fields/confidence_menu.html" %}
+    {% endif %}
     <input type="hidden"
            name="{{ conf_name_prefix }}__confidence"
            id="{{ conf_dom_id }}__confidence"
