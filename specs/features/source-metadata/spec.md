@@ -155,12 +155,21 @@ column:
 
 | Column | Content |
 |---|---|
-| Confidence | Badge (`low`/`medium`/`high`) or empty. |
+| Confidence | Editable badge (`low`/`medium`/`high`/unset). Click → dropdown → autosaves on pick. |
 | Comment | Truncating-text-tooltip. Click expands inline. |
 
-Each row for an **input** is clickable (or has an explicit edit affordance) to
-open the source+comment editor inline. Rows for calculated values render both
-new columns as empty and are not editable.
+Each input row also has a pencil affordance that expands the row into an
+inline **source editor** (single Cancel/Apply, no nested editors). Apply
+persists source + comment in one shot via a real HTMX form; the table
+re-renders on success. Cancel collapses the row.
+
+Calculated rows render both new columns empty and are not editable.
+
+The two affordances on an input row are intentionally split:
+- **Confidence** — autosaves on each menu pick (no Apply button needed; one
+  enum-bounded field).
+- **Source + comment** — bundled in the editor with an explicit Apply (free-form
+  fields where users want to compose before committing).
 
 ---
 
@@ -286,9 +295,13 @@ The implementation plan must explicitly commit to an approach and specify:
 ## 10. Resuming from cold context
 
 1. Read this file end to end.
-2. Read `01-implementation-plan.md` (to be written) for ordered steps and test
-   gates.
-3. Re-read the two `CLAUDE.md` files (`e-footprint/CLAUDE.md` and
+2. Read `plan.md` for the implementation approach and §7 "Resolved" for the
+   decisions taken (and re-taken) during implementation.
+3. Read `tasks.md` for ordered steps and per-task status. Tasks 1–6 are done;
+   Task 6's "Final shape" block captures how the source-table affordances ended
+   up (split between an event-driven autosave for the confidence badge and a
+   real HTMX form for the source/comment editor).
+4. Re-read the two `CLAUDE.md` files (`e-footprint/CLAUDE.md` and
    `e-footprint-interface/CLAUDE.md`) for code-style and architecture constraints
    — in particular the Clean Architecture layering in the interface and the
    ExplainableObject serialization conventions in the library.
