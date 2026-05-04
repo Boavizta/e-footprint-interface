@@ -3,6 +3,8 @@ const {
     parseLinkedIds,
     resolveLeaderLineEndpoint,
     resolveLeaderLineTargets,
+    updateLines,
+    _setAllLinesForTesting,
 } = require("../theme/static/scripts/leaderline_utils.js");
 
 function markVisible(element) {
@@ -129,4 +131,34 @@ test("several target ids resolving to the same visible accordion owner are dedup
 
     expect(parseLinkedIds(source)).toEqual(["service-1", "service-2"]);
     expect(resolveLeaderLineTargets(source).map((element) => element.id)).toEqual(["server-1"]);
+});
+
+test("updateLines skips lines whose endpoints were detached by an OOB swap", () => {
+    document.body.innerHTML = `
+        <div id="from-1"></div>
+        <div id="to-1"></div>
+    `;
+    const fromConnected = document.getElementById("from-1");
+    const toConnected = document.getElementById("to-1");
+    const fromDetached = document.createElement("div");
+    const toDetached = document.createElement("div");
+
+    const positionedLines = [];
+    const makeLine = (start, end) => ({start, end, position: jest.fn(() => positionedLines.push({start, end}))});
+
+    const liveLine = makeLine(fromConnected, toConnected);
+    const staleStartLine = makeLine(fromDetached, toConnected);
+    const staleEndLine = makeLine(fromConnected, toDetached);
+
+    _setAllLinesForTesting({
+        "from-1": [liveLine, staleEndLine],
+        "stale-source": [staleStartLine],
+    });
+
+    expect(() => updateLines()).not.toThrow();
+    expect(liveLine.position).toHaveBeenCalledTimes(1);
+    expect(staleStartLine.position).not.toHaveBeenCalled();
+    expect(staleEndLine.position).not.toHaveBeenCalled();
+
+    _setAllLinesForTesting({});
 });

@@ -46,7 +46,11 @@ let allLines = {};
 function updateLines() {
     Object.values(allLines).forEach(lineArray => {
         lineArray.forEach(line => {
-            line.position();
+            // Skip lines whose endpoints were detached by an OOB swap; resetLeaderLines
+            // (fired right after htmx:afterSettle) will rebuild them.
+            if (line.start?.isConnected && line.end?.isConnected) {
+                line.position();
+            }
         });
     });
 }
@@ -241,6 +245,8 @@ if (typeof module !== "undefined" && module.exports) {
         parseLinkedIds,
         resolveLeaderLineEndpoint,
         resolveLeaderLineTargets,
+        updateLines,
+        _setAllLinesForTesting: (lines) => { allLines = lines; },
     };
 }
 
@@ -263,6 +269,10 @@ function attachScrollListeners() {
 function setLeaderLineListeners() {
     document.body.addEventListener('resetLeaderLines', function (event) {
         removeAllLines();
+        // resetLeaderLines is fired pre-swap (HX-Trigger) so the new DOM isn't here yet.
+        // 100ms is a slack window that lets HTMX finish swap + settle before we rebuild.
+        // Cleaner alternative: set a "pendingRebuild" flag here and rebuild from the
+        // htmx:afterSettle handler — left as a follow-up since the timer works fine.
         setTimeout(() => {initLeaderLines();}, 100);
     });
 

@@ -136,8 +136,10 @@ class HtmxPresenter:
                 {"object": added_obj}
             )
 
+        # resetLeaderLines goes on HX-Trigger (fires before swap) so stale lines are torn
+        # down before htmx:afterSettle's global updateLines() runs on a partially-swapped DOM.
+        response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
         after_settle = {
-            "resetLeaderLines": "",
             "setAccordionListeners": {"accordionIds": [output.web_id]},
             "displayToastAndHighlightObjects": {
                 "ids": [output.web_id],
