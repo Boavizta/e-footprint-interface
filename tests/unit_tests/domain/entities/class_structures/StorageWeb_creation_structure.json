@@ -139,7 +139,7 @@
                 "web_id": "Storage_base_storage_need",
                 "attr_name": "base_storage_need",
                 "label": "base storage need",
-                "tooltip": "Initial amount of data stored, prior to this use case.",
+                "tooltip": false,
                 "metadata": {
                     "confidence": null,
                     "comment": null,

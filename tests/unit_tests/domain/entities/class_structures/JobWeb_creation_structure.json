@@ -130,7 +130,7 @@
                 "web_id": "Job_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server\u2019s storage.",
+                "tooltip": false,
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -251,7 +251,7 @@
                 "web_id": "GPUJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server\u2019s storage.",
+                "tooltip": false,
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -421,7 +421,7 @@
                 "web_id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": "Data stored in the server\u2019s storage.",
+                "tooltip": false,
                 "metadata": {
                     "confidence": null,
                     "comment": null,

@@ -407,7 +407,6 @@
             "VideoStreamingJob"
         ],
         "label": "data stored",
-        "tooltip": "Data stored in the server\u2019s storage.",
         "step": 1
     },
     "request_duration": {
@@ -495,23 +494,6 @@
             "EcoLogitsGenAIExternalAPI"
         ],
         "label": "model name"
-    },
-    "nb_of_bits_per_parameter": {
-        "modeling_obj_containers": [
-            "GenAIModel"
-        ],
-        "label": "nb of bits per parameter",
-        "is_advanced_parameter": true,
-        "tooltip": "Reduce this number if quantization techniques have been used.",
-        "step": 1
-    },
-    "llm_memory_factor": {
-        "modeling_obj_containers": [
-            "GenAIModel"
-        ],
-        "label": "LLM memory factor",
-        "is_advanced_parameter": true,
-        "tooltip": "Ratio between the GPU RAM needed and the model size."
     },
     "gpu_latency_alpha": {
         "modeling_obj_containers": [
@@ -606,7 +588,6 @@
             "Storage"
         ],
         "label": "base storage need",
-        "tooltip": "Initial amount of data stored, prior to this use case.",
         "is_advanced_parameter": true
     },
     "nb_of_active_instances": {
@@ -876,6 +857,6 @@
     },
     "parent_group_memberships": {
         "label": "Add to parent groups",
-        "tooltip": "Select the edge device groups this object should belong to upon creation."
+        "f": "Select the edge device groups this object should belong to upon creation."
     }
 }
