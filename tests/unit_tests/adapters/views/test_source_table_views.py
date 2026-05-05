@@ -31,11 +31,15 @@ class TestSourceTableViews:
         assert 'id="comment-cell-' in body
         assert body.count('class="confidence-menu"') == 1
 
-    def test_source_table_row_editor_renders_one_edit_form(self, client, minimal_system_data):
+    def test_source_table_row_editor_renders_one_edit_form(self, client, minimal_system_data, monkeypatch):
         _setup_session(client, minimal_system_data)
         eq = _first_editable_source_row(client)
         object_id = eq.modeling_obj_container.efootprint_id
         attr_name = eq.attr_name_in_mod_obj_container
+        monkeypatch.setattr(
+            "model_builder.adapters.views.views.ModelWeb",
+            lambda *args, **kwargs: pytest.fail("source_table_row_editor should not hydrate ModelWeb"),
+        )
 
         response = client.get(f"/model_builder/source-table-row-editor/{object_id}/{attr_name}/")
 
@@ -54,6 +58,24 @@ class TestSourceTableViews:
         _setup_session(client, minimal_system_data)
         eq = _first_editable_source_row(client)
         object_id = eq.modeling_obj_container.efootprint_id
+
+        response = client.get(f"/model_builder/source-table-row-editor/{object_id}/name/")
+
+        assert response.status_code == 404
+
+    def test_source_table_row_editor_rejects_non_source_attribute_even_when_json_looks_source_like(
+            self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        eq = _first_editable_source_row(client)
+        object_id = eq.modeling_obj_container.efootprint_id
+        object_type = eq.modeling_obj_container.class_as_simple_str
+        system_data = SessionSystemRepository(client.session).get_system_data()
+        system_data[object_type][object_id]["name"] = {
+            "label": "Name",
+            "source": eq.source.id,
+            "comment": "forged source metadata",
+        }
+        _setup_session(client, system_data)
 
         response = client.get(f"/model_builder/source-table-row-editor/{object_id}/name/")
 

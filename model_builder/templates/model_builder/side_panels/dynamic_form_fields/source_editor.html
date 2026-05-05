@@ -9,8 +9,7 @@ Context variables:
   source_meta_current_comment — current comment (string or None)
   source_editor_open        — if truthy, adds the 'open' class so the editor renders visible (optional)
   source_editor_cancel_target — id (no '#') of a Bootstrap collapse to hide on Cancel. When set,
-                                Cancel uses data-bs-toggle/data-bs-target instead of the JS
-                                cancel-source-editor handler (used by the source-table row form).
+                                Cancel uses the source-table row JS handler instead of the side-panel handler.
 {% endcomment %}
 <div class="source-editor{% if source_editor_open %} open{% endif %}"
      id="editor-{{ source_editor_id }}"
@@ -70,7 +69,7 @@ Context variables:
         <button type="button"
                 class="btn btn-outline-secondary btn-sm"
                 {% if source_editor_cancel_target %}
-                data-bs-toggle="collapse" data-bs-target="#{{ source_editor_cancel_target }}"
+                data-action="cancel-source-table-row-editor" data-bs-target="#{{ source_editor_cancel_target }}"
                 {% else %}
                 data-action="cancel-source-editor"
                 {% endif %}>Cancel</button>

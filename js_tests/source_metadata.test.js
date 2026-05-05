@@ -56,9 +56,30 @@ if (typeof global.CSS === "undefined") {
     global.CSS = { escape: s => String(s).replace(/[^a-zA-Z0-9_-]/g, c => "\\" + c) };
 }
 
+function installBootstrapCollapseStub() {
+    const calls = [];
+    const collapseApi = {
+        getOrCreateInstance: jest.fn(element => ({
+            show: () => {
+                calls.push(["show", element.id]);
+                element.classList.add("show");
+            },
+            hide: () => {
+                calls.push(["hide", element.id]);
+                element.classList.remove("show");
+            },
+        })),
+    };
+    global.bootstrap = {Collapse: collapseApi};
+    window.bootstrap = global.bootstrap;
+    return calls;
+}
+
 beforeEach(() => {
     document.body.innerHTML = "";
     global.tagFormAsModified.mockClear();
+    delete global.bootstrap;
+    delete window.bootstrap;
 });
 
 test("applyConfidenceToBadge swaps the conf-* and bars-* classes", () => {
@@ -382,6 +403,58 @@ test("row source editor form blocks native submit navigation", () => {
     form.dispatchEvent(submitEvent);
 
     expect(submitEvent.defaultPrevented).toBe(true);
+});
+
+test("row edit button opens only after HTMX has swapped the editor into the collapse", () => {
+    document.body.innerHTML = `<table><tbody>${loadFixture("source_table_row_listed_user_data")}</tbody></table>`;
+    const button = document.querySelector(".source-table-edit-btn");
+    const editorHost = document.getElementById("row-editor-row1");
+    const collapseCalls = installBootstrapCollapseStub();
+
+    button.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+
+    expect(editorHost.classList.contains("show")).toBe(false);
+    expect(collapseCalls).toEqual([]);
+
+    editorHost.innerHTML = loadFixture("row_editor_listed_user_data");
+    document.dispatchEvent(new CustomEvent("htmx:afterSwap", {detail: {elt: editorHost}}));
+
+    expect(collapseCalls).toEqual([["show", "row-editor-row1"]]);
+    expect(editorHost.classList.contains("show")).toBe(true);
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+});
+
+test("row edit button toggles an already-loaded editor without another Bootstrap data-api trigger", () => {
+    mountSourceTableRowWithEditor("source_table_row_listed_user_data", "row_editor_listed_user_data");
+    const button = document.querySelector(".source-table-edit-btn");
+    const editorHost = document.getElementById("row-editor-row1");
+    const collapseCalls = installBootstrapCollapseStub();
+
+    button.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+
+    expect(collapseCalls).toEqual([["hide", "row-editor-row1"]]);
+    expect(editorHost.classList.contains("show")).toBe(false);
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+
+    button.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+
+    expect(collapseCalls).toEqual([["hide", "row-editor-row1"], ["show", "row-editor-row1"]]);
+    expect(editorHost.classList.contains("show")).toBe(true);
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+});
+
+test("row editor Cancel collapses through source_metadata and resets the pencil state", () => {
+    mountSourceTableRowWithEditor("source_table_row_listed_user_data", "row_editor_listed_user_data");
+    const button = document.querySelector(".source-table-edit-btn");
+    const cancel = document.querySelector('[data-action="cancel-source-table-row-editor"]');
+    const editorHost = document.getElementById("row-editor-row1");
+    installBootstrapCollapseStub();
+    button.setAttribute("aria-expanded", "true");
+
+    cancel.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+
+    expect(editorHost.classList.contains("show")).toBe(false);
+    expect(button.getAttribute("aria-expanded")).toBe("false");
 });
 
 test("applySourceEditor in row form mode + custom source mints fresh id when prior was a listed source", () => {

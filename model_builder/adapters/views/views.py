@@ -20,6 +20,7 @@ from e_footprint_interface import __version__ as interface_version
 
 from model_builder.adapters.repositories import SessionSystemRepository, SessionCacheRepository
 from model_builder.adapters.label_resolver import LabelResolver
+from model_builder.adapters.views.source_table_row_editor_context import build_source_table_row_editor_context
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     get_web_explainable_from_attr,
@@ -264,22 +265,9 @@ def source_table(request):
 
 @time_it
 def source_table_row_editor(request, object_id: str, attr_name: str):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
-    obj = model_web.get_web_object_from_efootprint_id(object_id)
-    try:
-        explainable_quantity = getattr(obj, attr_name)
-    except AttributeError as exc:
-        raise Http404("Unknown source-table row.") from exc
-    if getattr(explainable_quantity, "is_calculated", True):
-        raise Http404("Only editable source-table rows have row editors.")
-    field_name_prefix = f"{obj.class_as_simple_str}_{attr_name}"
-
-    return render(request, "model_builder/result/source_table_row_editor.html", {
-        "eq": explainable_quantity,
-        "available_sources": model_web.available_sources,
-        "field_name_prefix": field_name_prefix,
-        "edit_object_url": reverse("edit-object", kwargs={"object_id": object_id}),
-    })
+    context = build_source_table_row_editor_context(
+        SessionSystemRepository(request.session), object_id, attr_name)
+    return render(request, "model_builder/result/source_table_row_editor.html", context)
 
 
 @time_it

@@ -382,16 +382,46 @@
         }
     }
 
-    function _collapseSourceTableRowEditor(form) {
-        const collapse = form.closest(".collapse");
+    function _setSourceTableRowEditorToggle(collapse, expanded) {
+        const toggle = document.querySelector(`.source-table-edit-btn[data-bs-target="#${CSS.escape(collapse.id)}"]`);
+        if (toggle) toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+    }
+
+    function _hideSourceTableRowEditor(collapse) {
         if (!collapse) return;
         if (window.bootstrap && bootstrap.Collapse) {
             bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).hide();
         } else {
             collapse.classList.remove("show");
         }
-        const toggle = document.querySelector(`[data-bs-target="#${CSS.escape(collapse.id)}"]`);
-        if (toggle) toggle.setAttribute("aria-expanded", "false");
+        _setSourceTableRowEditorToggle(collapse, false);
+    }
+
+    function _showSourceTableRowEditor(collapse) {
+        if (!collapse) return;
+        if (window.bootstrap && bootstrap.Collapse) {
+            bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
+        } else {
+            collapse.classList.add("show");
+        }
+        _setSourceTableRowEditorToggle(collapse, true);
+    }
+
+    function _collapseSourceTableRowEditor(form) {
+        _hideSourceTableRowEditor(form.closest(".collapse"));
+    }
+
+    function _toggleSourceTableRowEditor(button) {
+        const selector = button.dataset.bsTarget;
+        const collapse = selector ? document.querySelector(selector) : null;
+        if (!collapse || !collapse.querySelector("form[data-action='source-table-row-edit']")) return;
+        if (collapse.classList.contains("show")) _hideSourceTableRowEditor(collapse);
+        else _showSourceTableRowEditor(collapse);
+    }
+
+    function _cancelSourceTableRowEditor(button) {
+        const selector = button.dataset.bsTarget;
+        _hideSourceTableRowEditor(selector ? document.querySelector(selector) : null);
     }
 
     function _escapeHtml(s) {
@@ -459,6 +489,12 @@
             case "apply-source-editor":
                 applySourceEditor(fieldId);
                 break;
+            case "toggle-source-table-row-editor":
+                _toggleSourceTableRowEditor(target);
+                break;
+            case "cancel-source-table-row-editor":
+                _cancelSourceTableRowEditor(target);
+                break;
             case "toggle-comment-expand":
                 target.classList.toggle("expanded");
                 break;
@@ -502,6 +538,13 @@
        (and once on initial DOMContentLoaded for the no-htmx case). Idempotent. */
     document.addEventListener("htmx:load", e => initInFormSourceEditorsIn(e.target));
     document.addEventListener("DOMContentLoaded", () => initInFormSourceEditorsIn());
+
+    document.addEventListener("htmx:afterSwap", e => {
+        const collapse = e.detail.elt;
+        if (!collapse?.id?.startsWith("row-editor-")) return;
+        if (!collapse.querySelector("form[data-action='source-table-row-edit']")) return;
+        _showSourceTableRowEditor(collapse);
+    });
 
     /* After the row form's POST succeeds, update only the row display. The server
        has persisted the metadata; the client already knows the source/comment text. */
