@@ -9,6 +9,7 @@ from efootprint.abstract_modeling_classes.source_objects import Sources
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
+from efootprint.utils.tools import get_init_signature_params
 from efootprint import __version__ as efootprint_version
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT, ABSTRACT_EFOOTPRINT_MODELING_CLASSES
@@ -227,10 +228,16 @@ class ModelWeb:
     def web_explainable_quantities_sources(self):
         web_explainable_quantities_sources = []
         for efootprint_object in self.flat_efootprint_objs_dict.values():
+            init_param_names = get_init_signature_params(efootprint_object.efootprint_class).keys()
+            calculated_attribute_names = getattr(efootprint_object, "calculated_attributes", [])
+            explainable_quantities = get_instance_attributes(efootprint_object, ExplainableQuantity)
             web_explainable_quantities_sources += [
                 ExplainableQuantityWeb(explainable_object, self)
-                for explainable_object in get_instance_attributes(efootprint_object, ExplainableQuantity).values()
-                if explainable_object.source is not None]
+                for attr_name, explainable_object in explainable_quantities.items()
+                if (
+                    explainable_object.source is not None
+                    and (attr_name in init_param_names or attr_name in calculated_attribute_names)
+                )]
 
         return web_explainable_quantities_sources
 

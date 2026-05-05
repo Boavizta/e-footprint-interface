@@ -93,6 +93,28 @@ def test_delete_edge_device_with_cpu_component(default_system_repository):
     assert "EdgeCPUComponent" not in sd
 
 
+def test_edge_computer_cpu_component_fixed_inputs_are_excluded_from_source_table(default_system_repository):
+    edge_computer_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Test Edge Computer",
+            "EdgeComputer",
+            EdgeStorage_form_data=create_post_data_from_class_default_values("Test Edge Storage", "EdgeStorage"),
+        ),
+    )
+    model_web = ModelWeb(default_system_repository)
+    edge_computer = model_web.get_web_object_from_efootprint_id(edge_computer_id)
+    cpu_component_id = edge_computer.cpu_component.efootprint_id
+
+    source_table_rows = {
+        (row.modeling_obj_container.efootprint_id, row.attr_name_in_mod_obj_container)
+        for row in model_web.web_explainable_quantities_sources
+    }
+
+    assert (edge_computer_id, "structure_carbon_footprint_fabrication") in source_table_rows
+    assert (cpu_component_id, "carbon_footprint_fabrication_per_unit") not in source_table_rows
+
+
 def test_recurrent_edge_device_need_with_component_needs(default_system_repository):
     edge_device_id = create_object(
         default_system_repository,
