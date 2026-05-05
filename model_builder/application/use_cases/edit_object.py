@@ -6,8 +6,26 @@ HTTP/presentation concerns.
 from dataclasses import dataclass, field
 from typing import Dict, Any, List
 
+from efootprint.utils.tools import get_init_signature_params
+
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.oob_region import OobRegion
+
+
+def _is_metadata_only_edit(form_data: Dict[str, Any], obj_to_edit) -> bool:
+    if any(key.startswith("_parsed_") for key in form_data):
+        return False
+
+    editable_attribute_names = get_init_signature_params(obj_to_edit.efootprint_class).keys()
+    editable_values = [
+        form_data[attr_name]
+        for attr_name in editable_attribute_names
+        if attr_name in form_data
+    ]
+    return bool(editable_values) and all(
+        isinstance(value, dict) and value.get("_metadata_only") is True
+        for value in editable_values
+    )
 
 
 @dataclass
@@ -35,6 +53,7 @@ class EditObjectOutput:
     mirrored_cards: List[Any] = field(default_factory=list)  # Web objects for HTML rendering
     replaces_primary_render: bool = False
     oob_regions: List[OobRegion] = field(default_factory=list)
+    refresh_cards: bool = True
 
 
 class EditObjectUseCase:
@@ -69,6 +88,7 @@ class EditObjectUseCase:
         # Apply pre_edit hook if defined (e.g., ServerWeb edits storage first)
         if hasattr(obj_to_edit, 'pre_edit'):
             obj_to_edit.pre_edit(input_data.form_data)
+        metadata_only_edit = _is_metadata_only_edit(input_data.form_data, obj_to_edit)
 
         # Perform the edit with cascade cleanup (domain service, no HTML)
         edit_service = EditService()
@@ -91,4 +111,5 @@ class EditObjectUseCase:
             mirrored_cards=list(edited_obj.mirrored_cards),
             replaces_primary_render=edit_side_effects.replaces_primary_render,
             oob_regions=oob_regions,
+            refresh_cards=not metadata_only_edit,
         )

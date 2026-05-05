@@ -198,8 +198,8 @@ class HtmxPresenter:
             "constraint_messages": constraint_messages,
         }
 
-        if canvas_oob or output.replaces_primary_render:
-            # OOB regions cover all relevant cards; skip per-card mirrored-card swaps
+        if canvas_oob or output.replaces_primary_render or not output.refresh_cards:
+            # OOB regions cover all relevant cards, or this edit has no card-visible changes.
             html_updates = render_oob_regions(self.model_web, output.oob_regions)
         else:
             cards_to_refresh = list(output.mirrored_cards)

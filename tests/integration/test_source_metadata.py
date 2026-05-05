@@ -4,6 +4,8 @@ import pytest
 from efootprint.abstract_modeling_classes.source_objects import Sources
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
+from model_builder.adapters.presenters import HtmxPresenter
+from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.object_factory import edit_object_from_parsed_data
 
@@ -184,3 +186,32 @@ def test_existing_source_identity_is_preserved_after_edit(model_web_with_server)
     edit_object_from_parsed_data(parsed, server_web)
 
     assert server_web.modeling_obj.compute.source is existing_source
+
+
+def test_country_metadata_only_confidence_edit_from_source_table_does_not_require_card_render(rf, minimal_repository):
+    """Country source-table metadata autosave should not require a Country object-card template."""
+    model_web = ModelWeb(minimal_repository)
+    country_source_row = next(
+        row for row in model_web.web_explainable_quantities_sources
+        if (
+            row.modeling_obj_container.class_as_simple_str == "Country"
+            and row.attr_name_in_mod_obj_container == "average_carbon_intensity"
+        )
+    )
+    country_web = country_source_row.modeling_obj_container
+    raw_form_data = {
+        "Country_average_carbon_intensity__confidence": "medium",
+        "csrfmiddlewaretoken": "token",
+        "recomputation": "",
+    }
+    parsed = parse_form_data(raw_form_data, "Country")
+
+    output = EditObjectUseCase(model_web).execute(
+        EditObjectInput(object_id=country_web.efootprint_id, form_data=parsed))
+
+    response = HtmxPresenter(rf.post("/model_builder/edit-object/"), model_web).present_edited_object(output)
+
+    assert output.refresh_cards is False
+    assert response.status_code == 200
+    assert response.content == b""
+    assert country_web.modeling_obj.average_carbon_intensity.confidence == "medium"
