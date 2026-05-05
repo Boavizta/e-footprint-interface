@@ -395,6 +395,35 @@ test("applySourceEditor in row form mode writes hidden inputs and triggers form 
     delete global.htmx;
 });
 
+test("row Apply click updates hidden inputs before triggering the HTMX form event", () => {
+    mountRowEditor("row_editor_listed_src1");
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "user_data";
+    editor.querySelector(".source-editor-comment").value = "picked from table";
+    const submittedValues = [];
+    global.htmx = {
+        trigger: jest.fn(form => {
+            const data = new FormData(form);
+            submittedValues.push({
+                sourceId: data.get("Server_compute__source_id"),
+                sourceName: data.get("Server_compute__source_name"),
+                comment: data.get("Server_compute__comment"),
+            });
+        }),
+    };
+
+    editor.querySelector('[data-action="apply-source-editor"]').dispatchEvent(
+        new MouseEvent("click", {bubbles: true, cancelable: true})
+    );
+
+    expect(submittedValues).toEqual([{
+        sourceId: "user_data",
+        sourceName: "user data",
+        comment: "picked from table",
+    }]);
+    delete global.htmx;
+});
+
 test("row source editor form blocks native submit navigation", () => {
     mountRowEditor("row_editor_listed_user_data");
     const form = document.querySelector("form[data-action='source-table-row-edit']");
@@ -508,6 +537,19 @@ test("initInFormSourceEditorsIn keeps the listed source selected and the custom-
     const editor = document.getElementById("editor-row1_row");
     expect(editor.querySelector(".source-editor-select").value).toBe("src1");
     expect(document.getElementById("custom-fields-row1_row").classList.contains("open")).toBe(false);
+});
+
+test("initInFormSourceEditorsIn does not overwrite an already-initialized row editor", () => {
+    mountRowEditor("row_editor_listed_src1");
+    initInFormSourceEditorsIn();
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "user_data";
+    editor.querySelector(".source-editor-comment").value = "draft";
+
+    initInFormSourceEditorsIn();
+
+    expect(editor.querySelector(".source-editor-select").value).toBe("user_data");
+    expect(editor.querySelector(".source-editor-comment").value).toBe("draft");
 });
 
 test("successful row form POST updates source/comment cells without reloading the source table", () => {

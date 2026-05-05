@@ -239,7 +239,11 @@
     function initInFormSourceEditorsIn(root) {
         (root || document).querySelectorAll(
             "form[data-action='source-table-row-edit'] .source-editor"
-        ).forEach(editor => _populateEditorFromHidden(editor.dataset.fieldId));
+        ).forEach(editor => {
+            if (editor.dataset.sourceEditorInitialized === "true") return;
+            _populateEditorFromHidden(editor.dataset.fieldId);
+            editor.dataset.sourceEditorInitialized = "true";
+        });
     }
 
     function handleSourceSelect(select, fieldId) {
@@ -465,6 +469,19 @@
 
     /* ===== Delegated dispatchers ===== */
 
+    /* Apply is handled in capture phase (the final `true`) before the generic
+       bubble-phase dispatcher below. For row editors, Apply must first copy the
+       visible select/comment values into hidden form inputs, then trigger HTMX's
+       custom form event. preventDefault/stopPropagation keep the same click from
+       also reaching the later dispatcher or any native submit path. */
+    document.addEventListener("click", e => {
+        const target = e.target.closest?.('[data-action="apply-source-editor"]');
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        applySourceEditor(_fieldIdOf(target));
+    }, true);
+
     document.addEventListener("click", e => {
         if (!e.target.closest(".confidence-badge") && !e.target.closest(".confidence-menu")) {
             closeAllConfidenceMenus();
@@ -485,9 +502,6 @@
                 break;
             case "cancel-source-editor":
                 cancelSourceEditor(fieldId);
-                break;
-            case "apply-source-editor":
-                applySourceEditor(fieldId);
                 break;
             case "toggle-source-table-row-editor":
                 _toggleSourceTableRowEditor(target);
@@ -543,6 +557,7 @@
         const collapse = e.detail.elt;
         if (!collapse?.id?.startsWith("row-editor-")) return;
         if (!collapse.querySelector("form[data-action='source-table-row-edit']")) return;
+        initInFormSourceEditorsIn(collapse);
         _showSourceTableRowEditor(collapse);
     });
 
