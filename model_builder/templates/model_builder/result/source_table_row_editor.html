@@ -1,10 +1,11 @@
 {% comment %}
-Variables expected: eq (ExplainableQuantityWeb), field_name_prefix (str), available_sources (list). edit_object_url and source_table_url come from the parent source_table.html context. Source/comment edit for one source-table row: a real HTMX form wrapping the source editor. Apply writes hidden inputs (applySourceEditor) and the form posts; on success the row collapses (table refresh re-renders it closed). Confidence is edited inline via the badge.
+Variables expected: eq (ExplainableQuantityWeb), field_name_prefix (str), available_sources (list), edit_object_url (str). Source/comment edit for one source-table row: a real HTMX form wrapping the source editor. Apply writes hidden inputs (applySourceEditor) and the form posts; on success JS updates the row display and collapses the editor. Confidence is edited inline via the badge.
 {% endcomment %}
 <form class="p-3"
       hx-post="{{ edit_object_url }}"
+      hx-trigger="source-table-row-edit-submit"
       hx-swap="none"
       data-action="source-table-row-edit"
-      data-source-table-url="{{ source_table_url }}">
+      data-source-row-id="{{ eq.web_id }}">
     {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" with source_editor_id=eq.web_id|add:"_row" source_editor_name_prefix=field_name_prefix source_meta_available=available_sources source_meta_current_id=eq.source.id source_meta_current_name=eq.source.name source_meta_current_link=eq.source.link source_meta_current_comment=eq.comment source_editor_open=True source_editor_cancel_target="row-editor-"|add:eq.web_id %}
 </form>

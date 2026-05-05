@@ -27,6 +27,8 @@ class TestSourceTableViews:
         assert 'data-action="source-table-row-edit"' not in body
         assert "source-editor-select" not in body
         assert 'id="source-table-confidence-menu-template"' in body
+        assert 'id="source-cell-' in body
+        assert 'id="comment-cell-' in body
         assert body.count('class="confidence-menu"') == 1
 
     def test_source_table_row_editor_renders_one_edit_form(self, client, minimal_system_data):
@@ -42,6 +44,9 @@ class TestSourceTableViews:
         assert response.status_code == 200
         assert 'data-action="source-table-row-edit"' in body
         assert "source-editor-select" in body
+        assert 'hx-trigger="source-table-row-edit-submit"' in body
+        assert f'data-source-row-id="{eq.web_id}"' in body
+        assert "data-source-table-url" not in body
         assert f'name="{field_name_prefix}__source_id"' in body
         assert f'name="{field_name_prefix}__comment"' in body
 

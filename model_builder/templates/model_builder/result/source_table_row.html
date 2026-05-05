@@ -1,0 +1,84 @@
+{% load label_filters %}
+{% with is_calculated=explainable_quantity.is_calculated %}
+{% with field_name_prefix=explainable_quantity.modeling_obj_container.class_as_simple_str|add:"_"|add:explainable_quantity.attr_name_in_mod_obj_container %}
+{% url 'edit-object' explainable_quantity.modeling_obj_container.efootprint_id as edit_object_url %}
+<tr id="source-row-display-{{ explainable_quantity.web_id }}">
+    <th scope="row" class="source-col-name">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.label|capfirst %}
+    </th>
+    <td class="source-col-attr">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.modeling_obj_container.name %}
+    </td>
+    <td class="source-col-type d-none d-xl-table-cell">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.modeling_obj_container.class_as_simple_str|class_label %}
+    </td>
+    <td class="source-col-value">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.display_magnitude %}
+    </td>
+    <td class="source-col-unit">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.display_unit %}
+    </td>
+    <td class="source-col-source" id="source-cell-{{ explainable_quantity.web_id }}">
+        <p class="mb-0 text-truncate min-w-0 truncated-text-tooltip"
+           data-bs-toggle="tooltip"
+           data-bs-placement="top"
+           data-bs-title="{{ explainable_quantity.source.name }}">
+            <a data-source-table-role="source-link"
+               class="{% if not explainable_quantity.source.link %}d-none{% endif %}"
+               target="_blank"
+               href="{{ explainable_quantity.source.link|default:'' }}">{{ explainable_quantity.source.name }}</a>
+            <span data-source-table-role="source-text"
+                  class="{% if explainable_quantity.source.link %}d-none{% endif %}">
+                {{ explainable_quantity.source.name }}
+            </span>
+            {% if is_calculated %}
+                <a href="{% url 'display-calculus-graph' explainable_quantity.modeling_obj_container.efootprint_id explainable_quantity.attr_name_in_mod_obj_container %}" target="_blank">
+                (see graph)
+                </a>
+            {% endif %}
+        </p>
+    </td>
+    <td class="source-col-confidence">
+        {% if not is_calculated %}
+            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_omit_menu=True %}
+        {% endif %}
+    </td>
+    <td class="source-col-comment" id="comment-cell-{{ explainable_quantity.web_id }}">
+        {% if not is_calculated %}
+            <p data-source-table-role="comment-text"
+               class="mb-0 text-truncate min-w-0 truncated-text-tooltip {% if not explainable_quantity.comment %}d-none{% endif %}"
+               {% if explainable_quantity.comment %}
+               data-bs-toggle="tooltip"
+               data-bs-placement="top"
+               data-bs-title="{{ explainable_quantity.comment }}"
+               {% endif %}>
+                {{ explainable_quantity.comment|default:'' }}
+            </p>
+        {% endif %}
+    </td>
+    <td class="source-col-edit">
+        {% if not is_calculated %}
+            {% url 'source-table-row-editor' explainable_quantity.modeling_obj_container.efootprint_id explainable_quantity.attr_name_in_mod_obj_container as row_editor_url %}
+            <button type="button"
+                    class="btn btn-sm btn-link p-0 source-table-edit-btn"
+                    hx-get="{{ row_editor_url }}"
+                    hx-target="#row-editor-{{ explainable_quantity.web_id }}"
+                    hx-swap="innerHTML"
+                    hx-trigger="click once"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#row-editor-{{ explainable_quantity.web_id }}"
+                    aria-expanded="false">
+                <i class="bi bi-pencil"></i>
+            </button>
+        {% endif %}
+    </td>
+</tr>
+{% if not is_calculated %}
+<tr class="source-table-editor-row">
+    <td colspan="9" class="p-0">
+        <div id="row-editor-{{ explainable_quantity.web_id }}" class="collapse"></div>
+    </td>
+</tr>
+{% endif %}
+{% endwith %}
+{% endwith %}

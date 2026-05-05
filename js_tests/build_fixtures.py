@@ -14,6 +14,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import django
 
@@ -123,8 +124,6 @@ ROW_EDITOR_CASES = {
 
 
 def render_row_editor(case_ctx):
-    from types import SimpleNamespace
-
     src = case_ctx["prior_source"]
     eq = SimpleNamespace(
         web_id="row1",
@@ -142,8 +141,41 @@ def render_row_editor(case_ctx):
                 for s in case_ctx["available_sources"]
             ],
             "edit_object_url": "/edit/obj1/",
-            "source_table_url": "/source-table/",
         },
+    )
+
+
+# ---------------------------------------------------------------------------
+# source_metadata.test.js — source_table_row.html display cells
+# ---------------------------------------------------------------------------
+
+SOURCE_TABLE_ROW_CASES = {
+    "source_table_row_listed_user_data": row_editor(prior_source=USER_DATA),
+    "source_table_row_listed_src1": row_editor(prior_source=SRC1, prior_comment="old note"),
+}
+
+
+def render_source_table_row(case_ctx):
+    src = case_ctx["prior_source"]
+    eq = SimpleNamespace(
+        web_id="row1",
+        label="compute",
+        display_magnitude="12",
+        display_unit="cpu_core",
+        confidence=None,
+        comment=case_ctx["prior_comment"],
+        is_calculated=False,
+        attr_name_in_mod_obj_container="compute",
+        source=SimpleNamespace(id=src["id"], name=src["name"], link=src["link"]),
+        modeling_obj_container=SimpleNamespace(
+            efootprint_id="obj1",
+            name="Server A",
+            class_as_simple_str="Server",
+        ),
+    )
+    return render_to_string(
+        "model_builder/result/source_table_row.html",
+        {"explainable_quantity": eq},
     )
 
 
@@ -186,6 +218,7 @@ def render_dict_count(field_ctx):
 GROUPS = [
     (SOURCE_METADATA_CASES, render_metadata_field),
     (ROW_EDITOR_CASES, render_row_editor),
+    (SOURCE_TABLE_ROW_CASES, render_source_table_row),
     (DICT_COUNT_CASES, render_dict_count),
 ]
 

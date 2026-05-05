@@ -14,6 +14,7 @@ const {
     swapHypothesisToUserDataForField,
     autosaveConfidence,
     initInFormSourceEditorsIn,
+    updateSourceTableRowDisplay,
 } = require("../theme/static/scripts/source_metadata.js");
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures");
@@ -37,6 +38,13 @@ function mount(name) {
 // in production.
 function mountRowEditor(name) {
     document.body.innerHTML = `<div class="collapse show" id="row-editor-row1">${loadFixture(name)}</div>`;
+}
+
+function mountSourceTableRowWithEditor(rowFixture, editorFixture) {
+    document.body.innerHTML = `<table><tbody>${loadFixture(rowFixture)}</tbody></table>`;
+    const editorHost = document.getElementById("row-editor-row1");
+    editorHost.classList.add("show");
+    editorHost.innerHTML = loadFixture(editorFixture);
 }
 
 global.tagFormAsModified = jest.fn();
@@ -361,9 +369,19 @@ test("applySourceEditor in row form mode writes hidden inputs and triggers form 
     expect(document.getElementById("row1_row__source_link").value).toBe("https://ademe.fr");
     expect(document.getElementById("row1_row__comment").value).toBe("vetted");
     expect(global.htmx.trigger).toHaveBeenCalledWith(
-        document.querySelector("form[data-action='source-table-row-edit']"), "submit");
+        document.querySelector("form[data-action='source-table-row-edit']"), "source-table-row-edit-submit");
     expect(global.htmx.ajax).not.toHaveBeenCalled();
     delete global.htmx;
+});
+
+test("row source editor form blocks native submit navigation", () => {
+    mountRowEditor("row_editor_listed_user_data");
+    const form = document.querySelector("form[data-action='source-table-row-edit']");
+
+    const submitEvent = new Event("submit", {bubbles: true, cancelable: true});
+    form.dispatchEvent(submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
 });
 
 test("applySourceEditor in row form mode + custom source mints fresh id when prior was a listed source", () => {
@@ -417,6 +435,89 @@ test("initInFormSourceEditorsIn keeps the listed source selected and the custom-
     const editor = document.getElementById("editor-row1_row");
     expect(editor.querySelector(".source-editor-select").value).toBe("src1");
     expect(document.getElementById("custom-fields-row1_row").classList.contains("open")).toBe(false);
+});
+
+test("successful row form POST updates source/comment cells without reloading the source table", () => {
+    mountSourceTableRowWithEditor("source_table_row_listed_user_data", "row_editor_listed_user_data");
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "src1";
+    editor.querySelector(".source-editor-comment").value = "vetted";
+    global.htmx = {trigger: jest.fn(), ajax: jest.fn()};
+
+    applySourceEditor("row1_row");
+    const form = document.querySelector("form[data-action='source-table-row-edit']");
+    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {
+        bubbles: true,
+        detail: {successful: true},
+    }));
+
+    const sourceLink = document.querySelector('#source-cell-row1 [data-source-table-role="source-link"]');
+    const sourceText = document.querySelector('#source-cell-row1 [data-source-table-role="source-text"]');
+    expect(sourceLink.textContent).toBe("ADEME 2024");
+    expect(sourceLink.href).toBe("https://ademe.fr/");
+    expect(sourceLink.classList.contains("d-none")).toBe(false);
+    expect(sourceText.classList.contains("d-none")).toBe(true);
+    expect(document.querySelector("#source-cell-row1 .truncated-text-tooltip").dataset.bsTitle).toBe("ADEME 2024");
+    const commentText = document.querySelector('#comment-cell-row1 [data-source-table-role="comment-text"]');
+    expect(commentText.textContent).toBe("vetted");
+    expect(commentText.classList.contains("d-none")).toBe(false);
+    expect(document.getElementById("row-editor-row1").classList.contains("show")).toBe(false);
+    expect(global.htmx.ajax).not.toHaveBeenCalled();
+    delete global.htmx;
+});
+
+test("successful row form POST without link/comment toggles existing source/comment elements", () => {
+    mountSourceTableRowWithEditor("source_table_row_listed_src1", "row_editor_listed_src1");
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "__custom__";
+    editor.querySelector(".source-editor-custom-name").value = "Internal";
+    editor.querySelector(".source-editor-custom-link").value = "";
+    editor.querySelector(".source-editor-comment").value = "";
+    global.htmx = {trigger: jest.fn()};
+
+    applySourceEditor("row1_row");
+    updateSourceTableRowDisplay(document.querySelector("form[data-action='source-table-row-edit']"));
+
+    const sourceLink = document.querySelector('#source-cell-row1 [data-source-table-role="source-link"]');
+    const sourceText = document.querySelector('#source-cell-row1 [data-source-table-role="source-text"]');
+    const commentText = document.querySelector('#comment-cell-row1 [data-source-table-role="comment-text"]');
+    expect(sourceLink.classList.contains("d-none")).toBe(true);
+    expect(sourceLink.hasAttribute("href")).toBe(false);
+    expect(sourceText.textContent.trim()).toBe("Internal");
+    expect(sourceText.classList.contains("d-none")).toBe(false);
+    expect(commentText.classList.contains("d-none")).toBe(true);
+    expect(commentText.hasAttribute("data-bs-title")).toBe(false);
+    delete global.htmx;
+});
+
+test("successful custom source row POST makes the source available to loaded row editors", () => {
+    mountSourceTableRowWithEditor("source_table_row_listed_user_data", "row_editor_listed_user_data");
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        `<div class="collapse show" id="row-editor-row2">${loadFixture("row_editor_listed_user_data")}</div>`
+    );
+    const secondEditor = document.querySelector("#row-editor-row2 .source-editor");
+    secondEditor.id = "editor-row2_row";
+    secondEditor.dataset.fieldId = "row2_row";
+    secondEditor.querySelectorAll("[id]").forEach(el => {
+        el.id = el.id.replace("row1_row", "row2_row");
+    });
+
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-select").value = "__custom__";
+    editor.querySelector(".source-editor-custom-name").value = "Internal";
+    editor.querySelector(".source-editor-custom-link").value = "https://internal.example";
+    global.htmx = {trigger: jest.fn()};
+
+    applySourceEditor("row1_row");
+    const form = document.querySelector("form[data-action='source-table-row-edit']");
+    updateSourceTableRowDisplay(form);
+
+    const newId = document.getElementById("row1_row__source_id").value;
+    const injected = secondEditor.querySelector(`option[value="${newId}"]`);
+    expect(injected.dataset.name).toBe("Internal");
+    expect(injected.dataset.link).toBe("https://internal.example");
+    delete global.htmx;
 });
 
 test("autosaveConfidence on a 'none' selection sends an empty confidence string", async () => {

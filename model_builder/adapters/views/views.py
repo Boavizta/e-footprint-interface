@@ -279,7 +279,6 @@ def source_table_row_editor(request, object_id: str, attr_name: str):
         "available_sources": model_web.available_sources,
         "field_name_prefix": field_name_prefix,
         "edit_object_url": reverse("edit-object", kwargs={"object_id": object_id}),
-        "source_table_url": reverse("source-table"),
     })
 
 

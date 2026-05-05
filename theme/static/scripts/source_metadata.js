@@ -22,6 +22,10 @@
         return document.getElementById(`${fieldId}__${suffix}`);
     }
 
+    function _hiddenInputIn(root, suffix) {
+        return root.querySelector(`input[name$="__${suffix}"]`);
+    }
+
     function _fieldIdOf(target) {
         const el = target.closest("[data-field-id]");
         return el ? el.dataset.fieldId : null;
@@ -220,7 +224,7 @@
         // submission to the user's Save click.
         const rowForm = editor.closest("form[data-action='source-table-row-edit']");
         if (rowForm) {
-            htmx.trigger(rowForm, "submit");
+            htmx.trigger(rowForm, "source-table-row-edit-submit");
             return;
         }
 
@@ -310,6 +314,86 @@
         }
     }
 
+    function updateSourceTableRowDisplay(form) {
+        const rowId = form.dataset.sourceRowId;
+        if (!rowId) return;
+        const sourceId = _hiddenInputIn(form, "source_id")?.value || "";
+        const sourceName = _hiddenInputIn(form, "source_name")?.value || "";
+        const sourceLink = _hiddenInputIn(form, "source_link")?.value || "";
+        const comment = _hiddenInputIn(form, "comment")?.value || "";
+
+        _updateSourceTableSourceCell(rowId, sourceName, sourceLink);
+        _updateSourceTableCommentCell(rowId, comment);
+        _broadcastSourceToEditors(document.querySelectorAll(".source-editor"), null, sourceId, sourceName, sourceLink);
+        _collapseSourceTableRowEditor(form);
+    }
+
+    function _updateSourceTableSourceCell(rowId, name, link) {
+        const cell = document.getElementById("source-cell-" + rowId);
+        const display = cell?.querySelector(".truncated-text-tooltip");
+        const anchor = cell?.querySelector('[data-source-table-role="source-link"]');
+        const text = cell?.querySelector('[data-source-table-role="source-text"]');
+        if (!display || !anchor || !text) return;
+        if (link) {
+            anchor.href = link;
+            anchor.textContent = name;
+            text.textContent = "";
+            anchor.classList.remove("d-none");
+            text.classList.add("d-none");
+        } else {
+            anchor.removeAttribute("href");
+            anchor.textContent = "";
+            text.textContent = name;
+            anchor.classList.add("d-none");
+            text.classList.remove("d-none");
+        }
+        _refreshTooltip(display, name);
+    }
+
+    function _updateSourceTableCommentCell(rowId, comment) {
+        const cell = document.getElementById("comment-cell-" + rowId);
+        const text = cell?.querySelector('[data-source-table-role="comment-text"]');
+        if (!text) return;
+        text.textContent = comment;
+        text.classList.toggle("d-none", !comment);
+        _refreshTooltip(text, comment);
+    }
+
+    function _refreshTooltip(element, title) {
+        if (!title) {
+            element.removeAttribute("data-bs-toggle");
+            element.removeAttribute("data-bs-placement");
+            element.removeAttribute("data-bs-title");
+            if (window.bootstrap && bootstrap.Tooltip) {
+                bootstrap.Tooltip.getInstance(element)?.dispose();
+            }
+            return;
+        }
+        element.dataset.bsToggle = "tooltip";
+        element.dataset.bsPlacement = "top";
+        element.dataset.bsTitle = title;
+        if (window.bootstrap && bootstrap.Tooltip) {
+            const tooltip = bootstrap.Tooltip.getOrCreateInstance(element, {
+                container: "body",
+                delay: { show: 0, hide: 0 },
+                trigger: "hover",
+            });
+            tooltip.setContent({ ".tooltip-inner": title });
+        }
+    }
+
+    function _collapseSourceTableRowEditor(form) {
+        const collapse = form.closest(".collapse");
+        if (!collapse) return;
+        if (window.bootstrap && bootstrap.Collapse) {
+            bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).hide();
+        } else {
+            collapse.classList.remove("show");
+        }
+        const toggle = document.querySelector(`[data-bs-target="#${CSS.escape(collapse.id)}"]`);
+        if (toggle) toggle.setAttribute("aria-expanded", "false");
+    }
+
     function _escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, ch => ({
             "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -321,7 +405,12 @@
     function _broadcastNewSource(originatingEditor, id, name, link) {
         const form = _form(originatingEditor);
         if (!form) return;
-        form.querySelectorAll(".source-editor").forEach(other => {
+        _broadcastSourceToEditors(form.querySelectorAll(".source-editor"), originatingEditor, id, name, link);
+    }
+
+    function _broadcastSourceToEditors(editors, originatingEditor, id, name, link) {
+        if (!id || !name) return;
+        editors.forEach(other => {
             if (other === originatingEditor) return;
             const select = other.querySelector(".source-editor-select");
             if (!select) return;
@@ -392,6 +481,12 @@
         }
     });
 
+    document.addEventListener("submit", e => {
+        if (e.target.closest("form[data-action='source-table-row-edit']")) {
+            e.preventDefault();
+        }
+    });
+
     document.addEventListener("keydown", e => {
         if (e.key !== "Enter" && e.key !== " ") return;
         const target = e.target.closest("[data-action]");
@@ -403,18 +498,18 @@
         }
     });
 
-    /* Pick up freshly-rendered in-form source editors after the source table reloads
+    /* Pick up freshly-rendered in-form source editors after HTMX loads a row editor
        (and once on initial DOMContentLoaded for the no-htmx case). Idempotent. */
     document.addEventListener("htmx:load", e => initInFormSourceEditorsIn(e.target));
     document.addEventListener("DOMContentLoaded", () => initInFormSourceEditorsIn());
 
-    /* After the row form's POST succeeds, refresh the source table — the re-render
-       collapses the row that submitted (no `show` class on the new markup). */
+    /* After the row form's POST succeeds, update only the row display. The server
+       has persisted the metadata; the client already knows the source/comment text. */
     document.addEventListener("htmx:afterRequest", e => {
         if (!e.detail.successful) return;
         const form = e.target.closest("form[data-action='source-table-row-edit']");
         if (!form) return;
-        htmx.ajax("GET", form.dataset.sourceTableUrl, {target: "#source-block", swap: "innerHTML"});
+        updateSourceTableRowDisplay(form);
     });
 
     /* Cross-module hook: dynamic_forms.js fires this when an input value changes,
@@ -435,6 +530,7 @@
             resetConfidenceForField, swapHypothesisToUserDataForField,
             autosaveConfidence,
             initInFormSourceEditorsIn,
+            updateSourceTableRowDisplay,
         };
     }
 })();
