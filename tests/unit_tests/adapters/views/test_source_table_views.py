@@ -1,3 +1,6 @@
+from io import BytesIO
+
+from openpyxl import load_workbook
 import pytest
 
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -80,3 +83,30 @@ class TestSourceTableViews:
         response = client.get(f"/model_builder/source-table-row-editor/{object_id}/name/")
 
         assert response.status_code == 404
+
+    def test_download_sources_exports_confidence_and_comment_columns(self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        model_web = ModelWeb(SessionSystemRepository(client.session))
+        eq = next(row for row in model_web.web_explainable_quantities_sources if not row.is_calculated)
+        eq.efootprint_object.confidence = "high"
+        eq.efootprint_object.comment = "exported metadata note"
+        model_web.persist_to_cache()
+
+        response = client.get("/model_builder/download-sources/")
+
+        workbook = load_workbook(BytesIO(response.content))
+        worksheet = workbook["Sources"]
+        rows = list(worksheet.iter_rows(values_only=True))
+        assert response.status_code == 200
+        assert rows[0] == (
+            "Item name",
+            "Attribute of",
+            "Object type",
+            "Value",
+            "Unit",
+            "Source name",
+            "Source link",
+            "confidence",
+            "comment",
+        )
+        assert [row[-2:] for row in rows[1:]].count(("high", "exported metadata note")) == 1

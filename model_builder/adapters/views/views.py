@@ -226,13 +226,25 @@ def download_sources(request):
             human_readable_unit(display_value.units),
             source.name if source else "",
             source.link if source else "",
+            web_explainable_quantity_source.confidence or "",
+            web_explainable_quantity_source.comment or "",
         ])
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Sources"
 
-    headers = ["Item name", "Attribute of", "Object type", "Value", "Unit", "Source name", "Source link"]
+    headers = [
+        "Item name",
+        "Attribute of",
+        "Object type",
+        "Value",
+        "Unit",
+        "Source name",
+        "Source link",
+        "confidence",
+        "comment",
+    ]
     ws.append(headers)
 
     for row in sources:
