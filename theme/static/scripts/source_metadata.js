@@ -111,19 +111,14 @@
     }
 
     /* Inline (no-form) confidence edit: POST just the new confidence field.
-       _apply_metadata patches in place, so source/comment aren't touched. */
+       The badge is already updated locally; _apply_metadata patches in place,
+       so source/comment aren't touched and no table refresh is needed. */
     function autosaveConfidence(wrap, confidenceValue) {
         const hidden = wrap.querySelector('input[type="hidden"]');
         if (!hidden || !hidden.name) return;
         const ds = wrap.dataset;
         htmx.ajax("POST", ds.autosaveUrl,
-            {values: {[hidden.name]: confidenceValue}, swap: "none"})
-            .then(() => {
-                if (ds.autosaveRefreshUrl) {
-                    htmx.ajax("GET", ds.autosaveRefreshUrl,
-                        {target: "#source-block", swap: "innerHTML"});
-                }
-            });
+            {values: {[hidden.name]: confidenceValue}, swap: "none"});
     }
 
     function resetConfidenceForField(inputId) {

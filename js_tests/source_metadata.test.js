@@ -305,11 +305,10 @@ test("toggleConfidenceMenu clones the shared template when the badge has no inli
     expect(menus[0].querySelector('[data-level="none"]').classList.contains("selected")).toBe(false);
 });
 
-test("setConfidence on a wrap with autosave attrs POSTs only the new confidence, then refreshes #source-block", async () => {
+test("setConfidence on a wrap with autosave attrs POSTs only the new confidence", async () => {
     document.body.innerHTML = `
         <div class="confidence-wrap" data-field-id="row1"
-             data-autosave-url="/edit/obj1/"
-             data-autosave-refresh-url="/source-table/">
+             data-autosave-url="/edit/obj1/">
             <button class="confidence-badge conf-none" data-level="none">
                 <span class="bars"><i></i><i></i><i></i></span>
             </button>
@@ -340,11 +339,7 @@ test("setConfidence on a wrap with autosave attrs POSTs only the new confidence,
             swap: "none",
         },
     });
-    expect(ajaxCalls[1]).toEqual({
-        method: "GET",
-        url: "/source-table/",
-        opts: {target: "#source-block", swap: "innerHTML"},
-    });
+    expect(ajaxCalls).toHaveLength(1);
     expect(document.getElementById("row1__confidence").value).toBe("high");
 
     delete global.htmx;

@@ -69,7 +69,7 @@
                     </td>
                     <td class="source-col-confidence">
                         {% if not is_calculated %}
-                            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_autosave_refresh_url=source_table_url conf_omit_menu=True %}
+                            {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id=explainable_quantity.web_id|add:"_inline" conf_name_prefix=field_name_prefix conf_current=explainable_quantity.confidence conf_autosave_url=edit_object_url conf_omit_menu=True %}
                         {% endif %}
                     </td>
                     <td class="source-col-comment">

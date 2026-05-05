@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Change from re-rendering cards to re-rendering top parent cards, to make sure that rendering is always rightly done, because some cards’ rendering depend on their parents.
 
 ### Changed
+- Stop reloading the Sources table after inline confidence edits; the badge now stays updated locally after the metadata POST succeeds.
 - Truncate text on sources table to keep rows on one line.
 
 ## [1.3.3] - 2026-04-22

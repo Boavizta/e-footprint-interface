@@ -208,7 +208,7 @@ The form generator injects this as `field["subfields"]` so templates can render 
 - **HTMX partials.** Most UI actions trigger small HTTP requests that replace DOM snippets using templates under `model_builder/templates/model_builder/`.
 - **Metadata-only edits.** Parsed source metadata submissions (`_metadata_only`) are persisted through the normal
   edit use case, but the output sets `refresh_cards=False` so `HtmxPresenter` skips object-card OOB swaps;
-  source-table JS refreshes `#source-block` separately.
+  source-table JS updates already-known metadata display locally instead of reloading the full source table.
 - **Templates.**
   - Base layouts in `theme/templates/` (e.g., `base.html`, `navbar.html`) with Bootstrap styling.
   - Feature templates and partials under `model_builder/templates/model_builder/`.
