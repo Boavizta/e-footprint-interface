@@ -71,6 +71,28 @@ def test_edge_device_component_lifecycle(default_system_repository):
     assert sd["EdgeDevice"][edge_device_id]["components"] == []
 
 
+def test_delete_edge_device_with_cpu_component(default_system_repository):
+    edge_device_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Test Edge Device", "EdgeDevice", components=""),
+    )
+    cpu_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Test CPU Component", "EdgeCPUComponent"),
+        parent_id=edge_device_id,
+    )
+
+    sd = _system_data(default_system_repository)
+    assert edge_device_id in sd["EdgeDevice"]
+    assert cpu_id in sd["EdgeDevice"][edge_device_id]["components"]
+
+    delete_object(default_system_repository, edge_device_id)
+
+    sd = _system_data(default_system_repository)
+    assert "EdgeDevice" not in sd
+    assert "EdgeCPUComponent" not in sd
+
+
 def test_recurrent_edge_device_need_with_component_needs(default_system_repository):
     edge_device_id = create_object(
         default_system_repository,

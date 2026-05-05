@@ -430,16 +430,16 @@ class ModelingObjectWeb:
     def self_delete(self):
         obj_type = self.class_as_simple_str
         object_id = self.efootprint_id
-        objects_to_delete_afterwards = []
+        cascade_children_to_delete_before_cache_removal = []
         for modeling_obj in self.mod_obj_attributes:
             if (
                 modeling_obj.gets_deleted_if_unique_mod_obj_container_gets_deleted
                 and len(modeling_obj.modeling_obj_containers) == 1
             ):
-                objects_to_delete_afterwards.append(modeling_obj)
+                cascade_children_to_delete_before_cache_removal.append(modeling_obj)
         logger.info(f"Deleting {self.name}")
         self.modeling_obj.self_delete()
+        for mod_obj in cascade_children_to_delete_before_cache_removal:
+            mod_obj.self_delete()
         self.model_web.response_objs[obj_type].pop(object_id, None)
         self.model_web.flat_efootprint_objs_dict.pop(object_id, None)
-        for mod_obj in objects_to_delete_afterwards:
-            mod_obj.self_delete()
