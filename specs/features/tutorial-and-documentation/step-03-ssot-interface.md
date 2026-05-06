@@ -10,6 +10,8 @@
 
 **Prerequisite:** Step 2 has landed in e-footprint. Concrete classes carry `param_descriptions`, class docstrings, `update_<attr>` docstrings, and (where warranted) `disambiguation`, `pitfalls`, `interactions`, `param_interactions`. The library-side `tests/test_descriptions.py` is hard-failing.
 
+**Assumed library inheritance shape (verify against Step 2 before starting):** for every concrete class, `klass.param_descriptions` (read via plain attribute lookup) covers every `__init__` param — either authored on the class directly or inherited from an abstract base. The interface adapter relies on `getattr(klass, "param_descriptions", {})` returning the full dict for the concrete class; if Step 2 lands per-class-only dicts without inheritance, the form-field tooltip coverage claim breaks for subclasses and this plan needs a merge step.
+
 ---
 
 ## Goal
@@ -32,14 +34,12 @@ The interface tooltip is **appended** to the library description, not a replacem
 Concretely the merge produces:
 
 ```
-<library param_description, placeholder-resolved>
-
-<interface tooltip, placeholder-resolved>
+<library param_description, placeholder-resolved><br><br><interface tooltip, placeholder-resolved>
 ```
 
-Two newlines between the two parts (rendered as a paragraph break by the Bootstrap popover via the `tooltip_html` flag — see "Popover content rendering" below). The order is fixed: library first, interface second. Rationale: the library description states the meaning of the parameter; the interface tooltip is local guidance that builds on that meaning.
+The separator is a literal `<br><br>` HTML fragment, not `\n\n`: Bootstrap's popover with `data-bs-html="true"` (see "Popover content rendering" below) treats raw newlines as whitespace, so newlines would not produce a visible paragraph break. The order is fixed: library first, interface second. Rationale: the library description states the meaning of the parameter; the interface tooltip is local guidance that builds on that meaning.
 
-This forces the existing `FieldUIConfigProvider.get_tooltip(field_name)` callers to rewire, because the merged string requires the class context (param descriptions are per-class). All call sites move to `DescriptionProvider.field_tooltip(class_name, param)`.
+This forces the existing `FieldUIConfigProvider.get_tooltip(field_name)` callers to rewire, because the merged string requires the class context (param descriptions are per-class). All call sites move to `DescriptionProvider.field_tooltip(class_name, param)`. Every form field today maps to a real library `(class, param)` pair — including `parent_group_memberships`, which is the UI label for `EdgeDeviceGroup.sub_group_counts` or `EdgeDeviceGroup.edge_device_counts` depending on what is being added. The call site resolves to the right pair before invoking the provider (see "Form context builder rewiring" below), so the provider signature stays strictly class-scoped and there is no unscoped fallback.
 
 ---
 
@@ -47,7 +47,7 @@ This forces the existing `FieldUIConfigProvider.get_tooltip(field_name)` callers
 
 ### `DescriptionProvider` port — `domain/interfaces/description_provider.py`
 
-`Protocol` with no Django imports. The interface domain layer depends only on this. Methods return **already-resolved, plain strings** (or `None` when absent). Callers never see `{kind:target}` tokens.
+`Protocol` with no Django imports. The interface domain layer depends only on this. Methods return **placeholder-resolved strings; HTML or plain depending on the handler mode the provider was constructed with** (or `None` when absent). Callers never see `{kind:target}` tokens. Step 3 uses the HTML-mode singleton everywhere; the protocol is mode-agnostic so a future text-mode adapter can satisfy the same port.
 
 ```python
 class DescriptionProvider(Protocol):
@@ -55,37 +55,54 @@ class DescriptionProvider(Protocol):
     def class_disambiguation(self, class_name: str) -> str | None: ...
     def class_pitfalls(self, class_name: str) -> str | None: ...
     def class_interactions(self, class_name: str) -> str | None: ...  # interface-side, from class_ui_config
+    def param_description(self, class_name: str, param: str) -> str | None: ...  # library-only, raw (no merge)
     def field_tooltip(self, class_name: str, param: str) -> str | None: ...  # merged: library param_description + interface tooltip
     def calc_description(self, class_name: str, attr: str) -> str | None: ...
     def param_interaction(self, class_name: str, param: str) -> str | None: ...  # optional Python-facing param hint, rare
 ```
 
-`field_tooltip` is the merge point described above. `class_interactions` reads from `class_ui_config.json` (interface-owned). The other class-level methods read from the library class via introspection.
+All methods are strictly class-scoped (`class_name: str`, never `None`). `field_tooltip` is the merge point described above and is what every form-field call site uses. `param_description` is exposed separately for callers that explicitly want the unmerged library string (e.g. future help-drawer per-param sections); `field_tooltip` is implemented in terms of it so the contract stays consistent. `class_interactions` reads from `class_ui_config.json` (interface-owned). The other class-level methods read from the library class via introspection. Methods return `SafeString` (Django) in HTML mode so callers can render with `|safe` without re-escaping.
 
 ### `EfootprintDescriptionProvider` adapter — `adapters/ui_config/efootprint_description_provider.py`
 
-The single adapter implementing the port. Lives next to the existing `*_provider.py` files in `ui_config/` because it consumes the same JSON families.
-
-Construction:
+The single adapter implementing the port. Lives next to the existing `*_provider.py` files in `ui_config/` because it consumes the same JSON families. Shape matches `ClassUIConfigProvider` and `FieldUIConfigProvider`: a module-level singleton instance, no per-request construction.
 
 ```python
-class EfootprintDescriptionProvider:
-    def __init__(self, resolver: PlaceholderResolver):
-        self._resolver = resolver
+# adapters/ui_config/efootprint_description_provider.py
+from django.conf import settings
+from .interface_placeholder_handlers import build_html_handlers
+from .ui_token_registry import UI_TOKENS
 
-    def field_tooltip(self, class_name: str, param: str) -> str | None:
+_HTML_HANDLERS = build_html_handlers(UI_TOKENS, settings.MKDOCS_BASE_URL)
+
+
+class EfootprintDescriptionProvider:
+    def __init__(self, handlers: dict[str, Callable[[str], str]]):
+        self._handlers = handlers
+        self._class_cache: dict[str, type] = {}
+
+    def field_tooltip(self, class_name: str, param: str) -> SafeString | None:
         klass = self._resolve_class(class_name)
-        library_desc = (klass.param_descriptions or {}).get(param) if klass else None
+        library_desc = getattr(klass, "param_descriptions", {}).get(param)
         interface_desc = FIELD_UI_CONFIG.get(param, {}).get("tooltip")
         return self._merge(library_desc, interface_desc)
     ...
+
+
+EFOOTPRINT_DESCRIPTION_PROVIDER = EfootprintDescriptionProvider(_HTML_HANDLERS)
 ```
 
-Class lookup goes through `ALL_EFOOTPRINT_CLASSES` (efootprint side) plus the existing `MODELING_OBJECT_CLASSES_DICT` mapping when the input is a web class name. For consistency, `class_name` accepts the **efootprint class name** (e.g. `"Server"`, `"GPUServer"`) — web class names (`"ServerWeb"`) are translated via the existing mapping when the call site only knows the web class.
+Call sites import the singleton:
 
-The adapter caches resolved class lookups in a per-instance dict. The resolver is shared.
+```python
+from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
+```
 
-Inheritance footgun (flagged in Topic 1): `disambiguation`, `pitfalls`, and `interactions` are inherited via Python attribute lookup. The adapter intentionally honors inheritance — same behaviour as the library tests and the mkdocs build. If a child class needs different wording, the child class declares its own attribute. No special handling here.
+Rationale for the singleton: construction is cheap, no shared mutable state, all underlying data (`UI_TOKENS`, `CLASS_UI_CONFIG`, `ALL_EFOOTPRINT_CLASSES_DICT`, `settings.MKDOCS_BASE_URL`) is module-cached anyway, and broken handler config fails server startup rather than first-request. Matches the existing `ClassUIConfigProvider` / `FieldUIConfigProvider` convention.
+
+Class lookup goes through `efootprint.all_classes_in_order.ALL_EFOOTPRINT_CLASSES_DICT` (concrete + abstract bases — interface-side `MODELING_OBJECT_CLASSES_DICT` only covers concrete classes, which would miss abstract keys like `ServerBase`/`JobBase` that `class_ui_config.json` legitimately uses). For consistency, `class_name` accepts the **efootprint class name** (e.g. `"Server"`, `"GPUServer"`, `"ServerBase"`) — web class names (`"ServerWeb"`) are translated via the existing mapping when the call site only knows the web class. Lookups are cached in `self._class_cache` (bounded — ~20 classes total).
+
+Inheritance: `disambiguation`, `pitfalls`, and `interactions` are inherited via Python attribute lookup. The adapter honors inheritance — same behaviour as the library tests and the mkdocs build. The library-side convention is already settled (see `e-footprint/specs/conventions.md` §"Class-level metadata inheritance"): abstract bases carry the shared text and concrete subclasses override only when wording diverges, so the adapter can rely on plain attribute lookup with no special handling.
 
 ### Placeholder resolution — reuse `efootprint.utils.placeholder_resolver`
 
@@ -108,15 +125,15 @@ Both consult `ALL_EFOOTPRINT_CLASSES` directly to validate `class:X`, `param:X.y
 
 | Kind | HTML handler output | Text handler output | Failure mode |
 |---|---|---|---|
-| `class:X` | `<a href="/model_builder/help-drawer/X/" class="help-drawer-trigger" hx-get=… hx-target="#sidePanel">{label}</a>`; `label` from `class_ui_config[X].label` (or `X` if unconfigured). | `{label}` plain. | Unknown `X` (not in `ALL_EFOOTPRINT_CLASSES`) → `ValueError`. |
-| `param:X.y` | `<span class="ssot-param-ref">{label}</span>` where `label` comes from `field_ui_config[y].label` (fallback: `y`). | `{label}` plain. | Unknown `X` or `y` not in `X.__init__` → `ValueError`. |
+| `class:X` | `<a href="/model_builder/open-help-drawer/X/" class="help-drawer-trigger" hx-get=… hx-target="#sidePanel">{label}</a>`; `label` from `class_ui_config[X].label` (or `X` if unconfigured). | `{label}` plain. | Unknown `X` (not in `ALL_EFOOTPRINT_CLASSES_DICT`) → `ValueError`. |
+| `param:X.y` | `<span class="ssot-param-ref">{label}</span>` where `label` comes from `field_ui_config[y].label` (fallback: `y`). | `{label}` plain. | Unknown `X` (not in `ALL_EFOOTPRINT_CLASSES_DICT`) or `y` not in `X.__init__` → `ValueError`. |
 | `calc:X.y` | `<span class="ssot-calc-ref">{humanized_attr}</span>`. | `{humanized_attr}` plain. | Unknown → `ValueError`. |
 | `doc:slug` | `<a href="{mkdocs_base_url}/{slug}" target="_blank" rel="noopener">{slug}</a>`. | `{slug}` plain. | Unknown slug not validated here; mkdocs build is authoritative. |
 | `ui:token` | `<span class="ssot-ui-ref" data-ui-token="{token}">{display}</span>`; `display` from `UI_TOKENS[token]["display"]`. | `{display}` plain. | Unknown token → `ValueError`. |
 
 HTML handlers escape variable parts with Django's `escape`. Text handlers return plain strings.
 
-`EfootprintDescriptionProvider` is constructed with the handler dict appropriate for its mode (HTML for tooltips and the help drawer; text reserved for any future non-HTML context but not used in this step). Method calls invoke `resolve_placeholders(text, self._handlers)` directly — no wrapper class needed.
+The HTML-mode handler dict is built at module import time in `efootprint_description_provider.py` using `build_html_handlers(UI_TOKENS, settings.MKDOCS_BASE_URL)` and injected into the singleton instance. `MKDOCS_BASE_URL` is a Django setting (single source of truth, env-overridable); add it to `settings.py` with a sensible default. Text mode is unused in Step 3; a future text-mode caller would construct a second singleton (`EFOOTPRINT_DESCRIPTION_PROVIDER_TEXT`) rather than introducing a runtime mode flag. Method calls invoke `resolve_placeholders(text, self._handlers)` directly — no wrapper class needed.
 
 ### `{ui:token}` registry — `adapters/ui_config/ui_token_registry.py`
 
@@ -142,7 +159,7 @@ Extended schema, additive only:
 
 ```json
 {
-  "Server": {
+  "ServerBase": {
     "label": "Server",
     "type_object_available": "Available server types",
     "interactions": "Add via {ui:infra_panel_add_button}, then link {class:Job}s via the jobs panel."
@@ -150,16 +167,15 @@ Extended schema, additive only:
 }
 ```
 
-The field is optional. Classes without it simply don't render an "Interactions" section in the help drawer. This step adds the field as a schema option; the actual content is written incrementally — at minimum for the four classes that already drive the guided-tour orientation in Step 6 (`Server`, `UsageJourney`, `UsagePattern`, `Job`).
+The field is optional. Classes without it simply don't render an "Interactions" section in the help drawer. This step adds the field as a schema option; the actual content is written incrementally — at minimum for the four classes that already drive the guided-tour orientation in Step 6. **Author on the abstract base where one exists** (e.g. `ServerBase` rather than `Server`/`GPUServer`/`BoaviztaCloudServer`; `JobBase` rather than `Job`/`GPUJob`) so concrete subclasses share the text via the same provider lookup. Where no abstract base exists in the JSON (e.g. `UsageJourney`, `UsagePattern`), author on the concrete class. The provider's class lookup walks the MRO so a request for `Server` resolves to the `ServerBase` entry when `Server` itself has none.
 
 ### `ClassUIConfigProvider` — extend with class-level lookups
 
 Currently the provider exposes `get_label`, `get_type_object_available`, `get_more_descriptive_label`. Add:
 
 - `get_interactions(class_name) -> str | None`
-- `is_known_class(class_name) -> bool` — used by the completeness test.
 
-The `EfootprintDescriptionProvider` calls these for `class_interactions` and label resolution; the existing form-builder call sites are unchanged.
+The `EfootprintDescriptionProvider` calls this for `class_interactions`; the existing form-builder call sites are unchanged. The completeness test checks JSON keys against `ALL_EFOOTPRINT_CLASSES_DICT` directly — no provider method needed.
 
 ---
 
@@ -173,27 +189,37 @@ The class context is already available in `FormContextBuilder`: every form is ge
 
 Coverage delta: every form field for every class now has the option of carrying a tooltip. Today many are blank because `field_ui_config.json` doesn't define one and there is no library description. After Step 2, `param_descriptions` covers every param for every class, so info icons will appear on every numeric/text param field — visually busier than today, but consistent. No template changes needed.
 
-### Info icons on class cards
+### Info icons on Add buttons
 
-Object cards already display the class label at the top. Add a small info-icon button next to the label that opens the help drawer for that class. The icon reuses the existing `components/tooltip.html` SVG; `data-bs-toggle="popover"` is replaced with an HTMX-driven action that opens the drawer:
+Help is class-level, not instance-level, and the natural moment to ask "what is a Server? when should I use one?" is *before* creation — not after a card already sits on the canvas. The single help-drawer trigger therefore lives next to each Add button in `model_canvas_content.html` (Servers, External APIs, Edge devices, Edge device groups, Usage journeys, Edge usage journeys, Usage patterns, Edge usage patterns — already keyed per class or abstract base, matching the initial `interactions` set).
+
+Object cards do **not** carry a help-drawer trigger. They keep their existing header; no per-instance icon. Rationale: it would render redundantly across every instance and surface help at the wrong moment.
+
+The Add-button include (`model_builder/components/add_object_button.html`) is extended to optionally render a sibling info icon when `class_name`, `class_label`, and `class_description` are all passed. The icon is a separate `<button>` next to the Add button (not nested — the Add button's `hx-trigger="click"` covers its whole interior):
 
 ```html
-{% if class_description %}
+{% if class_name and class_description %}
 <button type="button" class="btn btn-link p-0 ms-1 help-drawer-trigger"
-        hx-get="/model_builder/help-drawer/{{ class_name }}/" hx-target="#sidePanel"
+        hx-get="/model_builder/open-help-drawer/{{ class_name }}/" hx-target="#sidePanel"
         hx-swap="innerHTML" aria-label="About {{ class_label }}">
     {# reuse the question-circle SVG inline #}
 </button>
 {% endif %}
 ```
 
-The button is rendered only when the provider returns a non-empty `class_description`.
+The icon renders only when `class_description` is non-empty. The two elements (Add button + help icon) are wrapped in a flex row so layout stays unchanged when the icon is absent. Each call site in `model_canvas_content.html` passes the same `class_name` it already passes via `hx_url` (e.g. `ServerBase`, `UsageJourney`), plus `class_label` and `class_description` resolved in the view.
 
-The card template is `model_builder/templates/model_builder/components/object_card.html` (and the variants for journeys, devices, edge groups). The new icon goes into the existing card header markup.
+The view that renders `model_canvas_content.html` calls:
+- `EFOOTPRINT_DESCRIPTION_PROVIDER.class_description(class_name)` for the gating value,
+- `ClassUIConfigProvider.get_label(class_name)` for the aria-label,
+
+once per Add button, and exposes both alongside the existing `creation_constraints` dict in the template context. `aria-label` is the screen-reader text announced when the help icon receives focus — using the class's human label ("Server") rather than the technical class name ("ServerBase") gives assistive-tech users meaningful context.
 
 ### Help drawer
 
 A new side-panel template `model_builder/templates/model_builder/help_drawer/class_help.html`. Rendered in the existing `#sidePanel` slot via HTMX, the same way "Link existing" works (`open_link_existing_panel` in `views_edition.py`). Inspecting the existing templates confirms the slide-in side-panel pattern is the idiomatic choice; the open question from Step 3 ("slide-in panel vs modal") resolves to **slide-in side panel**.
+
+**Trigger:** the only entry point is the info icon next to each Add button (see "Info icons on Add buttons" above). There is no card-level trigger.
 
 Sections, in order, each rendered only when the provider returns a non-empty value:
 
@@ -206,19 +232,27 @@ Sections, in order, each rendered only when the provider returns a non-empty val
 
 All strings come pre-resolved from `EfootprintDescriptionProvider`. The template uses `|safe` because the resolver emits trusted HTML built from values it controls — *not* from user input. (User-supplied model names never enter description strings.)
 
-A new view `views_help.py::class_help_drawer(request, class_name)` builds the context dict and renders the partial. Routed under `/model_builder/help-drawer/<class_name>/`.
+A new view `views_help.py::open_help_drawer(request, class_name)` builds the context dict and renders the partial. Routed under `/model_builder/open-help-drawer/<class_name>/` to match the existing convention (`/open-edit-object-panel/...`, `/open-link-existing-panel/...`). Unknown `class_name` (not in `ALL_EFOOTPRINT_CLASSES_DICT`) raises `Http404` — Django default, catches typos in templates and hand-typed URLs.
 
 ### Form context builder rewiring
 
-`form_context_builder.py:160` (`_build_parent_group_membership_field`) and `form_field_generator.py:168, 207` (`tooltip` keys built from `field_config.get("tooltip")`) all flow through one entry point: each builder/generator that produces a field dict.
+Three call sites switch from `FieldUIConfigProvider.get_tooltip(attr_name)` to `EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(class_name, attr_name)`:
 
-Replace the `FieldUIConfigProvider.get_tooltip(attr_name)` calls with `description_provider.field_tooltip(class_name, attr_name)`. The provider is constructed once per request (or once per `FormContextBuilder` instance) and passed through. Avoid threading it through every helper signature — instead, attach it to `FormContextBuilder` at construction, and pass it explicitly to `form_field_generator` helpers via a single new keyword argument.
+1. **`form_field_generator.py:168`** (`generate_select_multiple_field`) — class scope is `efootprint_class_str` from the enclosing `generate_dynamic_form` (verified: this variable is in scope at the call site, passed via the existing call chain).
+2. **`form_field_generator.py:207`** (`generate_dynamic_form` loop) — same `efootprint_class_str` is the local variable being iterated.
+3. **`form_context_builder.py:160`** (`_build_parent_group_membership_field`) — this is the "Add to parent groups" select. The field updates a concrete library attr on `EdgeDeviceGroup`:
+   - `sub_group_counts` when the new object is itself an `EdgeDeviceGroup`,
+   - `edge_device_counts` when the new object is an `EdgeDevice` (or any subclass of `EdgeDeviceBase`).
 
-`FieldUIConfigProvider.get_tooltip` stays — it's still useful for the rare contexts where there's no class scope (e.g. the parent-group-memberships dict field, where the field exists across many classes). For those, the provider falls back to `FieldUIConfigProvider.get_tooltip(field_name)` only.
+   Resolution is local to `_build_parent_group_membership_field`: the caller already knows the new object's web class, so the builder maps it to the right `(class_name="EdgeDeviceGroup", param=<sub_group_counts|edge_device_counts>)` pair and calls `field_tooltip` with it. The provider stays strictly class-scoped — there is no unscoped branch.
+
+Since the singleton is imported, there is no provider plumbing through helper signatures. `FieldUIConfigProvider.get_tooltip` becomes unused and is removed from `FieldUIConfigProvider` (label, config lookups remain).
 
 ### Popover content rendering
 
-The existing tooltip popover is plain text. To render the merged content (which contains paragraph breaks and possibly `<a>` tags from the resolver), enable Bootstrap's HTML mode by setting `data-bs-html="true"` on the popover trigger. Adjust `components/tooltip.html` to accept a `tooltip_html` flag (default `false`) and emit `data-bs-html` when truthy. Field-label info icons set `tooltip_html=True`. Other current call sites (which pass plain strings) keep the default and are unaffected.
+The existing tooltip popover is plain text. To render the merged content (which contains explicit `<br><br>` separators and possibly `<a>` tags from the resolver), enable Bootstrap's HTML mode by setting `data-bs-html="true"` on the popover trigger. Adjust `side_panels/components/tooltip.html` to accept a `tooltip_html` flag (default `false`) and emit `data-bs-html` when truthy. Field-label info icons set `tooltip_html=True`. Other current call sites (which pass plain strings) keep the default and are unaffected.
+
+Note on whitespace: Bootstrap's HTML mode does **not** convert raw newlines into paragraph breaks — they collapse to whitespace. The merge step therefore inserts a literal `<br><br>` between the library and interface segments rather than `\n\n` (see "Layered tooltip merging" above).
 
 XSS concern: only resolver-emitted HTML is allowed. The merge step in `EfootprintDescriptionProvider` runs each input through the resolver (which calls Django's `escape` on the textual chunks before re-inserting tags), so the final string is safe. `field_tooltip` returns `SafeString` to make that contract explicit; non-resolved fallbacks (e.g. legacy interface tooltips already in `field_ui_config.json`) are run through `escape` on their way out.
 
@@ -234,45 +268,54 @@ XSS concern: only resolver-emitted HTML is allowed. The merge step in `Efootprin
 
 2. `adapters/ui_config/interface_placeholder_handlers.py` — **new**. Two builder functions (`build_html_handlers`, `build_text_handlers`) returning handler dicts for the library's `resolve_placeholders`. No new resolver — imports `efootprint.utils.placeholder_resolver`.
 3. `adapters/ui_config/ui_token_registry.py` — **new**. `UI_TOKENS` dict. Initial entries cover only the tokens used by `class_ui_config.json` content written in this step.
-4. `adapters/ui_config/efootprint_description_provider.py` — **new**. `DescriptionProvider` implementation with class lookup, `field_tooltip` merge, calls `resolve_placeholders(text, handlers)` directly.
-5. `adapters/ui_config/class_ui_config_provider.py` — extend with `get_interactions`, `is_known_class`.
-6. `adapters/ui_config/class_ui_config.json` — add `interactions` field for the four "tour-relevant" classes (Server, UsageJourney, UsagePattern, Job). Other classes can be filled in later without code changes.
+4. `adapters/ui_config/efootprint_description_provider.py` — **new**. `DescriptionProvider` implementation with class lookup, `field_tooltip` merge, calls `resolve_placeholders(text, handlers)` directly. Exposes a module-level `EFOOTPRINT_DESCRIPTION_PROVIDER` singleton built with HTML handlers at import time.
+5. `adapters/ui_config/class_ui_config_provider.py` — extend with `get_interactions`.
+6. `adapters/ui_config/class_ui_config.json` — add `interactions` field for the four "tour-relevant" classes, authored on the abstract base where one exists (`ServerBase`, `JobBase`) or on the concrete class otherwise (`UsageJourney`, `UsagePattern`). Other classes can be filled in later without code changes.
+6b. `adapters/ui_config/field_ui_config.json` — migrate the existing `parent_group_memberships` entry. The `label` ("Add to parent groups") stays under that key (it's the UI label, not a library attr). Any tooltip text moves to per-attr entries under `sub_group_counts` and `edge_device_counts` (the real library attrs on `EdgeDeviceGroup`), where it will layer under library `param_descriptions` via the merge.
 
 ### Forms
 
-7. `adapters/forms/form_context_builder.py` — accept a `DescriptionProvider` at construction; replace direct `FieldUIConfigProvider.get_tooltip` calls for class-scoped fields with `description_provider.field_tooltip(class_name, attr)`. Keep the unscoped fallback for the parent-group-memberships field.
-8. `adapters/forms/form_field_generator.py` — accept the provider and class context as keyword args; update the two call sites that build `tooltip` keys.
+7. `adapters/forms/form_context_builder.py` — in `_build_parent_group_membership_field`, replace `FieldUIConfigProvider.get_tooltip("parent_group_memberships")` with a call to `EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip("EdgeDeviceGroup", attr)` where `attr` resolves to `sub_group_counts` or `edge_device_counts` based on the new object's web class. No constructor changes (singleton is imported).
+8. `adapters/forms/form_field_generator.py` — at `:168` and `:207`, replace `field_config.get("tooltip", False)` with `EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(efootprint_class_str, attr_name)` (verified: `efootprint_class_str` is in scope at both call sites via `generate_dynamic_form`). No new keyword arguments.
+8b. `adapters/ui_config/field_ui_config_provider.py` — remove `get_tooltip` (now unused). Keep `get_label` and `get_config`.
 
 ### Views and presenters
 
-9. `adapters/views/views_help.py` — **new**. `class_help_drawer(request, class_name)` builds the help-drawer context and returns the partial.
-10. `model_builder/urls.py` — route `/help-drawer/<str:class_name>/` to the new view.
-11. Wherever `FormContextBuilder` is constructed today — pass a single shared `EfootprintDescriptionProvider` instance built per request (provider is cheap; do not memoize across requests because `class_ui_config.json` should reflect dev edits without restart).
+9. `adapters/views/views_help.py` — **new**. `open_help_drawer(request, class_name)` raises `Http404` for unknown `class_name`, otherwise builds the help-drawer context via the singleton and returns the partial.
+10. `model_builder/urls.py` — route `/open-help-drawer/<str:class_name>/` to the new view (matches the existing `/open-edit-object-panel/...`, `/open-link-existing-panel/...` convention).
+11. `settings.py` — add `MKDOCS_BASE_URL` with a sensible default (env-overridable). Consumed by `efootprint_description_provider.py` at module import to build the HTML handler dict.
+12. The view that renders `model_canvas_content.html` (`adapters/views/views_model_builder.py` or wherever the canvas context is built) — for each Add button: call `EFOOTPRINT_DESCRIPTION_PROVIDER.class_description(class_name)` and `ClassUIConfigProvider.get_label(class_name)`, expose both in the template context, and pass them through the `add_object_button.html` include.
 
 ### Templates
 
-12. `templates/model_builder/help_drawer/class_help.html` — **new**. Sections per "Help drawer" above.
-13. `templates/model_builder/components/object_card.html` (and journey/device/edge variants found by grepping for the card-title block) — add the help-drawer trigger button next to the class label, gated on `class_description` being non-empty.
-14. `templates/model_builder/side_panels/components/tooltip.html` — accept `tooltip_html` flag; emit `data-bs-html="true"` when truthy.
-15. `templates/model_builder/side_panels/dynamic_form_fields/label.html` — pass `tooltip_html=True` when including the tooltip partial. (Other includes of `tooltip.html` are unchanged.)
+13. `templates/model_builder/help_drawer/class_help.html` — **new**. Sections per "Help drawer" above.
+14. `templates/model_builder/components/add_object_button.html` — accept optional `class_name`, `class_label`, and `class_description` parameters; when `class_description` is truthy, render a sibling help-icon button that opens the help drawer with `aria-label="About {{ class_label }}"`. Object cards (`button_card_header.html`, `object_cards/*.html`) are not modified.
+14b. `templates/model_builder/components/model_canvas_content.html` — pass `class_name`, `class_label`, `class_description` to each `add_object_button.html` include.
+15. `templates/model_builder/side_panels/components/tooltip.html` — accept `tooltip_html` flag; emit `data-bs-html="true"` when truthy.
+16. `templates/model_builder/side_panels/dynamic_form_fields/label.html` — pass `tooltip_html=True` when including the tooltip partial. (Other includes of `tooltip.html` are unchanged.)
 
 ### Tests
 
-16. `tests/unit_tests/adapters/ui_config/test_description_provider.py` — **new**. Round-trip per Topic 5 §3.4: construct provider, call each method on a representative class, assert non-None for present fields. Specific cases:
-    - `field_tooltip` returns the merged string when both library `param_descriptions` and interface `field_ui_config[tooltip]` are present, with library text first and interface text second separated by a blank line.
+17. `tests/unit_tests/adapters/ui_config/test_description_provider.py` — **new**. Round-trip per Topic 5 §3.4: call each method on the singleton for a representative class, assert non-None for present fields. Specific cases:
+    - `field_tooltip` returns the merged string when both library `param_descriptions` and interface `field_ui_config[tooltip]` are present, with library text first and interface text second separated by a literal `<br><br>`.
     - `field_tooltip` returns library-only text when interface is absent, and vice versa.
     - `field_tooltip` returns `None` when neither is present.
+    - `field_tooltip("EdgeDeviceGroup", "sub_group_counts")` and `field_tooltip("EdgeDeviceGroup", "edge_device_counts")` both return the merged tooltip — covers the `parent_group_memberships` resolution path (guards against the migration regressing if either per-attr entry goes missing in `field_ui_config.json`).
     - `class_description` returns the placeholder-resolved class docstring (i.e. no raw `{kind:target}` tokens survive).
     - `class_interactions` returns a placeholder-resolved string and the resolver has consumed the `{ui:...}` tokens that appear in the test fixture.
-17. `tests/unit_tests/adapters/ui_config/test_interface_placeholder_handlers.py` — **new**. Handler tests (the library already tests `resolve_placeholders` itself):
+    - Class lookup with a concrete subclass (`Server`) returns the `interactions` text authored on its abstract base (`ServerBase`) via MRO walk.
+18. `tests/unit_tests/adapters/ui_config/test_interface_placeholder_handlers.py` — **new**. Handler tests (the library already tests `resolve_placeholders` itself):
     - HTML handlers: each kind emits the expected tag for a known target.
     - Text handlers: each kind emits the expected plain label.
     - Unknown target for `class`, `param`, `calc`, `ui` raises `ValueError`; unknown `doc` slug renders without raising.
     - Variable parts are HTML-escaped in the HTML handlers (input containing `<` or `>` in a label).
-18. `tests/unit_tests/adapters/ui_config/test_ui_config_consistency.py` — extend the existing file from Step 1 with two new check groups:
+19. `tests/unit_tests/adapters/ui_config/test_ui_config_consistency.py` — extend the existing file from Step 1 with two new check groups:
     - **`{ui:token}` resolution**: every `{ui:token}` appearing in any `class_ui_config.json` `interactions` field has a registered handler entry in `UI_TOKENS`. Every `UI_TOKENS` entry has a non-empty `display`.
-    - **`class_ui_config.json` completeness**: every key in `CLASS_UI_CONFIG` corresponds to a class name in `MODELING_OBJECT_CLASSES_DICT` (catches stale entries from deleted classes); every class in `MODELING_OBJECT_CLASSES_DICT` either has an entry or is in an explicit `EXCLUDED_CLASSES_FROM_UI_CONFIG` list. The exclusion list is co-located with the test, with one-line justifications.
-19. `tests/unit_tests/adapters/views/test_views_help.py` — **new**. Smoke test: GET `/model_builder/help-drawer/Server/` returns 200 with the expected class label in the response body and no raw `{kind:target}` tokens. Same for one class that has no `interactions` field, asserting the section is absent.
+    - **`class_ui_config.json` completeness**: every key in `CLASS_UI_CONFIG` corresponds to a class name in `efootprint.all_classes_in_order.ALL_EFOOTPRINT_CLASSES_DICT` (concrete + abstract — needed because the JSON intentionally keys some entries by abstract bases like `ServerBase`/`JobBase`/`EdgeDeviceBase`; using `MODELING_OBJECT_CLASSES_DICT` would reject those). Every concrete class in `MODELING_OBJECT_CLASSES_DICT` either has an entry, inherits one from an abstract base entry via MRO, or is in an explicit `EXCLUDED_CLASSES_FROM_UI_CONFIG` list. The exclusion list is co-located with the test, with one-line justifications.
+20. `tests/unit_tests/adapters/views/test_views_help.py` — **new**. Smoke tests:
+    - GET `/model_builder/open-help-drawer/Server/` returns 200 with the expected class label in the response body and no raw `{kind:target}` tokens.
+    - GET on a class with no `interactions` field returns 200 with the "Interactions" section absent.
+    - GET `/model_builder/open-help-drawer/NotARealClass/` returns 404.
 
 ### Out of scope for this step
 
@@ -294,11 +337,10 @@ XSS concern: only resolver-emitted HTML is allowed. The merge step in `Efootprin
 
 ## Risks
 
-- **Visual noise from universal info icons.** After Step 2 every numeric/text field in every form will carry a tooltip. If users find this distracting we can later introduce a `is_advanced_parameter` style flag that suppresses the icon for "self-explanatory" fields — but defer that until we see real screenshots. Mitigation: ship as-is and decide based on feedback.
+- **Visual noise from universal info icons.** After Step 2 every numeric/text field in every form will carry a tooltip. If users find this distracting we can later introduce a `is_advanced_parameter`-style flag that suppresses the icon for "self-explanatory" fields — but defer that until we see real screenshots. Mitigation: ship as-is and **review screenshots of two representative dense forms (Server creation, Job creation) before declaring this step done**; if either looks objectively cluttered, scope a small follow-up rather than letting the risk roll silently into Step 7.
 - **HTML in tooltips raises XSS surface area.** Mitigation: only resolver output is allowed; resolver escapes textual chunks; merge output is a `SafeString`. No user-supplied content reaches the merge.
 - **Class lookup ambiguity (web vs efootprint class names).** Mitigation: provider accepts efootprint class names only; call sites that have the web class translate explicitly via `web_class.efootprint_class.__name__`. A single helper method on the adapter handles both forms to keep call sites short.
-- **`field_ui_config.json` already-present tooltips written from a UI-mechanics perspective ("click X").** They will now sit *under* the library description, which can read awkwardly. Mitigation: scan the existing tooltip set as part of this step and rewrite any that are pure UI-mechanics into "interface-context" wording. Small list (count is in the dozens, not hundreds).
-- **Fallback path for unscoped fields.** The "parent-group-memberships" field has no class scope. Calling `FieldUIConfigProvider.get_tooltip` directly bypasses the merge — that's correct, but a future contributor might add another unscoped field and silently lose library content. Mitigation: a comment on the fallback branch and a unit test asserting the fallback returns the unscoped tooltip verbatim.
+- **Step 2 inheritance shape.** The form-field tooltip coverage claim assumes `getattr(klass, "param_descriptions", {})` returns the full dict for any concrete class (via attribute inheritance from the abstract base). If Step 2 lands per-class-only dicts, subclasses will silently lose tooltips. Mitigation: verify against Step 2 before implementation (see Prerequisite), and the consistency test in #19 can be extended to cover `(class, param)` pairs missing from `param_descriptions`.
 
 ---
 
@@ -326,6 +368,6 @@ No constitutional amendment needed.
 
 ## Open questions
 
-- **Scope of initial `interactions` content.** Default plan covers four tour-relevant classes (Server, UsageJourney, UsagePattern, Job). Confirm the list matches the four classes Step 6's tour will hit, or expand if Step 6 has shifted scope. Decide before writing the `class_ui_config.json` entries.
-- **Help-drawer URL pattern.** Plan uses `/model_builder/help-drawer/<class_name>/`. If there is an existing convention (e.g. `/model_builder/help/...`) we should follow it. Confirm during implementation.
+- **Scope of initial `interactions` content.** Default plan covers four tour-relevant classes — authored on `ServerBase`, `JobBase`, `UsageJourney`, `UsagePattern` (abstract base where one exists in the JSON, concrete otherwise). Confirm the list matches the four classes Step 6's tour will hit, or expand if Step 6 has shifted scope. Decide before writing the `class_ui_config.json` entries.
+- ~~**Help-drawer URL pattern.**~~ Resolved: `/model_builder/open-help-drawer/<class_name>/`, matching the existing `/open-edit-object-panel/...`, `/open-link-existing-panel/...` convention.
 - **Should the help drawer also offer a "view raw docstring" link (e.g. for power users)?** Out of scope for now, but easy to add later.
