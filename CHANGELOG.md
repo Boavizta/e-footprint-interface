@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - 2026-05-06
+
+### Added
+- Source metadata: each user-editable input now carries a confidence level (low / medium / high) and a free-form comment. The metadata travels with the value through serialization, download/upload, and xlsx export. Calculated values intentionally don't carry metadata.
+- Source editing from the interface: the source line on each input is now clickable and opens an inline source + comment editor. The source picker is scoped to sources already used in the current modeling (plus the `USER_DATA` / `HYPOTHESIS` sentinels), with a "custom" option to create a new source on the fly. A custom source created in one field is reusable across sibling fields within the same submission.
+- Source table: new Confidence and Comment columns. Confidence is an inline-editable badge that autosaves on pick; the row pencil opens an inline source + comment editor with a single Apply.
+- xlsx export: new `confidence` and `comment` columns.
+- `@render_exception_modal_if_error` on `open_edit_object_panel` and the system-name panel — errors now surface as a modal instead of crashing silently.
+
+### Changed
+- Upgrade to e-footprint 21.0.0 for the v21 source schema and source deduplication on JSON load: shared `Source` instances are restored across `to_json` → `from_json_dict` round-trips, so the picker, source table, and xlsx export no longer see phantom duplicates.
+- Source table lazy-loads on the first Sources tab click, and its row controls lazy-load on demand.
+- Metadata-only edits skip card refresh. Confidence and source/comment edits update the affected source row locally instead of reloading the whole table.
+- Hide internal (interface-only) explainable quantities from the source table.
+- Use the simpler attribute labels from e-footprint 20.1.0 in the default countries, devices, and networks JSON.
+- Remove deprecated tooltips and fields from `field_ui_config.json`.
+- Communication strategy moved to e-footprint (internal refactor, no user-facing change).
+- Self-host the bootstrap-icons font so all `bi-*` glyphs render reliably.
+
+### Fixed
+- Leader-line crash when `htmx:afterSettle` ran on a partially-swapped DOM.
+- Edge device deletion when the device has components.
+- Source table row-editor Apply: stabilize behavior so confidence + source/comment edits commit reliably without spurious reloads.
+
 ## [1.3.4] - 2026-04-27
 
 ### Fixed
@@ -12,9 +36,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Change from re-rendering cards to re-rendering top parent cards, to make sure that rendering is always rightly done, because some cards’ rendering depend on their parents.
 
 ### Changed
-- Add confidence and comment columns to the Sources xlsx export.
-- Stop reloading the Sources table after inline confidence edits; the badge now stays updated locally after the metadata POST succeeds.
-- Stop reloading the Sources table after source/comment row edits; the edited row now updates locally after the metadata POST succeeds.
 - Truncate text on sources table to keep rows on one line.
 
 ## [1.3.3] - 2026-04-22

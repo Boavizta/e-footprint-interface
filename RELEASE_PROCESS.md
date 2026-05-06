@@ -58,7 +58,7 @@ poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000
 poetry run pytest tests --ignore=tests/e2e
 
 # JavaScript unit tests
-jest
+npm run jest
 ```
 
 All tests must pass before proceeding.

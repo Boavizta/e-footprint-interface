@@ -51,3 +51,7 @@ Investigations and ad-hoc design work are exempt; the four-stage flow is for fea
 ## Documentation upkeep
 
 When you implement a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), update the relevant spec file (`specs/architecture.md`, `specs/conventions.md`, or `specs/testing.md`) — a one-line mention in the right section is enough. The goal is to keep specs accurate so future agents don't rediscover patterns from code.
+
+## Git commit style
+
+Prefix your commit messages with the relevant tag among [FIX], [REFACTO], [ADD], [REMOVE], [OPTIM], [UPDATE]. The user might specify another tag. Always use brackets and uppercase. Example: `[FIX] Handle missing data in timeseries rendering`.

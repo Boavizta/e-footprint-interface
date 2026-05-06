@@ -16,12 +16,6 @@ Status:
 - Step 2 (SSOT metadata in the library) — planned next; library-side work coordinated via `../../e-footprint/specs/roadmap.md`.
 - Steps 3–7 — see `specs/features/tutorial-and-documentation/99-implementation-plan.md`.
 
-### Source metadata (planned)
-
-Path: `specs/features/source-metadata/`.
-
-Per-input confidence + comment annotations, plus source editing from the interface. Spec is locked; needs a plan.
-
 ### Recurrent quantities — weekly-pattern builder (planned)
 
 Path: `specs/features/recurrent-quantities-weekly-pattern-builder/`.
