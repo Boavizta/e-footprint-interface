@@ -8,6 +8,7 @@ from time import perf_counter
 from typing import Dict, Any
 
 from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
@@ -58,33 +59,28 @@ class ProgressiveImportService:
         upgraded_system_data["efootprint_version"] = efootprint_version
         size_tracker = {"json_size": 0}
 
-        self._patch_objects_for_progressive_computation(
-            flat_efootprint_objs_dict, upgraded_system_data, size_tracker)
+        self._patch_objects_for_progressive_computation(flat_efootprint_objs_dict, size_tracker)
 
         system = next(iter(response_objs["System"].values()))
         system.after_init()
 
-        self._compute_remaining_objects(flat_efootprint_objs_dict, upgraded_system_data, size_tracker)
+        self._remove_progressive_computation_patch(flat_efootprint_objs_dict)
 
-        # Reserialize all objects to ensure final calculation graph is captured
         start = perf_counter()
-        for efootprint_object in flat_efootprint_objs_dict.values():
-            del efootprint_object.__dict__["saved_to_json"]
-            upgraded_system_data[efootprint_object.class_as_simple_str][efootprint_object.id] = \
-                efootprint_object.to_json(save_calculated_attributes=True)
+        final_system_data = self._serialize_system_and_orphans(system, flat_efootprint_objs_dict)
+        self._preserve_interface_metadata(upgraded_system_data, final_system_data)
+        self._validate_payload_size(final_system_data)
         elapsed_ms = (perf_counter() - start) * 1000
-        logger.info(f"Reserialized all objects to finalize system data in {round(elapsed_ms, 1)} ms.")
+        logger.info(f"Serialized final system data in {round(elapsed_ms, 1)} ms.")
 
-        return upgraded_system_data
+        return final_system_data
 
     def _patch_objects_for_progressive_computation(
-            self, flat_efootprint_objs_dict: Dict[str, Any], system_data: Dict[str, Any],
-            size_tracker: Dict[str, float]) -> None:
+            self, flat_efootprint_objs_dict: Dict[str, Any], size_tracker: Dict[str, float]) -> None:
         """Patch all objects to track and validate size after computation.
 
         Args:
             flat_efootprint_objs_dict: Dictionary of efootprint objects by ID.
-            system_data: The system data dict to populate.
             size_tracker: Mutable dict tracking cumulative JSON size.
         """
         for efootprint_object in flat_efootprint_objs_dict.values():
@@ -95,19 +91,17 @@ class ProgressiveImportService:
 
             def compute_and_store_calculated_attributes(obj=efootprint_object):
                 obj.original_compute_calculated_attributes()
-                self._compute_json_and_save_to_dict(obj, system_data, size_tracker)
+                self._compute_json_and_track_size(obj, size_tracker)
 
             object.__setattr__(
                 efootprint_object, "compute_calculated_attributes", compute_and_store_calculated_attributes)
 
-    def _compute_json_and_save_to_dict(
-            self, efootprint_object: Any, system_data: Dict[str, Any],
-            size_tracker: Dict[str, float]) -> None:
-        """Compute JSON for an object and save it, checking size limits.
+    def _compute_json_and_track_size(
+            self, efootprint_object: Any, size_tracker: Dict[str, float]) -> None:
+        """Serialize a computed object for progressive size checks.
 
         Args:
             efootprint_object: The efootprint object to serialize.
-            system_data: The system data dict to populate.
             size_tracker: Mutable dict tracking cumulative JSON size.
 
         Raises:
@@ -123,30 +117,83 @@ class ProgressiveImportService:
         size_tracker["json_size"] += json_data_size
 
         logger.debug(
-            f"Computed and stored calculated attributes for {class_name} (ID: {efootprint_object.id}), "
+            f"Computed and serialized calculated attributes for {class_name} (ID: {efootprint_object.id}), "
             f"increasing JSON size by {round(json_data_size, 2)}. "
             f"Total size is now {round(size_tracker['json_size'], 1)} MB")
 
-        if size_tracker["json_size"] > self.max_payload_size_mb:
-            raise PayloadSizeLimitExceeded(size_tracker["json_size"], self.max_payload_size_mb)
+        self._validate_payload_size(size_mb=size_tracker["json_size"])
 
-        system_data[class_name][efootprint_object.id] = json_data
         object.__setattr__(efootprint_object, "saved_to_json", True)
 
-    def _compute_remaining_objects(
-            self, flat_efootprint_objs_dict: Dict[str, Any], system_data: Dict[str, Any],
-            size_tracker: Dict[str, float]) -> None:
-        """Compute and save any objects not yet processed.
-
-        Some objects may not have their compute_calculated_attributes called
-        during system.after_init() (e.g., orphaned objects). This ensures
-        all objects are processed.
-
-        Args:
-            flat_efootprint_objs_dict: Dictionary of efootprint objects by ID.
-            system_data: The system data dict to populate.
-            size_tracker: Mutable dict tracking cumulative JSON size.
-        """
+    def _remove_progressive_computation_patch(self, flat_efootprint_objs_dict: Dict[str, Any]) -> None:
+        """Remove import-only instance attributes before canonical serialization."""
         for efootprint_object in flat_efootprint_objs_dict.values():
-            if not getattr(efootprint_object, "saved_to_json", False):
-                self._compute_json_and_save_to_dict(efootprint_object, system_data, size_tracker)
+            efootprint_object.__dict__.pop("compute_calculated_attributes", None)
+            efootprint_object.__dict__.pop("original_compute_calculated_attributes", None)
+            efootprint_object.__dict__.pop("saved_to_json", None)
+
+    def _serialize_system_and_orphans(self, system: Any, flat_efootprint_objs_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """Serialize the connected system, then preserve objects outside that graph.
+
+        `system_to_json` owns both object serialization and top-level `Sources`
+        construction. Keeping final output assembled from `system_to_json`
+        fragments avoids duplicating source-hoisting rules here.
+        """
+        final_system_data = system_to_json(system, save_calculated_attributes=True)
+        serialized_object_ids = self._object_ids_in_system_data(final_system_data)
+
+        for efootprint_object in flat_efootprint_objs_dict.values():
+            if efootprint_object.id in serialized_object_ids:
+                continue
+            orphan_data = system_to_json(efootprint_object, save_calculated_attributes=True)
+            self._merge_system_json_fragment(final_system_data, orphan_data)
+            serialized_object_ids.update(self._object_ids_in_system_data(orphan_data))
+
+        return final_system_data
+
+    @staticmethod
+    def _object_ids_in_system_data(system_data: Dict[str, Any]) -> set[str]:
+        metadata_keys = {"efootprint_version", "efootprint_interface_version", "Sources", "interface_config"}
+        return {
+            object_id
+            for class_key, class_dict in system_data.items()
+            if class_key not in metadata_keys and isinstance(class_dict, dict)
+            for object_id in class_dict
+        }
+
+    @staticmethod
+    def _merge_system_json_fragment(target: Dict[str, Any], fragment: Dict[str, Any]) -> None:
+        for top_level_key, fragment_value in fragment.items():
+            if not isinstance(fragment_value, dict):
+                existing_value = target.get(top_level_key)
+                if existing_value is not None and existing_value != fragment_value:
+                    raise ValueError(
+                        f"Conflicting top-level payload for `{top_level_key}`.")
+                target[top_level_key] = fragment_value
+                continue
+
+            target_value = target.setdefault(top_level_key, {})
+            if not isinstance(target_value, dict):
+                raise ValueError(
+                    f"Cannot merge dict payload into non-dict top-level key `{top_level_key}`.")
+
+            for nested_key, nested_payload in fragment_value.items():
+                existing_payload = target_value.get(nested_key)
+                if existing_payload is not None and existing_payload != nested_payload:
+                    raise ValueError(
+                        f"Conflicting nested payload for `{top_level_key}.{nested_key}`.")
+                target_value[nested_key] = nested_payload
+
+    @staticmethod
+    def _preserve_interface_metadata(source: Dict[str, Any], target: Dict[str, Any]) -> None:
+        for metadata_key in ("interface_config", "efootprint_interface_version"):
+            if metadata_key in source:
+                target[metadata_key] = source[metadata_key]
+
+    def _validate_payload_size(self, system_data: Dict[str, Any] | None = None, size_mb: float | None = None) -> None:
+        if size_mb is None:
+            if system_data is None:
+                raise ValueError("Either system_data or size_mb must be provided for payload-size validation.")
+            size_mb = compute_json_size(system_data).size_mb
+        if size_mb > self.max_payload_size_mb:
+            raise PayloadSizeLimitExceeded(size_mb, self.max_payload_size_mb)

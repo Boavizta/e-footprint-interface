@@ -159,6 +159,8 @@ The repository layer manages two concerns:
 
 The `interface_config` is included in JSON exports (download) and restored on imports (upload), enabling Sankey settings to survive export/import cycles.
 
+Import recomputation payloads must be assembled from `efootprint.api_utils.system_to_json.system_to_json()` fragments (the connected `System` plus any orphaned objects) rather than hand-serializing objects in the interface. This keeps object serialization and top-level `Sources` hoisting owned by e-footprint and prevents dangling source references after calculated attributes are recomputed.
+
 ## Relationship types
 
 ### List-based children (standard pattern)
