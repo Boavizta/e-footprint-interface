@@ -22,10 +22,14 @@ from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
 class EfootprintDescriptionProvider:
     def __init__(self, handlers: dict[str, Callable[[str], str]]):
         self._handlers = handlers
-        self._class_cache: dict[str, type] = {}
 
     def class_description(self, class_name: str) -> SafeString | None:
-        return self._resolve_attr(class_name, "__doc__")
+        # inspect.getdoc strips the common leading indentation Python preserves
+        # in raw ``__doc__``, so popovers and the help drawer don't show ragged
+        # whitespace.
+        klass = self._resolve_class(class_name)
+        text = inspect.getdoc(klass)
+        return self._resolve(text) if text else None
 
     def class_disambiguation(self, class_name: str) -> SafeString | None:
         return self._resolve_attr(class_name, "disambiguation")
@@ -42,43 +46,39 @@ class EfootprintDescriptionProvider:
         return None
 
     def param_description(self, class_name: str, param: str) -> SafeString | None:
-        klass = self._resolve_class(class_name)
-        text = getattr(klass, "param_descriptions", {}).get(param)
+        text = self._raw_param_description(class_name, param)
         return self._resolve(text) if text else None
 
     def field_tooltip(self, class_name: str, param: str) -> SafeString | None:
-        klass = self._resolve_class(class_name)
-        library_text = getattr(klass, "param_descriptions", {}).get(param)
+        library_text = self._raw_param_description(class_name, param)
         interface_text = FIELD_UI_CONFIG.get(param, {}).get("tooltip")
         return self._merge(library_text, interface_text)
 
     def calc_description(self, class_name: str, attr: str) -> SafeString | None:
         klass = self._resolve_class(class_name)
         method = getattr(klass, f"update_{attr}", None)
-        text = getattr(method, "__doc__", None) if method else None
+        text = inspect.getdoc(method) if method else None
         return self._resolve(text) if text else None
 
     def param_interaction(self, class_name: str, param: str) -> SafeString | None:
         klass = self._resolve_class(class_name)
-        text = getattr(klass, "param_interactions", {}).get(param) if hasattr(klass, "param_interactions") else None
+        text = getattr(klass, "param_interactions", {}).get(param)
         return self._resolve(text) if text else None
 
     def _resolve_class(self, class_name: str) -> type:
-        cached = self._class_cache.get(class_name)
-        if cached is not None:
-            return cached
         klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
         if klass is None:
             raise ValueError(f"Unknown efootprint class: {class_name!r}")
-        self._class_cache[class_name] = klass
         return klass
+
+    def _raw_param_description(self, class_name: str, param: str) -> str | None:
+        klass = self._resolve_class(class_name)
+        return getattr(klass, "param_descriptions", {}).get(param)
 
     def _resolve_attr(self, class_name: str, attr: str) -> SafeString | None:
         klass = self._resolve_class(class_name)
         text = getattr(klass, attr, None)
-        if not text:
-            return None
-        return self._resolve(text)
+        return self._resolve(text) if text else None
 
     def _resolve(self, text: str) -> SafeString:
         return mark_safe(resolve_placeholders(text, self._handlers))
@@ -91,9 +91,7 @@ class EfootprintDescriptionProvider:
         if interface_text and not library_text:
             # Legacy interface tooltips don't go through the resolver; escape them.
             return mark_safe(escape(interface_text))
-        return mark_safe(
-            f"{resolve_placeholders(library_text, self._handlers)}<br><br>{escape(interface_text)}"
-        )
+        return mark_safe(f"{self._resolve(library_text)}<br><br>{escape(interface_text)}")
 
 
 EFOOTPRINT_DESCRIPTION_PROVIDER = EfootprintDescriptionProvider(

@@ -1,10 +1,7 @@
-"""Tests for the HTML and text placeholder handler builders."""
+"""Tests for the HTML placeholder handler builder."""
 import pytest
 
-from model_builder.adapters.ui_config.interface_placeholder_handlers import (
-    build_html_handlers,
-    build_text_handlers,
-)
+from model_builder.adapters.ui_config.interface_placeholder_handlers import build_html_handlers
 
 
 UI_TOKENS = {
@@ -18,10 +15,7 @@ UI_TOKENS = {
     },
 }
 HTML = build_html_handlers(UI_TOKENS, mkdocs_base_url="https://docs.example/")
-TEXT = build_text_handlers(UI_TOKENS)
 
-
-# ---- HTML handlers ---------------------------------------------------------
 
 def test_html_class_handler_emits_anchor_with_label():
     out = HTML["class"]("Server")
@@ -62,54 +56,27 @@ def test_html_handlers_escape_variable_parts():
     assert "<button>" not in out
 
 
-# ---- Text handlers ---------------------------------------------------------
-
-def test_text_class_handler_returns_label():
-    assert TEXT["class"]("Server") == "Custom server"
-
-
-def test_text_param_handler_returns_label():
-    assert TEXT["param"]("Server.power") == "power"
-
-
-def test_text_calc_handler_returns_humanized_attr():
-    assert TEXT["calc"]("Server.instances_energy") == "instances energy"
-
-
-def test_text_doc_handler_returns_slug():
-    assert TEXT["doc"]("methodology") == "methodology"
-
-
-def test_text_ui_handler_returns_display():
-    assert TEXT["ui"]("infra_panel_add_button") == "the Add button in the Infrastructure section"
-
-
 # ---- Failure modes ---------------------------------------------------------
 
-@pytest.mark.parametrize("handlers", [HTML, TEXT])
-def test_unknown_class_raises(handlers):
+def test_unknown_class_raises():
     with pytest.raises(ValueError):
-        handlers["class"]("NotAClass")
+        HTML["class"]("NotAClass")
 
 
-@pytest.mark.parametrize("handlers", [HTML, TEXT])
-def test_unknown_param_raises(handlers):
+def test_unknown_param_raises():
     with pytest.raises(ValueError):
-        handlers["param"]("Server.not_a_param")
+        HTML["param"]("Server.not_a_param")
 
 
-@pytest.mark.parametrize("handlers", [HTML, TEXT])
-def test_unknown_calc_raises(handlers):
+def test_unknown_calc_raises():
     with pytest.raises(ValueError):
-        handlers["calc"]("Server.not_a_calc")
+        HTML["calc"]("Server.not_a_calc")
 
 
-@pytest.mark.parametrize("handlers", [HTML, TEXT])
-def test_unknown_ui_token_raises(handlers):
+def test_unknown_ui_token_raises():
     with pytest.raises(ValueError):
-        handlers["ui"]("not_a_token")
+        HTML["ui"]("not_a_token")
 
 
-@pytest.mark.parametrize("handlers", [HTML, TEXT])
-def test_unknown_doc_slug_does_not_raise(handlers):
-    handlers["doc"]("any-slug-the-mkdocs-build-validates")
+def test_unknown_doc_slug_does_not_raise():
+    HTML["doc"]("any-slug-the-mkdocs-build-validates")

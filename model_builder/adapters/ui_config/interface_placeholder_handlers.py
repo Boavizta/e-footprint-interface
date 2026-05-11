@@ -1,14 +1,10 @@
-"""Builders for ``{kind:target}`` placeholder handler dicts.
+"""Builder for the ``{kind:target}`` placeholder handler dict.
 
-Two builders cover the modes used by the interface:
+``build_html_handlers`` returns handlers that emit HTML markup (anchors,
+spans). Variable parts are escaped via Django's ``escape`` so the output is
+safe to render with ``|safe``.
 
-- ``build_html_handlers`` returns handlers that emit HTML markup (anchors,
-  spans). Variable parts are escaped via Django's ``escape`` so the output is
-  safe to render with ``|safe``.
-- ``build_text_handlers`` returns handlers that emit plain labels (no markup,
-  no escaping).
-
-Both validate ``class:X``, ``param:X.y`` and ``calc:X.y`` targets against
+Handlers validate ``class:X``, ``param:X.y`` and ``calc:X.y`` targets against
 ``ALL_EFOOTPRINT_CLASSES_DICT``. Unknown ``ui`` tokens raise as well; ``doc``
 slugs are not validated here (mkdocs build is authoritative).
 """
@@ -101,39 +97,6 @@ def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Call
         display = escape(entry["display"])
         token_safe = escape(target)
         return f'<span class="ssot-ui-ref" data-ui-token="{token_safe}">{display}</span>'
-
-    return {
-        "class": handle_class,
-        "param": handle_param,
-        "calc": handle_calc,
-        "doc": handle_doc,
-        "ui": handle_ui,
-    }
-
-
-def build_text_handlers(ui_tokens: dict) -> dict[str, Callable[[str], str]]:
-    def handle_class(target: str) -> str:
-        _resolve_class(target)
-        return _class_label(target)
-
-    def handle_param(target: str) -> str:
-        class_name, attr = _split_class_attr(target)
-        _check_param(class_name, attr)
-        return _param_label(attr)
-
-    def handle_calc(target: str) -> str:
-        class_name, attr = _split_class_attr(target)
-        _check_calc(class_name, attr)
-        return _humanize(attr)
-
-    def handle_doc(target: str) -> str:
-        return target
-
-    def handle_ui(target: str) -> str:
-        entry = ui_tokens.get(target)
-        if entry is None:
-            raise ValueError(f"Unknown UI token: {target!r}")
-        return entry["display"]
 
     return {
         "class": handle_class,

@@ -11,7 +11,15 @@ from efootprint.utils.placeholder_resolver import extract_placeholders
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
 from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+
+
+# Interface-side abstract bases that legitimately key `class_ui_config.json` entries
+# but do not exist as efootprint classes. Web-class names (e.g. `ServerWeb`) must
+# never appear here — the JSON keys efootprint names only.
+INTERFACE_ONLY_ABSTRACT_BASES: dict[str, str] = {
+    "EdgeDeviceBase": "Interface-side abstract base spanning EdgeDevice + EdgeDeviceGroup for shared UI config.",
+    "RecurrentEdgeDeviceNeedBase": "Interface-side abstract base for the RecurrentEdge*Need family.",
+}
 
 
 # Concrete classes that intentionally do not have a `class_ui_config.json` entry.
@@ -56,11 +64,12 @@ def test_every_ui_token_has_non_empty_display():
 # ---- class_ui_config.json completeness -------------------------------------
 
 def test_every_class_ui_config_key_is_a_real_class():
-    # Accept either an efootprint class (concrete or abstract) or an interface-side
-    # abstract base that has a web wrapper (e.g. EdgeDeviceBase, RecurrentEdgeDeviceNeedBase).
-    valid = set(ALL_EFOOTPRINT_CLASSES_DICT.keys()) | set(EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.keys())
+    valid = set(ALL_EFOOTPRINT_CLASSES_DICT.keys()) | set(INTERFACE_ONLY_ABSTRACT_BASES.keys())
     unknown = set(CLASS_UI_CONFIG.keys()) - valid
-    assert not unknown, f"class_ui_config.json keys not in efootprint classes or web mapping: {unknown}"
+    assert not unknown, (
+        f"class_ui_config.json keys not in efootprint classes or INTERFACE_ONLY_ABSTRACT_BASES: {unknown}. "
+        f"Add the class to the appropriate set with justification."
+    )
 
 
 def test_every_concrete_class_has_or_inherits_a_ui_config_entry():
