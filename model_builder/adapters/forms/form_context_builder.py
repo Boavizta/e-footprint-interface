@@ -17,6 +17,7 @@ from model_builder.adapters.forms.form_field_generator import (
 )
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
+from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
 from model_builder.adapters.forms.strategies import (
     SimpleFormStrategy,
@@ -158,7 +159,14 @@ class FormContextBuilder:
         attr_name = "parent_group_memberships"
         # The parent group's dict-attr depends on what we're adding: sub-groups
         # land in sub_group_counts, devices land in edge_device_counts.
-        parent_param = "sub_group_counts" if issubclass(web_class, EdgeDeviceGroupWeb) else "edge_device_counts"
+        if issubclass(web_class, EdgeDeviceGroupWeb):
+            parent_param = "sub_group_counts"
+        elif issubclass(web_class, EdgeDeviceBaseWeb):
+            parent_param = "edge_device_counts"
+        else:
+            raise ValueError(
+                f"Unsupported web_class {web_class.__name__} for _build_parent_group_membership_field: "
+                "expected an EdgeDeviceGroupWeb or EdgeDeviceBaseWeb subclass.")
         return {
             "web_id": attr_name,
             "attr_name": attr_name,

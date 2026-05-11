@@ -144,13 +144,13 @@ def generate_object_creation_structure(
 
 
 def generate_select_multiple_field(
-    attr_name: str, id_prefix: str, selected_objects: list, child_type_str: str, model_web: "ModelWeb"
+    attr_name: str, class_name: str, selected_objects: list, child_type_str: str, model_web: "ModelWeb"
 ) -> dict:
     """Build a select_multiple field dict for a list attribute.
 
     Args:
         attr_name: The list attribute name (e.g. 'jobs')
-        id_prefix: The class name prefix used for web_id (e.g. 'UsageJourneyStep')
+        class_name: The efootprint class declaring the attribute (e.g. 'UsageJourneyStep'); also used as the web_id prefix
         selected_objects: Raw ModelingObject instances currently linked
         child_type_str: Class name of child objects (e.g. 'Job')
         model_web: ModelWeb instance for querying available objects
@@ -163,10 +163,10 @@ def generate_select_multiple_field(
     ]
     selected = [{"value": elt.id, "label": elt.name} for elt in selected_objects]
     return {
-        "web_id": f"{id_prefix}_{attr_name}",
+        "web_id": f"{class_name}_{attr_name}",
         "attr_name": attr_name,
         "label": field_config.get("label", attr_name),
-        "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(id_prefix, attr_name),
+        "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(class_name, attr_name),
         "input_type": "select_multiple",
         "selected": selected,
         "unselected": unselected,
@@ -212,7 +212,8 @@ def generate_dynamic_form(
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             selected_objects = default_values.get(attr_name, [])
             structure_field.update(
-                generate_select_multiple_field(attr_name, id_prefix, selected_objects, list_attribute_object_type_str, model_web)
+                generate_select_multiple_field(
+                    attr_name, efootprint_class_str, selected_objects, list_attribute_object_type_str, model_web)
             )
         elif (annotation_origin is not None
               and isinstance(annotation_origin, type)
