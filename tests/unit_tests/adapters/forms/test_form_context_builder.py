@@ -5,6 +5,7 @@ from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
+from model_builder.domain.entities.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 
 
 def _fields_by_attr(form_sections: list, category: str) -> dict:
@@ -62,3 +63,36 @@ class TestFormContextBuilder:
         assert "tooltip" in sub_group_field
         assert sub_group_field["options_json"].startswith("[")
         assert sub_group_field["selected_json"].startswith("{")
+
+
+class TestParentGroupMembershipField:
+    """Tests for the parent_group_memberships UI-only field override."""
+
+    def test_returns_none_when_no_available_groups(self):
+        assert FormContextBuilder._build_parent_group_membership_field([]) is None
+
+    def test_tooltip_is_resolved_ui_text_with_no_raw_tokens(self, minimal_model_web):
+        existing_group = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Existing Group"))
+
+        field = FormContextBuilder._build_parent_group_membership_field([existing_group])
+
+        assert field["attr_name"] == "parent_group_memberships"
+        assert field["label"] == "Add to parent groups"
+        assert field["tooltip"]
+        # The library param_descriptions for sub_group_counts/edge_device_counts must NOT leak in.
+        assert "Mapping from" not in field["tooltip"]
+        # Placeholder tokens must be fully resolved before reaching the template.
+        assert "{class:" not in field["tooltip"]
+        assert "{param:" not in field["tooltip"]
+
+    def test_same_tooltip_for_group_and_device_creation_contexts(self, minimal_model_web):
+        """The override is class-agnostic: same UI text from either child perspective."""
+        minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Existing Group"))
+
+        group_context = FormContextBuilder(minimal_model_web).build_creation_context(
+            EdgeDeviceGroupWeb, "EdgeDeviceGroup")
+        device_context = FormContextBuilder(minimal_model_web).build_creation_context(
+            EdgeDeviceWeb, "EdgeDevice")
+
+        assert group_context["parent_group_membership_field"]["tooltip"] \
+            == device_context["parent_group_membership_field"]["tooltip"]

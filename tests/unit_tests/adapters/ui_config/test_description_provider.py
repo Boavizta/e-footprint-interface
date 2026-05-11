@@ -75,16 +75,19 @@ def test_field_tooltip_library_only_for_known_pair_without_interface_text(provid
     assert not PLACEHOLDER_RE.search(out)
 
 
-def test_field_tooltip_for_edge_device_group_sub_group_counts(provider):
+def test_field_tooltip_for_edge_device_group_sub_group_counts_is_library_only(provider):
+    # parent_group_memberships is the UI surface for the child-creation flip and carries its own
+    # interface tooltip; sub_group_counts/edge_device_counts must stay library-only so the
+    # parent-edit form keeps the correct (parent's-perspective) text.
     out = provider.field_tooltip("EdgeDeviceGroup", "sub_group_counts")
     assert out is not None
-    assert SEPARATOR in out
+    assert SEPARATOR not in out
 
 
-def test_field_tooltip_for_edge_device_group_edge_device_counts(provider):
+def test_field_tooltip_for_edge_device_group_edge_device_counts_is_library_only(provider):
     out = provider.field_tooltip("EdgeDeviceGroup", "edge_device_counts")
     assert out is not None
-    assert SEPARATOR in out
+    assert SEPARATOR not in out
 
 
 # ---- placeholder resolution ------------------------------------------------

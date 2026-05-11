@@ -65,6 +65,9 @@ class EfootprintDescriptionProvider:
         text = getattr(klass, "param_interactions", {}).get(param)
         return self._resolve(text) if text else None
 
+    def resolve(self, text: str | None) -> SafeString | None:
+        return self._resolve(text) if text else None
+
     def _resolve_class(self, class_name: str) -> type:
         klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
         if klass is None:

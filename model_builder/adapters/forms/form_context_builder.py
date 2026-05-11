@@ -15,10 +15,9 @@ from model_builder.adapters.forms.form_field_generator import (
     compatible_step_for_magnitude,
     format_magnitude_for_number_input,
 )
+from model_builder.adapters.ui_config import FIELD_UI_CONFIG
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
-from model_builder.domain.entities.web_core.hardware.edge.edge_device_base_web import EdgeDeviceBaseWeb
-from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
 from model_builder.adapters.forms.strategies import (
     SimpleFormStrategy,
     WithStorageFormStrategy,
@@ -104,7 +103,7 @@ class FormContextBuilder:
             overrides = web_class.get_creation_context_overrides(self.model_web)
             if "available_groups_to_join" in overrides:
                 context["parent_group_membership_field"] = self._build_parent_group_membership_field(
-                    overrides["available_groups_to_join"], web_class)
+                    overrides["available_groups_to_join"])
         return context
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
@@ -151,27 +150,21 @@ class FormContextBuilder:
         ]
 
     @staticmethod
-    def _build_parent_group_membership_field(
-            available_groups: list, web_class: Type["ModelingObjectWeb"]) -> dict | None:
+    def _build_parent_group_membership_field(available_groups: list) -> dict | None:
         if not available_groups:
             return None
         options = FormContextBuilder._build_select_options(available_groups)
         attr_name = "parent_group_memberships"
-        # The parent group's dict-attr depends on what we're adding: sub-groups
-        # land in sub_group_counts, devices land in edge_device_counts.
-        if issubclass(web_class, EdgeDeviceGroupWeb):
-            parent_param = "sub_group_counts"
-        elif issubclass(web_class, EdgeDeviceBaseWeb):
-            parent_param = "edge_device_counts"
-        else:
-            raise ValueError(
-                f"Unsupported web_class {web_class.__name__} for _build_parent_group_membership_field: "
-                "expected an EdgeDeviceGroupWeb or EdgeDeviceBaseWeb subclass.")
+        # parent_group_memberships is a UI-only field — the reverse view of the parent group's
+        # sub_group_counts / edge_device_counts. The library descriptions for those attrs speak
+        # from the parent's perspective, so we don't reuse them here; tooltip text is authored
+        # directly under the parent_group_memberships key in field_ui_config.json.
         return {
             "web_id": attr_name,
             "attr_name": attr_name,
             "label": FieldUIConfigProvider.get_label(attr_name),
-            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip("EdgeDeviceGroup", parent_param),
+            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.resolve(
+                FIELD_UI_CONFIG.get(attr_name, {}).get("tooltip")),
             "input_type": "dict_count",
             "options": options,
             "options_json": json.dumps(options),
