@@ -77,6 +77,8 @@
 
 ## Task 3 — Help drawer and Add-button icon
 
+**Status:** Done.
+
 **Goal:** Wire the user-visible help drawer. Add the info-icon button next to each Add button in the canvas, route `/model_builder/open-help-drawer/<class_name>/` to a new view, render the multi-section partial. Also record the new `DescriptionProvider` pattern in `specs/architecture.md`.
 
 **Files touched:**

@@ -42,8 +42,10 @@ def _render_group_membership_section(model_web, params) -> str:
 
 def _render_model_canvas(model_web, params) -> str:
     del params
+    from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
     content = render_to_string(
-        "model_builder/components/model_canvas_content.html", {"model_web": model_web})
+        "model_builder/components/model_canvas_content.html",
+        {"model_web": model_web, "class_help_info": build_canvas_class_help_info()})
     return f"<div id='model-canva' class='d-flex flex-row' hx-swap-oob='innerHTML:#model-canva'>{content}</div>"
 
 

@@ -4,6 +4,7 @@ import model_builder.adapters.views.views_addition
 import model_builder.adapters.views.views_deletion
 import model_builder.adapters.views.views_dict_mutation
 import model_builder.adapters.views.views_edition
+import model_builder.adapters.views.views_help
 from .adapters.views import views
 from .adapters.views import sankey_views
 
@@ -20,6 +21,9 @@ urlpatterns = [
     path("open-link-existing-panel/<parent_id>/<child_type_str>/",
          model_builder.adapters.views.views_edition.open_link_existing_panel,
          name="open-link-existing-panel"),
+    path("open-help-drawer/<str:class_name>/",
+         model_builder.adapters.views.views_help.open_help_drawer,
+         name="open-help-drawer"),
     path("update-dict-count/<str:parent_id>/<str:key_id>/",
          model_builder.adapters.views.views_dict_mutation.update_dict_count,
          name="update-dict-count"),

@@ -92,6 +92,10 @@ Notable:
 - **`adapters/presenters/htmx_presenter.py`** — formats use case outputs as HTMX responses.
 - **`adapters/ui_config/`** — provides UI configuration (class labels, field metadata).
 
+### DescriptionProvider port
+
+Library-side SSOT metadata (`param_descriptions`, class docstrings, `disambiguation`, `pitfalls`) reaches templates through the `DescriptionProvider` port in `domain/interfaces/description_provider.py`. The only implementation, `EfootprintDescriptionProvider` (`adapters/ui_config/efootprint_description_provider.py`), merges library text with interface-side overlays from `class_ui_config.json` (`interactions`) and `field_ui_config.json` (per-field tooltips), then runs `{kind:target}` placeholders through `efootprint.utils.placeholder_resolver` with the interface's HTML handlers (`interface_placeholder_handlers.py`). The module-level `EFOOTPRINT_DESCRIPTION_PROVIDER` singleton is the entry point; templates only ever see `SafeString` output with placeholders already resolved. See `specs/features/tutorial-and-documentation/01-single-source-of-truth.md` for the broader rationale.
+
 ### Object factory
 
 `model_builder/domain/object_factory.py`:

@@ -20,6 +20,7 @@ from e_footprint_interface import __version__ as interface_version
 
 from model_builder.adapters.repositories import SessionSystemRepository, SessionCacheRepository
 from model_builder.adapters.label_resolver import LabelResolver
+from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
 from model_builder.adapters.views.source_table_row_editor_context import build_source_table_row_editor_context
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
@@ -63,7 +64,8 @@ def model_builder_main(request, reboot=False):
         logger.info("Upgrade successful")
 
     http_response = htmx_render(
-        request, "model_builder/model_builder_main.html", context={"model_web": model_web})
+        request, "model_builder/model_builder_main.html",
+        context={"model_web": model_web, "class_help_info": build_canvas_class_help_info()})
 
     if request.headers.get("HX-Request") == "true":
         # Lines updates are triggered at the after settle element, so might be triggered before initModelBuilderMain
@@ -140,6 +142,7 @@ def upload_json(request):
     model_web = ModelWeb(repository)
     if model_web.system_data:
         context["model_web"] = model_web
+        context["class_help_info"] = build_canvas_class_help_info()
 
     http_response = render(request, "model_builder/model_builder_main.html", context=context)
     http_response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
