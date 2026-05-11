@@ -1,7 +1,8 @@
 {
     "ServerBase": {
         "label": "Server",
-        "type_object_available": "Available server types"
+        "type_object_available": "Available server types",
+        "interactions": "Add a server via {ui:infra_panel_add_button}, then attach {class:Job}s by linking them from the jobs panel."
     },
     "EdgeDeviceBase": {
         "label": "Edge device",
@@ -53,7 +54,8 @@
     "JobBase": {
         "label": "Job",
         "type_object_available": "Available job types",
-        "pre_addition_help": "To facilitate job creation, install services on servers."
+        "pre_addition_help": "To facilitate job creation, install services on servers.",
+        "interactions": "Add a job via {ui:jobs_panel_add_button}, pick the {class:ServerBase} that runs it, then attach the job to a {class:UsageJourneyStep}."
     },
     "Job": {
         "label": "Job",
@@ -109,7 +111,8 @@
     },
     "UsagePattern": {
         "label": "Usage pattern",
-        "type_object_available": "Available usage patterns"
+        "type_object_available": "Available usage patterns",
+        "interactions": "Add a usage pattern via {ui:usage_patterns_panel_add_button}; pick the {class:UsageJourney} it follows, then set the hourly volume of journeys."
     },
     "EdgeUsagePattern": {
         "label": "Edge usage pattern",
@@ -121,7 +124,8 @@
     },
     "UsageJourney": {
         "label": "Usage journey",
-        "type_object_available": "Available usage journeys"
+        "type_object_available": "Available usage journeys",
+        "interactions": "Add a usage journey via {ui:usage_journeys_panel_add_button}, then assemble {class:UsageJourneyStep}s in the order users go through them."
     },
     "EdgeUsageJourney": {
         "label": "Edge usage journey",
@@ -146,14 +150,8 @@
     "VideoStreaming": {
         "label": "Video streaming application"
     },
-    "GenAIModel": {
-        "label": "Generative AI model"
-    },
     "VideoStreamingJob": {
         "label": "Video streaming job"
-    },
-    "GenAIJob": {
-        "label": "Generative AI job"
     },
     "EcoLogitsGenAIExternalAPIJob": {
         "label": "Gen AI Job"

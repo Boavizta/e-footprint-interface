@@ -10,6 +10,8 @@
 
 ## Task 1 — Description provider foundation
 
+**Status:** Done.
+
 **Goal:** Land everything needed to call `EFOOTPRINT_DESCRIPTION_PROVIDER.<method>()` from anywhere in the interface, without yet wiring any call site. After this PR the singleton exists, is fully tested, and `class_ui_config.json` carries `interactions` for the four tour-relevant classes — but no user-visible behaviour changes.
 
 **Files touched:**

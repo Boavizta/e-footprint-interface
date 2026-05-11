@@ -178,6 +178,10 @@ INTERNAL_IPS = ["127.0.0.1"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Base URL of the published e-footprint mkdocs site. Used to render `{doc:slug}`
+# placeholders as outbound links from interface help content.
+MKDOCS_BASE_URL = os.getenv("MKDOCS_BASE_URL", "https://publicissapient-france.github.io/e-footprint")
+
 # ============================================================================
 # ENVIRONMENT-SPECIFIC CONFIGURATION
 # ============================================================================

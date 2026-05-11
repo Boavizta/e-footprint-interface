@@ -1,0 +1,144 @@
+"""Builders for ``{kind:target}`` placeholder handler dicts.
+
+Two builders cover the modes used by the interface:
+
+- ``build_html_handlers`` returns handlers that emit HTML markup (anchors,
+  spans). Variable parts are escaped via Django's ``escape`` so the output is
+  safe to render with ``|safe``.
+- ``build_text_handlers`` returns handlers that emit plain labels (no markup,
+  no escaping).
+
+Both validate ``class:X``, ``param:X.y`` and ``calc:X.y`` targets against
+``ALL_EFOOTPRINT_CLASSES_DICT``. Unknown ``ui`` tokens raise as well; ``doc``
+slugs are not validated here (mkdocs build is authoritative).
+"""
+import inspect
+from typing import Callable
+
+from django.utils.html import escape
+from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
+
+from model_builder.adapters.ui_config import CLASS_UI_CONFIG, FIELD_UI_CONFIG
+
+
+def _split_class_attr(target: str) -> tuple[str, str]:
+    if "." not in target:
+        raise ValueError(f"Expected 'Class.attr' target, got {target!r}")
+    class_name, attr = target.split(".", 1)
+    return class_name, attr
+
+
+def _resolve_class(class_name: str) -> type:
+    klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
+    if klass is None:
+        raise ValueError(f"Unknown class in placeholder: {class_name!r}")
+    return klass
+
+
+def _class_label(class_name: str) -> str:
+    return CLASS_UI_CONFIG.get(class_name, {}).get("label", class_name)
+
+
+def _param_label(attr: str) -> str:
+    return FIELD_UI_CONFIG.get(attr, {}).get("label", attr)
+
+
+def _humanize(attr: str) -> str:
+    return attr.replace("_", " ")
+
+
+def _check_param(class_name: str, attr: str) -> None:
+    klass = _resolve_class(class_name)
+    init_params = inspect.signature(klass.__init__).parameters
+    if attr not in init_params:
+        raise ValueError(f"Unknown param {attr!r} for class {class_name!r}")
+
+
+def _check_calc(class_name: str, attr: str) -> None:
+    klass = _resolve_class(class_name)
+    # Calculated attributes are exposed as ``update_<attr>`` methods anywhere on the MRO;
+    # the runtime ``calculated_attributes`` property is instance-bound so we can't read
+    # it from the class directly. Mirrors the library-side validation in test_descriptions.
+    if attr.startswith("dict_element_in_"):
+        raise ValueError(f"Calc target {attr!r} is an internal helper, not user-visible")
+    if not any(f"update_{attr}" in vars(ancestor) for ancestor in klass.__mro__):
+        raise ValueError(f"Unknown calculated attribute {attr!r} for class {class_name!r}")
+
+
+def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Callable[[str], str]]:
+    def handle_class(target: str) -> str:
+        _resolve_class(target)
+        label = escape(_class_label(target))
+        target_safe = escape(target)
+        return (
+            f'<a href="/model_builder/open-help-drawer/{target_safe}/" '
+            f'class="help-drawer-trigger" '
+            f'hx-get="/model_builder/open-help-drawer/{target_safe}/" '
+            f'hx-target="#sidePanel">{label}</a>'
+        )
+
+    def handle_param(target: str) -> str:
+        class_name, attr = _split_class_attr(target)
+        _check_param(class_name, attr)
+        label = escape(_param_label(attr))
+        return f'<span class="ssot-param-ref">{label}</span>'
+
+    def handle_calc(target: str) -> str:
+        class_name, attr = _split_class_attr(target)
+        _check_calc(class_name, attr)
+        label = escape(_humanize(attr))
+        return f'<span class="ssot-calc-ref">{label}</span>'
+
+    def handle_doc(target: str) -> str:
+        slug = escape(target)
+        url = escape(f"{mkdocs_base_url.rstrip('/')}/{target}")
+        return f'<a href="{url}" target="_blank" rel="noopener">{slug}</a>'
+
+    def handle_ui(target: str) -> str:
+        entry = ui_tokens.get(target)
+        if entry is None:
+            raise ValueError(f"Unknown UI token: {target!r}")
+        display = escape(entry["display"])
+        token_safe = escape(target)
+        return f'<span class="ssot-ui-ref" data-ui-token="{token_safe}">{display}</span>'
+
+    return {
+        "class": handle_class,
+        "param": handle_param,
+        "calc": handle_calc,
+        "doc": handle_doc,
+        "ui": handle_ui,
+    }
+
+
+def build_text_handlers(ui_tokens: dict) -> dict[str, Callable[[str], str]]:
+    def handle_class(target: str) -> str:
+        _resolve_class(target)
+        return _class_label(target)
+
+    def handle_param(target: str) -> str:
+        class_name, attr = _split_class_attr(target)
+        _check_param(class_name, attr)
+        return _param_label(attr)
+
+    def handle_calc(target: str) -> str:
+        class_name, attr = _split_class_attr(target)
+        _check_calc(class_name, attr)
+        return _humanize(attr)
+
+    def handle_doc(target: str) -> str:
+        return target
+
+    def handle_ui(target: str) -> str:
+        entry = ui_tokens.get(target)
+        if entry is None:
+            raise ValueError(f"Unknown UI token: {target!r}")
+        return entry["display"]
+
+    return {
+        "class": handle_class,
+        "param": handle_param,
+        "calc": handle_calc,
+        "doc": handle_doc,
+        "ui": handle_ui,
+    }

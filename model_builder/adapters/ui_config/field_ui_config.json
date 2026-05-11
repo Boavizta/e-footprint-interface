@@ -847,16 +847,17 @@
         "modeling_obj_containers": [
             "EdgeDeviceGroup"
         ],
-        "label": "sub group counts"
+        "label": "sub group counts",
+        "tooltip": "Select the edge device groups this group should belong to upon creation."
     },
     "edge_device_counts": {
         "modeling_obj_containers": [
             "EdgeDeviceGroup"
         ],
-        "label": "edge device counts"
+        "label": "edge device counts",
+        "tooltip": "Select the edge device groups this device should belong to upon creation."
     },
     "parent_group_memberships": {
-        "label": "Add to parent groups",
-        "f": "Select the edge device groups this object should belong to upon creation."
+        "label": "Add to parent groups"
     }
 }
