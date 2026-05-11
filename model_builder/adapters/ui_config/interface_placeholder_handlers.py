@@ -52,12 +52,7 @@ def _check_param(class_name: str, attr: str) -> None:
 
 def _check_calc(class_name: str, attr: str) -> None:
     klass = _resolve_class(class_name)
-    # Calculated attributes are exposed as ``update_<attr>`` methods anywhere on the MRO;
-    # the runtime ``calculated_attributes`` property is instance-bound so we can't read
-    # it from the class directly. Mirrors the library-side validation in test_descriptions.
-    if attr.startswith("dict_element_in_"):
-        raise ValueError(f"Calc target {attr!r} is an internal helper, not user-visible")
-    if not any(f"update_{attr}" in vars(ancestor) for ancestor in klass.__mro__):
+    if attr not in klass.calculated_attributes:
         raise ValueError(f"Unknown calculated attribute {attr!r} for class {class_name!r}")
 
 
