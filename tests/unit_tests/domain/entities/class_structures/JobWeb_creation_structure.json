@@ -38,179 +38,22 @@
                 "label": "Available job types",
                 "options": [
                     {
-                        "label": "Gen AI Job",
-                        "value": "EcoLogitsGenAIExternalAPIJob"
+                        "label": "GPU job",
+                        "value": "GPUJob"
                     },
                     {
                         "label": "Job",
                         "value": "Job"
                     },
                     {
-                        "label": "GPU job",
-                        "value": "GPUJob"
+                        "label": "Gen AI Job",
+                        "value": "EcoLogitsGenAIExternalAPIJob"
                     },
                     {
                         "label": "Video streaming job",
                         "value": "VideoStreamingJob"
                     }
                 ]
-            }
-        ]
-    },
-    {
-        "category": "EcoLogitsGenAIExternalAPIJob",
-        "header": "Gen AI Job creation",
-        "fields": [
-            {
-                "web_id": "EcoLogitsGenAIExternalAPIJob_name",
-                "attr_name": "name",
-                "label": "name",
-                "tooltip": false,
-                "input_type": "str",
-                "default": "Gen AI Job 1"
-            },
-            {
-                "web_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",
-                "attr_name": "output_token_count",
-                "label": "output token count",
-                "tooltip": false,
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "dimensionless",
-                "default": "1000",
-                "can_be_negative": false,
-                "step": "1"
-            }
-        ],
-        "advanced_fields": []
-    },
-    {
-        "category": "Job",
-        "header": "Job creation",
-        "fields": [
-            {
-                "web_id": "Job_name",
-                "attr_name": "name",
-                "label": "name",
-                "tooltip": false,
-                "input_type": "str",
-                "default": "Job 1"
-            },
-            {
-                "web_id": "Job_data_transferred",
-                "attr_name": "data_transferred",
-                "label": "data transferred",
-                "tooltip": false,
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "kB",
-                "default": "150",
-                "can_be_negative": false,
-                "step": "1"
-            },
-            {
-                "web_id": "Job_data_stored",
-                "attr_name": "data_stored",
-                "label": "data stored",
-                "tooltip": false,
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "kB_stored",
-                "default": "100",
-                "can_be_negative": false,
-                "step": "1"
-            },
-            {
-                "web_id": "Job_request_duration",
-                "attr_name": "request_duration",
-                "label": "request duration",
-                "tooltip": false,
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "s",
-                "default": "1",
-                "can_be_negative": false,
-                "step": "0.1"
-            }
-        ],
-        "advanced_fields": [
-            {
-                "web_id": "Job_compute_needed",
-                "attr_name": "compute_needed",
-                "label": "compute needed",
-                "tooltip": false,
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "cpu_core",
-                "default": "0.1",
-                "can_be_negative": false,
-                "step": "0.1"
-            },
-            {
-                "web_id": "Job_ram_needed",
-                "attr_name": "ram_needed",
-                "label": "RAM needed",
-                "tooltip": false,
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "MB_ram",
-                "default": "50",
-                "can_be_negative": false,
-                "step": "1"
             }
         ]
     },
@@ -222,7 +65,7 @@
                 "web_id": "GPUJob_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "GPU job 1"
             },
@@ -230,7 +73,7 @@
                 "web_id": "GPUJob_data_transferred",
                 "attr_name": "data_transferred",
                 "label": "data transferred",
-                "tooltip": false,
+                "tooltip": "Total bytes uploaded plus downloaded over the network for one invocation of the job.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -251,7 +94,7 @@
                 "web_id": "GPUJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": false,
+                "tooltip": "Net change in stored data per invocation. Positive values only. Data deletion is handled by <span class=\"ssot-param-ref\">data storage duration</span>",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -272,7 +115,7 @@
                 "web_id": "GPUJob_request_duration",
                 "attr_name": "request_duration",
                 "label": "request duration",
-                "tooltip": false,
+                "tooltip": "How long the job takes to process from start to finish on the server.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -295,7 +138,7 @@
                 "web_id": "GPUJob_compute_needed",
                 "attr_name": "compute_needed",
                 "label": "compute needed",
-                "tooltip": false,
+                "tooltip": "GPU consumed by one invocation of the job, expressed in GPUs held for the request duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -316,7 +159,7 @@
                 "web_id": "GPUJob_ram_needed",
                 "attr_name": "ram_needed",
                 "label": "RAM needed",
-                "tooltip": false,
+                "tooltip": "GPU memory held by one invocation of the job for its full duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -336,6 +179,163 @@
         ]
     },
     {
+        "category": "Job",
+        "header": "Job creation",
+        "fields": [
+            {
+                "web_id": "Job_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": null,
+                "input_type": "str",
+                "default": "Job 1"
+            },
+            {
+                "web_id": "Job_data_transferred",
+                "attr_name": "data_transferred",
+                "label": "data transferred",
+                "tooltip": "Total bytes uploaded plus downloaded over the network for one invocation of the job.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "kB",
+                "default": "150",
+                "can_be_negative": false,
+                "step": "1"
+            },
+            {
+                "web_id": "Job_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Net change in stored data per invocation. Positive values only. Data deletion is handled by <span class=\"ssot-param-ref\">data storage duration</span>",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "kB_stored",
+                "default": "100",
+                "can_be_negative": false,
+                "step": "1"
+            },
+            {
+                "web_id": "Job_request_duration",
+                "attr_name": "request_duration",
+                "label": "request duration",
+                "tooltip": "How long the job takes to process from start to finish on the server.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "s",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "0.1"
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "Job_compute_needed",
+                "attr_name": "compute_needed",
+                "label": "compute needed",
+                "tooltip": "CPU consumed by one invocation of the job, expressed in CPU cores held for the request duration.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "cpu_core",
+                "default": "0.1",
+                "can_be_negative": false,
+                "step": "0.1"
+            },
+            {
+                "web_id": "Job_ram_needed",
+                "attr_name": "ram_needed",
+                "label": "RAM needed",
+                "tooltip": "RAM held by one invocation of the job for its full duration.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "MB_ram",
+                "default": "50",
+                "can_be_negative": false,
+                "step": "1"
+            }
+        ]
+    },
+    {
+        "category": "EcoLogitsGenAIExternalAPIJob",
+        "header": "Gen AI Job creation",
+        "fields": [
+            {
+                "web_id": "EcoLogitsGenAIExternalAPIJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": null,
+                "input_type": "str",
+                "default": "Gen AI Job 1"
+            },
+            {
+                "web_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",
+                "attr_name": "output_token_count",
+                "label": "output token count",
+                "tooltip": "Average number of tokens generated per call. Drives generation latency, energy use, and embodied GWP through the EcoLogits impact model.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "dimensionless",
+                "default": "1000",
+                "can_be_negative": false,
+                "step": "1"
+            }
+        ],
+        "advanced_fields": []
+    },
+    {
         "category": "VideoStreamingJob",
         "header": "Video streaming job creation",
         "fields": [
@@ -343,7 +343,7 @@
                 "web_id": "VideoStreamingJob_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Video streaming job 1"
             },
@@ -351,7 +351,7 @@
                 "web_id": "VideoStreamingJob_resolution",
                 "attr_name": "resolution",
                 "label": "resolution",
-                "tooltip": false,
+                "tooltip": "Display resolution as a label like \"1080p (1920 x 1080)\". The pixel count is parsed from the label and used to estimate the dynamic bitrate.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -400,7 +400,7 @@
                 "web_id": "VideoStreamingJob_video_duration",
                 "attr_name": "video_duration",
                 "label": "video duration",
-                "tooltip": false,
+                "tooltip": "Duration of one streaming session, used as the request duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -421,7 +421,7 @@
                 "web_id": "VideoStreamingJob_data_stored",
                 "attr_name": "data_stored",
                 "label": "data stored",
-                "tooltip": false,
+                "tooltip": "Net change in stored data per session. Usually 0 for streamed video.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -444,7 +444,7 @@
                 "web_id": "VideoStreamingJob_refresh_rate",
                 "attr_name": "refresh_rate",
                 "label": "refresh rate",
-                "tooltip": false,
+                "tooltip": "Frames-per-second rate of the stream. Higher refresh rates increase the bitrate proportionally.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

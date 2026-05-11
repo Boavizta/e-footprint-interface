@@ -15,7 +15,9 @@ from model_builder.adapters.forms.form_field_generator import (
     compatible_step_for_magnitude,
     format_magnitude_for_number_input,
 )
+from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
+from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
 from model_builder.adapters.forms.strategies import (
     SimpleFormStrategy,
     WithStorageFormStrategy,
@@ -101,7 +103,7 @@ class FormContextBuilder:
             overrides = web_class.get_creation_context_overrides(self.model_web)
             if "available_groups_to_join" in overrides:
                 context["parent_group_membership_field"] = self._build_parent_group_membership_field(
-                    overrides["available_groups_to_join"])
+                    overrides["available_groups_to_join"], web_class)
         return context
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
@@ -148,16 +150,20 @@ class FormContextBuilder:
         ]
 
     @staticmethod
-    def _build_parent_group_membership_field(available_groups: list) -> dict | None:
+    def _build_parent_group_membership_field(
+            available_groups: list, web_class: Type["ModelingObjectWeb"]) -> dict | None:
         if not available_groups:
             return None
         options = FormContextBuilder._build_select_options(available_groups)
         attr_name = "parent_group_memberships"
+        # The parent group's dict-attr depends on what we're adding: sub-groups
+        # land in sub_group_counts, devices land in edge_device_counts.
+        parent_param = "sub_group_counts" if issubclass(web_class, EdgeDeviceGroupWeb) else "edge_device_counts"
         return {
             "web_id": attr_name,
             "attr_name": attr_name,
             "label": FieldUIConfigProvider.get_label(attr_name),
-            "tooltip": FieldUIConfigProvider.get_tooltip(attr_name),
+            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip("EdgeDeviceGroup", parent_param),
             "input_type": "dict_count",
             "options": options,
             "options_json": json.dumps(options),

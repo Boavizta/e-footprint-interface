@@ -36,7 +36,7 @@
                 "web_id": "EdgeCPUComponent_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "CPU component 1"
             },
@@ -44,7 +44,7 @@
                 "web_id": "EdgeCPUComponent_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before a unit is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -65,7 +65,7 @@
                 "web_id": "EdgeCPUComponent_compute_per_unit",
                 "attr_name": "compute_per_unit",
                 "label": "compute per unit",
-                "tooltip": false,
+                "tooltip": "Number of CPU cores provided by one unit. Total compute is this value times <span class=\"ssot-param-ref\">nb of units</span>.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -86,7 +86,7 @@
                 "web_id": "EdgeCPUComponent_nb_of_units",
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
-                "tooltip": false,
+                "tooltip": "Number of identical units in the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -109,7 +109,7 @@
                 "web_id": "EdgeCPUComponent_carbon_footprint_fabrication_per_unit",
                 "attr_name": "carbon_footprint_fabrication_per_unit",
                 "label": "carbon footprint fabrication per unit",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one unit of the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -130,7 +130,7 @@
                 "web_id": "EdgeCPUComponent_power_per_unit",
                 "attr_name": "power_per_unit",
                 "label": "power per unit",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one fully-loaded unit.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -151,7 +151,7 @@
                 "web_id": "EdgeCPUComponent_idle_power_per_unit",
                 "attr_name": "idle_power_per_unit",
                 "label": "idle power per unit",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one idle unit.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -172,7 +172,7 @@
                 "web_id": "EdgeCPUComponent_base_compute_consumption",
                 "attr_name": "base_compute_consumption",
                 "label": "base compute consumption",
-                "tooltip": false,
+                "tooltip": "Compute permanently occupied independently of recurring needs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -199,7 +199,7 @@
                 "web_id": "EdgeRAMComponent_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "RAM component 1"
             },
@@ -207,7 +207,7 @@
                 "web_id": "EdgeRAMComponent_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before a unit is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -228,7 +228,7 @@
                 "web_id": "EdgeRAMComponent_ram_per_unit",
                 "attr_name": "ram_per_unit",
                 "label": "ram per unit",
-                "tooltip": false,
+                "tooltip": "Memory provided by one unit. Total capacity is this value times <span class=\"ssot-param-ref\">nb of units</span>.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -249,7 +249,7 @@
                 "web_id": "EdgeRAMComponent_nb_of_units",
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
-                "tooltip": false,
+                "tooltip": "Number of identical units in the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -272,7 +272,7 @@
                 "web_id": "EdgeRAMComponent_carbon_footprint_fabrication_per_unit",
                 "attr_name": "carbon_footprint_fabrication_per_unit",
                 "label": "carbon footprint fabrication per unit",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one unit of the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -293,7 +293,7 @@
                 "web_id": "EdgeRAMComponent_power_per_unit",
                 "attr_name": "power_per_unit",
                 "label": "power per unit",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one fully-loaded unit.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -314,7 +314,7 @@
                 "web_id": "EdgeRAMComponent_idle_power_per_unit",
                 "attr_name": "idle_power_per_unit",
                 "label": "idle power per unit",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one idle unit.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -335,7 +335,7 @@
                 "web_id": "EdgeRAMComponent_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
-                "tooltip": false,
+                "tooltip": "RAM permanently occupied independently of recurring needs (operating system, baseline processes).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -362,7 +362,7 @@
                 "web_id": "EdgeStorage_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Edge storage 1"
             },
@@ -370,7 +370,7 @@
                 "web_id": "EdgeStorage_storage_capacity_per_unit",
                 "attr_name": "storage_capacity_per_unit",
                 "label": "storage capacity per unit",
-                "tooltip": false,
+                "tooltip": "Storage capacity provided by one unit. Total capacity is this value times <span class=\"ssot-param-ref\">nb of units</span>.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -391,7 +391,7 @@
                 "web_id": "EdgeStorage_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before the storage is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -412,7 +412,7 @@
                 "web_id": "EdgeStorage_nb_of_units",
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
-                "tooltip": false,
+                "tooltip": "Number of storage units making up the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -435,7 +435,7 @@
                 "web_id": "EdgeStorage_carbon_footprint_fabrication_per_storage_capacity",
                 "attr_name": "carbon_footprint_fabrication_per_storage_capacity",
                 "label": "carbon footprint fabrication per storage capacity",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one unit of storage capacity.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -456,7 +456,7 @@
                 "web_id": "EdgeStorage_base_storage_need",
                 "attr_name": "base_storage_need",
                 "label": "base storage need",
-                "tooltip": false,
+                "tooltip": "Storage permanently occupied independently of recurring needs (system files, baseline assets).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -483,7 +483,7 @@
                 "web_id": "EdgeWorkloadComponent_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Workload component 1"
             },
@@ -491,7 +491,7 @@
                 "web_id": "EdgeWorkloadComponent_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before a unit is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -512,7 +512,7 @@
                 "web_id": "EdgeWorkloadComponent_nb_of_units",
                 "attr_name": "nb_of_units",
                 "label": "nb of units",
-                "tooltip": false,
+                "tooltip": "Number of identical units in the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -535,7 +535,7 @@
                 "web_id": "EdgeWorkloadComponent_carbon_footprint_fabrication_per_unit",
                 "attr_name": "carbon_footprint_fabrication_per_unit",
                 "label": "carbon footprint fabrication per unit",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one unit of the component.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -556,7 +556,7 @@
                 "web_id": "EdgeWorkloadComponent_power_per_unit",
                 "attr_name": "power_per_unit",
                 "label": "power per unit",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one fully-loaded unit.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -577,7 +577,7 @@
                 "web_id": "EdgeWorkloadComponent_idle_power_per_unit",
                 "attr_name": "idle_power_per_unit",
                 "label": "idle power per unit",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one idle unit.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

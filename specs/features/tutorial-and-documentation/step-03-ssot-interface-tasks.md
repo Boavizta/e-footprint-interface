@@ -51,6 +51,8 @@
 
 ## Task 2 — Form-field tooltip rewiring
 
+**Status:** Done.
+
 **Goal:** Switch the three form call sites to `EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip`, enable Bootstrap HTML-mode popovers on form-field info icons, and remove the unused `FieldUIConfigProvider.get_tooltip`. First user-visible delivery: every form field can carry the merged library + interface tooltip.
 
 **Files touched:**

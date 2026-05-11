@@ -24,7 +24,7 @@
                 "web_id": "UsagePattern_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Usage pattern 1"
             },
@@ -32,7 +32,7 @@
                 "web_id": "UsagePattern_usage_journey",
                 "attr_name": "usage_journey",
                 "label": "usage journey",
-                "tooltip": false,
+                "tooltip": "The <a href=\"/model_builder/open-help-drawer/UsageJourney/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/UsageJourney/\" hx-target=\"#sidePanel\">Usage journey</a> performed by users in this pattern.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -50,7 +50,7 @@
                 "web_id": "UsagePattern_devices",
                 "attr_name": "devices",
                 "label": "devices",
-                "tooltip": false,
+                "tooltip": "Devices that users perform the journey on. Fabrication and energy footprints of each device are weighted by the time the journey occupies on it.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -68,7 +68,7 @@
                 "web_id": "UsagePattern_network",
                 "attr_name": "network",
                 "label": "network",
-                "tooltip": false,
+                "tooltip": "<a href=\"/model_builder/open-help-drawer/Network/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Network/\" hx-target=\"#sidePanel\">Network</a> carrying traffic between the user's device and the servers.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -86,7 +86,7 @@
                 "web_id": "UsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
-                "tooltip": false,
+                "tooltip": "<a href=\"/model_builder/open-help-drawer/Country/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Country/\" hx-target=\"#sidePanel\">Country</a> where the users are located. Drives device-side electricity carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly number of usage journey starts</span>.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -104,7 +104,7 @@
                 "web_id": "UsagePattern_hourly_usage_journey_starts",
                 "attr_name": "hourly_usage_journey_starts",
                 "label": "hourly number of usage journey starts",
-                "tooltip": false,
+                "tooltip": "Hourly timeseries giving the number of usage journeys that begin in each hour of the modeling period, expressed in the country's local timezone.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

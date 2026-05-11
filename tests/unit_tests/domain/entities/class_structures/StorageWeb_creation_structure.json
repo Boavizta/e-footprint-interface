@@ -24,7 +24,7 @@
                 "web_id": "Storage_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Storage 1"
             },
@@ -32,7 +32,7 @@
                 "web_id": "Storage_storage_capacity",
                 "attr_name": "storage_capacity",
                 "label": "capacity per storage unit",
-                "tooltip": "The number of storage units will automatically adapt to data storage requirements.",
+                "tooltip": "Capacity of one storage instance. Used as the divisor when sizing the number of instances required to hold the cumulative storage need.<br><br>The number of storage units will automatically adapt to data storage requirements.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -53,7 +53,7 @@
                 "web_id": "Storage_data_replication_factor",
                 "attr_name": "data_replication_factor",
                 "label": "data replication factor",
-                "tooltip": false,
+                "tooltip": "Multiplier accounting for redundant copies stored on top of the live data, such as a value of 3 for a triplicated cluster.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -74,7 +74,7 @@
                 "web_id": "Storage_data_storage_duration",
                 "attr_name": "data_storage_duration",
                 "label": "data storage duration",
-                "tooltip": false,
+                "tooltip": "How long stored data is retained before being automatically dumped. Drives how cumulative storage grows over time.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -95,7 +95,7 @@
                 "web_id": "Storage_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before a storage instance is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -118,7 +118,7 @@
                 "web_id": "Storage_carbon_footprint_fabrication_per_storage_capacity",
                 "attr_name": "carbon_footprint_fabrication_per_storage_capacity",
                 "label": "carbon footprint fabrication per storage capacity",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one unit of storage capacity. Multiplied by capacity to obtain the per-instance fabrication footprint.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -139,7 +139,7 @@
                 "web_id": "Storage_base_storage_need",
                 "attr_name": "base_storage_need",
                 "label": "base storage need",
-                "tooltip": false,
+                "tooltip": "Storage occupied independently of jobs (system data, indexes, baseline assets). Added on top of the cumulative job-driven storage need.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

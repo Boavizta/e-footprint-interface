@@ -24,7 +24,7 @@
                 "web_id": "EcoLogitsGenAIExternalAPI_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Gen AI external API 1"
             },
@@ -32,7 +32,7 @@
                 "web_id": "EcoLogitsGenAIExternalAPI_provider",
                 "attr_name": "provider",
                 "label": "provider",
-                "tooltip": false,
+                "tooltip": "Provider key from the EcoLogits catalog (anthropic, openai, mistralai...).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -77,7 +77,7 @@
                 "web_id": "EcoLogitsGenAIExternalAPI_model_name",
                 "attr_name": "model_name",
                 "label": "model name",
-                "tooltip": false,
+                "tooltip": "Specific model name from the chosen provider's EcoLogits catalog. Drives parameter counts, throughput, and the datacenter location used for grid carbon intensity.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

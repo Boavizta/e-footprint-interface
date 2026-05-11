@@ -16,11 +16,6 @@ class FieldUIConfigProvider:
         return FIELD_UI_CONFIG.get(field_name, {}).get("label", field_name)
 
     @staticmethod
-    def get_tooltip(field_name: str) -> Optional[str]:
-        """Get tooltip text for a field."""
-        return FIELD_UI_CONFIG.get(field_name, {}).get("tooltip")
-
-    @staticmethod
     def is_advanced_parameter(field_name: str) -> bool:
         """Check if a field is an advanced parameter."""
         return FIELD_UI_CONFIG.get(field_name, {}).get("is_advanced_parameter", False)

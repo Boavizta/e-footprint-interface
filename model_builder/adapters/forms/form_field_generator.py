@@ -17,6 +17,7 @@ from efootprint.builders.timeseries.explainable_hourly_quantities_from_form_inpu
 from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import ExplainableRecurrentQuantitiesFromConstant
 
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
+from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
@@ -165,7 +166,7 @@ def generate_select_multiple_field(
         "web_id": f"{id_prefix}_{attr_name}",
         "attr_name": attr_name,
         "label": field_config.get("label", attr_name),
-        "tooltip": field_config.get("tooltip", False),
+        "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(id_prefix, attr_name),
         "input_type": "select_multiple",
         "selected": selected,
         "unselected": unselected,
@@ -204,7 +205,7 @@ def generate_dynamic_form(
             "web_id": id_prefix + "_" + attr_name,
             "attr_name": attr_name,
             "label": field_config.get("label", attr_name),
-            "tooltip": field_config.get("tooltip", False)
+            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(efootprint_class_str, attr_name),
         }
         annotation_origin = get_origin(annotation)
         if annotation_origin and annotation_origin in (list, List):

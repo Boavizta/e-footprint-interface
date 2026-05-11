@@ -24,7 +24,7 @@
                 "web_id": "UsageJourneyStep_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Usage journey step 1"
             },
@@ -32,7 +32,7 @@
                 "web_id": "UsageJourneyStep_user_time_spent",
                 "attr_name": "user_time_spent",
                 "label": "time spent by user",
-                "tooltip": false,
+                "tooltip": "Wall-clock time the user spends on this step (during which her device is powered on).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -53,7 +53,7 @@
                 "web_id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
                 "label": "Jobs in this usage journey step",
-                "tooltip": false,
+                "tooltip": "<a href=\"/model_builder/open-help-drawer/Job/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Job/\" hx-target=\"#sidePanel\">Job</a>s triggered on the server side during this step. Multiple jobs can fire per step; the same <a href=\"/model_builder/open-help-drawer/Job/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Job/\" hx-target=\"#sidePanel\">Job</a> can appear in several steps.",
                 "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [

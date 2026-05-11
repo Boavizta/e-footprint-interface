@@ -2,7 +2,8 @@
     <svg
         data-bs-toggle="popover"
         data-bs-trigger="hover focus"
-        data-bs-content="{{ tooltip|default:field.tooltip }}"
+        data-bs-content="{{ tooltip|default:field.tooltip|force_escape }}"
+        {% if tooltip_html %}data-bs-html="true"{% endif %}
         data-bs-placement="top"
         data-bs-custom-class="blue-popover"
         data-location="side_panel"

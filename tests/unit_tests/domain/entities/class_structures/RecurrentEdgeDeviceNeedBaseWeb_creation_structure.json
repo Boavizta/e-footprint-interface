@@ -58,7 +58,7 @@
                 "web_id": "RecurrentEdgeProcess_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Recurrent edge process 1"
             },
@@ -66,7 +66,7 @@
                 "web_id": "RecurrentEdgeProcess_recurrent_compute_needed",
                 "attr_name": "recurrent_compute_needed",
                 "label": "recurrent compute needed",
-                "tooltip": false,
+                "tooltip": "Hourly compute usage over a typical week.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -87,7 +87,7 @@
                 "web_id": "RecurrentEdgeProcess_recurrent_ram_needed",
                 "attr_name": "recurrent_ram_needed",
                 "label": "recurrent ram needed",
-                "tooltip": false,
+                "tooltip": "Hourly RAM usage over a typical week.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -108,7 +108,7 @@
                 "web_id": "RecurrentEdgeProcess_recurrent_storage_needed",
                 "attr_name": "recurrent_storage_needed",
                 "label": "recurrent storage needed",
-                "tooltip": false,
+                "tooltip": "Hourly net storage rate over a typical week (positive = writes, negative = deletes).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -136,7 +136,7 @@
                 "web_id": "RecurrentEdgeWorkload_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Recurrent edge workload 1"
             },
@@ -144,7 +144,7 @@
                 "web_id": "RecurrentEdgeWorkload_recurrent_workload",
                 "attr_name": "recurrent_workload",
                 "label": "recurrent workload",
-                "tooltip": false,
+                "tooltip": "Hourly utilisation over a typical week, with values between 0 (idle) and 1 (full load).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -172,7 +172,7 @@
                 "web_id": "RecurrentEdgeDeviceNeed_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Recurrent edge device need 1"
             }

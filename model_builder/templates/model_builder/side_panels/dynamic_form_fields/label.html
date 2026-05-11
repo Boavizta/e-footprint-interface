@@ -6,6 +6,6 @@
         </label>
     </div>
     {% if field.tooltip %}
-        {% include "model_builder/side_panels/components/tooltip.html" %}
+        {% include "model_builder/side_panels/components/tooltip.html" with tooltip_html=True %}
     {% endif %}
 </div>

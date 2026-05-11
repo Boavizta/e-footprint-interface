@@ -42,7 +42,7 @@
                 "web_id": "RecurrentEdgeComponentNeed_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Recurrent edge component need 1"
             },
@@ -50,7 +50,7 @@
                 "web_id": "RecurrentEdgeComponentNeed_recurrent_need",
                 "attr_name": "recurrent_need",
                 "label": "recurrent need",
-                "tooltip": false,
+                "tooltip": "Hourly resource consumption pattern over a typical week, starting Monday at midnight. The 168-hour pattern is repeated to cover the modeling period.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

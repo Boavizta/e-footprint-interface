@@ -24,7 +24,7 @@
                 "web_id": "VideoStreaming_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Video streaming application 1"
             }
@@ -34,7 +34,7 @@
                 "web_id": "VideoStreaming_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
-                "tooltip": false,
+                "tooltip": "RAM occupied per server by the service itself (operating system, runtime, idle services), independent of jobs running through the service.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -55,7 +55,7 @@
                 "web_id": "VideoStreaming_bits_per_pixel",
                 "attr_name": "bits_per_pixel",
                 "label": "bits per pixel",
-                "tooltip": false,
+                "tooltip": "Average compression density. Multiplied by pixel count and refresh rate to estimate the dynamic bitrate of one stream.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -76,7 +76,7 @@
                 "web_id": "VideoStreaming_static_delivery_cpu_cost",
                 "attr_name": "static_delivery_cpu_cost",
                 "label": "static delivery cpu cost",
-                "tooltip": false,
+                "tooltip": "CPU per unit of bitrate served (cores per GB/s). Multiplied by the dynamic bitrate to estimate the CPU consumed by one concurrent stream.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -97,7 +97,7 @@
                 "web_id": "VideoStreaming_ram_buffer_per_user",
                 "attr_name": "ram_buffer_per_user",
                 "label": "RAM buffer per user",
-                "tooltip": false,
+                "tooltip": "RAM held by the streaming server for each concurrent user (read-ahead buffers, sockets).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

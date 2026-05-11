@@ -32,7 +32,7 @@
                 "web_id": "GPUServer_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "AI server 1"
             },
@@ -40,7 +40,7 @@
                 "web_id": "GPUServer_server_type",
                 "attr_name": "server_type",
                 "label": "infrastructure type",
-                "tooltip": false,
+                "tooltip": "Provisioning model of the server, which decides how many instances are attributed in each hour. Autoscaling rounds the hourly demand up to a whole number of instances, so an instance is billed even when it is only partially loaded. Serverless attributes only the fractional instance-hours actually used. On-premise holds a fixed number of physical instances over the whole modeling period (capacity sized to peak demand, or to <span class=\"ssot-param-ref\">fixed nb of instances</span> if set).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -73,7 +73,7 @@
                 "web_id": "GPUServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
-                "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
+                "tooltip": "Average grid carbon intensity at the location where the server runs, used to convert energy consumption into carbon emissions.<br><br>Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -94,7 +94,7 @@
                 "web_id": "GPUServer_compute",
                 "attr_name": "compute",
                 "label": "compute",
-                "tooltip": false,
+                "tooltip": "Number of GPUs in one server instance.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -115,7 +115,7 @@
                 "web_id": "GPUServer_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before the server is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -138,7 +138,7 @@
                 "web_id": "GPUServer_gpu_power",
                 "attr_name": "gpu_power",
                 "label": "GPU power",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one fully-loaded GPU.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -159,7 +159,7 @@
                 "web_id": "GPUServer_gpu_idle_power",
                 "attr_name": "gpu_idle_power",
                 "label": "GPU idle power",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by a GPU that is on but not processing.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -180,7 +180,7 @@
                 "web_id": "GPUServer_ram_per_gpu",
                 "attr_name": "ram_per_gpu",
                 "label": "RAM per GPU",
-                "tooltip": false,
+                "tooltip": "Memory available per GPU. Total instance RAM is derived by multiplying with the GPU count.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -201,7 +201,7 @@
                 "web_id": "GPUServer_carbon_footprint_fabrication_per_gpu",
                 "attr_name": "carbon_footprint_fabrication_per_gpu",
                 "label": "carbon footprint fabrication per GPU",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one GPU.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -222,7 +222,7 @@
                 "web_id": "GPUServer_carbon_footprint_fabrication_without_gpu",
                 "attr_name": "carbon_footprint_fabrication_without_gpu",
                 "label": "carbon footprint fabrication without GPU",
-                "tooltip": false,
+                "tooltip": "Embodied carbon of one server chassis excluding GPUs (CPUs, motherboard, chassis).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -243,7 +243,7 @@
                 "web_id": "GPUServer_power_usage_effectiveness",
                 "attr_name": "power_usage_effectiveness",
                 "label": "power usage effectiveness",
-                "tooltip": false,
+                "tooltip": "Datacenter overhead multiplier applied to instance power to account for cooling, lighting, and other site-wide energy use.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -264,7 +264,7 @@
                 "web_id": "GPUServer_utilization_rate",
                 "attr_name": "utilization_rate",
                 "label": "server utilization rate",
-                "tooltip": false,
+                "tooltip": "Fraction of an instance's resources that is considered usable by jobs after operating-system and headroom overhead.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -285,7 +285,7 @@
                 "web_id": "GPUServer_base_compute_consumption",
                 "attr_name": "base_compute_consumption",
                 "label": "base compute consumption",
-                "tooltip": false,
+                "tooltip": "GPU consumed per instance independently of jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -306,7 +306,7 @@
                 "web_id": "GPUServer_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
-                "tooltip": false,
+                "tooltip": "GPU memory consumed per instance independently of jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -333,7 +333,7 @@
                 "web_id": "BoaviztaCloudServer_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Cloud server 1"
             },
@@ -341,7 +341,7 @@
                 "web_id": "BoaviztaCloudServer_provider",
                 "attr_name": "provider",
                 "label": "provider",
-                "tooltip": false,
+                "tooltip": "Cloud provider key as exposed by the Boavizta API (e.g. aws, azure, gcp, scaleway).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -382,7 +382,7 @@
                 "web_id": "BoaviztaCloudServer_instance_type",
                 "attr_name": "instance_type",
                 "label": "instance type",
-                "tooltip": false,
+                "tooltip": "Provider-specific instance type identifier. Must be valid for the chosen <span class=\"ssot-param-ref\">provider</span>.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -402,7 +402,7 @@
                 "web_id": "BoaviztaCloudServer_server_type",
                 "attr_name": "server_type",
                 "label": "infrastructure type",
-                "tooltip": false,
+                "tooltip": "Provisioning model of the server, which decides how many instances are attributed in each hour. Autoscaling rounds the hourly demand up to a whole number of instances, so an instance is billed even when it is only partially loaded. Serverless attributes only the fractional instance-hours actually used. On-premise holds a fixed number of physical instances over the whole modeling period (capacity sized to peak demand, or to <span class=\"ssot-param-ref\">fixed nb of instances</span> if set).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -435,7 +435,7 @@
                 "web_id": "BoaviztaCloudServer_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before the server is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -456,7 +456,7 @@
                 "web_id": "BoaviztaCloudServer_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
-                "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
+                "tooltip": "Average grid carbon intensity at the location where the server runs, used to convert energy consumption into carbon emissions.<br><br>Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -479,7 +479,7 @@
                 "web_id": "BoaviztaCloudServer_idle_power",
                 "attr_name": "idle_power",
                 "label": "idle power",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one instance that is on but not running any jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -500,7 +500,7 @@
                 "web_id": "BoaviztaCloudServer_power_usage_effectiveness",
                 "attr_name": "power_usage_effectiveness",
                 "label": "power usage effectiveness",
-                "tooltip": false,
+                "tooltip": "Datacenter overhead multiplier applied to instance power to account for cooling, lighting, and other site-wide energy use.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -521,7 +521,7 @@
                 "web_id": "BoaviztaCloudServer_utilization_rate",
                 "attr_name": "utilization_rate",
                 "label": "server utilization rate",
-                "tooltip": false,
+                "tooltip": "Fraction of an instance's RAM and compute that is considered usable by jobs after operating-system and headroom overhead.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -542,7 +542,7 @@
                 "web_id": "BoaviztaCloudServer_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
-                "tooltip": false,
+                "tooltip": "RAM consumed per instance independently of jobs, for the operating system, agents, and idle services.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -563,7 +563,7 @@
                 "web_id": "BoaviztaCloudServer_base_compute_consumption",
                 "attr_name": "base_compute_consumption",
                 "label": "base compute consumption",
-                "tooltip": false,
+                "tooltip": "Compute consumed per instance independently of jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -590,7 +590,7 @@
                 "web_id": "Server_name",
                 "attr_name": "name",
                 "label": "name",
-                "tooltip": false,
+                "tooltip": null,
                 "input_type": "str",
                 "default": "Custom server 1"
             },
@@ -598,7 +598,7 @@
                 "web_id": "Server_server_type",
                 "attr_name": "server_type",
                 "label": "infrastructure type",
-                "tooltip": false,
+                "tooltip": "Provisioning model of the server, which decides how many instances are attributed in each hour. Autoscaling rounds the hourly demand up to a whole number of instances, so an instance is billed even when it is only partially loaded. Serverless attributes only the fractional instance-hours actually used. On-premise holds a fixed number of physical instances over the whole modeling period (capacity sized to peak demand, or to <span class=\"ssot-param-ref\">fixed nb of instances</span> if set).",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -631,7 +631,7 @@
                 "web_id": "Server_lifespan",
                 "attr_name": "lifespan",
                 "label": "lifespan",
-                "tooltip": false,
+                "tooltip": "Expected time before the server is replaced. Embodied carbon is amortised over this duration.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -652,7 +652,7 @@
                 "web_id": "Server_ram",
                 "attr_name": "ram",
                 "label": "RAM",
-                "tooltip": false,
+                "tooltip": "Total memory available on one instance. Combined with <span class=\"ssot-param-ref\">server utilization rate</span> to obtain the memory usable by jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -673,7 +673,7 @@
                 "web_id": "Server_compute",
                 "attr_name": "compute",
                 "label": "compute",
-                "tooltip": false,
+                "tooltip": "Total compute capacity available on one instance, expressed in CPU cores.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -694,7 +694,7 @@
                 "web_id": "Server_average_carbon_intensity",
                 "attr_name": "average_carbon_intensity",
                 "label": "average carbon intensity of electricity",
-                "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
+                "tooltip": "Average grid carbon intensity at the location where the server runs, used to convert energy consumption into carbon emissions.<br><br>Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -717,7 +717,7 @@
                 "web_id": "Server_carbon_footprint_fabrication",
                 "attr_name": "carbon_footprint_fabrication",
                 "label": "carbon footprint fabrication",
-                "tooltip": false,
+                "tooltip": "Embodied carbon emitted to manufacture one unit of the hardware. Amortised over the lifespan when computing the hourly fabrication footprint.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -738,7 +738,7 @@
                 "web_id": "Server_power",
                 "attr_name": "power",
                 "label": "power",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one fully-loaded unit, before applying any datacenter overhead.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -759,7 +759,7 @@
                 "web_id": "Server_idle_power",
                 "attr_name": "idle_power",
                 "label": "idle power",
-                "tooltip": false,
+                "tooltip": "Electrical power drawn by one instance that is on but not running any jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -780,7 +780,7 @@
                 "web_id": "Server_power_usage_effectiveness",
                 "attr_name": "power_usage_effectiveness",
                 "label": "power usage effectiveness",
-                "tooltip": false,
+                "tooltip": "Datacenter overhead multiplier applied to instance power to account for cooling, lighting, and other site-wide energy use.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -801,7 +801,7 @@
                 "web_id": "Server_utilization_rate",
                 "attr_name": "utilization_rate",
                 "label": "server utilization rate",
-                "tooltip": false,
+                "tooltip": "Fraction of an instance's RAM and compute that is considered usable by jobs after operating-system and headroom overhead.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -822,7 +822,7 @@
                 "web_id": "Server_base_ram_consumption",
                 "attr_name": "base_ram_consumption",
                 "label": "base RAM consumption",
-                "tooltip": false,
+                "tooltip": "RAM consumed per instance independently of jobs, for the operating system, agents, and idle services.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -843,7 +843,7 @@
                 "web_id": "Server_base_compute_consumption",
                 "attr_name": "base_compute_consumption",
                 "label": "base compute consumption",
-                "tooltip": false,
+                "tooltip": "Compute consumed per instance independently of jobs.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
