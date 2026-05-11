@@ -13,7 +13,7 @@ Each step gets a dedicated sub-implementation plan file (linked below) written a
 | 1 | Disabled-instead-of-error UX | interface + lib CI | `step-01-disabled-ux.md` |
 | 2 | SSOT metadata in e-footprint | library | `step-02-ssot-library.md` |
 | 3 | Surface SSOT in the interface | interface | `step-03-ssot-interface.md` |
-| 4 | Docs overhaul + library modeling templates | library | `step-04-docs-library-templates.md` |
+| 4 | Docs overhaul + library modeling templates | library | `step-04-mechanical.md` + `step-04-content.md` (prose, co-authored) |
 | 5 | Web vs edge in the interface | interface | `step-05-edge-interface.md` |
 | 6 | Introductory templates + guided tour | interface | `step-06-templates-tour.md` |
 | 7 | Maintainability and build review | both | `step-07-build-review.md` |
