@@ -1,13 +1,14 @@
 {
-    "fea18f": {
+    "837fbc": {
         "name": "Afghanistan",
-        "id": "fea18f",
+        "id": "837fbc",
         "short_name": "AFG",
         "average_carbon_intensity": {
             "value": 123.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "20624c"
+            "source": "b56c8f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Kabul",
@@ -15,15 +16,16 @@
             "source": "user_data"
         }
     },
-    "c13f69": {
+    "b9b2db": {
         "name": "Algeria",
-        "id": "c13f69",
+        "id": "b9b2db",
         "short_name": "DZA",
         "average_carbon_intensity": {
             "value": 633.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "a32d3a"
+            "source": "886f23",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Algiers",
@@ -31,15 +33,16 @@
             "source": "user_data"
         }
     },
-    "d614f5": {
+    "329ca2": {
         "name": "Angola",
-        "id": "d614f5",
+        "id": "329ca2",
         "short_name": "AGO",
         "average_carbon_intensity": {
             "value": 167.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "221972"
+            "source": "9de044",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Luanda",
@@ -47,15 +50,16 @@
             "source": "user_data"
         }
     },
-    "034a3a": {
+    "5122e5": {
         "name": "Argentina",
-        "id": "034a3a",
+        "id": "5122e5",
         "short_name": "ARG",
         "average_carbon_intensity": {
             "value": 358.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "0a6223"
+            "source": "2fa0b7",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Argentina/Buenos_Aires",
@@ -63,15 +67,16 @@
             "source": "user_data"
         }
     },
-    "9a865a": {
+    "0a6798": {
         "name": "Australia",
-        "id": "9a865a",
+        "id": "0a6798",
         "short_name": "AUS",
         "average_carbon_intensity": {
             "value": 551.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "1e3de1"
+            "source": "8c2e93",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Australia/Sydney",
@@ -79,15 +84,16 @@
             "source": "user_data"
         }
     },
-    "cb63ee": {
+    "2c136b": {
         "name": "Austria",
-        "id": "cb63ee",
+        "id": "2c136b",
         "short_name": "AUT",
         "average_carbon_intensity": {
             "value": 102.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "7b40a0"
+            "source": "782efc",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Vienna",
@@ -95,15 +101,16 @@
             "source": "user_data"
         }
     },
-    "b76b4d": {
+    "175778": {
         "name": "Azerbaijan",
-        "id": "b76b4d",
+        "id": "175778",
         "short_name": "AZE",
         "average_carbon_intensity": {
             "value": 633.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "8c91f3"
+            "source": "cb315d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Baku",
@@ -111,15 +118,16 @@
             "source": "user_data"
         }
     },
-    "8efe20": {
+    "90df8d": {
         "name": "Bangladesh",
-        "id": "8efe20",
+        "id": "90df8d",
         "short_name": "BGD",
         "average_carbon_intensity": {
             "value": 694.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "661960"
+            "source": "d91c57",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Dhaka",
@@ -127,15 +135,16 @@
             "source": "user_data"
         }
     },
-    "e2ee43": {
+    "9f4fe9": {
         "name": "Belarus",
-        "id": "e2ee43",
+        "id": "9f4fe9",
         "short_name": "BLR",
         "average_carbon_intensity": {
             "value": 313.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "37b741"
+            "source": "cf1020",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Minsk",
@@ -143,15 +152,16 @@
             "source": "user_data"
         }
     },
-    "f19b28": {
+    "3514ca": {
         "name": "Belgium",
-        "id": "f19b28",
+        "id": "3514ca",
         "short_name": "BEL",
         "average_carbon_intensity": {
             "value": 117.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c74e74"
+            "source": "a3a48d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Brussels",
@@ -159,15 +169,16 @@
             "source": "user_data"
         }
     },
-    "6aee88": {
+    "9dbd31": {
         "name": "Benin",
-        "id": "6aee88",
+        "id": "9dbd31",
         "short_name": "BEN",
         "average_carbon_intensity": {
             "value": 590.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "59176c"
+            "source": "14b250",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Porto-Novo",
@@ -175,15 +186,16 @@
             "source": "user_data"
         }
     },
-    "dc1498": {
+    "dd10c6": {
         "name": "Bolivia",
-        "id": "dc1498",
+        "id": "dd10c6",
         "short_name": "BOL",
         "average_carbon_intensity": {
             "value": 468.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3304ed"
+            "source": "d6400d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/La_Paz",
@@ -191,15 +203,16 @@
             "source": "user_data"
         }
     },
-    "af0465": {
+    "9d61c8": {
         "name": "Brazil",
-        "id": "af0465",
+        "id": "9d61c8",
         "short_name": "BRA",
         "average_carbon_intensity": {
             "value": 103.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3762e1"
+            "source": "b024e0",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Sao_Paulo",
@@ -207,15 +220,16 @@
             "source": "user_data"
         }
     },
-    "34ca72": {
+    "1473f6": {
         "name": "Bulgaria",
-        "id": "34ca72",
+        "id": "1473f6",
         "short_name": "BGR",
         "average_carbon_intensity": {
             "value": 264.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "20b609"
+            "source": "6fb955",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Sofia",
@@ -223,15 +237,16 @@
             "source": "user_data"
         }
     },
-    "47fd08": {
+    "2df837": {
         "name": "Burkina Faso",
-        "id": "47fd08",
+        "id": "2df837",
         "short_name": "BFA",
         "average_carbon_intensity": {
             "value": 554.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3b307a"
+            "source": "d17951",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Ouagadougou",
@@ -239,15 +254,16 @@
             "source": "user_data"
         }
     },
-    "f884ea": {
+    "6b8281": {
         "name": "Burundi",
-        "id": "f884ea",
+        "id": "6b8281",
         "short_name": "BDI",
         "average_carbon_intensity": {
             "value": 230.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c06291"
+            "source": "6b3f25",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Bujumbura",
@@ -255,15 +271,16 @@
             "source": "user_data"
         }
     },
-    "4649f2": {
+    "a86dbf": {
         "name": "Cambodia",
-        "id": "4649f2",
+        "id": "a86dbf",
         "short_name": "KHM",
         "average_carbon_intensity": {
             "value": 497.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "1d865e"
+            "source": "71dd01",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Phnom_Penh",
@@ -271,15 +288,16 @@
             "source": "user_data"
         }
     },
-    "e1d246": {
+    "0f873b": {
         "name": "Cameroon",
-        "id": "e1d246",
+        "id": "0f873b",
         "short_name": "CMR",
         "average_carbon_intensity": {
             "value": 285.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "d802b1"
+            "source": "1166dc",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Douala",
@@ -287,15 +305,16 @@
             "source": "user_data"
         }
     },
-    "7bdc96": {
+    "2ca13c": {
         "name": "Canada",
-        "id": "7bdc96",
+        "id": "2ca13c",
         "short_name": "CAN",
         "average_carbon_intensity": {
             "value": 174.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "d8b0b4"
+            "source": "0f8ce6",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Toronto",
@@ -303,15 +322,16 @@
             "source": "user_data"
         }
     },
-    "dc5fc4": {
+    "d78536": {
         "name": "Central African Republic",
-        "id": "dc5fc4",
+        "id": "d78536",
         "short_name": "CAF",
         "average_carbon_intensity": {
             "value": 0.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3fcab3"
+            "source": "651d3b",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Bangui",
@@ -319,15 +339,16 @@
             "source": "user_data"
         }
     },
-    "e2a9e6": {
+    "23ed5b": {
         "name": "Chad",
-        "id": "e2a9e6",
+        "id": "23ed5b",
         "short_name": "TCD",
         "average_carbon_intensity": {
             "value": 615.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c6521c"
+            "source": "f8553d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Ndjamena",
@@ -335,15 +356,16 @@
             "source": "user_data"
         }
     },
-    "5cb082": {
+    "349355": {
         "name": "Chile",
-        "id": "5cb082",
+        "id": "349355",
         "short_name": "CHL",
         "average_carbon_intensity": {
             "value": 265.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "6ac427"
+            "source": "f7815f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Santiago",
@@ -351,15 +373,16 @@
             "source": "user_data"
         }
     },
-    "1000de": {
+    "0396e0": {
         "name": "China",
-        "id": "1000de",
+        "id": "0396e0",
         "short_name": "CHN",
         "average_carbon_intensity": {
             "value": 559.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "38e0fd"
+            "source": "801c11",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Shanghai",
@@ -367,15 +390,16 @@
             "source": "user_data"
         }
     },
-    "21e3f1": {
+    "019c5f": {
         "name": "Colombia",
-        "id": "21e3f1",
+        "id": "019c5f",
         "short_name": "COL",
         "average_carbon_intensity": {
             "value": 285.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "995537"
+            "source": "c781d4",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Bogota",
@@ -383,15 +407,16 @@
             "source": "user_data"
         }
     },
-    "af35cc": {
+    "507128": {
         "name": "Congo",
-        "id": "af35cc",
+        "id": "507128",
         "short_name": "COG",
         "average_carbon_intensity": {
             "value": 713.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "961ab5"
+            "source": "8eb482",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Brazzaville",
@@ -399,15 +424,16 @@
             "source": "user_data"
         }
     },
-    "abe616": {
+    "e5ddf9": {
         "name": "Costa Rica",
-        "id": "abe616",
+        "id": "e5ddf9",
         "short_name": "CRI",
         "average_carbon_intensity": {
             "value": 63.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "2cd0e8"
+            "source": "b3392f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Costa_Rica",
@@ -415,15 +441,16 @@
             "source": "user_data"
         }
     },
-    "6261af": {
+    "c16b54": {
         "name": "Cote d'Ivoire",
-        "id": "6261af",
+        "id": "c16b54",
         "short_name": "CIV",
         "average_carbon_intensity": {
             "value": 393.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "de1c11"
+            "source": "bcd756",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Abidjan",
@@ -431,15 +458,16 @@
             "source": "user_data"
         }
     },
-    "66ad46": {
+    "b63141": {
         "name": "Cuba",
-        "id": "66ad46",
+        "id": "b63141",
         "short_name": "CUB",
         "average_carbon_intensity": {
             "value": 638.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "ee6c7d"
+            "source": "121d7a",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Havana",
@@ -447,15 +475,16 @@
             "source": "user_data"
         }
     },
-    "8ddf39": {
+    "d38e4d": {
         "name": "Czechia",
-        "id": "8ddf39",
+        "id": "d38e4d",
         "short_name": "CZE",
         "average_carbon_intensity": {
             "value": 413.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "2e25c3"
+            "source": "c07a46",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Prague",
@@ -463,15 +492,16 @@
             "source": "user_data"
         }
     },
-    "b96aff": {
+    "18ce7c": {
         "name": "Democratic Republic of Congo",
-        "id": "b96aff",
+        "id": "18ce7c",
         "short_name": "COD",
         "average_carbon_intensity": {
             "value": 27.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "366165"
+            "source": "78c5aa",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Kinshasa",
@@ -479,15 +509,16 @@
             "source": "user_data"
         }
     },
-    "5d019b": {
+    "ce418d": {
         "name": "Denmark",
-        "id": "5d019b",
+        "id": "ce418d",
         "short_name": "DNK",
         "average_carbon_intensity": {
             "value": 143.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "07d345"
+            "source": "f8e5f9",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Copenhagen",
@@ -495,15 +526,16 @@
             "source": "user_data"
         }
     },
-    "da6928": {
+    "535b4d": {
         "name": "Dominican Republic",
-        "id": "da6928",
+        "id": "535b4d",
         "short_name": "DOM",
         "average_carbon_intensity": {
             "value": 566.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b0265c"
+            "source": "d64cd6",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Santo_Domingo",
@@ -511,15 +543,16 @@
             "source": "user_data"
         }
     },
-    "f3f6e7": {
+    "439ad8": {
         "name": "Ecuador",
-        "id": "f3f6e7",
+        "id": "439ad8",
         "short_name": "ECU",
         "average_carbon_intensity": {
             "value": 209.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "685d27"
+            "source": "321623",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Guayaquil",
@@ -527,15 +560,16 @@
             "source": "user_data"
         }
     },
-    "dd3829": {
+    "8b4bad": {
         "name": "Egypt",
-        "id": "dd3829",
+        "id": "8b4bad",
         "short_name": "EGY",
         "average_carbon_intensity": {
             "value": 571.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "d8ee5d"
+            "source": "6769dd",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Cairo",
@@ -543,15 +577,16 @@
             "source": "user_data"
         }
     },
-    "7ff846": {
+    "b7310d": {
         "name": "El Salvador",
-        "id": "7ff846",
+        "id": "b7310d",
         "short_name": "SLV",
         "average_carbon_intensity": {
             "value": 101.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "fc56f5"
+            "source": "b33094",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/El_Salvador",
@@ -559,15 +594,16 @@
             "source": "user_data"
         }
     },
-    "7c9d1d": {
+    "e7cc74": {
         "name": "Ethiopia",
-        "id": "7c9d1d",
+        "id": "e7cc74",
         "short_name": "ETH",
         "average_carbon_intensity": {
             "value": 23.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "5b0d0a"
+            "source": "9b78c1",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Addis_Ababa",
@@ -575,15 +611,16 @@
             "source": "user_data"
         }
     },
-    "4761a1": {
+    "01f77c": {
         "name": "Finland",
-        "id": "4761a1",
+        "id": "01f77c",
         "short_name": "FIN",
         "average_carbon_intensity": {
             "value": 72.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "97444b"
+            "source": "febbb3",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Helsinki",
@@ -591,15 +628,16 @@
             "source": "user_data"
         }
     },
-    "c91a8a": {
+    "6f0634": {
         "name": "France",
-        "id": "c91a8a",
+        "id": "6f0634",
         "short_name": "FRA",
         "average_carbon_intensity": {
             "value": 44.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3124d0"
+            "source": "b60f56",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Paris",
@@ -607,15 +645,16 @@
             "source": "user_data"
         }
     },
-    "4dae4b": {
+    "22735b": {
         "name": "Germany",
-        "id": "4dae4b",
+        "id": "22735b",
         "short_name": "DEU",
         "average_carbon_intensity": {
             "value": 344.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "ad9627"
+            "source": "5f6615",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Berlin",
@@ -623,15 +662,16 @@
             "source": "user_data"
         }
     },
-    "021de3": {
+    "543fac": {
         "name": "Ghana",
-        "id": "021de3",
+        "id": "543fac",
         "short_name": "GHA",
         "average_carbon_intensity": {
             "value": 452.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "95fac0"
+            "source": "b7ad55",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Accra",
@@ -639,15 +679,16 @@
             "source": "user_data"
         }
     },
-    "0d2c20": {
+    "7f6b42": {
         "name": "Greece",
-        "id": "0d2c20",
+        "id": "7f6b42",
         "short_name": "GRC",
         "average_carbon_intensity": {
             "value": 319.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "9f7dd7"
+            "source": "6d6175",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Athens",
@@ -655,15 +696,16 @@
             "source": "user_data"
         }
     },
-    "d8117a": {
+    "df3f78": {
         "name": "Guatemala",
-        "id": "d8117a",
+        "id": "df3f78",
         "short_name": "GTM",
         "average_carbon_intensity": {
             "value": 272.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "aea580"
+            "source": "3d8d6f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Guatemala",
@@ -671,15 +713,16 @@
             "source": "user_data"
         }
     },
-    "6334da": {
+    "401a90": {
         "name": "Guinea",
-        "id": "6334da",
+        "id": "401a90",
         "short_name": "GIN",
         "average_carbon_intensity": {
             "value": 182.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "53aebe"
+            "source": "ce6b38",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Conakry",
@@ -687,15 +730,16 @@
             "source": "user_data"
         }
     },
-    "131af4": {
+    "bed3a2": {
         "name": "Haiti",
-        "id": "131af4",
+        "id": "bed3a2",
         "short_name": "HTI",
         "average_carbon_intensity": {
             "value": 534.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3bffe1"
+            "source": "f02bf8",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Port-au-Prince",
@@ -703,15 +747,16 @@
             "source": "user_data"
         }
     },
-    "207f66": {
+    "8e4477": {
         "name": "Honduras",
-        "id": "207f66",
+        "id": "8e4477",
         "short_name": "HND",
         "average_carbon_intensity": {
             "value": 289.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "59ce0c"
+            "source": "6adfcf",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Tegucigalpa",
@@ -719,15 +764,16 @@
             "source": "user_data"
         }
     },
-    "b238b8": {
+    "038197": {
         "name": "Hong Kong",
-        "id": "b238b8",
+        "id": "038197",
         "short_name": "HKG",
         "average_carbon_intensity": {
             "value": 681.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "1ba391"
+            "source": "6d633f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Hong_Kong",
@@ -735,15 +781,16 @@
             "source": "user_data"
         }
     },
-    "d4d661": {
+    "57fcaf": {
         "name": "Hungary",
-        "id": "d4d661",
+        "id": "57fcaf",
         "short_name": "HUN",
         "average_carbon_intensity": {
             "value": 182.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b95e89"
+            "source": "09c1ef",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Budapest",
@@ -751,15 +798,16 @@
             "source": "user_data"
         }
     },
-    "06ce57": {
+    "4f0df8": {
         "name": "India",
-        "id": "06ce57",
+        "id": "4f0df8",
         "short_name": "IND",
         "average_carbon_intensity": {
             "value": 708.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "08e8f5"
+            "source": "4dbb2d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Kolkata",
@@ -767,15 +815,16 @@
             "source": "user_data"
         }
     },
-    "3cafdd": {
+    "2da772": {
         "name": "Indonesia",
-        "id": "3cafdd",
+        "id": "2da772",
         "short_name": "IDN",
         "average_carbon_intensity": {
             "value": 682.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "095df2"
+            "source": "0061d8",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Jakarta",
@@ -783,15 +832,16 @@
             "source": "user_data"
         }
     },
-    "31f8eb": {
+    "b27d94": {
         "name": "Iran",
-        "id": "31f8eb",
+        "id": "b27d94",
         "short_name": "IRN",
         "average_carbon_intensity": {
             "value": 641.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "9142ab"
+            "source": "b09e9a",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Tehran",
@@ -799,15 +849,16 @@
             "source": "user_data"
         }
     },
-    "1042e0": {
+    "6dda26": {
         "name": "Iraq",
-        "id": "1042e0",
+        "id": "6dda26",
         "short_name": "IRQ",
         "average_carbon_intensity": {
             "value": 689.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "a7817e"
+            "source": "93bc1c",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Baghdad",
@@ -815,15 +866,16 @@
             "source": "user_data"
         }
     },
-    "1785d7": {
+    "7e9f0f": {
         "name": "Ireland",
-        "id": "1785d7",
+        "id": "7e9f0f",
         "short_name": "IRL",
         "average_carbon_intensity": {
             "value": 279.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "9b336b"
+            "source": "454208",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Dublin",
@@ -831,15 +883,16 @@
             "source": "user_data"
         }
     },
-    "4d0aea": {
+    "8865f2": {
         "name": "Israel",
-        "id": "4d0aea",
+        "id": "8865f2",
         "short_name": "ISR",
         "average_carbon_intensity": {
             "value": 567.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c807d0"
+            "source": "c59ab4",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Jerusalem",
@@ -847,15 +900,16 @@
             "source": "user_data"
         }
     },
-    "a20e55": {
+    "f8163f": {
         "name": "Italy",
-        "id": "a20e55",
+        "id": "f8163f",
         "short_name": "ITA",
         "average_carbon_intensity": {
             "value": 287.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "971890"
+            "source": "cb4b41",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Rome",
@@ -863,15 +917,16 @@
             "source": "user_data"
         }
     },
-    "0dc077": {
+    "a271c5": {
         "name": "Japan",
-        "id": "0dc077",
+        "id": "a271c5",
         "short_name": "JPN",
         "average_carbon_intensity": {
             "value": 482.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "4e4d91"
+            "source": "0d715b",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Tokyo",
@@ -879,15 +934,16 @@
             "source": "user_data"
         }
     },
-    "1a56cd": {
+    "a2996c": {
         "name": "Jordan",
-        "id": "1a56cd",
+        "id": "a2996c",
         "short_name": "JOR",
         "average_carbon_intensity": {
             "value": 539.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "4b0647"
+            "source": "f45223",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Amman",
@@ -895,15 +951,16 @@
             "source": "user_data"
         }
     },
-    "c0e85c": {
+    "b4d317": {
         "name": "Kazakhstan",
-        "id": "c0e85c",
+        "id": "b4d317",
         "short_name": "KAZ",
         "average_carbon_intensity": {
             "value": 801.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c5f9eb"
+            "source": "f131cd",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Almaty",
@@ -911,15 +968,16 @@
             "source": "user_data"
         }
     },
-    "3b9bec": {
+    "eeb633": {
         "name": "Kenya",
-        "id": "3b9bec",
+        "id": "eeb633",
         "short_name": "KEN",
         "average_carbon_intensity": {
             "value": 84.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f7e0c3"
+            "source": "632c30",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Nairobi",
@@ -927,15 +985,16 @@
             "source": "user_data"
         }
     },
-    "e9db94": {
+    "f905ff": {
         "name": "Kyrgyzstan",
-        "id": "e9db94",
+        "id": "f905ff",
         "short_name": "KGZ",
         "average_carbon_intensity": {
             "value": 163.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "557559"
+            "source": "ce640e",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Bishkek",
@@ -943,15 +1002,16 @@
             "source": "user_data"
         }
     },
-    "8ea970": {
+    "d630e5": {
         "name": "Laos",
-        "id": "8ea970",
+        "id": "d630e5",
         "short_name": "LAO",
         "average_carbon_intensity": {
             "value": 232.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "ed0507"
+            "source": "9fd763",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Vientiane",
@@ -959,15 +1019,16 @@
             "source": "user_data"
         }
     },
-    "7a0bcd": {
+    "a98790": {
         "name": "Lebanon",
-        "id": "7a0bcd",
+        "id": "a98790",
         "short_name": "LBN",
         "average_carbon_intensity": {
             "value": 369.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "189a31"
+            "source": "743580",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Beirut",
@@ -975,15 +1036,16 @@
             "source": "user_data"
         }
     },
-    "328bab": {
+    "cc3de8": {
         "name": "Liberia",
-        "id": "328bab",
+        "id": "cc3de8",
         "short_name": "LBR",
         "average_carbon_intensity": {
             "value": 435.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "31ea79"
+            "source": "01fbf1",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Monrovia",
@@ -991,15 +1053,16 @@
             "source": "user_data"
         }
     },
-    "504371": {
+    "34897d": {
         "name": "Libya",
-        "id": "504371",
+        "id": "34897d",
         "short_name": "LBY",
         "average_carbon_intensity": {
             "value": 830.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "eae0ce"
+            "source": "29a655",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Tripoli",
@@ -1007,15 +1070,16 @@
             "source": "user_data"
         }
     },
-    "1e2fab": {
+    "32198d": {
         "name": "Madagascar",
-        "id": "1e2fab",
+        "id": "32198d",
         "short_name": "MDG",
         "average_carbon_intensity": {
             "value": 477.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "25963d"
+            "source": "e0b8dd",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Indian/Antananarivo",
@@ -1023,15 +1087,16 @@
             "source": "user_data"
         }
     },
-    "a2db86": {
+    "52d2ac": {
         "name": "Malawi",
-        "id": "a2db86",
+        "id": "52d2ac",
         "short_name": "MWI",
         "average_carbon_intensity": {
             "value": 54.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "ed717d"
+            "source": "dc0c6c",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Blantyre",
@@ -1039,15 +1104,16 @@
             "source": "user_data"
         }
     },
-    "9901b4": {
+    "fbc4f6": {
         "name": "Malaysia",
-        "id": "9901b4",
+        "id": "fbc4f6",
         "short_name": "MYS",
         "average_carbon_intensity": {
             "value": 604.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "8c34d8"
+            "source": "ef1fd0",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Kuala_Lumpur",
@@ -1055,15 +1121,16 @@
             "source": "user_data"
         }
     },
-    "da097f": {
+    "319c7b": {
         "name": "Mali",
-        "id": "da097f",
+        "id": "319c7b",
         "short_name": "MLI",
         "average_carbon_intensity": {
             "value": 394.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "85b139"
+            "source": "69dcd7",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Bamako",
@@ -1071,15 +1138,16 @@
             "source": "user_data"
         }
     },
-    "81a9da": {
+    "7f30f3": {
         "name": "Mauritania",
-        "id": "81a9da",
+        "id": "7f30f3",
         "short_name": "MRT",
         "average_carbon_intensity": {
             "value": 481.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "dfbf83"
+            "source": "9d973b",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Nouakchott",
@@ -1087,15 +1155,16 @@
             "source": "user_data"
         }
     },
-    "6e62f4": {
+    "2166c2": {
         "name": "Mexico",
-        "id": "6e62f4",
+        "id": "2166c2",
         "short_name": "MEX",
         "average_carbon_intensity": {
             "value": 484.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "a0fd42"
+            "source": "659112",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Mexico_City",
@@ -1103,15 +1172,16 @@
             "source": "user_data"
         }
     },
-    "80908f": {
+    "f958d6": {
         "name": "Morocco",
-        "id": "80908f",
+        "id": "f958d6",
         "short_name": "MAR",
         "average_carbon_intensity": {
             "value": 577.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f3dc45"
+            "source": "3f6abc",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Casablanca",
@@ -1119,15 +1189,16 @@
             "source": "user_data"
         }
     },
-    "4a328f": {
+    "96a666": {
         "name": "Mozambique",
-        "id": "4a328f",
+        "id": "96a666",
         "short_name": "MOZ",
         "average_carbon_intensity": {
             "value": 127.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "a6ab01"
+            "source": "defe5b",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Maputo",
@@ -1135,15 +1206,16 @@
             "source": "user_data"
         }
     },
-    "1c7868": {
+    "179dc8": {
         "name": "Myanmar",
-        "id": "1c7868",
+        "id": "179dc8",
         "short_name": "MMR",
         "average_carbon_intensity": {
             "value": 569.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "44c57a"
+            "source": "507863",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Yangon",
@@ -1151,15 +1223,16 @@
             "source": "user_data"
         }
     },
-    "c82576": {
+    "f9ca88": {
         "name": "Nepal",
-        "id": "c82576",
+        "id": "f9ca88",
         "short_name": "NPL",
         "average_carbon_intensity": {
             "value": 23.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "2952c9"
+            "source": "982a3a",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Kathmandu",
@@ -1167,15 +1240,16 @@
             "source": "user_data"
         }
     },
-    "b92e5e": {
+    "09adb5": {
         "name": "Netherlands",
-        "id": "b92e5e",
+        "id": "09adb5",
         "short_name": "NLD",
         "average_carbon_intensity": {
             "value": 253.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "3961f8"
+            "source": "c16f53",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Amsterdam",
@@ -1183,15 +1257,16 @@
             "source": "user_data"
         }
     },
-    "5b4577": {
+    "44c4d3": {
         "name": "New Zealand",
-        "id": "5b4577",
+        "id": "44c4d3",
         "short_name": "NZL",
         "average_carbon_intensity": {
             "value": 120.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "2dd53e"
+            "source": "453d5c",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Pacific/Auckland",
@@ -1199,15 +1274,16 @@
             "source": "user_data"
         }
     },
-    "fcdf59": {
+    "550707": {
         "name": "Nicaragua",
-        "id": "fcdf59",
+        "id": "550707",
         "short_name": "NIC",
         "average_carbon_intensity": {
             "value": 288.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "2a6596"
+            "source": "1896a8",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Managua",
@@ -1215,15 +1291,16 @@
             "source": "user_data"
         }
     },
-    "74dd93": {
+    "b7ff49": {
         "name": "Niger",
-        "id": "74dd93",
+        "id": "b7ff49",
         "short_name": "NER",
         "average_carbon_intensity": {
             "value": 687.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "0b0359"
+            "source": "a8744a",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Niamey",
@@ -1231,15 +1308,16 @@
             "source": "user_data"
         }
     },
-    "056f3e": {
+    "a6854d": {
         "name": "Nigeria",
-        "id": "056f3e",
+        "id": "a6854d",
         "short_name": "NGA",
         "average_carbon_intensity": {
             "value": 507.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "ea851b"
+            "source": "56f774",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Lagos",
@@ -1247,15 +1325,16 @@
             "source": "user_data"
         }
     },
-    "f802a7": {
+    "5a3756": {
         "name": "North Korea",
-        "id": "f802a7",
+        "id": "5a3756",
         "short_name": "PRK",
         "average_carbon_intensity": {
             "value": 344.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f566c9"
+            "source": "ba312f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Pyongyang",
@@ -1263,15 +1342,16 @@
             "source": "user_data"
         }
     },
-    "016557": {
+    "0460a7": {
         "name": "Norway",
-        "id": "016557",
+        "id": "0460a7",
         "short_name": "NOR",
         "average_carbon_intensity": {
             "value": 30.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c78ce0"
+            "source": "66a030",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Oslo",
@@ -1279,15 +1359,16 @@
             "source": "user_data"
         }
     },
-    "7d8ac2": {
+    "0fda96": {
         "name": "Oman",
-        "id": "7d8ac2",
+        "id": "0fda96",
         "short_name": "OMN",
         "average_carbon_intensity": {
             "value": 545.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "38ad8c"
+            "source": "9e7d25",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Muscat",
@@ -1295,15 +1376,16 @@
             "source": "user_data"
         }
     },
-    "9355ed": {
+    "2c0723": {
         "name": "Pakistan",
-        "id": "9355ed",
+        "id": "2c0723",
         "short_name": "PAK",
         "average_carbon_intensity": {
             "value": 398.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "5cfba6"
+            "source": "179bdc",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Karachi",
@@ -1311,15 +1393,16 @@
             "source": "user_data"
         }
     },
-    "faacd8": {
+    "7f0873": {
         "name": "Palestine",
-        "id": "faacd8",
+        "id": "7f0873",
         "short_name": "PSE",
         "average_carbon_intensity": {
             "value": 460.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "59871f"
+            "source": "cf9239",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Gaza",
@@ -1327,15 +1410,16 @@
             "source": "user_data"
         }
     },
-    "a55ec9": {
+    "2ba5da": {
         "name": "Papua New Guinea",
-        "id": "a55ec9",
+        "id": "2ba5da",
         "short_name": "PNG",
         "average_carbon_intensity": {
             "value": 513.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "74dbc2"
+            "source": "f0728a",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Pacific/Port_Moresby",
@@ -1343,15 +1427,16 @@
             "source": "user_data"
         }
     },
-    "9b3ab8": {
+    "91f2c8": {
         "name": "Paraguay",
-        "id": "9b3ab8",
+        "id": "91f2c8",
         "short_name": "PRY",
         "average_carbon_intensity": {
             "value": 24.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "6cb475"
+            "source": "fc4e73",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Asuncion",
@@ -1359,15 +1444,16 @@
             "source": "user_data"
         }
     },
-    "e4a98a": {
+    "d8e1fd": {
         "name": "Peru",
-        "id": "e4a98a",
+        "id": "d8e1fd",
         "short_name": "PER",
         "average_carbon_intensity": {
             "value": 263.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b760e1"
+            "source": "00f120",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Lima",
@@ -1375,15 +1461,16 @@
             "source": "user_data"
         }
     },
-    "6faf65": {
+    "310bd1": {
         "name": "Philippines",
-        "id": "6faf65",
+        "id": "310bd1",
         "short_name": "PHL",
         "average_carbon_intensity": {
             "value": 613.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f8c719"
+            "source": "155003",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Manila",
@@ -1391,15 +1478,16 @@
             "source": "user_data"
         }
     },
-    "153811": {
+    "90615b": {
         "name": "Poland",
-        "id": "153811",
+        "id": "90615b",
         "short_name": "POL",
         "average_carbon_intensity": {
             "value": 614.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b585c5"
+            "source": "48cce4",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Warsaw",
@@ -1407,15 +1495,16 @@
             "source": "user_data"
         }
     },
-    "8acf62": {
+    "6d24d1": {
         "name": "Portugal",
-        "id": "8acf62",
+        "id": "6d24d1",
         "short_name": "PRT",
         "average_carbon_intensity": {
             "value": 112.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "a249d6"
+            "source": "92d733",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Lisbon",
@@ -1423,15 +1512,16 @@
             "source": "user_data"
         }
     },
-    "5bd30c": {
+    "d050c4": {
         "name": "Romania",
-        "id": "5bd30c",
+        "id": "d050c4",
         "short_name": "ROU",
         "average_carbon_intensity": {
             "value": 245.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "051a52"
+            "source": "e20096",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Bucharest",
@@ -1439,15 +1529,16 @@
             "source": "user_data"
         }
     },
-    "103fe3": {
+    "99419e": {
         "name": "Russia",
-        "id": "103fe3",
+        "id": "99419e",
         "short_name": "RUS",
         "average_carbon_intensity": {
             "value": 449.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "80f7c6"
+            "source": "ed198d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Moscow",
@@ -1455,15 +1546,16 @@
             "source": "user_data"
         }
     },
-    "d16e06": {
+    "7949e5": {
         "name": "Rwanda",
-        "id": "d16e06",
+        "id": "7949e5",
         "short_name": "RWA",
         "average_carbon_intensity": {
             "value": 301.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "5f1196"
+            "source": "5ae275",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Kigali",
@@ -1471,15 +1563,16 @@
             "source": "user_data"
         }
     },
-    "0d30ea": {
+    "418012": {
         "name": "Saudi Arabia",
-        "id": "0d30ea",
+        "id": "418012",
         "short_name": "SAU",
         "average_carbon_intensity": {
             "value": 696.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "79a7b9"
+            "source": "b8d41c",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Riyadh",
@@ -1487,15 +1580,16 @@
             "source": "user_data"
         }
     },
-    "96dee5": {
+    "272118": {
         "name": "Senegal",
-        "id": "96dee5",
+        "id": "272118",
         "short_name": "SEN",
         "average_carbon_intensity": {
             "value": 535.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "556b23"
+            "source": "f4e8a0",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Dakar",
@@ -1503,15 +1597,16 @@
             "source": "user_data"
         }
     },
-    "4c43b4": {
+    "d7af75": {
         "name": "Serbia",
-        "id": "4c43b4",
+        "id": "d7af75",
         "short_name": "SRB",
         "average_carbon_intensity": {
             "value": 670.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "37e685"
+            "source": "f2dd2e",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Belgrade",
@@ -1519,15 +1614,16 @@
             "source": "user_data"
         }
     },
-    "86bbe2": {
+    "f72d75": {
         "name": "Sierra Leone",
-        "id": "86bbe2",
+        "id": "f72d75",
         "short_name": "SLE",
         "average_carbon_intensity": {
             "value": 47.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "83f7e7"
+            "source": "c0838f",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Freetown",
@@ -1535,15 +1631,16 @@
             "source": "user_data"
         }
     },
-    "349b76": {
+    "f2ee42": {
         "name": "Singapore",
-        "id": "349b76",
+        "id": "f2ee42",
         "short_name": "SGP",
         "average_carbon_intensity": {
             "value": 498.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "be9bf8"
+            "source": "0728a7",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Singapore",
@@ -1551,15 +1648,16 @@
             "source": "user_data"
         }
     },
-    "4bb749": {
+    "e4e57e": {
         "name": "Slovakia",
-        "id": "4bb749",
+        "id": "e4e57e",
         "short_name": "SVK",
         "average_carbon_intensity": {
             "value": 96.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b83f94"
+            "source": "4895e2",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Bratislava",
@@ -1567,15 +1665,16 @@
             "source": "user_data"
         }
     },
-    "1cf406": {
+    "282663": {
         "name": "Somalia",
-        "id": "1cf406",
+        "id": "282663",
         "short_name": "SOM",
         "average_carbon_intensity": {
             "value": 523.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f1f066"
+            "source": "7b8829",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Mogadishu",
@@ -1583,15 +1682,16 @@
             "source": "user_data"
         }
     },
-    "c7c8de": {
+    "c259f5": {
         "name": "South Africa",
-        "id": "c7c8de",
+        "id": "c259f5",
         "short_name": "ZAF",
         "average_carbon_intensity": {
             "value": 708.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b65f5a"
+            "source": "b8843c",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Johannesburg",
@@ -1599,15 +1699,16 @@
             "source": "user_data"
         }
     },
-    "58c4b4": {
+    "154d0e": {
         "name": "South Korea",
-        "id": "58c4b4",
+        "id": "154d0e",
         "short_name": "KOR",
         "average_carbon_intensity": {
             "value": 414.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "c63e66"
+            "source": "00cd20",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Seoul",
@@ -1615,15 +1716,16 @@
             "source": "user_data"
         }
     },
-    "4b5617": {
+    "cc63e1": {
         "name": "South Sudan",
-        "id": "4b5617",
+        "id": "cc63e1",
         "short_name": "SSD",
         "average_carbon_intensity": {
             "value": 610.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "243079"
+            "source": "3da095",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Juba",
@@ -1631,15 +1733,16 @@
             "source": "user_data"
         }
     },
-    "1b3582": {
+    "dc8109": {
         "name": "Spain",
-        "id": "1b3582",
+        "id": "dc8109",
         "short_name": "ESP",
         "average_carbon_intensity": {
             "value": 146.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "4e5807"
+            "source": "94f5fd",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Madrid",
@@ -1647,15 +1750,16 @@
             "source": "user_data"
         }
     },
-    "61208e": {
+    "6e66aa": {
         "name": "Sri Lanka",
-        "id": "61208e",
+        "id": "6e66aa",
         "short_name": "LKA",
         "average_carbon_intensity": {
             "value": 509.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "eac4ee"
+            "source": "3c3c13",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Colombo",
@@ -1663,15 +1767,16 @@
             "source": "user_data"
         }
     },
-    "473953": {
+    "5636fe": {
         "name": "Sudan",
-        "id": "473953",
+        "id": "5636fe",
         "short_name": "SDN",
         "average_carbon_intensity": {
             "value": 214.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f73284"
+            "source": "54bc45",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Khartoum",
@@ -1679,15 +1784,16 @@
             "source": "user_data"
         }
     },
-    "523af6": {
+    "b80bd2": {
         "name": "Sweden",
-        "id": "523af6",
+        "id": "b80bd2",
         "short_name": "SWE",
         "average_carbon_intensity": {
             "value": 35.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "7090d6"
+            "source": "f2639d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Stockholm",
@@ -1695,15 +1801,16 @@
             "source": "user_data"
         }
     },
-    "4b4dce": {
+    "abd0d8": {
         "name": "Switzerland",
-        "id": "4b4dce",
+        "id": "abd0d8",
         "short_name": "CHE",
         "average_carbon_intensity": {
             "value": 36.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "19b67a"
+            "source": "1c1970",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Zurich",
@@ -1711,15 +1818,16 @@
             "source": "user_data"
         }
     },
-    "fde794": {
+    "7a9bbc": {
         "name": "Syria",
-        "id": "fde794",
+        "id": "7a9bbc",
         "short_name": "SYR",
         "average_carbon_intensity": {
             "value": 682.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "d15811"
+            "source": "f478b1",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Damascus",
@@ -1727,15 +1835,16 @@
             "source": "user_data"
         }
     },
-    "336887": {
+    "1b146e": {
         "name": "Tajikistan",
-        "id": "336887",
+        "id": "1b146e",
         "short_name": "TJK",
         "average_carbon_intensity": {
             "value": 115.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "e22a15"
+            "source": "95aeba",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Dushanbe",
@@ -1743,15 +1852,16 @@
             "source": "user_data"
         }
     },
-    "1d829a": {
+    "e54f20": {
         "name": "Tanzania",
-        "id": "1d829a",
+        "id": "e54f20",
         "short_name": "TZA",
         "average_carbon_intensity": {
             "value": 371.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "83ba5a"
+            "source": "55ce4b",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Dar_es_Salaam",
@@ -1759,15 +1869,16 @@
             "source": "user_data"
         }
     },
-    "e59bf0": {
+    "6b9dea": {
         "name": "Thailand",
-        "id": "e59bf0",
+        "id": "6b9dea",
         "short_name": "THA",
         "average_carbon_intensity": {
             "value": 554.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "f0fb29"
+            "source": "e7d500",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Bangkok",
@@ -1775,15 +1886,16 @@
             "source": "user_data"
         }
     },
-    "c81ba3": {
+    "e81b25": {
         "name": "Togo",
-        "id": "c81ba3",
+        "id": "e81b25",
         "short_name": "TGO",
         "average_carbon_intensity": {
             "value": 478.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "32e8f6"
+            "source": "dbb5a3",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Lome",
@@ -1791,15 +1903,16 @@
             "source": "user_data"
         }
     },
-    "8fc877": {
+    "d3424c": {
         "name": "Tunisia",
-        "id": "8fc877",
+        "id": "d3424c",
         "short_name": "TUN",
         "average_carbon_intensity": {
             "value": 560.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "b36e54"
+            "source": "5daa3d",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Tunis",
@@ -1807,15 +1920,16 @@
             "source": "user_data"
         }
     },
-    "13ea78": {
+    "526c47": {
         "name": "Turkey",
-        "id": "13ea78",
+        "id": "526c47",
         "short_name": "TUR",
         "average_carbon_intensity": {
             "value": 469.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "e66503"
+            "source": "de24e1",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Istanbul",
@@ -1823,15 +1937,16 @@
             "source": "user_data"
         }
     },
-    "5d46cc": {
+    "ce7174": {
         "name": "Turkmenistan",
-        "id": "5d46cc",
+        "id": "ce7174",
         "short_name": "TKM",
         "average_carbon_intensity": {
             "value": 1306.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "eea5a6"
+            "source": "b3c3e3",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Ashgabat",
@@ -1839,15 +1954,16 @@
             "source": "user_data"
         }
     },
-    "fd3ee5": {
+    "221d30": {
         "name": "Uganda",
-        "id": "fd3ee5",
+        "id": "221d30",
         "short_name": "UGA",
         "average_carbon_intensity": {
             "value": 57.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "9b9cea"
+            "source": "42961c",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Kampala",
@@ -1855,15 +1971,16 @@
             "source": "user_data"
         }
     },
-    "c96841": {
+    "f9d4be": {
         "name": "Ukraine",
-        "id": "c96841",
+        "id": "f9d4be",
         "short_name": "UKR",
         "average_carbon_intensity": {
             "value": 256.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "12bd9e"
+            "source": "ca94ba",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/Kyiv",
@@ -1871,15 +1988,16 @@
             "source": "user_data"
         }
     },
-    "f1b8b3": {
+    "459beb": {
         "name": "United Arab Emirates",
-        "id": "f1b8b3",
+        "id": "459beb",
         "short_name": "ARE",
         "average_carbon_intensity": {
             "value": 492.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "14f575"
+            "source": "245623",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Dubai",
@@ -1887,15 +2005,16 @@
             "source": "user_data"
         }
     },
-    "886e95": {
+    "63cc86": {
         "name": "United Kingdom",
-        "id": "886e95",
+        "id": "63cc86",
         "short_name": "GBR",
         "average_carbon_intensity": {
             "value": 210.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "28981d"
+            "source": "76ff93",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Europe/London",
@@ -1903,15 +2022,16 @@
             "source": "user_data"
         }
     },
-    "bbdaa6": {
+    "c9e896": {
         "name": "United States",
-        "id": "bbdaa6",
+        "id": "c9e896",
         "short_name": "USA",
         "average_carbon_intensity": {
             "value": 383.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "24016b"
+            "source": "f4ec52",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/New_York",
@@ -1919,15 +2039,16 @@
             "source": "user_data"
         }
     },
-    "840075": {
+    "cd12f9": {
         "name": "Uzbekistan",
-        "id": "840075",
+        "id": "cd12f9",
         "short_name": "UZB",
         "average_carbon_intensity": {
             "value": 1121.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "e2009d"
+            "source": "276a03",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Tashkent",
@@ -1935,15 +2056,16 @@
             "source": "user_data"
         }
     },
-    "00f603": {
+    "ee070f": {
         "name": "Venezuela",
-        "id": "00f603",
+        "id": "ee070f",
         "short_name": "VEN",
         "average_carbon_intensity": {
             "value": 180.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "24e654"
+            "source": "606994",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "America/Caracas",
@@ -1951,15 +2073,16 @@
             "source": "user_data"
         }
     },
-    "9a3cda": {
+    "451266": {
         "name": "Vietnam",
-        "id": "9a3cda",
+        "id": "451266",
         "short_name": "VNM",
         "average_carbon_intensity": {
             "value": 471.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "340998"
+            "source": "860265",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Ho_Chi_Minh",
@@ -1967,15 +2090,16 @@
             "source": "user_data"
         }
     },
-    "839ae6": {
+    "25062c": {
         "name": "Yemen",
-        "id": "839ae6",
+        "id": "25062c",
         "short_name": "YEM",
         "average_carbon_intensity": {
             "value": 586.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "2f85d3"
+            "source": "8978af",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Asia/Aden",
@@ -1983,15 +2107,16 @@
             "source": "user_data"
         }
     },
-    "e6c549": {
+    "8c9371": {
         "name": "Zambia",
-        "id": "e6c549",
+        "id": "8c9371",
         "short_name": "ZMB",
         "average_carbon_intensity": {
             "value": 110.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "5db179"
+            "source": "838b5b",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Lusaka",
@@ -1999,15 +2124,16 @@
             "source": "user_data"
         }
     },
-    "030735": {
+    "690173": {
         "name": "Zimbabwe",
-        "id": "030735",
+        "id": "690173",
         "short_name": "ZWE",
         "average_carbon_intensity": {
             "value": 298.0,
             "unit": "gram / kilowatt_hour",
             "label": "Average carbon intensity",
-            "source": "ef34be"
+            "source": "f3332e",
+            "confidence": "high"
         },
         "timezone": {
             "zone": "Africa/Harare",
@@ -2016,8 +2142,8 @@
         }
     },
     "Sources": {
-        "20624c": {
-            "id": "20624c",
+        "b56c8f": {
+            "id": "b56c8f",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
@@ -2026,628 +2152,628 @@
             "name": "user data",
             "link": null
         },
-        "a32d3a": {
-            "id": "a32d3a",
+        "886f23": {
+            "id": "886f23",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "221972": {
-            "id": "221972",
+        "9de044": {
+            "id": "9de044",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "0a6223": {
-            "id": "0a6223",
+        "2fa0b7": {
+            "id": "2fa0b7",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "1e3de1": {
-            "id": "1e3de1",
+        "8c2e93": {
+            "id": "8c2e93",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "7b40a0": {
-            "id": "7b40a0",
+        "782efc": {
+            "id": "782efc",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "8c91f3": {
-            "id": "8c91f3",
+        "cb315d": {
+            "id": "cb315d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "661960": {
-            "id": "661960",
+        "d91c57": {
+            "id": "d91c57",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "37b741": {
-            "id": "37b741",
+        "cf1020": {
+            "id": "cf1020",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c74e74": {
-            "id": "c74e74",
+        "a3a48d": {
+            "id": "a3a48d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "59176c": {
-            "id": "59176c",
+        "14b250": {
+            "id": "14b250",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3304ed": {
-            "id": "3304ed",
+        "d6400d": {
+            "id": "d6400d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3762e1": {
-            "id": "3762e1",
+        "b024e0": {
+            "id": "b024e0",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "20b609": {
-            "id": "20b609",
+        "6fb955": {
+            "id": "6fb955",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3b307a": {
-            "id": "3b307a",
+        "d17951": {
+            "id": "d17951",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c06291": {
-            "id": "c06291",
+        "6b3f25": {
+            "id": "6b3f25",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "1d865e": {
-            "id": "1d865e",
+        "71dd01": {
+            "id": "71dd01",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "d802b1": {
-            "id": "d802b1",
+        "1166dc": {
+            "id": "1166dc",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "d8b0b4": {
-            "id": "d8b0b4",
+        "0f8ce6": {
+            "id": "0f8ce6",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3fcab3": {
-            "id": "3fcab3",
+        "651d3b": {
+            "id": "651d3b",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c6521c": {
-            "id": "c6521c",
+        "f8553d": {
+            "id": "f8553d",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "6ac427": {
-            "id": "6ac427",
+        "f7815f": {
+            "id": "f7815f",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "38e0fd": {
-            "id": "38e0fd",
+        "801c11": {
+            "id": "801c11",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "995537": {
-            "id": "995537",
+        "c781d4": {
+            "id": "c781d4",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "961ab5": {
-            "id": "961ab5",
+        "8eb482": {
+            "id": "8eb482",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "2cd0e8": {
-            "id": "2cd0e8",
+        "b3392f": {
+            "id": "b3392f",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "de1c11": {
-            "id": "de1c11",
+        "bcd756": {
+            "id": "bcd756",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "ee6c7d": {
-            "id": "ee6c7d",
+        "121d7a": {
+            "id": "121d7a",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "2e25c3": {
-            "id": "2e25c3",
+        "c07a46": {
+            "id": "c07a46",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "366165": {
-            "id": "366165",
+        "78c5aa": {
+            "id": "78c5aa",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "07d345": {
-            "id": "07d345",
+        "f8e5f9": {
+            "id": "f8e5f9",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b0265c": {
-            "id": "b0265c",
+        "d64cd6": {
+            "id": "d64cd6",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "685d27": {
-            "id": "685d27",
+        "321623": {
+            "id": "321623",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "d8ee5d": {
-            "id": "d8ee5d",
+        "6769dd": {
+            "id": "6769dd",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "fc56f5": {
-            "id": "fc56f5",
+        "b33094": {
+            "id": "b33094",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "5b0d0a": {
-            "id": "5b0d0a",
+        "9b78c1": {
+            "id": "9b78c1",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "97444b": {
-            "id": "97444b",
+        "febbb3": {
+            "id": "febbb3",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3124d0": {
-            "id": "3124d0",
+        "b60f56": {
+            "id": "b60f56",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "ad9627": {
-            "id": "ad9627",
+        "5f6615": {
+            "id": "5f6615",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "95fac0": {
-            "id": "95fac0",
+        "b7ad55": {
+            "id": "b7ad55",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "9f7dd7": {
-            "id": "9f7dd7",
+        "6d6175": {
+            "id": "6d6175",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "aea580": {
-            "id": "aea580",
+        "3d8d6f": {
+            "id": "3d8d6f",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "53aebe": {
-            "id": "53aebe",
+        "ce6b38": {
+            "id": "ce6b38",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3bffe1": {
-            "id": "3bffe1",
+        "f02bf8": {
+            "id": "f02bf8",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "59ce0c": {
-            "id": "59ce0c",
+        "6adfcf": {
+            "id": "6adfcf",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "1ba391": {
-            "id": "1ba391",
+        "6d633f": {
+            "id": "6d633f",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b95e89": {
-            "id": "b95e89",
+        "09c1ef": {
+            "id": "09c1ef",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "08e8f5": {
-            "id": "08e8f5",
+        "4dbb2d": {
+            "id": "4dbb2d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "095df2": {
-            "id": "095df2",
+        "0061d8": {
+            "id": "0061d8",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "9142ab": {
-            "id": "9142ab",
+        "b09e9a": {
+            "id": "b09e9a",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "a7817e": {
-            "id": "a7817e",
+        "93bc1c": {
+            "id": "93bc1c",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "9b336b": {
-            "id": "9b336b",
+        "454208": {
+            "id": "454208",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c807d0": {
-            "id": "c807d0",
+        "c59ab4": {
+            "id": "c59ab4",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "971890": {
-            "id": "971890",
+        "cb4b41": {
+            "id": "cb4b41",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "4e4d91": {
-            "id": "4e4d91",
+        "0d715b": {
+            "id": "0d715b",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "4b0647": {
-            "id": "4b0647",
+        "f45223": {
+            "id": "f45223",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c5f9eb": {
-            "id": "c5f9eb",
+        "f131cd": {
+            "id": "f131cd",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f7e0c3": {
-            "id": "f7e0c3",
+        "632c30": {
+            "id": "632c30",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "557559": {
-            "id": "557559",
+        "ce640e": {
+            "id": "ce640e",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "ed0507": {
-            "id": "ed0507",
+        "9fd763": {
+            "id": "9fd763",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "189a31": {
-            "id": "189a31",
+        "743580": {
+            "id": "743580",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "31ea79": {
-            "id": "31ea79",
+        "01fbf1": {
+            "id": "01fbf1",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "eae0ce": {
-            "id": "eae0ce",
+        "29a655": {
+            "id": "29a655",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "25963d": {
-            "id": "25963d",
+        "e0b8dd": {
+            "id": "e0b8dd",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "ed717d": {
-            "id": "ed717d",
+        "dc0c6c": {
+            "id": "dc0c6c",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "8c34d8": {
-            "id": "8c34d8",
+        "ef1fd0": {
+            "id": "ef1fd0",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "85b139": {
-            "id": "85b139",
+        "69dcd7": {
+            "id": "69dcd7",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "dfbf83": {
-            "id": "dfbf83",
+        "9d973b": {
+            "id": "9d973b",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "a0fd42": {
-            "id": "a0fd42",
+        "659112": {
+            "id": "659112",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f3dc45": {
-            "id": "f3dc45",
+        "3f6abc": {
+            "id": "3f6abc",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "a6ab01": {
-            "id": "a6ab01",
+        "defe5b": {
+            "id": "defe5b",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "44c57a": {
-            "id": "44c57a",
+        "507863": {
+            "id": "507863",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "2952c9": {
-            "id": "2952c9",
+        "982a3a": {
+            "id": "982a3a",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "3961f8": {
-            "id": "3961f8",
+        "c16f53": {
+            "id": "c16f53",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "2dd53e": {
-            "id": "2dd53e",
+        "453d5c": {
+            "id": "453d5c",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "2a6596": {
-            "id": "2a6596",
+        "1896a8": {
+            "id": "1896a8",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "0b0359": {
-            "id": "0b0359",
+        "a8744a": {
+            "id": "a8744a",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "ea851b": {
-            "id": "ea851b",
+        "56f774": {
+            "id": "56f774",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f566c9": {
-            "id": "f566c9",
+        "ba312f": {
+            "id": "ba312f",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c78ce0": {
-            "id": "c78ce0",
+        "66a030": {
+            "id": "66a030",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "38ad8c": {
-            "id": "38ad8c",
+        "9e7d25": {
+            "id": "9e7d25",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "5cfba6": {
-            "id": "5cfba6",
+        "179bdc": {
+            "id": "179bdc",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "59871f": {
-            "id": "59871f",
+        "cf9239": {
+            "id": "cf9239",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "74dbc2": {
-            "id": "74dbc2",
+        "f0728a": {
+            "id": "f0728a",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "6cb475": {
-            "id": "6cb475",
+        "fc4e73": {
+            "id": "fc4e73",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b760e1": {
-            "id": "b760e1",
+        "00f120": {
+            "id": "00f120",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f8c719": {
-            "id": "f8c719",
+        "155003": {
+            "id": "155003",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b585c5": {
-            "id": "b585c5",
+        "48cce4": {
+            "id": "48cce4",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "a249d6": {
-            "id": "a249d6",
+        "92d733": {
+            "id": "92d733",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "051a52": {
-            "id": "051a52",
+        "e20096": {
+            "id": "e20096",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "80f7c6": {
-            "id": "80f7c6",
+        "ed198d": {
+            "id": "ed198d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "5f1196": {
-            "id": "5f1196",
+        "5ae275": {
+            "id": "5ae275",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "79a7b9": {
-            "id": "79a7b9",
+        "b8d41c": {
+            "id": "b8d41c",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "556b23": {
-            "id": "556b23",
+        "f4e8a0": {
+            "id": "f4e8a0",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "37e685": {
-            "id": "37e685",
+        "f2dd2e": {
+            "id": "f2dd2e",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "83f7e7": {
-            "id": "83f7e7",
+        "c0838f": {
+            "id": "c0838f",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "be9bf8": {
-            "id": "be9bf8",
+        "0728a7": {
+            "id": "0728a7",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b83f94": {
-            "id": "b83f94",
+        "4895e2": {
+            "id": "4895e2",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f1f066": {
-            "id": "f1f066",
+        "7b8829": {
+            "id": "7b8829",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b65f5a": {
-            "id": "b65f5a",
+        "b8843c": {
+            "id": "b8843c",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "c63e66": {
-            "id": "c63e66",
+        "00cd20": {
+            "id": "00cd20",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "243079": {
-            "id": "243079",
+        "3da095": {
+            "id": "3da095",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "4e5807": {
-            "id": "4e5807",
+        "94f5fd": {
+            "id": "94f5fd",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "eac4ee": {
-            "id": "eac4ee",
+        "3c3c13": {
+            "id": "3c3c13",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f73284": {
-            "id": "f73284",
+        "54bc45": {
+            "id": "54bc45",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "7090d6": {
-            "id": "7090d6",
+        "f2639d": {
+            "id": "f2639d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "19b67a": {
-            "id": "19b67a",
+        "1c1970": {
+            "id": "1c1970",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "d15811": {
-            "id": "d15811",
+        "f478b1": {
+            "id": "f478b1",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "e22a15": {
-            "id": "e22a15",
+        "95aeba": {
+            "id": "95aeba",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "83ba5a": {
-            "id": "83ba5a",
+        "55ce4b": {
+            "id": "55ce4b",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "f0fb29": {
-            "id": "f0fb29",
+        "e7d500": {
+            "id": "e7d500",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "32e8f6": {
-            "id": "32e8f6",
+        "dbb5a3": {
+            "id": "dbb5a3",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "b36e54": {
-            "id": "b36e54",
+        "5daa3d": {
+            "id": "5daa3d",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "e66503": {
-            "id": "e66503",
+        "de24e1": {
+            "id": "de24e1",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "eea5a6": {
-            "id": "eea5a6",
+        "b3c3e3": {
+            "id": "b3c3e3",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "9b9cea": {
-            "id": "9b9cea",
+        "42961c": {
+            "id": "42961c",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "12bd9e": {
-            "id": "12bd9e",
+        "ca94ba": {
+            "id": "ca94ba",
             "name": "Our world in data (2022)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "14f575": {
-            "id": "14f575",
+        "245623": {
+            "id": "245623",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "28981d": {
-            "id": "28981d",
+        "76ff93": {
+            "id": "76ff93",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "24016b": {
-            "id": "24016b",
+        "f4ec52": {
+            "id": "f4ec52",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "e2009d": {
-            "id": "e2009d",
+        "276a03": {
+            "id": "276a03",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "24e654": {
-            "id": "24e654",
+        "606994": {
+            "id": "606994",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "340998": {
-            "id": "340998",
+        "860265": {
+            "id": "860265",
             "name": "Our world in data (2024)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "2f85d3": {
-            "id": "2f85d3",
+        "8978af": {
+            "id": "8978af",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "5db179": {
-            "id": "5db179",
+        "838b5b": {
+            "id": "838b5b",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         },
-        "ef34be": {
-            "id": "ef34be",
+        "f3332e": {
+            "id": "f3332e",
             "name": "Our world in data (2023)",
             "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
         }
