@@ -21,7 +21,7 @@
 - `adapters/ui_config/efootprint_description_provider.py` — **new**. `EfootprintDescriptionProvider` class implementing the port, with `_resolve_class` walking `ALL_EFOOTPRINT_CLASSES_DICT`, `_class_cache`, and the `field_tooltip` merge (`<library><br><br><interface>`, both placeholder-resolved, returns `SafeString`). Module-level `EFOOTPRINT_DESCRIPTION_PROVIDER` built with `build_html_handlers(UI_TOKENS, settings.MKDOCS_BASE_URL)` at import time.
 - `adapters/ui_config/class_ui_config_provider.py` — extend with `get_interactions(class_name) -> str | None`.
 - `adapters/ui_config/class_ui_config.json` — add `interactions` field for `ServerBase`, `JobBase`, `UsageJourney`, `UsagePattern` (authored on the abstract base where one exists). Tokens used here must be present in `UI_TOKENS`.
-- `adapters/ui_config/field_ui_config.json` — migrate `parent_group_memberships`: keep `label` ("Add to parent groups") under that key; move any tooltip text to per-attr entries under `sub_group_counts` and `edge_device_counts`.
+- `adapters/ui_config/field_ui_config.json` — keep both `label` ("Add to parent groups") and `tooltip` under `parent_group_memberships`. The tooltip speaks from the child-creation perspective and is read directly through `interface_only_tooltip`; the library `param_descriptions` on `EdgeDeviceGroup.sub_group_counts` / `edge_device_counts` (parent perspective) remain authoritative for the parent-edit form and must not be overlaid with the child-side text.
 - `settings.py` — add `MKDOCS_BASE_URL` (env-overridable, sensible default).
 
 **Tests added/changed:**
@@ -32,7 +32,7 @@
   - Variable parts with `<` / `>` are HTML-escaped in HTML handlers.
 - `tests/unit_tests/adapters/ui_config/test_description_provider.py` — **new**. Per plan §17:
   - `field_tooltip` merge cases (both present, library-only, interface-only, neither → None; library text first, literal `<br><br>` separator).
-  - `field_tooltip("EdgeDeviceGroup", "sub_group_counts")` and `("EdgeDeviceGroup", "edge_device_counts")` both return a merged tooltip.
+  - `field_tooltip("EdgeDeviceGroup", "sub_group_counts")` and `("EdgeDeviceGroup", "edge_device_counts")` return the library-only tooltip (no interface overlay — `parent_group_memberships` carries the child-perspective text instead).
   - `class_description` returns a placeholder-resolved string (no raw `{kind:target}` tokens survive).
   - `class_interactions` returns a placeholder-resolved string consuming `{ui:...}` tokens from the fixture.
   - Concrete subclass (`Server`) inherits `interactions` from abstract base (`ServerBase`) via MRO walk.
@@ -57,7 +57,7 @@
 
 **Files touched:**
 - `adapters/forms/form_field_generator.py` — at `:168` (`generate_select_multiple_field`) and `:207` (`generate_dynamic_form` loop), replace `field_config.get("tooltip", …)` with `EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(efootprint_class_str, attr_name)`. `efootprint_class_str` is already in scope; no new keyword arguments.
-- `adapters/forms/form_context_builder.py` — in `_build_parent_group_membership_field` (`:160`), resolve the new object's web class to the right `(class_name="EdgeDeviceGroup", param=<sub_group_counts|edge_device_counts>)` pair and call `field_tooltip` with it.
+- `adapters/forms/form_context_builder.py` — in `_build_parent_group_membership_field` (`:160`), read the child-perspective tooltip authored under `parent_group_memberships` via `EFOOTPRINT_DESCRIPTION_PROVIDER.interface_only_tooltip("parent_group_memberships")`. The override stays class-agnostic (same text from `EdgeDeviceGroupWeb` and `EdgeDeviceWeb` creation contexts).
 - `adapters/ui_config/field_ui_config_provider.py` — remove `get_tooltip`. Keep `get_label` and `get_config`.
 - `templates/model_builder/side_panels/components/tooltip.html` — accept optional `tooltip_html` flag (default `false`); emit `data-bs-html="true"` on the popover trigger when truthy.
 - `templates/model_builder/side_panels/dynamic_form_fields/label.html` — pass `tooltip_html=True` when including `tooltip.html`. Other includes unchanged.
