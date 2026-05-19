@@ -2,6 +2,7 @@
     "ServerBase": {
         "label": "Server",
         "type_object_available": "Available server types",
+        "description": "A computing resource that runs the jobs of your digital service. Pick a custom server you describe yourself, a cloud server selected from a provider's catalog, or a GPU-equipped server for AI workloads.",
         "interactions": "Add a server via {ui:infra_panel_add_button}, then attach {class:Job}s by linking them from the jobs panel."
     },
     "EdgeDeviceBase": {
@@ -100,7 +101,8 @@
     },
     "ExternalAPI": {
         "label": "External API",
-        "type_object_available": "Available external APIs."
+        "type_object_available": "Available external APIs.",
+        "description": "A third-party service your application calls out to (for example a generative-AI provider). Its footprint is charged per call by the {class:Job}s that target it."
     },
     "Storage": {
         "label": "Storage",
