@@ -72,7 +72,7 @@ def compatible_step_for_magnitude(magnitude, default_step: float = 0.1) -> str:
 
 
 def _build_dict_count_field_from_annotation(
-    attr_name: str, id_prefix: str, type_arg_str: str,
+    attr_name: str, class_name: str, type_arg_str: str,
     default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None) -> dict:
     """Build a dict_count field payload for an `ExplainableObjectDict[X]` attribute."""
     available_web_objects = model_web.get_web_objects_from_efootprint_type(type_arg_str)
@@ -86,7 +86,7 @@ def _build_dict_count_field_from_annotation(
     selected_counts = {key.id: count.value.magnitude for key, count in selected_raw.items()}
     return {
         "input_type": "dict_count",
-        "web_id": f"{id_prefix}_{attr_name}",
+        "web_id": f"{class_name}_{attr_name}",
         "options": options,
         "options_json": json.dumps(options),
         "selected_json": json.dumps(selected_counts),
@@ -185,7 +185,6 @@ def generate_dynamic_form(
 
     list_values = efootprint_class.list_values
     conditional_list_values = efootprint_class.conditional_list_values
-    id_prefix = efootprint_class_str
     init_sig_params = get_init_signature_params(efootprint_class)
 
     attributes_that_can_have_negative_values = efootprint_class.attributes_that_can_have_negative_values()
@@ -201,14 +200,19 @@ def generate_dynamic_form(
             annotation = str
         annotation = resolve_optional_annotation(annotation)
         field_config = FieldUIConfigProvider.get_config(attr_name)
+        annotation_origin = get_origin(annotation)
+        is_list_attr = bool(annotation_origin) and annotation_origin in (list, List)
         structure_field = {
-            "web_id": id_prefix + "_" + attr_name,
+            "web_id": f"{efootprint_class_str}_{attr_name}",
             "attr_name": attr_name,
             "label": field_config.get("label", attr_name),
-            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(efootprint_class_str, attr_name),
         }
-        annotation_origin = get_origin(annotation)
-        if annotation_origin and annotation_origin in (list, List):
+        if not is_list_attr:
+            # The list branch overwrites tooltip via generate_select_multiple_field,
+            # so only the non-list branches need to pay for the lookup here.
+            structure_field["tooltip"] = EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(
+                efootprint_class_str, attr_name)
+        if is_list_attr:
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             selected_objects = default_values.get(attr_name, [])
             structure_field.update(
@@ -222,7 +226,7 @@ def generate_dynamic_form(
             type_arg_str = type_arg if isinstance(type_arg, str) else type_arg.__name__
             structure_field.update(
                 _build_dict_count_field_from_annotation(
-                    attr_name, id_prefix, type_arg_str, default_values, model_web, obj_to_edit)
+                    attr_name, efootprint_class_str, type_arg_str, default_values, model_web, obj_to_edit)
             )
         elif issubclass(annotation, str):
             structure_field.update({
@@ -312,8 +316,8 @@ def generate_dynamic_form(
                     })
                     dynamic_lists.append(
                         {
-                            "input_id": id_prefix + "_" + attr_name,
-                            "filter_by": id_prefix + "_" + conditional_list_values[attr_name]["depends_on"],
+                            "input_id": f"{efootprint_class_str}_{attr_name}",
+                            "filter_by": f"{efootprint_class_str}_{conditional_list_values[attr_name]['depends_on']}",
                             "list_value": {
                                 str(conditional_value): [str(possible_value) for possible_value in possible_values]
                                 for conditional_value, possible_values in
