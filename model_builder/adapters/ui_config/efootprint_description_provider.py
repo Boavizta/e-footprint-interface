@@ -4,12 +4,15 @@ The ``EFOOTPRINT_DESCRIPTION_PROVIDER`` module-level singleton is built at
 import time with HTML-mode handlers. Every method returns a placeholder-resolved
 ``SafeString`` (or ``None``); callers render with ``|safe`` and templates never
 see raw ``{kind:target}`` tokens.
+
+Interface-only abstract bases (``CLASS_UI_CONFIG`` keys that are not real
+efootprint classes, e.g. ``EdgeDeviceBase``) are first-class: class-level
+methods fall back to JSON-authored content when no Python class exists.
 """
 import inspect
 from typing import Callable
 
 from django.conf import settings
-from django.utils.html import escape
 from django.utils.safestring import SafeString, mark_safe
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
 from efootprint.utils.placeholder_resolver import resolve_placeholders
@@ -24,26 +27,35 @@ class EfootprintDescriptionProvider:
         self._handlers = handlers
 
     def class_description(self, class_name: str) -> SafeString | None:
-        # inspect.getdoc strips the common leading indentation Python preserves
-        # in raw ``__doc__``, so popovers and the help drawer don't show ragged
-        # whitespace.
-        klass = self._resolve_class(class_name)
-        text = inspect.getdoc(klass)
+        self._assert_known(class_name)
+        # Interface-authored description wins when present; otherwise fall back
+        # to the library docstring (dedented via ``inspect.getdoc``).
+        text = CLASS_UI_CONFIG.get(class_name, {}).get("description")
+        if text is None:
+            klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
+            text = inspect.getdoc(klass) if klass else None
         return self._resolve(text) if text else None
 
     def class_disambiguation(self, class_name: str) -> SafeString | None:
-        return self._resolve_attr(class_name, "disambiguation")
+        return self._resolve_class_attr(class_name, "disambiguation")
 
     def class_pitfalls(self, class_name: str) -> SafeString | None:
-        return self._resolve_attr(class_name, "pitfalls")
+        return self._resolve_class_attr(class_name, "pitfalls")
 
     def class_interactions(self, class_name: str) -> SafeString | None:
-        klass = self._resolve_class(class_name)
+        self._assert_known(class_name)
+        klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
+        if klass is None:
+            text = CLASS_UI_CONFIG.get(class_name, {}).get("interactions")
+            return self._resolve(text) if text else None
         for ancestor in klass.__mro__:
             text = CLASS_UI_CONFIG.get(ancestor.__name__, {}).get("interactions")
             if text:
                 return self._resolve(text)
         return None
+
+    def class_doc_link(self, class_name: str) -> SafeString:
+        return mark_safe(self._handlers["doc"](f"objects/{class_name}"))
 
     def param_description(self, class_name: str, param: str) -> SafeString | None:
         text = self._raw_param_description(class_name, param)
@@ -54,32 +66,40 @@ class EfootprintDescriptionProvider:
         interface_text = FIELD_UI_CONFIG.get(param, {}).get("tooltip")
         return self._merge(library_text, interface_text)
 
+    def interface_only_tooltip(self, param: str) -> SafeString | None:
+        text = FIELD_UI_CONFIG.get(param, {}).get("tooltip")
+        return self._resolve(text) if text else None
+
     def calc_description(self, class_name: str, attr: str) -> SafeString | None:
-        klass = self._resolve_class(class_name)
+        klass = self._require_efootprint_class(class_name)
         method = getattr(klass, f"update_{attr}", None)
         text = inspect.getdoc(method) if method else None
         return self._resolve(text) if text else None
 
     def param_interaction(self, class_name: str, param: str) -> SafeString | None:
-        klass = self._resolve_class(class_name)
+        klass = self._require_efootprint_class(class_name)
         text = getattr(klass, "param_interactions", {}).get(param)
         return self._resolve(text) if text else None
 
-    def resolve(self, text: str | None) -> SafeString | None:
-        return self._resolve(text) if text else None
+    def _assert_known(self, class_name: str) -> None:
+        if class_name not in ALL_EFOOTPRINT_CLASSES_DICT and class_name not in CLASS_UI_CONFIG:
+            raise ValueError(f"Unknown class: {class_name!r}")
 
-    def _resolve_class(self, class_name: str) -> type:
+    def _require_efootprint_class(self, class_name: str) -> type:
         klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
         if klass is None:
             raise ValueError(f"Unknown efootprint class: {class_name!r}")
         return klass
 
     def _raw_param_description(self, class_name: str, param: str) -> str | None:
-        klass = self._resolve_class(class_name)
+        klass = self._require_efootprint_class(class_name)
         return getattr(klass, "param_descriptions", {}).get(param)
 
-    def _resolve_attr(self, class_name: str, attr: str) -> SafeString | None:
-        klass = self._resolve_class(class_name)
+    def _resolve_class_attr(self, class_name: str, attr: str) -> SafeString | None:
+        self._assert_known(class_name)
+        klass = ALL_EFOOTPRINT_CLASSES_DICT.get(class_name)
+        if klass is None:
+            return None
         text = getattr(klass, attr, None)
         return self._resolve(text) if text else None
 
@@ -92,9 +112,8 @@ class EfootprintDescriptionProvider:
         if library_text and not interface_text:
             return self._resolve(library_text)
         if interface_text and not library_text:
-            # Legacy interface tooltips don't go through the resolver; escape them.
-            return mark_safe(escape(interface_text))
-        return mark_safe(f"{self._resolve(library_text)}<br><br>{escape(interface_text)}")
+            return self._resolve(interface_text)
+        return mark_safe(f"{self._resolve(library_text)}<br><br>{self._resolve(interface_text)}")
 
 
 EFOOTPRINT_DESCRIPTION_PROVIDER = EfootprintDescriptionProvider(

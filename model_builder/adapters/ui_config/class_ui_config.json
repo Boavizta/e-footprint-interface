@@ -6,7 +6,8 @@
     },
     "EdgeDeviceBase": {
         "label": "Edge device",
-        "type_object_available": "Available edge device types"
+        "type_object_available": "Available edge device types",
+        "description": "Hardware sitting at the user's premises (laptop, monitor, smart appliance, ...) and contributing its share of the footprint while users interact with the service. Pick {class:EdgeComputer} for general-purpose CPU/RAM devices, {class:EdgeAppliance} for simple workload-based devices, or build one from components for everything else."
     },
     "EdgeDevice": {
         "label": "Edge device",

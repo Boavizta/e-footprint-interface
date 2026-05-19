@@ -15,7 +15,6 @@ from model_builder.adapters.forms.form_field_generator import (
     compatible_step_for_magnitude,
     format_magnitude_for_number_input,
 )
-from model_builder.adapters.ui_config import FIELD_UI_CONFIG
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.adapters.forms.strategies import (
@@ -156,15 +155,14 @@ class FormContextBuilder:
         options = FormContextBuilder._build_select_options(available_groups)
         attr_name = "parent_group_memberships"
         # parent_group_memberships is a UI-only field — the reverse view of the parent group's
-        # sub_group_counts / edge_device_counts. The library descriptions for those attrs speak
-        # from the parent's perspective, so we don't reuse them here; tooltip text is authored
-        # directly under the parent_group_memberships key in field_ui_config.json.
+        # sub_group_counts / edge_device_counts. The library param_descriptions for those attrs
+        # speak from the parent's perspective and would be wrong here, so we read the tooltip
+        # from field_ui_config.json directly via interface_only_tooltip.
         return {
             "web_id": attr_name,
             "attr_name": attr_name,
             "label": FieldUIConfigProvider.get_label(attr_name),
-            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.resolve(
-                FIELD_UI_CONFIG.get(attr_name, {}).get("tooltip")),
+            "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.interface_only_tooltip(attr_name),
             "input_type": "dict_count",
             "options": options,
             "options_json": json.dumps(options),

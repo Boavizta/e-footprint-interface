@@ -20,6 +20,6 @@ def open_help_drawer(request, class_name):
         "disambiguation": provider.class_disambiguation(class_name),
         "pitfalls": provider.class_pitfalls(class_name),
         "interactions": provider.class_interactions(class_name),
-        "docs_link": provider.resolve(f"{{doc:objects/{class_name}}}"),
+        "docs_link": provider.class_doc_link(class_name),
     }
     return render(request, "model_builder/help_drawer/class_help.html", context=context)

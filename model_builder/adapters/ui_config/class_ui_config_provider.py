@@ -27,11 +27,6 @@ class ClassUIConfigProvider:
         return config.get("more_descriptive_label_for_select_inputs", config.get("label", class_name))
 
     @staticmethod
-    def get_interactions(class_name: str) -> str | None:
-        """Get raw interface-side interactions string (unresolved placeholders)."""
-        return CLASS_UI_CONFIG.get(class_name, {}).get("interactions")
-
-    @staticmethod
     def get_config(class_name: str) -> dict:
         """Get full configuration for a class."""
         return CLASS_UI_CONFIG.get(class_name, {})
