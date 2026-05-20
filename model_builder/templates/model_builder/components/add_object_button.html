@@ -33,7 +33,7 @@
 {% if class_name and class_description %}
 <button type="button" class="btn btn-link p-0 ms-1 help-drawer-trigger flex-shrink-0"
         hx-get="/model_builder/open-help-drawer/{{ class_name }}/"
-        hx-target="#sidePanel"
+        hx-target="#helpDrawer"
         hx-swap="innerHTML"
         aria-label="About {{ class_label }}">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"

@@ -1,0 +1,24 @@
+<div class="container-fluid text-start py-3 z-2" id="helpDrawerContent">
+    <div class="form-header" id="help-drawer-header">
+        <div class="w-100 text-end d-flex flex-row align-items-center mb-3 justify-content-between">
+            <h5 id="helpDrawerTitle" class="m-0 p-2 text-start">
+                <b>{{ header_name }}</b>
+            </h5>
+            {% include "model_builder/help_drawer/components/close_help_drawer_cross.html" %}
+        </div>
+    </div>
+    <div class="panel-body" id="help-drawer-body">
+        <div class="row text-start">
+            <div class="col-12 mb-3">
+                {% block panel_body %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    openHelpDrawer();
+    window.helpDrawerPopoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="help_drawer"]');
+    window.helpDrawerPopoverList = [...window.helpDrawerPopoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+</script>
