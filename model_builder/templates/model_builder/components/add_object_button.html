@@ -1,13 +1,13 @@
 {% load static %}
-<div class="d-flex flex-row align-items-center {{ btn_extra_classes }}">
+<div class="d-flex flex-row align-items-center min-w-0 {{ btn_extra_classes }}">
 {% if disabled %}
 {# Bootstrap tooltips don't fire on disabled buttons (no pointer events), so wrap in a span. #}
-<span class="d-block flex-grow-1"
+<span class="d-block flex-grow-1 min-w-0"
       data-bs-toggle="tooltip"
       data-bs-placement="top"
       title="{{ disabled_reason }}"
       tabindex="0">
-<button class="btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2 w-100"
+<button class="btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row align-items-center px-0 py-2 w-100 min-w-0 overflow-hidden"
         id="{{ btn_id }}"
         style="pointer-events: none;"
         disabled
@@ -17,7 +17,7 @@
 </button>
 </span>
 {% else %}
-<button class="btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row px-0 py-2 flex-grow-1"
+<button class="btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row align-items-center px-0 py-2 flex-grow-1 min-w-0 overflow-hidden"
         id="{{ btn_id }}"
         hx-get="{{ hx_url }}"
         hx-target="#sidePanel"
