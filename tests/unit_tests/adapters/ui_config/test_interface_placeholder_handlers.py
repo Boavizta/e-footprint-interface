@@ -42,6 +42,13 @@ def test_html_doc_handler_emits_anchor_with_mkdocs_url():
     assert "methodology" in out
 
 
+def test_html_doc_handler_can_use_custom_label():
+    out = HTML["doc"]("Server|Custom server")
+    assert "https://docs.example/Server" in out
+    assert ">Custom server</a>" in out
+    assert "Server|Custom server" not in out
+
+
 def test_html_ui_handler_emits_span_with_display_text():
     out = HTML["ui"]("infra_panel_add_button")
     assert '<span class="ssot-ui-ref"' in out

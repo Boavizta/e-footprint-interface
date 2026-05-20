@@ -14,7 +14,7 @@ from typing import Callable
 
 from django.conf import settings
 from django.utils.safestring import SafeString, mark_safe
-from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
+from efootprint.all_classes_in_order import ALL_CONCRETE_EFOOTPRINT_CLASSES_DICT, ALL_EFOOTPRINT_CLASSES_DICT
 from efootprint.utils.placeholder_resolver import resolve_placeholders
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG, FIELD_UI_CONFIG
@@ -55,7 +55,9 @@ class EfootprintDescriptionProvider:
         return None
 
     def class_doc_link(self, class_name: str) -> SafeString:
-        return mark_safe(self._handlers["doc"](f"objects/{class_name}"))
+        self._assert_known(class_name)
+        doc_classes = self._doc_classes(class_name)
+        return mark_safe(", ".join(self._doc_link(doc_class) for doc_class in doc_classes))
 
     def param_description(self, class_name: str, param: str) -> SafeString | None:
         text = self._raw_param_description(class_name, param)
@@ -94,6 +96,34 @@ class EfootprintDescriptionProvider:
     def _raw_param_description(self, class_name: str, param: str) -> str | None:
         klass = self._require_efootprint_class(class_name)
         return getattr(klass, "param_descriptions", {}).get(param)
+
+    def _doc_classes(self, class_name: str) -> list[type]:
+        if class_name in ALL_CONCRETE_EFOOTPRINT_CLASSES_DICT:
+            return [ALL_CONCRETE_EFOOTPRINT_CLASSES_DICT[class_name]]
+
+        available_classes = self._static_available_classes(class_name)
+        if available_classes:
+            return available_classes
+
+        klass = self._require_efootprint_class(class_name)
+        return [
+            concrete_class
+            for concrete_class in ALL_CONCRETE_EFOOTPRINT_CLASSES_DICT.values()
+            if issubclass(concrete_class, klass)
+        ]
+
+    @staticmethod
+    def _static_available_classes(class_name: str) -> list[type]:
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+
+        web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(class_name)
+        config = getattr(web_class, "form_creation_config", {}) if web_class else {}
+        return config.get("available_classes", [])
+
+    def _doc_link(self, doc_class: type) -> str:
+        class_name = doc_class.__name__
+        label = CLASS_UI_CONFIG.get(class_name, {}).get("label", class_name)
+        return self._handlers["doc"](f"{class_name}|{label}")
 
     def _resolve_class_attr(self, class_name: str, attr: str) -> SafeString | None:
         self._assert_known(class_name)

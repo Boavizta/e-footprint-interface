@@ -45,6 +45,34 @@ class TestOpenHelpDrawer:
         assert response.status_code == 200
         assert "About Edge device" in body
 
+    @pytest.mark.parametrize(
+        ("class_name", "expected_urls", "abstract_url"),
+        [
+            ("ServerBase", ["/GPUServer", "/BoaviztaCloudServer", "/Server"], "/ServerBase"),
+            ("EdgeDeviceBase", ["/EdgeComputer", "/EdgeAppliance", "/EdgeDevice"], "/EdgeDeviceBase"),
+            ("ExternalAPI", ["/EcoLogitsGenAIExternalAPI"], "/ExternalAPI"),
+        ],
+    )
+    def test_abstract_base_docs_section_links_to_concrete_docs(
+        self, client, class_name, expected_urls, abstract_url
+    ):
+        response = client.get(f"/model_builder/open-help-drawer/{class_name}/")
+
+        body = response.content.decode()
+        assert response.status_code == 200
+        for expected_url in expected_urls:
+            assert expected_url in body
+        assert abstract_url not in body
+
+    def test_abstract_base_docs_section_uses_ui_labels(self, client):
+        response = client.get("/model_builder/open-help-drawer/ServerBase/")
+
+        body = response.content.decode()
+        assert response.status_code == 200
+        assert ">AI server</a>" in body
+        assert ">Cloud server</a>" in body
+        assert ">Custom server</a>" in body
+
     def test_unknown_class_returns_404(self, client):
         response = client.get("/model_builder/open-help-drawer/NotARealClass/")
 

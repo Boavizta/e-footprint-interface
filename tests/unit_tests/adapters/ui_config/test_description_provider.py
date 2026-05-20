@@ -12,6 +12,8 @@ from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
 
 
 PLACEHOLDER_RE = re.compile(r"\{(class|param|calc|doc|ui):[^}]+\}")
+HREF_RE = re.compile(r'href="([^"]+)"')
+DOC_ANCHOR_RE = re.compile(r'<a href="([^"]+)" target="_blank" rel="noopener">([^<]+)</a>')
 SEPARATOR = "<br><br>"
 
 
@@ -83,10 +85,32 @@ def test_interface_only_tooltip_returns_none_for_unknown_attr(provider):
 
 # ---- class_doc_link -------------------------------------------------------
 
-def test_class_doc_link_emits_anchor_to_objects_slug(provider):
+def test_class_doc_link_emits_anchor_to_class_slug(provider):
     out = provider.class_doc_link("Server")
-    assert "https://docs.example/objects/Server" in out
+    assert DOC_ANCHOR_RE.findall(out) == [("https://docs.example/Server", "Custom server")]
     assert 'target="_blank"' in out
+
+
+@pytest.mark.parametrize(
+    ("class_name", "expected_anchors"),
+    [
+        ("ServerBase", [
+            ("https://docs.example/GPUServer", "AI server"),
+            ("https://docs.example/BoaviztaCloudServer", "Cloud server"),
+            ("https://docs.example/Server", "Custom server"),
+        ]),
+        ("EdgeDeviceBase", [
+            ("https://docs.example/EdgeComputer", "Edge computer"),
+            ("https://docs.example/EdgeAppliance", "Edge appliance"),
+            ("https://docs.example/EdgeDevice", "Edge device"),
+        ]),
+        ("ExternalAPI", [("https://docs.example/EcoLogitsGenAIExternalAPI", "Gen AI external API")]),
+    ],
+)
+def test_class_doc_link_for_abstract_class_links_to_concrete_docs(provider, class_name, expected_anchors):
+    out = provider.class_doc_link(class_name)
+    assert DOC_ANCHOR_RE.findall(out) == expected_anchors
+    assert f"https://docs.example/{class_name}" not in HREF_RE.findall(out)
 
 
 # ---- class_description ----------------------------------------------------

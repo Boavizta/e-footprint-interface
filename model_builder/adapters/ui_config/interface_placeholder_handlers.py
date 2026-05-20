@@ -81,9 +81,10 @@ def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Call
         return f'<span class="ssot-calc-ref">{label}</span>'
 
     def handle_doc(target: str) -> str:
-        slug = escape(target)
-        url = escape(f"{mkdocs_base_url.rstrip('/')}/{target}")
-        return f'<a href="{url}" target="_blank" rel="noopener">{slug}</a>'
+        slug_target, _, label_target = target.partition("|")
+        label = label_target or slug_target
+        url = escape(f"{mkdocs_base_url.rstrip('/')}/{slug_target}")
+        return f'<a href="{url}" target="_blank" rel="noopener">{escape(label)}</a>'
 
     def handle_ui(target: str) -> str:
         entry = ui_tokens.get(target)
