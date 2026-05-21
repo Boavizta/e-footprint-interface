@@ -35,6 +35,8 @@
 
 ## Task 2 — Fix the in-tooltip `{class:X}` link via delegated click + handle_class rewrite
 
+**Status:** Done.
+
 **Goal:** Resolve the original bug. The `{class:X}` placeholder in field tooltips no longer renders a navigable `href`; a single document-level delegated listener intercepts `.help-drawer-trigger` clicks (works regardless of which DOM subtree Bootstrap popovers inject the markup into) and opens the help drawer overlay via `htmx.ajax` into `#helpDrawer`. Internal help-to-help navigation works for free.
 
 **Files touched:**

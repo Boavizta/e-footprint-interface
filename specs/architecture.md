@@ -219,6 +219,7 @@ The form generator injects this as `field["subfields"]` so templates can render 
   - Base layouts in `theme/templates/` (e.g., `base.html`, `navbar.html`) with Bootstrap styling.
   - Feature templates and partials under `model_builder/templates/model_builder/`.
   - Save button is centralized in `side_panel_structure.html` as a `{% block save_button %}` default.
+- **Help drawer is an independent overlay layer.** `#helpDrawer` is a sibling of `#sidePanel` with a higher z-index and its own open/close helpers in `help_drawer_utils.js`; it never touches the side panel. `{class:X}` placeholders rendered by `handle_class` are inert `<a class="help-drawer-trigger" data-help-class="X">` anchors that a single delegated `click` listener turns into an `htmx.ajax` swap into `#helpDrawer`, so the link works even when Bootstrap injects it into a popover subtree HTMX never processed.
 - **Frontend assets.**
   - `theme/static/scripts/` includes small utilities (loading bars, charts, leader lines).
   - CSS/SCSS in `theme/static/scss` and compiled CSS in `theme/static/css`.

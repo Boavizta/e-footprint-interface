@@ -53,7 +53,7 @@
                 "web_id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
                 "label": "Jobs in this usage journey step",
-                "tooltip": "<a href=\"/model_builder/open-help-drawer/Job/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Job/\" hx-target=\"#sidePanel\">Job</a>s triggered on the server side during this step. Multiple jobs can fire per step; the same <a href=\"/model_builder/open-help-drawer/Job/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Job/\" hx-target=\"#sidePanel\">Job</a> can appear in several steps.",
+                "tooltip": "<a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Job\" role=\"button\">Job</a>s triggered on the server side during this step. Multiple jobs can fire per step; the same <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Job\" role=\"button\">Job</a> can appear in several steps.",
                 "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [

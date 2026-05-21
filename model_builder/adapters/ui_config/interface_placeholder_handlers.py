@@ -61,11 +61,12 @@ def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Call
         _resolve_class(target)
         label = escape(_class_label(target))
         target_safe = escape(target)
+        # No real href / hx-get: a delegated click listener in help_drawer_utils.js drives the
+        # request, so the link works even when Bootstrap injects it into a popover subtree
+        # that HTMX never processed.
         return (
-            f'<a href="/model_builder/open-help-drawer/{target_safe}/" '
-            f'class="help-drawer-trigger" '
-            f'hx-get="/model_builder/open-help-drawer/{target_safe}/" '
-            f'hx-target="#sidePanel">{label}</a>'
+            f'<a href="#" class="help-drawer-trigger" '
+            f'data-help-class="{target_safe}" role="button">{label}</a>'
         )
 
     def handle_param(target: str) -> str:

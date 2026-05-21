@@ -19,9 +19,12 @@ HTML = build_html_handlers(UI_TOKENS, mkdocs_base_url="https://docs.example/")
 
 def test_html_class_handler_emits_anchor_with_label():
     out = HTML["class"]("Server")
-    assert "/model_builder/open-help-drawer/Server/" in out
-    assert "Custom server" in out
     assert 'class="help-drawer-trigger"' in out
+    assert 'data-help-class="Server"' in out
+    assert "Custom server" in out
+    # Markup must carry no navigable URL nor inert hx-get — a delegated click listener drives the request.
+    assert "hx-get" not in out
+    assert "/model_builder/open-help-drawer/" not in out
 
 
 def test_html_param_handler_emits_span_with_label():

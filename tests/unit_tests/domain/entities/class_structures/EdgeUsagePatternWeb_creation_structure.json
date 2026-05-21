@@ -32,7 +32,7 @@
                 "web_id": "EdgeUsagePattern_edge_usage_journey",
                 "attr_name": "edge_usage_journey",
                 "label": "edge usage journey",
-                "tooltip": "The <a href=\"/model_builder/open-help-drawer/EdgeUsageJourney/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/EdgeUsageJourney/\" hx-target=\"#sidePanel\">Edge usage journey</a> performed by the deployed edge devices.",
+                "tooltip": "The <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"EdgeUsageJourney\" role=\"button\">Edge usage journey</a> performed by the deployed edge devices.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -50,7 +50,7 @@
                 "web_id": "EdgeUsagePattern_network",
                 "attr_name": "network",
                 "label": "network",
-                "tooltip": "<a href=\"/model_builder/open-help-drawer/Network/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Network/\" hx-target=\"#sidePanel\">Network</a> used by the edge devices to communicate with servers (when applicable).",
+                "tooltip": "<a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Network\" role=\"button\">Network</a> used by the edge devices to communicate with servers (when applicable).",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -68,7 +68,7 @@
                 "web_id": "EdgeUsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
-                "tooltip": "<a href=\"/model_builder/open-help-drawer/Country/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Country/\" hx-target=\"#sidePanel\">Country</a> where the edge devices are deployed. Drives grid carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly edge usage journey starts</span>.",
+                "tooltip": "<a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Country\" role=\"button\">Country</a> where the edge devices are deployed. Drives grid carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly edge usage journey starts</span>.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [

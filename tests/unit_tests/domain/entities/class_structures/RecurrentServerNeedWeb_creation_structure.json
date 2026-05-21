@@ -32,7 +32,7 @@
                 "web_id": "RecurrentServerNeed_edge_device",
                 "attr_name": "edge_device",
                 "label": "edge device",
-                "tooltip": "<a href=\"/model_builder/open-help-drawer/EdgeDevice/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/EdgeDevice/\" hx-target=\"#sidePanel\">Edge device</a> that originates the calls. Used to size the volume against the number of devices in deployment.",
+                "tooltip": "<a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"EdgeDevice\" role=\"button\">Edge device</a> that originates the calls. Used to size the volume against the number of devices in deployment.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -50,7 +50,7 @@
                 "web_id": "RecurrentServerNeed_jobs",
                 "attr_name": "jobs",
                 "label": "Jobs in this usage journey step",
-                "tooltip": "Server-side <a href=\"/model_builder/open-help-drawer/Job/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/Job/\" hx-target=\"#sidePanel\">Job</a>s triggered by each occurrence of this need. The same job can appear multiple times to represent multiple invocations per occurrence.",
+                "tooltip": "Server-side <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Job\" role=\"button\">Job</a>s triggered by each occurrence of this need. The same job can appear multiple times to represent multiple invocations per occurrence.",
                 "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [

@@ -32,7 +32,7 @@
                 "web_id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
                 "label": "Usage journey steps in this usage journey",
-                "tooltip": "Ordered list of <a href=\"/model_builder/open-help-drawer/UsageJourneyStep/\" class=\"help-drawer-trigger\" hx-get=\"/model_builder/open-help-drawer/UsageJourneyStep/\" hx-target=\"#sidePanel\">Usage journey step</a>s that make up the journey. The journey duration is the sum of step durations.",
+                "tooltip": "Ordered list of <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"UsageJourneyStep\" role=\"button\">Usage journey step</a>s that make up the journey. The journey duration is the sum of step durations.",
                 "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [

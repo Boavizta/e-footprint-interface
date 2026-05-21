@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Help drawer is now an overlay layer on top of the side panel: opening help while an edit form is open no longer destroys the form, and closing the help drawer restores the underlying side panel with unsaved changes intact. Help-to-help navigation no longer fires the unsaved-changes modal.
+
+### Fixed
+- `{class:X}` placeholder links inside field tooltips opened a full-page partial template instead of the help drawer, because Bootstrap popovers inject content into a DOM subtree HTMX has not processed. A delegated click listener now drives the request, so the link works regardless of which subtree the popover renders into.
+
 ## [1.4.0] - 2026-05-06
 
 ### Added
@@ -24,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Self-host the bootstrap-icons font so all `bi-*` glyphs render reliably.
 
 ### Fixed
+- Help drawer documentation links for abstract add-button classes now point to the concrete object reference pages instead of broken abstract-class URLs.
 - Leader-line crash when `htmx:afterSettle` ran on a partially-swapped DOM.
 - Edge device deletion when the device has components.
 - Source table row-editor Apply: stabilize behavior so confidence + source/comment edits commit reliably without spurious reloads.
