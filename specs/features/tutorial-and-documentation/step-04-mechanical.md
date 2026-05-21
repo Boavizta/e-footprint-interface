@@ -1,5 +1,7 @@
 # Step 4 — Mechanical track: package, registry, resolver, tests, nav
 
+**Status:** Done (2026-05-21). All sub-steps 4.1, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11 landed in the e-footprint library; `mkdocs build --strict` is clean locally; full pytest suite passes.
+
 This document covers the **mechanical** half of Step 4. The companion `step-04-content.md` covers the prose authorship of the ten mkdocs pages (web_vs_edge, three how-to, four FAQ, two sub-bucket indexes), which is co-authored with the user in dedicated interactive sessions and tracked outside `tasks.md`.
 
 The two tracks ship independently but cross-reference each other:
@@ -317,13 +319,13 @@ Add a short "Documentation checks before merging" section to `CONTRIBUTING.md` (
 Before merging documentation changes, run the reference generator and a
 strict mkdocs build locally:
 
-    poetry run python docs_sources/doc_utils/generate_object_reference.py
+    poetry run python docs_sources/doc_utils/main.py
     poetry run mkdocs build --strict
 
 The first command regenerates the per-class reference pages from current
-class metadata. The second builds the full mkdocs site with warnings
-promoted to errors (broken links, missing files, etc.) and must exit
-zero.
+class metadata and copies the prose pages into the mkdocs build directory.
+The second builds the full mkdocs site with warnings promoted to errors
+(broken links, missing files, etc.) and must exit zero.
 ```
 
 Generated reference files are committed to the repo per the current convention; running the generator before the strict build ensures the committed files reflect current class metadata. A drift check (committed reference files == freshly generated) is deferred to Step 7.

@@ -2,7 +2,7 @@
 
 **Status:** Tasks — under review.
 **Plan:** [`step-03-ssot-interface.md`](step-03-ssot-interface.md).
-**Spec context:** [`01-single-source-of-truth.md`](01-single-source-of-truth.md), [`05-maintainability-and-build.md`](05-maintainability-and-build.md) (Step 3 row), [`99-implementation-plan.md`](99-implementation-plan.md) (Step 3).
+**Spec context:** [`01-single-source-of-truth.md`](01-single-source-of-truth.md), [`05-maintainability-and-build.md`](05-maintainability-and-build.md) (Step 3 row), [`99-roadmap.md`](99-roadmap.md) (Step 3).
 
 **Prerequisite (verify before Task 1):** Step 2 has landed in e-footprint and `getattr(klass, "param_descriptions", {})` returns the full dict for every concrete class (including inherited entries from abstract bases). If not, the plan needs a merge step before this task list starts. See the Prerequisite section of the plan.
 

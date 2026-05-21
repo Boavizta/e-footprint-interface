@@ -3,7 +3,7 @@
 **Status:** Plan — under review.
 **Date:** 2026-05-04.
 **Spec context:**
-- [`99-implementation-plan.md`](99-implementation-plan.md) Step 3 (high-level deliverables).
+- [`99-roadmap.md`](99-roadmap.md) Step 3 (high-level deliverables).
 - [`01-single-source-of-truth.md`](01-single-source-of-truth.md) (DescriptionProvider port, placeholder syntax, content kinds, interface-side tests).
 - [`05-maintainability-and-build.md`](05-maintainability-and-build.md) Step 3 row (`{ui:token}` resolution, `class_ui_config.json` completeness, DescriptionProvider round-trip).
 - [`00-index.md`](00-index.md) (overall feature framing and decisions summary).

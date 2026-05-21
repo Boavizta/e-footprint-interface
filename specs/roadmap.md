@@ -14,7 +14,7 @@ Status:
 
 - Step 1 (disabled-instead-of-error UX) — **shipped**.
 - Step 2 (SSOT metadata in the library) — planned next; library-side work coordinated via `../../e-footprint/specs/roadmap.md`.
-- Steps 3–7 — see `specs/features/tutorial-and-documentation/99-implementation-plan.md`.
+- Steps 3–7 — see `specs/features/tutorial-and-documentation/99-roadmap.md`.
 
 ### Recurrent quantities — weekly-pattern builder (planned)
 

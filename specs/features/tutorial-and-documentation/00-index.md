@@ -36,7 +36,7 @@ Constraints stated up front by the user:
 | `03-web-vs-edge-modeling.md` | Clarifying the web/edge conceptual distinction and where to surface it |
 | `04-efootprint-docs-overhaul.md` | What to do about the empty mkdocs stubs, the auto-generated reference, and modeling templates |
 | `05-maintainability-and-build.md` | CI checks, tests, and build pipeline that keep all of this honest |
-| `99-implementation-plan.md` | **The implementation plan** — seven sequential steps, each with deliverables, open questions, and a pointer to its sub-implementation plan file |
+| `99-roadmap.md` | **The implementation plan** — seven sequential steps, each with deliverables, open questions, and a pointer to its sub-implementation plan file |
 
 ---
 
@@ -160,7 +160,7 @@ summary.
 ## Open questions
 
 These questions remain open and are flagged at the top of their respective
-step in `99-implementation-plan.md`.
+step in `99-roadmap.md`.
 
 - **Ban-word list finalization** (Step 2): starting list is `click`, `button`,
   `drag`, `instantiate`, `import`, backtick. Lock when first content is written.
@@ -181,7 +181,7 @@ step in `99-implementation-plan.md`.
 ## How to resume from cold context
 
 1. Read this file end to end.
-2. Read `99-implementation-plan.md` for the seven-step implementation plan and
+2. Read `99-roadmap.md` for the seven-step implementation plan and
    the open questions gating each step.
 3. Read the topic file(s) relevant to the step you are about to implement for
    the full design decisions and rationale:

@@ -219,7 +219,7 @@ Use this pattern for modeling template authoring:
 ## Phasing
 
 These checks do not all need to land at once. They are distributed across the
-seven implementation steps defined in `99-implementation-plan.md`.
+seven implementation steps defined in `99-roadmap.md`.
 
 | Implementation step | What lands |
 |---|---|
