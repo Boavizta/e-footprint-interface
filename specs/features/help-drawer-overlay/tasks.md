@@ -39,7 +39,7 @@
 
 **Files touched:**
 - `model_builder/adapters/ui_config/interface_placeholder_handlers.py` — rewrite `handle_class` to emit `<a href="#" class="help-drawer-trigger" data-help-class="X" role="button">label</a>`. No `hx-get`, no `hx-target`.
-- `theme/static/scripts/side_panel_utils.js` — delegated `click` listener on `document.body` matching `.help-drawer-trigger`: `preventDefault`, dismiss any open Bootstrap popover/tooltip containing the trigger, then `htmx.ajax('GET', '/model_builder/open-help-drawer/' + className + '/', {target: '#helpDrawer', swap: 'innerHTML'})`.
+- `theme/static/scripts/help_drawer_utils.js` — delegated `click` listener on `document.body` matching `.help-drawer-trigger[data-help-class]` (the `data-help-class` gate is required: the canvas `?` button in `add_object_button.html` also carries the `help-drawer-trigger` class but drives its own `hx-get`/`hx-target`, so the delegated listener must skip it to avoid a double request). On match: `preventDefault`, dismiss any open Bootstrap popover/tooltip containing the trigger, then `htmx.ajax('GET', '/model_builder/open-help-drawer/' + className + '/', {target: '#helpDrawer', swap: 'innerHTML'})`.
 - `specs/architecture.md` — one-line note in the render-layer section about the independent help-drawer layer.
 - `CHANGELOG.md` — one entry under "Fixed" for the tooltip-link bug and one under "Changed" for the overlay behavior.
 

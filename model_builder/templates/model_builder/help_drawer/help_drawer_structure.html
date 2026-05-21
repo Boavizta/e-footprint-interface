@@ -4,7 +4,7 @@
             <h5 id="helpDrawerTitle" class="m-0 p-2 text-start">
                 <b>{{ header_name }}</b>
             </h5>
-            {% include "model_builder/help_drawer/components/close_help_drawer_cross.html" %}
+            {% include "model_builder/components/close_cross.html" with onclick="closeHelpDrawer()" btn_id="btn-close-help-drawer" %}
         </div>
     </div>
     <div class="panel-body" id="help-drawer-body">

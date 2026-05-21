@@ -6,7 +6,7 @@
             </h5>
             {% block link_to_delete_object %}
             {% endblock %}
-            {% include "model_builder/side_panels/components/close_side_panel_cross.html" %}
+            {% include "model_builder/components/close_cross.html" with onclick="warnBeforeClosingSidePanel()" btn_id="btn-close-side-panel" %}
         </div>
     </div>
     <div class="panel-body" id="panel-body">
