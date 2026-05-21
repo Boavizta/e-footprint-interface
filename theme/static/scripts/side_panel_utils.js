@@ -18,6 +18,7 @@ function expandRightColumn() {
     const canvas = document.getElementById("model-canva-scrollable-area");
     canvas.classList.remove("w-100");
     canvas.classList.add("side-panel-open");
+    updateLines();
 }
 
 function collapseRightColumn() {
@@ -34,6 +35,7 @@ function collapseRightColumn() {
     const canvas = document.getElementById("model-canva-scrollable-area");
     canvas.classList.remove("side-panel-open");
     canvas.classList.add("w-100");
+    updateLines();
 }
 
 function openSidePanel() {
@@ -68,7 +70,6 @@ function closeAndEmptySidePanel() {
     pendingRequest = null
 
     removeAllOpenedObjectsHighlights()
-    updateLines();
 }
 
 function setRecomputationToTrueIfResultPaneIsOpen(){
