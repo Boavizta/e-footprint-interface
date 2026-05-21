@@ -9,17 +9,37 @@ function recomputationVals() {
     return {};
 }
 
-function openSidePanel() {
-    let sidePanel = document.getElementById("sidePanel");
-    let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");
-    sidePanel.classList.remove("d-none");
-    let btn = document.getElementById("btn-open-panel-result");
+function expandRightColumn() {
+    const btn = document.getElementById("btn-open-panel-result");
     if (!btn.classList.contains("result-width")) {
         btn.classList.remove("w-100");
         btn.classList.add("result-width");
     }
-    modelCanvaScrollableArea.classList.remove("w-100");
-    modelCanvaScrollableArea.classList.add("side-panel-open");
+    const canvas = document.getElementById("model-canva-scrollable-area");
+    canvas.classList.remove("w-100");
+    canvas.classList.add("side-panel-open");
+}
+
+function collapseRightColumn() {
+    const panel = document.getElementById("panel-result-btn");
+    if (panel.classList.contains("result-width")) {
+        panel.classList.remove("result-width");
+        panel.classList.add("w-100");
+    }
+    const btn = document.getElementById("btn-open-panel-result");
+    if (btn.classList.contains("result-width")) {
+        btn.classList.remove("result-width");
+        btn.classList.add("w-100");
+    }
+    const canvas = document.getElementById("model-canva-scrollable-area");
+    canvas.classList.remove("side-panel-open");
+    canvas.classList.add("w-100");
+}
+
+function openSidePanel() {
+    let sidePanel = document.getElementById("sidePanel");
+    sidePanel.classList.remove("d-none");
+    expandRightColumn();
     hideEditIcons();
 
     let scrollTarget = document.getElementById("sidePanelTitle");
@@ -35,7 +55,6 @@ function openSidePanel() {
 function closeAndEmptySidePanel() {
     let sidePanel = document.getElementById("sidePanel");
     let flatpickrCalendar = document.querySelector('.flatpickr-calendar')
-    let modelCanvaScrollableArea = document.getElementById("model-canva-scrollable-area");
     if (flatpickrCalendar) {
         flatpickrCalendar.remove();
     }
@@ -43,21 +62,7 @@ function closeAndEmptySidePanel() {
     sidePanel.innerHTML = "";
     closeTimeseriesChart();
     closeCalculatedAttributesChart();
-
-    let panel = document.getElementById("panel-result-btn");
-    if (panel.classList.contains("result-width")) {
-        panel.classList.remove("result-width");
-        panel.classList.add("w-100");
-    }
-
-    let btn = document.getElementById("btn-open-panel-result");
-    if (btn.classList.contains("result-width")) {
-        btn.classList.remove("result-width");
-        btn.classList.add("w-100");
-    }
-
-    modelCanvaScrollableArea.classList.remove("side-panel-open");
-    modelCanvaScrollableArea.classList.add("w-100");
+    collapseRightColumn();
 
     formModified = false
     pendingRequest = null
