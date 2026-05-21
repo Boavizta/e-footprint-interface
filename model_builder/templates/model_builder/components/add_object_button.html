@@ -31,10 +31,9 @@
 </button>
 {% endif %}
 {% if class_name and class_description %}
-<button type="button" class="btn btn-link p-0 ms-1 help-drawer-trigger flex-shrink-0"
-        hx-get="/model_builder/open-help-drawer/{{ class_name }}/"
-        hx-target="#helpDrawer"
-        hx-swap="innerHTML"
+<button type="button" class="btn btn-link p-0 ms-1 flex-shrink-0"
+        data-action="open-help-drawer"
+        data-help-class="{{ class_name }}"
         aria-label="About {{ class_label }}">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
          class="bi bi-question-circle" viewBox="0 0 16 16">

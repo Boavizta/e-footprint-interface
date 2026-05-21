@@ -61,12 +61,12 @@ def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Call
         _resolve_class(target)
         label = escape(_class_label(target))
         target_safe = escape(target)
-        # No real href / hx-get: a delegated click listener in help_drawer_utils.js drives the
-        # request, so the link works even when Bootstrap injects it into a popover subtree
-        # that HTMX never processed.
+        # The delegated dispatcher in help_drawer_utils.js drives the request via data-action,
+        # so the button works even when Bootstrap injects it into a popover subtree HTMX
+        # never processed. <button> avoids the href="#" fragment-URL hazard.
         return (
-            f'<a href="#" class="help-drawer-trigger" '
-            f'data-help-class="{target_safe}" role="button">{label}</a>'
+            f'<button type="button" data-action="open-help-drawer" '
+            f'data-help-class="{target_safe}">{label}</button>'
         )
 
     def handle_param(target: str) -> str:

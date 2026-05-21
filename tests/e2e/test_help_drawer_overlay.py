@@ -34,7 +34,7 @@ class TestHelpDrawerOverlay:
         page.locator("#UsageJourney_name").click()
         page.locator("#UsageJourney_name").fill("dirty draft")
 
-        help_button = page.locator("#btn-add-usage-journey + button.help-drawer-trigger")
+        help_button = page.locator("#btn-add-usage-journey + button[data-help-class='UsageJourney']")
         click_and_wait_for_htmx(page, help_button)
 
         # Help drawer rendered with class-help content, side panel still mounted, no modal fired.
@@ -66,7 +66,7 @@ class TestHelpDrawerOverlay:
         page = model_builder.page
         canvas = page.locator("#model-canva-scrollable-area")
 
-        help_button = page.locator("#btn-add-usage-journey + button.help-drawer-trigger")
+        help_button = page.locator("#btn-add-usage-journey + button[data-help-class='UsageJourney']")
         click_and_wait_for_htmx(page, help_button)
         expect(page.locator("#helpDrawer")).to_be_visible()
         expect(page.locator("#helpDrawerTitle")).to_contain_text("About")
@@ -113,7 +113,7 @@ class TestHelpDrawerOverlay:
         # Bootstrap injects the popover content into a body-level subtree that HTMX never
         # processed — the link works only because help_drawer_utils.js listens on document.body.
         help_link = page.locator(
-            ".popover .help-drawer-trigger[data-help-class='UsageJourneyStep']"
+            ".popover button[data-help-class='UsageJourneyStep']"
         )
         expect(help_link).to_be_visible()
         help_link.click()
@@ -136,14 +136,14 @@ class TestHelpDrawerOverlay:
         model_builder = empty_model_builder
         page = model_builder.page
 
-        help_button = page.locator("#btn-add-usage-journey + button.help-drawer-trigger")
+        help_button = page.locator("#btn-add-usage-journey + button[data-help-class='UsageJourney']")
         click_and_wait_for_htmx(page, help_button)
         expect(page.locator("#helpDrawerTitle")).to_contain_text("About Usage journey")
 
         # UsageJourney's class description contains "{class:UsageJourneyStep}" — that anchor is the
         # in-drawer help-to-help link.
         inner_link = page.locator(
-            "#helpDrawer .help-drawer-trigger[data-help-class='UsageJourneyStep']"
+            "#helpDrawer button[data-help-class='UsageJourneyStep']"
         ).first
         expect(inner_link).to_be_visible()
         inner_link.click()

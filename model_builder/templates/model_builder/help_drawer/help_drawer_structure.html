@@ -4,7 +4,7 @@
             <h5 id="helpDrawerTitle" class="m-0 p-2 text-start">
                 <b>{{ header_name }}</b>
             </h5>
-            {% include "model_builder/components/close_cross.html" with onclick="closeHelpDrawer()" btn_id="btn-close-help-drawer" %}
+            {% include "model_builder/components/close_cross.html" with data_action="close-help-drawer" btn_id="btn-close-help-drawer" %}
         </div>
     </div>
     <div class="panel-body" id="help-drawer-body">
@@ -16,9 +16,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    openHelpDrawer();
-    window.helpDrawerPopoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"][data-location="help_drawer"]');
-    window.helpDrawerPopoverList = [...window.helpDrawerPopoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
-</script>

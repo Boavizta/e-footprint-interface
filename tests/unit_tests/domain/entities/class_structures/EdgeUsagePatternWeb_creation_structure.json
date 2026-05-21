@@ -32,7 +32,7 @@
                 "web_id": "EdgeUsagePattern_edge_usage_journey",
                 "attr_name": "edge_usage_journey",
                 "label": "edge usage journey",
-                "tooltip": "The <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"EdgeUsageJourney\" role=\"button\">Edge usage journey</a> performed by the deployed edge devices.",
+                "tooltip": "The <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"EdgeUsageJourney\">Edge usage journey</button> performed by the deployed edge devices.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -50,7 +50,7 @@
                 "web_id": "EdgeUsagePattern_network",
                 "attr_name": "network",
                 "label": "network",
-                "tooltip": "<a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Network\" role=\"button\">Network</a> used by the edge devices to communicate with servers (when applicable).",
+                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Network\">Network</button> used by the edge devices to communicate with servers (when applicable).",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -68,7 +68,7 @@
                 "web_id": "EdgeUsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
-                "tooltip": "<a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"Country\" role=\"button\">Country</a> where the edge devices are deployed. Drives grid carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly edge usage journey starts</span>.",
+                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Country\">Country</button> where the edge devices are deployed. Drives grid carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly edge usage journey starts</span>.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [

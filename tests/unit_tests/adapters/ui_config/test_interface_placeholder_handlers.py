@@ -17,14 +17,16 @@ UI_TOKENS = {
 HTML = build_html_handlers(UI_TOKENS, mkdocs_base_url="https://docs.example/")
 
 
-def test_html_class_handler_emits_anchor_with_label():
+def test_html_class_handler_emits_button_with_label():
     out = HTML["class"]("Server")
-    assert 'class="help-drawer-trigger"' in out
+    assert '<button type="button"' in out
+    assert 'data-action="open-help-drawer"' in out
     assert 'data-help-class="Server"' in out
     assert "Custom server" in out
-    # Markup must carry no navigable URL nor inert hx-get — a delegated click listener drives the request.
+    # No navigable URL, no inert hx-get, no <a> fallback — the delegated dispatcher drives the request.
     assert "hx-get" not in out
     assert "/model_builder/open-help-drawer/" not in out
+    assert "<a " not in out
 
 
 def test_html_param_handler_emits_span_with_label():

@@ -32,7 +32,7 @@
                 "web_id": "EdgeFunction_recurrent_edge_device_needs",
                 "attr_name": "recurrent_edge_device_needs",
                 "label": "recurrent edge resource needs",
-                "tooltip": "Recurring resource needs running on edge hardware: CPU, RAM, storage, or whole-device workloads (see <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"RecurrentEdgeDeviceNeed\" role=\"button\">Recurrent edge device need</a> subclasses).",
+                "tooltip": "Recurring resource needs running on edge hardware: CPU, RAM, storage, or whole-device workloads (see <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"RecurrentEdgeDeviceNeed\">Recurrent edge device need</button> subclasses).",
                 "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [
@@ -52,7 +52,7 @@
                 "web_id": "EdgeFunction_recurrent_server_needs",
                 "attr_name": "recurrent_server_needs",
                 "label": "recurrent server needs",
-                "tooltip": "Recurring batches of server-side jobs triggered by this function (see <a href=\"#\" class=\"help-drawer-trigger\" data-help-class=\"RecurrentServerNeed\" role=\"button\">Recurrent server need</a>).",
+                "tooltip": "Recurring batches of server-side jobs triggered by this function (see <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"RecurrentServerNeed\">Recurrent server need</button>).",
                 "input_type": "select_multiple",
                 "selected": [],
                 "unselected": [

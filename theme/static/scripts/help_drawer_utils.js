@@ -1,57 +1,86 @@
-// Bootstrap's default popover sanitizer strips data-* attributes from rendered HTML, which would
-// drop the data-help-class hook on {class:X} placeholder links injected via data-bs-content.
-// Extend the global allow-list once at script load so every popover preserves the attribute.
-if (window.bootstrap && bootstrap.Tooltip && bootstrap.Tooltip.Default.allowList) {
+/* Help drawer overlay — open/close the #helpDrawer layer and route entry points to it.
+   Templates declare intent with `data-action="open-help-drawer"` / `data-action="close-help-drawer"`;
+   a single delegated dispatcher does the work. Nothing escapes to `window`.
+   See conventions.md → JavaScript. */
+(function () {
+    /* Bootstrap's default sanitizer strips <button> and data-* attributes from rendered
+       popover/tooltip content. {class:X} placeholders render as <button data-action=...
+       data-help-class=...>, so popovers (which inject content into a DOM subtree HTMX
+       never processed) would otherwise lose both the tag and the dispatch attributes. */
     const allowList = bootstrap.Tooltip.Default.allowList;
-    allowList.a = [...(allowList.a || []), "data-help-class"];
-}
+    allowList.button = [...(allowList.button || []), "type", "data-action", "data-help-class"];
 
-function openHelpDrawer() {
-    const helpDrawer = document.getElementById("helpDrawer");
-    helpDrawer.classList.remove("d-none");
-    expandRightColumn();
-    const scrollTarget = document.getElementById("helpDrawerTitle");
-    if (scrollTarget) {
-        helpDrawer.scrollTo({ top: scrollTarget.offsetTop, behavior: "smooth" });
+    function openHelpDrawer() {
+        const helpDrawer = document.getElementById("helpDrawer");
+        helpDrawer.classList.remove("d-none");
+        expandRightColumn();
+        const scrollTarget = document.getElementById("helpDrawerTitle");
+        if (scrollTarget) {
+            helpDrawer.scrollTo({ top: scrollTarget.offsetTop, behavior: "smooth" });
+        }
     }
-}
 
-function closeHelpDrawer() {
-    const helpDrawer = document.getElementById("helpDrawer");
-    helpDrawer.classList.add("d-none");
-    helpDrawer.innerHTML = "";
-    const sidePanel = document.getElementById("sidePanel");
-    if (sidePanel.classList.contains("d-none")) {
-        collapseRightColumn();
+    function closeHelpDrawer() {
+        const helpDrawer = document.getElementById("helpDrawer");
+        helpDrawer.classList.add("d-none");
+        helpDrawer.innerHTML = "";
+        const sidePanel = document.getElementById("sidePanel");
+        if (sidePanel.classList.contains("d-none")) {
+            collapseRightColumn();
+        }
     }
-}
 
-document.body.addEventListener("htmx:afterSwap", function (event) {
-    if (event.detail.target && event.detail.target.id === "sidePanel") {
-        closeHelpDrawer();
+    /* Bootstrap puts popover/tooltip content inside a `.popover` / `.tooltip` wrapper whose
+       id is referenced by the trigger element's `aria-describedby`. Walk that chain to dismiss
+       only the popover the user actually clicked through. */
+    function dismissEnclosingPopover(triggerEl) {
+        const wrapper = triggerEl.closest(".popover, .tooltip");
+        if (!wrapper?.id) return;
+        const popoverTrigger = document.querySelector(`[aria-describedby="${wrapper.id}"]`);
+        if (!popoverTrigger) return;
+        const inst = bootstrap.Popover.getInstance(popoverTrigger)
+            || bootstrap.Tooltip.getInstance(popoverTrigger);
+        if (inst) inst.hide();
     }
-});
 
-// Delegated handler for {class:X} placeholder links emitted by handle_class.
-// Gating on [data-help-class] avoids double-firing on the canvas "?" button, which
-// shares the .help-drawer-trigger class but drives its own hx-get/hx-target.
-document.body.addEventListener("click", function (event) {
-    const trigger = event.target.closest(".help-drawer-trigger[data-help-class]");
-    if (!trigger) return;
-    event.preventDefault();
+    function openHelpForClass(className) {
+        htmx.ajax(
+            "GET",
+            `/model_builder/open-help-drawer/${className}/`,
+            { target: "#helpDrawer", swap: "innerHTML" }
+        );
+    }
 
-    // Dismiss any popover/tooltip the trigger lives inside so the help drawer surfaces cleanly.
-    document.querySelectorAll('[aria-describedby^="popover"], [aria-describedby^="tooltip"]').forEach(el => {
-        const popInst = bootstrap.Popover.getInstance(el);
-        if (popInst) popInst.hide();
-        const tipInst = bootstrap.Tooltip.getInstance(el);
-        if (tipInst) tipInst.hide();
+    /* ===== Delegated dispatcher ===== */
+
+    document.body.addEventListener("click", function (event) {
+        const target = event.target.closest("[data-action]");
+        if (!target) return;
+        switch (target.dataset.action) {
+            case "open-help-drawer":
+                event.preventDefault();
+                dismissEnclosingPopover(target);
+                openHelpForClass(target.dataset.helpClass);
+                break;
+            case "close-help-drawer":
+                event.preventDefault();
+                closeHelpDrawer();
+                break;
+        }
     });
 
-    const className = trigger.dataset.helpClass;
-    htmx.ajax(
-        "GET",
-        `/model_builder/open-help-drawer/${className}/`,
-        { target: "#helpDrawer", swap: "innerHTML" }
-    );
-});
+    /* React to swaps into either drawer. Help-drawer swap auto-opens the layer and inits
+       its popovers (the inline script that used to live in help_drawer_structure.html);
+       side-panel swap auto-closes the help drawer so the side panel takes over. */
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        const swapTarget = event.detail.target;
+        if (!swapTarget) return;
+        if (swapTarget.id === "helpDrawer") {
+            openHelpDrawer();
+            swapTarget.querySelectorAll('[data-bs-toggle="popover"][data-location="help_drawer"]')
+                .forEach(el => bootstrap.Popover.getOrCreateInstance(el));
+        } else if (swapTarget.id === "sidePanel") {
+            closeHelpDrawer();
+        }
+    });
+})();
