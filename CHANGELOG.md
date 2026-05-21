@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - `{class:X}` placeholder links inside field tooltips opened a full-page partial template instead of the help drawer, because Bootstrap popovers inject content into a DOM subtree HTMX has not processed. A delegated click listener now drives the request, so the link works regardless of which subtree the popover renders into.
+- Help drawer documentation links for abstract add-button classes now point to the concrete object reference pages instead of broken abstract-class URLs.
 
 ## [1.4.0] - 2026-05-06
 
@@ -32,7 +33,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Self-host the bootstrap-icons font so all `bi-*` glyphs render reliably.
 
 ### Fixed
-- Help drawer documentation links for abstract add-button classes now point to the concrete object reference pages instead of broken abstract-class URLs.
 - Leader-line crash when `htmx:afterSettle` ran on a partially-swapped DOM.
 - Edge device deletion when the device has components.
 - Source table row-editor Apply: stabilize behavior so confidence + source/comment edits commit reliably without spurious reloads.
