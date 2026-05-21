@@ -172,13 +172,11 @@ The "Try this interactively" line uses `{{ config.extra.interface_base_url }}` (
 
 Short prose, ~150–400 words each. No modeling templates. No code blocks expected (unless a single short snippet is genuinely the answer).
 
-### Page 5 — `best_practices.md`
+### Page 5 — `best_practices.md` (merged)
 
-**File:** rewrite of `docs_sources/mkdocs_sourcefiles/best_practices.md`.
+**Status:** merged into `ecodesign_strategies.md` (Explanation: "Best practices, measurement, simulation"). The best-practices points listed below were absorbed into that page alongside the measurement-tools content. No separate `best_practices.md` file is shipped.
 
-**Question framing:** "What are the best practices for building a trustworthy e-footprint model?"
-
-**Points to make:**
+**Points to make (now in `ecodesign_strategies.md`):**
 - Prefer measured `{class:Source}` entries over hypotheses; cite the source explicitly.
 - Keep `default_values` only for ranges you actually trust; override at the param level when you have better data.
 - Build incrementally: start with one usage pattern + one server, verify the numbers feel right, then add complexity.
@@ -200,13 +198,11 @@ Short prose, ~150–400 words each. No modeling templates. No code blocks expect
 
 Status: drafted 2026-05-18 (co-authored, pending commit). Stub `build_process.md` deleted; `mkdocs.yml` FAQ nav entry updated. When the mechanical track's `{doc:}` registry lands, register the `development_process` key.
 
-### Page 7 — `measurement_tools.md`
+### Page 7 — `measurement_tools.md` (merged)
 
-**File:** rewrite of `docs_sources/mkdocs_sourcefiles/measurement_tools.md`.
+**Status:** merged into `ecodesign_strategies.md` (Explanation: "Best practices, measurement, simulation"). The measurement-vs-modeling framing and the Boavizta / EcoLogits positioning now live there alongside the best-practices content. No separate `measurement_tools.md` file is shipped.
 
-**Question framing:** "What's e-footprint's relationship to measurement tools like Boavizta, EcoLogits, etc.?"
-
-**Points to make:**
+**Points to make (now in `ecodesign_strategies.md`):**
 - e-footprint is a **modeling** tool, not a measurement tool. It predicts impact from a structural description of a system.
 - It consumes measurement data from upstream tools:
   - Boavizta — hardware fabrication and usage emission factors (`{class:BoaviztaCloudServer}` integration).

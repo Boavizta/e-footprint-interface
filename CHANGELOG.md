@@ -4,14 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.5.0] - 2026-05-21
 
-### Changed
-- Help drawer is now an overlay layer on top of the side panel: opening help while an edit form is open no longer destroys the form, and closing the help drawer restores the underlying side panel with unsaved changes intact. Help-to-help navigation no longer fires the unsaved-changes modal.
-
-### Fixed
-- `{class:X}` placeholder links inside field tooltips opened a full-page partial template instead of the help drawer, because Bootstrap popovers inject content into a DOM subtree HTMX has not processed. A delegated click listener now drives the request, so the link works regardless of which subtree the popover renders into.
-- Help drawer documentation links for abstract add-button classes now point to the concrete object reference pages instead of broken abstract-class URLs.
+### Added
+- Edit-form fields now show object-type-specific description tooltips sourced from the e-footprint documentation.
+- Help drawer: a "?" button on add buttons and on the canvas opens a documentation panel as an overlay on top of the side panel, so an open edit form is preserved when browsing help.
+- Interface-side description overrides for Server and External API.
 
 ## [1.4.0] - 2026-05-06
 
