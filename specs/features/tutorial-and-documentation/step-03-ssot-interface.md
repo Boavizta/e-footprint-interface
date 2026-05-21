@@ -8,6 +8,8 @@
 - [`05-maintainability-and-build.md`](05-maintainability-and-build.md) Step 3 row (`{ui:token}` resolution, `class_ui_config.json` completeness, DescriptionProvider round-trip).
 - [`00-index.md`](00-index.md) (overall feature framing and decisions summary).
 
+**Later refinement:** the help drawer described below has since been reworked into an independent overlay layer by the [`help-drawer-overlay`](../help-drawer-overlay/spec.md) feature. The Step-3 server-side surface (view, URL, template, `{kind:target}` resolution) is unchanged; the front-end trigger markup is not — `{class:X}` placeholders and the canvas `?` button now emit `<button data-action="open-help-drawer" data-help-class="X">` and a single delegated dispatcher in `help_drawer_utils.js` swaps `#helpDrawer` (not `#sidePanel`). The trigger-markup snippets in this doc reflect that current shape; the rest of the design remains as originally planned.
+
 **Prerequisite:** Step 2 has landed in e-footprint. Concrete classes carry `param_descriptions`, class docstrings, `update_<attr>` docstrings, and (where warranted) `disambiguation`, `pitfalls`, `interactions`, `param_interactions`. The library-side `tests/test_descriptions.py` is hard-failing.
 
 **Assumed library inheritance shape (verify against Step 2 before starting):** for every concrete class, `klass.param_descriptions` (read via plain attribute lookup) covers every `__init__` param — either authored on the class directly or inherited from an abstract base. The interface adapter relies on `getattr(klass, "param_descriptions", {})` returning the full dict for the concrete class; if Step 2 lands per-class-only dicts without inheritance, the form-field tooltip coverage claim breaks for subclasses and this plan needs a merge step.
@@ -125,7 +127,7 @@ Both consult `ALL_EFOOTPRINT_CLASSES` directly to validate `class:X`, `param:X.y
 
 | Kind | HTML handler output | Text handler output | Failure mode |
 |---|---|---|---|
-| `class:X` | `<a href="/model_builder/open-help-drawer/X/" class="help-drawer-trigger" hx-get=… hx-target="#sidePanel">{label}</a>`; `label` from `class_ui_config[X].label` (or `X` if unconfigured). | `{label}` plain. | Unknown `X` (not in `ALL_EFOOTPRINT_CLASSES_DICT`) → `ValueError`. |
+| `class:X` | `<button type="button" data-action="open-help-drawer" data-help-class="X">{label}</button>`; `label` from `class_ui_config[X].label` (or `X` if unconfigured). The delegated dispatcher in `help_drawer_utils.js` swaps `#helpDrawer`. | `{label}` plain. | Unknown `X` (not in `ALL_EFOOTPRINT_CLASSES_DICT`) → `ValueError`. |
 | `param:X.y` | `<span class="ssot-param-ref">{label}</span>` where `label` comes from `field_ui_config[y].label` (fallback: `y`). | `{label}` plain. | Unknown `X` (not in `ALL_EFOOTPRINT_CLASSES_DICT`) or `y` not in `X.__init__` → `ValueError`. |
 | `calc:X.y` | `<span class="ssot-calc-ref">{humanized_attr}</span>`. | `{humanized_attr}` plain. | Unknown → `ValueError`. |
 | `doc:slug` | `<a href="{mkdocs_base_url}/{slug}" target="_blank" rel="noopener">{slug}</a>`. | `{slug}` plain. | Unknown slug not validated here; mkdocs build is authoritative. |
@@ -199,9 +201,10 @@ The Add-button include (`model_builder/components/add_object_button.html`) is ex
 
 ```html
 {% if class_name and class_description %}
-<button type="button" class="btn btn-link p-0 ms-1 help-drawer-trigger"
-        hx-get="/model_builder/open-help-drawer/{{ class_name }}/" hx-target="#sidePanel"
-        hx-swap="innerHTML" aria-label="About {{ class_label }}">
+<button type="button" class="btn btn-link p-0 ms-1 flex-shrink-0"
+        data-action="open-help-drawer"
+        data-help-class="{{ class_name }}"
+        aria-label="About {{ class_label }}">
     {# reuse the question-circle SVG inline #}
 </button>
 {% endif %}
