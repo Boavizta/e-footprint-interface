@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Internal `modeling_paradigm.py` module with `EDGE_EFOOTPRINT_CLASS_NAMES` and `paradigm_for()`. `ModelWeb` exposes `has_edge_objects`; `ModelingObjectWeb` exposes `modeling_paradigm`.
 - Edge modeling navbar toggle on the model-builder toolbar. Hides edge add-buttons by default (per-browser localStorage preference) and latches on when the model contains any edge object. Edge object cards get a small coloured dot for quick mixed-model scanning. Toggle re-renders OOB whenever `has_edge_objects` flips.
 
+### Changed
+- Edge-paradigm domain layer cleanup: dropped the abstract-alias defensive guard in `ModelWeb.has_edge_objects` and the two aliases (`EdgeDeviceBase`, `RecurrentEdgeDeviceNeedBase`) it was guarding; tightened the consistency test to assert every name resolves to an efootprint class. Renamed `ModelingObjectWeb._recompute_constraints_and_emit_regions` → `_recompute_state_and_emit_oob_regions` (it now also diffs `has_edge_objects`) and the lagging-state attribute `ModelWeb.has_edge_objects_cached` → `_last_emitted_has_edge_objects` to discourage misuse as a live cache. Replaced stub-based unit and integration tests with real `ModelWeb` / use-case driven flows.
+
 ## [1.5.0] - 2026-05-21
 
 ### Added

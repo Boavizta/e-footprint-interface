@@ -63,13 +63,13 @@ class ModelWeb:
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
             self.creation_constraints = self._build_creation_constraints()
-            self.has_edge_objects_cached = self.has_edge_objects
+            self._last_emitted_has_edge_objects = self.has_edge_objects
             if self.system_data_source == "postgres":
                 self.persist_to_cache()
         else:
             self.system_data = raw_system_data
             self.creation_constraints = {}
-            self.has_edge_objects_cached = False
+            self._last_emitted_has_edge_objects = False
             logger.info(f"Empty system data so e-footprint modeling hasn’t been hydrated.")
         self.constraint_changes = []
 
@@ -276,8 +276,6 @@ class ModelWeb:
         """True iff the model contains at least one edge-paradigm object."""
         from model_builder.domain.modeling_paradigm import EDGE_EFOOTPRINT_CLASS_NAMES
         for class_name in EDGE_EFOOTPRINT_CLASS_NAMES:
-            if class_name not in MODELING_OBJECT_CLASSES_DICT and class_name not in ABSTRACT_EFOOTPRINT_MODELING_CLASSES:
-                continue
             if self.get_web_objects_from_efootprint_type(class_name):
                 return True
         return False

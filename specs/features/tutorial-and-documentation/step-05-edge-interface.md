@@ -116,7 +116,7 @@ update. Reuse the side-effects OOB pattern established in Step 1:
 - Add an `edge_modeling_toggle` OOB region renderer in `oob_regions.py` that
   re-renders the toggle partial via
   `hx-swap-oob="outerHTML:#edge-modeling-toggle-wrapper"`.
-- In `ModelingObjectWeb._recompute_constraints_and_emit_regions` (or a sibling
+- In `ModelingObjectWeb._recompute_state_and_emit_oob_regions` (or a sibling
   helper invoked from the same `*_side_effects` instance methods), detect a
   flip of `has_edge_objects` and append the OOB region. The check is cheap
   (a property read) and only fires on create/delete, not edit.
@@ -266,7 +266,7 @@ existing `initModelBuilderMain` flow after OOB settles.
    — add `modeling_paradigm` property: returns
    `paradigm_for(self.modeling_obj.class_as_simple_str)`.
 4. `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py`
-   — extend `_recompute_constraints_and_emit_regions` (or sibling helper) to
+   — extend `_recompute_state_and_emit_oob_regions` (or sibling helper) to
    also detect a `has_edge_objects` flip and append the `navbar_edge_toggle` OOB
    region. The check compares `model_web.has_edge_objects` before vs. after the
    mutation; cache the pre-mutation value the same way constraints are cached.

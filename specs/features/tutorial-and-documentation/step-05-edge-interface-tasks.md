@@ -17,7 +17,7 @@
 **Files touched:**
 - `model_builder/domain/modeling_paradigm.py` — **new**. Exports `EDGE_EFOOTPRINT_CLASS_NAMES: frozenset[str]` (the 23-name set listed verbatim in the plan §"Edge object classification") and `paradigm_for(efootprint_class_name: str) -> str` returning `"edge"` or `"web"`. No Django imports.
 - `model_builder/domain/entities/web_core/model_web.py` — add `has_edge_objects` property. Implementation iterates `EDGE_EFOOTPRINT_CLASS_NAMES` and calls `get_web_objects_from_efootprint_type(name)`, returning `True` on the first non-empty result (do not enumerate accessors by hand).
-- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — add `modeling_paradigm` property returning `paradigm_for(self.modeling_obj.class_as_simple_str)`. **Do not** extend `_recompute_constraints_and_emit_regions` here — the OOB hook lands in Task 2 alongside its renderer.
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — add `modeling_paradigm` property returning `paradigm_for(self.modeling_obj.class_as_simple_str)`. **Do not** extend `_recompute_state_and_emit_oob_regions` here — the OOB hook lands in Task 2 alongside its renderer.
 
 **Tests added/changed:**
 - `tests/unit_tests/domain/test_model_web_edge.py` — **new**. Per plan §"Tests" → Unit:
@@ -50,7 +50,7 @@
 **Files touched:**
 
 *Domain (OOB hook only):*
-- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — extend `_recompute_constraints_and_emit_regions` (or sibling helper invoked from the same `*_side_effects` instance methods) to detect a `has_edge_objects` flip (pre-mutation vs. post-mutation, caching the pre-mutation value the same way constraints are cached) and append the `edge_modeling_toggle` OOB region only when it flips.
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — extend `_recompute_state_and_emit_oob_regions` (or sibling helper invoked from the same `*_side_effects` instance methods) to detect a `has_edge_objects` flip (pre-mutation vs. post-mutation, caching the pre-mutation value the same way constraints are cached) and append the `edge_modeling_toggle` OOB region only when it flips.
 
 *Adapter / presenter:*
 - `model_builder/adapters/presenters/oob_regions.py` — add `edge_modeling_toggle` region renderer using `hx-swap-oob="outerHTML:#edge-modeling-toggle-wrapper"`, re-rendering the `edge_modeling_toggle.html` partial standalone.
@@ -104,4 +104,4 @@
 
 Task 1 lands the domain primitives behind no user-visible change — paradigm classification, `has_edge_objects`, `modeling_paradigm`, and their unit + consistency tests. Splitting these from their consumer is the natural "infrastructure unused" pause point: the classification set is the load-bearing piece of the whole step and the consistency test guards future drift, so reviewing it in isolation pays off.
 
-Task 2 is one cohesive user-visible delivery. Toggle, latch, OOB region, card dot, gating CSS, JS, and settings are deliberately bundled: they all key off the same `data-modeling-paradigm` attribute and the single localStorage flag, and there is no meaningful behavioural pause point between "card dot visible" and "toggle works" — shipping the dot without the toggle would advertise a paradigm distinction the user can't yet act on, and shipping the toggle without the dot would leave mixed-model users without the per-card affordance the plan explicitly motivates. The OOB hook on `_recompute_constraints_and_emit_regions` lands in Task 2 (not Task 1) because it has no consumer until the OOB renderer in `oob_regions.py` and the toggle wrapper id `#edge-modeling-toggle-wrapper` also exist — splitting them would leave a half-wired call site.
+Task 2 is one cohesive user-visible delivery. Toggle, latch, OOB region, card dot, gating CSS, JS, and settings are deliberately bundled: they all key off the same `data-modeling-paradigm` attribute and the single localStorage flag, and there is no meaningful behavioural pause point between "card dot visible" and "toggle works" — shipping the dot without the toggle would advertise a paradigm distinction the user can't yet act on, and shipping the toggle without the dot would leave mixed-model users without the per-card affordance the plan explicitly motivates. The OOB hook on `_recompute_state_and_emit_oob_regions` lands in Task 2 (not Task 1) because it has no consumer until the OOB renderer in `oob_regions.py` and the toggle wrapper id `#edge-modeling-toggle-wrapper` also exist — splitting them would leave a half-wired call site.

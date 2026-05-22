@@ -178,15 +178,17 @@ class ModelingObjectWeb:
         """
         return {}
 
-    def _recompute_constraints_and_emit_regions(self) -> list:
-        """Refresh `model_web.creation_constraints`; return OOB regions if anything flipped.
+    def _recompute_state_and_emit_oob_regions(self) -> list:
+        """Diff post-mutation state vs. last-emitted state; return OOB regions for each flip.
 
-        Mutates `model_web.constraint_changes` only when there's at least one flip, so the
-        presenter can surface one toast per flipped constraint. Used by all three side-effect
-        hooks so the diff-and-emit logic lives in exactly one place.
+        Two diffs share this hook:
+          * `model_web.creation_constraints` flips emit `model_canvas` + `results_buttons`
+            regions and stage `model_web.constraint_changes` for the presenter's toasts.
+          * `model_web.has_edge_objects` flips emit the `edge_modeling_toggle` region
+            so the navbar toggle re-renders latched/unlatched.
 
-        Also detects a `has_edge_objects` flip and appends the `edge_modeling_toggle` OOB
-        region so the navbar toggle's latched/unlatched markup re-renders.
+        Called from all three `*_side_effects` hooks so the diff-and-emit logic lives in
+        exactly one place.
         """
         from model_builder.domain.oob_region import OobRegion
 
@@ -207,8 +209,8 @@ class ModelingObjectWeb:
             regions.extend([OobRegion("model_canvas"), OobRegion("results_buttons")])
 
         new_has_edge = model_web.has_edge_objects
-        if new_has_edge != model_web.has_edge_objects_cached:
-            model_web.has_edge_objects_cached = new_has_edge
+        if new_has_edge != model_web._last_emitted_has_edge_objects:
+            model_web._last_emitted_has_edge_objects = new_has_edge
             regions.append(OobRegion("edge_modeling_toggle"))
 
         return regions
@@ -217,19 +219,19 @@ class ModelingObjectWeb:
         """Side-effect descriptors emitted after this object is created."""
         from model_builder.domain.oob_region import CreateSideEffects
         side_effects = CreateSideEffects()
-        side_effects.oob_regions.extend(self._recompute_constraints_and_emit_regions())
+        side_effects.oob_regions.extend(self._recompute_state_and_emit_oob_regions())
         return side_effects
 
     def edit_side_effects(self):
         """Side-effect descriptors emitted after this object is edited."""
         from model_builder.domain.oob_region import EditSideEffects
         side_effects = EditSideEffects()
-        side_effects.oob_regions.extend(self._recompute_constraints_and_emit_regions())
+        side_effects.oob_regions.extend(self._recompute_state_and_emit_oob_regions())
         return side_effects
 
     def delete_side_effects(self):
         """Side-effect OOB regions emitted after this object is deleted."""
-        return self._recompute_constraints_and_emit_regions()
+        return self._recompute_state_and_emit_oob_regions()
 
 
     @property

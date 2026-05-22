@@ -1,7 +1,8 @@
 """Drift guards for EDGE_EFOOTPRINT_CLASS_NAMES vs. the efootprint mapping."""
 from unittest.mock import MagicMock
 
-from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.all_efootprint_classes import (
+    ABSTRACT_EFOOTPRINT_MODELING_CLASSES, MODELING_OBJECT_CLASSES_DICT)
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.modeling_paradigm import EDGE_EFOOTPRINT_CLASS_NAMES, paradigm_for
@@ -12,13 +13,30 @@ def test_edge_class_names_is_subset_of_mapping_keys():
     assert not missing, f"Edge class names not in the mapping: {sorted(missing)}"
 
 
+def test_edge_class_names_all_resolve_to_an_efootprint_class():
+    """Every name in EDGE_EFOOTPRINT_CLASS_NAMES resolves to a concrete or abstract efootprint class.
+
+    `ModelWeb.has_edge_objects` iterates the set unconditionally and calls
+    `get_efootprint_objects_from_efootprint_type(name)`, which crashes on
+    `issubclass(..., None)` for names absent from both class dicts. Keeping the set
+    resolvable is what makes the iteration loud-on-typo. Abstract entries (e.g.
+    `EdgeComponent`) are allowed because the helper accepts them and resolves all
+    concrete subclasses via `issubclass`.
+    """
+    known = set(MODELING_OBJECT_CLASSES_DICT) | set(ABSTRACT_EFOOTPRINT_MODELING_CLASSES)
+    missing = EDGE_EFOOTPRINT_CLASS_NAMES - known
+    assert not missing, (
+        f"Edge class names that don't resolve to any efootprint class: {sorted(missing)}. "
+        f"Either add the class or drop the name from the set.")
+
+
 def test_edge_classification_matches_efootprint_module_path():
     """For every concrete class in the mapping, "module path contains an edge segment" iff classified edge.
 
     Catches drift in both directions: a new edge class added to the mapping without joining
     EDGE_EFOOTPRINT_CLASS_NAMES, and a name kept in the set after the underlying class moves
-    out of an edge module. Interface-side aliases (e.g. EdgeDeviceBase) that have no concrete
-    efootprint class are skipped because there is no module path to consult.
+    out of an edge module. Abstract aliases (e.g. ServerBase) that have no concrete efootprint
+    class are skipped because there is no module path to consult.
     """
     mismatches = []
     for class_name in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING:
