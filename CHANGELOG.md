@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Edge-paradigm domain layer cleanup: dropped the abstract-alias defensive guard in `ModelWeb.has_edge_objects` and the two aliases (`EdgeDeviceBase`, `RecurrentEdgeDeviceNeedBase`) it was guarding; tightened the consistency test to assert every name resolves to an efootprint class. Renamed `ModelingObjectWeb._recompute_constraints_and_emit_regions` → `_recompute_state_and_emit_oob_regions` (it now also diffs `has_edge_objects`) and the lagging-state attribute `ModelWeb.has_edge_objects_cached` → `_last_emitted_has_edge_objects` to discourage misuse as a live cache. Replaced stub-based unit and integration tests with real `ModelWeb` / use-case driven flows.
+- Edge-paradigm templates and styling: moved `data-modeling-paradigm="edge"` out of the shared `add_object_button.html` partial and onto wrapper `<div>`s at the 4 edge add-button call sites in `model_canvas_content.html` (the partial no longer carries paradigm awareness). Dropped the redundant attribute from the `.modeling-paradigm-dot` span (latching makes its hide-state unreachable) and rebuilt `bs_main.css` via sass after introducing a dedicated `--edge-paradigm-accent` palette token (placeholder `#7B5DC7`, pending designer review) for the dot colour, replacing the brand `--gadrient-color-3` that visually blurred with primary chrome.
 
 ## [1.5.0] - 2026-05-21
 

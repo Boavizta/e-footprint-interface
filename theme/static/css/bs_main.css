@@ -20273,6 +20273,10 @@ textarea.form-control-lg {
   --loading-bar-bg: #e0e0e0;
   --gadrient-color-2: #017E7E;
   --gadrient-color-3: #1B9891;
+  /* Orthogonal to the teal/blue brand palette and to the red/amber/green confidence
+     palette, so the edge marker reads as "alternative category" rather than as brand
+     chrome or a status indicator. Designer review pending. */
+  --edge-paradigm-accent: #7B5DC7;
   --open-result-btn: 50px;
   --loading-bar-height: 2px;
 }
@@ -23002,7 +23006,7 @@ body.edge-modeling-off #model-canva [data-modeling-paradigm=edge] {
 .modeling-paradigm-dot {
   width: 8px;
   height: 8px;
-  background-color: var(--gadrient-color-3);
+  background-color: var(--edge-paradigm-accent);
   border-radius: 50%;
 }
 
@@ -23347,3 +23351,5 @@ body.edge-modeling-off #model-canva [data-modeling-paradigm=edge] {
   color: #4a90d9;
   background: #f0f6ff;
 }
+
+/*# sourceMappingURL=bs_main.css.map */
