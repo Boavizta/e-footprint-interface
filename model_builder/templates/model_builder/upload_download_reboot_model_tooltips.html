@@ -37,6 +37,7 @@
         </button>
         <div class="collapse navbar-collapse justify-content-end mt-1 m-lg-0" id="navbarSupportedContent">
             <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3 align-items-center">
+                {% include 'model_builder/components/edge_modeling_toggle.html' %}
                 <li class="nav-item">
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"

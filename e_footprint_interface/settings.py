@@ -89,6 +89,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "model_builder.adapters.context_processors.edge_modeling_doc_url",
             ],
         },
     },
@@ -181,6 +182,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Base URL of the published e-footprint mkdocs site. Used to render `{doc:slug}`
 # placeholders as outbound links from interface help content.
 MKDOCS_BASE_URL = os.getenv("MKDOCS_BASE_URL", "https://boavizta.github.io/e-footprint")
+
+# URL of the canonical "web vs edge modeling" explanation page on mkdocs.
+# Surfaced in the edge-modeling toggle popover.
+EDGE_MODELING_DOC_URL = os.getenv(
+    "EDGE_MODELING_DOC_URL", f"{MKDOCS_BASE_URL}/explanation/web_vs_edge/")
 
 # ============================================================================
 # ENVIRONMENT-SPECIFIC CONFIGURATION

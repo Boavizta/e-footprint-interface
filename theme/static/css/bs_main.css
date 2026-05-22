@@ -22994,6 +22994,18 @@ input:disabled {
   gap: 6px;
 }
 
+/* Edge modeling toggle: hide edge-paradigm add-buttons in the canvas when off. */
+body.edge-modeling-off #model-canva [data-modeling-paradigm=edge] {
+  display: none;
+}
+
+.modeling-paradigm-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--gadrient-color-3);
+  border-radius: 50%;
+}
+
 .sankey-section {
   padding: 0 4px 16px;
 }
@@ -23335,5 +23347,3 @@ input:disabled {
   color: #4a90d9;
   background: #f0f6ff;
 }
-
-/*# sourceMappingURL=bs_main.css.map */

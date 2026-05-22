@@ -43,6 +43,8 @@
 
 ## Task 2 — Edge modeling toggle, latch, card badge
 
+**Status:** Done.
+
 **Goal:** Ship the full user-visible edge modeling surface end-to-end. Navbar toggle with localStorage-driven hide/show of edge add-buttons, latching when the model already contains edge objects (server-rendered + OOB re-rendered on flip), the question-circle popover linking to `EDGE_MODELING_DOC_URL`, and the coloured dot on edge object cards. After this PR a user can toggle edge modeling on/off, see edge cards marked, and have the toggle latched on as soon as an edge object exists.
 
 **Files touched:**

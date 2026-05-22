@@ -63,11 +63,13 @@ class ModelWeb:
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
             self.creation_constraints = self._build_creation_constraints()
+            self.has_edge_objects_cached = self.has_edge_objects
             if self.system_data_source == "postgres":
                 self.persist_to_cache()
         else:
             self.system_data = raw_system_data
             self.creation_constraints = {}
+            self.has_edge_objects_cached = False
             logger.info(f"Empty system data so e-footprint modeling hasn’t been hydrated.")
         self.constraint_changes = []
 

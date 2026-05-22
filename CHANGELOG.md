@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- Internal `modeling_paradigm.py` module with `EDGE_EFOOTPRINT_CLASS_NAMES` and `paradigm_for()`. `ModelWeb` exposes `has_edge_objects`; `ModelingObjectWeb` exposes `modeling_paradigm`. No user-visible behaviour yet — wiring lands in a follow-up.
+- Internal `modeling_paradigm.py` module with `EDGE_EFOOTPRINT_CLASS_NAMES` and `paradigm_for()`. `ModelWeb` exposes `has_edge_objects`; `ModelingObjectWeb` exposes `modeling_paradigm`.
+- Edge modeling navbar toggle on the model-builder toolbar. Hides edge add-buttons by default (per-browser localStorage preference) and latches on when the model contains any edge object. Edge object cards get a small coloured dot for quick mixed-model scanning. Toggle re-renders OOB whenever `has_edge_objects` flips.
 
 ## [1.5.0] - 2026-05-21
 

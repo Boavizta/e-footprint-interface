@@ -184,6 +184,9 @@ class ModelingObjectWeb:
         Mutates `model_web.constraint_changes` only when there's at least one flip, so the
         presenter can surface one toast per flipped constraint. Used by all three side-effect
         hooks so the diff-and-emit logic lives in exactly one place.
+
+        Also detects a `has_edge_objects` flip and appends the `edge_modeling_toggle` OOB
+        region so the navbar toggle's latched/unlatched markup re-renders.
         """
         from model_builder.domain.oob_region import OobRegion
 
@@ -197,10 +200,18 @@ class ModelingObjectWeb:
             if old_constraints[key]["enabled"] != value["enabled"]:
                 changes.append((key, "unlocked" if value["enabled"] else "locked"))
         model_web.creation_constraints = new_constraints
-        if not changes:
-            return []
-        model_web.constraint_changes = changes
-        return [OobRegion("model_canvas"), OobRegion("results_buttons")]
+
+        regions: list = []
+        if changes:
+            model_web.constraint_changes = changes
+            regions.extend([OobRegion("model_canvas"), OobRegion("results_buttons")])
+
+        new_has_edge = model_web.has_edge_objects
+        if new_has_edge != model_web.has_edge_objects_cached:
+            model_web.has_edge_objects_cached = new_has_edge
+            regions.append(OobRegion("edge_modeling_toggle"))
+
+        return regions
 
     def create_side_effects(self):
         """Side-effect descriptors emitted after this object is created."""

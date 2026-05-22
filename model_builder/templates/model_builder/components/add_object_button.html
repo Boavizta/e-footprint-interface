@@ -1,5 +1,6 @@
 {% load static %}
-<div class="d-flex flex-row align-items-center min-w-0 {{ btn_extra_classes }}">
+<div class="d-flex flex-row align-items-center min-w-0 {{ btn_extra_classes }}"
+     {% if modeling_paradigm == "edge" %}data-modeling-paradigm="edge"{% endif %}>
 {% if disabled %}
 {# Bootstrap tooltips don't fire on disabled buttons (no pointer events), so wrap in a span. #}
 <span class="d-block flex-grow-1 min-w-0"

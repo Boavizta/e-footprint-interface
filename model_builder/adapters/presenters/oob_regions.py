@@ -58,8 +58,19 @@ def _render_results_buttons(model_web, params) -> str:
     return bar_html + toolbar_html
 
 
+def _render_edge_modeling_toggle(model_web, params) -> str:
+    from django.conf import settings
+    del params
+    return render_to_string(
+        "model_builder/components/edge_modeling_toggle.html",
+        {"model_web": model_web, "oob": True,
+         "EDGE_MODELING_DOC_URL": getattr(settings, "EDGE_MODELING_DOC_URL", "")},
+    )
+
+
 OOB_REGION_RENDERERS: Dict[str, Callable] = {
     "edge_device_lists": _render_edge_device_lists,
+    "edge_modeling_toggle": _render_edge_modeling_toggle,
     "group_membership_section": _render_group_membership_section,
     "model_canvas": _render_model_canvas,
     "results_buttons": _render_results_buttons,
