@@ -7,7 +7,7 @@ const {
 function renderUnlatchedToggle() {
     document.body.innerHTML = `
         <li id="edge-modeling-toggle-wrapper">
-            <input id="edge-modeling-toggle" type="checkbox" />
+            <input id="edge-modeling-toggle" data-action="edge-modeling-toggle" type="checkbox" />
         </li>
     `;
 }
@@ -15,7 +15,7 @@ function renderUnlatchedToggle() {
 function renderLatchedToggle() {
     document.body.innerHTML = `
         <li id="edge-modeling-toggle-wrapper">
-            <input id="edge-modeling-toggle" type="checkbox" checked disabled />
+            <input id="edge-modeling-toggle" data-action="edge-modeling-toggle" type="checkbox" checked disabled />
         </li>
     `;
 }
