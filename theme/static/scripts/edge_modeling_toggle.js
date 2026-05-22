@@ -4,9 +4,6 @@
 (function () {
     const EDGE_MODELING_STORAGE_KEY = "efootprint.edgeModeling";
     const TOGGLE_ACTION = "edge-modeling-toggle";
-    const POPOVER_SELECTORS =
-        '#edge-modeling-toggle-wrapper [data-bs-toggle="popover"], '
-        + '.modeling-paradigm-dot[data-bs-toggle="popover"]';
 
     function readEdgeModelingPreference() {
         return localStorage.getItem(EDGE_MODELING_STORAGE_KEY) === "on" ? "on" : "off";
@@ -30,12 +27,6 @@
         }
     }
 
-    function initEdgePopovers(root) {
-        if (typeof bootstrap === "undefined" || !bootstrap.Popover) return;
-        root.querySelectorAll(POPOVER_SELECTORS)
-            .forEach(el => bootstrap.Popover.getOrCreateInstance(el));
-    }
-
     function handleEdgeModelingChange(event) {
         const target = event.target;
         if (!target || target.dataset.action !== TOGGLE_ACTION || target.disabled) {
@@ -45,14 +36,8 @@
         applyEdgeModelingState();
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        applyEdgeModelingState();
-        initEdgePopovers(document);
-    });
-    document.body.addEventListener("htmx:afterSettle", (event) => {
-        applyEdgeModelingState();
-        initEdgePopovers(event.detail && event.detail.elt ? event.detail.elt : document);
-    });
+    document.addEventListener("DOMContentLoaded", applyEdgeModelingState);
+    document.body.addEventListener("htmx:afterSettle", applyEdgeModelingState);
     document.body.addEventListener("change", handleEdgeModelingChange);
 
     if (typeof module !== "undefined" && module.exports) {
@@ -61,7 +46,6 @@
             TOGGLE_ACTION,
             applyEdgeModelingState,
             handleEdgeModelingChange,
-            initEdgePopovers,
             readEdgeModelingPreference,
             writeEdgeModelingPreference,
         };

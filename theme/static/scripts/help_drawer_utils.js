@@ -69,16 +69,15 @@
         }
     });
 
-    /* React to swaps into either drawer. Help-drawer swap auto-opens the layer and inits
-       its popovers (the inline script that used to live in help_drawer_structure.html);
-       side-panel swap auto-closes the help drawer so the side panel takes over. */
+    /* React to swaps into either drawer. Help-drawer swap auto-opens the layer
+       (popover init is handled centrally by `bootstrap_widgets.js` on
+       `htmx:afterSettle`); side-panel swap auto-closes the help drawer so the side
+       panel takes over. */
     document.body.addEventListener("htmx:afterSwap", function (event) {
         const swapTarget = event.detail.target;
         if (!swapTarget) return;
         if (swapTarget.id === "helpDrawer") {
             openHelpDrawer();
-            swapTarget.querySelectorAll('[data-bs-toggle="popover"][data-location="help_drawer"]')
-                .forEach(el => bootstrap.Popover.getOrCreateInstance(el));
         } else if (swapTarget.id === "sidePanel") {
             closeHelpDrawer();
         }

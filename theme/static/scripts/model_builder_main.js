@@ -4,16 +4,6 @@ function initModelBuilderMain() {
     initGrabEffect();
     initHammer();
     initTruncatedTextTooltips();
-    initDisabledButtonTooltips();
-}
-
-function initDisabledButtonTooltips(root = document) {
-    if (!window.bootstrap || !bootstrap.Tooltip) {
-        return;
-    }
-    root.querySelectorAll("[data-bs-toggle='tooltip']").forEach(element => {
-        bootstrap.Tooltip.getOrCreateInstance(element, { container: "body", trigger: "hover" });
-    });
 }
 
 function initTruncatedTextTooltips(root = document) {
