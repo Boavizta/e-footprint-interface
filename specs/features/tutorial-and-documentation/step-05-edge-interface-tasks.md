@@ -10,6 +10,8 @@
 
 ## Task 1 — Edge paradigm domain foundation
 
+**Status:** Done.
+
 **Goal:** Land the paradigm classification primitives (`EDGE_EFOOTPRINT_CLASS_NAMES`, `paradigm_for`, `ModelWeb.has_edge_objects`, `ModelingObjectWeb.modeling_paradigm`) and their unit + consistency tests. No template, JS, CSS, settings, or OOB wiring — pure domain layer. After this PR the helpers are importable and tested, but no user-visible behaviour changes.
 
 **Files touched:**

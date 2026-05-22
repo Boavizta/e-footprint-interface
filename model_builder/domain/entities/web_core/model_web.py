@@ -270,6 +270,17 @@ class ModelWeb:
         return self.get_web_objects_from_efootprint_type("ExternalAPI")
 
     @property
+    def has_edge_objects(self) -> bool:
+        """True iff the model contains at least one edge-paradigm object."""
+        from model_builder.domain.modeling_paradigm import EDGE_EFOOTPRINT_CLASS_NAMES
+        for class_name in EDGE_EFOOTPRINT_CLASS_NAMES:
+            if class_name not in MODELING_OBJECT_CLASSES_DICT and class_name not in ABSTRACT_EFOOTPRINT_MODELING_CLASSES:
+                continue
+            if self.get_web_objects_from_efootprint_type(class_name):
+                return True
+        return False
+
+    @property
     def edge_devices(self):
         """Returns all edge devices."""
         all_edge_devices = self.get_web_objects_from_efootprint_type("EdgeDevice")

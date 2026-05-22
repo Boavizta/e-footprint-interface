@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Internal `modeling_paradigm.py` module with `EDGE_EFOOTPRINT_CLASS_NAMES` and `paradigm_for()`. `ModelWeb` exposes `has_edge_objects`; `ModelingObjectWeb` exposes `modeling_paradigm`. No user-visible behaviour yet — wiring lands in a follow-up.
+
 ## [1.5.0] - 2026-05-21
 
 ### Added

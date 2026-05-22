@@ -126,6 +126,11 @@ class ModelingObjectWeb:
         return self._modeling_obj
 
     @property
+    def modeling_paradigm(self) -> str:
+        from model_builder.domain.modeling_paradigm import paradigm_for
+        return paradigm_for(self._modeling_obj.class_as_simple_str)
+
+    @property
     def efootprint_id(self):
         return self._modeling_obj.id
 
