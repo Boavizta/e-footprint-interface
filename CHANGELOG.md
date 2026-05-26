@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.2] - 2026-05-26
+
+### Fixed
+- Update results buttons tooltips on constraint situation changes: Two issues kept the disabled-results-button tooltip from reflecting the
+current validation state until a full page reload: - bootstrap_widgets.js initialized tooltips via `querySelectorAll` on the htmx:afterSettle scope, which only walks descendants. OOB outerHTML swaps replace the button at its root, so the new element (carrying `data-bs-toggle="tooltip"` on itself) was missed and got no Bootstrap Tooltip instance. - `_recompute_state_and_emit_oob_regions` only emitted the `results_buttons` region on `enabled` flips. When `__results__.enabled` stayed False but the validation `reason` text changed (one invalid configuration to a different invalid configuration), nothing re-rendered and the button kept the stale `title`.
+- Upgraded to e-footprint 21.1.2 to fix a bug that happened with some EcoLogits models.
+- Reject systems with edge functions that have no recurrent need.
+- Reject systems with edge usage journeys that have no edge function
+
 ## [1.6.1] - 2026-05-26
 
 ### Fixed
