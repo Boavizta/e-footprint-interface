@@ -186,7 +186,7 @@ MKDOCS_BASE_URL = os.getenv("MKDOCS_BASE_URL", "https://boavizta.github.io/e-foo
 # URL of the canonical "web vs edge modeling" explanation page on mkdocs.
 # Surfaced in the edge-modeling toggle popover.
 EDGE_MODELING_DOC_URL = os.getenv(
-    "EDGE_MODELING_DOC_URL", f"{MKDOCS_BASE_URL}/explanation/web_vs_edge/")
+    "EDGE_MODELING_DOC_URL", f"{MKDOCS_BASE_URL}/web_vs_edge/")
 
 # ============================================================================
 # ENVIRONMENT-SPECIFIC CONFIGURATION
