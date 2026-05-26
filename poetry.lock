@@ -330,14 +330,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boaviztapi"
-version = "2.1.0"
+version = "2.2.0"
 description = "An API to access Boavizta's methodologies and footprint reference data"
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "boaviztapi-2.1.0-py3-none-any.whl", hash = "sha256:6c1607e5ae307896d05216fd4c49ebe76b420698787ba37ced1c5362319126f1"},
-    {file = "boaviztapi-2.1.0.tar.gz", hash = "sha256:9ad5f4a93903555d30b1053ab28376e4f160b597e0f78e6d00a72ee9004d767a"},
+    {file = "boaviztapi-2.2.0-py3-none-any.whl", hash = "sha256:f59e67dfc22124e2a62ab1d97bb61f08b31ec5f4f510537c678f427615b536bc"},
+    {file = "boaviztapi-2.2.0.tar.gz", hash = "sha256:f31b0a1732c7690dc2a7ae42d73215b2621d37b06109de323cebadacb4c7bac1"},
 ]
 
 [package.dependencies]
@@ -709,14 +709,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.4.0"
+version = "8.4.1"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "click-8.4.0-py3-none-any.whl", hash = "sha256:40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81"},
-    {file = "click-8.4.0.tar.gz", hash = "sha256:638f1338fe1235c8f4e008e4a8a254fb5c5fbdcbb40ece3c9142ebb78e792973"},
+    {file = "click-8.4.1-py3-none-any.whl", hash = "sha256:482be17c6991b8c19c5429a1e995d9b0efdbb63172824c41f99965dc0ade8ec2"},
+    {file = "click-8.4.1.tar.gz", hash = "sha256:918b5633eddf6b41c32d4f454bf0de810065c74e3f7dbf8ee5452f8be88d3e96"},
 ]
 
 [package.dependencies]
@@ -1091,14 +1091,14 @@ opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-
 
 [[package]]
 name = "efootprint"
-version = "21.0.1"
+version = "21.1.0"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-21.0.1-py3-none-any.whl", hash = "sha256:49b4bacbd70a7fe5dea10542b5636d5beb6dba584bd79d9382528d4348129903"},
-    {file = "efootprint-21.0.1.tar.gz", hash = "sha256:f60cdfe9810c45753222342702ae0c2deee0325ebd35df35f2d5d4748fd16070"},
+    {file = "efootprint-21.1.0-py3-none-any.whl", hash = "sha256:96ca5ed92ab688dbbcfb5a33f85f2adc8f0143449c8da4bae768f40b627066b4"},
+    {file = "efootprint-21.1.0.tar.gz", hash = "sha256:f6ec35609a7768aaf9392f343374a77381e1c6966f4b80718bc9d7f0ff111e7a"},
 ]
 
 [package.dependencies]
@@ -1576,14 +1576,14 @@ files = [
 
 [[package]]
 name = "idna"
-version = "3.15"
+version = "3.16"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "idna-3.15-py3-none-any.whl", hash = "sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8"},
-    {file = "idna-3.15.tar.gz", hash = "sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"},
+    {file = "idna-3.16-py3-none-any.whl", hash = "sha256:cc246e3a3f89580c3a951b5ad298ca4638078b2cdd4f115654332b5c26daded5"},
+    {file = "idna-3.16.tar.gz", hash = "sha256:d7a6da03db833450fca25d2358ac9ff06cd624577a4aea3a596d5c0f77b8e03d"},
 ]
 
 [package.extras]
@@ -3400,21 +3400,18 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyjwt"
-version = "2.12.1"
+version = "2.13.0"
 description = "JSON Web Token implementation in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyjwt-2.12.1-py3-none-any.whl", hash = "sha256:28ca37c070cad8ba8cd9790cd940535d40274d22f80ab87f3ac6a713e6e8454c"},
-    {file = "pyjwt-2.12.1.tar.gz", hash = "sha256:c74a7a2adf861c04d002db713dd85f84beb242228e671280bf709d765b03672b"},
+    {file = "pyjwt-2.13.0-py3-none-any.whl", hash = "sha256:66adcc2aff09b3f1bbd95fc1e1577df8ac8723c978552fd43304c8a290ac5728"},
+    {file = "pyjwt-2.13.0.tar.gz", hash = "sha256:41571c89ca91598c79e8ef18a2d07367d4810fbbd6f637794879baf1b7703423"},
 ]
 
 [package.extras]
 crypto = ["cryptography (>=3.4.0)"]
-dev = ["coverage[toml] (==7.10.7)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=8.4.2,<9.0.0)", "sphinx", "sphinx-rtd-theme", "zope.interface"]
-docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
-tests = ["coverage[toml] (==7.10.7)", "pytest (>=8.4.2,<9.0.0)"]
 
 [[package]]
 name = "pylint"
@@ -4516,4 +4513,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "0aa362c795b7afa6e8370005e40787153cca4b0a5f9e8e0f612fa99b5f320a83"
+content-hash = "81cb33c050db074047f422416aee1f505480083f0d1825d3b19d474e3238f67a"
