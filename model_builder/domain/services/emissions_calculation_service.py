@@ -9,6 +9,7 @@ from datetime import timedelta
 from typing import Dict, List, Any, Protocol, runtime_checkable
 
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.constants.units import u
 from efootprint.utils.display import best_display_unit, human_readable_unit
 
 from model_builder.domain.entities.web_core.model_web_utils import (
@@ -47,6 +48,18 @@ class EmissionsCalculationService:
     emissions values suitable for charting.
     """
 
+    EMPTY_VALUE_KEYS = (
+        "Servers_and_storage_energy",
+        "ExternalAPIs_energy",
+        "Edge_devices_energy",
+        "Devices_energy",
+        "Network_energy",
+        "Servers_and_storage_fabrication",
+        "ExternalAPIs_fabrication",
+        "Edge_devices_fabrication",
+        "Devices_fabrication",
+    )
+
     def calculate_daily_emissions(self, system: SystemWithFootprints) -> EmissionsResult:
         """Calculate daily emissions timeseries for the system.
 
@@ -54,10 +67,10 @@ class EmissionsCalculationService:
             system: The efootprint System to calculate emissions for
 
         Returns:
-            EmissionsResult with dates and categorized emissions values
-
-        Raises:
-            ValueError: If no ExplainableHourlyQuantities are found
+            EmissionsResult with dates and categorized emissions values.
+            When no ExplainableHourlyQuantities are found (e.g. a system with
+            usage but no hardware contributing emissions), an empty result is
+            returned so the chart can render a blank state instead of erroring.
         """
         energy = system.total_energy_footprints
         fab = system.total_fabrication_footprints
@@ -65,7 +78,8 @@ class EmissionsCalculationService:
         ehqs = [q for q in list(energy.values()) + list(fab.values()) if isinstance(q, ExplainableHourlyQuantities)]
 
         if not ehqs:
-            raise ValueError("No ExplainableHourlyQuantities found.")
+            return EmissionsResult(
+                dates=[], values={key: [] for key in self.EMPTY_VALUE_KEYS}, display_unit=human_readable_unit(u.kg))
 
         global_start, total_hours = determine_global_time_bounds(ehqs)
 

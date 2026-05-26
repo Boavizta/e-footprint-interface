@@ -45,6 +45,10 @@ export function createDatasetConfig(hardwareType, chartValues, chartType) {
 export function buildChartData(chartType, granularity) {
     const datasets = [];
 
+    if (!window.emissions.dates.length) {
+        return { labels: [], datasets };
+    }
+
     for (const hardwareType of Object.keys(window.emissions.values)) {
         let values = Object.values(
             sumDailyValuesByDisplayGranularity(

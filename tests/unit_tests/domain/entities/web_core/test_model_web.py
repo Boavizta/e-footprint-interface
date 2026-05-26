@@ -65,6 +65,38 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
         self.assertListEqual(emissions["values"]["Edge_devices_fabrication"], [3.1, 0])
 
+    def test_system_emissions_returns_empty_result_when_no_hourly_quantities(self):
+        empty_model_web = ModelWeb.__new__(ModelWeb)
+        empty_model_web._system_emissions = None
+        empty_model_web.system = MagicMock()
+        empty_model_web.system.total_energy_footprints = {
+            "Servers": EmptyExplainableObject(),
+            "Storage": EmptyExplainableObject(),
+            "ExternalAPIs": EmptyExplainableObject(),
+            "Devices": EmptyExplainableObject(),
+            "Network": EmptyExplainableObject(),
+            "EdgeDevices": EmptyExplainableObject(),
+        }
+        empty_model_web.system.total_fabrication_footprints = {
+            "Servers": EmptyExplainableObject(),
+            "Storage": EmptyExplainableObject(),
+            "ExternalAPIs": EmptyExplainableObject(),
+            "Devices": EmptyExplainableObject(),
+            "Network": EmptyExplainableObject(),
+            "EdgeDevices": EmptyExplainableObject(),
+        }
+
+        emissions = empty_model_web.system_emissions
+
+        self.assertListEqual(emissions["dates"], [])
+        self.assertEqual(emissions["display_unit"], "kg")
+        for key in [
+            "Servers_and_storage_energy", "ExternalAPIs_energy", "Edge_devices_energy", "Devices_energy",
+            "Network_energy", "Servers_and_storage_fabrication", "ExternalAPIs_fabrication",
+            "Edge_devices_fabrication", "Devices_fabrication",
+        ]:
+            self.assertListEqual(emissions["values"][key], [])
+
     def test_root_edge_device_groups_returns_only_groups_without_parents(self):
         root_group = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: []))
         nested_group = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: ["parent"]))
