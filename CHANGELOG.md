@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Send canonical web_id in HTMX highlight headers to avoid nginx 502 on heavily-mirrored objects.
 
 ### Added
+- EcoLogits video-generation external API surfaced in the model builder: the `External API` catalog now offers a `Gen AI video external API` (`EcoLogitsVideoGenExternalAPI`) alongside the LLM one, with a provider → model → resolution cascade, a boolean `Generates audio` toggle, and datacenter location/PUE as advanced parameters. Jobs attached to it (`EcoLogitsVideoGenExternalAPIJob`) feed the standard results pipeline and round-trip through JSON persistence.
+- The video-generation Job form's `resolution` dropdown now offers only the resolutions valid for the chosen video API and repopulates when a different API is selected.
+
+## [Unreleased]
+
+### Added
 - Introductory modeling templates (classical e-commerce, AI chatbot, industrial IoT) and their typed
   registry — the interface-owned data layer behind the upcoming first-run template picker. The committed
   JSON snapshots are regenerated from Python scenario constructors with `python -m scripts.build_intro_templates`.

@@ -150,6 +150,10 @@
         "label": "Gen AI external API",
         "more_descriptive_label_for_select_inputs": "EcoLogits modeling of API calls to major online AI providers."
     },
+    "EcoLogitsVideoGenExternalAPI": {
+        "label": "Gen AI video external API",
+        "more_descriptive_label_for_select_inputs": "EcoLogits modeling of generative-AI video API calls (Sora, Veo, Kling, ...)."
+    },
     "VideoStreaming": {
         "label": "Video streaming application"
     },
@@ -158,6 +162,9 @@
     },
     "EcoLogitsGenAIExternalAPIJob": {
         "label": "Gen AI Job"
+    },
+    "EcoLogitsVideoGenExternalAPIJob": {
+        "label": "Gen AI video Job"
     },
     "Network": {
         "label": "Network"

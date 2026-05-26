@@ -262,7 +262,8 @@
     "provider": {
         "modeling_obj_containers": [
             "BoaviztaCloudServer",
-            "EcoLogitsGenAIExternalAPI"
+            "EcoLogitsGenAIExternalAPI",
+            "EcoLogitsVideoGenExternalAPI"
         ],
         "label": "provider"
     },
@@ -453,9 +454,22 @@
     },
     "resolution": {
         "modeling_obj_containers": [
-            "VideoStreamingJob"
+            "VideoStreamingJob",
+            "EcoLogitsVideoGenExternalAPIJob"
         ],
         "label": "resolution"
+    },
+    "duration": {
+        "modeling_obj_containers": [
+            "EcoLogitsVideoGenExternalAPIJob"
+        ],
+        "label": "video duration"
+    },
+    "with_audio": {
+        "modeling_obj_containers": [
+            "EcoLogitsVideoGenExternalAPIJob"
+        ],
+        "label": "generates audio"
     },
     "video_duration": {
         "modeling_obj_containers": [

@@ -21,6 +21,11 @@ class ModelingObjectWeb:
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
     attributes_to_skip_in_forms = []
+    # Maps the first segment of a cross-object conditional_list_values `depends_on` path
+    # (e.g. "external_api" in "external_api.model_name") to the DOM id of the field that
+    # actually carries that referenced object's selection, when it isn't rendered as
+    # `{class}_{segment}` (e.g. because it's skipped in forms and chosen via a helper field).
+    conditional_list_filter_overrides = {}
     gets_deleted_if_unique_mod_obj_container_gets_deleted = True
 
     def __init__(self, modeling_obj: ModelingObject, model_web: "ModelWeb", list_container=None, dict_container=None):

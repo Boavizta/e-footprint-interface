@@ -129,10 +129,15 @@ def _build_job_snapshot_model_web():
     class _MockModelingObjectWeb:
         id: str
         name: str
+        # Cross-object conditional fields (e.g. resolution depends_on "external_api.model_name")
+        # resolve sub-attributes of referenced objects; a slug here keeps the snapshot deterministic.
+        model_name: str = "sora-2-pro"
 
     basic_model_web = MagicMock()
-    option1 = _MockModelingObjectWeb(id="efootprint_id1", name="option1")
-    option2 = _MockModelingObjectWeb(id="efootprint_id2", name="option2")
+    # Divergent models so the snapshot itself proves per-object differentiation: sora-2-pro offers
+    # 720p/1080p, seedance-1.0 offers 480p/720p — a regression that ignored model_name would break it.
+    option1 = _MockModelingObjectWeb(id="efootprint_id1", name="option1", model_name="sora-2-pro")
+    option2 = _MockModelingObjectWeb(id="efootprint_id2", name="option2", model_name="seedance-1.0")
     basic_model_web.get_efootprint_objects_from_efootprint_type.return_value = [option1, option2]
 
     model_web = deepcopy(basic_model_web)

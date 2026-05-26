@@ -1,7 +1,8 @@
 {
     "switch_item": "type_object_available",
     "switch_values": [
-        "EcoLogitsGenAIExternalAPI"
+        "EcoLogitsGenAIExternalAPI",
+        "EcoLogitsVideoGenExternalAPI"
     ],
     "dynamic_lists": [
         {
@@ -375,6 +376,33 @@
                     "gpt-35-turbo-16k",
                     "gpt-35-turbo-instruct-0914",
                     "gpt-35-turbo-instruct"
+                ]
+            }
+        },
+        {
+            "input_id": "EcoLogitsVideoGenExternalAPI_model_name",
+            "filter_by": "EcoLogitsVideoGenExternalAPI_provider",
+            "list_value": {
+                "bytedance": [
+                    "seedance-1.0",
+                    "seedance-1.5-pro"
+                ],
+                "google": [
+                    "veo-3.0",
+                    "veo-3.0-fast",
+                    "veo-3.1",
+                    "veo-3.1-fast"
+                ],
+                "klingai": [
+                    "kling-v1.6",
+                    "kling-v2.6",
+                    "kling-v3"
+                ],
+                "openai": [
+                    "sora-2-pro"
+                ],
+                "runway": [
+                    "gen-4.5"
                 ]
             }
         }

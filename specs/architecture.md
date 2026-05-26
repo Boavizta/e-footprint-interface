@@ -89,7 +89,7 @@ Notable:
 
 - **`adapters/repositories/session_system_repository.py`** — loads/saves system from Django session. Holds `interface_config` in RAM and merges it on `save_data()`.
 - **`adapters/forms/form_data_parser.py`** — parses HTTP form data before passing to use cases. Parsing happens here, never in domain — the domain receives parsed dicts.
-- **`adapters/forms/form_field_generator.py`** — form field generation utilities. Includes `generate_select_multiple_field()` as a standalone reusable helper.
+- **`adapters/forms/form_field_generator.py`** — form field generation utilities. Includes `generate_select_multiple_field()` as a standalone reusable helper. A class's `conditional_list_values` produces a `datalist` plus a one-hop `dynamic_lists` entry (`filter_by` = the parent field's web_id, `list_value` keyed by the parent's values); `dynamic_forms.js` repopulates the child when the parent changes. When `depends_on` is a **cross-object dotted path** (e.g. `external_api.model_name`), the generator collapses the hop at generation time: it keys `list_value` by each available referenced object's id (resolving the remaining path on the object) and points `filter_by` at the DOM element that carries that object's selection. That element defaults to `{class}_{first_segment}`, but a web class can redirect it via `conditional_list_filter_overrides` when the reference isn't rendered as its own field (e.g. `JobWeb` maps `external_api` → the `service_or_external_api` parent-selection helper). This reuses the single-hop cascade with no extra JS.
 - **`adapters/presenters/htmx_presenter.py`** — formats use case outputs as HTMX responses.
 - **`adapters/ui_config/`** — provides UI configuration (class labels, field metadata).
 

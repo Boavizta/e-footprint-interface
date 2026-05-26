@@ -55,7 +55,13 @@ COPY --from=assets /app/theme/static/bundles/result_charts.js.map /app/theme/sta
 # Install requirements
 ADD poetry.lock /app
 ADD pyproject.toml /app
-RUN poetry install
+# GITHUB_TOKEN is a Clever Cloud env var, auto-passed as a Docker build-arg.
+# It authenticates the two private git deps (e-footprint-private -> ecologits-private)
+# cloned by poetry install. Scrubbed in the same layer so it doesn't persist on disk.
+ARG GITHUB_TOKEN
+RUN git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/" \
+ && poetry install \
+ && rm -f /root/.gitconfig
 
 # Entrypoint & CMD
 EXPOSE 8080

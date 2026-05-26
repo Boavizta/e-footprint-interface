@@ -104,7 +104,10 @@ def test_class_doc_link_emits_anchor_to_class_slug(provider):
             ("https://docs.example/EdgeAppliance", "Edge appliance"),
             ("https://docs.example/EdgeDevice", "Edge device"),
         ]),
-        ("ExternalAPI", [("https://docs.example/EcoLogitsGenAIExternalAPI", "Gen AI external API")]),
+        ("ExternalAPI", [
+            ("https://docs.example/EcoLogitsGenAIExternalAPI", "Gen AI external API"),
+            ("https://docs.example/EcoLogitsVideoGenExternalAPI", "Gen AI video external API"),
+        ]),
     ],
 )
 def test_class_doc_link_for_abstract_class_links_to_concrete_docs(provider, class_name, expected_anchors):

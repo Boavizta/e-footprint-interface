@@ -14,6 +14,11 @@ if TYPE_CHECKING:
 
 class JobWeb(ResourceNeedBaseWeb):
     attributes_to_skip_in_forms = ["service", "server", "external_api"]
+    # `external_api` is not rendered as its own field; the API is chosen through the
+    # parent-selection helper `service_or_external_api`. A cross-object conditional field
+    # like `resolution` (depends_on="external_api.model_name") must therefore filter by that
+    # helper, whose option values are the API objects' efootprint ids.
+    conditional_list_filter_overrides = {"external_api": "service_or_external_api"}
 
     # Declarative form configuration - used by FormContextBuilder in adapters layer
     form_creation_config = {

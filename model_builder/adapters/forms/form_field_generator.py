@@ -311,7 +311,9 @@ def generate_dynamic_form(
                     structure_field.update({"input_type": "recurrent_timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableObject):
                 structure_field.update({"default": _stringify_form_value(default.value)})
-                if attr_name in list_values.keys():
+                if isinstance(default.value, bool):
+                    structure_field.update({"input_type": "bool"})
+                elif attr_name in list_values.keys():
                     structure_field.update({
                         "input_type": "select_str_input",
                         "selected": default_values[attr_name].value,
@@ -325,16 +327,40 @@ def generate_dynamic_form(
                         "selected": default_values[attr_name].value,
                         "options": None
                     })
-                    dynamic_lists.append(
-                        {
-                            "input_id": f"{efootprint_class_str}_{attr_name}",
-                            "filter_by": f"{efootprint_class_str}_{conditional_list_values[attr_name]['depends_on']}",
-                            "list_value": {
-                                str(conditional_value): [str(possible_value) for possible_value in possible_values]
-                                for conditional_value, possible_values in
-                                conditional_list_values[attr_name]["conditional_list_values"].items()
-                            }
-                        })
+                    depends_on = conditional_list_values[attr_name]["depends_on"]
+                    conditional_values = conditional_list_values[attr_name]["conditional_list_values"]
+                    values_by_conditional_value = {
+                        str(conditional_value): [str(possible_value) for possible_value in possible_values]
+                        for conditional_value, possible_values in conditional_values.items()
+                    }
+                    if "." in depends_on:
+                        # Cross-object dependency (e.g. "external_api.model_name"): the dotted path is
+                        # not a DOM id. Each referenced object has a fixed value for the resolved sub-path,
+                        # so we collapse the two-hop semantic into a single hop keyed by the referenced
+                        # object's id — reusing the single-hop datalist cascade with no extra JS.
+                        first_segment, *remaining_path = depends_on.split(".")
+                        filter_by = corresponding_web_class.conditional_list_filter_overrides.get(
+                            first_segment, f"{efootprint_class_str}_{first_segment}")
+                        referenced_type = resolve_optional_annotation(
+                            init_sig_params[first_segment].annotation).__name__
+                        list_value = {}
+                        for referenced_obj in model_web.get_efootprint_objects_from_efootprint_type(referenced_type):
+                            resolved = referenced_obj
+                            for segment in remaining_path:
+                                resolved = getattr(resolved, segment)
+                            # Persisted objects always resolve to a known key (submit-time
+                            # check_belonging_to_authorized_values rejects off-catalog values), so the [] fallback
+                            # only fires on a str()-keying bug — and then for every object at once. The
+                            # cross-object generator integration test guards that contract.
+                            list_value[referenced_obj.id] = values_by_conditional_value.get(str(resolved), [])
+                    else:
+                        filter_by = f"{efootprint_class_str}_{depends_on}"
+                        list_value = values_by_conditional_value
+                    dynamic_lists.append({
+                        "input_id": f"{efootprint_class_str}_{attr_name}",
+                        "filter_by": filter_by,
+                        "list_value": list_value,
+                    })
                 else:
                     structure_field.update({"input_type": "str"})
 

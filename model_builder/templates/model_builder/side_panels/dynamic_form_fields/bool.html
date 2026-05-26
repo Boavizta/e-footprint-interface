@@ -1,0 +1,15 @@
+<div class="form-check form-switch">
+    <input
+        type="hidden"
+        name="{{ field.web_id }}"
+        id="{{ field.web_id }}"
+        value="{% if field.default %}true{% else %}false{% endif %}"
+        data-default-value="{% if field.default %}true{% else %}false{% endif %}">
+    <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="{{ field.web_id }}_checkbox"
+        {% if field.default %}checked{% endif %}
+        onchange="document.getElementById('{{ field.web_id }}').value = this.checked ? 'true' : 'false'; onInputValueChange('{{ field.web_id }}'); tagFormAsModified();">
+</div>

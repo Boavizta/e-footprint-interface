@@ -178,7 +178,8 @@ document.addEventListener("initDynamicForm", function () {
 function checkCurrentValueVsDefaultValue(input) {
     let defaultValue = input.dataset.defaultValue;
     let fromDefaultValue = true;
-    if ( (input.type === 'date' || input.type === 'text' || input.tagName.toLowerCase() === 'select')
+    if ( (input.type === 'date' || input.type === 'text' || input.type === 'hidden'
+            || input.tagName.toLowerCase() === 'select')
         && input.value !== defaultValue){
         fromDefaultValue = false;
     }

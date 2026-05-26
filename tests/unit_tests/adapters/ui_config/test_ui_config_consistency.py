@@ -28,6 +28,7 @@ INTERFACE_ONLY_ABSTRACT_BASES: dict[str, str] = {
 # Add a one-line justification next to each entry.
 EXCLUDED_CLASSES_FROM_UI_CONFIG: dict[str, str] = {
     "EcoLogitsGenAIExternalAPIServer": "Internal server stub spawned by EcoLogitsGenAIExternalAPI; never user-created.",
+    "EcoLogitsVideoGenExternalAPIServer": "Internal server stub spawned by EcoLogitsVideoGenExternalAPI; never user-created.",
     "ExternalAPIServer": "Internal server stub spawned by ExternalAPI; never user-created.",
     "RecurrentEdgeStorageNeed": "Internal subclass; not surfaced as a standalone Add target.",
     "RecurrentEdgeProcessRAMNeed": "Internal subclass; not surfaced as a standalone Add target.",

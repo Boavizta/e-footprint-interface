@@ -11,6 +11,10 @@
                     {
                         "label": "EcoLogits modeling of API calls to major online AI providers.",
                         "value": "EcoLogitsGenAIExternalAPI"
+                    },
+                    {
+                        "label": "EcoLogits modeling of generative-AI video API calls (Sora, Veo, Kling, ...).",
+                        "value": "EcoLogitsVideoGenExternalAPI"
                     }
                 ]
             }
@@ -91,6 +95,82 @@
                 "default": "claude-opus-4-5",
                 "input_type": "datalist",
                 "selected": "claude-opus-4-5",
+                "options": null
+            }
+        ],
+        "advanced_fields": []
+    },
+    {
+        "category": "EcoLogitsVideoGenExternalAPI",
+        "header": "Gen AI video external API creation",
+        "fields": [
+            {
+                "web_id": "EcoLogitsVideoGenExternalAPI_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": null,
+                "input_type": "str",
+                "default": "Gen AI video external API 1"
+            },
+            {
+                "web_id": "EcoLogitsVideoGenExternalAPI_provider",
+                "attr_name": "provider",
+                "label": "provider",
+                "tooltip": "Provider key parsed from the EcoLogits video catalog (e.g. openai, google, klingai).",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "Ecologits-video_impacts-defaults",
+                        "name": "Ecologits video_impacts defaults",
+                        "link": "https://github.com/mlco2/ecologits/tree/main/ecologits/estimations/video.py"
+                    },
+                    "available_sources": []
+                },
+                "default": "openai",
+                "input_type": "select_str_input",
+                "selected": "openai",
+                "options": [
+                    {
+                        "label": "bytedance",
+                        "value": "bytedance"
+                    },
+                    {
+                        "label": "google",
+                        "value": "google"
+                    },
+                    {
+                        "label": "klingai",
+                        "value": "klingai"
+                    },
+                    {
+                        "label": "openai",
+                        "value": "openai"
+                    },
+                    {
+                        "label": "runway",
+                        "value": "runway"
+                    }
+                ]
+            },
+            {
+                "web_id": "EcoLogitsVideoGenExternalAPI_model_name",
+                "attr_name": "model_name",
+                "label": "model name",
+                "tooltip": "Specific video model name (after the provider/ prefix) from the chosen provider's EcoLogits video catalog. Drives the hardware configuration and the latency-regression coefficients.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "Ecologits-video_impacts-defaults",
+                        "name": "Ecologits video_impacts defaults",
+                        "link": "https://github.com/mlco2/ecologits/tree/main/ecologits/estimations/video.py"
+                    },
+                    "available_sources": []
+                },
+                "default": "sora-2-pro",
+                "input_type": "datalist",
+                "selected": "sora-2-pro",
                 "options": null
             }
         ],
