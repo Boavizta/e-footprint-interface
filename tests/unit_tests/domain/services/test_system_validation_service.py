@@ -7,14 +7,23 @@ from model_builder.domain.services.system_validation_service import SystemValida
 
 
 def _model_web(
-    *, usage_patterns=(), edge_usage_patterns=(), usage_journeys=(), edge_functions=()
+    *, usage_patterns=(), edge_usage_patterns=(), usage_journeys=(), edge_usage_journeys=(), edge_functions=()
 ):
     model_web = MagicMock()
     model_web.system.usage_patterns = list(usage_patterns)
     model_web.system.edge_usage_patterns = list(edge_usage_patterns)
     model_web.usage_journeys = list(usage_journeys)
+    model_web.edge_usage_journeys = list(edge_usage_journeys)
     model_web.edge_functions = list(edge_functions)
     return model_web
+
+
+def _edge_usage_journey(name, *, edge_usage_patterns, edge_functions):
+    return SimpleNamespace(
+        name=name,
+        edge_usage_patterns=list(edge_usage_patterns),
+        edge_functions=list(edge_functions),
+    )
 
 
 def _edge_function(name, *, edge_usage_patterns, recurrent_edge_device_needs, recurrent_server_needs):
@@ -24,6 +33,35 @@ def _edge_function(name, *, edge_usage_patterns, recurrent_edge_device_needs, re
         recurrent_edge_device_needs=list(recurrent_edge_device_needs),
         recurrent_server_needs=list(recurrent_server_needs),
     )
+
+
+class TestCheckEdgeUsageJourneysHaveFunctions:
+    """Tests for SystemValidationService._check_edge_usage_journeys_have_functions."""
+
+    def test_returns_none_when_no_edge_usage_journeys(self):
+        result = SystemValidationService()._check_edge_usage_journeys_have_functions(_model_web())
+        assert result is None
+
+    def test_returns_none_when_journey_has_functions(self):
+        euj = _edge_usage_journey("euj", edge_usage_patterns=["eup"], edge_functions=["ef"])
+        result = SystemValidationService()._check_edge_usage_journeys_have_functions(
+            _model_web(edge_usage_journeys=[euj]))
+        assert result is None
+
+    def test_ignores_journey_not_reached_from_any_pattern(self):
+        euj = _edge_usage_journey("wip_euj", edge_usage_patterns=[], edge_functions=[])
+        result = SystemValidationService()._check_edge_usage_journeys_have_functions(
+            _model_web(edge_usage_journeys=[euj]))
+        assert result is None
+
+    def test_flags_journey_with_no_functions(self):
+        euj = _edge_usage_journey("empty_euj", edge_usage_patterns=["eup"], edge_functions=[])
+        result = SystemValidationService()._check_edge_usage_journeys_have_functions(
+            _model_web(edge_usage_journeys=[euj]))
+        assert result is not None
+        assert result.affected_objects == ["empty_euj"]
+        assert "empty_euj" in result.message
+        assert "edge function" in result.message
 
 
 class TestCheckEdgeFunctionsHaveNeeds:
