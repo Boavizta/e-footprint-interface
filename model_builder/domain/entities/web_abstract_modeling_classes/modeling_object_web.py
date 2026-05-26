@@ -201,12 +201,19 @@ class ModelingObjectWeb:
                 continue
             if old_constraints[key]["enabled"] != value["enabled"]:
                 changes.append((key, "unlocked" if value["enabled"] else "locked"))
+        results_reason_changed = (
+            "__results__" in old_constraints
+            and old_constraints["__results__"].get("reason")
+                != new_constraints["__results__"].get("reason")
+        )
         model_web.creation_constraints = new_constraints
 
         regions: list = []
         if changes:
             model_web.constraint_changes = changes
             regions.extend([OobRegion("model_canvas"), OobRegion("results_buttons")])
+        elif results_reason_changed:
+            regions.append(OobRegion("results_buttons"))
 
         new_has_edge = model_web.has_edge_objects
         if new_has_edge != model_web._last_emitted_has_edge_objects:

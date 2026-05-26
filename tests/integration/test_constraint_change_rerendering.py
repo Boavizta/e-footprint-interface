@@ -107,3 +107,23 @@ def test_edge_device_group_delete_side_effects_preserve_base_regions():
 
     assert "edge_device_lists" in {r.key for r in regions}
     assert model_web.creation_constraints == baseline_constraints
+
+
+def test_results_reason_change_without_enabled_flip_emits_results_buttons():
+    """When `__results__.enabled` stays the same but `reason` text changes (e.g. moving
+    from one invalid configuration to a different invalid configuration), the results
+    buttons must still re-render so their `title=` tooltip reflects the new reason."""
+    repository = _fresh_repository()
+    model_web = ModelWeb(repository)
+    # Force a synthetic "old reason" so the recompute sees a reason diff while
+    # __results__.enabled stays False (baseline default-data system is invalid).
+    assert model_web.creation_constraints["__results__"]["enabled"] is False
+    model_web.creation_constraints["__results__"]["reason"] = "stale reason text"
+
+    stub = EdgeDeviceGroupWeb.__new__(EdgeDeviceGroupWeb)
+    stub.model_web = model_web
+    regions = stub._recompute_state_and_emit_oob_regions()
+
+    assert "results_buttons" in {r.key for r in regions}
+    assert "model_canvas" not in {r.key for r in regions}
+    assert model_web.creation_constraints["__results__"]["reason"] != "stale reason text"

@@ -16,15 +16,23 @@
     const POPOVER_SELECTOR = '[data-bs-toggle="popover"]';
     const TOOLTIP_SELECTOR = '[data-bs-toggle="tooltip"]:not(.truncated-text-tooltip)';
 
+    function collectMatches(scope, selector) {
+        const matches = Array.from(scope.querySelectorAll(selector));
+        if (scope.nodeType === 1 && scope.matches && scope.matches(selector)) {
+            matches.push(scope);
+        }
+        return matches;
+    }
+
     function initBootstrapWidgets(root) {
         if (typeof bootstrap === "undefined") return;
         const scope = root || document;
         if (bootstrap.Popover) {
-            scope.querySelectorAll(POPOVER_SELECTOR)
+            collectMatches(scope, POPOVER_SELECTOR)
                 .forEach(el => bootstrap.Popover.getOrCreateInstance(el));
         }
         if (bootstrap.Tooltip) {
-            scope.querySelectorAll(TOOLTIP_SELECTOR)
+            collectMatches(scope, TOOLTIP_SELECTOR)
                 .forEach(el => bootstrap.Tooltip.getOrCreateInstance(
                     el, { container: "body", trigger: "hover" }));
         }

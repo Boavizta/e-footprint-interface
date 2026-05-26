@@ -56,6 +56,17 @@ test("initBootstrapWidgets scopes to the provided root", () => {
     expect(popoverCalls.map(el => el.id)).toEqual(["inside"]);
 });
 
+test("initBootstrapWidgets initializes the scope element itself when it matches", () => {
+    // After an htmx OOB outerHTML swap, htmx fires htmx:afterSettle with elt = the
+    // newly-swapped-in root element. If the tooltip attributes live on that root (as
+    // they do on #btn-open-panel-result and #show-results-toolbar-btn), descendants-only
+    // queries would miss it and the tooltip would never get a Bootstrap instance until
+    // the next full page reload.
+    document.body.innerHTML = `<div id="root" data-bs-toggle="tooltip" title="x"></div>`;
+    initBootstrapWidgets(document.getElementById("root"));
+    expect(tooltipCalls.map(c => c.el.id)).toEqual(["root"]);
+});
+
 test("initBootstrapWidgets no-ops when bootstrap is undefined", () => {
     delete global.bootstrap;
     document.body.innerHTML = `<div data-bs-toggle="popover"></div>`;
