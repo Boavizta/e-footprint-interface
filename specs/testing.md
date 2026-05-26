@@ -111,6 +111,10 @@ Two patterns are load-bearing and must be preserved when extending:
 - **`monkeypatch.setenv("RAISE_EXCEPTIONS", "1")`** — `render_exception_modal_if_error` otherwise absorbs view exceptions into a status-200 modal, so a status-code assertion would silently pass on a crashing endpoint.
 - **Do not mock `ImpactRepartitionSankey` or other results builders.** The unit tests in `tests/unit_tests/adapters/views/test_sankey_views.py` mock it for speed; this smoke deliberately doesn't, so attribution-path bugs in efootprint surface here.
 
+### Coverage rule for new efootprint API consumption
+
+When a feature reaches into a new public efootprint API (a method/property/dict-attr on a `ModelingObject` subclass that no existing interface test path was already exercising), add either an integration assertion (Clean Architecture layer) or an entry in `test_results_views_smoke.py` (new archetype or endpoint) that exercises the new call site. The library covers `cached_property` automatically via `run_test_materialize_all_cached_properties`, but plain `@property`, methods, and dict lookups need an explicit interface-side touch. The `task-review` skill flags this as a checklist item.
+
 ## E2E tests (`tests/e2e/`)
 
 ### Philosophy: minimal, non-redundant
