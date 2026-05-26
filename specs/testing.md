@@ -102,6 +102,15 @@ For computed impacts, assert coarse signals:
 
 For testing edge device groups and other dict-based relationships, use the dict mutation view functions directly or build dict-count form payloads. See existing tests in `test_edge_device_groups.py` for patterns.
 
+### View-layer smoke tests for results endpoints
+
+`test_results_views_smoke.py` is the **one exception** to the "no Django request/session scaffolding" non-goal. It parametrizes a handful of minimal-model archetypes (web, edge without server need, edge with server need, edge with device groups), drops each into the session, and hits a real results endpoint (currently `sankey-diagram/`) end-to-end. Purpose: catch view-layer integration failures (session repository, ModelWeb rebuild, parameter shape, real Sankey build) on each archetype shape without paying the cost of a Playwright e2e.
+
+Two patterns are load-bearing and must be preserved when extending:
+
+- **`monkeypatch.setenv("RAISE_EXCEPTIONS", "1")`** — `render_exception_modal_if_error` otherwise absorbs view exceptions into a status-200 modal, so a status-code assertion would silently pass on a crashing endpoint.
+- **Do not mock `ImpactRepartitionSankey` or other results builders.** The unit tests in `tests/unit_tests/adapters/views/test_sankey_views.py` mock it for speed; this smoke deliberately doesn't, so attribution-path bugs in efootprint surface here.
+
 ## E2E tests (`tests/e2e/`)
 
 ### Philosophy: minimal, non-redundant
