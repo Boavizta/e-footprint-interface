@@ -58,6 +58,11 @@ class SystemValidationService:
         if uj_error:
             errors.append(uj_error)
 
+        # Check edge functions have at least one need
+        ef_error = self._check_edge_functions_have_needs(model_web)
+        if ef_error:
+            errors.append(ef_error)
+
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
     def _check_usage_patterns(self, model_web: "ModelWeb") -> ValidationError | None:
@@ -90,5 +95,27 @@ class SystemValidationService:
                     "pointing to them: in that way the usage journeys will be ignored in the computation.)"
                 ),
                 affected_objects=journeys_without_steps
+            )
+        return None
+
+    def _check_edge_functions_have_needs(self, model_web: "ModelWeb") -> ValidationError | None:
+        """Check that edge functions reachable from a pattern declare at least one recurrent need."""
+        functions_without_needs = []
+        for edge_function in model_web.edge_functions:
+            if (len(edge_function.edge_usage_patterns) > 0
+                    and len(edge_function.recurrent_edge_device_needs) == 0
+                    and len(edge_function.recurrent_server_needs) == 0):
+                functions_without_needs.append(edge_function.name)
+
+        if functions_without_needs:
+            return ValidationError(
+                message=(
+                    f"The following edge function(s) have no recurrent need: {functions_without_needs}. "
+                    f"Please add at least one edge device need or server need in each of the above edge "
+                    f"function(s), so that the model can be computed.\n\n"
+                    "(Alternatively, if they are work in progress, you can delete the edge usage patterns "
+                    "pointing to them: in that way the edge functions will be ignored in the computation.)"
+                ),
+                affected_objects=functions_without_needs
             )
         return None
