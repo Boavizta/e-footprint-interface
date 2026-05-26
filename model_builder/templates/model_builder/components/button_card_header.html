@@ -1,11 +1,11 @@
-{% include 'model_builder/components/truncating_text.html' with visible_text=object_card.name extra_classes=title_class|default:"h6"|add:" flex-grow-1" %}
-
 {% if object_card.modeling_paradigm == "edge" %}
-<span class="modeling-paradigm-dot rounded-circle d-inline-block ms-2"
+<span class="modeling-paradigm-dot rounded-circle d-inline-block flex-shrink-0 align-self-center me-2"
       data-bs-toggle="popover" data-bs-trigger="hover focus"
       data-bs-placement="top" data-bs-custom-class="blue-popover"
       data-bs-content="Edge object — part of the edge modeling layer (vs. web)."></span>
 {% endif %}
+
+{% include 'model_builder/components/truncating_text.html' with visible_text=object_card.name extra_classes=title_class|default:"h6"|add:" flex-grow-1" %}
 
 <span class="d-none position-absolute top-50 end-0 translate-middle-y badge rounded-circle badge-gray-100
 text-black z-3 p-1 me-2"

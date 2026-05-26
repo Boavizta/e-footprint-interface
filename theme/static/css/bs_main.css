@@ -23013,6 +23013,16 @@ body.edge-modeling-off #model-canva [data-modeling-paradigm=edge] {
   border-radius: 50%;
 }
 
+#edge-modeling-toggle:checked {
+  background-color: var(--edge-paradigm-accent);
+  border-color: var(--edge-paradigm-accent);
+}
+
+#edge-modeling-toggle:focus {
+  border-color: var(--edge-paradigm-accent);
+  box-shadow: 0 0 0 0.25rem rgba(123, 93, 199, 0.25);
+}
+
 .sankey-section {
   padding: 0 4px 16px;
 }
