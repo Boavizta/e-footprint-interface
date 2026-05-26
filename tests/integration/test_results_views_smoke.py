@@ -191,15 +191,6 @@ def raise_view_exceptions(monkeypatch):
     monkeypatch.setenv("RAISE_EXCEPTIONS", "1")
 
 
-@pytest.fixture(autouse=True)
-def disable_staticfiles_manifest(settings):
-    """Templates use {% static %}, which fails under ManifestStaticFilesStorage without collectstatic."""
-    settings.STORAGES = {
-        **settings.STORAGES,
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
-
-
 @pytest.mark.django_db
 @pytest.mark.parametrize("hit", [h for _, h in ENDPOINTS], ids=[name for name, _ in ENDPOINTS])
 @pytest.mark.parametrize("builder", [b for _, b in ARCHETYPES], ids=[name for name, _ in ARCHETYPES])
