@@ -856,6 +856,13 @@ input:disabled{
     .result-width{
         width: 100%;
     }
+
+    // Shrink the canvas area so its horizontal scrollbar renders above the
+    // result button overlay (otherwise the button sits on the scrollbar and
+    // blocks click-and-drag).
+    #model-canva-scrollable-area {
+        height: calc(100% - var(--open-result-btn));
+    }
 }
 
 @media (min-width: 1200px) {

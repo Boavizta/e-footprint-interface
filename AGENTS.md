@@ -35,6 +35,10 @@ poetry run pytest tests/e2e -n 4             # E2E (requires running server)
 npm run jest                                 # JS unit tests
 ```
 
+## Styles
+
+Never edit `theme/static/css/bs_main.css` by hand — it is compiled from `theme/static/scss/`. Edit the SCSS source and recompile with `npm run watch` (or a one-shot `npx sass theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss`).
+
 For full setup options (full local / hybrid / Docker), see [`INSTALL.md`](INSTALL.md).
 
 ## Spec-driven workflow at a glance

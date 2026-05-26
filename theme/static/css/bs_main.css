@@ -21081,6 +21081,9 @@ input:disabled {
   .result-width {
     width: 100%;
   }
+  #model-canva-scrollable-area {
+    height: calc(100% - var(--open-result-btn));
+  }
 }
 @media (min-width: 1200px) {
   #model-canva {
