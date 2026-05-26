@@ -1,10 +1,15 @@
-"""View-layer smoke tests for the sankey-diagram results endpoint.
+"""View-layer smoke tests for the results endpoints.
 
-Catches "Sankey returns 500 on a freshly-built minimal model" — the failure
-mode where a real attribution path explodes on a shape no fixture exercised
-end-to-end. Library-side bugs are covered by efootprint's
+Catches "Results view returns 500 on a freshly-built minimal model" — the
+failure mode where a real attribution path explodes on a shape no fixture
+exercised end-to-end. Library-side bugs are covered by efootprint's
 run_test_materialize_all_cached_properties; these tests defend the interface
-seam (session repository, view parameter shapes, ModelWeb rebuild).
+seam (session repository, view parameter shapes, ModelWeb rebuild,
+SystemValidationService) on each archetype.
+
+Each archetype × endpoint pair is one test. Endpoints covered:
+- GET /model_builder/result-chart/    — fires the moment "Results" is clicked
+- POST /model_builder/sankey-diagram/ — fires when the panel settles
 
 RAISE_EXCEPTIONS=1 is critical: without it, render_exception_modal_if_error
 absorbs view exceptions into a modal returned with status 200, and a status-code
@@ -175,16 +180,31 @@ _DEFAULT_POST = {
 }
 
 
+ENDPOINTS = [
+    ("result_chart", lambda client: client.get("/model_builder/result-chart/")),
+    ("sankey_diagram", lambda client: client.post("/model_builder/sankey-diagram/", _DEFAULT_POST)),
+]
+
+
 @pytest.fixture(autouse=True)
 def raise_view_exceptions(monkeypatch):
     monkeypatch.setenv("RAISE_EXCEPTIONS", "1")
 
 
+@pytest.fixture(autouse=True)
+def disable_staticfiles_manifest(settings):
+    """Templates use {% static %}, which fails under ManifestStaticFilesStorage without collectstatic."""
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+
+
 @pytest.mark.django_db
+@pytest.mark.parametrize("hit", [h for _, h in ENDPOINTS], ids=[name for name, _ in ENDPOINTS])
 @pytest.mark.parametrize("builder", [b for _, b in ARCHETYPES], ids=[name for name, _ in ARCHETYPES])
-def test_sankey_diagram_smoke(client, builder):
+def test_results_endpoint_smoke(client, builder, hit):
     system = builder()
     SessionSystemRepository(client.session).save_data(
         system_to_json(system, save_calculated_attributes=False))
-    response = client.post("/model_builder/sankey-diagram/", _DEFAULT_POST)
-    assert response.status_code == 200
+    assert hit(client).status_code == 200
