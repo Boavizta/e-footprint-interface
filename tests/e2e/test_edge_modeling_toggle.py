@@ -45,7 +45,7 @@ class TestEdgeModelingToggle:
 
         click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
         page.locator("#sidePanelForm").wait_for(state="visible")
-        side_panel.fill_field("EdgeDeviceBase_name", "Sensor")
+        side_panel.fill_field("EdgeComputer_name", "Sensor")
         side_panel.submit_and_wait_for_close()
 
         toggle = page.locator("#edge-modeling-toggle")

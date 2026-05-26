@@ -131,6 +131,20 @@ def empty_model_builder(model_builder_page: ModelBuilderPage) -> ModelBuilderPag
 
 
 @pytest.fixture
+def edge_modeling_enabled(empty_model_builder: ModelBuilderPage) -> ModelBuilderPage:
+    """Enable the edge-modeling toggle so edge-paradigm add-buttons are visible.
+
+    A fresh session defaults to `edge-modeling-off`, which hides the edge add-buttons
+    via CSS. Tests that need to click them must opt in via this fixture (typically
+    applied to a class with `@pytest.mark.usefixtures("edge_modeling_enabled")`).
+    """
+    page = empty_model_builder.page
+    page.evaluate("localStorage.setItem('efootprint.edgeModeling', 'on')")
+    page.reload()
+    return empty_model_builder
+
+
+@pytest.fixture
 def minimal_complete_model_builder(minimal_system, model_builder_page) -> ModelBuilderPage:
     """Build a minimal complete system with all required objects connected.
 

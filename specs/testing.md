@@ -148,6 +148,10 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 
 Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. This handles waiting for the HTTP response — don't write raw Playwright clicks for HTMX flows.
 
+### Edge-paradigm tests
+
+Edge add-buttons are hidden by default (`body.edge-modeling-off`). Tests that click them must opt in via the `edge_modeling_enabled` fixture — typically `@pytest.mark.usefixtures("edge_modeling_enabled")` on the test class.
+
 ### Test structure
 
 - One test file per domain concept (servers, jobs, usage patterns, etc.).

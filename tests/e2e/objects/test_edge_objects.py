@@ -67,6 +67,7 @@ def edge_system_with_mirrored_edge_functions(model_builder_page: ModelBuilderPag
 
 
 @pytest.mark.e2e
+@pytest.mark.usefixtures("edge_modeling_enabled")
 class TestEdgeObjects:
     """Tests for edge device and edge usage journey workflows."""
 
