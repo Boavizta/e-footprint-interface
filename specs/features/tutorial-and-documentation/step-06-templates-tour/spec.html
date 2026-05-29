@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introductory templates + guided tour — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+
+  /* ---- scoped mockup styling ---- */
+  .mk-tabs { display: flex; gap: .4rem; margin-bottom: .8rem; flex-wrap: wrap; }
+  .mk-tabs button { font: inherit; padding: .35rem .7rem; border: 1px solid #bbb;
+        background: #fafafa; border-radius: 6px; cursor: pointer; }
+  .mk-tabs button[aria-selected="true"] { background: #1a6; color: #fff; border-color: #1a6; }
+  .mk-stage { background: #f7f9fb; border-radius: 8px; padding: 1rem; min-height: 16rem; position: relative; }
+  .mk-hidden { display: none; }
+
+  /* picker */
+  .mk-grouptitle { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
+        color: #777; margin: .8rem 0 .4rem; }
+  .mk-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .6rem; }
+  .mk-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: .6rem .7rem; cursor: pointer; }
+  .mk-card:hover { border-color: #1a6; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .mk-card h4 { margin: 0 0 .2rem; font-size: .95rem; }
+  .mk-card p { margin: 0; font-size: .8rem; color: #555; }
+  .mk-chips { margin-top: .4rem; }
+  .mk-chip { display: inline-block; font-size: .68rem; background: #eef6f1; color: #1a6;
+        border: 1px solid #bfe3cf; border-radius: 10px; padding: 0 .45rem; margin: .1rem .15rem 0 0; }
+  .mk-edge { background: #fff4e6; color: #b15c00; border-color: #f1cfa0; }
+  .mk-scratch { border-style: dashed; }
+
+  /* interface skeleton + tour */
+  .mk-navbar { display: flex; justify-content: space-between; align-items: center;
+        background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: .35rem .6rem; margin-bottom: .6rem; }
+  .mk-navbar .mk-brand { font-weight: 700; color: #1a6; }
+  .mk-nav-right { display: flex; gap: .5rem; align-items: center; }
+  .mk-toggle { font-size: .75rem; border: 1px solid #ccc; border-radius: 12px; padding: .1rem .5rem; color: #555; }
+  .mk-help { position: relative; }
+  .mk-help-btn { cursor: pointer; border: 1px solid #ccc; border-radius: 6px; padding: .1rem .5rem; background: #fafafa; }
+  .mk-help-menu { position: absolute; right: 0; top: 1.8rem; background: #fff; border: 1px solid #ccc;
+        border-radius: 6px; min-width: 11rem; box-shadow: 0 2px 8px rgba(0,0,0,.12); z-index: 5; }
+  .mk-help-menu div { padding: .4rem .6rem; font-size: .85rem; cursor: pointer; }
+  .mk-help-menu div:hover { background: #f0f7f3; }
+  .mk-cols { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: .5rem; }
+  .mk-col { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: .5rem; min-height: 9rem; }
+  .mk-col h5 { margin: 0 0 .4rem; font-size: .8rem; color: #444; text-align: center; }
+  .mk-obj { background: #f0f4f8; border: 1px solid #d4dde6; border-radius: 5px; padding: .35rem .45rem;
+        font-size: .78rem; margin-bottom: .35rem; }
+  .mk-obj.mk-ghost { background: repeating-linear-gradient(45deg,#f7f7f7,#f7f7f7 6px,#efefef 6px,#efefef 12px);
+        color: #999; border-style: dashed; }
+  .mk-info { color: #1a6; font-weight: 700; cursor: help; }
+  .mk-highlight { outline: 3px solid #1a6; outline-offset: 2px; border-radius: 6px; }
+  .mk-tip { position: absolute; max-width: 16rem; background: #1f2937; color: #fff; border-radius: 8px;
+        padding: .7rem .8rem; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.25); z-index: 6; }
+  .mk-tip h4 { margin: 0 0 .3rem; font-size: .9rem; }
+  .mk-tip p { margin: 0 0 .5rem; }
+  .mk-tip .mk-tiprow { display: flex; justify-content: space-between; align-items: center; }
+  .mk-tip button { font: inherit; font-size: .78rem; border: 0; border-radius: 5px; padding: .2rem .6rem; cursor: pointer; }
+  .mk-tip .mk-skip { background: transparent; color: #cbd5e1; text-decoration: underline; }
+  .mk-tip .mk-next { background: #1a6; color: #fff; }
+  .mk-stepcount { font-size: .72rem; color: #9aa6b2; }
+  .mk-note { font-size: .78rem; color: #666; margin-top: .6rem; }
+</style>
+</head>
+<body>
+
+<h1>Step 6 — Introductory templates + guided tour</h1>
+<p class="status">Status: Spec — under review · 2026-05-28</p>
+<p class="status">Part of the <code>tutorial-and-documentation</code> overhaul (roadmap Step 6). Draws on
+topic files <code>02-interface-onboarding-ux.md</code> and <code>04-efootprint-docs-overhaul.md</code>.</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <ul>
+    <li><strong>Problem.</strong> A first-time visitor lands on a blank model builder with no
+    guidance: no example to mutate, no orientation to where things live, no explanation of the
+    order to model in. The interface has contextual help (info icons, help drawer) and
+    disabled-instead-of-error buttons after earlier steps, but nothing that <em>greets</em> a new
+    user or gives them a running start. For the primary audience this is the difference between
+    "I get it" and "I close the tab."</li>
+    <li><strong>Audience.</strong> Primarily the non-technical product person with zero Python and
+    zero modeling background; secondarily technical users who want to sense depth and drop into it.
+    Frequency: the first run is once-per-user but decisive; the replay paths serve returning users
+    who want to start over or explore a different shape of system.</li>
+    <li><strong>Why now.</strong> The prerequisites are in place: contextual help and disabled-UX
+    (Steps 1&ndash;3), the library&rsquo;s how-to modeling templates exposed as a public API
+    (Step 4), and the edge modeling toggle + latch (Step 5). Onboarding is the payoff that ties
+    those investments into a coherent first-run experience &mdash; and it is the last
+    user-facing piece of the overhaul before the final build review.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <p>Each criterion is phrased as a user-observable, testable outcome.</p>
+  <ul>
+    <li>The existing marketing <strong>home page is preserved as the front door</strong>; it is not
+    skipped on a first visit. It gains one addition: a secondary <strong>&ldquo;Browse templates&rdquo;
+    CTA</strong> beside &ldquo;Start modeling yourself&rdquo; that opens the picker directly.
+    Onboarding otherwise triggers at the model-builder entry &mdash; so <strong>&ldquo;first run&rdquo;
+    means first entry into the model builder</strong>, not first hit on the site root.</li>
+    <li>Whenever the builder is <strong>entered with an empty model</strong> (the first-ever entry,
+    or a later return by someone who never built anything), the user is met with a
+    <strong>template picker</strong> instead of a blank canvas. It offers a small set of
+    ready-to-mutate introductory systems, the library&rsquo;s how-to example systems, and a
+    first-class <strong>&ldquo;Start from scratch&rdquo;</strong> option (which loads a truly empty
+    system). Once the model has content, entry goes straight to it.</li>
+    <li>Choosing any introductory or how-to template loads a <strong>complete, working system</strong>
+    the user can immediately edit, whose results compute without error.</li>
+    <li>Choosing the IoT/industrial template lands the user in a model where <strong>edge modeling is
+    already active</strong> (the Step 5 toggle is latched on by the loaded system), with no separate
+    &ldquo;web or edge?&rdquo; prompt.</li>
+    <li>After a template loads (or after &ldquo;Start from scratch&rdquo;), a short
+    <strong>guided tour</strong> orients the user to the interface map (where usage journeys,
+    infrastructure, usage patterns, and results live), the <strong>recommended modeling order</strong>,
+    and where contextual help is found. The tour is dismissible at any step.</li>
+    <li>The tour teaches concepts by <strong>pointing at the existing help affordances</strong> &mdash;
+    the help buttons next to the add buttons, the field tooltips, the info icons &mdash; not by
+    carrying its own concept text. At the help step it can <strong>open the help side panel itself</strong>
+    so the user sees it populated.</li>
+    <li>The tour is <strong>non-blocking</strong>: the user can open and explore the help side panel
+    <em>while the tour is still active</em> and then continue, rather than being trapped in a modal
+    overlay.</li>
+    <li>The tour <strong>auto-runs only on a user&rsquo;s first-ever visit</strong>. It does not
+    reappear on later visits.</li>
+    <li>A user can <strong>replay the tour</strong> and <strong>re-open the template picker</strong>
+    at any time from a persistent help entry point, without losing the ability to keep their current
+    work if they choose not to switch.</li>
+    <li>The tour points at <strong>real on-screen targets</strong> when a template is loaded, and at
+    placeholder targets with a concrete first-action suggestion when the user started from scratch.</li>
+    <li>The tour teaches the <em>map and order</em> only; <strong>domain concepts are not duplicated</strong>
+    into tour copy &mdash; they remain in contextual help and mkdocs deep-links.</li>
+    <li>Every shipped template and the metadata that describes it are <strong>covered by tests</strong>
+    that fail if a template stops loading, stops computing, or its metadata becomes inconsistent.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, registry/module names, the JSON storage scheme, the
+  guided-tour mechanism, first-run state plumbing, and the fate of the current default-system data
+  belong in <code>plan.html</code> (and in the existing topic files <code>02</code>/<code>04</code>),
+  not here.</blockquote>
+
+  <p>Step 6 is delivered in three sub-phases, sequenced by their prerequisites. They form one
+  user-facing capability &mdash; the first-run experience &mdash; and are scoped together here even
+  though each gets its own implementation plan.</p>
+
+  <details open><summary>In scope</summary>
+    <ul>
+      <li><strong>Sub-phase A &mdash; Introductory templates.</strong> A small curated set of
+      ready-to-mutate example systems (a classical e-commerce service, an AI chatbot, an
+      industrial IoT setup) plus the descriptive metadata each needs to appear in the picker
+      (display name, short description, an icon, and the concepts it showcases). The IoT template
+      demonstrates edge modeling in context. A wired-but-empty home for ad-hoc &ldquo;other&rdquo;
+      examples so they can be added later without new plumbing.</li>
+      <li><strong>Sub-phase B &mdash; Template picker.</strong> A picker screen offering the
+      introductory templates, the library&rsquo;s how-to example systems, and
+      &ldquo;Start from scratch&rdquo;, shown whenever the builder is entered with an empty model and
+      reachable any time from the help entry point. A &ldquo;Browse templates&rdquo; CTA on the home
+      page opens it directly. A persistent help entry point in the navbar toolbar lets a user replay
+      the tour or re-open the picker mid-session. Onboarding-seen state is tracked in localStorage
+      (per-browser; no user-profile flag, no Django model).</li>
+      <li><strong>Sub-phase C &mdash; Guided tour.</strong> Two flavors sharing the same
+      orientation content: one overlaid on a loaded template pointing at real cards/panels, and one
+      for the blank start that uses placeholders and suggests the first concrete action. Tour scope:
+      interface orientation, recommended modeling order, and contextual-help discoverability &mdash;
+      including a step that opens the help side panel so the user sees it in use. The overlay is
+      non-blocking, so the user can explore the help panel alongside the running tour. The tour
+      auto-runs on first-ever visit and is replayable from the help entry point.</li>
+    </ul>
+  </details>
+
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li><strong>Re-authored domain prose in the tour.</strong> The tour carries no concept
+      explanations of its own and embeds no copied help text. It teaches concepts only by pointing
+      at &mdash; and opening &mdash; the existing SSOT-fed help affordances (help buttons, field
+      tooltips, info icons, help drawer) and mkdocs deep-links. Surfacing that content is in scope;
+      duplicating it into tour copy is not.</li>
+      <li><strong>Step-by-step wizard or video onboarding.</strong> Explicitly rejected in topic 02.</li>
+      <li><strong>Redesigning the marketing home page.</strong> Its only change is the added
+      &ldquo;Browse templates&rdquo; CTA (in scope, above); the page is otherwise preserved as-is.
+      No layout, hero, or section rework.</li>
+      <li><strong>New library how-to templates.</strong> Step 6 <em>consumes</em> the how-to
+      templates delivered in Step 4; it does not author more.</li>
+      <li><strong>A full multi-category template browser beyond first-run.</strong> First-run shows
+      introductory + how-to + scratch; a richer merged browser is a later concern. The
+      &ldquo;other&rdquo; category ships only as an empty, wired placeholder.</li>
+      <li><strong>Persistent per-user model libraries</strong> and <strong>analytics/telemetry</strong>
+      on tour completion or template choice (out of scope per mission unless a telemetry story
+      already exists).</li>
+      <li><strong>Authoring a new contextual-help content store.</strong> Tour copy is
+      interface-specific, but contextual help still draws from the SSOT plumbing from Steps 2&ndash;3;
+      no parallel content store is introduced.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The interface is <strong>not</strong> getting new pages or new navigation. The existing marketing
+  <strong>home page</strong> stays as the public front door; its only addition is a secondary
+  &ldquo;Browse templates&rdquo; CTA beside &ldquo;Start modeling yourself&rdquo;. The model builder
+  is one canvas &mdash; columns of cards, a right-side help drawer and edit panel that slide in, and a
+  results bar at the bottom. Everything new is an <em>overlay on that same canvas</em>: the picker
+  opens over it, the tour points at its cards, the help menu lives in its chrome.</p>
+
+  <p>The home page is <strong>not short-circuited</strong> on a first visit &mdash; a cold visitor
+  still gets the marketing context that helps them decide to engage. The picker then appears
+  <strong>whenever the builder is entered with an empty model</strong> (the first-ever entry, or a
+  later return by someone who never built anything) &mdash; so &ldquo;first run&rdquo; is anchored on
+  the model being empty, not on first hit of the site root. Once the model has content, entry goes
+  straight to it. The <em>tour</em> auto-runs once ever (a localStorage flag); both picker and tour
+  are reachable any time from the help menu.</p>
+
+  <p>How the surfaces relate in the <strong>real app flow</strong>:</p>
+  <svg viewBox="0 0 720 170" width="100%" role="img"
+       aria-label="The home page stays the front door, with Start modeling yourself and Browse templates CTAs. Entering the builder with an empty model opens the template picker; picking a card loads that system into the canvas and runs the guided tour. Entering with existing content goes straight to the model. The help menu is always present and re-opens the picker or replays the tour.">
+    <style>
+      .fbox { fill:#fff; stroke:#1a6; stroke-width:1.5; }
+      .fbox-n { fill:#f7f9fb; stroke:#9aa6b2; stroke-width:1.3; }
+      .flabel { font: 600 12px system-ui, sans-serif; fill:#1a4; }
+      .flabel-n { font: 600 12px system-ui, sans-serif; fill:#555; }
+      .fsub { font: 11px system-ui, sans-serif; fill:#666; }
+      .farrow { stroke:#1a6; stroke-width:1.5; fill:none; marker-end:url(#ah); }
+      .farrow-n { stroke:#9aa6b2; stroke-width:1.3; fill:none; marker-end:url(#ah3); }
+      .floop { stroke:#b15c00; stroke-width:1.3; fill:none; stroke-dasharray:4 3; marker-end:url(#ah2); }
+    </style>
+    <defs>
+      <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#1a6"/></marker>
+      <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#b15c00"/></marker>
+      <marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa6b2"/></marker>
+    </defs>
+    <!-- home page (front door + Browse templates CTA) -->
+    <rect class="fbox-n" x="6" y="40" width="150" height="46" rx="8"/>
+    <text class="flabel-n" x="18" y="60">Home page</text>
+    <text class="fsub" x="18" y="76">+ Browse templates CTA</text>
+    <!-- empty-model path (top) -->
+    <rect class="fbox" x="250" y="6" width="160" height="44" rx="8"/>
+    <text class="flabel" x="262" y="26">Template picker</text>
+    <text class="fsub" x="262" y="41">overlay on the canvas</text>
+    <rect class="fbox" x="470" y="6" width="170" height="44" rx="8"/>
+    <text class="flabel" x="482" y="26">Canvas + tour</text>
+    <text class="fsub" x="482" y="41">system loaded, tour runs</text>
+    <!-- has-content path (middle) -->
+    <rect class="fbox-n" x="250" y="62" width="160" height="40" rx="8"/>
+    <text class="flabel-n" x="262" y="80">Canvas (no picker)</text>
+    <text class="fsub" x="262" y="95">straight to existing model</text>
+    <!-- help menu (bottom) -->
+    <rect class="fbox" x="470" y="124" width="170" height="34" rx="8" style="stroke:#b15c00;"/>
+    <text class="flabel" x="482" y="145" style="fill:#b15c00;">Help menu (always present)</text>
+    <!-- arrows -->
+    <path class="farrow" d="M156,55 C200,55 206,28 248,28"/>
+    <text class="fsub" x="158" y="34">enter · empty model</text>
+    <path class="farrow-n" d="M156,70 C200,70 206,82 248,82"/>
+    <text class="fsub" x="158" y="118" style="fill:#9aa6b2;">enter · has content</text>
+    <line class="farrow" x1="410" y1="28" x2="468" y2="28"/>
+    <text class="fsub" x="416" y="22">pick / scratch</text>
+    <!-- help loops -->
+    <path class="floop" d="M555,124 L555,52"/>
+    <path class="floop" d="M470,141 C360,141 330,52 330,52"/>
+    <text class="fsub" x="345" y="138" style="fill:#b15c00;">replay tour · re-open picker</text>
+  </svg>
+
+  <p>The four panels below are a <strong>spec-viewing device</strong> &mdash; click a tab to preview
+  each state of that single canvas (they start from the &ldquo;Start modeling yourself&rdquo; click).
+  They are not app tabs; the real triggers are the arrows above. Layout, copy, and placement are
+  indicative, not final.</p>
+
+  <div class="mockup" id="mk-onboarding">
+    <div class="mk-tabs" role="tablist" aria-label="Preview onboarding states">
+      <button role="tab" aria-selected="true" data-view="picker">Preview · Template picker</button>
+      <button role="tab" aria-selected="false" data-view="tour">Preview · Tour on a template</button>
+      <button role="tab" aria-selected="false" data-view="blank">Preview · Tour on a blank start</button>
+      <button role="tab" aria-selected="false" data-view="help">Preview · Help menu</button>
+    </div>
+
+    <!-- VIEW: PICKER -->
+    <div class="mk-stage" data-stagefor="picker">
+      <div style="font-weight:700;margin-bottom:.2rem;">Welcome to e-footprint</div>
+      <div style="font-size:.85rem;color:#555;">Pick a starting point. You can change everything once it loads.</div>
+
+      <div class="mk-grouptitle">Start here</div>
+      <div class="mk-cards">
+        <div class="mk-card" data-pick="ecommerce">
+          <h4>🛒 Classical e-commerce</h4>
+          <p>A typical web service: pages, a server, a database.</p>
+          <div class="mk-chips"><span class="mk-chip">web service</span><span class="mk-chip">database</span></div>
+        </div>
+        <div class="mk-card" data-pick="chatbot">
+          <h4>🤖 AI chatbot</h4>
+          <p>An inference-heavy LLM workload.</p>
+          <div class="mk-chips"><span class="mk-chip">LLM inference</span><span class="mk-chip">GPU server</span></div>
+        </div>
+        <div class="mk-card" data-pick="iot">
+          <h4>📟 Industrial IoT</h4>
+          <p>A mixed setup with connected edge devices.</p>
+          <div class="mk-chips"><span class="mk-chip mk-edge">edge modeling</span><span class="mk-chip">device fleet</span></div>
+        </div>
+      </div>
+
+      <div class="mk-grouptitle">Deep-dive examples (from the docs)</div>
+      <div class="mk-cards">
+        <div class="mk-card" data-pick="howto">
+          <h4>🗄️ Database modeling</h4>
+          <p>Backs the &ldquo;Database modeling&rdquo; how-to guide.</p>
+          <div class="mk-chips"><span class="mk-chip">how-to</span></div>
+        </div>
+        <div class="mk-card" data-pick="howto">
+          <h4>🔁 Server-to-server</h4>
+          <p>Backs the &ldquo;Server interaction&rdquo; how-to guide.</p>
+          <div class="mk-chips"><span class="mk-chip">how-to</span></div>
+        </div>
+      </div>
+
+      <div class="mk-grouptitle">Or</div>
+      <div class="mk-cards">
+        <div class="mk-card mk-scratch" data-pick="scratch">
+          <h4>＋ Start from scratch</h4>
+          <p>An empty model. We&rsquo;ll show you where to begin.</p>
+        </div>
+      </div>
+      <p class="mk-note">Clicking a card loads its system and starts the guided tour. Try the
+      <em>Industrial IoT</em> card &mdash; it lands with edge modeling already on.</p>
+    </div>
+
+    <!-- VIEW: TOUR (template) -->
+    <div class="mk-stage mk-hidden" data-stagefor="tour">
+      <div class="mk-navbar">
+        <span class="mk-brand">e-footprint</span>
+        <div class="mk-nav-right">
+          <span class="mk-toggle" data-edgetoggle>Edge modeling: <strong>off</strong></span>
+          <span class="mk-help"><span class="mk-help-btn">? Help</span></span>
+        </div>
+      </div>
+      <div class="mk-cols">
+        <div class="mk-col" data-col="infra">
+          <h5>Infrastructure</h5>
+          <div class="mk-obj">Server <span class="mk-info" title="What is a server? — opens contextual help">ⓘ</span></div>
+          <div class="mk-obj">Storage</div>
+        </div>
+        <div class="mk-col" data-col="journeys">
+          <h5>Usage journeys</h5>
+          <div class="mk-obj">Browse catalog <span class="mk-info" title="What is a usage journey? — opens contextual help">ⓘ</span></div>
+          <div class="mk-obj">Checkout</div>
+        </div>
+        <div class="mk-col" data-col="patterns">
+          <h5>Usage patterns</h5>
+          <div class="mk-obj">Daily shoppers</div>
+        </div>
+      </div>
+      <p class="mk-note">Results appear once the model is complete. The tour points at the real cards
+      that the chosen template loaded.</p>
+    </div>
+
+    <!-- VIEW: TOUR (blank) -->
+    <div class="mk-stage mk-hidden" data-stagefor="blank">
+      <div class="mk-navbar">
+        <span class="mk-brand">e-footprint</span>
+        <div class="mk-nav-right">
+          <span class="mk-toggle">Edge modeling: <strong>off</strong></span>
+          <span class="mk-help"><span class="mk-help-btn">? Help</span></span>
+        </div>
+      </div>
+      <div class="mk-cols">
+        <div class="mk-col" data-col="infra"><h5>Infrastructure</h5><div class="mk-obj mk-ghost">no servers yet</div></div>
+        <div class="mk-col" data-col="journeys"><h5>Usage journeys</h5><div class="mk-obj mk-ghost">no journeys yet</div></div>
+        <div class="mk-col" data-col="patterns"><h5>Usage patterns</h5><div class="mk-obj mk-ghost">no patterns yet</div></div>
+      </div>
+      <p class="mk-note">Same orientation content as the template tour, but anchored on placeholders.
+      The final step suggests the first concrete action.</p>
+    </div>
+
+    <!-- VIEW: HELP MENU -->
+    <div class="mk-stage mk-hidden" data-stagefor="help">
+      <div class="mk-navbar">
+        <span class="mk-brand">e-footprint</span>
+        <div class="mk-nav-right">
+          <span class="mk-toggle">Edge modeling: <strong>off</strong></span>
+          <span class="mk-help">
+            <span class="mk-help-btn" aria-expanded="true">? Help ▾</span>
+            <div class="mk-help-menu">
+              <div data-help="tour">↺ Replay tour</div>
+              <div data-help="templates">▦ Open templates</div>
+              <div>📖 Documentation</div>
+            </div>
+          </span>
+        </div>
+      </div>
+      <p class="mk-note">The help entry point is always available. &ldquo;Replay tour&rdquo; restarts
+      the orientation overlay on the current model; &ldquo;Open templates&rdquo; re-opens the picker
+      so the user can start over or try another shape of system.</p>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const root = document.getElementById('mk-onboarding');
+    const tabs = root.querySelectorAll('.mk-tabs button');
+    const stages = root.querySelectorAll('.mk-stage');
+    const show = (view) => {
+      tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === view)));
+      stages.forEach(s => s.classList.toggle('mk-hidden', s.dataset.stagefor !== view));
+      if (view === 'tour') runTour(root.querySelector('[data-stagefor="tour"]'), false);
+      if (view === 'blank') runTour(root.querySelector('[data-stagefor="blank"]'), true);
+    };
+    tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.view)));
+
+    // picker cards -> jump to the relevant tour
+    root.querySelectorAll('[data-pick]').forEach(card => {
+      card.addEventListener('click', () => {
+        const pick = card.dataset.pick;
+        if (pick === 'iot') {
+          show('tour');
+          const tog = root.querySelector('[data-stagefor="tour"] [data-edgetoggle]');
+          if (tog) { tog.innerHTML = 'Edge modeling: <strong>on</strong>'; tog.style.background = '#fff4e6'; tog.style.color = '#b15c00'; }
+        } else if (pick === 'scratch') {
+          show('blank');
+        } else {
+          show('tour');
+          const tog = root.querySelector('[data-stagefor="tour"] [data-edgetoggle]');
+          if (tog) { tog.innerHTML = 'Edge modeling: <strong>off</strong>'; tog.style.background = ''; tog.style.color = '#555'; }
+        }
+      });
+    });
+
+    // help menu actions
+    root.querySelectorAll('[data-help]').forEach(item => {
+      item.addEventListener('click', () => {
+        if (item.dataset.help === 'tour') show('tour');
+        if (item.dataset.help === 'templates') show('picker');
+      });
+    });
+
+    // minimal guided-tour walkthrough over the column skeleton
+    const steps = [
+      { col: 'journeys', title: 'Start in the middle', body: 'Begin with a usage journey — what a user actually does. This column is your anchor.' },
+      { col: 'infra', title: 'Then the infrastructure', body: 'Add the servers and storage your journeys rely on.' },
+      { col: 'patterns', title: 'Then who uses it, and how much', body: 'Usage patterns describe how many people follow each journey over time.' },
+      { col: 'journeys', title: 'Help is always one click away', body: 'The ⓘ icons next to each add button and the field tooltips explain every concept — we just opened the help panel so you can see. Explore it now; the tour stays open. Results appear once the model is complete.' },
+    ];
+    function runTour(stage, isBlank) {
+      stage.querySelectorAll('.mk-tip').forEach(n => n.remove());
+      stage.querySelectorAll('.mk-highlight').forEach(n => n.classList.remove('mk-highlight'));
+      let i = 0;
+      const render = () => {
+        stage.querySelectorAll('.mk-tip').forEach(n => n.remove());
+        stage.querySelectorAll('.mk-highlight').forEach(n => n.classList.remove('mk-highlight'));
+        const step = steps[i];
+        const target = stage.querySelector('[data-col="' + step.col + '"]');
+        if (target) target.classList.add('mk-highlight');
+        const tip = document.createElement('div');
+        tip.className = 'mk-tip';
+        const last = i === steps.length - 1;
+        const blankExtra = (last && isBlank) ? '<p style="color:#a7f3d0;margin-top:.4rem;">Suggested first step: <strong>create a usage journey</strong>.</p>' : '';
+        tip.innerHTML =
+          '<div class="mk-stepcount">Step ' + (i + 1) + ' of ' + steps.length + '</div>' +
+          '<h4>' + step.title + '</h4><p>' + step.body + '</p>' + blankExtra +
+          '<div class="mk-tiprow"><button class="mk-skip">Skip tour</button>' +
+          '<button class="mk-next">' + (last ? 'Done' : 'Next') + '</button></div>';
+        const rect = target.getBoundingClientRect();
+        const sRect = stage.getBoundingClientRect();
+        tip.style.top = (rect.bottom - sRect.top + 8) + 'px';
+        tip.style.left = Math.min(rect.left - sRect.left, sRect.width - 270) + 'px';
+        stage.appendChild(tip);
+        tip.querySelector('.mk-next').addEventListener('click', () => {
+          if (last) { tip.remove(); target.classList.remove('mk-highlight'); }
+          else { i++; render(); }
+        });
+        tip.querySelector('.mk-skip').addEventListener('click', () => {
+          tip.remove(); stage.querySelectorAll('.mk-highlight').forEach(n => n.classList.remove('mk-highlight'));
+        });
+      };
+      render();
+    }
+  })();
+  </script>
+
+  <p class="mk-note">Placement of the help entry point (navbar vs floating vs side panel), the
+  template-card icons, and the exact tour copy are intentionally indicative here &mdash; they are
+  settled at implementation start.</p>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Mission fit.</strong> Onboarding with starter templates, contextual help, and the
+    web/edge toggle is named as forthcoming scope in <code>mission.md</code>; the primary audience
+    (non-technical product person, zero Python) governs tone and defaults.</li>
+    <li><strong>Constitution &mdash; HTMX-first, minimize JS.</strong> The rule is the boundary, and
+    this feature splits cleanly across it. The state-bearing parts stay HTMX/server-rendered: the
+    picker is a server-rendered partial whose selection loads a <code>System</code> into the session
+    and swaps the canvas; the help drawer is already an HTMX endpoint; first-run state is a single
+    server write; tour step copy and targets are server-provided so the words don&rsquo;t live in JS.
+    The <strong>tour engine</strong> (element highlighting, tooltip positioning, step sequencing,
+    reposition on scroll/resize, non-blocking overlay) is inherently client-side view logic with
+    <em>no domain state and no routing</em> &mdash; it is precisely the constitution&rsquo;s
+    sanctioned &ldquo;vanilla JS where unavoidable,&rdquo; not a deviation from it. &ldquo;Minimize
+    JS&rdquo; here means &ldquo;no client-side data layer shadowing the server,&rdquo; which the tour
+    respects. A small dependency-free tour library is permissible (it is not an SPA framework);
+    hand-rolled vanilla vs. such a library is a plan-time maintainability call, not a constitutional
+    one.</li>
+    <li><strong>Constitution &mdash; Clean Architecture.</strong> First-run state, template loading,
+    and tour orchestration must respect the domain/application/adapter dependency direction; the
+    library stays the modeling truth and the interface never re-implements modeling.</li>
+    <li><strong>Constitution &mdash; quality gates.</strong> Templates and their metadata need test
+    coverage (load + compute + metadata consistency). Onboarding-seen state is localStorage-only, so
+    it adds no Django model and needs no migration; a <code>CHANGELOG.md</code> entry is still
+    required, and <code>efootprint</code> must be referenced from PyPI (not an editable path) before
+    reaching <code>main</code>.</li>
+    <li><strong>Cross-step dependencies.</strong> Sub-phase A&rsquo;s IoT template relies on the
+    Step 5 edge toggle/latch (verified present). Sub-phase B surfaces the library&rsquo;s how-to
+    example systems through the public API delivered in Step 4 (verified present in the installed
+    library). Both prerequisites are satisfied.</li>
+    <li><strong>SSOT, not a parallel store.</strong> Contextual help surfaced during onboarding
+    continues to draw from the Step 2&ndash;3 description plumbing; only the tour&rsquo;s own
+    step copy (interface-specific, not derivable from library classes) is new content.</li>
+    <li><strong>Deep-link targets must exist.</strong> Any mkdocs deep-link the tour or picker
+    relies on must point at a page delivered in Step 4.</li>
+    <li><strong>English only</strong> per mission and constitution.</li>
+    <li><strong>Desktop-first, but should also work on mobile.</strong> Desktop is the primary target
+    (per mission/constitution), yet the picker and tour should remain usable on a small screen &mdash;
+    mobile is not to be ignored. Where genuine mobile support would add complexity out of proportion
+    to its value (e.g. tooltip anchoring against a horizontally-scrolling canvas on a narrow
+    viewport), that is to be <strong>raised and discussed at implementation time</strong> rather than
+    silently dropped or silently over-built.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Decisions and remaining questions</h2>
+  <p>The questions that were open at first draft are now resolved as follows:</p>
+  <ul>
+    <li><strong>&ldquo;Start from scratch&rdquo; loads a truly empty system</strong> &mdash; a named
+    <code>System</code> with no usage journeys, servers, or patterns. The pre-seeded journey/step in
+    today&rsquo;s default is dropped, so the blank tour&rsquo;s &ldquo;create a usage journey&rdquo;
+    suggestion stays coherent.</li>
+    <li><strong>Fate of the current default system data follows from the above:</strong> it becomes
+    the empty &ldquo;Start from scratch&rdquo; baseline (slimmed to an empty system). It is not kept
+    as a seeded skeleton and not promoted into the introductory set.</li>
+    <li><strong>The help entry point lives in the navbar toolbar</strong>, next to the edge-modeling
+    toggle, where global model-level controls already sit. It follows the same desktop/mobile merge
+    behavior as the rest of that toolbar.</li>
+    <li><strong>Showcased concepts are tokens</strong> resolved through the placeholder registry to
+    canonical class/concept names &mdash; CI-validated, no free-form drift.</li>
+    <li><strong>The blank tour&rsquo;s first concrete action is &ldquo;create a usage journey&rdquo;</strong>,
+    matching the recommended modeling order the tour teaches.</li>
+    <li><strong>The home page gains a secondary &ldquo;Browse templates&rdquo; CTA</strong> next to
+    &ldquo;Start modeling yourself&rdquo;, opening the picker directly. It remains otherwise unchanged
+    as the front door.</li>
+    <li><strong>Onboarding-seen state is stored in localStorage only</strong> &mdash; per-browser, no
+    user-profile flag and no Django model (hence no migration for first-run state). This is a
+    deliberate simplification over the profile+fallback split floated in topic 02; it means
+    onboarding memory does not follow a signed-in user across browsers/devices.</li>
+    <li><strong>The picker auto-appears whenever the builder is entered with an empty model</strong>
+    &mdash; the first-ever entry is simply the first instance of that, and a returning user who never
+    built anything is re-offered it. Once the model has content, entry goes straight to it; the picker
+    is then reachable only via Help &#9656; Open templates. Independently, the <em>tour</em> auto-runs
+    once ever (gated by the localStorage flag) and is otherwise replayed via Help &#9656; Replay tour.</li>
+  </ul>
+  <p>Genuinely deferred to implementation time (not blocking the plan):</p>
+  <ul>
+    <li><strong>Tour engine: hand-rolled vanilla vs. a small dependency-free tour library</strong> &mdash;
+    a maintainability call, both constitution-compliant (see &sect;5).</li>
+    <li><strong>Mobile fidelity of the picker and tour</strong> &mdash; usable on small screens is the
+    goal; where it would cost disproportionate complexity, raise it for discussion rather than
+    silently dropping or over-building (see &sect;5).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read the source design decisions in <code>02-interface-onboarding-ux.md</code> (onboarding
+    mode, tour flavors, persistence/replay) and <code>04-efootprint-docs-overhaul.md</code>
+    (three-category template scheme, library how-to public API).</li>
+    <li>Read <code>99-roadmap.md</code> Step 6 for the sub-phase breakdown and its cross-step
+    prerequisites (Steps 4 and 5).</li>
+    <li>Read <code>plan.html</code> (written in the <code>spec-plan</code> stage) for module layout,
+    storage paths, the guided-tour mechanism, first-run state plumbing, and test gates.</li>
+    <li>Re-read <code>specs/architecture.md</code> and <code>specs/conventions.md</code> for
+    Clean-Architecture and code-style constraints before implementing.</li>
+  </ol>
+</section>
+
+</body>
+</html>

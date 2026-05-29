@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step 6 — Introductory templates + guided tour — Tasks</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  h3 { margin-top: 1.4rem; }
+  .status { color: #666; font-size: .9rem; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  .new { color: #1a6; font-weight: 600; }
+  .mod { color: #b15c00; font-weight: 600; }
+  .task { border: 1px solid #e0e0e0; border-radius: 8px; padding: .2rem 1.2rem 1rem; margin: 1.4rem 0; }
+  .task h2 { margin-top: 1rem; }
+  .meta { font-size: .85rem; color: #666; }
+  ul.tight li { margin: .25rem 0; }
+  hr { border: 0; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+  .tag { display: inline-block; font-size: .7rem; background: #eef6f1; color: #1a6;
+         border: 1px solid #bfe3cf; border-radius: 10px; padding: 0 .45rem; margin-left: .3rem; }
+</style>
+</head>
+<body>
+
+<h1>Step 6 — Introductory templates + guided tour — Tasks</h1>
+<p class="status"><strong>Status:</strong> Tasks — under review · 2026-05-29</p>
+<p class="status">Spec: <code>spec.html</code>. Plan: <code>plan.html</code>. Sequencing follows plan §8
+(three review-gated sub-phases A → B → C, each one task).</p>
+
+<blockquote>One task = one commit = one review pass. The three tasks map 1:1 to the plan's
+sub-phases: each sub-phase has a clean behavioural pause point at its boundary (data layer
+landed-but-unused → first-run picker works → guided tour runs) and no behavioural pause
+<em>within</em> it, so aggregating each sub-phase into a single review-sized task is correct.
+Commit-tag prefixes per the interface's git style: <code>[ADD]</code> / <code>[UPDATE]</code>.</blockquote>
+
+<!-- ============================================================= -->
+<div class="task">
+<h2>Task 1 — Introductory templates + registry (Sub-phase A) <span class="tag">requires Step 5</span></h2>
+
+<p class="meta"><strong>Goal.</strong> Land the interface-owned template data layer that everything
+downstream consumes: three ready-to-mutate introductory <code>System</code>s, the typed metadata
+registry that describes them, an empty-but-wired <code>other</code> category, and the slimmed
+truly-empty "Start from scratch" baseline. Nothing user-visible yet — this is the data layer
+landed-but-unused.</p>
+
+<p class="meta"><strong>Files touched.</strong></p>
+<ul class="tight">
+  <li><span class="new">new</span> <code>scripts/build_intro_templates.py</code> + per-template
+  Python scenario constructors — the committed source of truth; runs each scenario through
+  <code>efootprint.api_utils.system_to_json</code> to (re)generate the JSONs, re-runnable on a
+  library schema change.</li>
+  <li><span class="new">new</span> <code>model_builder/domain/reference_data/modeling_templates/introductory/{ecommerce,ai_chatbot,iot_industrial}.json</code>
+  — serialized pure <code>System</code> snapshots (no UI metadata inside). The IoT JSON contains
+  edge objects so the Step 5 latch fires on load.</li>
+  <li><span class="new">new</span> <code>.../introductory/registry.py</code> — <code>IntroTemplate</code>
+  dataclass (mirrors the library's <code>HowToTemplate</code>) + tuple of the three entries + closed
+  <code>CONCEPTS</code> enum (token → label + optional help/doc target). <code>showcased_concepts</code>
+  mix <code>{class:X}</code> tokens with <code>CONCEPTS</code> keys. Shared placeholder resolver
+  untouched.</li>
+  <li><span class="new">new</span> <code>.../modeling_templates/other/registry.py</code> +
+  <code>__init__.py</code> — empty but wired placeholder.</li>
+  <li><span class="new">new</span> <code>.../modeling_templates/__init__.py</code> — interface-side
+  aggregation of introductory + other registries (how-to comes from the library).</li>
+  <li><span class="mod">modified</span> <code>model_builder/domain/reference_data/default_system_data.json</code>
+  — slimmed to a truly empty named <code>System</code> (empty <code>usage_patterns</code> /
+  <code>edge_usage_patterns</code>, pre-seeded journey/step dropped).</li>
+  <li><span class="mod">modified</span> any existing test/fixture that assumed the old seeded default
+  journey/step (grep first — plan §4 risk "Default-data slimming"; fix, don't paper over).</li>
+</ul>
+
+<p class="meta"><strong>Tests added/changed.</strong></p>
+<ul class="tight">
+  <li><code>tests/.../test_intro_template_registry.py</code> — metadata consistency: every
+  <code>json_path</code> exists, <code>category</code> valid, every <code>showcased_concepts</code>
+  token resolves (through the placeholder registry / <code>CONCEPTS</code> enum), <code>icon</code>
+  present. Mirrors the library's <code>HowToTemplate</code> validation.</li>
+  <li><code>tests/.../test_intro_templates_load_and_compute.py</code> — load-and-compute per
+  introductory template: each JSON loads via <code>json_to_system</code> /
+  <code>ProgressiveImportService</code> and produces computed emissions without error (pattern from
+  <code>e-footprint/tests/test_modeling_templates.py</code> and the interface's
+  <code>test_progressive_import_service.py</code>).</li>
+  <li>Update fixtures touched by the default slimming so the existing suite stays green.</li>
+</ul>
+
+<p class="meta"><strong>Acceptance.</strong></p>
+<ul class="tight">
+  <li>Re-running <code>scripts/build_intro_templates.py</code> reproduces the committed JSONs.</li>
+  <li>Each of the three templates loads and computes emissions without error (success criterion:
+  "complete, working system… results compute without error").</li>
+  <li>The IoT template's serialized JSON contains edge objects (verifies the Step 5 latch will fire
+  — asserted in Task 2's E2E).</li>
+  <li>The metadata-consistency test fails if a <code>json_path</code>, <code>category</code>,
+  <code>icon</code>, or concept token becomes inconsistent.</li>
+  <li><code>default_system_data.json</code> deserializes to an empty <code>System</code> (no journeys,
+  servers, or patterns); full unit/integration suite green.</li>
+</ul>
+
+<p class="meta"><strong>Depends on:</strong> none (Step 5 prerequisite verified present).</p>
+</div>
+
+<!-- ============================================================= -->
+<div class="task">
+<h2>Task 2 — Template picker + help menu + first-run trigger (Sub-phase B)</h2>
+
+<p class="meta"><strong>Goal.</strong> First user-visible milestone: entering the builder with an
+empty model opens the template picker over the canvas; picking any card (or "Start from scratch")
+loads that system and swaps the canvas; the picker is reachable any time from a new toolbar help
+menu and from a "Browse templates" CTA on the home page. First-run-seen state is tracked in
+localStorage. (The <em>tour</em> that a load triggers arrives in Task 3 — here, loading just lands
+on the canvas; "Replay tour" wiring is finished in Task 3.)</p>
+
+<p class="meta"><strong>Files touched.</strong></p>
+<ul class="tight">
+  <li><span class="new">new</span> template-catalog service under
+  <code>model_builder/domain/services/</code> — merges introductory registry +
+  <code>efootprint.modeling_templates.list_how_to_templates()</code> + <code>other</code> into
+  category groups. Runtime use of the library public API (no copying, no parity test).</li>
+  <li><span class="new">new</span> <code>model_builder/adapters/views/views_onboarding.py</code> —
+  thin adapters: <code>open_template_picker</code> (render partial), <code>load_template</code>
+  (POST: load chosen/scratch system into session, swap canvas).</li>
+  <li><span class="mod">modified</span> <code>model_builder/adapters/views/views.py</code> →
+  <code>model_builder_main</code> — stop auto-rebooting to a seeded default; render the canvas with
+  the picker overlay when <code>system_data is None</code> <em>or</em> the only efootprint object key
+  is <code>System</code> (metadata keys excluded per plan §7).</li>
+  <li><span class="mod">modified</span> <code>model_builder/urls.py</code> — routes for
+  <code>open-template-picker</code> and <code>load-template/&lt;template_id&gt;/</code> (reserved
+  <code>scratch</code> id).</li>
+  <li><span class="new">new</span> <code>model_builder/templates/model_builder/onboarding/template_picker.html</code>
+  — server-rendered bespoke canvas overlay (HTMX swap into a canvas-scoped container): three grouped
+  card lists (Start here / Deep-dive from docs / Start from scratch); icons + concept chips from the
+  registry; how-to cards deep-link to Step 4 mkdocs pages via <code>{doc:…}</code> /
+  <code>mkdocs_base_url</code>.</li>
+  <li><span class="new">new</span> <code>model_builder/templates/model_builder/components/help_menu.html</code>
+  — toolbar dropdown: Replay tour · Open templates · Documentation (next to the edge toggle). The
+  "Replay tour" item is present here but fully wired in Task 3.</li>
+  <li><span class="mod">modified</span> <code>model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html</code>
+  — include <code>help_menu.html</code> as a sibling <code>&lt;li&gt;</code> in
+  <code>#toolbar-nav</code>, same desktop/mobile merge behaviour.</li>
+  <li><span class="mod">modified</span> <code>theme/templates/home.html</code> — secondary "Browse
+  templates" CTA beside <code>#btn-start-modeling-my-service</code>; page otherwise unchanged.</li>
+  <li><span class="new">new</span> <code>theme/static/scripts/onboarding_first_run.js</code> —
+  localStorage flag <code>efootprint_onboarding_seen</code> (set on first run; no Django model, no
+  migration).</li>
+</ul>
+
+<p class="meta"><strong>Tests added/changed.</strong></p>
+<ul class="tight">
+  <li><code>tests/.../test_template_catalog_service.py</code> — integration: catalog service merges
+  all three categories (introductory + library how-to + other), running adapters → use cases →
+  domain with no Django scaffolding (constitution §1.1).</li>
+  <li><code>tests/.../test_empty_model_predicate.py</code> — unit: the picker-trigger predicate is
+  true for <code>None</code> and for an only-<code>System</code>-object payload, false once real
+  content exists; asserts the excluded-metadata-key set stays in sync with the serializer (plan §4
+  risk).</li>
+  <li><code>tests/e2e/...</code> — picker first-run flow: enter with empty model → picker appears →
+  pick a template → canvas loads; "Browse templates" CTA on home opens the picker. Use
+  <code>click_and_wait_for_htmx()</code>; fixtures via <code>from_defaults()</code>. (The
+  tour/IoT-latch assertions are added in Task 3.)</li>
+</ul>
+
+<p class="meta"><strong>Acceptance.</strong></p>
+<ul class="tight">
+  <li>Entering the builder with an empty model shows the picker; entering with existing content goes
+  straight to the model.</li>
+  <li>Picking any introductory or how-to card loads a working, computing system onto the canvas;
+  "Start from scratch" loads the truly-empty baseline.</li>
+  <li>The help menu appears in the toolbar next to the edge toggle; "Open templates" re-opens the
+  picker mid-session without discarding current work unless a template is chosen.</li>
+  <li>The home "Browse templates" CTA opens the picker directly; the marketing page is otherwise
+  unchanged.</li>
+  <li>First-run-seen is recorded in localStorage; no migration is introduced.</li>
+  <li>Unit + integration + picker E2E green.</li>
+</ul>
+
+<p class="meta"><strong>Depends on:</strong> Task 1 (registry + JSONs + slimmed default).</p>
+</div>
+
+<!-- ============================================================= -->
+<div class="task">
+<h2>Task 3 — Guided tour (Sub-phase C)</h2>
+
+<p class="meta"><strong>Goal.</strong> Second user-visible milestone: after a template loads (or
+after "Start from scratch"), a short non-blocking guided tour orients the user to the interface map,
+the recommended modeling order, and where contextual help lives — pointing at real on-screen targets
+on a loaded template and at placeholders (with a "create a usage journey" suggestion) on a blank
+start. The tour auto-runs once ever and is replayable from the help menu; the help step opens the
+help side panel while the tour stays open.</p>
+
+<p class="meta"><strong>Files touched.</strong></p>
+<ul class="tight">
+  <li><span class="mod">modified</span> <code>package.json</code> / <code>package-lock.json</code> —
+  add <code>driver.js</code>; bundle through the existing <code>npm run build</code> pipeline.</li>
+  <li><span class="new">new</span> <code>theme/static/scripts/tour.js</code> — IIFE +
+  <code>data-action="replay-tour"</code>; reads server-rendered steps from a
+  <code>&lt;script type="application/json"&gt;</code>, drives driver.js with a non-blocking overlay;
+  the help step calls the existing <code>openHelpDrawer()</code> and keeps the drawer clickable.</li>
+  <li><span class="new">new</span> <code>model_builder/adapters/ui_config/tour_steps.py</code> —
+  interface-specific tour copy (map + recommended order + help discoverability) with
+  <code>{kind:target}</code> placeholders and stable selectors; two flavors share content, blank
+  flavor adds the "create a usage journey" suggestion. No domain concept prose duplicated.</li>
+  <li><span class="new">new</span> <code>model_builder/templates/model_builder/onboarding/tour_steps.html</code>
+  — renders the resolved steps as JSON for <code>tour.js</code>; placeholders resolved server-side
+  via <code>interface_placeholder_handlers</code> so copy never lives in JS.</li>
+  <li><span class="mod">modified</span> <code>model_builder/templates/model_builder/model_builder_main.html</code>
+  + canvas column partials — stable <code>data-tour-target</code> attributes on the journey /
+  infrastructure / patterns columns, the results area, and a help affordance.</li>
+  <li><span class="mod">modified</span> <code>onboarding_first_run.js</code> / <code>help_menu.html</code>
+  wiring — auto-run the tour once ever; finish the "Replay tour" menu action.</li>
+</ul>
+
+<p class="meta"><strong>Tests added/changed.</strong></p>
+<ul class="tight">
+  <li><code>npm run jest</code> — <code>onboarding_first_run.js</code> flag logic and
+  <code>tour.js</code> step wiring (driver.js mocked).</li>
+  <li><code>tests/e2e/...</code> — extend the first-run flow: pick a template → tour runs; replay
+  from the help menu re-opens the tour; the help step opens the drawer and the drawer stays
+  clickable while the tour is active; <strong>the IoT template lands with the edge toggle latched
+  on</strong>; <code>data-tour-target</code> attributes asserted present.</li>
+</ul>
+
+<p class="meta"><strong>Acceptance.</strong></p>
+<ul class="tight">
+  <li>Loading a template runs the tour pointing at real cards; "Start from scratch" runs the
+  placeholder flavor ending on the "create a usage journey" suggestion.</li>
+  <li>The tour is non-blocking — the help drawer is interactable while it is active — and dismissible
+  at any step.</li>
+  <li>The tour auto-runs only on a first-ever visit (localStorage), and never carries duplicated
+  domain concept text — only map/order copy plus pointers to existing help affordances and mkdocs
+  deep-links.</li>
+  <li>"Replay tour" from the help menu restarts the overlay on the current model.</li>
+  <li>The IoT E2E confirms the edge toggle is latched on after that template loads.</li>
+  <li>jest + tour E2E green; <code>CHANGELOG.md</code> entry added; <code>efootprint</code> referenced
+  from PyPI (not an editable path) before reaching <code>main</code>.</li>
+</ul>
+
+<p class="meta"><strong>Depends on:</strong> Task 2 (help-menu replay entry point + canvas; first-run
+state plumbing).</p>
+</div>
+
+<hr>
+
+<section>
+  <h2>Ordering rationale</h2>
+  <p>The three tasks are the plan's three sub-phases (plan §8), and the ordering is forced by their
+  data/UI dependencies:</p>
+  <ul class="tight">
+    <li><strong>Task 1 before 2</strong> — the picker and catalog service consume the introductory
+    registry, the generated JSONs, and the slimmed empty baseline. Until they exist there is nothing
+    to merge or to load.</li>
+    <li><strong>Task 2 before 3</strong> — the tour's replay entry point lives in the help menu and
+    its targets live on the loaded canvas; both are delivered in Task 2. The tour also rides on the
+    first-run state plumbing Task 2 introduces.</li>
+  </ul>
+  <p><strong>Why each sub-phase is one task, not several.</strong> Within a sub-phase there is no
+  behavioural pause point where the system is both shippable and meaningfully demoable as a
+  standalone increment — the units are tightly coupled toward a single milestone:</p>
+  <ul class="tight">
+    <li><em>Task 1:</em> the registry, the JSONs it points at, the build script that regenerates
+    them, the default slimming, and the metadata/load-compute tests that guard them are one
+    consistency boundary — splitting "JSONs" from "the registry that validates them" or from "the
+    test that asserts they load" creates review boundaries with no working pause between them.</li>
+    <li><em>Task 2:</em> the catalog service, picker partial, load endpoint, empty-model trigger,
+    help menu, home CTA, and first-run flag together deliver exactly one observable behaviour
+    ("first-run picker appears and loads a system"); each piece is inert without the others (a picker
+    with no trigger, a trigger with no partial, a load endpoint with no card to invoke it).</li>
+    <li><em>Task 3:</em> the driver.js dependency, <code>tour.js</code>, the server-rendered step
+    payload, and the canvas <code>data-tour-target</code> anchors are a single feature — the engine
+    is useless without targets and the targets without the engine.</li>
+  </ul>
+  <p>Each task leaves the system in a working state with its suite green, so each is independently
+  shippable as one PR and reviewable in one pass.</p>
+</section>
+
+</body>
+</html>
