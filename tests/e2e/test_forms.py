@@ -147,9 +147,9 @@ class TestAdvancedOptions:
 class TestSourceLabels:
     """Tests for source labels displayed in forms."""
 
-    def test_source_labels_display_in_usage_pattern_form(self, empty_model_builder: ModelBuilderPage):
+    def test_source_labels_display_in_usage_pattern_form(self, seeded_journey_model_builder: ModelBuilderPage):
         """Source labels should display correctly when creating and editing."""
-        model_builder = empty_model_builder
+        model_builder = seeded_journey_model_builder
         side_panel = model_builder.side_panel
         page = model_builder.page
 

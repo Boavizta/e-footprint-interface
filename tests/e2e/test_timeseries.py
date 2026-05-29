@@ -94,7 +94,7 @@ class TestTimeseriesChartDisplay:
 class TestTimeseriesValidation:
     """Tests for modeling duration validation with different units."""
 
-    def test_modeling_duration_validation_with_day_and_month_units(self, empty_model_builder: ModelBuilderPage):
+    def test_modeling_duration_validation_with_day_and_month_units(self, seeded_journey_model_builder: ModelBuilderPage):
         """Modeling duration should validate against max values that change based on unit.
 
         This test verifies:
@@ -103,7 +103,7 @@ class TestTimeseriesValidation:
         - Value of 0 shows error message and is corrected to min value
         - Max value changes when switching from day to month unit
         """
-        model_builder = empty_model_builder
+        model_builder = seeded_journey_model_builder
         page = model_builder.page
 
         # Create usage pattern
@@ -161,13 +161,13 @@ class TestTimeseriesValidation:
         duration_field.fill("24")
         expect(error_message).not_to_be_visible()
 
-    def test_edit_usage_pattern_with_month_unit_validation(self, empty_model_builder: ModelBuilderPage):
+    def test_edit_usage_pattern_with_month_unit_validation(self, seeded_journey_model_builder: ModelBuilderPage):
         """When editing UP created with month unit, max validation should work correctly.
 
         This verifies that the max value constraint is properly set when reopening
         a form for an existing object with a specific duration unit.
         """
-        model_builder = empty_model_builder
+        model_builder = seeded_journey_model_builder
         page = model_builder.page
 
         up_name = "Test E2E Usage Pattern 1"
@@ -214,20 +214,17 @@ class TestTimeseriesValidation:
 class TestTimeseriesResponsiveChart:
     """Tests for timeseries chart responsive behavior on mobile/tablet."""
 
-    def test_chart_hidden_on_iphone_viewport(self, model_builder_page: ModelBuilderPage):
+    def test_chart_hidden_on_iphone_viewport(self, seeded_journey_model_builder: ModelBuilderPage):
         """On iPhone viewport, chart should exist but remain empty (hidden).
 
         This tests responsive behavior where the chart is hidden on small screens
         to save space and improve UX.
         """
-        model_builder = model_builder_page
+        model_builder = seeded_journey_model_builder
         page = model_builder.page
 
-        # Set iPhone X viewport
+        # Set iPhone X viewport (chart stays hidden below the 1200px threshold)
         page.set_viewport_size({"width": 375, "height": 812})
-
-        # Navigate to model builder
-        model_builder.goto()
 
         # Open usage pattern form
         page.locator("button").filter(has_text="Add usage pattern").click()
@@ -241,19 +238,16 @@ class TestTimeseriesResponsiveChart:
         # We verify this by checking the chartTimeseries container is hidden
         expect(page.locator("#chartTimeseries")).to_contain_class("d-none")
 
-    def test_chart_hidden_on_ipad_viewport(self, model_builder_page: ModelBuilderPage):
+    def test_chart_hidden_on_ipad_viewport(self, seeded_journey_model_builder: ModelBuilderPage):
         """On iPad viewport, chart should exist but remain empty (hidden).
 
         Similar to iPhone test but for tablet viewport size.
         """
-        model_builder = model_builder_page
+        model_builder = seeded_journey_model_builder
         page = model_builder.page
 
-        # Set iPad Mini viewport
+        # Set iPad Mini viewport (chart stays hidden below the 1200px threshold)
         page.set_viewport_size({"width": 768, "height": 1024})
-
-        # Navigate to model builder
-        model_builder.goto()
 
         # Open usage pattern form
         page.locator("button").filter(has_text="Add usage pattern").click()
