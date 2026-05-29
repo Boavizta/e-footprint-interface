@@ -11,7 +11,7 @@ Pure domain: imports only the library and the interface registry, no Django.
 display chips in the presentation layer (which alone owns ``CLASS_UI_CONFIG``).
 """
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from efootprint.modeling_templates import get_template as get_how_to_template, list_how_to_templates
@@ -39,7 +39,7 @@ class CatalogEntry:
 class CatalogGroup:
     id: str
     title: str
-    entries: tuple[CatalogEntry, ...] = field(default_factory=tuple)
+    entries: tuple[CatalogEntry, ...] = ()
 
 
 def build_template_catalog() -> tuple[CatalogGroup, ...]:

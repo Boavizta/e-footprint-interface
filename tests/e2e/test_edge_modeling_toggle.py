@@ -36,14 +36,9 @@ class TestEdgeModelingToggle:
 
         assert page.evaluate("localStorage.getItem('efootprint.edgeModeling')") == "on"
 
-    def test_creating_edge_device_latches_toggle(self, empty_model_builder: ModelBuilderPage):
-        page = empty_model_builder.page
-        side_panel = empty_model_builder.side_panel
-
-        page.evaluate("localStorage.setItem('efootprint.edgeModeling', 'on')")
-        page.reload()
-        # Reloading an empty model re-triggers the first-run picker; dismiss it to reach the canvas.
-        empty_model_builder.dismiss_template_picker_if_present()
+    def test_creating_edge_device_latches_toggle(self, edge_modeling_enabled: ModelBuilderPage):
+        page = edge_modeling_enabled.page
+        side_panel = edge_modeling_enabled.side_panel
 
         click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
         page.locator("#sidePanelForm").wait_for(state="visible")
