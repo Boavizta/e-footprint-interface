@@ -36,8 +36,9 @@ def test_delete_video_streaming_job(minimal_repository):
     assert job_id not in sd["UsageJourneyStep"][uj_step_id]["jobs"]
 
 
-def test_delete_ecologits_job_then_service(default_system_repository):
+def test_delete_ecologits_job_then_service(default_system_repository_with_journey):
     """Deleting an EcoLogits job then its service clears both from system_data."""
+    default_system_repository = default_system_repository_with_journey
     uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id
 
     api_id = create_object(
@@ -108,9 +109,10 @@ def test_delete_edge_appliance_cascades_to_component(default_system_repository):
     assert "EdgeApplianceComponent" not in sd
 
 
-def test_create_2_external_api_jobs_then_delete_one(default_system_repository):
+def test_create_2_external_api_jobs_then_delete_one(default_system_repository_with_journey):
     """Creating two jobs linked to the same external API then deleting one should not raise any error.
     This tests a weird bug solved by efootprint 16.0.4."""
+    default_system_repository = default_system_repository_with_journey
     uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id
 
     api_id = create_object(

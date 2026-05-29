@@ -1,11 +1,6 @@
 """Tests for toolbar features - import, export, reboot, system name."""
-import os.path
-from pathlib import Path
-
 import pytest
 from playwright.sync_api import expect
-
-from efootprint.api_utils.system_to_json import system_to_json
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
@@ -17,7 +12,7 @@ class TestToolbarFeatures:
     """Tests for toolbar import/export/reboot features."""
 
     def test_reboot_clears_model(self, minimal_complete_model_builder: ModelBuilderPage):
-        """Reboot should clear all objects and return to default state."""
+        """Reboot should clear all objects and return to the empty default state."""
         model_builder = minimal_complete_model_builder
         page = model_builder.page
 
@@ -29,12 +24,11 @@ class TestToolbarFeatures:
         with page.expect_response(lambda r: "reboot" in r.url):
             page.locator("#btn-reboot-modeling").click()
 
-        # Verify model is reset to default state
+        # Verify model is reset to the empty default state (Step 6 slimmed the default to an empty System)
         expect(page.locator("div").filter(has_text="Test Usage Pattern")).not_to_be_visible()
         expect(page.locator("div").filter(has_text="Test Journey")).not_to_be_visible()
-
-        # Default UJ should exist
-        expect(page.locator("div").filter(has_text="My first usage journey").first).to_be_visible()
+        expect(page.locator("div[id^='UsageJourney-']")).to_have_count(0)
+        expect(page.locator("div[id^='UsagePattern-']")).to_have_count(0)
 
     def test_change_system_name(self, minimal_complete_model_builder: ModelBuilderPage):
         """System name can be changed and persists after reload."""
@@ -61,7 +55,8 @@ class TestToolbarFeatures:
         page.locator("#model-canva").wait_for(state="visible")
         expect(page.locator("#system-name")).to_contain_text(new_name)
 
-    def test_import_json_replaces_existing_model(self, minimal_complete_model_builder: ModelBuilderPage):
+    def test_import_json_replaces_existing_model(
+            self, minimal_complete_model_builder: ModelBuilderPage, seeded_journey_json_path: str):
         """Import JSON should replace existing model and reinitialize leader lines."""
         model_builder = minimal_complete_model_builder
         page = model_builder.page
@@ -81,11 +76,8 @@ class TestToolbarFeatures:
                     };
                 """)
 
-        # Import the default model
-        filedir = os.path.dirname(os.path.abspath(__file__))
-        fixture_path = os.path.join(
-            filedir, "..", "..", "model_builder", "domain", "reference_data", "default_system_data.json")
-        model_builder.import_json_file(fixture_path)
+        # Import a system containing a usage journey
+        model_builder.import_json_file(seeded_journey_json_path)
 
         # Verify initLeaderLines was called
         leader_lines_called = page.evaluate("window.initLeaderLinesCalled")
@@ -94,7 +86,8 @@ class TestToolbarFeatures:
         # Verify objects from the imported model exist
         model_builder.object_should_exist("UsageJourney", "My first usage journey")
 
-    def test_import_json_into_empty_model_adds_objects(self, model_builder_page: ModelBuilderPage):
+    def test_import_json_into_empty_model_adds_objects(
+            self, model_builder_page: ModelBuilderPage, seeded_journey_json_path: str):
         """Importing into an empty model should create objects from the JSON."""
         # Start from an empty system with no objects
         empty_model = load_system_dict_into_browser(model_builder_page, EMPTY_SYSTEM_DICT)
@@ -104,9 +97,8 @@ class TestToolbarFeatures:
         expect(page.locator("div[id^='UsageJourney-']")).to_have_count(0)
         expect(page.locator("div[id^='UsagePattern-']")).to_have_count(0)
 
-        # Import the default system
-        fixture_path = Path(__file__).resolve().parents[2] / "model_builder" / "domain" / "reference_data" / "default_system_data.json"
-        empty_model.import_json_file(str(fixture_path))
+        # Import a system containing a usage journey
+        empty_model.import_json_file(seeded_journey_json_path)
 
         # Objects from the imported model should now exist
         empty_model.object_should_exist("UsageJourney", "My first usage journey")

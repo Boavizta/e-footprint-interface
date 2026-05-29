@@ -13,13 +13,17 @@ Usage:
 """
 import json
 import tempfile
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
 from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.core.usage.usage_journey import UsageJourney
+from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from playwright.sync_api import Page
 
 from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update
 
 
 # Default base URL for E2E tests (Django dev server)
@@ -183,3 +187,31 @@ def load_system_dict_into_browser(model_builder_page: ModelBuilderPage, system_d
         Path(temp_path).unlink(missing_ok=True)
 
     return model_builder_page
+
+
+def build_seeded_journey_dict() -> dict:
+    """A minimal system dict containing one usage journey + step.
+
+    Since Step 6, the shipped default is a truly empty System (the template
+    picker replaces the old seeded journey). E2E tests that need pre-existing
+    journey content load this instead of relying on default seeding.
+    """
+    uj_step = UsageJourneyStep.from_defaults("My first usage journey step", jobs=[])
+    uj = UsageJourney("My first usage journey", uj_steps=[uj_step])
+    system_data = deepcopy(EMPTY_SYSTEM_DICT)
+    add_only_update(system_data, system_to_json(uj, save_calculated_attributes=False))
+    return system_data
+
+
+@pytest.fixture
+def seeded_journey_model_builder(model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
+    """Model builder loaded with one usage journey + step (replaces old default seeding)."""
+    return load_system_dict_into_browser(model_builder_page, build_seeded_journey_dict())
+
+
+@pytest.fixture
+def seeded_journey_json_path(tmp_path) -> str:
+    """Path to a JSON file holding a one-journey system, for import-flow tests."""
+    path = tmp_path / "seeded_journey.json"
+    path.write_text(json.dumps(build_seeded_journey_dict()))
+    return str(path)

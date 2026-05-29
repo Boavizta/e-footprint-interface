@@ -168,13 +168,6 @@ async def run_full_journey(page: Page, run_number: int, user_id: int) -> None:
     await click_delete_in_panel()
     await confirm_delete()
 
-    # --- Delete default UJ ---
-    default_uj = "My first usage journey"
-    default_uj_card = await get_object_card("UsageJourney", default_uj)
-    await click_and_wait_for_htmx(page, default_uj_card.locator("button[id^='button-']").first)
-    await click_delete_in_panel()
-    await confirm_delete()
-
     # --- Open and close results panel ---
     await click_and_wait_for_htmx(page, page.locator("#btn-open-panel-result"))
     await page.locator("#lineChart").wait_for(state="visible")

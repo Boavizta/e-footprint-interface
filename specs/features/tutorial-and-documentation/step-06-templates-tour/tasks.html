@@ -41,6 +41,11 @@ Commit-tag prefixes per the interface's git style: <code>[ADD]</code> / <code>[U
 <div class="task">
 <h2>Task 1 — Introductory templates + registry (Sub-phase A) <span class="tag">requires Step 5</span></h2>
 
+<p class="status"><strong>Status:</strong> Done — 2026-05-29. Unit + integration suite green (2 pre-existing,
+unrelated failures remain: <code>test_ui_config_consistency</code> and the <code>JobWeb</code> creation snapshot,
+both from installed-efootprint <code>EcoLogitsVideoGen*</code> drift — confirmed failing on baseline). E2E
+updated for the default-data slimming and collected clean, but not executed (needs a running server).</p>
+
 <p class="meta"><strong>Goal.</strong> Land the interface-owned template data layer that everything
 downstream consumes: three ready-to-mutate introductory <code>System</code>s, the typed metadata
 registry that describes them, an empty-but-wired <code>other</code> category, and the slimmed

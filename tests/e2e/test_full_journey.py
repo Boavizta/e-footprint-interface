@@ -136,14 +136,6 @@ class TestFullJourney:
         side_panel.confirm_delete()
         model_builder.object_should_not_exist("UsageJourney", uj_name_two)
 
-        # --- Delete default UJ ---
-        default_uj = "My first usage journey"
-        default_uj_card = model_builder.get_object_card("UsageJourney", default_uj)
-        default_uj_card.click_edit_button()
-        side_panel.click_delete_button()
-        side_panel.confirm_delete()
-        model_builder.object_should_not_exist("UsageJourney", default_uj)
-
         # --- Open and close results panel ---
         model_builder.open_result_panel()
         model_builder.result_chart_should_be_visible()

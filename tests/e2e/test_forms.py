@@ -42,9 +42,9 @@ class TestUnsavedChangesWarning:
         page.locator("#cancel-unsaved-modal").click()
         expect(page.locator("#unsavedModal.show")).not_to_be_visible()
 
-    def test_warns_when_opening_new_panel_with_unsaved_changes(self, empty_model_builder: ModelBuilderPage):
+    def test_warns_when_opening_new_panel_with_unsaved_changes(self, seeded_journey_model_builder: ModelBuilderPage):
         """User should be warned when opening another form with unsaved changes."""
-        model_builder = empty_model_builder
+        model_builder = seeded_journey_model_builder
         page = model_builder.page
 
         # Open form and make changes

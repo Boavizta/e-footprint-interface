@@ -1,0 +1,365 @@
+{
+    "efootprint_version": "21.1.2",
+    "Sources": {
+        "Our-world-in-data-28202429": {
+            "id": "Our-world-in-data-28202429",
+            "name": "Our world in data (2024)",
+            "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+        },
+        "Traficom-study": {
+            "id": "Traficom-study",
+            "name": "Traficom study",
+            "link": "https://www.traficom.fi/en/news/first-study-energy-consumption-communications-networks"
+        },
+        "hypothesis": {
+            "id": "hypothesis",
+            "name": "e-footprint hypothesis",
+            "link": null
+        },
+        "user_data": {
+            "id": "user_data",
+            "name": "user data",
+            "link": null
+        }
+    },
+    "System": {
+        "Industrial-IoT-system": {
+            "name": "Industrial IoT system",
+            "id": "Industrial-IoT-system",
+            "usage_patterns": [],
+            "edge_usage_patterns": [
+                "Connected-device-fleet"
+            ]
+        }
+    },
+    "EdgeUsagePattern": {
+        "Connected-device-fleet": {
+            "name": "Connected device fleet",
+            "id": "Connected-device-fleet",
+            "hourly_edge_usage_journey_starts": {
+                "compressed_values": "KLUv/SAkrQAAUAAAyEJIQ5ZIyEIEACALyBcM/OCI",
+                "unit": "occurrence",
+                "start_date": "2025-01-01 00:00:00",
+                "timezone": null,
+                "label": "Hourly nb of edge usage journey starts",
+                "source": "hypothesis"
+            },
+            "edge_usage_journey": "Gateway-operation",
+            "network": "Default-wifi-network",
+            "country": "France"
+        }
+    },
+    "EdgeUsageJourney": {
+        "Gateway-operation": {
+            "name": "Gateway operation",
+            "id": "Gateway-operation",
+            "edge_functions": [
+                "Gateway-workload"
+            ],
+            "usage_span": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Usage span",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeFunction": {
+        "Gateway-workload": {
+            "name": "Gateway workload",
+            "id": "Gateway-workload",
+            "recurrent_edge_device_needs": [
+                "Telemetry-collection",
+                "Local-anomaly-detection"
+            ],
+            "recurrent_server_needs": []
+        }
+    },
+    "RecurrentEdgeProcess": {
+        "Telemetry-collection": {
+            "name": "Telemetry collection",
+            "id": "Telemetry-collection",
+            "edge_device": "Industrial-edge-gateway",
+            "recurrent_edge_component_needs": [
+                "Telemetry-collection-RAM-need",
+                "Telemetry-collection-CPU-need",
+                "Telemetry-collection-storage-need"
+            ],
+            "recurrent_compute_needed": {
+                "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+                "unit": "cpu_core",
+                "label": "Recurrent compute needed",
+                "source": "hypothesis"
+            },
+            "recurrent_ram_needed": {
+                "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+                "unit": "gigabyte_ram",
+                "label": "Recurrent RAM needed",
+                "source": "hypothesis"
+            },
+            "recurrent_storage_needed": {
+                "recurring_values": "[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]",
+                "unit": "gigabyte_stored",
+                "label": "Recurrent storage needed",
+                "source": "hypothesis"
+            }
+        },
+        "Local-anomaly-detection": {
+            "name": "Local anomaly detection",
+            "id": "Local-anomaly-detection",
+            "edge_device": "Industrial-edge-gateway",
+            "recurrent_edge_component_needs": [
+                "Local-anomaly-detection-RAM-need",
+                "Local-anomaly-detection-CPU-need",
+                "Local-anomaly-detection-storage-need"
+            ],
+            "recurrent_compute_needed": {
+                "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+                "unit": "cpu_core",
+                "label": "Recurrent compute needed",
+                "source": "hypothesis"
+            },
+            "recurrent_ram_needed": {
+                "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+                "unit": "gigabyte_ram",
+                "label": "Recurrent RAM needed",
+                "source": "hypothesis"
+            },
+            "recurrent_storage_needed": {
+                "recurring_values": "[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]",
+                "unit": "gigabyte_stored",
+                "label": "Recurrent storage needed",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeComputer": {
+        "Industrial-edge-gateway": {
+            "name": "Industrial edge gateway",
+            "id": "Industrial-edge-gateway",
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "components": [
+                "Industrial-edge-gateway-CPU",
+                "Industrial-edge-gateway-RAM",
+                "Gateway-storage"
+            ],
+            "storage": "Gateway-storage",
+            "carbon_footprint_fabrication": {
+                "value": 60.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "hypothesis"
+            },
+            "power": {
+                "value": 30.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "idle_power": {
+                "value": 5.0,
+                "unit": "watt",
+                "label": "Idle power",
+                "source": "hypothesis"
+            },
+            "ram": {
+                "value": 8.0,
+                "unit": "gigabyte_ram",
+                "label": "RAM",
+                "source": "hypothesis"
+            },
+            "compute": {
+                "value": 4.0,
+                "unit": "cpu_core",
+                "label": "Compute",
+                "source": "hypothesis"
+            },
+            "base_ram_consumption": {
+                "value": 1.0,
+                "unit": "gigabyte_ram",
+                "label": "Base RAM consumption",
+                "source": "hypothesis"
+            },
+            "base_compute_consumption": {
+                "value": 0.2,
+                "unit": "cpu_core",
+                "label": "Base compute consumption",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeComputerCPUComponent": {
+        "Industrial-edge-gateway-CPU": {
+            "name": "Industrial edge gateway CPU",
+            "id": "Industrial-edge-gateway-CPU",
+            "carbon_footprint_fabrication_per_unit": {
+                "value": 0.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication per unit",
+                "source": "hypothesis"
+            },
+            "nb_of_units": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Number of units",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeComputerRAMComponent": {
+        "Industrial-edge-gateway-RAM": {
+            "name": "Industrial edge gateway RAM",
+            "id": "Industrial-edge-gateway-RAM",
+            "carbon_footprint_fabrication_per_unit": {
+                "value": 0.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication per unit",
+                "source": "hypothesis"
+            },
+            "power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Power per unit",
+                "source": "hypothesis"
+            },
+            "idle_power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Idle power per unit",
+                "source": "hypothesis"
+            },
+            "nb_of_units": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Number of units",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeStorage": {
+        "Gateway-storage": {
+            "name": "Gateway storage",
+            "id": "Gateway-storage",
+            "carbon_footprint_fabrication_per_unit": {
+                "value": 0.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication per unit",
+                "source": "hypothesis"
+            },
+            "power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Power per unit",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "idle_power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Idle power per unit",
+                "source": "hypothesis"
+            },
+            "nb_of_units": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Number of units",
+                "source": "hypothesis"
+            },
+            "carbon_footprint_fabrication_per_storage_capacity": {
+                "value": 160.0,
+                "unit": "kilogram / terabyte_stored",
+                "label": "Fabrication carbon footprint per unit per storage capacity",
+                "source": "hypothesis"
+            },
+            "storage_capacity_per_unit": {
+                "value": 1.0,
+                "unit": "terabyte_stored",
+                "label": "Storage capacity per unit",
+                "source": "hypothesis"
+            },
+            "base_storage_need": {
+                "value": 50.0,
+                "unit": "gigabyte_stored",
+                "label": "Initial storage need",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "RecurrentEdgeProcessRAMNeed": {
+        "Telemetry-collection-RAM-need": {
+            "name": "Telemetry collection RAM need",
+            "id": "Telemetry-collection-RAM-need",
+            "edge_component": "Industrial-edge-gateway-RAM"
+        },
+        "Local-anomaly-detection-RAM-need": {
+            "name": "Local anomaly detection RAM need",
+            "id": "Local-anomaly-detection-RAM-need",
+            "edge_component": "Industrial-edge-gateway-RAM"
+        }
+    },
+    "RecurrentEdgeProcessCPUNeed": {
+        "Telemetry-collection-CPU-need": {
+            "name": "Telemetry collection CPU need",
+            "id": "Telemetry-collection-CPU-need",
+            "edge_component": "Industrial-edge-gateway-CPU"
+        },
+        "Local-anomaly-detection-CPU-need": {
+            "name": "Local anomaly detection CPU need",
+            "id": "Local-anomaly-detection-CPU-need",
+            "edge_component": "Industrial-edge-gateway-CPU"
+        }
+    },
+    "RecurrentEdgeProcessStorageNeed": {
+        "Telemetry-collection-storage-need": {
+            "name": "Telemetry collection storage need",
+            "id": "Telemetry-collection-storage-need",
+            "edge_component": "Gateway-storage"
+        },
+        "Local-anomaly-detection-storage-need": {
+            "name": "Local anomaly detection storage need",
+            "id": "Local-anomaly-detection-storage-need",
+            "edge_component": "Gateway-storage"
+        }
+    },
+    "Network": {
+        "Default-wifi-network": {
+            "name": "Default wifi network",
+            "id": "Default-wifi-network",
+            "bandwidth_energy_intensity": {
+                "value": 0.05,
+                "unit": "kilowatt_hour / gigabyte",
+                "label": "bandwith energy intensity",
+                "source": "Traficom-study"
+            }
+        }
+    },
+    "Country": {
+        "France": {
+            "name": "France",
+            "id": "France",
+            "short_name": "FRA",
+            "average_carbon_intensity": {
+                "value": 44.0,
+                "unit": "gram / kilowatt_hour",
+                "label": "Average carbon intensity",
+                "source": "Our-world-in-data-28202429",
+                "confidence": "high"
+            },
+            "timezone": {
+                "zone": "Europe/Paris",
+                "label": "Timezone",
+                "source": "user_data"
+            }
+        }
+    }
+}

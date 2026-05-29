@@ -34,7 +34,8 @@ def test_create_usage_journey(default_system_repository):
     assert any(uj.efootprint_id == uj_id for uj in ModelWeb(default_system_repository).usage_journeys)
 
 
-def test_create_usage_journey_step(default_system_repository):
+def test_create_usage_journey_step(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     uj_id = ModelWeb(default_system_repository).usage_journeys[0].efootprint_id
     nb_steps_before = len(ModelWeb(default_system_repository).usage_journey_steps)
 
@@ -63,7 +64,8 @@ def test_create_usage_journey_step_for_unlinked_journey(default_system_repositor
     assert len(sd["UsageJourney"][new_uj_id]["uj_steps"]) == 1
 
 
-def test_usage_pattern_create_edit_delete_flow(default_system_repository):
+def test_usage_pattern_create_edit_delete_flow(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     uj_id = ModelWeb(default_system_repository).usage_journeys[0].efootprint_id
     nb_patterns_before = len(
         default_system_repository.get_system_data()["System"]["uuid-system-1"]["usage_patterns"])
@@ -91,7 +93,8 @@ def test_usage_pattern_create_edit_delete_flow(default_system_repository):
     assert len(sd["System"]["uuid-system-1"]["usage_patterns"]) == nb_patterns_before
 
 
-def test_incomplete_modeling_raises_error_when_uj_has_no_steps(default_system_repository):
+def test_incomplete_modeling_raises_error_when_uj_has_no_steps(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id
     uj_id = ModelWeb(default_system_repository).usage_journeys[0].efootprint_id
 
@@ -104,7 +107,8 @@ def test_incomplete_modeling_raises_error_when_uj_has_no_steps(default_system_re
         ModelWeb(default_system_repository).raise_incomplete_modeling_errors()
 
 
-def test_usage_pattern_delete_then_gpu_server_create(default_system_repository):
+def test_usage_pattern_delete_then_gpu_server_create(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     uj_id = ModelWeb(default_system_repository).usage_journeys[0].efootprint_id
     up_id = create_object(default_system_repository, _usage_pattern_post_data("Temp UP", uj_id))
 
@@ -121,7 +125,8 @@ def test_usage_pattern_delete_then_gpu_server_create(default_system_repository):
     assert server_id in default_system_repository.get_system_data()["GPUServer"]
 
 
-def test_create_ecologits_external_api_and_job(default_system_repository):
+def test_create_ecologits_external_api_and_job(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id
 
     api_id = create_object(

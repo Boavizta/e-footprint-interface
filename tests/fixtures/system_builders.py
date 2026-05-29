@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any
 
 import pytest
@@ -101,5 +102,28 @@ def default_system_repository() -> InMemorySystemRepository:
     integration tests can compare structure after create/edit/delete flows.
     """
     repository = InMemorySystemRepository(initial_data=DEFAULT_SYSTEM_DATA)
+    ModelWeb(repository).persist_to_cache()
+    return repository
+
+
+@pytest.fixture
+def default_system_repository_with_journey() -> InMemorySystemRepository:
+    """Default system seeded with one usage journey + step.
+
+    Since Step 6, the shipped default is a truly empty System (the template
+    picker replaces the old seeded journey/step). Integration tests that need a
+    pre-existing journey/step to build flows on top of use this fixture instead
+    of relying on default seeding.
+    """
+    uj_step = UsageJourneyStep.from_defaults("My first usage journey step", jobs=[])
+    uj = UsageJourney("My first usage journey", uj_steps=[uj_step])
+    uj_fragment = system_to_json(uj, save_calculated_attributes=False)
+
+    system_data = deepcopy(DEFAULT_SYSTEM_DATA)
+    for class_key in ("UsageJourney", "UsageJourneyStep"):
+        system_data[class_key] = uj_fragment[class_key]
+    system_data.setdefault("Sources", {}).update(uj_fragment.get("Sources", {}))
+
+    repository = InMemorySystemRepository(initial_data=system_data)
     ModelWeb(repository).persist_to_cache()
     return repository

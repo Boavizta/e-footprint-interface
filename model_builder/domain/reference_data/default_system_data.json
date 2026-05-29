@@ -21,27 +21,5 @@
                 "explain_nested_tuples": []
             }
         }
-    },
-    "UsageJourneyStep": {
-        "uid-my-first-usage-journey-step-1": {
-            "name": "My first usage journey step",
-            "id": "uid-my-first-usage-journey-step-1",
-            "user_time_spent": {
-                "label": "Time spent on My first usage journey step from hypothesis",
-                "value": 1.0,
-                "unit": "minute",
-                "source": "hypothesis"
-            },
-            "jobs": []
-        }
-    },
-    "UsageJourney": {
-        "uid-my-first-usage-journey-1": {
-            "name": "My first usage journey",
-            "id": "uid-my-first-usage-journey-1",
-            "uj_steps": [
-                "uid-my-first-usage-journey-step-1"
-            ]
-        }
     }
 }

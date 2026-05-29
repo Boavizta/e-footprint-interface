@@ -32,7 +32,7 @@ model_builder/
 │   └── ui_config/             # UI configuration providers
 ├── templates/                 # Django templates
 ├── version_upgrade_handlers.py  # interface_config schema migrations
-└── domain/reference_data/     # JSON configs (default data)
+└── domain/reference_data/     # JSON configs (default data) + modeling_templates/ (see "Modeling templates")
 ```
 
 ### Request lifecycle
@@ -262,6 +262,19 @@ To add a new way to generate timeseries (e.g., from uploaded CSV):
 3. Implement `from_json_dict()`, `to_json()`, `__init__()`, and lazy `@property value`.
 4. In **e-footprint-interface**, create a form template in `side_panels/dynamic_form_fields/`.
 5. Update `generate_dynamic_form()` to detect your new type.
+
+## Modeling templates
+
+`model_builder/domain/reference_data/modeling_templates/` holds the interface-owned template registries shown in the first-run template picker:
+
+- `introductory/registry.py` — the `IntroTemplate` dataclass (mirrors the library's `HowToTemplate`: `id`, `name`, `description`, `icon`, `showcased_concepts`, `json_path`, `category`), the `INTRO_TEMPLATES` tuple, and a closed `CONCEPTS` mapping for picker chips that map to no single efootprint class. `showcased_concepts` tokens are either `{class:X}` (validated against `ALL_EFOOTPRINT_CLASSES_DICT`, like the SSOT placeholder handlers) or `CONCEPTS` keys; `resolve_concept_token` validates them and the registry consistency test fails on drift. The registry imports only the library (no adapter imports — Clean Architecture).
+- `introductory/{ecommerce,ai_chatbot,iot_industrial}.json` — serialized pure `System` snapshots (no UI metadata inside). The IoT snapshot contains edge objects so the Step 5 edge toggle latches on load.
+- `other/registry.py` — an empty-but-wired placeholder so ad-hoc examples can be added later with no new plumbing.
+- `__init__.py` aggregates introductory + other registries; **how-to templates are not re-exported here** — they are consumed at runtime from the library's `efootprint.modeling_templates.list_how_to_templates()`.
+
+The JSONs are **derived artifacts**: the source of truth is the Python `build_system()` constructors under `scripts/intro_template_scenarios/`, regenerated via `python -m scripts.build_intro_templates` (the build flips `_use_name_as_id` before importing efootprint so ids are readable and stable, mirroring the library's how-to `_authoring` package). Re-run it after a library serialization-schema change.
+
+The shipped `default_system_data.json` is a truly empty `System` (no journeys/servers/patterns) — the "Start from scratch" baseline. Tests needing a pre-existing journey use the `default_system_repository_with_journey` (integration) / `seeded_journey_model_builder` (e2e) fixtures instead of relying on default seeding.
 
 ## Security and data
 

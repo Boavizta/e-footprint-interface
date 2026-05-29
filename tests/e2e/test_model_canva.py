@@ -8,9 +8,9 @@ from tests.e2e.pages import ModelBuilderPage
 class TestModelCanvas:
     """Model canvas behaviors (job creation buttons, accordion ordering)."""
 
-    def test_edit_usage_journey_keeps_steps_visible(self, model_builder_page: ModelBuilderPage):
+    def test_edit_usage_journey_keeps_steps_visible(self, seeded_journey_model_builder: ModelBuilderPage):
         """Editing a usage journey without changes should keep its steps intact."""
-        model_builder = model_builder_page.goto()
+        model_builder = seeded_journey_model_builder
 
         uj_card = model_builder.get_object_card("UsageJourney", "My first usage journey")
         uj_card.click_edit_button()

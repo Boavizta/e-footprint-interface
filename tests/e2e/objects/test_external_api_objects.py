@@ -10,10 +10,10 @@ from tests.e2e.utils import click_and_wait_for_htmx
 class TestExternalAPIObjects:
     """Tests for EcoLogitsGenAI external API creation, job linkage, and calculated attributes."""
 
-    def test_ecologits_genai_full_workflow(self, empty_model_builder: ModelBuilderPage):
+    def test_ecologits_genai_full_workflow(self, seeded_journey_model_builder: ModelBuilderPage):
         """Test full workflow: create EcoLogitsGenAIExternalAPI, add job, usage pattern, check results
         and EcoLogits formula, then delete the job without raising an error."""
-        model_builder = empty_model_builder
+        model_builder = seeded_journey_model_builder
         side_panel = model_builder.side_panel
         page = model_builder.page
 

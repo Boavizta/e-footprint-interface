@@ -23,7 +23,8 @@ def _extract_structure_from_repository(model_web: ModelWeb) -> dict[str, set[str
     return structure
 
 
-def test_integration_create_edit_delete_flow(default_system_repository):
+def test_integration_create_edit_delete_flow(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     baseline_model_web = ModelWeb(default_system_repository)
     usage_journey_step_id = baseline_model_web.usage_journey_steps[0].efootprint_id
     usage_journey_id = baseline_model_web.usage_journeys[0].efootprint_id

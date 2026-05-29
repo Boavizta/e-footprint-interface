@@ -144,7 +144,8 @@ def test_edit_usage_journey_remove_step_deletes_orphan(default_system_repository
     assert step_2 not in sd.get("UsageJourneyStep", {})
 
 
-def test_edit_usage_pattern_initial_volume_increases_total_footprint(default_system_repository):
+def test_edit_usage_pattern_initial_volume_increases_total_footprint(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
     model_web = ModelWeb(default_system_repository)
     uj_id = model_web.usage_journeys[0].efootprint_id
 
@@ -199,8 +200,9 @@ def test_edit_ecologits_external_api_provider_and_model(default_system_repositor
     assert sd[api_class][api_id]["model_name"]["value"] == model_2
 
 
-def test_delete_one_of_two_usage_patterns_then_edit_shared_server(default_system_repository):
+def test_delete_one_of_two_usage_patterns_then_edit_shared_server(default_system_repository_with_journey):
     """Regression for a legacy scenario: deleting one usage pattern must not break editing shared objects."""
+    default_system_repository = default_system_repository_with_journey
     model_web = ModelWeb(default_system_repository)
     uj_step_id = model_web.usage_journey_steps[0].efootprint_id
     uj_id = model_web.usage_journeys[0].efootprint_id
