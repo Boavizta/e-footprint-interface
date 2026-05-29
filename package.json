@@ -12,12 +12,12 @@
         "jest": "npm run build:js-test-fixtures && jest"
     },
     "devDependencies": {
-        "@types/node": "^20.12",
-        "esbuild": "^0.25.0",
-        "jest-environment-jsdom": "^29.7.0",
+        "@types/node": "^25.9.1",
+        "esbuild": "^0.28.0",
+        "jest-environment-jsdom": "^30.4.1",
         "luxon": "^3.5.0",
         "sass": "^1.81",
-        "typescript": "^5.4"
+        "typescript": "^6.0.3"
     },
     "dependencies": {
         "bootstrap": "^5.3",
