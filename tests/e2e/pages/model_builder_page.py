@@ -61,6 +61,18 @@ class ModelBuilderPage:
         self.canvas.wait_for(state="visible")
         return self
 
+    def reset_to_default(self):
+        """Reset the model via the toolbar button, confirming the discard, then dismiss the picker.
+
+        The reset button POSTs and re-opens the first-run picker over the now-empty canvas. It
+        confirms first when the current model is non-empty (the callers here always reset a
+        populated model), so accept that dialog. Leaves a blank, usable canvas.
+        """
+        self.page.once("dialog", lambda dialog: dialog.accept())
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-reboot-modeling"))
+        self.dismiss_template_picker_if_present()
+        return self
+
     def should_have_leader_line(self):
         """Assert that LeaderLine JS library is loaded."""
         self.page.wait_for_function("window.LeaderLine !== undefined")

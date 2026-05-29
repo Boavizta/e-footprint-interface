@@ -94,8 +94,13 @@ async def run_full_journey(page: Page, run_number: int, user_id: int) -> None:
     # --- Navigate to model builder with fresh session ---
     await page.goto("/")
     await page.locator("#btn-start-modeling-my-service").click()
-    await page.locator("#btn-reboot-modeling").click()
     await page.locator("#model-canva").wait_for(state="visible")
+    # A fresh session lands on an empty model overlaid by the first-run template picker; dismiss it
+    # to reach the blank canvas.
+    picker_close = page.locator("#template-picker .btn-close")
+    if await picker_close.is_visible():
+        await picker_close.click()
+        await page.locator("#template-picker").wait_for(state="detached")
 
     # --- Create two usage journeys ---
     await click_and_wait_for_htmx(page, page.locator("#btn-add-usage-journey"))

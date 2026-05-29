@@ -33,7 +33,8 @@ baseline. Closing the overlay just reveals the canvas behind it.
                                 hx-post="{% url 'load-template' entry.id %}"
                                 hx-target="#main-content-block"
                                 hx-swap="innerHTML"
-                                hx-disabled-elt="this">
+                                hx-disabled-elt="this"
+                                {% if not model_is_empty %}hx-confirm="This will replace your current model. Continue?"{% endif %}>
                             <span class="fw-semibold">
                                 {% if entry.icon %}{{ entry.icon }} {% endif %}{{ entry.name }}
                             </span>

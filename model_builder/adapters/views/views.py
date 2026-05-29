@@ -10,6 +10,7 @@ import gc
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from openpyxl import Workbook
 from efootprint import __version__ as efootprint_version
 from efootprint.logger import logger
@@ -54,7 +55,8 @@ def load_system_into_session(repository, raw_system_data):
 def render_model_builder(request, model_web, show_template_picker):
     """Render the builder canvas, optionally overlaying the first-run template picker."""
     context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
-               "show_template_picker": show_template_picker}
+               "show_template_picker": show_template_picker,
+               "model_is_empty": is_empty_model(model_web.system_data)}
     if show_template_picker:
         context["template_picker_groups"] = build_picker_groups()
 
@@ -70,18 +72,12 @@ def render_model_builder(request, model_web, show_template_picker):
 
 
 @time_it
-def model_builder_main(request, reboot=False):
+def model_builder_main(request):
     repository = SessionSystemRepository(request.session)
-    if reboot and reboot != "reboot":
-        raise ValueError("reboot must be False or 'reboot'")
-    if reboot == "reboot":
-        load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
-        return redirect("model-builder")
-
     model_web = ModelWeb(repository)
     if model_web.system_data is None:
-        logger.info("No system data found in session, initializing with empty default system data through reboot")
-        return redirect("model-builder", reboot="reboot")
+        logger.info("No system data found in session, initializing with the empty 'scratch' baseline")
+        model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
 
     if efootprint_version != model_web.initial_system_data_efootprint_version:
         logger.info(f"Upgrading system data from version "
@@ -92,6 +88,19 @@ def model_builder_main(request, reboot=False):
     # An empty model (fresh session, reset, or a returning user who never built anything) is met with
     # the template picker overlaid on the canvas; once there is content, entry goes straight to the model.
     return render_model_builder(request, model_web, show_template_picker=is_empty_model(model_web.system_data))
+
+
+@require_POST
+def reset_model(request):
+    """Discard the current model, reset to the empty 'scratch' baseline and re-open the picker.
+
+    POST-only: it destroys the session model, so it must not be reachable by a bare GET
+    navigation. The toolbar reset button confirms first when the model is non-empty.
+    """
+    repository = SessionSystemRepository(request.session)
+    model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
+    return render_model_builder(request, model_web, show_template_picker=True)
+
 
 def open_import_json_panel(request):
     return render(request, "model_builder/side_panels/import_model.html", context={

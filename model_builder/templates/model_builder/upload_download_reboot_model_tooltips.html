@@ -74,8 +74,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="reboot"
+                    <button type="button"
                        id="btn-reboot-modeling"
+                           hx-post="{% url 'reset-model' %}"
+                           hx-target="#main-content-block"
+                           hx-swap="innerHTML"
+                           hx-disabled-elt="this"
+                           {% if not model_is_empty %}hx-confirm="This will discard your current model and reset to an empty one. Continue?"{% endif %}
                            class="nav-link d-flex flex-row gap-2 mx-2"
                            data-bs-title="Reset to default model"
                            data-bs-placement="bottom"
@@ -87,7 +92,7 @@
                         <p class="d-block d-lg-none">
                             Reset to default model
                         </p>
-                    </a>
+                    </button>
                 </li>
                 <!-- GitHub link (visible in hamburger on mobile, hidden on desktop where navbar has it) -->
                 <li class="nav-item d-xl-none">

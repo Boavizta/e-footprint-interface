@@ -20,9 +20,8 @@ class TestToolbarFeatures:
         model_builder.object_should_exist("UsagePattern", "Test Usage Pattern")
         model_builder.object_should_exist("UsageJourney", "Test Journey")
 
-        # Click reboot
-        with page.expect_response(lambda r: "reboot" in r.url):
-            page.locator("#btn-reboot-modeling").click()
+        # Reset (confirming the discard of the populated model)
+        model_builder.reset_to_default()
 
         # Verify model is reset to the empty default state (Step 6 slimmed the default to an empty System)
         expect(page.locator("div").filter(has_text="Test Usage Pattern")).not_to_be_visible()

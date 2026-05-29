@@ -277,8 +277,7 @@ class TestSourceMetadataSidePanel:
         data = _download_model_json(page, download_path)
         assert len(_downloaded_sources_by_name(data, CUSTOM_SOURCE_NAME)) == 1
 
-        page.goto("/model_builder/reboot")
-        page.locator("#model-canva").wait_for(state="visible")
+        model_builder.reset_to_default()
         model_builder.import_json_file(str(download_path))
 
         _open_server_form(model_builder)

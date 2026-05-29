@@ -6,6 +6,7 @@ model land with the app chrome intact and the model preserved in the session —
 no separate partial-swap container to keep in sync.
 """
 from django.http import Http404
+from django.views.decorators.http import require_POST
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.views import load_system_into_session, render_model_builder
@@ -24,8 +25,13 @@ def open_template_picker(request):
     return render_model_builder(request, model_web, show_template_picker=True)
 
 
+@require_POST
 def load_template(request, template_id):
-    """Load the chosen (or scratch) system into the session and land on the canvas."""
+    """Load the chosen (or scratch) system into the session and land on the canvas.
+
+    POST-only: it replaces the session model, so it must not be reachable by a bare GET.
+    The picker cards confirm first when the current model is non-empty.
+    """
     repository = SessionSystemRepository(request.session)
     try:
         raw_system_data = get_template_system_data(template_id)

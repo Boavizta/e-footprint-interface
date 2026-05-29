@@ -15,7 +15,7 @@ urlpatterns = [
          name="open-template-picker"),
     path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,
          name="load-template"),
-    path("<reboot>", views.model_builder_main, name="model-builder"),
+    path("reset-model/", views.reset_model, name="reset-model"),
     path("open-create-object-panel/<object_type>/",
          model_builder.adapters.views.views_addition.open_create_object_panel, name="open-add-new-object-panel"),
     path("add-object/<object_type>/",
