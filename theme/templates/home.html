@@ -16,6 +16,14 @@
                         hx-push-url="{% url 'model-builder' %}">
                     Start modeling yourself →
                 </button>
+                <button id="btn-browse-templates"
+                        class="btn btn-outline-secondary rounded-pill px-3 py-2"
+                        hx-get="{% url 'open-template-picker' %}"
+                        hx-target="#main-content-block"
+                        hx-swap="innerHTML"
+                        hx-push-url="{% url 'model-builder' %}">
+                    Browse templates
+                </button>
             </div>
         </div>
     </section>

@@ -42,6 +42,8 @@ class TestEdgeModelingToggle:
 
         page.evaluate("localStorage.setItem('efootprint.edgeModeling', 'on')")
         page.reload()
+        # Reloading an empty model re-triggers the first-run picker; dismiss it to reach the canvas.
+        empty_model_builder.dismiss_template_picker_if_present()
 
         click_and_wait_for_htmx(page, page.locator("#btn-add-edge-device"))
         page.locator("#sidePanelForm").wait_for(state="visible")

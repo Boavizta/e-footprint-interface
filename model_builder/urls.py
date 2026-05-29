@@ -5,11 +5,16 @@ import model_builder.adapters.views.views_deletion
 import model_builder.adapters.views.views_dict_mutation
 import model_builder.adapters.views.views_edition
 import model_builder.adapters.views.views_help
+import model_builder.adapters.views.views_onboarding
 from .adapters.views import views
 from .adapters.views import sankey_views
 
 urlpatterns = [
     path("", views.model_builder_main, name="model-builder"),
+    path("open-template-picker/", model_builder.adapters.views.views_onboarding.open_template_picker,
+         name="open-template-picker"),
+    path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,
+         name="load-template"),
     path("<reboot>", views.model_builder_main, name="model-builder"),
     path("open-create-object-panel/<object_type>/",
          model_builder.adapters.views.views_addition.open_create_object_panel, name="open-add-new-object-panel"),

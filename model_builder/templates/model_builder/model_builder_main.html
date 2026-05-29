@@ -12,6 +12,9 @@
         {% include 'model_builder/components/results_bar_button.html' %}
         <div id="result-block" class="bg-transparent overflow-y-auto overflow-x-hidden pt-1"></div>
     </div>
+    {% if show_template_picker %}
+        {% include 'model_builder/onboarding/template_picker.html' %}
+    {% endif %}
 </div>
 
 <button id="model-scroll-to-right"

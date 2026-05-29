@@ -144,6 +144,8 @@ def edge_modeling_enabled(empty_model_builder: ModelBuilderPage) -> ModelBuilder
     page = empty_model_builder.page
     page.evaluate("localStorage.setItem('efootprint.edgeModeling', 'on')")
     page.reload()
+    # Reloading an empty model re-triggers the first-run picker; dismiss it so edge add-buttons are reachable.
+    empty_model_builder.dismiss_template_picker_if_present()
     return empty_model_builder
 
 

@@ -31,41 +31,34 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
 )
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
-from model_builder.domain.services import ProgressiveImportService
+from model_builder.adapters.presenters.template_picker_presenter import build_picker_groups
+from model_builder.domain.services import (
+    ProgressiveImportService, SCRATCH_ID, get_template_system_data, is_empty_model)
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
-@time_it
-def model_builder_main(request, reboot=False):
-    repository = SessionSystemRepository(request.session)
-    if reboot and reboot != "reboot":
-        raise ValueError("reboot must be False or 'reboot'")
-    if reboot == "reboot":
-        with open(os.path.join("model_builder", "domain", "reference_data", "default_system_data.json"), "r") as file:
-            data = json.load(file)
-        system_data = SessionSystemRepository.upgrade_system_data(data)
-        import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-        system_data_with_calculated_attributes = import_service.import_system(system_data)
-        model_web = ModelWeb(repository, system_data_with_calculated_attributes)
-        model_web.persist_to_cache()
-        gc.collect()
+def load_system_into_session(repository, raw_system_data):
+    """Upgrade, recompute, wrap and persist a raw system dict into the session.
 
-        return redirect("model-builder")
+    Shared by reboot, template loading, and the empty-model initialization — the
+    one place that turns a serialized System into the session-backed current model.
+    """
+    system_data = SessionSystemRepository.upgrade_system_data(raw_system_data)
+    import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    model_web = ModelWeb(repository, import_service.import_system(system_data))
+    model_web.persist_to_cache()
+    gc.collect()
+    return model_web
 
-    model_web = ModelWeb(repository)
-    if model_web.system_data is None:
-        logger.info("No system data found in session, initializing with default system data through reboot")
-        return redirect("model-builder", reboot="reboot")
 
-    if efootprint_version != model_web.initial_system_data_efootprint_version:
-        logger.info(f"Upgrading system data from version "
-                    f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
-        model_web.persist_to_cache()
-        logger.info("Upgrade successful")
+def render_model_builder(request, model_web, show_template_picker):
+    """Render the builder canvas, optionally overlaying the first-run template picker."""
+    context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
+               "show_template_picker": show_template_picker}
+    if show_template_picker:
+        context["template_picker_groups"] = build_picker_groups()
 
-    http_response = htmx_render(
-        request, "model_builder/model_builder_main.html",
-        context={"model_web": model_web, "class_help_info": build_canvas_class_help_info()})
+    http_response = htmx_render(request, "model_builder/model_builder_main.html", context=context)
 
     if request.headers.get("HX-Request") == "true":
         # Lines updates are triggered at the after settle element, so might be triggered before initModelBuilderMain
@@ -74,6 +67,31 @@ def model_builder_main(request, reboot=False):
         http_response["HX-Trigger-After-Settle"] = "initModelBuilderMain"
 
     return http_response
+
+
+@time_it
+def model_builder_main(request, reboot=False):
+    repository = SessionSystemRepository(request.session)
+    if reboot and reboot != "reboot":
+        raise ValueError("reboot must be False or 'reboot'")
+    if reboot == "reboot":
+        load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
+        return redirect("model-builder")
+
+    model_web = ModelWeb(repository)
+    if model_web.system_data is None:
+        logger.info("No system data found in session, initializing with empty default system data through reboot")
+        return redirect("model-builder", reboot="reboot")
+
+    if efootprint_version != model_web.initial_system_data_efootprint_version:
+        logger.info(f"Upgrading system data from version "
+                    f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
+        model_web.persist_to_cache()
+        logger.info("Upgrade successful")
+
+    # An empty model (fresh session, reset, or a returning user who never built anything) is met with
+    # the template picker overlaid on the canvas; once there is content, entry goes straight to the model.
+    return render_model_builder(request, model_web, show_template_picker=is_empty_model(model_web.system_data))
 
 def open_import_json_panel(request):
     return render(request, "model_builder/side_panels/import_model.html", context={

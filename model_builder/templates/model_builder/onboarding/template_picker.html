@@ -1,0 +1,62 @@
+{% comment %}
+First-run template picker — a bespoke overlay on the canvas (not a Bootstrap modal).
+Rendered into #model-builder-page when the model is empty, or re-opened over the current
+model via Help ▸ Open templates. Picking a card POSTs to load-template and re-renders the
+whole builder into #main-content-block; the dashed "Start from scratch" card loads the empty
+baseline. Closing the overlay just reveals the canvas behind it.
+{% endcomment %}
+<div id="template-picker"
+     class="position-absolute top-0 start-0 w-100 h-100 overflow-y-auto bg-white bg-opacity-75 z-3 p-3 p-lg-4">
+    <div class="bg-white rounded-3 shadow-sm border mx-auto p-3 p-lg-4" style="max-width: 60rem;">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="text-start">
+                <h2 class="h4 fw-bold mb-1">Welcome to e-footprint</h2>
+                <p class="text-muted mb-0">Pick a starting point. You can change everything once it loads.</p>
+            </div>
+            <button type="button" class="btn-close" aria-label="Close"
+                    _="on click remove #template-picker"></button>
+        </div>
+
+        {% for group in template_picker_groups %}
+        <section class="mb-3">
+            <h3 class="text-uppercase text-muted fw-semibold mb-2" style="font-size: .75rem; letter-spacing: .04em;">
+                {{ group.title }}
+            </h3>
+            <div class="row g-2 row-cols-1 row-cols-sm-2 row-cols-lg-3 text-start">
+                {% for entry in group.entries %}
+                <div class="col">
+                    <div class="card h-100">
+                        <button type="button"
+                                class="btn text-start card-body d-flex flex-column gap-1 h-100 border-0
+                                       {% if entry.category == 'scratch' %}border-2 border-dashed{% endif %}"
+                                data-template-id="{{ entry.id }}"
+                                hx-post="{% url 'load-template' entry.id %}"
+                                hx-target="#main-content-block"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="this">
+                            <span class="fw-semibold">
+                                {% if entry.icon %}{{ entry.icon }} {% endif %}{{ entry.name }}
+                            </span>
+                            <span class="small text-muted">{{ entry.description }}</span>
+                            {% if entry.chips %}
+                            <span class="mt-1">
+                                {% for chip in entry.chips %}
+                                <span class="badge rounded-pill text-bg-light border me-1 mb-1">{{ chip.label }}</span>
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </button>
+                        {% if entry.doc_url %}
+                        <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3">
+                            <a href="{{ entry.doc_url }}" target="_blank" rel="noopener noreferrer"
+                               class="small text-decoration-none">Read the guide ↗</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+</div>

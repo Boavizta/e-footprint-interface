@@ -109,6 +109,15 @@ landed-but-unused.</p>
 <div class="task">
 <h2>Task 2 — Template picker + help menu + first-run trigger (Sub-phase B)</h2>
 
+<p class="status"><strong>Status:</strong> Done — 2026-05-29. Full suite green: unit + integration (465 passed),
+Playwright e2e (80 passed, run against a local server), and jest (92 passed). The empty-model picker,
+template-load endpoint, toolbar Help menu, home "Browse templates" CTA, and localStorage first-run flag
+all land. Two plan deviations (both documented in the summary): a dedicated
+<code>template_picker_presenter.py</code> was added (Clean-Architecture presenter, avoids a view/onboarding
+import cycle), and <code>open_template_picker</code> re-renders the full builder rather than a bare partial
+(uniform behaviour from home and mid-session, session model preserved). The picker also yields to side
+panels/help drawer so toolbar Import is never blocked.</p>
+
 <p class="meta"><strong>Goal.</strong> First user-visible milestone: entering the builder with an
 empty model opens the template picker over the canvas; picking any card (or "Start from scratch")
 loads that system and swaps the canvas; the picker is reachable any time from a new toolbar help

@@ -275,6 +275,12 @@ The JSONs are **derived artifacts**: the source of truth is the Python `build_sy
 
 The shipped `default_system_data.json` is a truly empty `System` (no journeys/servers/patterns) — the "Start from scratch" baseline. Tests needing a pre-existing journey use the `default_system_repository_with_journey` (integration) / `seeded_journey_model_builder` (e2e) fixtures instead of relying on default seeding.
 
+### First-run template picker
+
+`domain/services/template_catalog_service.py` merges the introductory registry with the library's how-to templates (consumed at runtime via `efootprint.modeling_templates.list_how_to_templates` / `get_template`) plus a `scratch` sentinel into ordered `CatalogGroup`s, and resolves a picker `template_id` to its raw serialized `System` dict (`get_template_system_data`, raising `KeyError` for unknown ids). `domain/services/empty_model.py::is_empty_model` decides whether the picker is shown: a model is empty when its only top-level efootprint *class* key is `System` (keying off `ALL_EFOOTPRINT_CLASSES_DICT` membership, so new metadata keys never read as content). `adapters/presenters/template_picker_presenter.py` enriches catalog entries with display chips (resolving `{class:X}`/`CONCEPTS` tokens via `CLASS_UI_CONFIG`) and mkdocs deep-link URLs.
+
+`views.py::model_builder_main` renders the canvas with the picker overlay (`onboarding/template_picker.html`, swapped into `#model-builder-page`) whenever `is_empty_model` holds; `load_system_into_session`/`render_model_builder` are the shared helpers behind reboot, template loading, and empty-model init. `adapters/views/views_onboarding.py` adds `open_template_picker` (re-render the builder with the picker forced on — used by the toolbar Help menu and the home "Browse templates" CTA) and `load_template` (load the chosen/scratch/how-to system, land on the canvas). Both re-render the full builder into `#main-content-block` so the session model is preserved with the app chrome intact. The picker is a welcome overlay: `onboarding_first_run.js` removes it when a side panel or help drawer opens (so toolbar actions like Import are never blocked) and records the `efootprint_onboarding_seen` localStorage flag, emitting `onboarding:first-run` for the guided tour (Step 6 Task 3) to auto-run once.
+
 ## Security and data
 
 - Session-only by default; no PII expected. Do not log sensitive info.

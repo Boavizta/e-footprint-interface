@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Introductory modeling templates (classical e-commerce, AI chatbot, industrial IoT) and their typed
   registry — the interface-owned data layer behind the upcoming first-run template picker. The committed
   JSON snapshots are regenerated from Python scenario constructors with `python -m scripts.build_intro_templates`.
+- First-run template picker: entering the builder with an empty model overlays a picker offering the
+  introductory templates, the library's how-to example systems (with mkdocs deep-links), and
+  "Start from scratch". Picking a card loads that working system onto the canvas. A toolbar Help menu
+  (Replay tour · Open templates · Documentation) and a "Browse templates" CTA on the home page re-open
+  the picker at any time; first-run-seen state is recorded in localStorage.
 
 ### Changed
 - Slimmed the default system to a truly empty `System` (the pre-seeded usage journey/step is dropped); it
