@@ -18,12 +18,11 @@ from pathlib import Path
 
 import pytest
 from efootprint.api_utils.system_to_json import system_to_json
-from efootprint.core.usage.usage_journey import UsageJourney
-from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from playwright.sync_api import Page
 
 from tests.e2e.pages import ModelBuilderPage
 from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update
+from tests.fixtures.system_builders import build_seeded_journey_fragment
 
 
 # Default base URL for E2E tests (Django dev server)
@@ -190,16 +189,9 @@ def load_system_dict_into_browser(model_builder_page: ModelBuilderPage, system_d
 
 
 def build_seeded_journey_dict() -> dict:
-    """A minimal system dict containing one usage journey + step.
-
-    Since Step 6, the shipped default is a truly empty System (the template
-    picker replaces the old seeded journey). E2E tests that need pre-existing
-    journey content load this instead of relying on default seeding.
-    """
-    uj_step = UsageJourneyStep.from_defaults("My first usage journey step", jobs=[])
-    uj = UsageJourney("My first usage journey", uj_steps=[uj_step])
+    """A minimal system dict containing one usage journey + step (see build_seeded_journey_fragment)."""
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    add_only_update(system_data, system_to_json(uj, save_calculated_attributes=False))
+    add_only_update(system_data, build_seeded_journey_fragment())
     return system_data
 
 

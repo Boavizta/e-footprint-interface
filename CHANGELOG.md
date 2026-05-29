@@ -8,9 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Introductory modeling templates (classical e-commerce, AI chatbot, industrial IoT) and their typed
-  registry, plus a wired-but-empty "other" category — the interface-owned data layer behind the upcoming
-  first-run template picker. The committed JSON snapshots are regenerated from Python scenario constructors
-  with `python -m scripts.build_intro_templates`.
+  registry — the interface-owned data layer behind the upcoming first-run template picker. The committed
+  JSON snapshots are regenerated from Python scenario constructors with `python -m scripts.build_intro_templates`.
 
 ### Changed
 - Slimmed the default system to a truly empty `System` (the pre-seeded usage journey/step is dropped); it

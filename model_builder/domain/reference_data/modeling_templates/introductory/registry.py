@@ -11,7 +11,7 @@ metadata tokens: each is either a ``{class:X}`` token (resolved against the
 efootprint class set, just like the SSOT placeholder handlers) or a key of the
 closed ``CONCEPTS`` mapping below, for concepts that map to no single class.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
@@ -25,7 +25,6 @@ class Concept:
     """A picker concept chip that maps to no single efootprint class."""
     label: str
     help_class: str | None = None  # optional {class:X} to open in the help drawer
-    doc: str | None = None         # optional mkdocs slug to deep-link to
 
 
 # Closed set of concept tokens. Tokens that *do* map to a class are written as
@@ -51,12 +50,15 @@ class IntroTemplate:
     showcased_concepts: tuple[str, ...]
     json_path: Path
     category: str = CATEGORY
-    tags: tuple[str, ...] = field(default_factory=tuple)
 
 
 def resolve_concept_token(token: str) -> str:
-    """Validate a ``showcased_concepts`` token and return its human label.
+    """Validate a ``showcased_concepts`` token and return its resolved value.
 
+    Returns the bare class name for a ``{class:X}`` token and the concept label
+    for a ``CONCEPTS`` key. This is domain-level validation, not display: the
+    human-facing chip label (the class UI label, mirroring the help-drawer links)
+    is resolved in the presentation layer, which alone owns ``CLASS_UI_CONFIG``.
     Raises ``ValueError`` for an unknown class or concept key, so the registry
     consistency test fails loudly on drift.
     """

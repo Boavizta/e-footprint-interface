@@ -10,7 +10,6 @@ import pytest
 from model_builder.domain.reference_data.modeling_templates import (
     CONCEPTS,
     INTRO_TEMPLATES,
-    OTHER_TEMPLATES,
     resolve_concept_token,
 )
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import CATEGORY
@@ -65,8 +64,3 @@ def test_concepts_have_labels_and_valid_help_classes():
         if concept.help_class is not None:
             # A help_class must point at a real efootprint class.
             assert resolve_concept_token(f"{{class:{concept.help_class}}}")
-
-
-def test_other_registry_is_empty_but_wired():
-    # The "other" category ships as an empty, wired placeholder (spec §3 out-of-scope).
-    assert OTHER_TEMPLATES == ()

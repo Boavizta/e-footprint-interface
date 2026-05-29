@@ -48,7 +48,7 @@ updated for the default-data slimming and collected clean, but not executed (nee
 
 <p class="meta"><strong>Goal.</strong> Land the interface-owned template data layer that everything
 downstream consumes: three ready-to-mutate introductory <code>System</code>s, the typed metadata
-registry that describes them, an empty-but-wired <code>other</code> category, and the slimmed
+registry that describes them, and the slimmed
 truly-empty "Start from scratch" baseline. Nothing user-visible yet — this is the data layer
 landed-but-unused.</p>
 
@@ -63,13 +63,11 @@ landed-but-unused.</p>
   edge objects so the Step 5 latch fires on load.</li>
   <li><span class="new">new</span> <code>.../introductory/registry.py</code> — <code>IntroTemplate</code>
   dataclass (mirrors the library's <code>HowToTemplate</code>) + tuple of the three entries + closed
-  <code>CONCEPTS</code> enum (token → label + optional help/doc target). <code>showcased_concepts</code>
+  <code>CONCEPTS</code> mapping (token → label + optional help target). <code>showcased_concepts</code>
   mix <code>{class:X}</code> tokens with <code>CONCEPTS</code> keys. Shared placeholder resolver
   untouched.</li>
-  <li><span class="new">new</span> <code>.../modeling_templates/other/registry.py</code> +
-  <code>__init__.py</code> — empty but wired placeholder.</li>
   <li><span class="new">new</span> <code>.../modeling_templates/__init__.py</code> — interface-side
-  aggregation of introductory + other registries (how-to comes from the library).</li>
+  re-export of the introductory registry (how-to comes from the library).</li>
   <li><span class="mod">modified</span> <code>model_builder/domain/reference_data/default_system_data.json</code>
   — slimmed to a truly empty named <code>System</code> (empty <code>usage_patterns</code> /
   <code>edge_usage_patterns</code>, pre-seeded journey/step dropped).</li>
@@ -121,8 +119,8 @@ on the canvas; "Replay tour" wiring is finished in Task 3.)</p>
 <p class="meta"><strong>Files touched.</strong></p>
 <ul class="tight">
   <li><span class="new">new</span> template-catalog service under
-  <code>model_builder/domain/services/</code> — merges introductory registry +
-  <code>efootprint.modeling_templates.list_how_to_templates()</code> + <code>other</code> into
+  <code>model_builder/domain/services/</code> — merges the introductory registry +
+  <code>efootprint.modeling_templates.list_how_to_templates()</code> into
   category groups. Runtime use of the library public API (no copying, no parity test).</li>
   <li><span class="new">new</span> <code>model_builder/adapters/views/views_onboarding.py</code> —
   thin adapters: <code>open_template_picker</code> (render partial), <code>load_template</code>
@@ -155,7 +153,7 @@ on the canvas; "Replay tour" wiring is finished in Task 3.)</p>
 <p class="meta"><strong>Tests added/changed.</strong></p>
 <ul class="tight">
   <li><code>tests/.../test_template_catalog_service.py</code> — integration: catalog service merges
-  all three categories (introductory + library how-to + other), running adapters → use cases →
+  both categories (introductory + library how-to), running adapters → use cases →
   domain with no Django scaffolding (constitution §1.1).</li>
   <li><code>tests/.../test_empty_model_predicate.py</code> — unit: the picker-trigger predicate is
   true for <code>None</code> and for an only-<code>System</code>-object payload, false once real

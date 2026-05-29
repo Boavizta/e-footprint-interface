@@ -106,18 +106,28 @@ def default_system_repository() -> InMemorySystemRepository:
     return repository
 
 
+SEEDED_JOURNEY_NAME = "My first usage journey"
+SEEDED_JOURNEY_STEP_NAME = "My first usage journey step"
+
+
+def build_seeded_journey_fragment() -> dict:
+    """Serialized fragment of one usage journey + step.
+
+    Since Step 6 the shipped default is a truly empty System (the template picker
+    replaces the old seeded journey/step). Tests that need pre-existing journey
+    content merge this fragment into their base system dict — integration into
+    ``DEFAULT_SYSTEM_DATA``, e2e into ``EMPTY_SYSTEM_DICT`` — instead of relying
+    on default seeding.
+    """
+    uj_step = UsageJourneyStep.from_defaults(SEEDED_JOURNEY_STEP_NAME, jobs=[])
+    uj = UsageJourney(SEEDED_JOURNEY_NAME, uj_steps=[uj_step])
+    return system_to_json(uj, save_calculated_attributes=False)
+
+
 @pytest.fixture
 def default_system_repository_with_journey() -> InMemorySystemRepository:
-    """Default system seeded with one usage journey + step.
-
-    Since Step 6, the shipped default is a truly empty System (the template
-    picker replaces the old seeded journey/step). Integration tests that need a
-    pre-existing journey/step to build flows on top of use this fixture instead
-    of relying on default seeding.
-    """
-    uj_step = UsageJourneyStep.from_defaults("My first usage journey step", jobs=[])
-    uj = UsageJourney("My first usage journey", uj_steps=[uj_step])
-    uj_fragment = system_to_json(uj, save_calculated_attributes=False)
+    """Default system seeded with one usage journey + step (see build_seeded_journey_fragment)."""
+    uj_fragment = build_seeded_journey_fragment()
 
     system_data = deepcopy(DEFAULT_SYSTEM_DATA)
     for class_key in ("UsageJourney", "UsageJourneyStep"):

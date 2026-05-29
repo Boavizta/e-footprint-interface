@@ -13,6 +13,10 @@ from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyE
 from efootprint.api_utils.json_to_system import json_to_system
 
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
+from model_builder.domain.services import ProgressiveImportService
+
+# Mirror the production import cap (InMemorySystemRepository(max_payload_size_mb=30.0)).
+MAX_PAYLOAD_SIZE_MB = 30.0
 
 _params = pytest.mark.parametrize("tpl", INTRO_TEMPLATES, ids=lambda t: t.id)
 
@@ -24,9 +28,7 @@ def _load_raw(tpl):
 
 @_params
 def test_template_imports_and_computes_through_interface_path(tpl):
-    from model_builder.domain.services import ProgressiveImportService
-
-    imported = ProgressiveImportService(max_payload_size_mb=30).import_system(_load_raw(tpl))
+    imported = ProgressiveImportService(max_payload_size_mb=MAX_PAYLOAD_SIZE_MB).import_system(_load_raw(tpl))
 
     class_obj_dict, _, _ = json_to_system(imported)
     system = next(iter(class_obj_dict["System"].values()))
