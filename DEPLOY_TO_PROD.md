@@ -153,6 +153,27 @@ Or use a PostgreSQL client with the `DATABASE_URL` from Clever Cloud environment
 2. Manually run migrations via Clever Cloud SSH
 3. Check database connectivity
 
+### Browser shows a certificate warning (`net::ERR_CERT_AUTHORITY_INVALID`)
+The proxy is serving Clever Cloud's self-signed fallback cert (`CN=lolcatho.st`)
+instead of a Let's Encrypt one — i.e. no valid LE cert is bound to the domain.
+This happens when an app has been **undeployed for a while**: the old cert expired
+and renewal kept failing (the ACME HTTP-01 challenge needs the app running to
+answer), so it fell back to the placeholder. A plain redeploy does **not**
+retrigger issuance.
+
+Fix: in the Clever console → app → **Domain names**, **remove and re-add** the
+domain. That forces a fresh Let's Encrypt issuance, which succeeds once the app
+is up. Issuance takes ~10-15 min; the site serves the fallback cert until then.
+
+Verify from the terminal (DNS/CAA/app are almost never the cause — confirm the
+issuer flips to Let's Encrypt):
+```shell
+echo | openssl s_client -connect <domain>:443 -servername <domain> 2>/dev/null | openssl x509 -noout -issuer
+curl -sS -o /dev/null -w "%{http_code} verify=%{ssl_verify_result}\n" https://<domain>   # verify=0 means OK
+```
+Only file a Clever support ticket if it's still the fallback cert ~30 min after
+re-adding the domain.
+
 ## Rolling Back
 
 If a deployment introduces issues:
