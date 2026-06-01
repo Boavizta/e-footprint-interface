@@ -14,6 +14,7 @@ from tests.e2e.pages import ModelBuilderPage
 
 
 @pytest.mark.e2e
+@pytest.mark.onboarding_first_run
 class TestOnboardingPicker:
     def test_empty_model_shows_picker_and_loading_a_template_swaps_the_canvas(
             self, model_builder_page: ModelBuilderPage):
@@ -60,6 +61,7 @@ class TestOnboardingPicker:
 
 
 @pytest.mark.e2e
+@pytest.mark.onboarding_first_run
 class TestOnboardingTour:
     def test_data_tour_target_anchors_are_present(self, model_builder_page: ModelBuilderPage):
         page = model_builder_page.page

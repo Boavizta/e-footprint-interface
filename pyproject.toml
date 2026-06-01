@@ -76,4 +76,5 @@ base_url = "http://localhost:8000"
 markers = [
     "e2e: End-to-end tests requiring browser",
     "slow: Tests that take longer to run",
+    "onboarding_first_run: Let the once-ever guided tour auto-run (suppressed by default so it doesn't overlay other suites)",
 ]

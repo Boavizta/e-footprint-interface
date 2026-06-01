@@ -1,0 +1,29 @@
+/* Guided-tour layering (Step 6 Task 3).
+
+   driver.js makes itself modal with `.driver-active * { pointer-events: none }`, re-enabling
+   only the highlighted element and its own popover. That would trap the user — the spec
+   requires the tour to be non-blocking. These rules keep the app chrome the tour points at
+   reachable while it runs: the toolbar Help menu (replay tour / open templates / docs) and the
+   help drawer that the help step opens. Both are lifted above driver's overlay and have pointer
+   events restored on their whole subtree (the root alone is not enough — the actual buttons are
+   descendants). The canvas itself stays dimmed and non-interactive, so the tour still frames it.
+
+   z-index bands: driver overlay ~1e4, driver popover 1e9. The toolbar sits between the two
+   (visible and clickable, but under the tooltip); the help drawer sits above the popover so it
+   is fully usable once opened. `.z-3` on the toolbar is `!important`, hence `!important` here. */
+.driver-active #toolbar-nav {
+    position: relative;
+    z-index: 100000000 !important;
+    pointer-events: auto;
+}
+.driver-active #toolbar-nav * {
+    pointer-events: auto;
+}
+
+.driver-active #helpDrawer {
+    z-index: 1000000001 !important;
+    pointer-events: auto;
+}
+.driver-active #helpDrawer * {
+    pointer-events: auto;
+}

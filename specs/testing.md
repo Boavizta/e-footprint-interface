@@ -165,6 +165,10 @@ Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered cli
 
 Edge add-buttons are hidden by default (`body.edge-modeling-off`). Tests that click them must opt in via the `edge_modeling_enabled` fixture — typically `@pytest.mark.usefixtures("edge_modeling_enabled")` on the test class.
 
+### First-run guided tour
+
+The once-ever guided tour auto-runs on a fresh `efootprint_onboarding_seen` localStorage flag — which every Playwright context has by default — and its overlay would block the canvas and side panel in unrelated suites. The `model_builder_page` fixture therefore sets the flag (via `add_init_script`) so the tour stays dormant, mimicking a returning user. Tests that exercise the tour itself opt in with `@pytest.mark.onboarding_first_run` (see `test_onboarding.py`), which skips the suppression so the tour auto-runs.
+
 ### Test structure
 
 - One test file per domain concept (servers, jobs, usage patterns, etc.).

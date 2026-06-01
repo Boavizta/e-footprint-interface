@@ -93,8 +93,6 @@ describe("buildDriverSteps", () => {
 
         helpStep.onHighlighted();
         expect(openHelpFor).toHaveBeenCalledWith("UsageJourney");
-        const helpDrawer = document.getElementById("helpDrawer");
-        expect(helpDrawer.style.pointerEvents).toBe("auto");
     });
 });
 
@@ -148,15 +146,19 @@ describe("event wiring", () => {
         document.querySelector('[data-action="replay-tour"]').click();
         expect(window.driver.js.driver).toHaveBeenCalledTimes(1);
     });
-});
 
-describe("resetHelpDrawerLayering", () => {
-    test("clears the inline overrides applied for the help step", () => {
+    test("re-opening the template picker ends an active tour", () => {
         mount("tour_loaded");
-        tour.openHelpDrawerForTour("UsageJourney");
-        tour.resetHelpDrawerLayering();
-        const helpDrawer = document.getElementById("helpDrawer");
-        expect(helpDrawer.style.pointerEvents).toBe("");
-        expect(helpDrawer.style.zIndex).toBe("");
+        tour.runTour();
+        const destroyedBefore = destroyCalls;
+
+        // Help ▸ Open templates swaps the picker back into #main-content-block; tour.js
+        // tears the tour down so the picker is not stranded under the overlay.
+        const swapped = document.createElement("div");
+        swapped.innerHTML = '<div id="template-picker"></div>';
+        document.body.appendChild(swapped);
+        document.body.dispatchEvent(new CustomEvent("htmx:afterSwap", { detail: { target: swapped } }));
+        expect(destroyCalls).toBe(destroyedBefore + 1);
     });
 });
+

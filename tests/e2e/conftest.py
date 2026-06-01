@@ -104,6 +104,12 @@ def model_builder_page(page: Page, base_url: str, request) -> ModelBuilderPage:
     _attach_slow_request_logger(page, test_name=request.node.name)
     server_url = base_url or DEFAULT_BASE_URL
 
+    # Each Playwright context starts with empty localStorage, so the once-ever guided tour would
+    # auto-run (and its overlay would block the canvas/side panel) in every suite. Mimic a returning
+    # user by default — mark a test `onboarding_first_run` to exercise the first-run tour itself.
+    if not request.node.get_closest_marker("onboarding_first_run"):
+        page.add_init_script("try { localStorage.setItem('efootprint_onboarding_seen', 'true'); } catch (e) {}")
+
     # Override goto to use server URL for relative paths
     original_goto = page.goto
 

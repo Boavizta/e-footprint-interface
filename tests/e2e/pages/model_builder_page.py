@@ -93,14 +93,23 @@ class ModelBuilderPage:
         return self
 
     def advance_tour_to_help_step(self):
-        """Click Next until the tour opens the help drawer (the contextual-help step)."""
+        """Click Next until the tour's help step opens the help drawer.
+
+        The help step opens the drawer via an async htmx swap, so wait for the drawer to
+        appear on each step before advancing — otherwise we race past the step (clicking
+        Next while it is still hidden) and run the tour off its end.
+        """
         help_drawer = self.page.locator("#helpDrawer")
-        next_btn = self.page.locator(".driver-popover-next-btn")
         for _ in range(10):
-            if not help_drawer.evaluate("el => el.classList.contains('d-none')"):
+            try:
+                expect(help_drawer).to_be_visible(timeout=1000)
                 return self
+            except AssertionError:
+                pass
+            next_btn = self.page.locator(".driver-popover-next-btn")
+            if next_btn.count() == 0:
+                break
             next_btn.click()
-            self.page.wait_for_timeout(150)
         raise AssertionError("Tour never reached the help step that opens the drawer.")
 
     # --- Object card accessors ---

@@ -29,16 +29,11 @@
         }
     }
 
-    /* Open the help drawer for a class and keep it clickable above driver's overlay
-       (driver greys out everything but the highlighted element via pointer-events).
-       The endpoint + swap is owned by help_drawer_utils.js; we trigger its established
-       `data-action="open-help-drawer"` dispatch and only layer the drawer for the tour. */
+    /* Open the help drawer for a class on the tour's help step. The endpoint + swap is
+       owned by help_drawer_utils.js; we just trigger its established
+       `data-action="open-help-drawer"` dispatch. Keeping the drawer (and the toolbar)
+       clickable above driver's modal overlay is handled in CSS — see tour.css. */
     function openHelpDrawerForTour(className) {
-        const helpDrawer = document.getElementById("helpDrawer");
-        if (helpDrawer) {
-            helpDrawer.style.pointerEvents = "auto";
-            helpDrawer.style.zIndex = "1000000001";  // above driver's popover (1e9)
-        }
         if (!className) return;
         const trigger = document.createElement("button");
         trigger.setAttribute("data-action", "open-help-drawer");
@@ -47,13 +42,6 @@
         document.body.appendChild(trigger);
         trigger.click();  // bubbles to help_drawer_utils.js's delegated listener
         trigger.remove();
-    }
-
-    function resetHelpDrawerLayering() {
-        const helpDrawer = document.getElementById("helpDrawer");
-        if (!helpDrawer) return;
-        helpDrawer.style.pointerEvents = "";
-        helpDrawer.style.zIndex = "";
     }
 
     /* Map a server step to a driver.js step. */
@@ -86,14 +74,11 @@
         const tour = driverFactory({
             showProgress: true,
             allowClose: true,
-            // Non-blocking: a click on the dimmed area dismisses the tour rather than
-            // trapping the user, and the help step raises the drawer above the overlay.
+            // Non-blocking: clicking the dimmed canvas dismisses the tour rather than trapping
+            // the user. The toolbar and the help drawer stay reachable above the overlay (tour.css).
             overlayClickBehavior: "close",
             steps: driverSteps,
-            onDestroyed: () => {
-                activeTour = null;
-                resetHelpDrawerLayering();
-            },
+            onDestroyed: () => { activeTour = null; },
         });
         activeTour = tour;
         tour.drive();
@@ -113,6 +98,17 @@
         runTour();
     });
 
+    /* Re-opening the template picker (Help ▸ Open templates) ends the tour: the picker is
+       a fresh "choose a starting point" surface that would otherwise sit under the tour's
+       overlay, and the tour's targets no longer apply once the picker covers the canvas. */
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        const target = event.detail && event.detail.target;
+        if (!activeTour || !target) return;
+        if (target.id === "template-picker" || (target.querySelector && target.querySelector("#template-picker"))) {
+            activeTour.destroy();
+        }
+    });
+
     if (typeof module !== "undefined" && module.exports) {
         module.exports = {
             readTourSteps,
@@ -120,7 +116,6 @@
             toDriverStep,
             runTour,
             openHelpDrawerForTour,
-            resetHelpDrawerLayering,
         };
     }
 })();
