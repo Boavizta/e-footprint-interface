@@ -6,8 +6,10 @@
         "start": "poetry run python manage.py runserver",
         "test": "poetry run python manage.py test",
         "watch": "npx sass --watch theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss",
+        "build": "npm run build:result-charts && npm run vendor:driver",
         "build:result-charts": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --minify --outfile=theme/static/bundles/result_charts.js",
         "build:result-charts:dev": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --outfile=theme/static/bundles/result_charts.js",
+        "vendor:driver": "cp node_modules/driver.js/dist/driver.js.iife.js theme/static/scripts/external_librairies/driver.iife.js && cp node_modules/driver.js/dist/driver.css theme/static/css/driver.css",
         "build:js-test-fixtures": "poetry run python js_tests/build_fixtures.py",
         "jest": "npm run build:js-test-fixtures && jest"
     },
@@ -23,6 +25,7 @@
         "bootstrap": "^5.3",
         "bootstrap-icons": "^1.13.1",
         "chart.js": "^4.4",
+        "driver.js": "^1.4.0",
         "flatpickr": "^4.6.13",
         "hammerjs": "^2.0.8",
         "shave": "^5.0.4"

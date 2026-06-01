@@ -8,13 +8,14 @@
     </div>
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-3" id="sidePanel"></div>
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"></div>
-    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
+    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn" data-tour-target="results">
         {% include 'model_builder/components/results_bar_button.html' %}
         <div id="result-block" class="bg-transparent overflow-y-auto overflow-x-hidden pt-1"></div>
     </div>
     {% if show_template_picker %}
         {% include 'model_builder/onboarding/template_picker.html' %}
     {% endif %}
+    {% include 'model_builder/onboarding/tour_steps.html' %}
 </div>
 
 <button id="model-scroll-to-right"

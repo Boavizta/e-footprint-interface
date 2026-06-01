@@ -1,9 +1,11 @@
-"""E2E for the first-run onboarding flow: empty-model picker, template load, re-open paths.
+"""E2E for the first-run onboarding flow: empty-model picker, template load, re-open paths,
+and the guided tour (auto-run, replay, non-blocking help step, IoT edge latch).
 
 Covers the critical first-run journey only (testing.md "minimal, non-redundant"): entering
 an empty model shows the picker; picking a card loads a working system; the home "Browse
-templates" CTA and the toolbar Help menu both re-open the picker. The guided-tour and
-IoT-edge-latch assertions land in Step 6 Task 3.
+templates" CTA and the toolbar Help menu both re-open the picker; the guided tour auto-runs
+once, replays from the help menu, opens the help drawer non-blockingly, and the IoT template
+lands with the edge toggle latched on.
 """
 import pytest
 from playwright.sync_api import expect
@@ -55,3 +57,71 @@ class TestOnboardingPicker:
         expect(model_builder_page.template_picker).to_be_visible()
         model_builder_page.dismiss_template_picker_if_present()
         expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+
+
+@pytest.mark.e2e
+class TestOnboardingTour:
+    def test_data_tour_target_anchors_are_present(self, model_builder_page: ModelBuilderPage):
+        page = model_builder_page.page
+        page.goto("/model_builder/")
+        model_builder_page.pick_template("ecommerce")
+        for target in ("usage-journeys", "infrastructure", "usage-patterns", "results", "help-menu"):
+            expect(page.locator(f"[data-tour-target='{target}']")).to_have_count(1)
+
+    def test_tour_auto_runs_after_a_template_loads(self, model_builder_page: ModelBuilderPage):
+        page = model_builder_page.page
+        # Raw nav so the first-run flag is fresh (each Playwright context has clean localStorage).
+        page.goto("/model_builder/")
+        expect(model_builder_page.tour_popover).not_to_be_visible()
+
+        # Picking a template dismisses the picker; the tour then auto-runs once ever.
+        model_builder_page.pick_template("ecommerce")
+        expect(model_builder_page.tour_popover).to_be_visible()
+
+    def test_tour_does_not_re_run_on_a_returning_visit(self, model_builder_page: ModelBuilderPage):
+        page = model_builder_page.page
+        page.goto("/model_builder/")
+        model_builder_page.pick_template("ecommerce")
+        expect(model_builder_page.tour_popover).to_be_visible()
+
+        # The flag is now set; re-entering the (now non-empty) builder must not re-run the tour.
+        page.goto("/model_builder/")
+        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+        expect(model_builder_page.tour_popover).not_to_be_visible()
+
+    def test_replay_from_help_menu_reopens_the_tour(self, model_builder_page: ModelBuilderPage):
+        page = model_builder_page.page
+        page.goto("/model_builder/")
+        model_builder_page.pick_template("ecommerce")
+        # Dismiss the auto-run tour, then replay it from the help menu.
+        page.locator(".driver-popover-close-btn").click()
+        expect(model_builder_page.tour_popover).not_to_be_visible()
+
+        model_builder_page.replay_tour_from_help_menu()
+        expect(model_builder_page.tour_popover).to_be_visible()
+
+    def test_help_step_opens_drawer_and_drawer_stays_clickable(self, model_builder_page: ModelBuilderPage):
+        page = model_builder_page.page
+        page.goto("/model_builder/")
+        model_builder_page.pick_template("ecommerce")
+        expect(model_builder_page.tour_popover).to_be_visible()
+
+        # Advance to the step that opens the help drawer while the tour stays open.
+        model_builder_page.advance_tour_to_help_step()
+        help_drawer = page.locator("#helpDrawer")
+        expect(help_drawer).to_be_visible()
+        expect(model_builder_page.tour_popover).to_be_visible()
+
+        # Non-blocking: the drawer's close button is interactable while the tour runs.
+        page.locator("#btn-close-help-drawer").click()
+        expect(help_drawer).not_to_be_visible()
+
+    def test_iot_template_lands_with_edge_toggle_latched_on(self, model_builder_page: ModelBuilderPage):
+        page = model_builder_page.page
+        page.goto("/model_builder/")
+        model_builder_page.pick_template("iot_industrial")
+
+        toggle = page.locator("#edge-modeling-toggle")
+        expect(toggle).to_be_checked()
+        expect(toggle).to_be_disabled()
+        expect(page.locator("body.edge-modeling-on")).to_have_count(1)

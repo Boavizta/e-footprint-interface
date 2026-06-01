@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   "Start from scratch". Picking a card loads that working system onto the canvas. A toolbar Help menu
   (Replay tour · Open templates · Documentation) and a "Browse templates" CTA on the home page re-open
   the picker at any time; first-run-seen state is recorded in localStorage.
+- First-run guided tour: after a template loads (or "Start from scratch"), a short non-blocking tour
+  (driver.js) orients the user to the interface map, the recommended modeling order, and where contextual
+  help lives — pointing at real cards on a loaded template and at placeholders (ending on a "create a
+  usage journey" suggestion) on a blank start. It auto-runs once ever, is replayable from the Help menu,
+  and its help step opens the help drawer while staying clickable. Tour copy is server-provided (resolved
+  through the SSOT placeholder provider); no domain-concept prose is duplicated into JS.
 
 ### Changed
 - Slimmed the default system to a truly empty `System` (the pre-seeded usage journey/step is dropped); it

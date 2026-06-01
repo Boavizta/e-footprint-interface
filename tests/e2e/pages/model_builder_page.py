@@ -78,6 +78,31 @@ class ModelBuilderPage:
         self.page.wait_for_function("window.LeaderLine !== undefined")
         return self
 
+    # --- Guided tour (driver.js) ---
+
+    @property
+    def tour_popover(self):
+        """The driver.js tour popover (present only while the tour is running)."""
+        return self.page.locator(".driver-popover")
+
+    def replay_tour_from_help_menu(self):
+        """Open Help ▸ Replay tour from the toolbar and wait for the overlay."""
+        self.page.locator("#help-menu-toggle").click()
+        self.page.locator('[data-action="replay-tour"]').click()
+        self.tour_popover.wait_for(state="visible")
+        return self
+
+    def advance_tour_to_help_step(self):
+        """Click Next until the tour opens the help drawer (the contextual-help step)."""
+        help_drawer = self.page.locator("#helpDrawer")
+        next_btn = self.page.locator(".driver-popover-next-btn")
+        for _ in range(10):
+            if not help_drawer.evaluate("el => el.classList.contains('d-none')"):
+                return self
+            next_btn.click()
+            self.page.wait_for_timeout(150)
+        raise AssertionError("Tour never reached the help step that opens the drawer.")
+
     # --- Object card accessors ---
 
     def get_object_card(self, object_type: str, name: str) -> ObjectCard:

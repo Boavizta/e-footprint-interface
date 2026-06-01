@@ -133,6 +133,14 @@ class EfootprintDescriptionProvider:
         text = getattr(klass, attr, None)
         return self._resolve(text) if text else None
 
+    def resolve_text(self, text: str) -> SafeString:
+        """Resolve ``{kind:target}`` placeholders in interface-authored copy (e.g. tour steps).
+
+        For text that is not tied to a single class/param — the guided tour's map/order copy —
+        but still wants the same SSOT-backed help links and doc deep-links as the rest of the UI.
+        """
+        return self._resolve(text)
+
     def _resolve(self, text: str) -> SafeString:
         return mark_safe(resolve_placeholders(text, self._handlers))
 

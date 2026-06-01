@@ -195,6 +195,17 @@ on the canvas; "Replay tour" wiring is finished in Task 3.)</p>
 <div class="task">
 <h2>Task 3 — Guided tour (Sub-phase C)</h2>
 
+<p class="status"><strong>Status:</strong> Done — 2026-06-01. driver.js vendored (`external_librairies/driver.iife.js`
++ `css/driver.css`, refreshed via `npm run vendor:driver`); `tour.js` drives a non-blocking tour from
+server-provided steps (`tour_steps.py` → `tour_steps.html` JSON), auto-running once ever on
+`onboarding:first-run` (deferred until the picker is gone) and replayable from the Help menu. Two flavors
+(loaded vs blank "create a usage journey"); the help step opens the help drawer and keeps it clickable.
+Unit + integration suite green (476 passed — the previously-noted `EcoLogitsVideoGen*` baseline failures no
+longer reproduce). jest green (108 passed, +16: `tour.test.js` with driver.js mocked + `onboarding_first_run.test.js`).
+E2E extended (auto-run, replay, non-blocking help step, IoT edge latch, `data-tour-target` anchors) and
+collected clean, not executed (needs a running server). `CHANGELOG.md` entry added; `efootprint` references
+PyPI. Docs updated (architecture/conventions/tech_stack).</p>
+
 <p class="meta"><strong>Goal.</strong> Second user-visible milestone: after a template loads (or
 after "Start from scratch"), a short non-blocking guided tour orients the user to the interface map,
 the recommended modeling order, and where contextual help lives — pointing at real on-screen targets

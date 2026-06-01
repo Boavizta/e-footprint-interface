@@ -1,7 +1,7 @@
 {% load static label_filters %}
 {% with creation_constraints=model_web.creation_constraints %}
 <div class="equal-width p-2">
-    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-pattern-container">
+    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-pattern-container" data-tour-target="usage-patterns">
         <h5><b>Usage patterns</b></h5>
         {% include 'model_builder/components/add_object_button.html' with btn_id="add_usage_pattern" hx_url="/model_builder/open-create-object-panel/UsagePattern/" label="Add usage pattern" btn_extra_classes="w-75 mb-1" disabled=creation_constraints.UsagePatternWeb.disabled disabled_reason="UsagePatternWeb"|constraint_tooltip class_name="UsagePattern" class_label=class_help_info.UsagePattern.label class_description=class_help_info.UsagePattern.description %}
         <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="add_edge_usage_pattern" hx_url="/model_builder/open-create-object-panel/EdgeUsagePattern/" label="Add edge usage pattern" btn_extra_classes="w-75 mb-0" disabled=creation_constraints.EdgeUsagePatternWeb.disabled disabled_reason="EdgeUsagePatternWeb"|constraint_tooltip class_name="EdgeUsagePattern" class_label=class_help_info.EdgeUsagePattern.label class_description=class_help_info.EdgeUsagePattern.description %}</div>
@@ -16,7 +16,7 @@
     </div>
 </div>
 <div class="equal-width p-2">
-    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-journey-container">
+    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-journey-container" data-tour-target="usage-journeys">
          <h5><b>Usage journeys</b></h5>
         {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-usage-journey" hx_url="/model_builder/open-create-object-panel/UsageJourney/" label="Add usage journey" btn_extra_classes="w-100 mb-1" class_name="UsageJourney" class_label=class_help_info.UsageJourney.label class_description=class_help_info.UsageJourney.description %}
         <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-usage-journey" hx_url="/model_builder/open-create-object-panel/EdgeUsageJourney/" label="Add edge usage journey" btn_extra_classes="w-100 mb-0" class_name="EdgeUsageJourney" class_label=class_help_info.EdgeUsageJourney.label class_description=class_help_info.EdgeUsageJourney.description %}</div>
@@ -31,7 +31,7 @@
     </div>
 </div>
 <div class="equal-width p-2">
-    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container">
+    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container" data-tour-target="infrastructure">
         <h5><b>Infrastructure</b></h5>
         <div class="d-grid gap-1 mb-3" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);">
             {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-server" hx_url="/model_builder/open-create-object-panel/ServerBase/" label="Add server" btn_extra_classes="" class_name="ServerBase" class_label=class_help_info.ServerBase.label class_description=class_help_info.ServerBase.description %}

@@ -212,6 +212,36 @@ def render_dict_count(field_ctx):
 
 
 # ---------------------------------------------------------------------------
+# tour.test.js — onboarding/tour_steps.html (+ the canvas data-tour-target anchors)
+# ---------------------------------------------------------------------------
+
+# The real canvas markup is large; for the tour the only load-bearing part is the set of
+# data-tour-target anchors tour.js resolves. Render the *real* tour_steps.html (so a step
+# attribute rename fails the test) and wrap it in stand-in anchors mirroring the column ids.
+_TOUR_TARGET_STANDIN = "".join(
+    f'<div data-tour-target="{target}"></div>'
+    for target in ("usage-journeys", "infrastructure", "usage-patterns", "results", "help-menu")
+)
+
+
+def render_tour_steps(case_ctx):
+    from model_builder.adapters.ui_config.tour_steps import build_tour_steps
+
+    steps_html = render_to_string(
+        "model_builder/onboarding/tour_steps.html",
+        {"tour_steps": build_tour_steps(is_blank=case_ctx["is_blank"]),
+         "model_is_empty": case_ctx["is_blank"]},
+    )
+    return _TOUR_TARGET_STANDIN + steps_html
+
+
+TOUR_CASES = {
+    "tour_loaded": {"is_blank": False},
+    "tour_blank": {"is_blank": True},
+}
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -220,6 +250,7 @@ GROUPS = [
     (ROW_EDITOR_CASES, render_row_editor),
     (SOURCE_TABLE_ROW_CASES, render_source_table_row),
     (DICT_COUNT_CASES, render_dict_count),
+    (TOUR_CASES, render_tour_steps),
 ]
 
 

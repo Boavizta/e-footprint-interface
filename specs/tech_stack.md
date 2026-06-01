@@ -26,6 +26,7 @@
 - **HTMX** — partial-update interactivity model (constitution §1.4). No SPA framework.
 - **Bootstrap 5** — UI components.
 - **Vanilla JavaScript** — small utilities (loading bars, leader lines, charts wiring). No frontend framework.
+- **driver.js** (`^1.4.0`) — dependency-free, view-only library powering the first-run guided tour (`tour.js`). Vendored into `external_librairies/driver.iife.js` (+ `css/driver.css`) via `npm run vendor:driver`; step copy is server-provided (see conventions.md → JavaScript). Not an SPA framework — does not fall under the constitution §4 framework ban.
 - **SCSS** under `theme/static/scss/`, compiled to `theme/static/css/` via `npm run watch`.
 - **Webpack** bundling for the result charts (`theme/static/scripts/result_charts/` → `theme/static/bundles/`).
 

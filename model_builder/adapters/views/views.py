@@ -33,6 +33,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.adapters.presenters.template_picker_presenter import build_picker_groups
+from model_builder.adapters.ui_config.tour_steps import build_tour_steps
 from model_builder.domain.services import (
     ProgressiveImportService, SCRATCH_ID, get_template_system_data, is_empty_model)
 from utils import htmx_render, sanitize_filename, smart_truncate
@@ -54,9 +55,11 @@ def load_system_into_session(repository, raw_system_data):
 
 def render_model_builder(request, model_web, show_template_picker):
     """Render the builder canvas, optionally overlaying the first-run template picker."""
+    model_is_empty = is_empty_model(model_web.system_data)
     context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
                "show_template_picker": show_template_picker,
-               "model_is_empty": is_empty_model(model_web.system_data)}
+               "model_is_empty": model_is_empty,
+               "tour_steps": build_tour_steps(is_blank=model_is_empty)}
     if show_template_picker:
         context["template_picker_groups"] = build_picker_groups()
 

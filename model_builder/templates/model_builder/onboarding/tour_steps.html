@@ -1,0 +1,10 @@
+{% comment %}
+Server-provided guided-tour payload for tour.js (Step 6 Task 3).
+
+The step copy is resolved server-side in tour_steps.py (placeholders already expanded to HTML),
+so the words never live in JS. tour.js reads this JSON, drives driver.js, and auto-runs once ever
+on the `onboarding:first-run` event emitted by onboarding_first_run.js. `data-tour-flavor` records
+whether the model is blank (the picker/scratch path adds a "create a usage journey" suggestion).
+{% endcomment %}
+{{ tour_steps|json_script:"tour-steps-data" }}
+<div id="tour-config" data-tour-flavor="{% if model_is_empty %}blank{% else %}loaded{% endif %}"></div>
