@@ -1,4 +1,5 @@
 """Unit tests for payload size limit enforcement in repositories."""
+import json
 import os
 import pytest
 from unittest.mock import MagicMock, patch
@@ -31,6 +32,33 @@ class TestJsonPayloadUtils:
         # JSON will be {"key": "xxx..."} so slightly more than 1000 bytes
         assert result.size_bytes > 1000
         assert result.size_bytes < 1100  # Reasonable overhead
+
+    def test_compute_json_size_handles_deeply_nested_payload(self):
+        """Should not crash on payloads deeper than orjson's 255-level nesting limit.
+
+        e-footprint serializes calculation explanations as deeply nested
+        ``explain_nested_tuples``; summing many objects in one step can exceed
+        orjson's hard recursion ceiling. compute_json_size must fall back to the
+        stdlib encoder instead of raising "Recursion limit reached" (regression
+        for the JSON-upload crash on such models).
+        """
+        depth = 600  # well beyond orjson's 254-level ceiling
+        nested = current = {}
+        for _ in range(depth):
+            child = {}
+            current["next"] = child
+            current = child
+
+        result = compute_json_size(nested)
+
+        assert result.size_bytes > 0
+        # The stdlib fallback must agree with the literal JSON encoding.
+        assert result.size_bytes == len(json.dumps(nested).encode("utf-8"))
+
+    def test_compute_json_size_propagates_non_recursion_type_errors(self):
+        """Should not mask genuine serialization failures behind the fallback."""
+        with pytest.raises(TypeError):
+            compute_json_size({"bad": object()})
 
 
 class TestInMemorySystemRepositorySizeLimit:
