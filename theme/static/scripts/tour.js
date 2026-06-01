@@ -9,13 +9,11 @@
    - Auto-runs once ever, on the `onboarding:first-run` event onboarding_first_run.js
      emits on the user's first-ever builder entry.
    - Replayable any time via the toolbar Help menu's `data-action="replay-tour"`.
-   - The help step opens the help drawer (htmx.ajax, same endpoint as the canvas help
-     buttons) and keeps it clickable while the tour stays open — the tour is non-blocking.
+   - The help step opens the help drawer via help_drawer_utils.js's shared open path and
+     keeps it clickable while the tour stays open — the tour is non-blocking.
 
    IIFE + data-action dispatch, nothing on window. See conventions.md → JavaScript. */
 (function () {
-    const HELP_DRAWER_ENDPOINT = "/model_builder/open-help-drawer/";
-
     function getDriverFactory() {
         // The vendored IIFE build exposes the factory at window.driver.js.driver.
         return window.driver && window.driver.js && window.driver.js.driver;
@@ -32,17 +30,23 @@
     }
 
     /* Open the help drawer for a class and keep it clickable above driver's overlay
-       (driver greys out everything but the highlighted element via pointer-events). */
+       (driver greys out everything but the highlighted element via pointer-events).
+       The endpoint + swap is owned by help_drawer_utils.js; we trigger its established
+       `data-action="open-help-drawer"` dispatch and only layer the drawer for the tour. */
     function openHelpDrawerForTour(className) {
         const helpDrawer = document.getElementById("helpDrawer");
         if (helpDrawer) {
             helpDrawer.style.pointerEvents = "auto";
             helpDrawer.style.zIndex = "1000000001";  // above driver's popover (1e9)
         }
-        if (window.htmx && className) {
-            window.htmx.ajax("GET", `${HELP_DRAWER_ENDPOINT}${className}/`,
-                { target: "#helpDrawer", swap: "innerHTML" });
-        }
+        if (!className) return;
+        const trigger = document.createElement("button");
+        trigger.setAttribute("data-action", "open-help-drawer");
+        trigger.setAttribute("data-help-class", className);
+        trigger.style.display = "none";
+        document.body.appendChild(trigger);
+        trigger.click();  // bubbles to help_drawer_utils.js's delegated listener
+        trigger.remove();
     }
 
     function resetHelpDrawerLayering() {
@@ -52,8 +56,7 @@
         helpDrawer.style.zIndex = "";
     }
 
-    /* Map a server step to a driver.js step. Targets whose element is absent are dropped,
-       so a step pointing at an edge-only column on a web model is silently skipped. */
+    /* Map a server step to a driver.js step. */
     function toDriverStep(step) {
         const driverStep = {
             element: step.target,
@@ -66,9 +69,7 @@
     }
 
     function buildDriverSteps(steps) {
-        return steps
-            .filter(step => !step.target || document.querySelector(step.target))
-            .map(toDriverStep);
+        return steps.map(toDriverStep);
     }
 
     function runTour() {

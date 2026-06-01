@@ -67,14 +67,12 @@ describe("readTourSteps", () => {
 });
 
 describe("buildDriverSteps", () => {
-    test("maps server steps to driver steps and drops targets absent from the DOM", () => {
+    test("maps every server step straight through to a driver step", () => {
         mount("tour_loaded");
-        // Remove one anchor so its step is filtered out.
-        document.querySelector('[data-tour-target="results"]').remove();
-        const driverSteps = tour.buildDriverSteps(tour.readTourSteps());
-        expect(driverSteps.length).toBe(5);
+        const steps = tour.readTourSteps();
+        const driverSteps = tour.buildDriverSteps(steps);
+        expect(driverSteps.length).toBe(steps.length);
         expect(driverSteps.every(s => s.popover && s.popover.title)).toBe(true);
-        expect(driverSteps.some(s => s.element === '[data-tour-target="results"]')).toBe(false);
     });
 
     test("the help step carries an onHighlighted that opens the help drawer", () => {
@@ -83,10 +81,16 @@ describe("buildDriverSteps", () => {
         const helpStep = driverSteps.find(s => typeof s.onHighlighted === "function");
         expect(helpStep).toBeDefined();
 
+        // tour.js delegates the actual open to help_drawer_utils.js's
+        // data-action="open-help-drawer" dispatch; stand in for it here.
+        const openHelpFor = jest.fn();
+        document.body.addEventListener("click", function (event) {
+            const trigger = event.target.closest('[data-action="open-help-drawer"]');
+            if (trigger) openHelpFor(trigger.dataset.helpClass);
+        });
+
         helpStep.onHighlighted();
-        expect(window.htmx.ajax).toHaveBeenCalledWith(
-            "GET", "/model_builder/open-help-drawer/UsageJourney/",
-            { target: "#helpDrawer", swap: "innerHTML" });
+        expect(openHelpFor).toHaveBeenCalledWith("UsageJourney");
         const helpDrawer = document.getElementById("helpDrawer");
         expect(helpDrawer.style.pointerEvents).toBe("auto");
     });
