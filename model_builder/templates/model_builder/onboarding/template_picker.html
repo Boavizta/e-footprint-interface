@@ -14,7 +14,7 @@ baseline. Closing the overlay just reveals the canvas behind it.
                 <p class="text-muted mb-0">Pick a starting point. You can change everything once it loads.</p>
             </div>
             <button type="button" class="btn-close" aria-label="Close"
-                    _="on click remove #template-picker"></button>
+                    onclick="document.getElementById('template-picker').remove()"></button>
         </div>
 
         {% for group in template_picker_groups %}
