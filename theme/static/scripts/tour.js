@@ -51,10 +51,29 @@
         fireHelpDrawerAction("close-help-drawer");
     }
 
+    /* Pick the element to highlight. A step may carry a `mobile_target` fallback for when its
+       primary target lives in a surface that collapses on small screens (e.g. the toolbar's
+       Help menu, hidden inside the burger below the lg breakpoint). An element with no layout
+       box (offsetParent === null) can't be anchored, so driver.js would float the popover to
+       the top — fall back to the mobile target then. Resolved lazily (a function), so a viewport
+       resize between building the steps and reaching the step still picks the right anchor. */
+    function resolveElement(step) {
+        const primary = document.querySelector(step.target);
+        if (primary && primary.offsetParent !== null) return primary;
+        if (step.mobile_target) {
+            const fallback = document.querySelector(step.mobile_target);
+            if (fallback && fallback.offsetParent !== null) return fallback;
+        }
+        // Return the (possibly hidden or null) primary element — never the selector string,
+        // since driver.js uses a function's return value as the element directly. A null lets
+        // driver.js fall back to its centered dummy rather than mis-anchoring.
+        return primary;
+    }
+
     /* Map a server step to a driver.js step. */
     function toDriverStep(step) {
         const driverStep = {
-            element: step.target,
+            element: step.mobile_target ? (() => resolveElement(step)) : step.target,
             popover: { title: step.title, description: step.body },
         };
         if (step.open_help_class) {
@@ -133,6 +152,7 @@
             readTourSteps,
             buildDriverSteps,
             toDriverStep,
+            resolveElement,
             runTour,
             openHelpDrawerForTour,
             closeHelpDrawerForTour,

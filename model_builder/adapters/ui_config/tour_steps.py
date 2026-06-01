@@ -25,6 +25,9 @@ what a usage journey or a server *is*. Two flavors share the same orientation st
 The help step is the one exception: it anchors on the "?" help button beside the
 "Add usage journey" button (``_HELP_BUTTON_SEL``) rather than a ``data-tour-target``
 column, because the column resizes when the drawer opens and would break the highlight.
+
+A step may carry an optional ``mobile_target`` selector: tour.js uses it when the primary
+target isn't visible (e.g. the toolbar Help menu collapses into the burger below ``lg``).
 """
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 
@@ -74,6 +77,10 @@ _SHARED_STEPS = [
     },
     {
         "target": _sel("help-menu"),
+        # On mobile the toolbar collapses into the burger, so the Help menu has no layout box
+        # to anchor on; point at the burger (where the Help menu now lives) instead. tour.js
+        # uses this only when the primary target isn't visible.
+        "mobile_target": ".navbar-toggler",
         "title": "Replay this any time",
         "body": "The Help menu replays this tour, re-opens the templates, or jumps to the documentation.",
         # Close the help drawer we opened on the previous step before highlighting the toolbar.
@@ -99,6 +106,8 @@ def _resolve(steps: list[dict]) -> list[dict]:
             resolved_step["open_help_class"] = step["open_help_class"]
         if "close_help" in step:
             resolved_step["close_help"] = step["close_help"]
+        if "mobile_target" in step:
+            resolved_step["mobile_target"] = step["mobile_target"]
         resolved.append(resolved_step)
     return resolved
 

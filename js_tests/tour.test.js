@@ -114,6 +114,44 @@ describe("buildDriverSteps", () => {
     });
 });
 
+describe("mobile_target fallback", () => {
+    // jsdom does no layout, so offsetParent is always null; stub it to model visibility.
+    function setVisible(el, visible) {
+        Object.defineProperty(el, "offsetParent", { configurable: true, get: () => (visible ? document.body : null) });
+    }
+
+    test("a step with a mobile_target produces a lazy element resolver", () => {
+        const step = tour.toDriverStep({ target: "#primary", mobile_target: "#burger", title: "t", body: "b" });
+        expect(typeof step.element).toBe("function");
+    });
+
+    test("resolves to the primary target when it is visible", () => {
+        document.body.innerHTML = '<div id="primary"></div><button id="burger"></button>';
+        const primary = document.getElementById("primary");
+        setVisible(primary, true);
+        setVisible(document.getElementById("burger"), true);
+        const step = { target: "#primary", mobile_target: "#burger" };
+        expect(tour.resolveElement(step)).toBe(primary);
+    });
+
+    test("falls back to the mobile target when the primary is hidden (collapsed navbar)", () => {
+        document.body.innerHTML = '<div id="primary"></div><button id="burger"></button>';
+        const burger = document.getElementById("burger");
+        setVisible(document.getElementById("primary"), false);
+        setVisible(burger, true);
+        const step = { target: "#primary", mobile_target: "#burger" };
+        expect(tour.resolveElement(step)).toBe(burger);
+    });
+
+    test("returns the (hidden) primary element rather than a selector string when nothing is visible", () => {
+        document.body.innerHTML = '<div id="primary"></div>';
+        const primary = document.getElementById("primary");
+        setVisible(primary, false);
+        const step = { target: "#primary", mobile_target: "#burger" };
+        expect(tour.resolveElement(step)).toBe(primary);
+    });
+});
+
 describe("runTour", () => {
     test("builds a driver instance from the server steps and drives it", () => {
         mount("tour_loaded");
