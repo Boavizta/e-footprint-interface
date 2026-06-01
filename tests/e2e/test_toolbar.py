@@ -29,6 +29,51 @@ class TestToolbarFeatures:
         expect(page.locator("div[id^='UsageJourney-']")).to_have_count(0)
         expect(page.locator("div[id^='UsagePattern-']")).to_have_count(0)
 
+    def test_reboot_confirms_after_adding_to_initially_empty_model(self, empty_model_builder: ModelBuilderPage):
+        """Regression: reboot must confirm once the model has content, even when the page loaded empty.
+
+        The toolbar (and its reboot button) is only re-rendered on full-page swaps, never when an
+        object is added via a partial swap. A server-rendered ``hx-confirm`` would therefore stay
+        frozen at its empty-model value and reboot silently. The confirmation is decided client-side
+        at click time from the live DOM instead.
+        """
+        model_builder = empty_model_builder
+        page = model_builder.page
+
+        # Add an object via a partial swap (does not re-render the toolbar).
+        model_builder.click_add_usage_journey()
+        model_builder.side_panel.fill_field("UsageJourney_name", "UJ for reboot confirm")
+        model_builder.side_panel.submit_and_wait_for_close()
+        model_builder.object_should_exist("UsageJourney", "UJ for reboot confirm")
+
+        # Rebooting now must prompt for confirmation.
+        dialogs = []
+
+        def accept(dialog):
+            dialogs.append(dialog.message)
+            dialog.accept()
+
+        page.on("dialog", accept)
+        click_and_wait_for_htmx(page, page.locator("#btn-reboot-modeling"))
+
+        assert dialogs, "Reboot should ask for confirmation once the model has content"
+
+    def test_reboot_on_empty_model_does_not_confirm(self, empty_model_builder: ModelBuilderPage):
+        """Rebooting an already-empty model has nothing to discard, so it must not prompt."""
+        model_builder = empty_model_builder
+        page = model_builder.page
+
+        dialogs = []
+
+        def accept(dialog):
+            dialogs.append(dialog.message)
+            dialog.accept()
+
+        page.on("dialog", accept)
+        click_and_wait_for_htmx(page, page.locator("#btn-reboot-modeling"))
+
+        assert not dialogs, "Rebooting an empty model should not prompt for confirmation"
+
     def test_change_system_name(self, minimal_complete_model_builder: ModelBuilderPage):
         """System name can be changed and persists after reload."""
         model_builder = minimal_complete_model_builder

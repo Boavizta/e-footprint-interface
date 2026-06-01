@@ -297,3 +297,20 @@ document.body.addEventListener("htmx:afterRequest", function (evt) {
 document.body.addEventListener("htmx:afterSettle", function (event) {
     initTruncatedTextTooltips(event.detail.elt);
 });
+
+// Conditional confirmation for destructive model-replacing actions (toolbar reboot, picker cards).
+// The triggering element carries `data-confirm-when-model-not-empty="<question>"`; we only prompt
+// when the canvas actually holds objects (`.model-builder-card`) — rebooting/replacing an empty
+// model has nothing to discard. Decided here at click time from the live DOM, so it stays correct
+// no matter which partials have swapped since the toolbar/picker was rendered. Bound once at the
+// body level (not per-element hyperscript) so it survives HTMX swaps with no wiring window (see
+// conventions.md on hyperscript-on-swapped-content).
+document.body.addEventListener("htmx:confirm", function (evt) {
+    const elt = evt.target.closest("[data-confirm-when-model-not-empty]");
+    if (!elt) return; // not a guarded action — let HTMX proceed normally
+    if (!document.querySelector(".model-builder-card")) return; // empty model — nothing to discard
+    evt.preventDefault();
+    if (window.confirm(elt.getAttribute("data-confirm-when-model-not-empty"))) {
+        evt.detail.issueRequest(true);
+    }
+});

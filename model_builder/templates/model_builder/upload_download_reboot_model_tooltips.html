@@ -80,7 +80,7 @@
                            hx-target="#main-content-block"
                            hx-swap="innerHTML"
                            hx-disabled-elt="this"
-                           {% if not model_is_empty %}hx-confirm="This will discard your current model and reset to an empty one. Continue?"{% endif %}
+                           data-confirm-when-model-not-empty="This will discard your current model and reset to an empty one. Continue?"
                            class="nav-link d-flex flex-row gap-2 mx-2"
                            data-bs-title="Reset to default model"
                            data-bs-placement="bottom"

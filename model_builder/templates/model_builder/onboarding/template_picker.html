@@ -34,7 +34,7 @@ baseline. Closing the overlay just reveals the canvas behind it.
                                 hx-target="#main-content-block"
                                 hx-swap="innerHTML"
                                 hx-disabled-elt="this"
-                                {% if not model_is_empty %}hx-confirm="This will replace your current model. Continue?"{% endif %}>
+                                data-confirm-when-model-not-empty="This will replace your current model. Continue?">
                             <span class="fw-semibold">
                                 {% if entry.icon %}{{ entry.icon }} {% endif %}{{ entry.name }}
                             </span>

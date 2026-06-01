@@ -11,6 +11,7 @@ import pytest
 from playwright.sync_api import expect
 
 from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.utils import click_and_wait_for_htmx
 
 
 @pytest.mark.e2e
@@ -58,6 +59,34 @@ class TestOnboardingPicker:
         expect(model_builder_page.template_picker).to_be_visible()
         model_builder_page.dismiss_template_picker_if_present()
         expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+
+    def test_picking_a_template_over_a_loaded_model_confirms_first(self, model_builder_page: ModelBuilderPage):
+        """Regression: replacing a loaded model from the re-opened picker must confirm first.
+
+        The picker is server-rendered once; its replace-confirmation is decided client-side at
+        click time from the live DOM, so it stays correct whether the picker overlays an empty
+        canvas (no prompt) or a populated one (prompt).
+        """
+        page = model_builder_page.page
+        page.goto("/model_builder/")
+        model_builder_page.pick_template("ecommerce")
+        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+
+        # Re-open the picker over the now-loaded model and pick a different template.
+        model_builder_page.open_template_picker_from_help_menu()
+
+        dialogs = []
+
+        def accept(dialog):
+            dialogs.append(dialog.message)
+            dialog.accept()
+
+        page.on("dialog", accept)
+        click_and_wait_for_htmx(
+            page, model_builder_page.template_picker.locator("[data-template-id='ai_chatbot']"))
+
+        assert dialogs, "Replacing a loaded model from the picker should ask for confirmation"
+        expect(model_builder_page.template_picker).to_have_count(0)
 
 
 @pytest.mark.e2e
