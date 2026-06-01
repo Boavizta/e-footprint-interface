@@ -54,7 +54,7 @@ class TestSelectMultipleJobs:
         job2_card_in_step = ObjectCard(uj_step_card.locator.locator(f"div[id^='Job-']").filter(has_text="Test Job 2"))
         job2_card_in_step.should_exist()
         # Job card ID is of the form 'Job-2df3a0_in_UsageJourneyStep-2331a3_in_UsageJourney-bc6c5e'
-        job2_id = job2_card_in_step.locator.get_attribute("id")[4:10]
+        job2_id = job2_card_in_step.locator.get_attribute("id")[4:16]
 
         # Remove Job 2
         uj_step_card.click_edit_button()
@@ -67,7 +67,7 @@ class TestSelectMultipleJobs:
         # Remove Job 1 (last remaining job)
         job1_card_in_step = ObjectCard(uj_step_card.locator.locator(f"div[id^='Job-']").filter(has_text="Test Job 1"))
         job1_card_in_step.should_exist()
-        job1_id = job1_card_in_step.locator.get_attribute("id")[4:10]
+        job1_id = job1_card_in_step.locator.get_attribute("id")[4:16]
         uj_step_card.click_edit_button()
         page.locator(f"#remove-{job1_id}").click()
         model_builder.side_panel.submit_and_wait_for_close()

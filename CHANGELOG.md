@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.3] - 2026-05-26
+
+### Fixed
+- Upgrade to e-footprint 21.1.3 for a couple bug fixes (reduce recursion depth in Job calculated attributes and increase object id length).
+
 ## [1.6.2] - 2026-05-26
 
 ### Fixed
