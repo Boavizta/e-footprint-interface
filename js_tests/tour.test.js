@@ -114,6 +114,37 @@ describe("buildDriverSteps", () => {
     });
 });
 
+describe("help step on a full-screen-drawer viewport", () => {
+    // Below the sm breakpoint the help drawer covers the whole screen, so the help step must
+    // not open it; it shows mobile_body and points at the still-visible "?" button instead.
+    function stubViewport(matchesNarrow) {
+        window.matchMedia = jest.fn(() => ({ matches: matchesNarrow }));
+    }
+    afterEach(() => { delete window.matchMedia; });
+
+    test("does not open the drawer and uses mobile_body when the drawer would cover the tour", () => {
+        stubViewport(true);
+        const step = {
+            target: "#help-btn", title: "t", body: "desktop copy",
+            open_help_class: "UsageJourney", mobile_body: "mobile copy",
+        };
+        const driverStep = tour.toDriverStep(step);
+        expect(driverStep.onHighlightStarted).toBeUndefined();
+        expect(driverStep.popover.description).toBe("mobile copy");
+    });
+
+    test("opens the drawer and uses the desktop body on a wider viewport", () => {
+        stubViewport(false);
+        const step = {
+            target: "#help-btn", title: "t", body: "desktop copy",
+            open_help_class: "UsageJourney", mobile_body: "mobile copy",
+        };
+        const driverStep = tour.toDriverStep(step);
+        expect(typeof driverStep.onHighlightStarted).toBe("function");
+        expect(driverStep.popover.description).toBe("desktop copy");
+    });
+});
+
 describe("mobile_target fallback", () => {
     // jsdom does no layout, so offsetParent is always null; stub it to model visibility.
     function setVisible(el, visible) {

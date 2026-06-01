@@ -28,6 +28,10 @@ column, because the column resizes when the drawer opens and would break the hig
 
 A step may carry an optional ``mobile_target`` selector: tour.js uses it when the primary
 target isn't visible (e.g. the toolbar Help menu collapses into the burger below ``lg``).
+
+The help step also carries an optional ``mobile_body``: below the ``sm`` breakpoint the help
+drawer fills the whole screen and would bury the tour popover, so tour.js skips opening the
+drawer there and shows ``mobile_body`` (which invites exploring help after the tour) instead.
 """
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 
@@ -74,6 +78,11 @@ _SHARED_STEPS = [
                 "see. Together with the field tooltips and info icons, they explain every concept. Explore "
                 "it now; the tour stays open.",
         "open_help_class": "UsageJourney",
+        # On phones the help drawer fills the whole screen, which would bury the tour popover — so
+        # tour.js skips opening it there and shows this copy instead, inviting exploration afterwards.
+        "mobile_body": "Every add button has a help link beside it, like this one. Together with the field "
+                       "tooltips and info icons, they explain every concept — open any of them to explore "
+                       "once you've finished the tour.",
     },
     {
         "target": _sel("help-menu"),
@@ -104,6 +113,8 @@ def _resolve(steps: list[dict]) -> list[dict]:
                          "body": str(EFOOTPRINT_DESCRIPTION_PROVIDER.resolve_text(step["body"]))}
         if "open_help_class" in step:
             resolved_step["open_help_class"] = step["open_help_class"]
+        if "mobile_body" in step:
+            resolved_step["mobile_body"] = str(EFOOTPRINT_DESCRIPTION_PROVIDER.resolve_text(step["mobile_body"]))
         if "close_help" in step:
             resolved_step["close_help"] = step["close_help"]
         if "mobile_target" in step:

@@ -51,6 +51,16 @@
         fireHelpDrawerAction("close-help-drawer");
     }
 
+    /* Below Bootstrap's `sm` breakpoint the help drawer fills the whole viewport
+       (custom.scss: @media (max-width: 575.98px) #helpDrawer { width: 100% }), which would
+       bury the tour popover and leave the user staring at a full-screen panel with no visible
+       tour. On those widths the help step skips opening the drawer (see toDriverStep). Guarded
+       so it degrades to desktop behaviour where matchMedia is absent (e.g. jsdom in tests). */
+    function helpDrawerCoversViewport() {
+        return typeof window.matchMedia === "function"
+            && window.matchMedia("(max-width: 575.98px)").matches;
+    }
+
     /* Pick the element to highlight. A step may carry a `mobile_target` fallback for when its
        primary target lives in a surface that collapses on small screens (e.g. the toolbar's
        Help menu, hidden inside the burger below the lg breakpoint). An element with no layout
@@ -72,11 +82,16 @@
 
     /* Map a server step to a driver.js step. */
     function toDriverStep(step) {
+        // The help step opens a drawer that, on phones, covers the whole screen and hides the
+        // tour. There it instead points at the still-visible "?" button with copy (mobile_body)
+        // inviting the user to explore help once the tour is done — never opening the drawer.
+        const suppressHelpDrawer = step.open_help_class && helpDrawerCoversViewport();
+        const description = (suppressHelpDrawer && step.mobile_body) ? step.mobile_body : step.body;
         const driverStep = {
             element: step.mobile_target ? (() => resolveElement(step)) : step.target,
-            popover: { title: step.title, description: step.body },
+            popover: { title: step.title, description: description },
         };
-        if (step.open_help_class) {
+        if (step.open_help_class && !suppressHelpDrawer) {
             // Open the drawer as the step begins. It opens via an async htmx swap that
             // resizes the canvas and shifts the highlighted "?" button — the
             // htmx:afterSwap handler below refreshes the tour onto its new position.
@@ -153,6 +168,7 @@
             buildDriverSteps,
             toDriverStep,
             resolveElement,
+            helpDrawerCoversViewport,
             runTour,
             openHelpDrawerForTour,
             closeHelpDrawerForTour,

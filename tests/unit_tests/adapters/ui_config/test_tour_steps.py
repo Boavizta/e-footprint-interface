@@ -49,6 +49,10 @@ def test_help_step_opens_drawer_and_anchors_on_the_help_button():
     # which resizes when the drawer opens), and the body no longer hard-links UsageJourney.
     assert help_steps[0]["target"] == '[data-action="open-help-drawer"][data-help-class="UsageJourney"]'
     assert 'data-action="open-help-drawer"' not in help_steps[0]["body"]
+    # It carries a phone-only body (tour.js shows it instead of opening the full-screen drawer),
+    # resolved server-side like every other body so no raw placeholder reaches JS.
+    assert "mobile_body" in help_steps[0]
+    assert not _PLACEHOLDER_RE.search(help_steps[0]["mobile_body"])
 
 
 def test_help_menu_step_closes_the_drawer():
