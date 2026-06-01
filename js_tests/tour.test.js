@@ -77,22 +77,40 @@ describe("buildDriverSteps", () => {
         expect(driverSteps.every(s => s.popover && s.popover.title)).toBe(true);
     });
 
-    test("the help step carries an onHighlighted that opens the help drawer", () => {
+    test("the help step opens the help drawer as it begins", () => {
         mount("tour_loaded");
-        const driverSteps = tour.buildDriverSteps(tour.readTourSteps());
-        const helpStep = driverSteps.find(s => typeof s.onHighlighted === "function");
-        expect(helpStep).toBeDefined();
+        const steps = tour.readTourSteps();
+        const helpIndex = steps.findIndex(s => s.open_help_class);
+        const helpStep = tour.buildDriverSteps(steps)[helpIndex];
+        expect(typeof helpStep.onHighlightStarted).toBe("function");
 
         // tour.js delegates the actual open to help_drawer_utils.js's
-        // data-action="open-help-drawer" dispatch; stand in for it here.
-        const openHelpFor = jest.fn();
+        // data-action dispatch; stand in for it here.
+        const action = jest.fn();
         document.body.addEventListener("click", function (event) {
-            const trigger = event.target.closest('[data-action="open-help-drawer"]');
-            if (trigger) openHelpFor(trigger.dataset.helpClass);
+            const trigger = event.target.closest("[data-action]");
+            if (trigger) action(trigger.dataset.action, trigger.dataset.helpClass);
         });
 
-        helpStep.onHighlighted();
-        expect(openHelpFor).toHaveBeenCalledWith("UsageJourney");
+        helpStep.onHighlightStarted();
+        expect(action).toHaveBeenCalledWith("open-help-drawer", "UsageJourney");
+    });
+
+    test("the help-menu step closes the help drawer as it begins", () => {
+        mount("tour_loaded");
+        const steps = tour.readTourSteps();
+        const closeIndex = steps.findIndex(s => s.close_help);
+        const closeStep = tour.buildDriverSteps(steps)[closeIndex];
+        expect(typeof closeStep.onHighlightStarted).toBe("function");
+
+        const action = jest.fn();
+        document.body.addEventListener("click", function (event) {
+            const trigger = event.target.closest("[data-action]");
+            if (trigger) action(trigger.dataset.action);
+        });
+
+        closeStep.onHighlightStarted();
+        expect(action).toHaveBeenCalledWith("close-help-drawer");
     });
 });
 

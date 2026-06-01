@@ -29,19 +29,26 @@
         }
     }
 
-    /* Open the help drawer for a class on the tour's help step. The endpoint + swap is
-       owned by help_drawer_utils.js; we just trigger its established
-       `data-action="open-help-drawer"` dispatch. Keeping the drawer (and the toolbar)
-       clickable above driver's modal overlay is handled in CSS — see tour.css. */
-    function openHelpDrawerForTour(className) {
-        if (!className) return;
+    /* Drive the help drawer from the tour by firing help_drawer_utils.js's established
+       `data-action` dispatch (it owns the endpoint, swap, open/close + canvas resize).
+       Keeping the drawer (and the toolbar) clickable above driver's modal overlay is
+       handled in CSS — see tour.css. */
+    function fireHelpDrawerAction(action, className) {
         const trigger = document.createElement("button");
-        trigger.setAttribute("data-action", "open-help-drawer");
-        trigger.setAttribute("data-help-class", className);
+        trigger.setAttribute("data-action", action);
+        if (className) trigger.setAttribute("data-help-class", className);
         trigger.style.display = "none";
         document.body.appendChild(trigger);
         trigger.click();  // bubbles to help_drawer_utils.js's delegated listener
         trigger.remove();
+    }
+
+    function openHelpDrawerForTour(className) {
+        if (className) fireHelpDrawerAction("open-help-drawer", className);
+    }
+
+    function closeHelpDrawerForTour() {
+        fireHelpDrawerAction("close-help-drawer");
     }
 
     /* Map a server step to a driver.js step. */
@@ -51,7 +58,14 @@
             popover: { title: step.title, description: step.body },
         };
         if (step.open_help_class) {
-            driverStep.onHighlighted = () => openHelpDrawerForTour(step.open_help_class);
+            // Open the drawer as the step begins. It opens via an async htmx swap that
+            // resizes the canvas and shifts the highlighted "?" button — the
+            // htmx:afterSwap handler below refreshes the tour onto its new position.
+            driverStep.onHighlightStarted = () => openHelpDrawerForTour(step.open_help_class);
+        }
+        if (step.close_help) {
+            // Close the drawer opened by an earlier step before highlighting this one.
+            driverStep.onHighlightStarted = () => closeHelpDrawerForTour();
         }
         return driverStep;
     }
@@ -106,6 +120,11 @@
         if (!activeTour || !target) return;
         if (target.id === "template-picker" || (target.querySelector && target.querySelector("#template-picker"))) {
             activeTour.destroy();
+        } else if (target.id === "helpDrawer") {
+            // The drawer just opened and resized the canvas, moving the highlighted "?"
+            // button. driver's refresh() is rAF-deferred, so it recomputes the overlay and
+            // popover after help_drawer_utils.js's sibling handler has settled the layout.
+            activeTour.refresh();
         }
     });
 
@@ -116,6 +135,7 @@
             toDriverStep,
             runTour,
             openHelpDrawerForTour,
+            closeHelpDrawerForTour,
         };
     }
 })();

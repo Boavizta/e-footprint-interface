@@ -13,7 +13,8 @@ _TOUR_TARGETS = {"usage-journeys", "infrastructure", "usage-patterns", "results"
 
 
 def _targets(steps):
-    return {re.search(r'data-tour-target="([^"]+)"', step["target"]).group(1) for step in steps}
+    # The help step anchors on the "?" help button, not a data-tour-target column — skip it here.
+    return {m.group(1) for step in steps if (m := re.search(r'data-tour-target="([^"]+)"', step["target"]))}
 
 
 def test_loaded_flavor_has_no_first_action_suggestion():
@@ -40,9 +41,19 @@ def test_placeholders_are_resolved_server_side():
             assert not _PLACEHOLDER_RE.search(step["body"]), step["body"]
 
 
-def test_help_step_resolves_a_help_drawer_link():
+def test_help_step_opens_drawer_and_anchors_on_the_help_button():
     help_steps = [s for s in build_tour_steps(is_blank=False) if "open_help_class" in s]
     assert len(help_steps) == 1
     assert help_steps[0]["open_help_class"] == "UsageJourney"
-    # The {class:UsageJourney} placeholder resolved into an open-help-drawer button.
-    assert 'data-action="open-help-drawer"' in help_steps[0]["body"]
+    # It anchors on the "?" help button beside the add-usage-journey button (not the column,
+    # which resizes when the drawer opens), and the body no longer hard-links UsageJourney.
+    assert help_steps[0]["target"] == '[data-action="open-help-drawer"][data-help-class="UsageJourney"]'
+    assert 'data-action="open-help-drawer"' not in help_steps[0]["body"]
+
+
+def test_help_menu_step_closes_the_drawer():
+    steps = build_tour_steps(is_blank=False)
+    close_steps = [s for s in steps if s.get("close_help")]
+    assert len(close_steps) == 1
+    # It is the toolbar Help-menu step, reached right after the drawer-opening help step.
+    assert 'data-tour-target="help-menu"' in close_steps[0]["target"]

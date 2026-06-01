@@ -21,12 +21,22 @@ what a usage journey or a server *is*. Two flavors share the same orientation st
 - ``usage-patterns``  — the usage-patterns column
 - ``results``         — the results bar at the bottom
 - ``help-menu``       — the toolbar Help menu (replay tour, templates, docs)
+
+The help step is the one exception: it anchors on the "?" help button beside the
+"Add usage journey" button (``_HELP_BUTTON_SEL``) rather than a ``data-tour-target``
+column, because the column resizes when the drawer opens and would break the highlight.
 """
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 
 
 def _sel(target: str) -> str:
     return f'[data-tour-target="{target}"]'
+
+
+# The concrete "?" help affordance the help step points at — the one beside the
+# "Add usage journey" button. Unique on the page (only UsageJourney's add button
+# renders this class). tour.js opens the drawer for this same class on the step.
+_HELP_BUTTON_SEL = '[data-action="open-help-drawer"][data-help-class="UsageJourney"]'
 
 
 # Shared orientation steps (same content in both flavors). ``open_help_class`` on a
@@ -55,10 +65,10 @@ _SHARED_STEPS = [
         "body": "Once the model is complete, its environmental footprint appears here.",
     },
     {
-        "target": _sel("usage-journeys"),
+        "target": _HELP_BUTTON_SEL,
         "title": "Help is always one click away",
-        "body": "The {class:UsageJourney} help links beside each add button, the field tooltips and the "
-                "info icons explain every concept — we just opened the help panel so you can see. Explore "
+        "body": "Every add button has a help link beside it, like this one — we just opened it so you can "
+                "see. Together with the field tooltips and info icons, they explain every concept. Explore "
                 "it now; the tour stays open.",
         "open_help_class": "UsageJourney",
     },
@@ -66,6 +76,8 @@ _SHARED_STEPS = [
         "target": _sel("help-menu"),
         "title": "Replay this any time",
         "body": "The Help menu replays this tour, re-opens the templates, or jumps to the documentation.",
+        # Close the help drawer we opened on the previous step before highlighting the toolbar.
+        "close_help": True,
     },
 ]
 
@@ -85,6 +97,8 @@ def _resolve(steps: list[dict]) -> list[dict]:
                          "body": str(EFOOTPRINT_DESCRIPTION_PROVIDER.resolve_text(step["body"]))}
         if "open_help_class" in step:
             resolved_step["open_help_class"] = step["open_help_class"]
+        if "close_help" in step:
+            resolved_step["close_help"] = step["close_help"]
         resolved.append(resolved_step)
     return resolved
 
