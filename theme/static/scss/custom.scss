@@ -701,7 +701,7 @@ input:disabled{
 }
 
 /* Mobile toolbar */
-@media (max-width: 1199.9px) {
+@media (max-width: 991.98px) {
     .mobile-toolbar-border {
         border-bottom: 1px solid var(--gray-200);
     }
@@ -766,7 +766,7 @@ input:disabled{
 }
 
 /* tablette */
-@media (min-width:576px) and (max-width:1199.9px){
+@media (min-width:576px) and (max-width:991.98px){
 
     .list-object-efootprint{
         min-width: 300px;
@@ -800,7 +800,7 @@ input:disabled{
 }
 
 
-@media (max-width: 1199.9px) {
+@media (max-width: 991.98px) {
     .fs-sm{
         font-size: 0.4em;
     }
@@ -865,7 +865,7 @@ input:disabled{
     }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
 
     #model-canva{
         width:100%;
