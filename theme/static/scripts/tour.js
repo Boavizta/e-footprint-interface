@@ -72,11 +72,16 @@
         return steps.map(toDriverStep);
     }
 
+    // Track the live driver so a replay never stacks a second tour over an active one.
+    let activeTour = null;
+
     function runTour() {
         const driverFactory = getDriverFactory();
         if (!driverFactory) return;
         const driverSteps = buildDriverSteps(readTourSteps());
         if (driverSteps.length === 0) return;
+
+        if (activeTour) activeTour.destroy();
 
         const tour = driverFactory({
             showProgress: true,
@@ -85,8 +90,12 @@
             // trapping the user, and the help step raises the drawer above the overlay.
             overlayClickBehavior: "close",
             steps: driverSteps,
-            onDestroyed: resetHelpDrawerLayering,
+            onDestroyed: () => {
+                activeTour = null;
+                resetHelpDrawerLayering();
+            },
         });
+        activeTour = tour;
         tour.drive();
         return tour;
     }

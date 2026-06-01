@@ -29,7 +29,9 @@ function installDriverMock() {
                 lastDriverConfig = config;
                 return {
                     drive: () => { driveCalls += 1; },
-                    destroy: () => { destroyCalls += 1; },
+                    // Mirror driver.js: destroying a tour fires its onDestroyed hook,
+                    // which is how tour.js clears its active-instance reference.
+                    destroy: () => { destroyCalls += 1; config.onDestroyed?.(); },
                 };
             }),
         },
@@ -116,6 +118,19 @@ describe("runTour", () => {
         tour.runTour();
         const titles = lastDriverConfig.steps.map(s => s.popover.title);
         expect(titles).toContain("Your first step");
+    });
+
+    test("replaying while a tour is active destroys the in-flight instance first", () => {
+        mount("tour_loaded");
+        tour.runTour();
+        expect(window.driver.js.driver).toHaveBeenCalledTimes(1);
+        const destroyedBefore = destroyCalls;
+
+        // A second run with the first still live must tear the first one down,
+        // not stack a second tour on screen.
+        tour.runTour();
+        expect(window.driver.js.driver).toHaveBeenCalledTimes(2);
+        expect(destroyCalls).toBe(destroyedBefore + 1);
     });
 });
 
