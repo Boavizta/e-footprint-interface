@@ -198,3 +198,16 @@ When a test exercises JS that manipulates a real Django partial, do **not** hand
 ## Flakiness
 
 If a test fails on the first run but passes on retry, **flag it explicitly** to the developer as a flaky test rather than silently re-running.
+
+### Known artifact: DB-cache writes lost under the parallel harness (SQLite)
+
+Locally the `postgres` cache alias is Django's `DatabaseCache` on **SQLite**. Under the `-n 4`
+e2e harness, concurrent writes to the single SQLite file contend on the whole-DB write lock;
+`DatabaseCache._base_set` then catches the `DatabaseError` and **silently returns `False`**, so
+the write is dropped with no exception. Any feature that hands content between two sequential
+requests through this cache can therefore see the second request read `None`. The calculus-graph
+iframe is the known case — it shows "Graph content expired" — and `test_calculus_graph.py` retries
+the *parent* navigation (which mints a fresh cache key + re-writes) rather than reloading the
+single-use iframe URL. This is a local/CI SQLite concurrency artifact, **not** a production bug:
+production uses real Postgres (and Redis), which handle concurrent writes to distinct keys fine.
+`CacheBackend.set` logs a warning when a DB-cache write is dropped so the loss is observable.

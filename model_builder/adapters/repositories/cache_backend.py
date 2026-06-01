@@ -104,7 +104,7 @@ class CacheBackend:
                 ),
             )
         if write_postgres and postgres_cache is not None:
-            self._time_cache_call(
+            set_result = self._time_cache_call(
                 "set", self.POSTGRES_CACHE_ALIAS,
                 lambda: postgres_cache.set(
                     cache_key,
@@ -112,6 +112,10 @@ class CacheBackend:
                     timeout=postgres_timeout_seconds or self.POSTGRES_CACHE_TIMEOUT_SECONDS,
                 ),
             )
+            # DatabaseCache.set returns False when it silently drops a write under DB-lock contention
+            # ("allowed to fail silently to be threadsafe"). Surface it so lost writes aren't invisible.
+            if set_result is False:
+                logger.warning(f"{self.POSTGRES_CACHE_ALIAS} cache set for key {cache_key} was dropped (write lost)")
 
     def delete(self, cache_key: str) -> None:
         redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)

@@ -9,6 +9,29 @@ from playwright.sync_api import expect
 from tests.e2e.pages import ModelBuilderPage
 
 
+def _open_calculus_graph_frame(page, graph_url, retries=3):
+    """Navigate to a calculus-graph page and return the iframe's content frame.
+
+    The graph HTML is handed off from `display_calculus_graph` to the iframe's
+    `get_calculus_graph` request through the (Postgres-only) DB cache. Under the parallel
+    e2e harness on SQLite, that single write is occasionally dropped under DB-lock
+    contention, so the iframe shows "Graph content expired". Re-navigating the parent URL
+    mints a fresh cache key and re-writes, so we retry the parent request rather than
+    reloading the single-use iframe URL. This is a local/CI SQLite artifact, not a
+    production bug (Postgres handles concurrent writes). See specs/testing.md.
+    """
+    for _ in range(retries):
+        page.goto(graph_url)
+        iframe = page.locator("iframe")
+        expect(iframe).to_be_attached()
+        frame = iframe.element_handle().content_frame()
+        assert frame is not None
+        expect(frame.locator("body")).not_to_be_empty()
+        if "Graph content expired" not in frame.locator("body").inner_text():
+            return frame
+    return frame
+
+
 @pytest.mark.e2e
 class TestCalculusGraph:
     """Tests for calculus graph visualization."""
@@ -42,16 +65,9 @@ class TestCalculusGraph:
         expect(graph_link).to_be_visible()
         graph_url = graph_link.get_attribute("href")
         assert graph_url is not None
-        page.goto(graph_url)
 
         # Verify iframe with vis.js network
-        iframe = page.locator("iframe")
-        expect(iframe).to_be_attached()
-
-        frame = iframe.element_handle().content_frame()
-        assert frame is not None
-
-        expect(frame.locator("body")).not_to_be_empty()
+        frame = _open_calculus_graph_frame(page, graph_url)
         expect(frame.locator("#mynetwork")).to_be_attached()
         expect(frame.locator("script[type='text/javascript']").first).to_be_attached()
 
@@ -94,15 +110,8 @@ class TestCalculusGraph:
         # Navigate to graph
         graph_url = graph_link.get_attribute("href")
         assert graph_url is not None
-        page.goto(graph_url)
 
         # Verify iframe with vis.js network
-        iframe = page.locator("iframe")
-        expect(iframe).to_be_attached()
-
-        frame = iframe.element_handle().content_frame()
-        assert frame is not None
-
-        expect(frame.locator("body")).not_to_be_empty()
+        frame = _open_calculus_graph_frame(page, graph_url)
         expect(frame.locator("#mynetwork")).to_be_attached()
         expect(frame.locator("script[type='text/javascript']").first).to_be_attached()
