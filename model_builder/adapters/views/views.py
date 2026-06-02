@@ -31,7 +31,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     prepare_recurrent_quantity_data,
 )
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
-from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+from model_builder.adapters.views.exception_handling import render_exception_modal_if_error, render_recovery_page
 from model_builder.adapters.presenters.template_picker_presenter import build_picker_groups
 from model_builder.adapters.ui_config.tour_steps import build_tour_steps
 from model_builder.domain.services import (
@@ -77,20 +77,55 @@ def render_model_builder(request, model_web, show_template_picker):
 @time_it
 def model_builder_main(request):
     repository = SessionSystemRepository(request.session)
-    model_web = ModelWeb(repository)
-    if model_web.system_data is None:
-        logger.info("No system data found in session, initializing with the empty 'scratch' baseline")
-        model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
+    try:
+        model_web = ModelWeb(repository)
+        if model_web.system_data is None:
+            logger.info("No system data found in session, initializing with the empty 'scratch' baseline")
+            model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
 
-    if efootprint_version != model_web.initial_system_data_efootprint_version:
-        logger.info(f"Upgrading system data from version "
-                    f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
-        model_web.persist_to_cache()
-        logger.info("Upgrade successful")
+        if efootprint_version != model_web.initial_system_data_efootprint_version:
+            logger.info(f"Upgrading system data from version "
+                        f"{model_web.initial_system_data_efootprint_version} to {efootprint_version}")
+            model_web.persist_to_cache()
+            logger.info("Upgrade successful")
+    except Exception as e:
+        # A corrupt or unsupported session model would otherwise 500 here and leave the user with no
+        # way out (the reset button lives on this very page). Fall back to the recovery page instead.
+        # RAISE_EXCEPTIONS=1 keeps the raw traceback for debugging — same convention as upload_json.
+        if os.environ.get("RAISE_EXCEPTIONS"):
+            raise
+        logger.exception("Failed to load the model from the session; rendering the recovery page")
+        return render_recovery_page(request, error=e)
 
     # An empty model (fresh session, reset, or a returning user who never built anything) is met with
     # the template picker overlaid on the canvas; once there is content, entry goes straight to the model.
     return render_model_builder(request, model_web, show_template_picker=is_empty_model(model_web.system_data))
+
+
+def recover_model(request):
+    """Always-reachable, read-only escape hatch from a dead state (GET, never deserializes the model).
+
+    This replaces the old GET /model_builder/reboot: it offers the user a way out without ever
+    touching the model that may be crashing the deserializer. The destructive reset stays POST-only.
+    """
+    return render_recovery_page(request)
+
+
+def download_raw_json(request):
+    """Download the raw session model dict as-is, without going through ModelWeb.
+
+    download_json rebuilds the model (and would crash on a corrupt one); this serves the stored
+    JSON verbatim so a user in a dead state can still save their work and attach it to a bug report.
+    """
+    repository = SessionSystemRepository(request.session)
+    raw_system_data = repository.get_system_data()
+    if raw_system_data is None:
+        raise Http404("No model data found in the current session.")
+    json_data = json.dumps(raw_system_data, indent=4)
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+    response = HttpResponse(json_data, content_type="application/json")
+    response["Content-Disposition"] = f"attachment; filename={current_date_time} UTC recovered-model.e-f.json"
+    return response
 
 
 @require_POST
@@ -102,6 +137,10 @@ def reset_model(request):
     """
     repository = SessionSystemRepository(request.session)
     model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
+    if request.headers.get("HX-Request") != "true":
+        # Non-HTMX callers (e.g. the recovery page's plain form) get a clean redirect to a fresh
+        # GET of the builder, rather than the toolbar's in-place fragment swap.
+        return redirect("model-builder")
     return render_model_builder(request, model_web, show_template_picker=True)
 
 

@@ -16,6 +16,8 @@ urlpatterns = [
     path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,
          name="load-template"),
     path("reset-model/", views.reset_model, name="reset-model"),
+    path("recover/", views.recover_model, name="recover-model"),
+    path("download-raw-json/", views.download_raw_json, name="download-raw-json"),
     path("open-create-object-panel/<object_type>/",
          model_builder.adapters.views.views_addition.open_create_object_panel, name="open-add-new-object-panel"),
     path("add-object/<object_type>/",

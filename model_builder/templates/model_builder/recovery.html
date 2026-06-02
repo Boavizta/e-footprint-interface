@@ -1,0 +1,48 @@
+{% load static %}
+{# Self-contained recovery page: the escape hatch from a dead state (corrupt model / 500). #}
+{# It deliberately does NOT depend on model_web — the model may be exactly what is crashing. #}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+        <meta charset="UTF-8" />
+        <title>e-footprint — recover your model</title>
+        <link rel="stylesheet" href="{% static 'css/bs_main.css' %}" />
+        <link rel="icon" type="image/x-icon" href="/static/icons/sidenav/e-footprint-logo.svg" />
+    </head>
+
+    <body>
+        {% include 'navbar.html' %}
+        <main class="container d-flex flex-column align-items-center text-center py-5" style="max-width: 640px;">
+            <h1 class="h3 fw-bold mb-3">Something went wrong loading your model</h1>
+            <p class="text-muted mb-4">
+                Your model couldn't be opened — it may be corrupt or built with an incompatible version.
+                Your work is still stored; you can download it before resetting, and reporting the bug helps
+                us fix it.
+                {% if error_type %}<br /><small class="text-muted">(Error: {{ error_type }})</small>{% endif %}
+            </p>
+
+            <div class="d-flex flex-column gap-3 w-100" style="max-width: 360px;">
+                {% if has_saved_model %}
+                <a href="{% url 'download-raw-json' %}"
+                   class="btn btn-outline-secondary rounded-pill px-3 py-2">
+                    Download your current model
+                </a>
+                {% endif %}
+
+                <a href="{{ report_bug_url }}" target="_blank" rel="noopener noreferrer"
+                   class="btn btn-outline-secondary rounded-pill px-3 py-2">
+                    Report this bug on GitHub
+                </a>
+
+                <form action="{% url 'reset-model' %}" method="post"
+                      onsubmit="return confirm('This will discard your current model and reset to an empty one. Continue?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-cta-green rounded-pill px-3 py-2 w-100">
+                        Reset to a blank model
+                    </button>
+                </form>
+            </div>
+        </main>
+    </body>
+</html>
