@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "21.1.2",
+    "efootprint_version": "21.1.3",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -11,10 +11,15 @@
             "name": "DATA.AI - STATE OF MOBILE",
             "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
         },
-        "Estimating-the-Carbon-Footprint-of-BLOOM": {
-            "id": "Estimating-the-Carbon-Footprint-of-BLOOM",
-            "name": "Estimating the Carbon Footprint of BLOOM",
-            "link": "https://arxiv.org/abs/2211.05100"
+        "Ecologits-compute_llm_impacts_dag-function": {
+            "id": "Ecologits-compute_llm_impacts_dag-function",
+            "name": "Ecologits compute_llm_impacts_dag function",
+            "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/impacts/llm.py"
+        },
+        "Ecologits-llm_impacts-function": {
+            "id": "Ecologits-llm_impacts-function",
+            "name": "Ecologits llm_impacts function",
+            "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/tracers/utils.py#L60"
         },
         "Our-world-in-data-28202429": {
             "id": "Our-world-in-data-28202429",
@@ -68,7 +73,8 @@
             "id": "Chatbot-conversation",
             "uj_steps": [
                 "Open-the-assistant",
-                "Send-a-message"
+                "Ask-a-quick-question",
+                "Ask-a-detailed-question"
             ]
         }
     },
@@ -83,12 +89,12 @@
                 "source": "hypothesis"
             },
             "jobs": [
-                "Open-the-chat"
+                "Serve-chat-interface"
             ]
         },
-        "Send-a-message": {
-            "name": "Send a message",
-            "id": "Send-a-message",
+        "Ask-a-quick-question": {
+            "name": "Ask a quick question",
+            "id": "Ask-a-quick-question",
             "user_time_spent": {
                 "value": 1.0,
                 "unit": "minute",
@@ -96,16 +102,32 @@
                 "source": "hypothesis"
             },
             "jobs": [
-                "Answer-a-message"
+                "Handle-quick-question",
+                "Small-LLM-short-answer"
+            ]
+        },
+        "Ask-a-detailed-question": {
+            "name": "Ask a detailed question",
+            "id": "Ask-a-detailed-question",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": [
+                "Prepare-detailed-question",
+                "Small-LLM-route-complex-request",
+                "Big-LLM-detailed-answer"
             ]
         }
     },
-    "GPUJob": {
-        "Open-the-chat": {
-            "name": "Open the chat",
-            "id": "Open-the-chat",
+    "Job": {
+        "Serve-chat-interface": {
+            "name": "Serve chat interface",
+            "id": "Serve-chat-interface",
             "data_transferred": {
-                "value": 50.0,
+                "value": 300.0,
                 "unit": "kilobyte",
                 "label": "Sum of all data uploads and downloads by request",
                 "source": "hypothesis"
@@ -117,28 +139,28 @@
                 "source": "hypothesis"
             },
             "request_duration": {
-                "value": 200.0,
+                "value": 120.0,
                 "unit": "millisecond",
                 "label": "Request duration",
                 "source": "hypothesis"
             },
             "ram_needed": {
-                "value": 4000.0,
+                "value": 80.0,
                 "unit": "megabyte_ram",
                 "label": "RAM needed during job processing",
                 "source": "hypothesis"
             },
             "compute_needed": {
-                "value": 0.1,
-                "unit": "gpu",
-                "label": "gpus needed on server Inference GPU server during job processing",
+                "value": 0.05,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Chat web application server during job processing",
                 "source": "hypothesis"
             },
-            "server": "Inference-GPU-server"
+            "server": "Chat-web-application-server"
         },
-        "Answer-a-message": {
-            "name": "Answer a message",
-            "id": "Answer-a-message",
+        "Handle-quick-question": {
+            "name": "Handle quick question",
+            "id": "Handle-quick-question",
             "data_transferred": {
                 "value": 20.0,
                 "unit": "kilobyte",
@@ -146,36 +168,83 @@
                 "source": "hypothesis"
             },
             "data_stored": {
-                "value": 1.0,
+                "value": 2.0,
                 "unit": "kilobyte_stored",
                 "label": "Data stored by request",
                 "source": "hypothesis"
             },
             "request_duration": {
-                "value": 3.0,
-                "unit": "second",
+                "value": 180.0,
+                "unit": "millisecond",
                 "label": "Request duration",
                 "source": "hypothesis"
             },
             "ram_needed": {
-                "value": 40000.0,
+                "value": 120.0,
                 "unit": "megabyte_ram",
                 "label": "RAM needed during job processing",
                 "source": "hypothesis"
             },
             "compute_needed": {
-                "value": 1.0,
-                "unit": "gpu",
-                "label": "gpus needed on server Inference GPU server during job processing",
+                "value": 0.1,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Chat web application server during job processing",
                 "source": "hypothesis"
             },
-            "server": "Inference-GPU-server"
+            "server": "Chat-web-application-server"
+        },
+        "Prepare-detailed-question": {
+            "name": "Prepare detailed question",
+            "id": "Prepare-detailed-question",
+            "data_transferred": {
+                "value": 80.0,
+                "unit": "kilobyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 8.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 350.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 200.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.2,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Chat web application server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Chat-web-application-server"
         }
     },
-    "GPUServer": {
-        "Inference-GPU-server": {
-            "name": "Inference GPU server",
-            "id": "Inference-GPU-server",
+    "Server": {
+        "Chat-web-application-server": {
+            "name": "Chat web application server",
+            "id": "Chat-web-application-server",
+            "carbon_footprint_fabrication": {
+                "value": 600.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "Base-ADEME_V19"
+            },
+            "power": {
+                "value": 300.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
             "lifespan": {
                 "value": 6.0,
                 "unit": "year",
@@ -193,10 +262,22 @@
                 "label": "Server type",
                 "source": "hypothesis"
             },
+            "idle_power": {
+                "value": 50.0,
+                "unit": "watt",
+                "label": "Idle power",
+                "source": "hypothesis"
+            },
+            "ram": {
+                "value": 128.0,
+                "unit": "gigabyte_ram",
+                "label": "RAM",
+                "source": "hypothesis"
+            },
             "compute": {
-                "value": 4.0,
-                "unit": "gpu",
-                "label": "Nb gpus",
+                "value": 24.0,
+                "unit": "cpu_core",
+                "label": "Nb cpu cores",
                 "source": "hypothesis"
             },
             "power_usage_effectiveness": {
@@ -212,64 +293,34 @@
                 "source": "hypothesis"
             },
             "utilization_rate": {
-                "value": 1.0,
+                "value": 0.9,
                 "unit": "dimensionless",
                 "label": "Utilization rate",
                 "source": "hypothesis"
             },
             "base_ram_consumption": {
-                "value": 0.0,
+                "value": 1.0,
                 "unit": "gigabyte_ram",
                 "label": "Base RAM consumption",
                 "source": "hypothesis"
             },
             "base_compute_consumption": {
-                "value": 0.0,
-                "unit": "gpu",
-                "label": "Base gpu consumption",
+                "value": 0.1,
+                "unit": "cpu_core",
+                "label": "Base cpu core consumption",
                 "source": "hypothesis"
             },
             "fixed_nb_of_instances": {
                 "value": null,
                 "label": "User defined number of instances"
             },
-            "storage": "Model-weights-storage",
-            "gpu_power": {
-                "value": 400.0,
-                "unit": "watt / gpu",
-                "label": "GPU power",
-                "source": "Estimating-the-Carbon-Footprint-of-BLOOM"
-            },
-            "gpu_idle_power": {
-                "value": 50.0,
-                "unit": "watt / gpu",
-                "label": "GPU idle power",
-                "source": "Estimating-the-Carbon-Footprint-of-BLOOM"
-            },
-            "ram_per_gpu": {
-                "value": 80.0,
-                "unit": "gigabyte_ram / gpu",
-                "label": "RAM per GPU",
-                "source": "Estimating-the-Carbon-Footprint-of-BLOOM"
-            },
-            "carbon_footprint_fabrication_without_gpu": {
-                "value": 2500.0,
-                "unit": "kilogram",
-                "label": "Carbon footprint without GPU",
-                "source": "Estimating-the-Carbon-Footprint-of-BLOOM"
-            },
-            "carbon_footprint_fabrication_per_gpu": {
-                "value": 150.0,
-                "unit": "kilogram / gpu",
-                "label": "Carbon footprint one GPU",
-                "source": "Estimating-the-Carbon-Footprint-of-BLOOM"
-            }
+            "storage": "Chat-logs-storage"
         }
     },
     "Storage": {
-        "Model-weights-storage": {
-            "name": "Model weights storage",
-            "id": "Model-weights-storage",
+        "Chat-logs-storage": {
+            "name": "Chat logs storage",
+            "id": "Chat-logs-storage",
             "power": {
                 "value": 0.0,
                 "unit": "watt",
@@ -313,8 +364,8 @@
                 "source": "hypothesis"
             },
             "base_storage_need": {
-                "value": 2.0,
-                "unit": "terabyte_stored",
+                "value": 20.0,
+                "unit": "gigabyte_stored",
                 "label": "Initial storage need",
                 "source": "hypothesis"
             },
@@ -322,6 +373,137 @@
                 "value": null,
                 "label": "User defined number of instances"
             }
+        }
+    },
+    "EcoLogitsGenAIExternalAPIJob": {
+        "Small-LLM-short-answer": {
+            "name": "Small LLM short answer",
+            "id": "Small-LLM-short-answer",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Small-LLM-API",
+            "output_token_count": {
+                "value": 300.0,
+                "unit": "dimensionless",
+                "label": "Output token count for gpt-4.1-nano",
+                "source": "hypothesis"
+            }
+        },
+        "Small-LLM-route-complex-request": {
+            "name": "Small LLM route complex request",
+            "id": "Small-LLM-route-complex-request",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Small-LLM-API",
+            "output_token_count": {
+                "value": 80.0,
+                "unit": "dimensionless",
+                "label": "Output token count for gpt-4.1-nano",
+                "source": "hypothesis"
+            }
+        },
+        "Big-LLM-detailed-answer": {
+            "name": "Big LLM detailed answer",
+            "id": "Big-LLM-detailed-answer",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Big-LLM-API",
+            "output_token_count": {
+                "value": 1200.0,
+                "unit": "dimensionless",
+                "label": "Output token count for gpt-4.1",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EcoLogitsGenAIExternalAPI": {
+        "Small-LLM-API": {
+            "name": "Small LLM API",
+            "id": "Small-LLM-API",
+            "server": "Small-LLM-API-server",
+            "provider": {
+                "value": "openai",
+                "label": "Provider",
+                "source": "hypothesis"
+            },
+            "model_name": {
+                "value": "gpt-4.1-nano",
+                "label": "Model used",
+                "source": "hypothesis"
+            }
+        },
+        "Big-LLM-API": {
+            "name": "Big LLM API",
+            "id": "Big-LLM-API",
+            "server": "Big-LLM-API-server",
+            "provider": {
+                "value": "openai",
+                "label": "Provider",
+                "source": "hypothesis"
+            },
+            "model_name": {
+                "value": "gpt-4.1",
+                "label": "Model used",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EcoLogitsGenAIExternalAPIServer": {
+        "Small-LLM-API-server": {
+            "name": "Small LLM API server",
+            "id": "Small-LLM-API-server"
+        },
+        "Big-LLM-API-server": {
+            "name": "Big LLM API server",
+            "id": "Big-LLM-API-server"
         }
     },
     "Device": {

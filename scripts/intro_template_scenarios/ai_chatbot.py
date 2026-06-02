@@ -1,53 +1,89 @@
 """Build the ``ai_chatbot`` introductory template.
 
-An inference-heavy LLM assistant: a short conversation journey (open the chat,
-send a message) whose message step drives a GPUJob on a self-hosted autoscaling
-GPU server. Wired into a daily usage pattern so the template loads as a runnable
-System whose results compute.
+An LLM assistant served by a web application and two external AI APIs: a small
+model handles routing and short replies, while a larger model handles detailed
+answers. The web tier is modeled separately so its impact can be compared with
+the AI API impact in the Sankey diagram.
 """
 from datetime import datetime
 
-from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
+    EcoLogitsGenAIExternalAPI,
+    EcoLogitsGenAIExternalAPIJob,
+)
 from efootprint.builders.time_builders import create_hourly_usage_from_frequency
 from efootprint.constants.countries import Countries
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
-from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.network import Network
+from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.system import System
-from efootprint.core.usage.job import GPUJob
+from efootprint.core.usage.job import Job
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
 
 def build_system() -> System:
-    storage = Storage.from_defaults(
-        "Model weights storage", base_storage_need=SourceValue(2 * u.TB_stored))
-    inference_server = GPUServer.from_defaults(
-        "Inference GPU server", server_type=ServerTypes.autoscaling(),
-        compute=SourceValue(4 * u.gpu), storage=storage)
+    web_storage = Storage.from_defaults(
+        "Chat logs storage", base_storage_need=SourceValue(20 * u.GB_stored))
+    web_server = Server.from_defaults(
+        "Chat web application server", server_type=ServerTypes.autoscaling(),
+        base_ram_consumption=SourceValue(1 * u.GB_ram),
+        base_compute_consumption=SourceValue(0.1 * u.cpu_core),
+        storage=web_storage)
 
-    open_chat_job = GPUJob(
-        "Open the chat", server=inference_server,
-        request_duration=SourceValue(200 * u.ms),
-        compute_needed=SourceValue(0.1 * u.gpu),
-        ram_needed=SourceValue(4 * u.GB_ram),
-        data_transferred=SourceValue(50 * u.kB),
+    small_llm = EcoLogitsGenAIExternalAPI(
+        "Small LLM API",
+        provider=SourceObject("openai"),
+        model_name=SourceObject("gpt-4.1-nano"))
+    big_llm = EcoLogitsGenAIExternalAPI(
+        "Big LLM API",
+        provider=SourceObject("openai"),
+        model_name=SourceObject("gpt-4.1"))
+
+    open_chat_job = Job(
+        "Serve chat interface", server=web_server,
+        request_duration=SourceValue(120 * u.ms),
+        compute_needed=SourceValue(0.05 * u.cpu_core),
+        ram_needed=SourceValue(80 * u.MB_ram),
+        data_transferred=SourceValue(300 * u.kB),
         data_stored=SourceValue(0 * u.kB_stored))
-    answer_job = GPUJob(
-        "Answer a message", server=inference_server,
-        request_duration=SourceValue(3 * u.s),
-        compute_needed=SourceValue(1 * u.gpu),
-        ram_needed=SourceValue(40 * u.GB_ram),
+    quick_request_job = Job(
+        "Handle quick question", server=web_server,
+        request_duration=SourceValue(180 * u.ms),
+        compute_needed=SourceValue(0.1 * u.cpu_core),
+        ram_needed=SourceValue(120 * u.MB_ram),
         data_transferred=SourceValue(20 * u.kB),
-        data_stored=SourceValue(1 * u.kB_stored))
+        data_stored=SourceValue(2 * u.kB_stored))
+    detailed_request_job = Job(
+        "Prepare detailed question", server=web_server,
+        request_duration=SourceValue(350 * u.ms),
+        compute_needed=SourceValue(0.2 * u.cpu_core),
+        ram_needed=SourceValue(200 * u.MB_ram),
+        data_transferred=SourceValue(80 * u.kB),
+        data_stored=SourceValue(8 * u.kB_stored))
+
+    quick_answer_job = EcoLogitsGenAIExternalAPIJob(
+        "Small LLM short answer", external_api=small_llm,
+        output_token_count=SourceValue(300 * u.dimensionless))
+    route_question_job = EcoLogitsGenAIExternalAPIJob(
+        "Small LLM route complex request", external_api=small_llm,
+        output_token_count=SourceValue(80 * u.dimensionless))
+    detailed_answer_job = EcoLogitsGenAIExternalAPIJob(
+        "Big LLM detailed answer", external_api=big_llm,
+        output_token_count=SourceValue(1200 * u.dimensionless))
 
     open_step = UsageJourneyStep.from_defaults("Open the assistant", jobs=[open_chat_job])
-    message_step = UsageJourneyStep.from_defaults("Send a message", jobs=[answer_job])
-    journey = UsageJourney("Chatbot conversation", uj_steps=[open_step, message_step])
+    quick_question_step = UsageJourneyStep.from_defaults(
+        "Ask a quick question", jobs=[quick_request_job, quick_answer_job])
+    detailed_question_step = UsageJourneyStep.from_defaults(
+        "Ask a detailed question", jobs=[detailed_request_job, route_question_job, detailed_answer_job])
+    journey = UsageJourney(
+        "Chatbot conversation", uj_steps=[open_step, quick_question_step, detailed_question_step])
 
     start_date = datetime(2025, 1, 1)
     usage_pattern = UsagePattern(
