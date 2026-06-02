@@ -2,7 +2,7 @@
 
 A classical web service: a three-step shopping journey (browse, add to cart,
 checkout) served by a single web server backed by a relational database
-(modelled as Storage attached to the Server). Wired into a daily usage pattern
+(modeled as Storage attached to the Server). Wired into a daily usage pattern
 so the template loads as a runnable System whose results compute.
 """
 from datetime import datetime
