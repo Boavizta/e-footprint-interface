@@ -5,15 +5,15 @@ model handles routing and short replies, while a larger model handles detailed
 answers. The web tier is modeled separately so its impact can be compared with
 the AI API impact in the Sankey diagram.
 """
-from datetime import datetime
 
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
     EcoLogitsGenAIExternalAPI,
     EcoLogitsGenAIExternalAPIJob,
 )
-from efootprint.builders.time_builders import create_hourly_usage_from_frequency
+from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
 from efootprint.constants.countries import Countries
+from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
@@ -85,11 +85,17 @@ def build_system() -> System:
     journey = UsageJourney(
         "Chatbot conversation", uj_steps=[open_step, quick_question_step, detailed_question_step])
 
-    start_date = datetime(2025, 1, 1)
     usage_pattern = UsagePattern(
         "Daily conversations", journey, [Device.laptop()], Network.from_defaults("Default network"),
         Countries.FRANCE(),
-        create_hourly_usage_from_frequency(
-            timespan=7 * u.day, input_volume=2000, frequency="daily", start_date=start_date))
+        ExplainableHourlyQuantitiesFromFormInputs({
+            "start_date": "2025-01-01",
+            "modeling_duration_value": 3,
+            "modeling_duration_unit": "year",
+            "initial_volume": 720000,
+            "initial_volume_timespan": "year",
+            "net_growth_rate_in_percentage": 35,
+            "net_growth_rate_timespan": "year",
+        }, source=Sources.USER_DATA))
 
     return System("AI chatbot system", [usage_pattern], edge_usage_patterns=[])

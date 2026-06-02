@@ -5,15 +5,26 @@ Mirrors the library's ``HowToTemplate`` validation: every template's
 ``showcased_concepts`` token resolves (through ``{class:X}`` validation or the
 closed ``CONCEPTS`` mapping). Fails loudly on drift.
 """
+import inspect
+import json
+
 import pytest
 
+from efootprint.abstract_modeling_classes.contextual_modeling_object_attribute import ContextualModelingObjectAttribute
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
+from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.builders.timeseries import (
+    ExplainableHourlyQuantitiesFromFormInputs,
+    ExplainableRecurrentQuantitiesFromConstant,
+)
+from efootprint.modeling_templates import get_introductory_template
 from model_builder.domain.reference_data.modeling_templates import (
     CONCEPTS,
     INTRO_TEMPLATES,
     resolve_concept_token,
 )
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import CATEGORY
-from efootprint.modeling_templates import get_introductory_template
 
 _params = pytest.mark.parametrize("tpl", INTRO_TEMPLATES, ids=lambda t: t.id)
 
@@ -26,6 +37,33 @@ def test_at_least_three_introductory_templates():
 @_params
 def test_json_path_exists(tpl):
     assert tpl.json_path.is_file(), f"{tpl.json_path} does not exist"
+
+
+@_params
+def test_template_input_timeseries_are_editable_builders(tpl):
+    with open(tpl.json_path) as f:
+        class_obj_dict, _, _ = json_to_system(json.load(f))
+    system = next(iter(class_obj_dict["System"].values()))
+
+    checked = []
+    for obj in [system, *system.all_linked_objects]:
+        obj = obj._value if isinstance(obj, ContextualModelingObjectAttribute) else obj
+        init_params = inspect.signature(type(obj).__init__).parameters
+        for attr_name in init_params:
+            if attr_name in ("self", "name") or not hasattr(obj, attr_name):
+                continue
+            value = getattr(obj, attr_name)
+            if isinstance(value, ExplainableHourlyQuantities):
+                assert isinstance(value, ExplainableHourlyQuantitiesFromFormInputs), (
+                    f"{tpl.id}: {type(obj).__name__}.{attr_name} on {obj.name!r} must use "
+                    "ExplainableHourlyQuantitiesFromFormInputs so it is editable in the interface.")
+                checked.append((obj, attr_name))
+            elif isinstance(value, ExplainableRecurrentQuantities):
+                assert isinstance(value, ExplainableRecurrentQuantitiesFromConstant), (
+                    f"{tpl.id}: {type(obj).__name__}.{attr_name} on {obj.name!r} must use "
+                    "ExplainableRecurrentQuantitiesFromConstant so it is editable in the interface.")
+                checked.append((obj, attr_name))
+    assert checked, f"{tpl.id}: expected at least one input timeseries to validate."
 
 
 @_params

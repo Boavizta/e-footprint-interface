@@ -4,13 +4,16 @@ Factory sensors measure machine data, upload readings to a server, and analysts
 open a web dashboard to review the stored readings. Contains both edge and web
 objects, so loading it latches the edge modeling toggle on (Step 5).
 """
-from datetime import datetime
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
-from efootprint.builders.time_builders import create_hourly_usage_from_frequency, create_source_hourly_values_from_list
+from efootprint.builders.timeseries import (
+    ExplainableHourlyQuantitiesFromFormInputs,
+    ExplainableRecurrentQuantitiesFromConstant,
+)
 from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeProcess
 from efootprint.constants.countries import Countries
+from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
@@ -26,6 +29,19 @@ from efootprint.core.usage.job import Job
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
+
+
+def _recurrent_constant(value: float, unit: str) -> ExplainableRecurrentQuantitiesFromConstant:
+    return ExplainableRecurrentQuantitiesFromConstant(
+        {"constant_value": value, "constant_unit": unit}, source=Sources.HYPOTHESIS)
+
+
+def _default_sensor_process_kwargs() -> dict:
+    return {
+        "recurrent_compute_needed": _recurrent_constant(1, "cpu_core"),
+        "recurrent_ram_needed": _recurrent_constant(1, "GB_ram"),
+        "recurrent_storage_needed": _recurrent_constant(0, "GB_stored"),
+    }
 
 
 def build_system() -> System:
@@ -88,11 +104,16 @@ def build_system() -> System:
         base_compute_consumption=SourceValue(0.02 * u.cpu_core))
 
     measure_machine_data = RecurrentEdgeProcess.from_defaults(
-        "Measure temperature and vibration", edge_device=factory_sensor)
+        "Measure temperature and vibration",
+        edge_device=factory_sensor,
+        **_default_sensor_process_kwargs())
     keep_recent_readings = RecurrentEdgeProcess.from_defaults(
-        "Keep recent readings on the sensor", edge_device=factory_sensor)
+        "Keep recent readings on the sensor",
+        edge_device=factory_sensor,
+        **_default_sensor_process_kwargs())
     upload_sensor_data = RecurrentServerNeed.from_defaults(
         "Upload sensor readings", edge_device=factory_sensor,
+        recurrent_volume_per_edge_device=_recurrent_constant(1, "occurrence"),
         jobs=[receive_sensor_data, store_sensor_data])
 
     edge_function = EdgeFunction(
@@ -102,21 +123,33 @@ def build_system() -> System:
     edge_usage_journey = EdgeUsageJourney.from_defaults(
         "Sensor working day", edge_functions=[edge_function])
 
-    start_date = datetime(2025, 1, 1)
     analyst_usage_pattern = UsagePattern(
         "Daily analyst sessions", analyst_journey, [Device.laptop("Analyst laptop")],
         Network.from_defaults("Office network"), Countries.FRANCE(),
-        create_hourly_usage_from_frequency(
-            timespan=7 * u.day, input_volume=40, frequency="daily", start_date=start_date))
+        ExplainableHourlyQuantitiesFromFormInputs({
+            "start_date": "2025-01-01",
+            "modeling_duration_value": 3,
+            "modeling_duration_unit": "year",
+            "initial_volume": 14400,
+            "initial_volume_timespan": "year",
+            "net_growth_rate_in_percentage": 5,
+            "net_growth_rate_timespan": "year",
+        }, source=Sources.USER_DATA))
 
-    # Sensors are added during the first day and then keep running for their usage span.
     edge_usage_pattern = EdgeUsagePattern(
         "Factory sensors starting up",
         edge_usage_journey=edge_usage_journey,
         network=Network.wifi_network(),
         country=Countries.FRANCE(),
-        hourly_edge_usage_journey_starts=create_source_hourly_values_from_list(
-            [elt * 50 for elt in [1, 1, 2, 2, 3, 3, 2, 2, 1]], start_date))
+        hourly_edge_usage_journey_starts=ExplainableHourlyQuantitiesFromFormInputs({
+            "start_date": "2025-01-01",
+            "modeling_duration_value": 1,
+            "modeling_duration_unit": "month",
+            "initial_volume": 750,
+            "initial_volume_timespan": "month",
+            "net_growth_rate_in_percentage": 0,
+            "net_growth_rate_timespan": "month",
+        }, source=Sources.USER_DATA))
 
     return System(
         "Factory sensors and analysis system",
