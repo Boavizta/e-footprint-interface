@@ -1,4 +1,4 @@
-"""Introductory modeling templates (interface-owned)."""
+"""Introductory modeling template metadata used by the interface picker."""
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import (
     CONCEPTS,
     Concept,

@@ -13,6 +13,7 @@ from model_builder.domain.reference_data.modeling_templates import (
     resolve_concept_token,
 )
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import CATEGORY
+from efootprint.modeling_templates import get_introductory_template
 
 _params = pytest.mark.parametrize("tpl", INTRO_TEMPLATES, ids=lambda t: t.id)
 
@@ -46,6 +47,11 @@ def test_showcased_concepts_resolve(tpl):
 def test_template_ids_unique():
     ids = [tpl.id for tpl in INTRO_TEMPLATES]
     assert len(ids) == len(set(ids)), f"Duplicate introductory template ids: {ids}"
+
+
+def test_ecommerce_uses_library_owned_template_json():
+    ecommerce = next(tpl for tpl in INTRO_TEMPLATES if tpl.id == "ecommerce")
+    assert ecommerce.json_path == get_introductory_template("ecommerce").json_path
 
 
 def test_resolve_concept_token_rejects_unknown_class():

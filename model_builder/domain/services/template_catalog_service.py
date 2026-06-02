@@ -19,6 +19,10 @@ from efootprint.modeling_templates import get_template as get_how_to_template, l
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 
 SCRATCH_ID = "scratch"
+OBSOLETE_HOW_TO_TEMPLATE_IDS = frozenset({
+    "database_modeling",
+    "server_to_server_interaction",
+})
 
 # The "Start from scratch" baseline — a truly empty named System (Task 1).
 DEFAULT_SYSTEM_DATA_PATH = Path(__file__).resolve().parents[1] / "reference_data" / "default_system_data.json"
@@ -52,6 +56,7 @@ def build_template_catalog() -> tuple[CatalogGroup, ...]:
     how_to = tuple(
         CatalogEntry(t.id, t.name, t.description, t.category, doc_path=t.doc_path)
         for t in list_how_to_templates()
+        if t.id not in OBSOLETE_HOW_TO_TEMPLATE_IDS
     )
     scratch = (
         CatalogEntry(SCRATCH_ID, "Start from scratch",
@@ -71,6 +76,8 @@ def get_template_system_data(template_id: str) -> dict:
     """
     if template_id == SCRATCH_ID:
         json_path = DEFAULT_SYSTEM_DATA_PATH
+    elif template_id in OBSOLETE_HOW_TO_TEMPLATE_IDS:
+        raise KeyError(template_id)
     else:
         intro = next((t for t in INTRO_TEMPLATES if t.id == template_id), None)
         if intro is not None:

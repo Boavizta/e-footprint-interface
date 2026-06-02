@@ -1,9 +1,9 @@
 """(Re)generate the introductory template JSONs from their Python scenario constructors.
 
-The committed source of truth is the ``build_system()`` constructors under
-``scripts/intro_template_scenarios/``; the JSONs next to the introductory
-registry are derived artifacts. Re-run this whenever a constructor or the
-library serialization schema changes:
+The committed source of truth for interface-owned templates is the
+``build_system()`` constructors under ``scripts/intro_template_scenarios/``; the
+local JSONs next to the introductory registry are derived artifacts. Re-run this
+whenever a constructor or the library serialization schema changes:
 
     python -m scripts.build_intro_templates
 
@@ -12,6 +12,8 @@ uuids) so the committed JSON is reviewable and stable across regenerations —
 hence the ``_use_name_as_id`` flips, which must happen before any other
 efootprint import (mirrors the library's how-to ``_authoring`` package).
 """
+from pathlib import Path
+
 from efootprint.abstract_modeling_classes.explainable_object_base_class import Source
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 
@@ -23,28 +25,35 @@ from efootprint.api_utils.system_to_json import system_to_json  # noqa: E402
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import (  # noqa: E402
     INTRO_TEMPLATES,
 )
-from scripts.intro_template_scenarios import ai_chatbot, ecommerce, iot_industrial  # noqa: E402
+from scripts.intro_template_scenarios import ai_chatbot, iot_industrial  # noqa: E402
 
 BUILDERS = {
-    "ecommerce": ecommerce.build_system,
     "ai_chatbot": ai_chatbot.build_system,
     "iot_industrial": iot_industrial.build_system,
 }
 
+LOCAL_TEMPLATE_DIR = (
+    Path(__file__).resolve().parents[1] /
+    "model_builder/domain/reference_data/modeling_templates/introductory"
+)
+
 
 def main() -> None:
-    templates_by_id = {tpl.id: tpl for tpl in INTRO_TEMPLATES}
-    missing = set(templates_by_id) ^ set(BUILDERS)
+    local_templates_by_id = {
+        tpl.id: tpl for tpl in INTRO_TEMPLATES
+        if tpl.json_path.parent == LOCAL_TEMPLATE_DIR
+    }
+    missing = set(local_templates_by_id) ^ set(BUILDERS)
     if missing:
         raise SystemExit(
             f"Mismatch between registry ids and scenario builders: {sorted(missing)}. "
-            f"Every introductory template must have exactly one build_system().")
+            f"Every interface-owned introductory template must have exactly one build_system().")
 
     assert ModelingObject._use_name_as_id and Source._use_name_as_id, (
         "Build must run with name-based ids; the _use_name_as_id flips must precede efootprint imports.")
 
     for template_id, build_system in BUILDERS.items():
-        target = templates_by_id[template_id].json_path
+        target = local_templates_by_id[template_id].json_path
         system_to_json(build_system(), save_calculated_attributes=False, output_filepath=str(target))
         print(f"Wrote {target}")
 

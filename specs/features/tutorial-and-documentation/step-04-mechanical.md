@@ -79,9 +79,7 @@ efootprint/modeling_templates/
 ├── __init__.py                       # public API
 ├── how_to/
 │   ├── __init__.py
-│   ├── database_modeling.json
 │   ├── machine_learning_workflow.json
-│   ├── server_to_server_interaction.json
 │   └── registry.py
 ```
 
@@ -128,25 +126,11 @@ class HowToTemplate:
 
 HOW_TO_TEMPLATES: tuple[HowToTemplate, ...] = (
     HowToTemplate(
-        id="database_modeling",
-        name="Database modeling",
-        description="A web service backed by a relational database, modeled as Storage attached to a Server.",
-        doc_path="database_modeling.md",
-        json_path=HERE / "database_modeling.json",
-    ),
-    HowToTemplate(
         id="machine_learning_workflow",
         name="Machine learning workflow",
         description="Training on a GPUServer plus recurrent inference jobs.",
         doc_path="machine_learning_workflow.md",
         json_path=HERE / "machine_learning_workflow.json",
-    ),
-    HowToTemplate(
-        id="server_to_server_interaction",
-        name="Server-to-server interaction",
-        description="An outbound Job from one service triggering a Job on another.",
-        doc_path="server_to_server_interaction.md",
-        json_path=HERE / "server_to_server_interaction.json",
     ),
 )
 ```
@@ -170,9 +154,7 @@ Each how-to JSON is regenerated from a Python constructor. **Locked-in decision:
 ```
 efootprint/modeling_templates/how_to/_authoring/
 ├── __init__.py
-├── database_modeling.py
-├── machine_learning_workflow.py
-└── server_to_server_interaction.py
+└── machine_learning_workflow.py
 ```
 
 Each module exposes a `build_system() -> System` function and a `if __name__ == "__main__":` block that writes the JSON next to itself in `how_to/`:
@@ -197,7 +179,7 @@ if __name__ == "__main__":
 
 ### Why a `_authoring/` sub-package, not `tests/`
 
-- The scripts ship with the package because users can run them as worked examples (`python -m efootprint.modeling_templates.how_to._authoring.database_modeling`).
+- The scripts ship with the package because users can run them as worked examples (`python -m efootprint.modeling_templates.how_to._authoring.machine_learning_workflow`).
 - Underscore-prefix signals "internal authoring tool" without hiding it.
 - Keeps `tests/` focused on testing.
 
@@ -345,14 +327,10 @@ Generated reference files are committed to the repo per the current convention; 
 1. `efootprint/modeling_templates/__init__.py` — **new** (sub-step 4.6).
 2. `efootprint/modeling_templates/how_to/__init__.py` — **new**.
 3. `efootprint/modeling_templates/how_to/registry.py` — **new** (sub-step 4.6).
-4. `efootprint/modeling_templates/how_to/database_modeling.json` — **new** (generated via authoring script).
-5. `efootprint/modeling_templates/how_to/machine_learning_workflow.json` — **new**.
-6. `efootprint/modeling_templates/how_to/server_to_server_interaction.json` — **new**.
-7. `efootprint/modeling_templates/how_to/_authoring/__init__.py` — **new**.
-8. `efootprint/modeling_templates/how_to/_authoring/database_modeling.py` — **new** (sub-step 4.7).
-9. `efootprint/modeling_templates/how_to/_authoring/machine_learning_workflow.py` — **new**.
-10. `efootprint/modeling_templates/how_to/_authoring/server_to_server_interaction.py` — **new**.
-11. `pyproject.toml` — add `efootprint.modeling_templates` and its submodules to the package list; include `*.json` files (sub-step 4.6).
+4. `efootprint/modeling_templates/how_to/machine_learning_workflow.json` — **new**.
+5. `efootprint/modeling_templates/how_to/_authoring/__init__.py` — **new**.
+6. `efootprint/modeling_templates/how_to/_authoring/machine_learning_workflow.py` — **new**.
+7. `pyproject.toml` — add `efootprint.modeling_templates` and its submodules to the package list; include `*.json` files (sub-step 4.6).
 
 ### Docs tooling
 

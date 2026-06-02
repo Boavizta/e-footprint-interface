@@ -127,7 +127,7 @@ The "Try this interactively" line uses `{{ config.extra.interface_base_url }}` (
 - Forgetting that storage has both fabrication and idle/operational energy components.
 - Read/write ratio: model it via job mix (different `{class:Job}` per operation type), not via a single average.
 
-**Template pairing:** `efootprint/modeling_templates/how_to/database_modeling.json` (mechanical track 4.7).
+**Template pairing:** the interface `ecommerce` introductory template.
 
 ### Page 3 — `machine_learning_workflow.md`
 
@@ -164,7 +164,7 @@ The "Try this interactively" line uses `{{ config.extra.interface_base_url }}` (
 - Underestimating fan-out when one upstream call triggers N downstream calls.
 - Forgetting cross-region carbon intensity differences.
 
-**Template pairing:** `efootprint/modeling_templates/how_to/server_to_server_interaction.json`.
+**Template pairing:** the interface `ecommerce` introductory template.
 
 ---
 

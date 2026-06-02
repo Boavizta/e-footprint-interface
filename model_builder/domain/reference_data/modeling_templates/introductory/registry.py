@@ -1,9 +1,11 @@
 """Registry of introductory modeling templates owned by the interface.
 
 These are ready-to-mutate example {class:System}s shown in the first-run template
-picker. The serialized snapshots live next to this file as ``<id>.json`` and are
-(re)generated from the Python scenario constructors in
+picker. Interface-owned serialized snapshots live next to this file as
+``<id>.json`` and are (re)generated from the Python scenario constructors in
 ``scripts/intro_template_scenarios/`` via ``scripts/build_intro_templates.py``.
+The e-commerce snapshot is library-owned and referenced from
+``efootprint.modeling_templates`` so docs and interface cannot drift.
 
 ``IntroTemplate`` mirrors the library's ``HowToTemplate`` so the catalog service
 can merge both into a single picker. ``showcased_concepts`` are display-only
@@ -15,6 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
+from efootprint.modeling_templates import get_introductory_template
 
 HERE = Path(__file__).parent
 CATEGORY = "introductory"
@@ -77,11 +80,10 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
     IntroTemplate(
         id="ecommerce",
         name="Classical e-commerce",
-        description="A typical web service: a multi-step shopping journey served by a web server "
-                    "and its database.",
+        description="A shopping journey served by a web application server calling a database server.",
         icon="🛒",
         showcased_concepts=("web_service", "{class:Server}", "database"),
-        json_path=HERE / "ecommerce.json",
+        json_path=get_introductory_template("ecommerce").json_path,
     ),
     IntroTemplate(
         id="ai_chatbot",
