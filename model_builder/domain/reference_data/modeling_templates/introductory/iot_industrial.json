@@ -1,6 +1,16 @@
 {
-    "efootprint_version": "21.1.2",
+    "efootprint_version": "21.1.3",
     "Sources": {
+        "Base-ADEME_V19": {
+            "id": "Base-ADEME_V19",
+            "name": "Base ADEME_V19",
+            "link": "https://data.ademe.fr/datasets/base-carbone(r)"
+        },
+        "DATA2eAI---STATE-OF-MOBILE": {
+            "id": "DATA2eAI---STATE-OF-MOBILE",
+            "name": "DATA.AI - STATE OF MOBILE",
+            "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
+        },
         "Our-world-in-data-28202429": {
             "id": "Our-world-in-data-28202429",
             "name": "Our world in data (2024)",
@@ -23,38 +33,506 @@
         }
     },
     "System": {
-        "Industrial-IoT-system": {
-            "name": "Industrial IoT system",
-            "id": "Industrial-IoT-system",
-            "usage_patterns": [],
+        "Factory-sensors-and-analysis-system": {
+            "name": "Factory sensors and analysis system",
+            "id": "Factory-sensors-and-analysis-system",
+            "usage_patterns": [
+                "Daily-analyst-sessions"
+            ],
             "edge_usage_patterns": [
-                "Connected-device-fleet"
+                "Factory-sensors-starting-up"
             ]
         }
     },
+    "UsagePattern": {
+        "Daily-analyst-sessions": {
+            "name": "Daily analyst sessions",
+            "id": "Daily-analyst-sessions",
+            "hourly_usage_journey_starts": {
+                "compressed_values": "KLUv/WCkAX0AACgAACBCAAIAP8ZQAZ2AFg==",
+                "unit": "occurrence",
+                "start_date": "2025-01-01 00:00:00",
+                "timezone": null,
+                "label": "Hourly nb of usage journey starts",
+                "source": "hypothesis"
+            },
+            "usage_journey": "Analyst-reviews-sensor-data",
+            "devices": [
+                "Analyst-laptop"
+            ],
+            "network": "Office-network",
+            "country": "France"
+        }
+    },
+    "UsageJourney": {
+        "Analyst-reviews-sensor-data": {
+            "name": "Analyst reviews sensor data",
+            "id": "Analyst-reviews-sensor-data",
+            "uj_steps": [
+                "Open-the-dashboard",
+                "Review-recent-readings",
+                "Create-a-daily-report"
+            ]
+        }
+    },
+    "UsageJourneyStep": {
+        "Open-the-dashboard": {
+            "name": "Open the dashboard",
+            "id": "Open-the-dashboard",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": [
+                "Open-analysis-dashboard"
+            ]
+        },
+        "Review-recent-readings": {
+            "name": "Review recent readings",
+            "id": "Review-recent-readings",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": [
+                "Load-recent-sensor-readings"
+            ]
+        },
+        "Create-a-daily-report": {
+            "name": "Create a daily report",
+            "id": "Create-a-daily-report",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": [
+                "Prepare-daily-analysis-report"
+            ]
+        }
+    },
+    "Job": {
+        "Open-analysis-dashboard": {
+            "name": "Open analysis dashboard",
+            "id": "Open-analysis-dashboard",
+            "data_transferred": {
+                "value": 800.0,
+                "unit": "kilobyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 0.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 150.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 120.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.08,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        },
+        "Load-recent-sensor-readings": {
+            "name": "Load recent sensor readings",
+            "id": "Load-recent-sensor-readings",
+            "data_transferred": {
+                "value": 2.0,
+                "unit": "megabyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 0.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 600.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 300.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.25,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        },
+        "Prepare-daily-analysis-report": {
+            "name": "Prepare daily analysis report",
+            "id": "Prepare-daily-analysis-report",
+            "data_transferred": {
+                "value": 1.0,
+                "unit": "megabyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 200.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 2.0,
+                "unit": "second",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 512.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.5,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        },
+        "Receive-sensor-upload": {
+            "name": "Receive sensor upload",
+            "id": "Receive-sensor-upload",
+            "data_transferred": {
+                "value": 30.0,
+                "unit": "kilobyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 0.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 200.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 80.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.05,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        },
+        "Store-sensor-reading": {
+            "name": "Store sensor reading",
+            "id": "Store-sensor-reading",
+            "data_transferred": {
+                "value": 8.0,
+                "unit": "kilobyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 25.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 250.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 100.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.08,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        }
+    },
+    "Server": {
+        "Sensor-data-server": {
+            "name": "Sensor data server",
+            "id": "Sensor-data-server",
+            "carbon_footprint_fabrication": {
+                "value": 600.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "Base-ADEME_V19"
+            },
+            "power": {
+                "value": 300.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Fraction of usage time",
+                "source": "hypothesis"
+            },
+            "server_type": {
+                "value": "on-premise",
+                "label": "Server type",
+                "source": "hypothesis"
+            },
+            "idle_power": {
+                "value": 50.0,
+                "unit": "watt",
+                "label": "Idle power",
+                "source": "hypothesis"
+            },
+            "ram": {
+                "value": 128.0,
+                "unit": "gigabyte_ram",
+                "label": "RAM",
+                "source": "hypothesis"
+            },
+            "compute": {
+                "value": 24.0,
+                "unit": "cpu_core",
+                "label": "Nb cpu cores",
+                "source": "hypothesis"
+            },
+            "power_usage_effectiveness": {
+                "value": 1.2,
+                "unit": "dimensionless",
+                "label": "PUE",
+                "source": "hypothesis"
+            },
+            "average_carbon_intensity": {
+                "value": 400.0,
+                "unit": "gram / kilowatt_hour",
+                "label": "Average carbon intensity of electricity",
+                "source": "hypothesis"
+            },
+            "utilization_rate": {
+                "value": 0.9,
+                "unit": "dimensionless",
+                "label": "Utilization rate",
+                "source": "hypothesis"
+            },
+            "base_ram_consumption": {
+                "value": 4.0,
+                "unit": "gigabyte_ram",
+                "label": "Base RAM consumption",
+                "source": "hypothesis"
+            },
+            "base_compute_consumption": {
+                "value": 0.25,
+                "unit": "cpu_core",
+                "label": "Base cpu core consumption",
+                "source": "hypothesis"
+            },
+            "fixed_nb_of_instances": {
+                "value": null,
+                "label": "User defined number of instances"
+            },
+            "storage": "Sensor-readings-storage"
+        }
+    },
+    "Storage": {
+        "Sensor-readings-storage": {
+            "name": "Sensor readings storage",
+            "id": "Sensor-readings-storage",
+            "power": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Fraction of usage time",
+                "source": "hypothesis"
+            },
+            "carbon_footprint_fabrication_per_storage_capacity": {
+                "value": 160.0,
+                "unit": "kilogram / terabyte_stored",
+                "label": "Fabrication carbon footprint per storage capacity",
+                "source": "hypothesis"
+            },
+            "storage_capacity": {
+                "value": 1.0,
+                "unit": "terabyte_stored",
+                "label": "Storage capacity",
+                "source": "hypothesis"
+            },
+            "data_replication_factor": {
+                "value": 3.0,
+                "unit": "dimensionless",
+                "label": "Data replication factor",
+                "source": "hypothesis"
+            },
+            "data_storage_duration": {
+                "value": 43830.0,
+                "unit": "hour",
+                "label": "Data storage duration",
+                "source": "hypothesis"
+            },
+            "base_storage_need": {
+                "value": 500.0,
+                "unit": "gigabyte_stored",
+                "label": "Initial storage need",
+                "source": "hypothesis"
+            },
+            "fixed_nb_of_instances": {
+                "value": null,
+                "label": "User defined number of instances"
+            }
+        }
+    },
+    "Device": {
+        "Analyst-laptop": {
+            "name": "Analyst laptop",
+            "id": "Analyst-laptop",
+            "carbon_footprint_fabrication": {
+                "value": 156.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "Base-ADEME_V19"
+            },
+            "power": {
+                "value": 50.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 7.0,
+                "unit": "hour / day",
+                "label": "Fraction of usage time",
+                "source": "DATA2eAI---STATE-OF-MOBILE"
+            }
+        }
+    },
+    "Network": {
+        "Office-network": {
+            "name": "Office network",
+            "id": "Office-network",
+            "bandwidth_energy_intensity": {
+                "value": 0.1,
+                "unit": "kilowatt_hour / gigabyte",
+                "label": "bandwith energy intensity",
+                "source": "hypothesis"
+            }
+        },
+        "Default-wifi-network": {
+            "name": "Default wifi network",
+            "id": "Default-wifi-network",
+            "bandwidth_energy_intensity": {
+                "value": 0.05,
+                "unit": "kilowatt_hour / gigabyte",
+                "label": "bandwith energy intensity",
+                "source": "Traficom-study"
+            }
+        }
+    },
+    "Country": {
+        "France": {
+            "name": "France",
+            "id": "France",
+            "short_name": "FRA",
+            "average_carbon_intensity": {
+                "value": 44.0,
+                "unit": "gram / kilowatt_hour",
+                "label": "Average carbon intensity",
+                "source": "Our-world-in-data-28202429",
+                "confidence": "high"
+            },
+            "timezone": {
+                "zone": "Europe/Paris",
+                "label": "Timezone",
+                "source": "user_data"
+            }
+        }
+    },
     "EdgeUsagePattern": {
-        "Connected-device-fleet": {
-            "name": "Connected device fleet",
-            "id": "Connected-device-fleet",
+        "Factory-sensors-starting-up": {
+            "name": "Factory sensors starting up",
+            "id": "Factory-sensors-starting-up",
             "hourly_edge_usage_journey_starts": {
-                "compressed_values": "KLUv/SAkrQAAUAAAyEJIQ5ZIyEIEACALyBcM/OCI",
+                "compressed_values": "KLUv/SAkrQAASAAASELIFkNIQgQAMwkAA0FmDy4L",
                 "unit": "occurrence",
                 "start_date": "2025-01-01 00:00:00",
                 "timezone": null,
                 "label": "Hourly nb of edge usage journey starts",
                 "source": "hypothesis"
             },
-            "edge_usage_journey": "Gateway-operation",
+            "edge_usage_journey": "Sensor-working-day",
             "network": "Default-wifi-network",
             "country": "France"
         }
     },
     "EdgeUsageJourney": {
-        "Gateway-operation": {
-            "name": "Gateway operation",
-            "id": "Gateway-operation",
+        "Sensor-working-day": {
+            "name": "Sensor working day",
+            "id": "Sensor-working-day",
             "edge_functions": [
-                "Gateway-workload"
+                "Sensor-records-and-uploads-readings"
             ],
             "usage_span": {
                 "value": 6.0,
@@ -65,25 +543,27 @@
         }
     },
     "EdgeFunction": {
-        "Gateway-workload": {
-            "name": "Gateway workload",
-            "id": "Gateway-workload",
+        "Sensor-records-and-uploads-readings": {
+            "name": "Sensor records and uploads readings",
+            "id": "Sensor-records-and-uploads-readings",
             "recurrent_edge_device_needs": [
-                "Telemetry-collection",
-                "Local-anomaly-detection"
+                "Measure-temperature-and-vibration",
+                "Keep-recent-readings-on-the-sensor"
             ],
-            "recurrent_server_needs": []
+            "recurrent_server_needs": [
+                "Upload-sensor-readings"
+            ]
         }
     },
     "RecurrentEdgeProcess": {
-        "Telemetry-collection": {
-            "name": "Telemetry collection",
-            "id": "Telemetry-collection",
-            "edge_device": "Industrial-edge-gateway",
+        "Measure-temperature-and-vibration": {
+            "name": "Measure temperature and vibration",
+            "id": "Measure-temperature-and-vibration",
+            "edge_device": "Factory-sensor",
             "recurrent_edge_component_needs": [
-                "Telemetry-collection-RAM-need",
-                "Telemetry-collection-CPU-need",
-                "Telemetry-collection-storage-need"
+                "Measure-temperature-and-vibration-RAM-need",
+                "Measure-temperature-and-vibration-CPU-need",
+                "Measure-temperature-and-vibration-storage-need"
             ],
             "recurrent_compute_needed": {
                 "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
@@ -104,14 +584,14 @@
                 "source": "hypothesis"
             }
         },
-        "Local-anomaly-detection": {
-            "name": "Local anomaly detection",
-            "id": "Local-anomaly-detection",
-            "edge_device": "Industrial-edge-gateway",
+        "Keep-recent-readings-on-the-sensor": {
+            "name": "Keep recent readings on the sensor",
+            "id": "Keep-recent-readings-on-the-sensor",
+            "edge_device": "Factory-sensor",
             "recurrent_edge_component_needs": [
-                "Local-anomaly-detection-RAM-need",
-                "Local-anomaly-detection-CPU-need",
-                "Local-anomaly-detection-storage-need"
+                "Keep-recent-readings-on-the-sensor-RAM-need",
+                "Keep-recent-readings-on-the-sensor-CPU-need",
+                "Keep-recent-readings-on-the-sensor-storage-need"
             ],
             "recurrent_compute_needed": {
                 "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
@@ -134,9 +614,9 @@
         }
     },
     "EdgeComputer": {
-        "Industrial-edge-gateway": {
-            "name": "Industrial edge gateway",
-            "id": "Industrial-edge-gateway",
+        "Factory-sensor": {
+            "name": "Factory sensor",
+            "id": "Factory-sensor",
             "lifespan": {
                 "value": 6.0,
                 "unit": "year",
@@ -144,11 +624,11 @@
                 "source": "hypothesis"
             },
             "components": [
-                "Industrial-edge-gateway-CPU",
-                "Industrial-edge-gateway-RAM",
-                "Gateway-storage"
+                "Factory-sensor-CPU",
+                "Factory-sensor-RAM",
+                "Sensor-local-storage"
             ],
-            "storage": "Gateway-storage",
+            "storage": "Sensor-local-storage",
             "carbon_footprint_fabrication": {
                 "value": 60.0,
                 "unit": "kilogram",
@@ -186,7 +666,7 @@
                 "source": "hypothesis"
             },
             "base_compute_consumption": {
-                "value": 0.2,
+                "value": 0.02,
                 "unit": "cpu_core",
                 "label": "Base compute consumption",
                 "source": "hypothesis"
@@ -194,9 +674,9 @@
         }
     },
     "EdgeComputerCPUComponent": {
-        "Industrial-edge-gateway-CPU": {
-            "name": "Industrial edge gateway CPU",
-            "id": "Industrial-edge-gateway-CPU",
+        "Factory-sensor-CPU": {
+            "name": "Factory sensor CPU",
+            "id": "Factory-sensor-CPU",
             "carbon_footprint_fabrication_per_unit": {
                 "value": 0.0,
                 "unit": "kilogram",
@@ -212,9 +692,9 @@
         }
     },
     "EdgeComputerRAMComponent": {
-        "Industrial-edge-gateway-RAM": {
-            "name": "Industrial edge gateway RAM",
-            "id": "Industrial-edge-gateway-RAM",
+        "Factory-sensor-RAM": {
+            "name": "Factory sensor RAM",
+            "id": "Factory-sensor-RAM",
             "carbon_footprint_fabrication_per_unit": {
                 "value": 0.0,
                 "unit": "kilogram",
@@ -242,9 +722,9 @@
         }
     },
     "EdgeStorage": {
-        "Gateway-storage": {
-            "name": "Gateway storage",
-            "id": "Gateway-storage",
+        "Sensor-local-storage": {
+            "name": "Sensor local storage",
+            "id": "Sensor-local-storage",
             "carbon_footprint_fabrication_per_unit": {
                 "value": 0.0,
                 "unit": "kilogram",
@@ -288,7 +768,7 @@
                 "source": "hypothesis"
             },
             "base_storage_need": {
-                "value": 50.0,
+                "value": 2.0,
                 "unit": "gigabyte_stored",
                 "label": "Initial storage need",
                 "source": "hypothesis"
@@ -296,70 +776,55 @@
         }
     },
     "RecurrentEdgeProcessRAMNeed": {
-        "Telemetry-collection-RAM-need": {
-            "name": "Telemetry collection RAM need",
-            "id": "Telemetry-collection-RAM-need",
-            "edge_component": "Industrial-edge-gateway-RAM"
+        "Measure-temperature-and-vibration-RAM-need": {
+            "name": "Measure temperature and vibration RAM need",
+            "id": "Measure-temperature-and-vibration-RAM-need",
+            "edge_component": "Factory-sensor-RAM"
         },
-        "Local-anomaly-detection-RAM-need": {
-            "name": "Local anomaly detection RAM need",
-            "id": "Local-anomaly-detection-RAM-need",
-            "edge_component": "Industrial-edge-gateway-RAM"
+        "Keep-recent-readings-on-the-sensor-RAM-need": {
+            "name": "Keep recent readings on the sensor RAM need",
+            "id": "Keep-recent-readings-on-the-sensor-RAM-need",
+            "edge_component": "Factory-sensor-RAM"
         }
     },
     "RecurrentEdgeProcessCPUNeed": {
-        "Telemetry-collection-CPU-need": {
-            "name": "Telemetry collection CPU need",
-            "id": "Telemetry-collection-CPU-need",
-            "edge_component": "Industrial-edge-gateway-CPU"
+        "Measure-temperature-and-vibration-CPU-need": {
+            "name": "Measure temperature and vibration CPU need",
+            "id": "Measure-temperature-and-vibration-CPU-need",
+            "edge_component": "Factory-sensor-CPU"
         },
-        "Local-anomaly-detection-CPU-need": {
-            "name": "Local anomaly detection CPU need",
-            "id": "Local-anomaly-detection-CPU-need",
-            "edge_component": "Industrial-edge-gateway-CPU"
+        "Keep-recent-readings-on-the-sensor-CPU-need": {
+            "name": "Keep recent readings on the sensor CPU need",
+            "id": "Keep-recent-readings-on-the-sensor-CPU-need",
+            "edge_component": "Factory-sensor-CPU"
         }
     },
     "RecurrentEdgeProcessStorageNeed": {
-        "Telemetry-collection-storage-need": {
-            "name": "Telemetry collection storage need",
-            "id": "Telemetry-collection-storage-need",
-            "edge_component": "Gateway-storage"
+        "Measure-temperature-and-vibration-storage-need": {
+            "name": "Measure temperature and vibration storage need",
+            "id": "Measure-temperature-and-vibration-storage-need",
+            "edge_component": "Sensor-local-storage"
         },
-        "Local-anomaly-detection-storage-need": {
-            "name": "Local anomaly detection storage need",
-            "id": "Local-anomaly-detection-storage-need",
-            "edge_component": "Gateway-storage"
+        "Keep-recent-readings-on-the-sensor-storage-need": {
+            "name": "Keep recent readings on the sensor storage need",
+            "id": "Keep-recent-readings-on-the-sensor-storage-need",
+            "edge_component": "Sensor-local-storage"
         }
     },
-    "Network": {
-        "Default-wifi-network": {
-            "name": "Default wifi network",
-            "id": "Default-wifi-network",
-            "bandwidth_energy_intensity": {
-                "value": 0.05,
-                "unit": "kilowatt_hour / gigabyte",
-                "label": "bandwith energy intensity",
-                "source": "Traficom-study"
-            }
-        }
-    },
-    "Country": {
-        "France": {
-            "name": "France",
-            "id": "France",
-            "short_name": "FRA",
-            "average_carbon_intensity": {
-                "value": 44.0,
-                "unit": "gram / kilowatt_hour",
-                "label": "Average carbon intensity",
-                "source": "Our-world-in-data-28202429",
-                "confidence": "high"
+    "RecurrentServerNeed": {
+        "Upload-sensor-readings": {
+            "name": "Upload sensor readings",
+            "id": "Upload-sensor-readings",
+            "edge_device": "Factory-sensor",
+            "recurrent_volume_per_edge_device": {
+                "recurring_values": "[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+                "unit": "occurrence",
+                "label": "Default recurrent volume per edge device"
             },
-            "timezone": {
-                "zone": "Europe/Paris",
-                "label": "Timezone",
-                "source": "user_data"
-            }
+            "jobs": [
+                "Receive-sensor-upload",
+                "Store-sensor-reading"
+            ]
         }
     }
 }

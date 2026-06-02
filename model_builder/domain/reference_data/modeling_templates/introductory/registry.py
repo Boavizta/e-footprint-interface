@@ -37,7 +37,9 @@ CONCEPTS: dict[str, Concept] = {
     "database": Concept("Database", help_class="Storage"),
     "llm_inference": Concept("LLM inference"),
     "edge_computing": Concept("Edge computing"),
-    "device_fleet": Concept("Device fleet"),
+    "connected_sensors": Concept("Connected sensors", help_class="EdgeComputer"),
+    "sensor_uploads": Concept("Sensor uploads", help_class="RecurrentServerNeed"),
+    "analysis_dashboard": Concept("Analysis dashboard"),
 }
 
 _CLASS_TOKEN_PREFIX = "{class:"
@@ -96,10 +98,10 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
     IntroTemplate(
         id="iot_industrial",
         name="Industrial IoT",
-        description="A fleet of connected edge devices running recurrent on-device workloads — "
-                    "lands with edge modeling already active.",
+        description="Factory sensors send readings to a server, and analysts use a dashboard to review "
+                    "that server data.",
         icon="📟",
-        showcased_concepts=("edge_computing", "{class:EdgeComputer}", "device_fleet"),
+        showcased_concepts=("connected_sensors", "sensor_uploads", "analysis_dashboard", "{class:Server}"),
         json_path=HERE / "iot_industrial.json",
     ),
 )
