@@ -1013,21 +1013,21 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-bootstrap5"
-version = "24.3"
+version = "26.2"
 description = "Bootstrap 5 for Django"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "django_bootstrap5-24.3-py3-none-any.whl", hash = "sha256:98f7916f9f7f9c34dfe157f7c062a28ebf6d17ff95307bef260ba794ba34e2a0"},
-    {file = "django_bootstrap5-24.3.tar.gz", hash = "sha256:ca5ec5568fc2a3fc239f0cb8ce41a7df3802b8c4af930d7f64451784ec7ddc16"},
+    {file = "django_bootstrap5-26.2-py3-none-any.whl", hash = "sha256:179af37c59f4e9b1070fc650f30961c5d903c2c0ad60280ad5b63ed394f68658"},
+    {file = "django_bootstrap5-26.2.tar.gz", hash = "sha256:12331059c8230ba372ffaad990a706151e1ad8f721a870aa2e862cf6746f0d33"},
 ]
 
 [package.dependencies]
-Django = ">=4.2"
+django = ">=4.2"
 
 [package.extras]
-jinja = ["Jinja2 (>=3.0,<4)"]
+jinja = ["jinja2 (>=3.0,<4)"]
 
 [[package]]
 name = "django-browser-reload"
@@ -4513,4 +4513,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "13dd88d59b8aac549a90fd5fe8e9277b3a8be63c0d4a11b35d93970ac9c2d091"
+content-hash = "d8bab6708c9aa0bb81e198435e1a25b5be9c633f6981b9b5b9668bde3c4a5d5b"
