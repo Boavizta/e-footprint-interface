@@ -9,9 +9,12 @@ import pytest
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.modeling_templates import list_how_to_templates
 
+from model_builder.adapters.repositories import InMemorySystemRepository
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 from model_builder.domain.services import (
-    OBSOLETE_HOW_TO_TEMPLATE_IDS, SCRATCH_ID, build_template_catalog, get_template_system_data)
+    OBSOLETE_HOW_TO_TEMPLATE_IDS, ProgressiveImportService, SCRATCH_ID, build_template_catalog,
+    get_template_system_data)
 
 
 def test_catalog_has_introductory_howto_and_scratch_groups():
@@ -61,6 +64,20 @@ def test_get_template_system_data_resolves_a_loadable_system(template_id):
     # Exercise the resolved JSON through the library loader so a broken path/payload fails here.
     class_obj_dict, _, _ = json_to_system(system_data, launch_system_computations=False)
     assert class_obj_dict["System"]
+
+
+def test_machine_learning_template_survives_interface_persistence_round_trip():
+    imported = ProgressiveImportService(max_payload_size_mb=30.0).import_system(
+        get_template_system_data("machine_learning_workflow"))
+    repository = InMemorySystemRepository(initial_data=imported)
+
+    ModelWeb(repository).persist_to_cache()
+
+    reloaded = ModelWeb(repository)
+    assert [usage_pattern.name for usage_pattern in reloaded.usage_patterns] == [
+        "Weekly retraining pattern",
+        "Production inference pattern",
+    ]
 
 
 def test_get_template_system_data_unknown_id_raises():
