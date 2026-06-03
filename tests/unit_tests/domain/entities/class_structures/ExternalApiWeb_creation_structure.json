@@ -132,6 +132,10 @@
                 "selected": "openai",
                 "options": [
                     {
+                        "label": "alibaba",
+                        "value": "alibaba"
+                    },
+                    {
                         "label": "bytedance",
                         "value": "bytedance"
                     },
@@ -144,12 +148,20 @@
                         "value": "klingai"
                     },
                     {
+                        "label": "lightricks",
+                        "value": "lightricks"
+                    },
+                    {
                         "label": "openai",
                         "value": "openai"
                     },
                     {
                         "label": "runway",
                         "value": "runway"
+                    },
+                    {
+                        "label": "tencent",
+                        "value": "tencent"
                     }
                 ]
             },

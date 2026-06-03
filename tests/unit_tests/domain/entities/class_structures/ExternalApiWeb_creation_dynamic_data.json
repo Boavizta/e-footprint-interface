@@ -383,6 +383,10 @@
             "input_id": "EcoLogitsVideoGenExternalAPI_model_name",
             "filter_by": "EcoLogitsVideoGenExternalAPI_provider",
             "list_value": {
+                "alibaba": [
+                    "wan2.1",
+                    "wan2.2"
+                ],
                 "bytedance": [
                     "seedance-1.0",
                     "seedance-1.5-pro"
@@ -398,11 +402,19 @@
                     "kling-v2.6",
                     "kling-v3"
                 ],
+                "lightricks": [
+                    "ltx-2-t2va",
+                    "ltx-2-t2v"
+                ],
                 "openai": [
                     "sora-2-pro"
                 ],
                 "runway": [
                     "gen-4.5"
+                ],
+                "tencent": [
+                    "hunyuanvideo",
+                    "hunyuanvideo-1.5"
                 ]
             }
         }
