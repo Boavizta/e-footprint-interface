@@ -5,7 +5,8 @@ open a web dashboard to review the stored readings. Contains both edge and web
 objects, so loading it latches the edge modeling toggle on (Step 5).
 """
 
-from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from efootprint.builders.timeseries import (
     ExplainableHourlyQuantitiesFromFormInputs,
@@ -18,7 +19,7 @@ from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 from efootprint.core.hardware.network import Network
-from efootprint.core.hardware.server import Server, ServerTypes
+from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.system import System
 from efootprint.core.usage.edge.edge_function import EdgeFunction
@@ -47,10 +48,13 @@ def _default_sensor_process_kwargs() -> dict:
 def build_system() -> System:
     server_storage = Storage.from_defaults(
         "Sensor readings storage", base_storage_need=SourceValue(500 * u.GB_stored))
-    data_server = Server.from_defaults(
+    data_server = BoaviztaCloudServer.from_defaults(
         "Sensor data server", server_type=ServerTypes.on_premise(),
+        provider=SourceObject("scaleway"),
+        instance_type=SourceObject("ent1-l"),
         base_ram_consumption=SourceValue(4 * u.GB_ram),
         base_compute_consumption=SourceValue(0.25 * u.cpu_core),
+        average_carbon_intensity=SourceValue(100 * u.g / u.kWh),
         storage=server_storage)
 
     receive_sensor_data = Job(
@@ -121,7 +125,7 @@ def build_system() -> System:
         recurrent_edge_device_needs=[measure_machine_data, keep_recent_readings],
         recurrent_server_needs=[upload_sensor_data])
     edge_usage_journey = EdgeUsageJourney.from_defaults(
-        "Sensor working day", edge_functions=[edge_function])
+        "Sensor working week", edge_functions=[edge_function])
 
     analyst_usage_pattern = UsagePattern(
         "Daily analyst sessions", analyst_journey, [Device.laptop("Analyst laptop")],

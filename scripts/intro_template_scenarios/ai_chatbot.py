@@ -11,13 +11,13 @@ from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
     EcoLogitsGenAIExternalAPI,
     EcoLogitsGenAIExternalAPIJob,
 )
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
 from efootprint.constants.countries import Countries
 from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
-from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.system import System
@@ -30,10 +30,13 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 def build_system() -> System:
     web_storage = Storage.from_defaults(
         "Chat logs storage", base_storage_need=SourceValue(20 * u.GB_stored))
-    web_server = Server.from_defaults(
+    web_server = BoaviztaCloudServer.from_defaults(
         "Chat web application server", server_type=ServerTypes.autoscaling(),
+        provider=SourceObject("scaleway"),
+        instance_type=SourceObject("dev1-s"),
         base_ram_consumption=SourceValue(1 * u.GB_ram),
         base_compute_consumption=SourceValue(0.1 * u.cpu_core),
+        average_carbon_intensity=SourceValue(100 * u.g / u.kWh),
         storage=web_storage)
 
     small_llm = EcoLogitsGenAIExternalAPI(

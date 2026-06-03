@@ -84,7 +84,7 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
         name="Classical e-commerce",
         description="A shopping journey served by a web application server calling a database server.",
         icon="🛒",
-        showcased_concepts=("web_service", "{class:Server}", "database"),
+        showcased_concepts=("web_service", "{class:BoaviztaCloudServer}", "database"),
         json_path=get_introductory_template("ecommerce").json_path,
     ),
     IntroTemplate(
@@ -92,7 +92,7 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
         name="AI chatbot",
         description="A chatbot served by a web app that routes simple and complex prompts to small and large LLM APIs.",
         icon="🤖",
-        showcased_concepts=("web_service", "llm_inference", "{class:ExternalAPI}", "{class:Server}"),
+        showcased_concepts=("web_service", "llm_inference", "{class:ExternalAPI}", "{class:BoaviztaCloudServer}"),
         json_path=HERE / "ai_chatbot.json",
     ),
     IntroTemplate(
@@ -101,7 +101,7 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
         description="Factory sensors send readings to a server, and analysts use a dashboard to review "
                     "that server data.",
         icon="📟",
-        showcased_concepts=("connected_sensors", "sensor_uploads", "analysis_dashboard", "{class:Server}"),
+        showcased_concepts=("connected_sensors", "sensor_uploads", "analysis_dashboard", "{class:BoaviztaCloudServer}"),
         json_path=HERE / "iot_industrial.json",
     ),
 )
