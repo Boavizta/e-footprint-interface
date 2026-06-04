@@ -33,11 +33,9 @@ class CreateObjectOutput:
     created_object_type: str
     template_name: str
     web_id: str
-    mirrored_web_ids: List[str] = field(default_factory=list)
     parent_was_linked: bool = False
     linked_parent_id: Optional[str] = None
     linked_parent_web_id: Optional[str] = None
-    linked_parent_mirrored_web_ids: List[str] = field(default_factory=list)
     # For cases where a different object should be returned (e.g., server instead of service)
     override_object: Optional[Any] = None
     model_web: ModelWeb = None
@@ -139,14 +137,13 @@ class CreateObjectUseCase:
             parent_was_linked = False
             linked_parent_id = None
             linked_parent_web_id = None
-            linked_parent_mirrored_web_ids = []
 
             # Check if this class should skip parent linking (e.g., services link via 'server' field)
             skip_linking = (getattr(input_web_class, 'skip_parent_linking', False)
                             or getattr(web_class, 'skip_parent_linking', False))
 
             if input_data.parent_id and not skip_linking:
-                parent_was_linked, linked_parent_web_id, linked_parent_mirrored_web_ids = self._link_to_parent(
+                parent_was_linked, linked_parent_web_id = self._link_to_parent(
                     model_web, added_obj, input_data.parent_id)
                 linked_parent_id = input_data.parent_id
 
@@ -176,11 +173,9 @@ class CreateObjectUseCase:
                 created_object_type=object_creation_type,
                 template_name=added_obj.template_name,
                 web_id=added_obj.web_id,
-                mirrored_web_ids=[card.web_id for card in added_obj.mirrored_cards],
                 parent_was_linked=parent_was_linked,
                 linked_parent_id=linked_parent_id,
                 linked_parent_web_id=linked_parent_web_id,
-                linked_parent_mirrored_web_ids=linked_parent_mirrored_web_ids,
                 override_object=override_object,
                 model_web=model_web,
                 oob_regions=side_effects.oob_regions,
@@ -196,7 +191,7 @@ class CreateObjectUseCase:
         """Link the created object to its parent.
 
         Returns:
-            Tuple of (parent_was_linked, parent_web_id, parent_mirrored_web_ids)
+            Tuple of (parent_was_linked, parent_web_id)
         """
         from model_builder.domain.services import ObjectLinkingService
         from model_builder.domain.object_factory import edit_object_from_parsed_data
@@ -208,6 +203,4 @@ class CreateObjectUseCase:
         # Edit the parent - edit_data is already in clean format (no prefixes)
         edit_object_from_parsed_data(link_result.edit_data, link_result.parent_web_obj)
 
-        parent_mirrored_web_ids = [card.web_id for card in link_result.parent_web_obj.mirrored_cards]
-
-        return True, link_result.parent_web_obj.web_id, parent_mirrored_web_ids
+        return True, link_result.parent_web_obj.web_id

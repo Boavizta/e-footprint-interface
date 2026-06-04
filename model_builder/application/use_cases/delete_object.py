@@ -36,7 +36,6 @@ class DeleteObjectOutput:
     deleted_object_name: str
     deleted_object_type: str
     was_list_deletion: bool = False
-    deleted_web_ids: List[str] = field(default_factory=list)
     # For list deletions, we need the edited containers to generate HTML in presenter
     edited_containers: List[Any] = field(default_factory=list)
     oob_regions: List[OobRegion] = field(default_factory=list)

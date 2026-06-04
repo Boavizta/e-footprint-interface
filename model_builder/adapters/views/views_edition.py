@@ -31,10 +31,12 @@ def open_edit_object_panel(request, object_id):
     http_response = render(
         request, f"model_builder/side_panels/edit/{obj_to_edit.edit_template}", context=context_data)
 
+    # Send only the object's canonical web_id (constant size); the client expands it to every
+    # mirrored card button by id-prefix. Listing each mirror here can overflow nginx's upstream
+    # header buffer (proxy_buffer_size) for heavily-mirrored objects and yield a 502.
     http_response["HX-Trigger-After-Settle"] = json.dumps({
         "initDynamicForm" : "",
-        "highlightOpenedObjects": [f"button-{mirrored_card.web_id}" for mirrored_card in obj_to_edit.mirrored_cards]
-        if len(obj_to_edit.mirrored_cards) > 1 else [],
+        "highlightOpenedObjects": obj_to_edit.web_id if len(obj_to_edit.mirrored_cards) > 1 else "",
     })
 
     return http_response

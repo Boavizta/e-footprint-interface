@@ -117,12 +117,20 @@ function highlightObjectAfterAddOrEdit(modelObjectId){
     }
 }
 
+// A modeling object is rendered once per place it is mirrored. Every mirror's card button id is
+// `button-<canonical web_id>`, optionally suffixed `_in_<parent web_id>`. The server sends only the
+// canonical web_id (constant-size header — listing every mirror can overflow nginx's upstream header
+// buffer and 502); the client expands it to all card buttons here.
+function cardButtonsForWebId(webId) {
+    const base = `button-${webId}`;
+    return document.querySelectorAll(`[id="${base}"], [id^="${base}_in_"]`);
+}
+
 document.body.addEventListener("highlightOpenedObjects", function (event) {
-    let elements = event.detail.value;
-    elements.forEach(function (element) {
-        if (document.getElementById(element).classList.contains("model-builder-card-opened") === false) {
-            document.getElementById(element).classList.add("model-builder-card-opened");
-        }
+    let webId = event.detail.value;
+    if (!webId) return;
+    cardButtonsForWebId(webId).forEach(function (element) {
+        element.classList.add("model-builder-card-opened");
     })
 })
 
@@ -149,10 +157,9 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
         toastBody.innerHTML = baseMessage;
     }
 
-    event.detail["ids"].forEach((mirrorObjetWebId, index) => {
+    const highlightButtons = event.detail["id"] ? Array.from(cardButtonsForWebId(event.detail["id"])) : [];
+    highlightButtons.forEach((element, index) => {
         if (index === 0) {
-        const element = document.getElementById(`button-${mirrorObjetWebId}`);
-        if (element) {
             const rect = element.getBoundingClientRect();
             if (rect.top < 0 || rect.bottom > window.innerHeight) {
                 setTimeout(() => {
@@ -160,8 +167,7 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
                 }, 100);
             }
         }
-    }
-        highlightObjectAfterAddOrEdit(`button-${mirrorObjetWebId}`);
+        highlightObjectAfterAddOrEdit(element.id);
     })
 
     toastBootstrap.show();

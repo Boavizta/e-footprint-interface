@@ -81,7 +81,7 @@ class HtmxPresenter:
 
         if output.parent_was_linked:
             toast_and_highlight_data = {
-                "ids": output.mirrored_web_ids,
+                "id": output.web_id,
                 "name": output.created_object_name,
                 "action_type": "add_new_object",
                 "constraint_messages": constraint_messages,
@@ -113,7 +113,7 @@ class HtmxPresenter:
             )
             after_settle = {
                 "displayToastAndHighlightObjects": {
-                    "ids": [override_obj.web_id],
+                    "id": override_obj.web_id,
                     "name": override_obj.name,
                     "action_type": "add_new_object",
                     "constraint_messages": constraint_messages,
@@ -142,7 +142,7 @@ class HtmxPresenter:
         after_settle = {
             "setAccordionListeners": {"accordionIds": [output.web_id]},
             "displayToastAndHighlightObjects": {
-                "ids": [output.web_id],
+                "id": output.web_id,
                 "name": output.created_object_name,
                 "action_type": "add_new_object",
                 "constraint_messages": constraint_messages,
@@ -170,7 +170,7 @@ class HtmxPresenter:
             HttpResponse with the parent's updated HTML and HTMX triggers.
         """
         toast_and_highlight_data = {
-            "ids": output.mirrored_web_ids,
+            "id": output.web_id,
             "name": output.created_object_name,
             "action_type": "add_new_object"
         }
@@ -192,7 +192,7 @@ class HtmxPresenter:
         canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
 
         toast_and_highlight_data = {
-            "ids": output.mirrored_web_ids,
+            "id": output.web_id,
             "name": output.edited_object_name,
             "action_type": "edit_object",
             "constraint_messages": constraint_messages,
@@ -281,7 +281,6 @@ class HtmxPresenter:
         canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
 
         toast_and_highlight_data = {
-            "ids": output.deleted_web_ids,
             "name": output.deleted_object_name,
             "action_type": "delete_object",
             "constraint_messages": constraint_messages,
