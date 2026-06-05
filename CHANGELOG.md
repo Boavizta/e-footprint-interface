@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.6.4]
+
+### Fixed
+- In docker-compose.yml pin postgres image to 17 to avoid PG18 data-dir breakage.
+- Send canonical web_id in HTMX highlight headers to avoid nginx 502 on heavily-mirrored objects.
 
 ### Added
 - Introductory modeling templates (classical e-commerce, AI chatbot, industrial IoT) and their typed

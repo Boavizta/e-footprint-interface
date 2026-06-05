@@ -992,14 +992,14 @@ profile = ["gprof2dot (>=2022.7.29)"]
 
 [[package]]
 name = "django"
-version = "5.2.14"
+version = "5.2.15"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "django-5.2.14-py3-none-any.whl", hash = "sha256:6f712143bd3064310d1f50fac859c3e9a274bdcfc9595339853be7779297fc76"},
-    {file = "django-5.2.14.tar.gz", hash = "sha256:58a63ba841662e5c686b57ba1fec52ddd68c0b93bd96ac3029d55728f00bf8a2"},
+    {file = "django-5.2.15-py3-none-any.whl", hash = "sha256:0eb4a9bb1853a35b0286dbc6d916bd352c8c2687195a7f2d6f80cefd840e4970"},
+    {file = "django-5.2.15.tar.gz", hash = "sha256:5154a9bf84ac01dde011e367f355c07dbb329532e06810dcf3ef2af269e236e7"},
 ]
 
 [package.dependencies]
@@ -1064,14 +1064,14 @@ testing = ["coverage[toml] (>=5.0a4)", "pytest (>=4.6.11)", "setuptools (>=71.0.
 
 [[package]]
 name = "ecologits"
-version = "0.10.1"
+version = "0.10.2"
 description = "EcoLogits tracks and estimates the energy consumption and environmental impacts of using generative AI models through APIs."
 optional = false
 python-versions = "<4,>=3.10"
 groups = ["main"]
 files = [
-    {file = "ecologits-0.10.1-py3-none-any.whl", hash = "sha256:5dc95f379e87f60025f6bcd28d50c84cbc8024fea3ada909480e74a2c7dd1d4b"},
-    {file = "ecologits-0.10.1.tar.gz", hash = "sha256:e4b4013e7132713e2b392559d3766f24df1ec4661580ca12f87f48adbb0263c7"},
+    {file = "ecologits-0.10.2-py3-none-any.whl", hash = "sha256:d98973a196566f640c8b213f371b44b6d0b11a4b49a9551d3771fee77ac798d7"},
+    {file = "ecologits-0.10.2.tar.gz", hash = "sha256:cdbd1f67a82d4008c6bb2d3373912f5f58fba4eedb25531972544b950bab5332"},
 ]
 
 [package.dependencies]
@@ -1083,22 +1083,22 @@ wrapt = ">=1.14.1,<2.0.0"
 anthropic = ["anthropic (>=0.45.2,<1.0.0)"]
 cohere = ["cohere (>=5.13.12,<6.0.0)"]
 google-genai = ["google-genai (>=1.26.0,<2.0.0)"]
-huggingface-hub = ["huggingface-hub (>=0.28.1,<2.0.0)", "minijinja (>=2.7.0,<3.0.0)", "tiktoken (>=0.8.0,<0.10.0)"]
-litellm = ["litellm (>=1.60.6,<2.0.0)", "rapidfuzz (>=3.12.1,<4.0.0)"]
+huggingface-hub = ["huggingface-hub (>=0.28.1,<2.0.0)", "minijinja (>=2.7.0,<3.0.0)", "tiktoken (>=0.8.0,<0.13.0)"]
+litellm = ["aiohttp (>=3.14.0)", "litellm (>=1.83.10,<2.0.0)", "rapidfuzz (>=3.12.1,<4.0.0)"]
 mistralai = ["mistralai (>=1.5.0,<2.0.0)"]
 openai = ["openai (>=1.66.0,<3.0.0)"]
-opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-otlp (>=1.32.1,<2.0.0)", "opentelemetry-sdk (>=1.32.1,<2.0.0)", "tiktoken (>=0.8.0,<0.10.0)"]
+opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-otlp (>=1.32.1,<2.0.0)", "opentelemetry-sdk (>=1.32.1,<2.0.0)", "tiktoken (>=0.8.0,<0.13.0)"]
 
 [[package]]
 name = "efootprint"
-version = "21.1.3"
+version = "21.1.4"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-21.1.3-py3-none-any.whl", hash = "sha256:71ce8c475f89aad511d0f2c333e94f2d5bd385ec3b76a880f19edf0cee99668e"},
-    {file = "efootprint-21.1.3.tar.gz", hash = "sha256:5b61d5a1b75bf52874431be9e35133a8c57339ab82540d346e4e774c8e5d32a7"},
+    {file = "efootprint-21.1.4-py3-none-any.whl", hash = "sha256:de71b132f3ad79ac7d4cccc0e9f996a82e2d210cf44d5a876307006c70d01692"},
+    {file = "efootprint-21.1.4.tar.gz", hash = "sha256:71932cd2eb1164d79e7592d5f846f349b253e3914ed40743ed8fc4b85bea1bd9"},
 ]
 
 [package.dependencies]
@@ -1576,14 +1576,14 @@ files = [
 
 [[package]]
 name = "idna"
-version = "3.17"
+version = "3.18"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "idna-3.17-py3-none-any.whl", hash = "sha256:466e48829084efe2548012b855df21540b96f2e20e51bd124c851536556a592c"},
-    {file = "idna-3.17.tar.gz", hash = "sha256:5eb0cb53bc467c12eadcf6de83163ad8527cec9416f44b9b61b19caedad2b87f"},
+    {file = "idna-3.18-py3-none-any.whl", hash = "sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2"},
+    {file = "idna-3.18.tar.gz", hash = "sha256:ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848"},
 ]
 
 [package.extras]
@@ -4065,19 +4065,19 @@ files = [
 
 [[package]]
 name = "traitlets"
-version = "5.15.0"
+version = "5.15.1"
 description = "Traitlets Python configuration system"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "traitlets-5.15.0-py3-none-any.whl", hash = "sha256:fb36a18867a6803deab09f3c5e0fa81bb7b26a5c9e82501c9933f759166eff40"},
-    {file = "traitlets-5.15.0.tar.gz", hash = "sha256:4fead733f81cf1c4c938e06f8ca4633896833c9d89eff878159457f4d4392971"},
+    {file = "traitlets-5.15.1-py3-none-any.whl", hash = "sha256:770a53705f84b81ac107e83a1b3328ff2dae16094d8fc3cfc004e4b22dfd8e92"},
+    {file = "traitlets-5.15.1.tar.gz", hash = "sha256:7b1c07854fe25acb39e009bae49f11b79ff6cbb2f27999104e9110e7a6b53722"},
 ]
 
 [package.extras]
 docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
-test = ["argcomplete (>=3.0.3)", "mypy (>=1.7.0)", "mypy (>=1.7.0,<1.19) ; platform_python_implementation == \"PyPy\"", "pre-commit", "pytest (>=7.0,<8.2)", "pytest-mock", "pytest-mypy-testing"]
+test = ["argcomplete (>=3.0.3)", "mypy (>=1.17.0,<1.19)", "pre-commit", "pytest (>=7.0,<8.2)", "pytest-mock", "pytest-mypy-testing"]
 
 [[package]]
 name = "typing-extensions"
@@ -4513,4 +4513,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "d8bab6708c9aa0bb81e198435e1a25b5be9c633f6981b9b5b9668bde3c4a5d5b"
+content-hash = "6d68fdb461526897d857ee7f17c1b8f7df4b2105d7b317baa65ad377d646a5b3"
