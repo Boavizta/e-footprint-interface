@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [V1.6.5]
+
+### Fixed
+- Reuse existing system objects instead of duplicating catalog defaults (avoiding duplicating countries when using a model that has created countries from code and hence a different id from interface defaults).
+- Upgrade to e-footprint 21.1.5 for small bugfix.
+
 ## [V1.6.4]
 
 ### Fixed

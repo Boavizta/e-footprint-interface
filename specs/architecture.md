@@ -55,6 +55,7 @@ model_builder/
 - Serializes back to JSON with or without calculated attributes via `to_json()`.
 - Persists to cache via `persist_to_cache()` (serializes system + merges `interface_config` via the repository).
 - Maintains a flat index of objects (`flat_efootprint_objs_dict`) for quick lookups.
+- `get_efootprint_objects_from_efootprint_type` builds form selection options from the catalog defaults (`DEFAULT_OBJECTS_CLASS_MAPPING`, e.g. countries) plus the system's existing objects. An existing system object **shadows** the catalog default with the same name, so selecting e.g. "France" reuses the country already in the system instead of materializing a duplicate on submit (templates ship their own copy keyed differently from the catalog).
 
 `ModelWeb` does **not** see or touch `interface_config`. The repository owns that (constitution §1.3, library is the truth).
 

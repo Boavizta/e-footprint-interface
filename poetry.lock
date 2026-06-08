@@ -1091,14 +1091,14 @@ opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-
 
 [[package]]
 name = "efootprint"
-version = "21.1.4"
+version = "21.1.5"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-21.1.4-py3-none-any.whl", hash = "sha256:de71b132f3ad79ac7d4cccc0e9f996a82e2d210cf44d5a876307006c70d01692"},
-    {file = "efootprint-21.1.4.tar.gz", hash = "sha256:71932cd2eb1164d79e7592d5f846f349b253e3914ed40743ed8fc4b85bea1bd9"},
+    {file = "efootprint-21.1.5-py3-none-any.whl", hash = "sha256:789f9f9194b850fc7d82de86613ef57b49fe24ba7fbfb3913ade243b1dcade33"},
+    {file = "efootprint-21.1.5.tar.gz", hash = "sha256:4f4ddfcd00f4b31e6e84ac95e12a731b451d9a7053eb51ee9136ada74d0eb3cb"},
 ]
 
 [package.dependencies]
@@ -1627,14 +1627,14 @@ files = [
 
 [[package]]
 name = "ipython"
-version = "9.14.0"
+version = "9.14.1"
 description = "IPython: Productive Interactive Computing"
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "ipython-9.14.0-py3-none-any.whl", hash = "sha256:8fd984a3372c14b12790b084ba6b5cff5678c0cb063244a0034f06a51f20d6c2"},
-    {file = "ipython-9.14.0.tar.gz", hash = "sha256:6f27ff0f1d9ea050e0551f71568bc4b34d8aba579e8f111c5b4175f44ac6b4aa"},
+    {file = "ipython-9.14.1-py3-none-any.whl", hash = "sha256:5d4a9ecaa3b10e6e5f269dd0948bdb58ca9cb851899cd23e07c320d3eb11613c"},
+    {file = "ipython-9.14.1.tar.gz", hash = "sha256:f913bf74df06d458e46ced84ca506c23797590d594b236fe60b14df213291e7b"},
 ]
 
 [package.dependencies]
@@ -4157,14 +4157,14 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 
 [[package]]
 name = "wcwidth"
-version = "0.7.0"
+version = "0.8.1"
 description = "Measures the displayed width of unicode strings in a terminal"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "wcwidth-0.7.0-py3-none-any.whl", hash = "sha256:5d69154c429a82910e241c738cd0e2976fac8a2dd47a1a805f4afed1c0f136f2"},
-    {file = "wcwidth-0.7.0.tar.gz", hash = "sha256:90e3a7ea092341c44b99562e75d09e4d5160fe7a3974c6fb842a101a95e7eed0"},
+    {file = "wcwidth-0.8.1-py3-none-any.whl", hash = "sha256:f453740b1e4a4f3291faa37944c555d71056c4da08d59809b307ef4feba695c8"},
+    {file = "wcwidth-0.8.1.tar.gz", hash = "sha256:faf5b4a5366a72dc49cad48cdf21f52bdf63bdda995178e483ba247ff79089b9"},
 ]
 
 [[package]]
@@ -4513,4 +4513,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "6d68fdb461526897d857ee7f17c1b8f7df4b2105d7b317baa65ad377d646a5b3"
+content-hash = "a6cd1bf5f392fe332d590ed7dbcbbc0ef04c4e141a11cc723e418957bcc9df11"

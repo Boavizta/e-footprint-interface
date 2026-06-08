@@ -174,19 +174,28 @@ class ModelWeb:
         return efootprint_object
 
     def get_efootprint_objects_from_efootprint_type(self, obj_type):
+        obj_type_class = MODELING_OBJECT_CLASSES_DICT.get(obj_type, None)
+        if obj_type_class is None:
+            obj_type_class = ABSTRACT_EFOOTPRINT_MODELING_CLASSES.get(obj_type, None)
+        existing_objects = []
+        for existing_obj_type in self.response_objs.keys():
+            if issubclass(MODELING_OBJECT_CLASSES_DICT[existing_obj_type], obj_type_class):
+                existing_objects += [obj for obj in list(self.response_objs[existing_obj_type].values())
+                                     if obj not in existing_objects]
+
+        # An existing system object shadows the catalog default with the same name, so selecting e.g. "France" reuses
+        # the country already in the system (templates ship their own copy keyed differently from the catalog) instead
+        # of materializing a duplicate on submit.
+        existing_names = {obj.name for obj in existing_objects}
         output_list = []
         if obj_type in DEFAULT_OBJECTS_CLASS_MAPPING:
             sources_dict = DEFAULT_SOURCES_CLASS_MAPPING[obj_type]()
             for json_input in DEFAULT_OBJECTS_CLASS_MAPPING[obj_type]().values():
-                output_list.append(self._efootprint_object_from_json(json_input, obj_type, sources_dict))
+                default_obj = self._efootprint_object_from_json(json_input, obj_type, sources_dict)
+                if default_obj.name not in existing_names:
+                    output_list.append(default_obj)
 
-        obj_type_class = MODELING_OBJECT_CLASSES_DICT.get(obj_type, None)
-        if obj_type_class is None:
-            obj_type_class = ABSTRACT_EFOOTPRINT_MODELING_CLASSES.get(obj_type, None)
-        for existing_obj_type in self.response_objs.keys():
-            if issubclass(MODELING_OBJECT_CLASSES_DICT[existing_obj_type], obj_type_class):
-                output_list += [obj for obj in list(self.response_objs[existing_obj_type].values())
-                                if obj not in output_list]
+        output_list += existing_objects
 
         return output_list
 

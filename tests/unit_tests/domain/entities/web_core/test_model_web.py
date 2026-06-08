@@ -167,3 +167,52 @@ class TestAvailableSources:
         next(iter(target_eod.values())).source = custom_source
 
         assert custom_source.id in [s.id for s in minimal_model_web.available_sources]
+
+
+class TestGetEfootprintObjectsFromEfootprintType:
+    """Tests for ModelWeb.get_efootprint_objects_from_efootprint_type catalog/system deduplication."""
+
+    def _model_web_with_france(self):
+        from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.constants.countries import Countries
+        from efootprint.core.hardware.device import Device
+        from efootprint.core.hardware.network import Network
+        from efootprint.core.hardware.server import Server
+        from efootprint.core.hardware.storage import Storage
+        from efootprint.core.system import System
+        from efootprint.core.usage.job import Job
+        from efootprint.core.usage.usage_journey import UsageJourney
+        from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+        from efootprint.core.usage.usage_pattern import UsagePattern
+        from model_builder.adapters.repositories import InMemorySystemRepository
+        from tests.fixtures.system_builders import create_hourly_usage
+
+        storage = Storage.from_defaults("Storage")
+        server = Server.from_defaults("Server", storage=storage)
+        job = Job.from_defaults("Job", server=server)
+        uj = UsageJourney("Journey", uj_steps=[UsageJourneyStep.from_defaults("Step", jobs=[job])])
+        usage_pattern = UsagePattern(
+            "UP", usage_journey=uj, devices=[Device.from_defaults("Device")],
+            network=Network.from_defaults("Network"), country=Countries.FRANCE(),
+            hourly_usage_journey_starts=create_hourly_usage())
+        system = System("System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
+        repository = InMemorySystemRepository(initial_data=system_to_json(system, save_calculated_attributes=False))
+        return ModelWeb(repository)
+
+    def test_existing_country_shadows_same_named_catalog_default(self):
+        # A system country named "France" (with a system-generated id, not the catalog id) must shadow the catalog
+        # "France": the option list offers it once, and selecting it reuses the existing object instead of
+        # materializing a duplicate on submit.
+        model_web = self._model_web_with_france()
+        existing_france = next(c for c in model_web.response_objs["Country"].values() if c.name == "France")
+
+        countries = model_web.get_efootprint_objects_from_efootprint_type("Country")
+
+        frances = [c for c in countries if c.name == "France"]
+        assert len(frances) == 1
+        assert frances[0].id == existing_france.id
+
+        before = set(model_web.flat_efootprint_objs_dict)
+        resolved = model_web.get_efootprint_object_from_efootprint_id(frances[0].id, "Country")
+        assert resolved.id == existing_france.id
+        assert set(model_web.flat_efootprint_objs_dict) == before
