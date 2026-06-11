@@ -107,10 +107,7 @@ class ModelingObjectWeb:
 
     @property
     def calculated_attributes_values(self):
-        return [self.__getattr__(attr_name) for attr_name in self.calculated_attributes_without_validations
-                if attr_name not in [
-                    "fabrication_impact_repartition_weights", "fabrication_impact_repartition_weight_sum",
-                    "usage_impact_repartition_weights", "usage_impact_repartition_weight_sum"]]
+        return [self.__getattr__(attr_name) for attr_name in self.calculated_attributes_without_validations]
 
     def filter_dict_count_options(self, attr_name: str, available_options: list) -> list:
         """Filter options offered for an `ExplainableObjectDict[X]` attribute in the edit form.

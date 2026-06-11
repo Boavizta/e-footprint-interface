@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [V1.6.6]
+
+### Fixed
+- Upgraded to e-footprint V21.1.6 to fix impact attribution logic.
+
 ## [V1.6.5]
 
 ### Fixed
