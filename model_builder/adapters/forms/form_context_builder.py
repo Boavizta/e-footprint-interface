@@ -164,6 +164,7 @@ class FormContextBuilder:
             "label": FieldUIConfigProvider.get_label(attr_name),
             "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.interface_only_tooltip(attr_name),
             "input_type": "dict_count",
+            "count_label": FieldUIConfigProvider.get_config(attr_name).get("count_label", "Count"),
             "options": options,
             "options_json": json.dumps(options),
             "selected_json": json.dumps({}),

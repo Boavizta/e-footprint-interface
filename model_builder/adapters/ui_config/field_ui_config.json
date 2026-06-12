@@ -283,13 +283,15 @@
             "UsageJourneyStep",
             "RecurrentServerNeed"
         ],
-        "label": "Jobs in this usage journey step"
+        "label": "Jobs",
+        "count_label": "Times per step"
     },
     "uj_steps": {
         "modeling_obj_containers": [
             "UsageJourney"
         ],
-        "label": "Usage journey steps in this usage journey"
+        "label": "Usage journey steps in this usage journey",
+        "count_label": "Times per journey"
     },
     "usage_journey": {
         "modeling_obj_containers": [
@@ -847,16 +849,27 @@
         "modeling_obj_containers": [
             "EdgeDeviceGroup"
         ],
-        "label": "sub group counts"
+        "label": "sub group counts",
+        "count_label": "Count in group"
     },
     "edge_device_counts": {
         "modeling_obj_containers": [
             "EdgeDeviceGroup"
         ],
-        "label": "edge device counts"
+        "label": "edge device counts",
+        "count_label": "Count in group"
     },
     "parent_group_memberships": {
         "label": "Add to parent groups",
-        "tooltip": "Select the {class:EdgeDeviceGroup}s this object should belong to upon creation."
+        "tooltip": "Select the {class:EdgeDeviceGroup}s this object should belong to upon creation.",
+        "count_label": "Count in group"
+    },
+    "UsageJourneyStep.jobs": {
+        "label": "Jobs in this usage journey step",
+        "count_label": "Times per step"
+    },
+    "RecurrentServerNeed.jobs": {
+        "label": "Jobs in this recurrent server need",
+        "count_label": "Times per occurrence"
     }
 }

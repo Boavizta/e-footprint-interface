@@ -133,10 +133,10 @@ class TestParseFormData:
         result = parse_form_data(form_data, "EdgeDeviceGroup")
 
         assert result["sub_group_counts"] == {
-            "group-1": {"value": 2, "unit": "dimensionless", "label": "no label"}
+            "group-1": {"value": 2, "unit": "dimensionless", "label": "Count in group"}
         }
         assert result["edge_device_counts"] == {
-            "device-1": {"value": 3, "unit": "dimensionless", "label": "no label"}
+            "device-1": {"value": 3, "unit": "dimensionless", "label": "Count in group"}
         }
 
     def test_parses_empty_explainable_object_dict_widget_payload(self):

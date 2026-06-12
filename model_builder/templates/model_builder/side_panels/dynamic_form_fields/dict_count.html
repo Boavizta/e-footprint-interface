@@ -1,5 +1,14 @@
 <div class="mb-3 bg-light rounded-2 p-2">
-    <table class="w-100" id="objects-already-selected-for-{{ field.web_id }}"></table>
+    <table class="w-100">
+        <thead>
+            <tr>
+                <th class="width-70 fw-normal text-secondary fs-sm"></th>
+                <th class="width-20 fw-normal text-secondary fs-sm">{{ field.count_label|default:"Count" }}</th>
+                <th class="width-10"></th>
+            </tr>
+        </thead>
+        <tbody id="objects-already-selected-for-{{ field.web_id }}"></tbody>
+    </table>
 </div>
 <div class="d-flex flex-row mb-2 gap-2">
     <select

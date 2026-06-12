@@ -87,7 +87,7 @@ class SystemValidationService:
         """Check that usage journeys linked to patterns have at least one step."""
         journeys_without_steps = []
         for usage_journey in model_web.usage_journeys:
-            if len(usage_journey.usage_patterns) > 0 and len(usage_journey.uj_steps) == 0:
+            if len(usage_journey.usage_patterns) > 0 and len(usage_journey.modeling_obj.uj_steps) == 0:
                 journeys_without_steps.append(usage_journey.name)
 
         if journeys_without_steps:

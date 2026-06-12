@@ -13,6 +13,7 @@ from efootprint.abstract_modeling_classes.explainable_object_dict import Explain
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.utils.tools import get_init_signature_params
 
+from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.services.group_membership_service import PARENT_GROUP_MEMBERSHIPS_FIELD
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
@@ -54,7 +55,8 @@ def _parse_parent_group_memberships(raw_value: Any) -> Dict[str, float]:
     }
 
 
-def _parse_explainable_object_dict_input(raw_value: Any, *, field_name: str) -> Dict[str, Dict[str, Any]]:
+def _parse_explainable_object_dict_input(
+    raw_value: Any, *, field_name: str, default_label: str = "no label") -> Dict[str, Dict[str, Any]]:
     """Normalize ExplainableObjectDict widget payloads into canonical parsed data."""
     if raw_value in ("", None):
         return {}
@@ -76,12 +78,12 @@ def _parse_explainable_object_dict_input(raw_value: Any, *, field_name: str) -> 
             if "value" not in explainable_value:
                 raise ValueError(f"{field_name}[{key_id}] must contain a value.")
             normalized_value = dict(explainable_value)
-            normalized_value.setdefault("label", "no label")
+            normalized_value.setdefault("label", default_label)
         else:
             normalized_value = {
                 "value": parse_count(explainable_value, error_prefix=f"{field_name}[{key_id}]"),
                 "unit": "dimensionless",
-                "label": "no label",
+                "label": default_label,
             }
 
         parsed_mapping[str(key_id)] = normalized_value
@@ -187,12 +189,16 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         elif annotation_origin and annotation_origin in (list, List):
             # List attribute - split by semicolon
             parsed[attr_key] = [v for v in str(value).split(";") if v]
-        elif (annotation_origin is not None
-              and isinstance(annotation_origin, type)
-              and issubclass(annotation_origin, ExplainableObjectDict)):
-            parsed[attr_key] = _parse_explainable_object_dict_input(value, field_name=attr_key)
-        elif annotation is not None and isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict):
-            parsed[attr_key] = _parse_explainable_object_dict_input(value, field_name=attr_key)
+        elif ((annotation_origin is not None
+               and isinstance(annotation_origin, type)
+               and issubclass(annotation_origin, ExplainableObjectDict))
+              or (annotation is not None and isinstance(annotation, type)
+                  and issubclass(annotation, ExplainableObjectDict))):
+            # Plain-number widget payloads become weights labeled with the relationship's static
+            # count wording (e.g. "Times per journey"), matching the library's weight labels.
+            count_label = FieldUIConfigProvider.get_config(attr_key, object_type).get("count_label", "no label")
+            parsed[attr_key] = _parse_explainable_object_dict_input(
+                value, field_name=attr_key, default_label=count_label)
         elif annotation is None:
             # Case of JobWeb form: some fields like server_or_external_api or service_or_external_api are resolved
             # in the pre_create hook and thus not annotated in the JobWeb __init__. We want to pass them through as-is.

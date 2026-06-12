@@ -71,7 +71,7 @@ def compatible_step_for_magnitude(magnitude, default_step: float = 0.1) -> str:
     return _get_compatible_step(Decimal(str(magnitude)), default_step)
 
 
-def _build_dict_count_field_from_annotation(
+def build_dict_count_field_from_annotation(
     attr_name: str, class_name: str, type_arg_str: str,
     default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None) -> dict:
     """Build a dict_count field payload for an `ExplainableObjectDict[X]` attribute."""
@@ -87,6 +87,7 @@ def _build_dict_count_field_from_annotation(
     return {
         "input_type": "dict_count",
         "web_id": f"{class_name}_{attr_name}",
+        "count_label": FieldUIConfigProvider.get_config(attr_name, class_name).get("count_label", "Count"),
         "options": options,
         "options_json": json.dumps(options),
         "selected_json": json.dumps(selected_counts),
@@ -199,7 +200,7 @@ def generate_dynamic_form(
                 f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
             annotation = str
         annotation = resolve_optional_annotation(annotation)
-        field_config = FieldUIConfigProvider.get_config(attr_name)
+        field_config = FieldUIConfigProvider.get_config(attr_name, efootprint_class_str)
         annotation_origin = get_origin(annotation)
         is_list_attr = bool(annotation_origin) and annotation_origin in (list, List)
         structure_field = {
@@ -225,7 +226,7 @@ def generate_dynamic_form(
             type_arg = get_args(annotation)[0]
             type_arg_str = type_arg if isinstance(type_arg, str) else type_arg.__name__
             structure_field.update(
-                _build_dict_count_field_from_annotation(
+                build_dict_count_field_from_annotation(
                     attr_name, efootprint_class_str, type_arg_str, default_values, model_web, obj_to_edit)
             )
         elif issubclass(annotation, str):

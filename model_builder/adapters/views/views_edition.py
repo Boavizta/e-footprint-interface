@@ -74,24 +74,26 @@ def edit_object(request, object_id, trigger_result_display=False):
 @render_exception_modal_if_error
 @time_it
 def open_link_existing_panel(request, parent_id, child_type_str):
-    from typing import get_args
-    from efootprint.utils.tools import get_init_signature_params
     from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
-    from model_builder.adapters.forms.form_field_generator import generate_select_multiple_field
+    from model_builder.adapters.forms.form_field_generator import (
+        build_dict_count_field_from_annotation, generate_select_multiple_field)
 
     model_web = ModelWeb(SessionSystemRepository(request.session))
     parent_obj = model_web.get_web_object_from_efootprint_id(parent_id)
 
-    init_sig = get_init_signature_params(parent_obj.efootprint_class)
     attr_name = next(
-        attr for attr in parent_obj.list_attr_names
-        if get_args(init_sig[attr].annotation)[0].__name__ == child_type_str
+        attr for attr, type_str in parent_obj.child_attr_names_to_child_types_str.items()
+        if type_str == child_type_str
     )
 
-    currently_linked = getattr(parent_obj._modeling_obj, attr_name, []) or []
-
-    field = generate_select_multiple_field(
-        attr_name, parent_obj.class_as_simple_str, currently_linked, child_type_str, model_web)
+    if attr_name in parent_obj.dict_attr_names:
+        field = build_dict_count_field_from_annotation(
+            attr_name, parent_obj.class_as_simple_str, child_type_str,
+            {attr_name: parent_obj.get_efootprint_value(attr_name)}, model_web, obj_to_edit=parent_obj)
+    else:
+        currently_linked = getattr(parent_obj._modeling_obj, attr_name, []) or []
+        field = generate_select_multiple_field(
+            attr_name, parent_obj.class_as_simple_str, currently_linked, child_type_str, model_web)
 
     context = {
         "header_name": f"Link existing {ClassUIConfigProvider.get_label(child_type_str).lower()} to {parent_obj.name}",

@@ -32,21 +32,12 @@
                 "web_id": "UsageJourney_uj_steps",
                 "attr_name": "uj_steps",
                 "label": "Usage journey steps in this usage journey",
-                "tooltip": "Ordered list of <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"UsageJourneyStep\">Usage journey step</button>s that make up the journey. The journey duration is the sum of step durations.",
-                "input_type": "select_multiple",
-                "selected": [],
-                "unselected": [
-                    {
-                        "value": "efootprint_id1",
-                        "label": "option1"
-                    },
-                    {
-                        "value": "efootprint_id2",
-                        "label": "option2"
-                    }
-                ],
-                "selected_json": "[]",
-                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]"
+                "tooltip": "Ordered mapping from <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"UsageJourneyStep\">Usage journey step</button> to how many times the step occurs in one journey. The journey duration is the sum of step durations weighted by their number of occurrences.",
+                "input_type": "dict_count",
+                "count_label": "Times per journey",
+                "options": [],
+                "options_json": "[]",
+                "selected_json": "{}"
             }
         ],
         "advanced_fields": []

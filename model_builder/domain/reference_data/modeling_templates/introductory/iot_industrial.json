@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "21.1.3",
+    "efootprint_version": "22.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -78,11 +78,444 @@
         "Analyst-reviews-sensor-data": {
             "name": "Analyst reviews sensor data",
             "id": "Analyst-reviews-sensor-data",
-            "uj_steps": [
-                "Open-the-dashboard",
-                "Review-recent-readings",
-                "Create-a-daily-report"
+            "uj_steps": {
+                "Open-the-dashboard": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Review-recent-readings": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Create-a-daily-report": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                }
+            }
+        }
+    },
+    "Device": {
+        "Analyst-laptop": {
+            "name": "Analyst laptop",
+            "id": "Analyst-laptop",
+            "carbon_footprint_fabrication": {
+                "value": 156.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "Base-ADEME_V19"
+            },
+            "power": {
+                "value": 50.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 7.0,
+                "unit": "hour / day",
+                "label": "Fraction of usage time",
+                "source": "DATA2eAI---STATE-OF-MOBILE"
+            }
+        }
+    },
+    "Network": {
+        "Office-network": {
+            "name": "Office network",
+            "id": "Office-network",
+            "bandwidth_energy_intensity": {
+                "value": 0.1,
+                "unit": "kilowatt_hour / gigabyte",
+                "label": "bandwith energy intensity",
+                "source": "hypothesis"
+            }
+        },
+        "Default-wifi-network": {
+            "name": "Default wifi network",
+            "id": "Default-wifi-network",
+            "bandwidth_energy_intensity": {
+                "value": 0.05,
+                "unit": "kilowatt_hour / gigabyte",
+                "label": "bandwith energy intensity",
+                "source": "Traficom-study"
+            }
+        }
+    },
+    "Country": {
+        "France": {
+            "name": "France",
+            "id": "France",
+            "short_name": "FRA",
+            "average_carbon_intensity": {
+                "value": 44.0,
+                "unit": "gram / kilowatt_hour",
+                "label": "Average carbon intensity",
+                "source": "Our-world-in-data-28202429",
+                "confidence": "high"
+            },
+            "timezone": {
+                "zone": "Europe/Paris",
+                "label": "Timezone",
+                "source": "user_data"
+            }
+        }
+    },
+    "EdgeUsagePattern": {
+        "Factory-sensors-starting-up": {
+            "name": "Factory sensors starting up",
+            "id": "Factory-sensors-starting-up",
+            "hourly_edge_usage_journey_starts": {
+                "form_inputs": {
+                    "start_date": "2025-01-01",
+                    "modeling_duration_value": 1,
+                    "modeling_duration_unit": "month",
+                    "initial_volume": 750,
+                    "initial_volume_timespan": "month",
+                    "net_growth_rate_in_percentage": 0,
+                    "net_growth_rate_timespan": "month"
+                },
+                "label": "Hourly nb of edge usage journey starts",
+                "source": "user_data"
+            },
+            "edge_usage_journey": "Sensor-working-week",
+            "network": "Default-wifi-network",
+            "country": "France"
+        }
+    },
+    "EdgeUsageJourney": {
+        "Sensor-working-week": {
+            "name": "Sensor working week",
+            "id": "Sensor-working-week",
+            "edge_functions": [
+                "Sensor-records-and-uploads-readings"
+            ],
+            "usage_span": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Usage span",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeFunction": {
+        "Sensor-records-and-uploads-readings": {
+            "name": "Sensor records and uploads readings",
+            "id": "Sensor-records-and-uploads-readings",
+            "recurrent_edge_device_needs": [
+                "Measure-temperature-and-vibration",
+                "Keep-recent-readings-on-the-sensor"
+            ],
+            "recurrent_server_needs": [
+                "Upload-sensor-readings"
             ]
+        }
+    },
+    "RecurrentEdgeProcess": {
+        "Measure-temperature-and-vibration": {
+            "name": "Measure temperature and vibration",
+            "id": "Measure-temperature-and-vibration",
+            "edge_device": "Factory-sensor",
+            "recurrent_edge_component_needs": [
+                "Measure-temperature-and-vibration-RAM-need",
+                "Measure-temperature-and-vibration-CPU-need",
+                "Measure-temperature-and-vibration-storage-need"
+            ],
+            "recurrent_compute_needed": {
+                "form_inputs": {
+                    "constant_value": 1,
+                    "constant_unit": "cpu_core"
+                },
+                "label": "Recurrent compute needed",
+                "source": "hypothesis"
+            },
+            "recurrent_ram_needed": {
+                "form_inputs": {
+                    "constant_value": 1,
+                    "constant_unit": "GB_ram"
+                },
+                "label": "Recurrent RAM needed",
+                "source": "hypothesis"
+            },
+            "recurrent_storage_needed": {
+                "form_inputs": {
+                    "constant_value": 0,
+                    "constant_unit": "GB_stored"
+                },
+                "label": "Recurrent storage needed",
+                "source": "hypothesis"
+            }
+        },
+        "Keep-recent-readings-on-the-sensor": {
+            "name": "Keep recent readings on the sensor",
+            "id": "Keep-recent-readings-on-the-sensor",
+            "edge_device": "Factory-sensor",
+            "recurrent_edge_component_needs": [
+                "Keep-recent-readings-on-the-sensor-RAM-need",
+                "Keep-recent-readings-on-the-sensor-CPU-need",
+                "Keep-recent-readings-on-the-sensor-storage-need"
+            ],
+            "recurrent_compute_needed": {
+                "form_inputs": {
+                    "constant_value": 1,
+                    "constant_unit": "cpu_core"
+                },
+                "label": "Recurrent compute needed",
+                "source": "hypothesis"
+            },
+            "recurrent_ram_needed": {
+                "form_inputs": {
+                    "constant_value": 1,
+                    "constant_unit": "GB_ram"
+                },
+                "label": "Recurrent RAM needed",
+                "source": "hypothesis"
+            },
+            "recurrent_storage_needed": {
+                "form_inputs": {
+                    "constant_value": 0,
+                    "constant_unit": "GB_stored"
+                },
+                "label": "Recurrent storage needed",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeComputer": {
+        "Factory-sensor": {
+            "name": "Factory sensor",
+            "id": "Factory-sensor",
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "components": [
+                "Factory-sensor-CPU",
+                "Factory-sensor-RAM",
+                "Sensor-local-storage"
+            ],
+            "storage": "Sensor-local-storage",
+            "carbon_footprint_fabrication": {
+                "value": 60.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "hypothesis"
+            },
+            "power": {
+                "value": 30.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "idle_power": {
+                "value": 5.0,
+                "unit": "watt",
+                "label": "Idle power",
+                "source": "hypothesis"
+            },
+            "ram": {
+                "value": 8.0,
+                "unit": "gigabyte_ram",
+                "label": "RAM",
+                "source": "hypothesis"
+            },
+            "compute": {
+                "value": 4.0,
+                "unit": "cpu_core",
+                "label": "Compute",
+                "source": "hypothesis"
+            },
+            "base_ram_consumption": {
+                "value": 1.0,
+                "unit": "gigabyte_ram",
+                "label": "Base RAM consumption",
+                "source": "hypothesis"
+            },
+            "base_compute_consumption": {
+                "value": 0.02,
+                "unit": "cpu_core",
+                "label": "Base compute consumption",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeComputerCPUComponent": {
+        "Factory-sensor-CPU": {
+            "name": "Factory sensor CPU",
+            "id": "Factory-sensor-CPU",
+            "carbon_footprint_fabrication_per_unit": {
+                "value": 0.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication per unit",
+                "source": "hypothesis"
+            },
+            "nb_of_units": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Number of units",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeComputerRAMComponent": {
+        "Factory-sensor-RAM": {
+            "name": "Factory sensor RAM",
+            "id": "Factory-sensor-RAM",
+            "carbon_footprint_fabrication_per_unit": {
+                "value": 0.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication per unit",
+                "source": "hypothesis"
+            },
+            "power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Power per unit",
+                "source": "hypothesis"
+            },
+            "idle_power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Idle power per unit",
+                "source": "hypothesis"
+            },
+            "nb_of_units": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Number of units",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EdgeStorage": {
+        "Sensor-local-storage": {
+            "name": "Sensor local storage",
+            "id": "Sensor-local-storage",
+            "carbon_footprint_fabrication_per_unit": {
+                "value": 0.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication per unit",
+                "source": "hypothesis"
+            },
+            "power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Power per unit",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "idle_power_per_unit": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Idle power per unit",
+                "source": "hypothesis"
+            },
+            "nb_of_units": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Number of units",
+                "source": "hypothesis"
+            },
+            "carbon_footprint_fabrication_per_storage_capacity": {
+                "value": 160.0,
+                "unit": "kilogram / terabyte_stored",
+                "label": "Fabrication carbon footprint per unit per storage capacity",
+                "source": "hypothesis"
+            },
+            "storage_capacity_per_unit": {
+                "value": 1.0,
+                "unit": "terabyte_stored",
+                "label": "Storage capacity per unit",
+                "source": "hypothesis"
+            },
+            "base_storage_need": {
+                "value": 2.0,
+                "unit": "gigabyte_stored",
+                "label": "Initial storage need",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "RecurrentEdgeProcessRAMNeed": {
+        "Measure-temperature-and-vibration-RAM-need": {
+            "name": "Measure temperature and vibration RAM need",
+            "id": "Measure-temperature-and-vibration-RAM-need",
+            "edge_component": "Factory-sensor-RAM"
+        },
+        "Keep-recent-readings-on-the-sensor-RAM-need": {
+            "name": "Keep recent readings on the sensor RAM need",
+            "id": "Keep-recent-readings-on-the-sensor-RAM-need",
+            "edge_component": "Factory-sensor-RAM"
+        }
+    },
+    "RecurrentEdgeProcessCPUNeed": {
+        "Measure-temperature-and-vibration-CPU-need": {
+            "name": "Measure temperature and vibration CPU need",
+            "id": "Measure-temperature-and-vibration-CPU-need",
+            "edge_component": "Factory-sensor-CPU"
+        },
+        "Keep-recent-readings-on-the-sensor-CPU-need": {
+            "name": "Keep recent readings on the sensor CPU need",
+            "id": "Keep-recent-readings-on-the-sensor-CPU-need",
+            "edge_component": "Factory-sensor-CPU"
+        }
+    },
+    "RecurrentEdgeProcessStorageNeed": {
+        "Measure-temperature-and-vibration-storage-need": {
+            "name": "Measure temperature and vibration storage need",
+            "id": "Measure-temperature-and-vibration-storage-need",
+            "edge_component": "Sensor-local-storage"
+        },
+        "Keep-recent-readings-on-the-sensor-storage-need": {
+            "name": "Keep recent readings on the sensor storage need",
+            "id": "Keep-recent-readings-on-the-sensor-storage-need",
+            "edge_component": "Sensor-local-storage"
+        }
+    },
+    "RecurrentServerNeed": {
+        "Upload-sensor-readings": {
+            "name": "Upload sensor readings",
+            "id": "Upload-sensor-readings",
+            "edge_device": "Factory-sensor",
+            "recurrent_volume_per_edge_device": {
+                "form_inputs": {
+                    "constant_value": 1,
+                    "constant_unit": "occurrence"
+                },
+                "label": "no label",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Receive-sensor-upload": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per occurrence",
+                    "source": "hypothesis"
+                },
+                "Store-sensor-reading": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per occurrence",
+                    "source": "hypothesis"
+                }
+            }
         }
     },
     "UsageJourneyStep": {
@@ -95,9 +528,14 @@
                 "label": "Time spent by user",
                 "source": "hypothesis"
             },
-            "jobs": [
-                "Open-analysis-dashboard"
-            ]
+            "jobs": {
+                "Open-analysis-dashboard": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
         },
         "Review-recent-readings": {
             "name": "Review recent readings",
@@ -108,9 +546,14 @@
                 "label": "Time spent by user",
                 "source": "hypothesis"
             },
-            "jobs": [
-                "Load-recent-sensor-readings"
-            ]
+            "jobs": {
+                "Load-recent-sensor-readings": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
         },
         "Create-a-daily-report": {
             "name": "Create a daily report",
@@ -121,9 +564,14 @@
                 "label": "Time spent by user",
                 "source": "hypothesis"
             },
-            "jobs": [
-                "Prepare-daily-analysis-report"
-            ]
+            "jobs": {
+                "Prepare-daily-analysis-report": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
         }
     },
     "Job": {
@@ -434,414 +882,6 @@
                 "value": null,
                 "label": "User defined number of instances"
             }
-        }
-    },
-    "Device": {
-        "Analyst-laptop": {
-            "name": "Analyst laptop",
-            "id": "Analyst-laptop",
-            "carbon_footprint_fabrication": {
-                "value": 156.0,
-                "unit": "kilogram",
-                "label": "Carbon footprint fabrication",
-                "source": "Base-ADEME_V19"
-            },
-            "power": {
-                "value": 50.0,
-                "unit": "watt",
-                "label": "Power",
-                "source": "hypothesis"
-            },
-            "lifespan": {
-                "value": 6.0,
-                "unit": "year",
-                "label": "Lifespan",
-                "source": "hypothesis"
-            },
-            "fraction_of_usage_time": {
-                "value": 7.0,
-                "unit": "hour / day",
-                "label": "Fraction of usage time",
-                "source": "DATA2eAI---STATE-OF-MOBILE"
-            }
-        }
-    },
-    "Network": {
-        "Office-network": {
-            "name": "Office network",
-            "id": "Office-network",
-            "bandwidth_energy_intensity": {
-                "value": 0.1,
-                "unit": "kilowatt_hour / gigabyte",
-                "label": "bandwith energy intensity",
-                "source": "hypothesis"
-            }
-        },
-        "Default-wifi-network": {
-            "name": "Default wifi network",
-            "id": "Default-wifi-network",
-            "bandwidth_energy_intensity": {
-                "value": 0.05,
-                "unit": "kilowatt_hour / gigabyte",
-                "label": "bandwith energy intensity",
-                "source": "Traficom-study"
-            }
-        }
-    },
-    "Country": {
-        "France": {
-            "name": "France",
-            "id": "France",
-            "short_name": "FRA",
-            "average_carbon_intensity": {
-                "value": 44.0,
-                "unit": "gram / kilowatt_hour",
-                "label": "Average carbon intensity",
-                "source": "Our-world-in-data-28202429",
-                "confidence": "high"
-            },
-            "timezone": {
-                "zone": "Europe/Paris",
-                "label": "Timezone",
-                "source": "user_data"
-            }
-        }
-    },
-    "EdgeUsagePattern": {
-        "Factory-sensors-starting-up": {
-            "name": "Factory sensors starting up",
-            "id": "Factory-sensors-starting-up",
-            "hourly_edge_usage_journey_starts": {
-                "form_inputs": {
-                    "start_date": "2025-01-01",
-                    "modeling_duration_value": 1,
-                    "modeling_duration_unit": "month",
-                    "initial_volume": 750,
-                    "initial_volume_timespan": "month",
-                    "net_growth_rate_in_percentage": 0,
-                    "net_growth_rate_timespan": "month"
-                },
-                "label": "Hourly nb of edge usage journey starts",
-                "source": "user_data"
-            },
-            "edge_usage_journey": "Sensor-working-day",
-            "network": "Default-wifi-network",
-            "country": "France"
-        }
-    },
-    "EdgeUsageJourney": {
-        "Sensor-working-day": {
-            "name": "Sensor working week",
-            "id": "Sensor-working-day",
-            "edge_functions": [
-                "Sensor-records-and-uploads-readings"
-            ],
-            "usage_span": {
-                "value": 6.0,
-                "unit": "year",
-                "label": "Usage span",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EdgeFunction": {
-        "Sensor-records-and-uploads-readings": {
-            "name": "Sensor records and uploads readings",
-            "id": "Sensor-records-and-uploads-readings",
-            "recurrent_edge_device_needs": [
-                "Measure-temperature-and-vibration",
-                "Keep-recent-readings-on-the-sensor"
-            ],
-            "recurrent_server_needs": [
-                "Upload-sensor-readings"
-            ]
-        }
-    },
-    "RecurrentEdgeProcess": {
-        "Measure-temperature-and-vibration": {
-            "name": "Measure temperature and vibration",
-            "id": "Measure-temperature-and-vibration",
-            "edge_device": "Factory-sensor",
-            "recurrent_edge_component_needs": [
-                "Measure-temperature-and-vibration-RAM-need",
-                "Measure-temperature-and-vibration-CPU-need",
-                "Measure-temperature-and-vibration-storage-need"
-            ],
-            "recurrent_compute_needed": {
-                "form_inputs": {
-                    "constant_value": 1,
-                    "constant_unit": "cpu_core"
-                },
-                "label": "Recurrent compute needed",
-                "source": "hypothesis"
-            },
-            "recurrent_ram_needed": {
-                "form_inputs": {
-                    "constant_value": 1,
-                    "constant_unit": "GB_ram"
-                },
-                "label": "Recurrent RAM needed",
-                "source": "hypothesis"
-            },
-            "recurrent_storage_needed": {
-                "form_inputs": {
-                    "constant_value": 0,
-                    "constant_unit": "GB_stored"
-                },
-                "label": "Recurrent storage needed",
-                "source": "hypothesis"
-            }
-        },
-        "Keep-recent-readings-on-the-sensor": {
-            "name": "Keep recent readings on the sensor",
-            "id": "Keep-recent-readings-on-the-sensor",
-            "edge_device": "Factory-sensor",
-            "recurrent_edge_component_needs": [
-                "Keep-recent-readings-on-the-sensor-RAM-need",
-                "Keep-recent-readings-on-the-sensor-CPU-need",
-                "Keep-recent-readings-on-the-sensor-storage-need"
-            ],
-            "recurrent_compute_needed": {
-                "form_inputs": {
-                    "constant_value": 1,
-                    "constant_unit": "cpu_core"
-                },
-                "label": "Recurrent compute needed",
-                "source": "hypothesis"
-            },
-            "recurrent_ram_needed": {
-                "form_inputs": {
-                    "constant_value": 1,
-                    "constant_unit": "GB_ram"
-                },
-                "label": "Recurrent RAM needed",
-                "source": "hypothesis"
-            },
-            "recurrent_storage_needed": {
-                "form_inputs": {
-                    "constant_value": 0,
-                    "constant_unit": "GB_stored"
-                },
-                "label": "Recurrent storage needed",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EdgeComputer": {
-        "Factory-sensor": {
-            "name": "Factory sensor",
-            "id": "Factory-sensor",
-            "lifespan": {
-                "value": 6.0,
-                "unit": "year",
-                "label": "Lifespan",
-                "source": "hypothesis"
-            },
-            "components": [
-                "Factory-sensor-CPU",
-                "Factory-sensor-RAM",
-                "Sensor-local-storage"
-            ],
-            "storage": "Sensor-local-storage",
-            "carbon_footprint_fabrication": {
-                "value": 60.0,
-                "unit": "kilogram",
-                "label": "Carbon footprint fabrication",
-                "source": "hypothesis"
-            },
-            "power": {
-                "value": 30.0,
-                "unit": "watt",
-                "label": "Power",
-                "source": "hypothesis"
-            },
-            "idle_power": {
-                "value": 5.0,
-                "unit": "watt",
-                "label": "Idle power",
-                "source": "hypothesis"
-            },
-            "ram": {
-                "value": 8.0,
-                "unit": "gigabyte_ram",
-                "label": "RAM",
-                "source": "hypothesis"
-            },
-            "compute": {
-                "value": 4.0,
-                "unit": "cpu_core",
-                "label": "Compute",
-                "source": "hypothesis"
-            },
-            "base_ram_consumption": {
-                "value": 1.0,
-                "unit": "gigabyte_ram",
-                "label": "Base RAM consumption",
-                "source": "hypothesis"
-            },
-            "base_compute_consumption": {
-                "value": 0.02,
-                "unit": "cpu_core",
-                "label": "Base compute consumption",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EdgeComputerCPUComponent": {
-        "Factory-sensor-CPU": {
-            "name": "Factory sensor CPU",
-            "id": "Factory-sensor-CPU",
-            "carbon_footprint_fabrication_per_unit": {
-                "value": 0.0,
-                "unit": "kilogram",
-                "label": "Carbon footprint fabrication per unit",
-                "source": "hypothesis"
-            },
-            "nb_of_units": {
-                "value": 1.0,
-                "unit": "dimensionless",
-                "label": "Number of units",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EdgeComputerRAMComponent": {
-        "Factory-sensor-RAM": {
-            "name": "Factory sensor RAM",
-            "id": "Factory-sensor-RAM",
-            "carbon_footprint_fabrication_per_unit": {
-                "value": 0.0,
-                "unit": "kilogram",
-                "label": "Carbon footprint fabrication per unit",
-                "source": "hypothesis"
-            },
-            "power_per_unit": {
-                "value": 0.0,
-                "unit": "watt",
-                "label": "Power per unit",
-                "source": "hypothesis"
-            },
-            "idle_power_per_unit": {
-                "value": 0.0,
-                "unit": "watt",
-                "label": "Idle power per unit",
-                "source": "hypothesis"
-            },
-            "nb_of_units": {
-                "value": 1.0,
-                "unit": "dimensionless",
-                "label": "Number of units",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EdgeStorage": {
-        "Sensor-local-storage": {
-            "name": "Sensor local storage",
-            "id": "Sensor-local-storage",
-            "carbon_footprint_fabrication_per_unit": {
-                "value": 0.0,
-                "unit": "kilogram",
-                "label": "Carbon footprint fabrication per unit",
-                "source": "hypothesis"
-            },
-            "power_per_unit": {
-                "value": 0.0,
-                "unit": "watt",
-                "label": "Power per unit",
-                "source": "hypothesis"
-            },
-            "lifespan": {
-                "value": 6.0,
-                "unit": "year",
-                "label": "Lifespan",
-                "source": "hypothesis"
-            },
-            "idle_power_per_unit": {
-                "value": 0.0,
-                "unit": "watt",
-                "label": "Idle power per unit",
-                "source": "hypothesis"
-            },
-            "nb_of_units": {
-                "value": 1.0,
-                "unit": "dimensionless",
-                "label": "Number of units",
-                "source": "hypothesis"
-            },
-            "carbon_footprint_fabrication_per_storage_capacity": {
-                "value": 160.0,
-                "unit": "kilogram / terabyte_stored",
-                "label": "Fabrication carbon footprint per unit per storage capacity",
-                "source": "hypothesis"
-            },
-            "storage_capacity_per_unit": {
-                "value": 1.0,
-                "unit": "terabyte_stored",
-                "label": "Storage capacity per unit",
-                "source": "hypothesis"
-            },
-            "base_storage_need": {
-                "value": 2.0,
-                "unit": "gigabyte_stored",
-                "label": "Initial storage need",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "RecurrentEdgeProcessRAMNeed": {
-        "Measure-temperature-and-vibration-RAM-need": {
-            "name": "Measure temperature and vibration RAM need",
-            "id": "Measure-temperature-and-vibration-RAM-need",
-            "edge_component": "Factory-sensor-RAM"
-        },
-        "Keep-recent-readings-on-the-sensor-RAM-need": {
-            "name": "Keep recent readings on the sensor RAM need",
-            "id": "Keep-recent-readings-on-the-sensor-RAM-need",
-            "edge_component": "Factory-sensor-RAM"
-        }
-    },
-    "RecurrentEdgeProcessCPUNeed": {
-        "Measure-temperature-and-vibration-CPU-need": {
-            "name": "Measure temperature and vibration CPU need",
-            "id": "Measure-temperature-and-vibration-CPU-need",
-            "edge_component": "Factory-sensor-CPU"
-        },
-        "Keep-recent-readings-on-the-sensor-CPU-need": {
-            "name": "Keep recent readings on the sensor CPU need",
-            "id": "Keep-recent-readings-on-the-sensor-CPU-need",
-            "edge_component": "Factory-sensor-CPU"
-        }
-    },
-    "RecurrentEdgeProcessStorageNeed": {
-        "Measure-temperature-and-vibration-storage-need": {
-            "name": "Measure temperature and vibration storage need",
-            "id": "Measure-temperature-and-vibration-storage-need",
-            "edge_component": "Sensor-local-storage"
-        },
-        "Keep-recent-readings-on-the-sensor-storage-need": {
-            "name": "Keep recent readings on the sensor storage need",
-            "id": "Keep-recent-readings-on-the-sensor-storage-need",
-            "edge_component": "Sensor-local-storage"
-        }
-    },
-    "RecurrentServerNeed": {
-        "Upload-sensor-readings": {
-            "name": "Upload sensor readings",
-            "id": "Upload-sensor-readings",
-            "edge_device": "Factory-sensor",
-            "recurrent_volume_per_edge_device": {
-                "form_inputs": {
-                    "constant_value": 1,
-                    "constant_unit": "occurrence"
-                },
-                "label": "no label",
-                "source": "hypothesis"
-            },
-            "jobs": [
-                "Receive-sensor-upload",
-                "Store-sensor-reading"
-            ]
         }
     }
 }

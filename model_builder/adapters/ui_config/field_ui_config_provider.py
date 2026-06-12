@@ -31,6 +31,14 @@ class FieldUIConfigProvider:
         return FIELD_UI_CONFIG.get(field_name, {}).get("modeling_obj_containers", [])
 
     @staticmethod
-    def get_config(field_name: str) -> dict:
-        """Get full configuration for a field."""
-        return FIELD_UI_CONFIG.get(field_name, {})
+    def get_config(field_name: str, class_name: str = None) -> dict:
+        """Get full configuration for a field, with class-qualified overrides.
+
+        Entries keyed "ClassName.field_name" override the plain field entry, so attributes shared
+        across classes (e.g. `jobs` on UsageJourneyStep and RecurrentServerNeed) can word their
+        labels per parent class.
+        """
+        config = FIELD_UI_CONFIG.get(field_name, {})
+        if class_name:
+            config = {**config, **FIELD_UI_CONFIG.get(f"{class_name}.{field_name}", {})}
+        return config

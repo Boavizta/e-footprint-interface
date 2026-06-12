@@ -106,14 +106,23 @@ def test_edit_usage_journey_reorders_steps(default_system_repository):
         parent_id=uj_id,
     )
 
+    sd = default_system_repository.get_system_data()
+    created_entries = sd["UsageJourney"][uj_id]["uj_steps"]
+    assert list(created_entries) == [step_1, step_2, step_3]
+    assert all(entry["value"] == 1 for entry in created_entries.values())
+
     new_order = [step_2, step_3, step_1]
-    edit_object(default_system_repository, uj_id, "UsageJourney", {"uj_steps": ";".join(new_order)})
+    edit_object(
+        default_system_repository, uj_id, "UsageJourney",
+        {"uj_steps": json.dumps({step_2: 1, step_3: 2.5, step_1: 1})})
 
     sd = default_system_repository.get_system_data()
-    assert sd["UsageJourney"][uj_id]["uj_steps"] == new_order
+    assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == new_order
+    assert sd["UsageJourney"][uj_id]["uj_steps"][step_3]["value"] == 2.5
+    assert sd["UsageJourney"][uj_id]["uj_steps"][step_3]["label"] == "Times per journey"
 
     journey = ModelWeb(default_system_repository).get_web_object_from_efootprint_id(uj_id)
-    assert [s.efootprint_id for s in journey.uj_steps] == new_order
+    assert [step.id for step in journey.modeling_obj.uj_steps] == new_order
 
 
 def test_edit_usage_journey_remove_step_deletes_orphan(default_system_repository):
@@ -137,10 +146,11 @@ def test_edit_usage_journey_remove_step_deletes_orphan(default_system_repository
         parent_id=uj_id,
     )
 
-    edit_object(default_system_repository, uj_id, "UsageJourney", {"uj_steps": ";".join([step_1, step_3])})
+    edit_object(
+        default_system_repository, uj_id, "UsageJourney", {"uj_steps": json.dumps({step_1: 1, step_3: 1})})
 
     sd = default_system_repository.get_system_data()
-    assert sd["UsageJourney"][uj_id]["uj_steps"] == [step_1, step_3]
+    assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == [step_1, step_3]
     assert step_2 not in sd.get("UsageJourneyStep", {})
 
 

@@ -1,5 +1,5 @@
 import re
-from typing import TYPE_CHECKING, get_origin, Dict, List, Tuple, Optional
+from typing import TYPE_CHECKING, get_args, get_origin, Dict, List, Tuple, Optional
 
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
@@ -349,8 +349,9 @@ class ModelingObjectWeb:
         init_signature = get_init_signature_params(self.efootprint_class)
         dict_attr_names = []
         for attr_name, param_info in init_signature.items():
-            annotation = param_info.annotation
-            if get_origin(annotation) and get_origin(annotation) in (dict, Dict, ExplainableObjectDict):
+            annotation_origin = get_origin(param_info.annotation)
+            if annotation_origin in (dict, Dict) or (
+                    isinstance(annotation_origin, type) and issubclass(annotation_origin, ExplainableObjectDict)):
                 dict_attr_names.append(attr_name)
         return dict_attr_names
 
@@ -386,24 +387,28 @@ class ModelingObjectWeb:
         return children
 
     @property
-    def children_property_name(self) -> str:
-        """Property name for accessing children (e.g., 'jobs'). Assumes a single list attr."""
-        list_attr_names = self.list_attr_names
-        assert len(list_attr_names) == 1, (
-            f"{self} should have exactly one list attribute, found: {list_attr_names}.")
+    def child_attr_names_to_child_types_str(self) -> Dict[str, str]:
+        """Child relationship attributes (list or ExplainableObjectDict) mapped to their child type string."""
+        init_signature = get_init_signature_params(self.efootprint_class)
+        child_attrs = {}
+        for attr_name in self.list_attr_names + self.dict_attr_names:
+            type_arg = get_args(init_signature[attr_name].annotation)[0]
+            child_attrs[attr_name] = type_arg if isinstance(type_arg, str) else type_arg.__name__
+        return child_attrs
 
-        return list_attr_names[0]
+    @property
+    def children_property_name(self) -> str:
+        """Property name for accessing children (e.g., 'jobs'). Assumes a single child attr."""
+        child_attr_names = list(self.child_attr_names_to_child_types_str)
+        assert len(child_attr_names) == 1, (
+            f"{self} should have exactly one child attribute, found: {child_attr_names}.")
+
+        return child_attr_names[0]
 
     @property
     def child_object_types_str(self) -> List[str]:
-        """Type strings of child objects (supports multiple list attributes)."""
-        init_signature = get_init_signature_params(self.efootprint_class)
-        child_types = []
-        for attr_name in self.list_attr_names:
-            annotation = init_signature[attr_name].annotation
-            child_types.append(annotation.__args__[0].__name__)
-
-        return child_types
+        """Type strings of child objects (supports multiple child attributes)."""
+        return list(self.child_attr_names_to_child_types_str.values())
 
     @property
     def child_object_type_str(self) -> str:
@@ -415,16 +420,21 @@ class ModelingObjectWeb:
 
     @property
     def child_sections(self):
-        """Structured view of children grouped by their list attribute/type."""
-        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+        """Structured view of children grouped by their child attribute/type."""
+        from model_builder.domain.efootprint_to_web_mapping import (
+            EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING, wrap_efootprint_object)
 
-        init_signature = get_init_signature_params(self.efootprint_class)
+        dict_attr_names = self.dict_attr_names
         constraints = getattr(self.model_web, "creation_constraints", {})
         sections = []
-        for attr_name in self.list_attr_names:
-            children = getattr(self, attr_name, []) or []
-            annotation = init_signature[attr_name].annotation
-            child_type = annotation.__args__[0].__name__
+        for attr_name, child_type in self.child_attr_names_to_child_types_str.items():
+            if attr_name in dict_attr_names:
+                children = [
+                    wrap_efootprint_object(child, self.model_web, dict_container=self)
+                    for child in (self.get_efootprint_value(attr_name) or {})
+                    if isinstance(child, ModelingObject)]
+            else:
+                children = getattr(self, attr_name, []) or []
             linked_ids = {child.efootprint_id for child in children}
             all_of_type = self.model_web.get_efootprint_objects_from_efootprint_type(child_type)
             linkable_existing_count = sum(1 for obj in all_of_type if obj.id not in linked_ids)

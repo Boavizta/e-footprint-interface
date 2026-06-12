@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Upgraded to e-footprint V22.0.0: `UsageJourney.uj_steps`, `UsageJourneyStep.jobs` and
+  `RecurrentServerNeed.jobs` are now weighted dicts (step-and-job-multipliers feature). The journey
+  panel's steps table and the step / recurrent-server-need panels' jobs tables render as weighted
+  `dict_count` tables ("Times per journey" / "Times per step" / "Times per occurrence" count columns),
+  with rows in journey order (the `dict_count` widget now renders rows in selected-map insertion order
+  for all dict fields, edge device groups included). Creating a step or job from the canvas links it
+  to its parent with count 1; "Link existing" on these relationships opens the weighted table.
+  Pre-feature JSONs (sessions, uploads, templates) upgrade automatically via the library's format-22
+  handler; the shipped introductory template JSONs were regenerated to the current format.
+  Count-column wording lives in `field_ui_config.json`, with `"ClassName.field"` class-qualified keys
+  for the `jobs` attribute shared across parent classes.
+- Remaining for release: pin `efootprint == 22.x` from PyPI in `pyproject.toml` / `poetry.lock`
+  (development used the editable local install).
+
 ## [V1.6.6]
 
 ### Fixed

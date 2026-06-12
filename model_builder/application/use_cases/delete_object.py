@@ -68,13 +68,19 @@ class DeleteObjectUseCase:
         from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
         web_obj = self.model_web.get_web_object_from_efootprint_id(object_id)
+        web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(web_obj.class_as_simple_str)
 
         list_containers, _ = web_obj.list_containers_and_attr_name_in_list_container
+        dict_containers, _ = web_obj.dict_containers_and_attr_name_in_dict_container
+        # Classes with a pre_delete hook (e.g. edge group members) handle their dict memberships
+        # themselves on the normal deletion path, so their dict containers don't count here.
+        if web_class and hasattr(web_class, 'pre_delete'):
+            dict_containers = []
+        child_containers = list_containers + dict_containers
 
-        # Check for blocking containers (non-list references)
-        if web_obj.modeling_obj_containers and not list_containers:
+        # Check for blocking containers (non-child references)
+        if web_obj.modeling_obj_containers and not child_containers:
             # Check if class has custom blocking logic via can_delete hook
-            web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(web_obj.class_as_simple_str)
             if web_class and hasattr(web_class, 'can_delete'):
                 can_delete, blocking_names = web_class.can_delete(web_obj)
                 if not can_delete:
@@ -98,7 +104,7 @@ class DeleteObjectUseCase:
 
         return DeleteCheckResult(
             can_delete=True,
-            is_list_deletion=bool(list_containers),
+            is_list_deletion=bool(child_containers),
             has_accordion_children=has_children,
             accordion_children_count=len(accordion_children),
             accordion_children_class_type=children_class_type,
@@ -116,36 +122,51 @@ class DeleteObjectUseCase:
             DeleteObjectOutput with deletion results.
         """
         from model_builder.domain.services import EditService
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
         from efootprint.logger import logger
 
         web_obj = self.model_web.get_web_object_from_efootprint_id(input_data.object_id)
 
         object_name = web_obj.name
         object_type = web_obj.class_as_simple_str
+        web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(object_type)
 
         list_containers, attr_name_in_list_container = web_obj.list_containers_and_attr_name_in_list_container
+        dict_containers, attr_name_in_dict_container = web_obj.dict_containers_and_attr_name_in_dict_container
+        # Classes with a pre_delete hook (e.g. edge group members) handle their dict memberships
+        # themselves on the normal deletion path below.
+        if web_class and hasattr(web_class, 'pre_delete'):
+            dict_containers = []
 
-        if list_containers:
-            # List deletion: remove from all list containers using domain service
+        if list_containers or dict_containers:
+            # Child deletion: remove from all list and dict containers using domain service
+            from model_builder.domain.services.object_linking_service import serialize_weighted_dict_entry
             edit_service = EditService()
             edited_containers = []
 
-            for list_container in list_containers:
-                logger.info(f"Removing {web_obj.name} from {list_container.name}")
+            containers_with_attrs = (
+                [(container, attr_name_in_list_container, False) for container in list_containers]
+                + [(container, attr_name_in_dict_container, True) for container in dict_containers])
+            for container, attr_name, is_dict_container in containers_with_attrs:
+                logger.info(f"Removing {web_obj.name} from {container.name}")
 
-                # Build edit data to remove this object from the list
-                new_list_attribute_ids = [
-                    list_attribute.efootprint_id
-                    for list_attribute in getattr(list_container, attr_name_in_list_container)
-                    if list_attribute.efootprint_id != web_obj.efootprint_id
-                ]
-                edit_data = {
-                    "name": list_container.name,
-                    attr_name_in_list_container: new_list_attribute_ids
-                }
+                # Build edit data to remove this object from the container attribute
+                if is_dict_container:
+                    new_attr_value = {
+                        key.id: serialize_weighted_dict_entry(value)
+                        for key, value in container.get_efootprint_value(attr_name).items()
+                        if key.id != web_obj.efootprint_id
+                    }
+                else:
+                    new_attr_value = [
+                        list_attribute.efootprint_id
+                        for list_attribute in getattr(container, attr_name)
+                        if list_attribute.efootprint_id != web_obj.efootprint_id
+                    ]
+                edit_data = {"name": container.name, attr_name: new_attr_value}
 
                 # Use domain service (no HTML generation)
-                edit_result = edit_service.edit_with_cascade_cleanup(list_container, edit_data)
+                edit_result = edit_service.edit_with_cascade_cleanup(container, edit_data)
                 edited_containers.append(edit_result.edited_object)
 
             self.model_web.persist_to_cache()
@@ -161,8 +182,6 @@ class DeleteObjectUseCase:
         else:
             # Normal deletion
             # Call pre_delete hook if defined (e.g., UsagePattern needs to unlink from system)
-            from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
-            web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(object_type)
             if web_class and hasattr(web_class, 'pre_delete'):
                 web_class.pre_delete(web_obj, self.model_web)
 

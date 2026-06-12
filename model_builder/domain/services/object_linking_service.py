@@ -1,13 +1,17 @@
 """Service for linking child objects to parent objects.
 
-This service handles the domain logic for finding the correct list attribute
-on a parent object and building the edit data to link a child object.
+This service handles the domain logic for finding the correct child attribute
+(list or weighted ExplainableObjectDict) on a parent object and building the
+edit data to link a child object.
 """
 from dataclasses import dataclass
 from typing import List, Optional, TYPE_CHECKING, get_origin, get_args
 
+from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.utils.tools import get_init_signature_params
+
+from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -22,16 +26,23 @@ class LinkResult:
     parent_web_obj: "ModelingObjectWeb"
 
 
+def serialize_weighted_dict_entry(value) -> dict:
+    """Serialize one weighted-dict value into the parsed-form-data shape, preserving its label."""
+    return {"value": value.value.magnitude, "unit": "dimensionless", "label": value.label}
+
+
 class ObjectLinkingService:
     """Service for linking child modeling objects to parent objects.
 
     This service encapsulates the domain logic for:
-    - Finding which list attribute on a parent accepts a given child type
-    - Building the edit data needed to add the child to the parent's list
+    - Finding which child attribute on a parent accepts a given child type
+      (a `List[ChildType]` or a weighted `ExplainableObjectDict[ChildType]`)
+    - Building the edit data needed to add the child to that attribute
     """
 
-    def find_list_attribute_for_child(self, parent_obj: ModelingObject, child_obj: ModelingObject) -> Optional[str]:
-        """Find the list attribute on the parent that can contain the child type.
+    def find_child_attribute_for_child(
+        self, parent_obj: ModelingObject, child_obj: ModelingObject) -> Optional[str]:
+        """Find the list or dict attribute on the parent that can contain the child type.
 
         Args:
             parent_obj: The parent modeling object
@@ -43,24 +54,39 @@ class ObjectLinkingService:
         init_sig_params = get_init_signature_params(type(parent_obj))
         for attr_name, param in init_sig_params.items():
             annotation = param.annotation
-            if get_origin(annotation) and get_origin(annotation) in (list, List):
-                list_item_type = get_args(annotation)[0]
-                if isinstance(child_obj, list_item_type):
+            annotation_origin = get_origin(annotation)
+            if annotation_origin in (list, List):
+                if isinstance(child_obj, get_args(annotation)[0]):
+                    return attr_name
+            elif isinstance(annotation_origin, type) and issubclass(annotation_origin, ExplainableObjectDict):
+                type_arg = get_args(annotation)[0]
+                child_class = MODELING_OBJECT_CLASSES_DICT[type_arg] if isinstance(type_arg, str) else type_arg
+                if isinstance(child_obj, child_class):
                     return attr_name
         return None
 
     def build_link_edit_data(self, parent_obj: ModelingObject, child_id: str, attr_name: str) -> dict:
-        """Build the edit data to add a child to a parent's list attribute.
+        """Build the edit data to add a child to a parent's child attribute.
+
+        For list attributes the edit data is the list of linked ids; for weighted dict attributes
+        it is a `{child_id: {value, unit, label}}` mapping with the new entry at count 1. Existing
+        entries are re-serialized as-is so their weights and labels are preserved; the new entry
+        inherits the static weight label from its siblings when the dict is not empty.
 
         Args:
             parent_obj: The parent modeling object
             child_id: The ID of the child object to add
-            attr_name: The name of the list attribute on the parent
+            attr_name: The name of the child attribute on the parent
 
         Returns:
-            Dict with the attribute name and semicolon-separated IDs
+            Dict with the attribute name mapped to its post-link parsed value
         """
         existing_elements = getattr(parent_obj, attr_name)
+        if isinstance(existing_elements, ExplainableObjectDict):
+            entries = {key.id: serialize_weighted_dict_entry(value) for key, value in existing_elements.items()}
+            label = next(iter(entries.values()))["label"] if entries else "no label"
+            entries[child_id] = {"value": 1, "unit": "dimensionless", "label": label}
+            return {attr_name: entries}
         existing_ids = [elt.id for elt in existing_elements]
         existing_ids.append(child_id)
         return {attr_name: existing_ids}
@@ -68,7 +94,7 @@ class ObjectLinkingService:
     def link_child_to_parent(self, model_web: "ModelWeb", child_web_obj: "ModelingObjectWeb", parent_id: str) -> LinkResult:
         """Link a child object to its parent.
 
-        This method finds the correct list attribute and builds the edit data,
+        This method finds the correct child attribute and builds the edit data,
         but does NOT perform the actual edit (that's the caller's responsibility).
 
         Args:
@@ -80,14 +106,14 @@ class ObjectLinkingService:
             LinkResult containing the attribute name, edit data, and parent web object
 
         Raises:
-            AssertionError: If no suitable list attribute is found on the parent
+            AssertionError: If no suitable child attribute is found on the parent
         """
         parent_web_obj = model_web.get_web_object_from_efootprint_id(parent_id)
         parent_modeling_obj = parent_web_obj.modeling_obj
         child_modeling_obj = child_web_obj.modeling_obj
 
-        attr_name = self.find_list_attribute_for_child(parent_modeling_obj, child_modeling_obj)
-        assert attr_name is not None, "A list attr name should always be found"
+        attr_name = self.find_child_attribute_for_child(parent_modeling_obj, child_modeling_obj)
+        assert attr_name is not None, "A child attr name should always be found"
 
         edit_data = self.build_link_edit_data(parent_modeling_obj, child_web_obj.efootprint_id, attr_name)
 

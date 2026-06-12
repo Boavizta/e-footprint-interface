@@ -8,6 +8,10 @@
           hx-on::after-request="closeAndEmptySidePanel()"
     >
         {% csrf_token %}
-        {% include "model_builder/side_panels/dynamic_form_fields/select_multiple.html" %}
+        {% if field.input_type == "dict_count" %}
+            {% include "model_builder/side_panels/dynamic_form_fields/dict_count.html" %}
+        {% else %}
+            {% include "model_builder/side_panels/dynamic_form_fields/select_multiple.html" %}
+        {% endif %}
     </form>
 {% endblock %}

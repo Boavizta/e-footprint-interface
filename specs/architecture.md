@@ -180,10 +180,15 @@ Most parent-child relationships use `List[ChildType]` constructor parameters. Ma
 
 ### Dict-based relationships (`ExplainableObjectDict`)
 
-Edge device groups use dict-based relationships where each entry is `{object: count}`:
+Weighted dict relationships map each child to a dimensionless count `{object: count}`:
 
-- `EdgeDeviceGroup.sub_group_counts` — maps sub-groups to counts.
-- `EdgeDeviceGroup.edge_device_counts` — maps devices to counts.
+- `EdgeDeviceGroup.sub_group_counts` / `EdgeDeviceGroup.edge_device_counts` — group composition counts.
+- `UsageJourney.uj_steps`, `UsageJourneyStep.jobs`, `RecurrentServerNeed.jobs` — step/job multipliers
+  (since e-footprint 22). Parent panels edit them with the `dict_count` widget, whose rows follow the
+  dict's insertion order (meaningful for steps); count-column wording (`count_label`) comes from
+  `field_ui_config.json`, where `"ClassName.field"` keys override shared attribute names per parent class.
+  The generic child machinery (`accordion_children`, `child_sections`, canvas-create linking with
+  count 1, "Link existing", container-removal deletion) treats dict children like list children.
 
 These require dedicated mutation endpoints in `views_dict_mutation.py`:
 

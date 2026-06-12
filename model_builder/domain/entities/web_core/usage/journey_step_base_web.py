@@ -20,19 +20,19 @@ class JourneyStepBaseWeb(ModelingObjectWeb):
     @property
     def icon_links_to(self):
         """Returns the web_id of the icon this journey step's icon should link to (next step or add button)."""
-        journey_steps = self.list_container.accordion_children
+        journey_steps = self.parent_container.accordion_children
         index = journey_steps.index(self)
         if index < len(journey_steps) - 1:
             link_to = f"icon-{journey_steps[index + 1].web_id}"
         else:
-            link_to = f"icon-add-step-to-{self.list_container.web_id}"
+            link_to = f"icon-add-step-to-{self.parent_container.web_id}"
 
         return link_to
 
     @property
     def icon_leaderline_style(self):
         """Returns the CSS class name for the leaderline style between journey step icons."""
-        journey_steps = self.list_container.accordion_children
+        journey_steps = self.parent_container.accordion_children
         index = journey_steps.index(self)
         if index < len(journey_steps) - 1:
             class_name = "vertical-step-swimlane"

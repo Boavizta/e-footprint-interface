@@ -6,6 +6,8 @@
 
 ## Task 1 — Weighted-dict groundwork in the library (repo: e-footprint)
 
+**Status:** Done
+
 **Goal:** Land the shared list / plain-number → weighted-dict normalizer and prove `ExplainableObjectDict` works as a relationship carrier, without touching the three target relationships yet. `EdgeDeviceGroup` adopts the normalizer as its first consumer.
 
 **Files touched:**
@@ -25,6 +27,8 @@
 ---
 
 ## Task 2 — Convert the three relationships to weighted dicts (repo: e-footprint)
+
+**Status:** Done
 
 **Goal:** `UsageJourney.uj_steps`, `UsageJourneyStep.jobs`, and `RecurrentServerNeed.jobs` become weighted `ExplainableObjectDict`s (same attribute names); all calculations honor the weights; pre-feature JSONs upgrade automatically. This is the whole modeling-semantics change in one review.
 
@@ -51,6 +55,8 @@
 ---
 
 ## Task 3 — Interface adopts the new library; parent panels gain weighted tables (repo: e-footprint-interface)
+
+**Status:** Done (against the editable local e-footprint 22.0.0 — PyPI pin deferred to release; `pyproject.toml`/`poetry.lock` deliberately left out of the commit)
 
 **Goal:** Bump `efootprint`, absorb the dict semantics, and deliver the first user-visible change: the journey panel's steps table and the step/recurrent-need panels' jobs tables render as weighted (`dict_count`) tables in journey order, with "Times per…" wording. Everything else behaves as before.
 

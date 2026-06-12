@@ -49,22 +49,13 @@
             {
                 "web_id": "RecurrentServerNeed_jobs",
                 "attr_name": "jobs",
-                "label": "Jobs in this usage journey step",
-                "tooltip": "Server-side <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button>s triggered by each occurrence of this need. The same job can appear multiple times to represent multiple invocations per occurrence.",
-                "input_type": "select_multiple",
-                "selected": [],
-                "unselected": [
-                    {
-                        "value": "efootprint_id1",
-                        "label": "option1"
-                    },
-                    {
-                        "value": "efootprint_id2",
-                        "label": "option2"
-                    }
-                ],
-                "selected_json": "[]",
-                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]"
+                "label": "Jobs in this recurrent server need",
+                "tooltip": "Mapping from server-side <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> to how many times it is invoked by each occurrence of this need.",
+                "input_type": "dict_count",
+                "count_label": "Times per occurrence",
+                "options": [],
+                "options_json": "[]",
+                "selected_json": "{}"
             },
             {
                 "web_id": "RecurrentServerNeed_recurrent_volume_per_edge_device",

@@ -53,12 +53,11 @@ class TestSelectMultipleJobs:
         # Verify Job 2 now appears on the card
         job2_card_in_step = ObjectCard(uj_step_card.locator.locator(f"div[id^='Job-']").filter(has_text="Test Job 2"))
         job2_card_in_step.should_exist()
-        # Job card ID is of the form 'Job-2df3a0_in_UsageJourneyStep-2331a3_in_UsageJourney-bc6c5e'
-        job2_id = job2_card_in_step.locator.get_attribute("id")[4:16]
 
-        # Remove Job 2
+        # Remove Job 2 from the weighted jobs table
         uj_step_card.click_edit_button()
-        page.locator(f"#remove-{job2_id}").click()
+        page.locator("#objects-already-selected-for-UsageJourneyStep_jobs tr").filter(
+            has_text="Test Job 2").locator("button").click()
         model_builder.side_panel.submit_and_wait_for_close()
 
         # Job 2 should be removed
@@ -67,9 +66,9 @@ class TestSelectMultipleJobs:
         # Remove Job 1 (last remaining job)
         job1_card_in_step = ObjectCard(uj_step_card.locator.locator(f"div[id^='Job-']").filter(has_text="Test Job 1"))
         job1_card_in_step.should_exist()
-        job1_id = job1_card_in_step.locator.get_attribute("id")[4:16]
         uj_step_card.click_edit_button()
-        page.locator(f"#remove-{job1_id}").click()
+        page.locator("#objects-already-selected-for-UsageJourneyStep_jobs tr").filter(
+            has_text="Test Job 1").locator("button").click()
         model_builder.side_panel.submit_and_wait_for_close()
 
         # Job 1 should also be removed

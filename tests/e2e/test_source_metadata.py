@@ -26,7 +26,8 @@ SOURCE_BLOCK_STABLE_MARKER = "source-table-was-not-replaced"
 @pytest.fixture
 def source_metadata_model_builder(minimal_system, model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
     """Load a complete model with one existing custom source available in source pickers."""
-    server = minimal_system.usage_patterns[0].usage_journey.uj_steps[0].jobs[0].server
+    uj_step = next(iter(minimal_system.usage_patterns[0].usage_journey.uj_steps))
+    server = next(iter(uj_step.jobs)).server
     server.power.source = Source(CUSTOM_SOURCE_NAME, CUSTOM_SOURCE_LINK, id="labsrc")
     server.power.comment = EXISTING_SERVER_POWER_COMMENT
     server.power.confidence = "medium"

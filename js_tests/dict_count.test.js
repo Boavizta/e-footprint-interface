@@ -84,3 +84,35 @@ test("the hidden JSON payload stays in sync after multiple add remove edit opera
 
     expect(document.getElementById(FIELD_ID).value).toBe('{"device-2":5}');
 });
+
+describe("insertion-ordered rendering", () => {
+    const STEPS_FIELD_ID = "UsageJourney_uj_steps";
+
+    beforeEach(() => {
+        document.body.innerHTML = loadFixture("dict_count_steps_preselected");
+        refreshDictCountField(STEPS_FIELD_ID);
+    });
+
+    test("rows follow the selected map order, not the alphabetical options order", () => {
+        const rowLabels = [...document.querySelectorAll(
+            `#objects-already-selected-for-${STEPS_FIELD_ID} tr td:first-child`)]
+            .map((cell) => cell.textContent.trim());
+
+        expect(rowLabels).toEqual(["Search", "Browse", "Checkout"]);
+    });
+
+    test("editing a value keeps the order and updates the hidden JSON in place", () => {
+        updateDictCountEntry(STEPS_FIELD_ID, "step-browse", "3.5");
+
+        expect(document.getElementById(STEPS_FIELD_ID).value)
+            .toBe('{"step-search":1,"step-browse":3.5,"step-checkout":0.5}');
+        const rowLabels = [...document.querySelectorAll(
+            `#objects-already-selected-for-${STEPS_FIELD_ID} tr td:first-child`)]
+            .map((cell) => cell.textContent.trim());
+        expect(rowLabels).toEqual(["Search", "Browse", "Checkout"]);
+    });
+
+    test("the count column header carries the relationship wording", () => {
+        expect(document.querySelector("thead").textContent).toContain("Times per journey");
+    });
+});

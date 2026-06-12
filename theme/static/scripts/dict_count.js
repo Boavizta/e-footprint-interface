@@ -63,7 +63,12 @@ function refreshDictCountField(fieldId) {
         selectElement.appendChild(newOption);
     });
 
-    const selectedEntries = availableOptions.filter((option) => selectedMap[option.value] !== undefined);
+    // Iterate the selected map (insertion-ordered) rather than the alphabetical options list,
+    // so rows keep their domain order (e.g. usage journey steps in journey order).
+    const labelsByValue = new Map(availableOptions.map((option) => [option.value, option.label]));
+    const selectedEntries = Object.keys(selectedMap)
+        .filter((value) => labelsByValue.has(value))
+        .map((value) => ({value: value, label: labelsByValue.get(value)}));
     if (selectedEntries.length === 0) {
         tableElement.innerHTML = `
             <tr>

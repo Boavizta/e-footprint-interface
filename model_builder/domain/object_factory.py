@@ -203,7 +203,8 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
             new_entries = _build_explainable_object_dict_entries(value, model_web, attr_name)
             if new_entries != current_value:
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
-                changes_list.append([current_value, ExplainableObjectDict(new_entries)])
+                # Rebuild with the current dict's concrete type so weighted dicts keep their validation
+                changes_list.append([current_value, type(current_value)(new_entries)])
             continue
 
         if issubclass(annotation, ModelingObject):

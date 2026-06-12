@@ -53,21 +53,12 @@
                 "web_id": "UsageJourneyStep_jobs",
                 "attr_name": "jobs",
                 "label": "Jobs in this usage journey step",
-                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button>s triggered on the server side during this step. Multiple jobs can fire per step; the same <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> can appear in several steps.",
-                "input_type": "select_multiple",
-                "selected": [],
-                "unselected": [
-                    {
-                        "value": "efootprint_id1",
-                        "label": "option1"
-                    },
-                    {
-                        "value": "efootprint_id2",
-                        "label": "option2"
-                    }
-                ],
-                "selected_json": "[]",
-                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]"
+                "tooltip": "Mapping from <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> to how many times it is triggered on the server side during one occurrence of this step. The same <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> can appear in several steps, with its own count in each.",
+                "input_type": "dict_count",
+                "count_label": "Times per step",
+                "options": [],
+                "options_json": "[]",
+                "selected_json": "{}"
             }
         ],
         "advanced_fields": []
