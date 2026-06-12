@@ -32,7 +32,10 @@ def _build_explainable_object_dict_entries(value: Dict[str, Any], model_web: "Mo
         if key_id not in model_web.flat_efootprint_objs_dict:
             raise ValueError(f"Unknown modeling object id '{key_id}' in {attr_name}.")
         explainable_obj = ExplainableObject.from_json_dict(explainable_value_dict)
-        explainable_obj.source = Sources.USER_DATA
+        # Entries round-tripped by server-side flows (link, container removal) carry their original
+        # source explicitly; only genuinely user-entered values get stamped as user data.
+        explicit_source = explainable_value_dict.get("source")
+        explainable_obj.source = Source.from_json_dict(explicit_source) if explicit_source else Sources.USER_DATA
         entries[model_web.flat_efootprint_objs_dict[key_id]] = explainable_obj
     return entries
 

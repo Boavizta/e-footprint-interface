@@ -36,6 +36,34 @@ def test_delete_video_streaming_job(minimal_repository):
     assert job_id not in sd["UsageJourneyStep"][uj_step_id]["jobs"]
 
 
+def test_deleting_dict_child_preserves_sibling_weight_metadata(minimal_repository):
+    """Removing one entry from a weighted dict must not rewrite its siblings' weight metadata."""
+    uj_step_id = ModelWeb(minimal_repository).usage_journey_steps[0].efootprint_id
+    original_job_id = next(iter(minimal_repository.get_system_data()["Job"]))
+    existing_server_id = next(iter(minimal_repository.get_system_data()["Server"]))
+
+    service_id = create_object(
+        minimal_repository,
+        create_post_data_from_class_default_values("Test VideoStreaming", "VideoStreaming",
+                                                   efootprint_id_of_parent_to_link_to=existing_server_id),
+    )
+    job_id = create_object(
+        minimal_repository,
+        create_post_data_from_class_default_values("Test VideoStreamingJob", "VideoStreamingJob", service=service_id),
+        parent_id=uj_step_id,
+    )
+
+    created_entry = minimal_repository.get_system_data()["UsageJourneyStep"][uj_step_id]["jobs"][job_id]
+    assert created_entry["label"] == "Times per step"
+
+    delete_object(minimal_repository, job_id)
+
+    sibling_entry = minimal_repository.get_system_data()["UsageJourneyStep"][uj_step_id]["jobs"][original_job_id]
+    assert sibling_entry["value"] == 1
+    assert sibling_entry["label"] == "Times per step"
+    assert sibling_entry["source"] == "hypothesis"
+
+
 def test_delete_ecologits_job_then_service(default_system_repository_with_journey):
     """Deleting an EcoLogits job then its service clears both from system_data."""
     default_system_repository = default_system_repository_with_journey

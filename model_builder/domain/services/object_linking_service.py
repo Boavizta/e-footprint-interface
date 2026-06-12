@@ -27,8 +27,11 @@ class LinkResult:
 
 
 def serialize_weighted_dict_entry(value) -> dict:
-    """Serialize one weighted-dict value into the parsed-form-data shape, preserving its label."""
-    return {"value": value.value.magnitude, "unit": "dimensionless", "label": value.label}
+    """Serialize one weighted-dict value into the parsed-form-data shape, preserving its label and source."""
+    entry = {"value": value.value.magnitude, "unit": "dimensionless", "label": value.label}
+    if value.source is not None:
+        entry["source"] = value.source.to_json()
+    return entry
 
 
 class ObjectLinkingService:
@@ -69,9 +72,9 @@ class ObjectLinkingService:
         """Build the edit data to add a child to a parent's child attribute.
 
         For list attributes the edit data is the list of linked ids; for weighted dict attributes
-        it is a `{child_id: {value, unit, label}}` mapping with the new entry at count 1. Existing
-        entries are re-serialized as-is so their weights and labels are preserved; the new entry
-        inherits the static weight label from its siblings when the dict is not empty.
+        it is a `{child_id: {value, unit, label}}` mapping with the new entry at count 1, labeled
+        with the parent class's static weight label (`weight_labels`). Existing entries are
+        re-serialized as-is so their weights, labels and sources are preserved.
 
         Args:
             parent_obj: The parent modeling object
@@ -84,8 +87,8 @@ class ObjectLinkingService:
         existing_elements = getattr(parent_obj, attr_name)
         if isinstance(existing_elements, ExplainableObjectDict):
             entries = {key.id: serialize_weighted_dict_entry(value) for key, value in existing_elements.items()}
-            label = next(iter(entries.values()))["label"] if entries else "no label"
-            entries[child_id] = {"value": 1, "unit": "dimensionless", "label": label}
+            entries[child_id] = {
+                "value": 1, "unit": "dimensionless", "label": type(parent_obj).weight_labels[attr_name]}
             return {attr_name: entries}
         existing_ids = [elt.id for elt in existing_elements]
         existing_ids.append(child_id)

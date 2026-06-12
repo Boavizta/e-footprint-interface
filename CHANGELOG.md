@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   (`"ordered": true` in `field_ui_config.json`, currently `uj_steps`), so journey steps can be
   reordered from the journey panel as they could with the previous list widget.
 
+### Fixed
+- Weight entries built server-side (canvas-create / "Link existing") are labeled with the library's
+  static `weight_labels` wording (e.g. "Times per step") instead of "no label", and removing one
+  entry from a weighted dict no longer rewrites its siblings' weight sources to `user_data`
+  (sources now round-trip through container-removal deletes and link edits).
+
 ### Changed
 - Upgraded to e-footprint V22.0.0: `UsageJourney.uj_steps`, `UsageJourneyStep.jobs` and
   `RecurrentServerNeed.jobs` are now weighted dicts (step-and-job-multipliers feature). The journey

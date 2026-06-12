@@ -110,6 +110,7 @@ def test_edit_usage_journey_reorders_steps(default_system_repository):
     created_entries = sd["UsageJourney"][uj_id]["uj_steps"]
     assert list(created_entries) == [step_1, step_2, step_3]
     assert all(entry["value"] == 1 for entry in created_entries.values())
+    assert all(entry["label"] == "Times per journey" for entry in created_entries.values())
 
     new_order = [step_2, step_3, step_1]
     edit_object(
