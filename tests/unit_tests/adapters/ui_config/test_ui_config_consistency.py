@@ -9,8 +9,10 @@ from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
 from efootprint.utils.placeholder_resolver import extract_placeholders
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
+from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.services.object_linking_service import dict_relationship_registry
 
 
 # Interface-side abstract bases that legitimately key `class_ui_config.json` entries
@@ -85,4 +87,22 @@ def test_every_concrete_class_has_or_inherits_a_ui_config_entry():
     assert not missing, (
         f"Concrete classes without a CLASS_UI_CONFIG entry (own or via MRO): {missing}. "
         f"Add an entry, or list them in EXCLUDED_CLASSES_FROM_UI_CONFIG with a justification."
+    )
+
+
+# ---- field_ui_config.json membership wording ------------------------------
+
+def test_every_dict_relationship_has_membership_wording_configured():
+    """Membership sections render automatically for every dict relationship in the registry, so each
+    one must carry its UI wording in field_ui_config.json — otherwise the runtime falls back to
+    generic "Membership"/"Add" labels and the gap ships invisibly."""
+    missing = []
+    for parent_class, attr_name, _ in dict_relationship_registry():
+        config = FieldUIConfigProvider.get_config(attr_name, parent_class.__name__)
+        for key in ("membership_title", "add_to_label", "count_label"):
+            if not config.get(key):
+                missing.append(f"{parent_class.__name__}.{attr_name}: {key}")
+    assert not missing, (
+        f"Dict relationships missing membership wording in field_ui_config.json: {missing}. "
+        f"Add the keys under the attribute entry (class-qualified key if the attr name is shared)."
     )

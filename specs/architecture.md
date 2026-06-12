@@ -202,7 +202,23 @@ These require dedicated mutation endpoints in `views_dict_mutation.py`:
 - `POST /unlink-dict-entry/<parent_id>/<key_id>/` — remove entry.
 - `POST /link-dict-entry/<parent_id>/<key_id>/` — add entry with count=1.
 
-The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-entry count inputs. Cycle prevention for nested groups is enforced at the view layer by excluding the group itself and all its ancestors from the sub-group picker.
+The endpoints resolve the target dict attribute from `object_linking_service.dict_relationship_registry()`
+— a cached (parent class, attr name, child class) tuple built from the `ExplainableObjectDict[X]` init
+annotations of all modeling classes, the single source of truth for dict-relationship resolution.
+Because the URLs carry no attribute name, resolution assumes **(parent class, child class) uniqueness**:
+a class must not declare two dict attributes accepting the same child class — `resolve_dict_attr` raises
+if it ever does (an exact-pin unit test on the registry surfaces new library annotations deliberately).
+
+Child panels render one generic membership section per registry entry matching the object's class
+(`ModelingObjectWeb.dict_membership_sections`, the reverse view), with per-parent count edit, unlink and
+an "Add to…" select — all through `group_membership_section.html`. Section wording comes from
+`field_ui_config.json` (`membership_title` / `add_to_label`, class-qualified where the attr name is
+shared); a consistency test requires every registry entry to have its wording configured. The parents
+offered in the "Add to…" select pass through the `filter_available_membership_parents` hook on the web
+wrapper (default: exclude self; `EdgeDeviceGroupWeb` also excludes ancestor groups for cycle prevention,
+mirrored server-side by a guard in `link_dict_entry`).
+
+The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-entry count inputs on the parent panel; its options pass through the symmetric `filter_dict_count_options` hook (`EdgeDeviceGroupWeb` excludes the group itself and all its ancestors from the sub-group picker).
 
 ### "Link existing" flow
 

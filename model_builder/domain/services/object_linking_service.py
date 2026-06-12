@@ -47,7 +47,11 @@ def resolve_dict_attr(parent_obj: ModelingObject, key_obj: ModelingObject) -> st
     matches = list(dict.fromkeys(
         attr_name for parent_class, attr_name, child_class in dict_relationship_registry()
         if isinstance(parent_obj, parent_class) and isinstance(key_obj, child_class)))
-    if len(matches) != 1:
+    if not matches:
+        raise ValueError(
+            f"Object {key_obj.id} cannot be linked into any dict attribute of "
+            f"{type(parent_obj).__name__} {parent_obj.id}.")
+    if len(matches) > 1:
         raise ValueError(
             f"Object {key_obj.id} cannot be unambiguously linked into a dict attribute of "
             f"{type(parent_obj).__name__} {parent_obj.id} (matching attributes: {matches}).")
