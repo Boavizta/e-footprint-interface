@@ -168,6 +168,16 @@ class ModelingObjectWeb:
         return {}  # Default: no special HTMX configuration
 
     @property
+    def count_in_dict_container(self) -> Optional[float]:
+        """This entry's weight in the dict container it is rendered under; None for list children."""
+        if self.dict_container is None:
+            return None
+        from model_builder.domain.services.object_linking_service import resolve_dict_attr
+
+        attr_name = resolve_dict_attr(self.dict_container.modeling_obj, self._modeling_obj)
+        return getattr(self.dict_container.modeling_obj, attr_name)[self._modeling_obj].value.magnitude
+
+    @property
     def dict_membership_sections(self) -> List[dict]:
         """Reverse view of `ExplainableObjectDict` relationships, for child-panel membership sections.
 

@@ -103,7 +103,27 @@ class FormContextBuilder:
             if "available_groups_to_join" in overrides:
                 context["parent_group_membership_field"] = self._build_parent_group_membership_field(
                     overrides["available_groups_to_join"])
+        if efootprint_id_of_parent_to_link_to:
+            context["parent_link_count_field"] = self._build_parent_link_count_field(
+                efootprint_id_of_parent_to_link_to, object_type)
         return context
+
+    def _build_parent_link_count_field(self, parent_id: str, object_type: str) -> dict | None:
+        """Multiplier field for creation panels opened from a parent whose relationship is a weighted dict.
+
+        Prefilled at 1 by the template; None (no field) when the parent-child relationship is list-based.
+        """
+        from model_builder.domain.all_efootprint_classes import (
+            ABSTRACT_EFOOTPRINT_MODELING_CLASSES, MODELING_OBJECT_CLASSES_DICT)
+        from model_builder.domain.services.object_linking_service import resolve_dict_attr_for_classes
+
+        parent_obj = self.model_web.get_web_object_from_efootprint_id(parent_id).modeling_obj
+        child_class = MODELING_OBJECT_CLASSES_DICT.get(object_type) or ABSTRACT_EFOOTPRINT_MODELING_CLASSES[object_type]
+        attr_name = resolve_dict_attr_for_classes(type(parent_obj), child_class)
+        if attr_name is None:
+            return None
+        label = FieldUIConfigProvider.get_config(attr_name, type(parent_obj).__name__).get("count_label", "Count")
+        return {"label": label, "parent_name": parent_obj.name}
 
     def build_edition_context(self, obj_to_edit: "ModelingObjectWeb") -> dict:
         """Build form context for object edition.

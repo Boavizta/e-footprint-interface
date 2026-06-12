@@ -48,6 +48,49 @@ def test_create_usage_journey_step(default_system_repository_with_journey):
     assert len(ModelWeb(default_system_repository).usage_journey_steps) == nb_steps_before + 1
 
 
+def test_create_usage_journey_step_with_non_default_multiplier(default_system_repository_with_journey):
+    """Creating a step from its journey with `parent_link_count` lands a weighted dict entry."""
+    default_system_repository = default_system_repository_with_journey
+    uj_id = ModelWeb(default_system_repository).usage_journeys[0].efootprint_id
+
+    step_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Weighted Step", "UsageJourneyStep", jobs="", parent_link_count="2.5"),
+        parent_id=uj_id,
+    )
+
+    model_web = ModelWeb(default_system_repository)
+    journey = model_web.flat_efootprint_objs_dict[uj_id]
+    step = model_web.flat_efootprint_objs_dict[step_id]
+    assert journey.uj_steps[step].value.magnitude == 2.5
+    assert journey.uj_steps[step].label == "Times per journey"
+
+
+def test_create_job_with_non_default_multiplier(default_system_repository_with_journey):
+    default_system_repository = default_system_repository_with_journey
+    uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id
+    server_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Job Server", "Server",
+            Storage_form_data=create_post_data_from_class_default_values("Job Server Storage", "Storage"),
+        ),
+    )
+
+    job_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Triple Job", "Job", server=server_id, parent_link_count="3"),
+        parent_id=uj_step_id,
+    )
+
+    model_web = ModelWeb(default_system_repository)
+    step = model_web.flat_efootprint_objs_dict[uj_step_id]
+    job = model_web.flat_efootprint_objs_dict[job_id]
+    assert step.jobs[job].value.magnitude == 3
+    assert step.jobs[job].label == "Times per step"
+
+
 def test_create_usage_journey_step_for_unlinked_journey(default_system_repository):
     """Adding a UJStep to a freshly created UJ (not yet in any UsagePattern) must not raise."""
     new_uj_id = create_object(

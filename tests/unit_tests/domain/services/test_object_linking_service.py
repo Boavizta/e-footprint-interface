@@ -10,7 +10,8 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 
 from model_builder.domain.services.object_linking_service import (
-    dict_attr_names_for_class, dict_membership_specs, dict_relationship_registry, resolve_dict_attr)
+    dict_attr_names_for_class, dict_membership_specs, dict_relationship_registry, resolve_dict_attr,
+    resolve_dict_attr_for_classes)
 
 
 def test_registry_is_exactly_the_known_weighted_relationships():
@@ -45,6 +46,22 @@ def test_resolve_dict_attr_rejects_unmatched_pair():
     other_journey = UsageJourney("Other journey", uj_steps=[])
     with pytest.raises(ValueError, match="cannot be linked into any dict attribute"):
         resolve_dict_attr(journey, other_journey)
+
+
+@pytest.mark.parametrize(
+    ("parent_class", "child_class", "expected_attr"),
+    [
+        (UsageJourney, UsageJourneyStep, "uj_steps"),
+        (UsageJourneyStep, JobBase, "jobs"),
+        (UsageJourneyStep, Job, "jobs"),
+        (RecurrentServerNeed, JobBase, "jobs"),
+        (EdgeDeviceGroup, EdgeDevice, "edge_device_counts"),
+        (UsageJourney, Job, None),
+        (UsageJourneyStep, UsageJourneyStep, None),
+    ],
+)
+def test_resolve_dict_attr_for_classes(parent_class, child_class, expected_attr):
+    assert resolve_dict_attr_for_classes(parent_class, child_class) == expected_attr
 
 
 def test_dict_membership_specs_for_jobs_cover_steps_and_recurrent_server_needs():

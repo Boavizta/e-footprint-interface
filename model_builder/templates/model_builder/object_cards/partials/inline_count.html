@@ -1,0 +1,9 @@
+{% load label_filters %}
+{# Always-visible "× n" weight of `object` in the dict container it is rendered under. Count-only: #}
+{# no inline unlink on canvas step rows / job chips — removal stays in the side panels. #}
+{% if object.dict_container %}
+<span class="canvas-inline-count d-flex align-items-center" onclick="event.stopPropagation()">
+    <span class="text-addition me-1">&times;</span>
+    {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with count_only=True group_efootprint_id=object.dict_container.efootprint_id entry_efootprint_id=object.efootprint_id entry_count=object.count_in_dict_container|display_count group_name=object.dict_container.name min_val=0 step=object.count_in_dict_container|count_step extra_class="me-2" %}
+</span>
+{% endif %}

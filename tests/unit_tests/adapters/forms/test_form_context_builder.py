@@ -4,6 +4,7 @@ from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
+from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_group_web import EdgeDeviceGroupWeb
 from model_builder.domain.entities.web_core.hardware.edge.edge_device_web import EdgeDeviceWeb
 
@@ -96,3 +97,39 @@ class TestParentGroupMembershipField:
 
         assert group_context["parent_group_membership_field"]["tooltip"] \
             == device_context["parent_group_membership_field"]["tooltip"]
+
+
+class TestParentLinkCountField:
+    """Creation panels opened from a dict-relationship parent offer a multiplier field prefilled at 1."""
+
+    def test_step_creation_from_journey_offers_times_per_journey_field(self, minimal_model_web):
+        journey = minimal_model_web.usage_journeys[0]
+
+        context = FormContextBuilder(minimal_model_web).build_creation_context(
+            EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["UsageJourneyStep"], "UsageJourneyStep",
+            journey.efootprint_id)
+
+        assert context["parent_link_count_field"] == {"label": "Times per journey", "parent_name": journey.name}
+
+    def test_job_creation_from_step_offers_times_per_step_field(self, minimal_model_web):
+        step = minimal_model_web.usage_journey_steps[0]
+
+        context = FormContextBuilder(minimal_model_web).build_creation_context(
+            EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["JobBase"], "JobBase", step.efootprint_id)
+
+        assert context["parent_link_count_field"] == {"label": "Times per step", "parent_name": step.name}
+
+    def test_no_field_for_list_relationship_parent(self, minimal_model_web):
+        device = minimal_model_web.add_new_efootprint_object_to_system(
+            EdgeDevice.from_defaults("Bare Device", components=[]))
+
+        context = FormContextBuilder(minimal_model_web).build_creation_context(
+            EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["EdgeComponent"], "EdgeComponent", device.efootprint_id)
+
+        assert context["parent_link_count_field"] is None
+
+    def test_no_field_without_parent(self, minimal_model_web):
+        context = FormContextBuilder(minimal_model_web).build_creation_context(
+            EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["UsageJourneyStep"], "UsageJourneyStep")
+
+        assert "parent_link_count_field" not in context

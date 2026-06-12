@@ -1,4 +1,6 @@
 """Tests for usage journey and usage journey step creation/editing/deletion."""
+import re
+
 import pytest
 from playwright.sync_api import expect
 
@@ -115,12 +117,16 @@ class TestUsageJourneySteps:
         step_one_card.open_accordion()  # toggle: open → closed
         step_one_card.accordion_should_be_closed()
 
-        # Add second step — UJ card is re-rendered; step one's accordion should stay closed
+        # Add second step with a non-default "Times per journey" multiplier — the creation panel
+        # knows its parent journey, so it offers the relationship field prefilled at 1.
         uj_card.click_add_step_button()
         side_panel.fill_field("UsageJourneyStep_name", steps[1][0])
         side_panel.fill_field("UsageJourneyStep_user_time_spent", steps[1][1], clear_first=False)
+        expect(page.locator("#parent_link_count")).to_have_value("1")
+        side_panel.fill_field("parent_link_count", "2")
         side_panel.submit_and_wait_for_close()
         step_one_card.accordion_should_be_closed()
+        model_builder.get_object_card("UsageJourneyStep", steps[1][0]).inline_count_should_equal("2")
 
         # Add third step — accordion state still preserved
         uj_card.click_add_step_button()
@@ -132,3 +138,35 @@ class TestUsageJourneySteps:
         # Verify all steps were added
         for step_name, _ in steps:
             expect(page.locator("div").filter(has_text=step_name).first).to_be_visible()
+
+
+@pytest.mark.e2e
+class TestCanvasInlineCounts:
+    """Always-visible "× n" counts on step rows and job chips: immediate recalculation, dimming at 0."""
+
+    def test_inline_step_weight_and_job_count_edits_recalculate_and_dim(self, minimal_complete_model_builder):
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        step_card = model_builder.get_object_card("UsageJourneyStep", "Test Step")
+        step_card.should_exist().inline_count_should_equal("1")
+        # Step rows and job chips carry no inline unlink ✕ — removal stays in the side panels.
+        expect(step_card.locator.locator("button.unlink-btn")).to_have_count(0)
+        step_card.get_nested_object_card("Job", "Test Job").should_exist().inline_count_should_equal("1")
+
+        model_builder.open_result_panel()
+        initial_chart_data = page.evaluate("JSON.stringify(window.charts.barChart.data)")
+
+        # Editing the step weight inline posts and recomputes immediately — no panel round-trip.
+        step_card.set_inline_count("0.5")
+        page.wait_for_function(
+            "data => !!window.charts && !!window.charts.barChart && JSON.stringify(window.charts.barChart.data) !== data", arg=initial_chart_data)
+        step_card.inline_count_should_equal("0.5")
+
+        # A 0-count job chip dims (still in the model, visibly contributing nothing) and recomputes.
+        chart_after_step_edit = page.evaluate("JSON.stringify(window.charts.barChart.data)")
+        step_card.get_nested_object_card("Job", "Test Job").set_inline_count("0")
+        page.wait_for_function(
+            "data => !!window.charts && !!window.charts.barChart && JSON.stringify(window.charts.barChart.data) !== data", arg=chart_after_step_edit)
+        step_card.get_nested_object_card("Job", "Test Job").should_have_class("dict-entry-zero")
+        expect(step_card.locator).not_to_have_class(re.compile(r"\bdict-entry-zero\b"))

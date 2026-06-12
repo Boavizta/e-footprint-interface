@@ -143,8 +143,9 @@ class CreateObjectUseCase:
                             or getattr(web_class, 'skip_parent_linking', False))
 
             if input_data.parent_id and not skip_linking:
+                link_count = form_data.get("parent_link_count")
                 parent_was_linked, linked_parent_web_id = self._link_to_parent(
-                    model_web, added_obj, input_data.parent_id)
+                    model_web, added_obj, input_data.parent_id, 1 if link_count is None else link_count)
                 linked_parent_id = input_data.parent_id
 
             # 9. Post-create hook (e.g., ExternalAPI returned server instead of service)
@@ -187,7 +188,7 @@ class CreateObjectUseCase:
                 logger.error("An error occurred during new object creation, deleting the created object.")
             raise e
 
-    def _link_to_parent(self, model_web, added_obj, parent_id: str):
+    def _link_to_parent(self, model_web, added_obj, parent_id: str, count: float = 1):
         """Link the created object to its parent.
 
         Returns:
@@ -198,7 +199,7 @@ class CreateObjectUseCase:
 
         # Use domain service to find attribute and build edit data
         linking_service = ObjectLinkingService()
-        link_result = linking_service.link_child_to_parent(model_web, added_obj, parent_id)
+        link_result = linking_service.link_child_to_parent(model_web, added_obj, parent_id, count)
 
         # Edit the parent - edit_data is already in clean format (no prefixes)
         edit_object_from_parsed_data(link_result.edit_data, link_result.parent_web_obj)

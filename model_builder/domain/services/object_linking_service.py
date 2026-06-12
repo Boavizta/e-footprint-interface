@@ -58,6 +58,18 @@ def resolve_dict_attr(parent_obj: ModelingObject, key_obj: ModelingObject) -> st
     return matches[0]
 
 
+def resolve_dict_attr_for_classes(parent_class: type, child_class: type) -> Optional[str]:
+    """Dict attribute of `parent_class` that holds `child_class` entries, or None for list/other relations."""
+    matches = list(dict.fromkeys(
+        attr_name for registry_parent_class, attr_name, registry_child_class in dict_relationship_registry()
+        if issubclass(parent_class, registry_parent_class) and issubclass(child_class, registry_child_class)))
+    if len(matches) > 1:
+        raise ValueError(
+            f"{child_class.__name__} cannot be unambiguously linked into a dict attribute of "
+            f"{parent_class.__name__} (matching attributes: {matches}).")
+    return matches[0] if matches else None
+
+
 def dict_attr_names_for_class(parent_class: type) -> List[str]:
     """Names of all `ExplainableObjectDict[X]` attributes declared by `parent_class`'s init."""
     return list(dict.fromkeys(
@@ -114,18 +126,20 @@ class ObjectLinkingService:
                     return attr_name
         return None
 
-    def build_link_edit_data(self, parent_obj: ModelingObject, child_id: str, attr_name: str) -> dict:
+    def build_link_edit_data(self, parent_obj: ModelingObject, child_id: str, attr_name: str,
+                             count: float = 1) -> dict:
         """Build the edit data to add a child to a parent's child attribute.
 
         For list attributes the edit data is the list of linked ids; for weighted dict attributes
-        it is a `{child_id: {value, unit, label}}` mapping with the new entry at count 1, labeled
-        with the parent class's static weight label (`weight_labels`). Existing entries are
-        re-serialized as-is so their weights, labels and sources are preserved.
+        it is a `{child_id: {value, unit, label}}` mapping with the new entry at `count` (1 by
+        default), labeled with the parent class's static weight label (`weight_labels`). Existing
+        entries are re-serialized as-is so their weights, labels and sources are preserved.
 
         Args:
             parent_obj: The parent modeling object
             child_id: The ID of the child object to add
             attr_name: The name of the child attribute on the parent
+            count: The weight of the new entry (dict attributes only)
 
         Returns:
             Dict with the attribute name mapped to its post-link parsed value
@@ -134,13 +148,14 @@ class ObjectLinkingService:
         if isinstance(existing_elements, ExplainableObjectDict):
             entries = {key.id: serialize_weighted_dict_entry(value) for key, value in existing_elements.items()}
             entries[child_id] = {
-                "value": 1, "unit": "dimensionless", "label": type(parent_obj).weight_labels[attr_name]}
+                "value": count, "unit": "dimensionless", "label": type(parent_obj).weight_labels[attr_name]}
             return {attr_name: entries}
         existing_ids = [elt.id for elt in existing_elements]
         existing_ids.append(child_id)
         return {attr_name: existing_ids}
 
-    def link_child_to_parent(self, model_web: "ModelWeb", child_web_obj: "ModelingObjectWeb", parent_id: str) -> LinkResult:
+    def link_child_to_parent(self, model_web: "ModelWeb", child_web_obj: "ModelingObjectWeb", parent_id: str,
+                             count: float = 1) -> LinkResult:
         """Link a child object to its parent.
 
         This method finds the correct child attribute and builds the edit data,
@@ -150,6 +165,7 @@ class ObjectLinkingService:
             model_web: The ModelWeb instance
             child_web_obj: The child web object to link
             parent_id: The efootprint ID of the parent object
+            count: The weight of the new entry when the relationship is a weighted dict
 
         Returns:
             LinkResult containing the attribute name, edit data, and parent web object
@@ -164,6 +180,6 @@ class ObjectLinkingService:
         attr_name = self.find_child_attribute_for_child(parent_modeling_obj, child_modeling_obj)
         assert attr_name is not None, "A child attr name should always be found"
 
-        edit_data = self.build_link_edit_data(parent_modeling_obj, child_web_obj.efootprint_id, attr_name)
+        edit_data = self.build_link_edit_data(parent_modeling_obj, child_web_obj.efootprint_id, attr_name, count)
 
         return LinkResult(attr_name=attr_name, edit_data=edit_data, parent_web_obj=parent_web_obj)

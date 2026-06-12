@@ -1035,6 +1035,11 @@ input:disabled{
     }
 }
 
+// 0-multiplier canvas entries stay in the model but visibly contribute nothing.
+.dict-entry-zero {
+    opacity: 0.45;
+}
+
 .count-inline-edit.form-control {
     width: 3.25rem;
     padding: 2px 6px;

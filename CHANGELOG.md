@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Canvas inline counts for step and job multipliers: every step row of a journey card and every job
+  chip of a step or recurrent-server-need card shows an always-visible, directly editable "× n"
+  count (change → save → recalculation immediately, no side panel). Unlike edge group entries, these
+  rows carry no inline unlink ✕ — removal stays in the side panels. A 0-count entry dims on the
+  canvas (still in the model, visibly contributing nothing).
+- Creation panels opened from a parent with a weighted dict relationship (add step from a journey,
+  add job from a step or recurrent server need) offer the multiplier field directly
+  ("Times per journey" / "Times per step" / "Times per occurrence"), prefilled at 1
+  (`parent_link_count`).
 - Up/down row reordering in the `dict_count` widget for order-meaningful dict relationships
   (`"ordered": true` in `field_ui_config.json`, currently `uj_steps`), so journey steps can be
   reordered from the journey panel as they could with the previous list widget.

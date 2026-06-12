@@ -110,3 +110,14 @@ def display_count(value):
     except (TypeError, ValueError):
         return value
     return int(numeric) if numeric.is_integer() else value
+
+
+@register.filter
+def count_step(value):
+    """Step attribute compatible with a count's current decimals (for inline number inputs)."""
+    from model_builder.adapters.forms.form_field_generator import compatible_step_for_magnitude
+
+    try:
+        return compatible_step_for_magnitude(float(value))
+    except (TypeError, ValueError):
+        return "0.1"

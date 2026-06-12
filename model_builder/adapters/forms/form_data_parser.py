@@ -183,6 +183,9 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             parsed[parsed_key] = parsed_form
         elif attr_key == PARENT_GROUP_MEMBERSHIPS_FIELD:
             parsed[attr_key] = _parse_parent_group_memberships(value)
+        elif attr_key == "parent_link_count":
+            # UI-only creation field: weight of the new entry in the parent's weighted dict.
+            parsed[attr_key] = parse_count(value, error_prefix="Count") if value not in ("", None) else None
         elif attr_key in ["name", "id", "type_object_available", "efootprint_id_of_parent_to_link_to",
                           "csrfmiddlewaretoken", "recomputation"]:
             parsed[attr_key] = value

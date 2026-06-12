@@ -265,12 +265,16 @@ class TestWeightedRelationshipDictMutations:
             create_post_data_from_class_default_values("Second Journey", "UsageJourney", uj_steps=""),
         )
 
-        update_response = client.post(f"/model_builder/update-dict-count/{journey_id}/{step_id}/", {"count": "0.5"})
+        update_response = client.post(
+            f"/model_builder/update-dict-count/{journey_id}/{step_id}/", {"count": "0.5", "recomputation": "true"})
 
         assert update_response.status_code == 200
         model_web = _model_web(client)
         step = model_web.flat_efootprint_objs_dict[step_id]
-        assert model_web.flat_efootprint_objs_dict[journey_id].uj_steps[step].value.magnitude == 0.5
+        journey = model_web.flat_efootprint_objs_dict[journey_id]
+        assert journey.uj_steps[step].value.magnitude == 0.5
+        # The inline count post recomputes immediately: the persisted journey duration honors the new weight.
+        assert journey.duration.value == 0.5 * step.user_time_spent.value
 
         link_response = client.post(f"/model_builder/link-dict-entry/{step_id}/", {"parent_id": second_journey_id})
 

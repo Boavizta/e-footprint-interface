@@ -105,6 +105,8 @@
 
 ## Task 5 — Canvas inline counts and creation-flow field (repo: e-footprint-interface)
 
+**Status:** Done
+
 **Goal:** The remaining spec §4 surfaces: always-visible inline "× n" count on step rows and job chips (immediate recalculation, no unlink ✕ on these rows), 0-multiplier dimming, and the multiplier field in creation panels when created from a parent.
 
 **Files touched:**
