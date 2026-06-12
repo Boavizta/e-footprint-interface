@@ -366,16 +366,6 @@ class TestModelingObjectWeb:
 
     # --- children helpers ---
 
-    def test_children_property_name_requires_single_list_attribute(self):
-        class Container:  # pragma: no cover - only signature used
-            def __init__(self, items: List[int]):
-                self.items = items
-
-        base_model = StubModelingObject(efootprint_class=Container)
-        wrapper = ModelingObjectWeb(base_model, MagicMock())
-
-        assert wrapper.children_property_name == "items"
-
     def test_list_attr_names_and_accordion_children(self):
         class Container:  # pragma: no cover - only signature used
             def __init__(self, items: List[int], tags: List[str], name: str):

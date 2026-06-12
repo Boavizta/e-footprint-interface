@@ -188,7 +188,13 @@ Weighted dict relationships map each child to a dimensionless count `{object: co
   dict's insertion order (meaningful for steps); count-column wording (`count_label`) comes from
   `field_ui_config.json`, where `"ClassName.field"` keys override shared attribute names per parent class.
   The generic child machinery (`accordion_children`, `child_sections`, canvas-create linking with
-  count 1, "Link existing", container-removal deletion) treats dict children like list children.
+  count 1, "Link existing", container-removal deletion) treats dict children like list children;
+  server-built weight entries take their label from the library's `weight_labels` class metadata and
+  round-trip their source, so untouched siblings keep their provenance. Order-meaningful dicts
+  (`"ordered": true` in `field_ui_config.json`, e.g. `uj_steps`) get up/down row reordering in the
+  widget; entry order is the dict's insertion order server-side. Web classes whose `pre_delete`
+  removes their own dict memberships declare `handles_own_dict_memberships = True` so the generic
+  delete flow skips their dict containers.
 
 These require dedicated mutation endpoints in `views_dict_mutation.py`:
 

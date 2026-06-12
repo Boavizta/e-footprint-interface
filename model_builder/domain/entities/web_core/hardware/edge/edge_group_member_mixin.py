@@ -10,6 +10,10 @@ def _build_group_membership_row(group, magnitude) -> dict:
 class EdgeGroupMemberMixin:
     """Shared behavior for objects that can belong to EdgeDeviceGroups (devices and sub-groups)."""
 
+    # The pre_delete hook below removes self from parent group dicts, so the generic delete flow
+    # must not treat those dicts as child containers to edit (see DeleteObjectUseCase).
+    handles_own_dict_memberships = True
+
     @property
     def _parent_group_membership_dict(self) -> str:
         """Name of the ExplainableObjectDict attribute on the parent group that holds self."""

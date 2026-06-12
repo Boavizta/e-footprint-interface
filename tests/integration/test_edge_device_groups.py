@@ -36,6 +36,43 @@ def _unlink_group_device(repository, group_id: str, device_id: str) -> None:
     model_web.persist_to_cache()
 
 
+def test_edge_group_child_sections_and_edit_rendering_are_deliberate(default_system_repository, rf):
+    """Pins the expansion of child_sections to dict relationships for edge groups.
+
+    Since the step-and-job-multipliers feature, child_sections covers dict attributes, so edge
+    groups expose their two dict sections and enter the presenter's link-flipped sibling scan on
+    edits of their type. This test makes that deliberate: sections carry the expected attrs and
+    children, and an edge-group edit renders through the presenter without error.
+    """
+    from model_builder.adapters.forms.form_data_parser import parse_form_data
+    from model_builder.adapters.presenters import HtmxPresenter
+    from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
+
+    parent_id = create_object(
+        default_system_repository, create_post_data_from_class_default_values("Building", "EdgeDeviceGroup"))
+    child_id = create_object(
+        default_system_repository, create_post_data_from_class_default_values("Floor", "EdgeDeviceGroup"))
+    device_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values("Sensor", "EdgeDevice", components=""))
+    _link_group_to_group(default_system_repository, parent_id, child_id, count=2)
+    _set_group_device_count(default_system_repository, parent_id, device_id, count=3)
+
+    model_web = _model_web(default_system_repository)
+    sections = model_web.get_web_object_from_efootprint_id(parent_id).child_sections
+    assert [(section["attr_name"], section["type_str"]) for section in sections] == [
+        ("sub_group_counts", "EdgeDeviceGroup"), ("edge_device_counts", "EdgeDevice")]
+    assert [[child.efootprint_id for child in section["children"]] for section in sections] == [
+        [child_id], [device_id]]
+
+    parsed = parse_form_data({"name": "Building renamed", "csrfmiddlewaretoken": "token"}, "EdgeDeviceGroup")
+    output = EditObjectUseCase(model_web).execute(EditObjectInput(object_id=parent_id, form_data=parsed))
+    response = HtmxPresenter(rf.post("/model_builder/edit-object/"), model_web).present_edited_object(output)
+
+    assert response.status_code == 200
+    assert "Building renamed" in response.content.decode()
+
+
 def test_deleting_parent_group_promotes_child_groups_back_to_root_groups(default_system_repository):
     parent_id = create_object(
         default_system_repository,

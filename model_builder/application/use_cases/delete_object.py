@@ -56,6 +56,20 @@ class DeleteObjectUseCase:
         """
         self.model_web = model_web
 
+    @staticmethod
+    def _container_removal_targets(web_obj, web_class):
+        """Containers whose list/dict attribute must be edited to remove web_obj before deletion.
+
+        Classes that declare `handles_own_dict_memberships` (e.g. edge group members) remove
+        themselves from their parent dicts in their pre_delete hook, so their dict containers
+        are excluded here.
+        """
+        list_containers, list_attr_name = web_obj.list_containers_and_attr_name_in_list_container
+        dict_containers, dict_attr_name = web_obj.dict_containers_and_attr_name_in_dict_container
+        if web_class and getattr(web_class, "handles_own_dict_memberships", False):
+            dict_containers = []
+        return list_containers, list_attr_name, dict_containers, dict_attr_name
+
     def check_can_delete(self, object_id: str) -> DeleteCheckResult:
         """Check if an object can be deleted and gather context for confirmation.
 
@@ -70,12 +84,7 @@ class DeleteObjectUseCase:
         web_obj = self.model_web.get_web_object_from_efootprint_id(object_id)
         web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(web_obj.class_as_simple_str)
 
-        list_containers, _ = web_obj.list_containers_and_attr_name_in_list_container
-        dict_containers, _ = web_obj.dict_containers_and_attr_name_in_dict_container
-        # Classes with a pre_delete hook (e.g. edge group members) handle their dict memberships
-        # themselves on the normal deletion path, so their dict containers don't count here.
-        if web_class and hasattr(web_class, 'pre_delete'):
-            dict_containers = []
+        list_containers, _, dict_containers, _ = self._container_removal_targets(web_obj, web_class)
         child_containers = list_containers + dict_containers
 
         # Check for blocking containers (non-child references)
@@ -131,12 +140,8 @@ class DeleteObjectUseCase:
         object_type = web_obj.class_as_simple_str
         web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(object_type)
 
-        list_containers, attr_name_in_list_container = web_obj.list_containers_and_attr_name_in_list_container
-        dict_containers, attr_name_in_dict_container = web_obj.dict_containers_and_attr_name_in_dict_container
-        # Classes with a pre_delete hook (e.g. edge group members) handle their dict memberships
-        # themselves on the normal deletion path below.
-        if web_class and hasattr(web_class, 'pre_delete'):
-            dict_containers = []
+        list_containers, attr_name_in_list_container, dict_containers, attr_name_in_dict_container = (
+            self._container_removal_targets(web_obj, web_class))
 
         if list_containers or dict_containers:
             # Child deletion: remove from all list and dict containers using domain service

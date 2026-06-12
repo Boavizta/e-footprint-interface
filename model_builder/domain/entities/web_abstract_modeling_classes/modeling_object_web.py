@@ -350,8 +350,7 @@ class ModelingObjectWeb:
         dict_attr_names = []
         for attr_name, param_info in init_signature.items():
             annotation_origin = get_origin(param_info.annotation)
-            if annotation_origin in (dict, Dict) or (
-                    isinstance(annotation_origin, type) and issubclass(annotation_origin, ExplainableObjectDict)):
+            if isinstance(annotation_origin, type) and issubclass(annotation_origin, ExplainableObjectDict):
                 dict_attr_names.append(attr_name)
         return dict_attr_names
 
@@ -395,15 +394,6 @@ class ModelingObjectWeb:
             type_arg = get_args(init_signature[attr_name].annotation)[0]
             child_attrs[attr_name] = type_arg if isinstance(type_arg, str) else type_arg.__name__
         return child_attrs
-
-    @property
-    def children_property_name(self) -> str:
-        """Property name for accessing children (e.g., 'jobs'). Assumes a single child attr."""
-        child_attr_names = list(self.child_attr_names_to_child_types_str)
-        assert len(child_attr_names) == 1, (
-            f"{self} should have exactly one child attribute, found: {child_attr_names}.")
-
-        return child_attr_names[0]
 
     @property
     def child_object_types_str(self) -> List[str]:
