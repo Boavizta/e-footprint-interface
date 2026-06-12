@@ -211,7 +211,7 @@ if it ever does (an exact-pin unit test on the registry surfaces new library ann
 
 Child panels render one generic membership section per registry entry matching the object's class
 (`ModelingObjectWeb.dict_membership_sections`, the reverse view), with per-parent count edit, unlink and
-an "Add to…" select — all through `group_membership_section.html`. Section wording comes from
+an "Add to…" select — all through `dict_membership_section.html`. Section wording comes from
 `field_ui_config.json` (`membership_title` / `add_to_label`, class-qualified where the attr name is
 shared); a consistency test requires every registry entry to have its wording configured. The parents
 offered in the "Add to…" select pass through the `filter_available_membership_parents` hook on the web

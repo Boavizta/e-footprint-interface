@@ -1111,7 +1111,7 @@ input:disabled{
     color: var(--new-primary) !important;
 }
 
-.group-membership-row {
+.dict-membership-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -1126,7 +1126,7 @@ input:disabled{
         border-color: var(--gray-300);
     }
 
-    .group-membership-name {
+    .dict-membership-name {
         flex: 1;
         min-width: 0;
         color: var(--dark-blue);

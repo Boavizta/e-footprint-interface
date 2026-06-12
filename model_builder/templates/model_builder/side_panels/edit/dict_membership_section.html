@@ -1,12 +1,12 @@
-<div id="group-membership-section-{{ object_to_edit.efootprint_id }}">
+<div id="dict-membership-section-{{ object_to_edit.efootprint_id }}">
 {% with panel_id=object_to_edit.efootprint_id %}
 {% for section in dict_membership_sections %}
-    <div class="group-membership-section border rounded-2 p-3 mb-3">
+    <div class="dict-membership-section border rounded-2 p-3 mb-3">
         <h6 class="mb-2"><b>{{ section.title }}</b></h6>
         {% for membership in section.memberships %}
-            <div class="group-membership-row"
-                 data-group-membership-name="{{ membership.parent_name }}">
-                <span class="group-membership-name">{{ membership.parent_name }}</span>
+            <div class="dict-membership-row"
+                 data-dict-membership-name="{{ membership.parent_name }}">
+                <span class="dict-membership-name">{{ membership.parent_name }}</span>
                 {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=membership.parent_id entry_efootprint_id=panel_id entry_count=membership.count group_name=membership.parent_name min_val=0 step=membership.step extra_class="" %}
             </div>
         {% endfor %}

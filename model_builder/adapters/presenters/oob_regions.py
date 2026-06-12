@@ -29,15 +29,15 @@ def _render_edge_device_lists(model_web, params) -> str:
     )
 
 
-def _render_group_membership_section(model_web, params) -> str:
+def _render_dict_membership_section(model_web, params) -> str:
     from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 
     object_id = params["object_id"]
     web_obj = model_web.get_web_object_from_efootprint_id(object_id)
-    context = FormContextBuilder.build_group_membership_section_context(web_obj)
+    context = FormContextBuilder.build_dict_membership_section_context(web_obj)
     section_html = render_to_string(
-        "model_builder/side_panels/edit/group_membership_section.html", context)
-    return f"<div hx-swap-oob='outerHTML:#group-membership-section-{object_id}'>{section_html}</div>"
+        "model_builder/side_panels/edit/dict_membership_section.html", context)
+    return f"<div hx-swap-oob='outerHTML:#dict-membership-section-{object_id}'>{section_html}</div>"
 
 
 def _render_model_canvas(model_web, params) -> str:
@@ -71,7 +71,7 @@ def _render_edge_modeling_toggle(model_web, params) -> str:
 OOB_REGION_RENDERERS: Dict[str, Callable] = {
     "edge_device_lists": _render_edge_device_lists,
     "edge_modeling_toggle": _render_edge_modeling_toggle,
-    "group_membership_section": _render_group_membership_section,
+    "dict_membership_section": _render_dict_membership_section,
     "model_canvas": _render_model_canvas,
     "results_buttons": _render_results_buttons,
 }

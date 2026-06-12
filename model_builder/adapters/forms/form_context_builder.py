@@ -124,11 +124,11 @@ class FormContextBuilder:
 
         strategy = strategy_class(self.model_web)
         context = strategy.build_edition_context(obj_to_edit, config)
-        context.update(self.build_group_membership_section_context(obj_to_edit))
+        context.update(self.build_dict_membership_section_context(obj_to_edit))
         return context
 
     @staticmethod
-    def build_group_membership_section_context(web_obj: "ModelingObjectWeb") -> dict:
+    def build_dict_membership_section_context(web_obj: "ModelingObjectWeb") -> dict:
         """Build the dict-membership part of an edition context for a web object.
 
         The domain provides the raw sections (one per dict relationship whose child annotation

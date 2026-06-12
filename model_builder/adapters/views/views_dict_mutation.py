@@ -47,7 +47,7 @@ def _run_edit_and_present(request, model_web: ModelWeb, parent_obj, form_data: d
     use_case = EditObjectUseCase(model_web)
     # Preserve the side-panel sync side-effect: if a child object's edit panel is currently
     # open, its membership section needs to refresh too.
-    extra_oob_regions = [OobRegion.make("group_membership_section", object_id=panel_object_id)]
+    extra_oob_regions = [OobRegion.make("dict_membership_section", object_id=panel_object_id)]
     output = use_case.execute(EditObjectInput(
         object_id=parent_obj.id, form_data=form_data, extra_oob_regions=extra_oob_regions))
     presenter = HtmxPresenter(request, model_web)

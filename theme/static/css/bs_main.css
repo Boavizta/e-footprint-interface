@@ -22637,7 +22637,7 @@ input:disabled {
   color: var(--new-primary) !important;
 }
 
-.group-membership-row {
+.dict-membership-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -22648,10 +22648,10 @@ input:disabled {
   margin-bottom: 0.5rem;
   transition: border-color 0.15s;
 }
-.group-membership-row:hover {
+.dict-membership-row:hover {
   border-color: var(--gray-300);
 }
-.group-membership-row .group-membership-name {
+.dict-membership-row .dict-membership-name {
   flex: 1;
   min-width: 0;
   color: var(--dark-blue);
@@ -22660,7 +22660,7 @@ input:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.group-membership-row .unlink-btn.btn {
+.dict-membership-row .unlink-btn.btn {
   font-size: 0.75rem;
   padding: 4px 8px;
 }

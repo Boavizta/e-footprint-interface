@@ -234,10 +234,10 @@ class TestEdgeDeviceGroups:
         side_panel = model_builder.side_panel.should_be_visible().should_contain_text("Group membership")
         side_panel.should_contain_text(group_name)
 
-        side_panel.set_group_membership_count(group_name, "6")
+        side_panel.set_dict_membership_count(group_name, "6")
         rack_card.get_nested_object_card("EdgeDevice", device_name).inline_count_should_equal("6")
 
-        side_panel.remove_group_membership(group_name)
+        side_panel.remove_dict_membership(group_name)
         model_builder.ungrouped_edge_device_should_exist(device_name)
         expect(rack_card.locator.locator("div[id^='EdgeDevice-']").filter(has_text=device_name)).to_have_count(0)
 
