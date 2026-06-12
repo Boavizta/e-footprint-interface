@@ -11,10 +11,6 @@ The key principle is:
 import json
 from typing import TYPE_CHECKING, Type
 
-from model_builder.adapters.forms.form_field_generator import (
-    compatible_step_for_magnitude,
-    format_magnitude_for_number_input,
-)
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.adapters.forms.strategies import (
@@ -152,8 +148,8 @@ class FormContextBuilder:
         """Build the dict-membership part of an edition context for a web object.
 
         The domain provides the raw sections (one per dict relationship whose child annotation
-        matches the object's class); this hydrates them with UI wording from `field_ui_config.json`
-        and <input type=number>-ready count strings.
+        matches the object's class); this hydrates them with UI wording from `field_ui_config.json`.
+        Count and step formatting happens in the template via the `display_count` / `count_step` filters.
         """
         return {
             "object_to_edit": web_obj,
@@ -170,14 +166,6 @@ class FormContextBuilder:
             "section_id": f"{section['parent_class_name']}-{section['attr_name']}",
             "title": config.get("membership_title", "Membership"),
             "add_to_label": config.get("add_to_label", "Add"),
-            "memberships": [
-                {
-                    **membership,
-                    "count": format_magnitude_for_number_input(membership["count"]),
-                    "step": compatible_step_for_magnitude(membership["count"]),
-                }
-                for membership in section["memberships"]
-            ],
         }
 
     @staticmethod

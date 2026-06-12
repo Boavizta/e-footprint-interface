@@ -1,3 +1,4 @@
+{% load label_filters %}
 <div id="dict-membership-section-{{ object_to_edit.efootprint_id }}">
 {% with panel_id=object_to_edit.efootprint_id %}
 {% for section in dict_membership_sections %}
@@ -7,7 +8,7 @@
             <div class="dict-membership-row"
                  data-dict-membership-name="{{ membership.parent_name }}">
                 <span class="dict-membership-name">{{ membership.parent_name }}</span>
-                {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=membership.parent_id entry_efootprint_id=panel_id entry_count=membership.count group_name=membership.parent_name min_val=0 step=membership.step extra_class="" %}
+                {% include 'model_builder/object_cards/partials/dict_entry_count_unlink.html' with parent_efootprint_id=membership.parent_id entry_efootprint_id=panel_id entry_count=membership.count|display_count parent_name=membership.parent_name min_val=0 step=membership.count|count_step extra_class="" %}
             </div>
         {% endfor %}
         {% if section.available_parents %}

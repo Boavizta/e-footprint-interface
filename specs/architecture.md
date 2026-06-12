@@ -220,7 +220,7 @@ mirrored server-side by a guard in `link_dict_entry`).
 
 The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-entry count inputs on the parent panel; its options pass through the symmetric `filter_dict_count_options` hook (`EdgeDeviceGroupWeb` excludes the group itself and all its ancestors from the sub-group picker).
 
-Dict relationships now cover journeys/steps/needs with a shared inline-count UX: canvas step rows and job chips render an always-visible "× n" count via `partials/inline_count.html` (count-only mode of `group_entry_count_unlink.html` — no inline unlink there, unlike edge group entries), 0-count entries get the `dict-entry-zero` dimming class, and creation panels opened from a dict-relationship parent offer a `parent_link_count` multiplier field (prefilled at 1) that the create use case passes to `ObjectLinkingService.link_child_to_parent`.
+Dict relationships now cover journeys/steps/needs with a shared inline-count UX: canvas step rows and job chips render an always-visible "× n" count via `partials/inline_count.html` (count-only mode of `dict_entry_count_unlink.html` — no inline unlink there, unlike edge group entries), 0-count entries get the `dict-entry-zero` dimming class, and creation panels opened from a dict-relationship parent offer a `parent_link_count` multiplier field (prefilled at 1) that the create use case passes to `ObjectLinkingService.link_child_to_parent`.
 
 ### "Link existing" flow
 
