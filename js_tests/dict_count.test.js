@@ -3,6 +3,7 @@ const path = require("path");
 
 const {
     addDictCountEntry,
+    moveDictCountEntry,
     removeDictCountEntry,
     refreshDictCountField,
     updateDictCountEntry,
@@ -114,5 +115,65 @@ describe("insertion-ordered rendering", () => {
 
     test("the count column header carries the relationship wording", () => {
         expect(document.querySelector("thead").textContent).toContain("Times per journey");
+    });
+});
+
+describe("row reordering", () => {
+    const STEPS_FIELD_ID = "UsageJourney_uj_steps";
+
+    function rowLabels() {
+        return [...document.querySelectorAll(
+            `#objects-already-selected-for-${STEPS_FIELD_ID} tr td:first-child`)]
+            .map((cell) => cell.textContent.trim());
+    }
+
+    beforeEach(() => {
+        document.body.innerHTML = loadFixture("dict_count_steps_preselected");
+        global.tagFormAsModified.mockClear();
+        refreshDictCountField(STEPS_FIELD_ID);
+    });
+
+    test("moving a row down swaps it with its successor and updates the hidden JSON key order", () => {
+        moveDictCountEntry(STEPS_FIELD_ID, "step-search", "down");
+
+        expect(rowLabels()).toEqual(["Browse", "Search", "Checkout"]);
+        expect(document.getElementById(STEPS_FIELD_ID).value)
+            .toBe('{"step-browse":2,"step-search":1,"step-checkout":0.5}');
+        expect(global.tagFormAsModified).toHaveBeenCalled();
+    });
+
+    test("moving a row up swaps it with its predecessor and keeps counts attached to their entries", () => {
+        moveDictCountEntry(STEPS_FIELD_ID, "step-checkout", "up");
+
+        expect(rowLabels()).toEqual(["Search", "Checkout", "Browse"]);
+        expect(document.getElementById(STEPS_FIELD_ID).value)
+            .toBe('{"step-search":1,"step-checkout":0.5,"step-browse":2}');
+    });
+
+    test("moving the first row up and the last row down are no-ops", () => {
+        moveDictCountEntry(STEPS_FIELD_ID, "step-search", "up");
+        moveDictCountEntry(STEPS_FIELD_ID, "step-checkout", "down");
+
+        expect(rowLabels()).toEqual(["Search", "Browse", "Checkout"]);
+        expect(global.tagFormAsModified).not.toHaveBeenCalled();
+    });
+
+    test("ordered fields render move buttons, except at the boundaries", () => {
+        const rows = [...document.querySelectorAll(`#objects-already-selected-for-${STEPS_FIELD_ID} tr`)];
+        expect(rows[0].querySelectorAll("button[aria-label='Move up']").length).toBe(0);
+        expect(rows[0].querySelectorAll("button[aria-label='Move down']").length).toBe(1);
+        expect(rows[1].querySelectorAll("button[aria-label='Move up']").length).toBe(1);
+        expect(rows[1].querySelectorAll("button[aria-label='Move down']").length).toBe(1);
+        expect(rows[2].querySelectorAll("button[aria-label='Move up']").length).toBe(1);
+        expect(rows[2].querySelectorAll("button[aria-label='Move down']").length).toBe(0);
+    });
+
+    test("unordered fields render no move buttons", () => {
+        document.body.innerHTML = loadFixture("dict_count_two_options_empty");
+        document.getElementById("select-new-object-EdgeDeviceGroup_edge_device_counts").value = "device-1";
+        addDictCountEntry("EdgeDeviceGroup_edge_device_counts");
+
+        expect(document.querySelectorAll("button[aria-label='Move up'], button[aria-label='Move down']").length)
+            .toBe(0);
     });
 });

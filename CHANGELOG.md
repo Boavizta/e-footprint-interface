@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Up/down row reordering in the `dict_count` widget for order-meaningful dict relationships
+  (`"ordered": true` in `field_ui_config.json`, currently `uj_steps`), so journey steps can be
+  reordered from the journey panel as they could with the previous list widget.
+
 ### Changed
 - Upgraded to e-footprint V22.0.0: `UsageJourney.uj_steps`, `UsageJourneyStep.jobs` and
   `RecurrentServerNeed.jobs` are now weighted dicts (step-and-job-multipliers feature). The journey

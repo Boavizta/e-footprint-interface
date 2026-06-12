@@ -183,7 +183,7 @@ def render_source_table_row(case_ctx):
 # dict_count.test.js — dict_count.html
 # ---------------------------------------------------------------------------
 
-def dict_count_field(web_id, options, selected=None, count_label=None):
+def dict_count_field(web_id, options, selected=None, count_label=None, ordered=False):
     selected = selected or {}
     return {
         "web_id": web_id,
@@ -191,6 +191,7 @@ def dict_count_field(web_id, options, selected=None, count_label=None):
         "selected_json": json.dumps(selected),
         "options_json": json.dumps(options),
         "count_label": count_label,
+        "ordered": ordered,
     }
 
 
@@ -211,6 +212,7 @@ DICT_COUNT_CASES = {
         ],
         selected={"step-search": 1, "step-browse": 2, "step-checkout": 0.5},
         count_label="Times per journey",
+        ordered=True,
     ),
 }
 

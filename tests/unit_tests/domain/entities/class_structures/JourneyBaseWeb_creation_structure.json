@@ -35,6 +35,7 @@
                 "tooltip": "Ordered mapping from <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"UsageJourneyStep\">Usage journey step</button> to how many times the step occurs in one journey. The journey duration is the sum of step durations weighted by their number of occurrences.",
                 "input_type": "dict_count",
                 "count_label": "Times per journey",
+                "ordered": true,
                 "options": [],
                 "options_json": "[]",
                 "selected_json": "{}"

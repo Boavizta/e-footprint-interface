@@ -10,6 +10,26 @@ function _setDictCountSelectedMap(fieldId, selectedMap) {
     document.getElementById("selected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(selectedMap);
 }
 
+function _isDictCountOrdered(fieldId) {
+    return document.getElementById("selected_data_" + fieldId).dataset.ordered === "true";
+}
+
+function moveDictCountEntry(fieldId, objectId, direction) {
+    const selectedMap = _getDictCountSelectedMap(fieldId);
+    const keys = Object.keys(selectedMap);
+    const index = keys.indexOf(objectId);
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (index === -1 || targetIndex < 0 || targetIndex >= keys.length) {
+        return;
+    }
+    [keys[index], keys[targetIndex]] = [keys[targetIndex], keys[index]];
+    const reorderedMap = {};
+    keys.forEach((key) => { reorderedMap[key] = selectedMap[key]; });
+    _setDictCountSelectedMap(fieldId, reorderedMap);
+    refreshDictCountField(fieldId);
+    tagFormAsModified();
+}
+
 function addDictCountEntry(fieldId) {
     const selectElement = document.getElementById("select-new-object-" + fieldId);
     const objectId = selectElement.value;
@@ -75,7 +95,23 @@ function refreshDictCountField(fieldId) {
                 <td colspan="3"><span class="text-muted">No values selected</span></td>
             </tr>`;
     } else {
-        tableElement.innerHTML = selectedEntries.map((option) => `
+        const ordered = _isDictCountOrdered(fieldId);
+        tableElement.innerHTML = selectedEntries.map((option, index) => {
+            const upButton = ordered && index !== 0 ? `
+                    <button type="button" class="btn btn-white border-0 rounded-2 p-1" aria-label="Move up"
+                        onclick="event.stopPropagation();moveDictCountEntry('${fieldId}', '${option.value}', 'up')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/>
+                        </svg>
+                    </button>` : "";
+            const downButton = ordered && index !== selectedEntries.length - 1 ? `
+                    <button type="button" class="btn btn-white border-0 rounded-2 p-1" aria-label="Move down"
+                        onclick="event.stopPropagation();moveDictCountEntry('${fieldId}', '${option.value}', 'down')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </button>` : "";
+            return `
             <tr>
                 <td class="width-70">${option.label}</td>
                 <td class="width-20">
@@ -83,7 +119,7 @@ function refreshDictCountField(fieldId) {
                         value="${selectedMap[option.value]}"
                         onchange="event.stopPropagation();updateDictCountEntry('${fieldId}', '${option.value}', this.value)">
                 </td>
-                <td class="width-10 text-end">
+                <td class="width-10 text-end text-nowrap">${upButton}${downButton}
                     <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2"
                         onclick="event.stopPropagation();removeDictCountEntry('${fieldId}', '${option.value}')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
@@ -91,7 +127,8 @@ function refreshDictCountField(fieldId) {
                         </svg>
                     </button>
                 </td>
-            </tr>`).join("");
+            </tr>`;
+        }).join("");
     }
 
     const disabled = unselectedOptions.length === 0;
@@ -109,6 +146,7 @@ function refreshDictCountField(fieldId) {
 if (typeof module !== "undefined") {
     module.exports = {
         addDictCountEntry,
+        moveDictCountEntry,
         removeDictCountEntry,
         refreshDictCountField,
         updateDictCountEntry,

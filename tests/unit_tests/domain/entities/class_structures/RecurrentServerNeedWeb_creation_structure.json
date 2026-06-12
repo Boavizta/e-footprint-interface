@@ -53,6 +53,7 @@
                 "tooltip": "Mapping from server-side <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> to how many times it is invoked by each occurrence of this need.",
                 "input_type": "dict_count",
                 "count_label": "Times per occurrence",
+                "ordered": false,
                 "options": [],
                 "options_json": "[]",
                 "selected_json": "{}"

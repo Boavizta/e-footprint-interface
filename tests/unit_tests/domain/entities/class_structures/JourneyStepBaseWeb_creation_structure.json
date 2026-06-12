@@ -56,6 +56,7 @@
                 "tooltip": "Mapping from <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> to how many times it is triggered on the server side during one occurrence of this step. The same <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Job\">Job</button> can appear in several steps, with its own count in each.",
                 "input_type": "dict_count",
                 "count_label": "Times per step",
+                "ordered": false,
                 "options": [],
                 "options_json": "[]",
                 "selected_json": "{}"

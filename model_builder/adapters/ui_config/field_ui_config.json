@@ -291,7 +291,8 @@
             "UsageJourney"
         ],
         "label": "Usage journey steps in this usage journey",
-        "count_label": "Times per journey"
+        "count_label": "Times per journey",
+        "ordered": true
     },
     "usage_journey": {
         "modeling_obj_containers": [

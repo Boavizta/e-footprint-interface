@@ -84,10 +84,12 @@ def build_dict_count_field_from_annotation(
     )
     selected_raw = default_values.get(attr_name) or {}
     selected_counts = {key.id: count.value.magnitude for key, count in selected_raw.items()}
+    field_config = FieldUIConfigProvider.get_config(attr_name, class_name)
     return {
         "input_type": "dict_count",
         "web_id": f"{class_name}_{attr_name}",
-        "count_label": FieldUIConfigProvider.get_config(attr_name, class_name).get("count_label", "Count"),
+        "count_label": field_config.get("count_label", "Count"),
+        "ordered": field_config.get("ordered", False),
         "options": options,
         "options_json": json.dumps(options),
         "selected_json": json.dumps(selected_counts),
