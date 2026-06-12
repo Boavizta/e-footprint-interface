@@ -67,6 +67,23 @@ def test_create_usage_journey_step_with_non_default_multiplier(default_system_re
     assert journey.uj_steps[step].label == "Times per journey"
 
 
+def test_create_usage_journey_step_with_invalid_multiplier_is_rejected(default_system_repository_with_journey):
+    """A bad `parent_link_count` fails at parse time with a clear message and creates no object."""
+    default_system_repository = default_system_repository_with_journey
+    uj_id = ModelWeb(default_system_repository).usage_journeys[0].efootprint_id
+    nb_steps_before = len(ModelWeb(default_system_repository).usage_journey_steps)
+
+    with pytest.raises(ValueError, match="Count must be positive"):
+        create_object(
+            default_system_repository,
+            create_post_data_from_class_default_values(
+                "Bad Step", "UsageJourneyStep", jobs="", parent_link_count="-1"),
+            parent_id=uj_id,
+        )
+
+    assert len(ModelWeb(default_system_repository).usage_journey_steps) == nb_steps_before
+
+
 def test_create_job_with_non_default_multiplier(default_system_repository_with_journey):
     default_system_repository = default_system_repository_with_journey
     uj_step_id = ModelWeb(default_system_repository).usage_journey_steps[0].efootprint_id

@@ -292,3 +292,20 @@ class TestMetadataSuffixes:
         }
         result = parse_form_data(form_data, "Server")
         assert "_metadata_only" not in result["compute"]
+
+
+class TestParentLinkCount:
+    """Tests for the UI-only `parent_link_count` creation field."""
+
+    def test_parses_numeric_value(self):
+        result = parse_form_data({"parent_link_count": "2.5"}, "UsageJourneyStep")
+        assert result["parent_link_count"] == 2.5
+
+    def test_empty_value_becomes_none(self):
+        result = parse_form_data({"parent_link_count": ""}, "UsageJourneyStep")
+        assert result["parent_link_count"] is None
+
+    @pytest.mark.parametrize(("raw_value", "message"), [("-1", "must be positive"), ("abc", "must be a number")])
+    def test_rejects_invalid_values(self, raw_value, message):
+        with pytest.raises(ValueError, match=message):
+            parse_form_data({"parent_link_count": raw_value}, "UsageJourneyStep")

@@ -32,6 +32,15 @@ Part of the tutorial-and-documentation Step 5. Adds the navbar edge-mode toggle 
 
 Tutorial-and-documentation Step 6. Template picker, three starter templates (e-commerce, AI chatbot, IoT industrial), guided first-run tour.
 
+### Candidate refactor — converge creation-time linking paths
+
+Two creation-time linking mechanisms coexist: edge devices/groups link through the
+`parent_group_memberships` multi-parent widget (`group_membership_service.py`), while steps/jobs link
+through the generic `efootprint_id_of_parent_to_link_to` + `parent_link_count` path
+(`ObjectLinkingService`). They coexist because the edge widget supports joining several parents with
+per-parent counts at creation, which the single-parent count field doesn't. Candidate: fold edge
+creation onto the generic path (extended to multi-parent) so dict-relationship creation has one code path.
+
 ## Far horizon (no commitment)
 
 - Persistent per-user model libraries (multi-model save/load per user).

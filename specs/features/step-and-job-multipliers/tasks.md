@@ -1,6 +1,6 @@
 # Step and job multipliers — Tasks
 
-**Status:** Tasks — under review.
+**Status:** Implemented — all tasks done · 2026-06-12.
 **Spec:** [`spec.html`](spec.html). **Plan:** [`plan.html`](plan.html).
 **Cross-repo feature:** Tasks 1–2 land in `e-footprint` (library), Tasks 3–5 in `e-footprint-interface`. A PyPI release of the library separates Task 2 from Task 3 (constitution §2.4: interface `pyproject.toml` must reference PyPI before merge).
 
