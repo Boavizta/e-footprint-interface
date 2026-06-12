@@ -147,3 +147,51 @@ class TestViewsEdition:
         assert parent.edge_device_counts[device].value.magnitude == 4
         assert [group.efootprint_id for group in model_web.root_edge_device_groups] == [parent_group_id]
         assert [edge_device.efootprint_id for edge_device in model_web.ungrouped_edge_devices] == []
+
+
+def _efootprint_obj_by_name(model_web: ModelWeb, class_str: str, name: str):
+    return next(obj for obj in model_web.get_efootprint_objects_from_efootprint_type(class_str) if obj.name == name)
+
+
+@pytest.mark.django_db
+class TestEditPanelMembershipSections:
+    """Child panels render generic dict-membership sections for the weighted relationships."""
+
+    def test_step_panel_renders_journey_membership_section(self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        journey_id = _efootprint_obj_by_name(model_web, "UsageJourney", "Test Journey").id
+        step_id = _efootprint_obj_by_name(model_web, "UsageJourneyStep", "Test Step").id
+
+        response = client.get(f"/model_builder/open-edit-object-panel/{step_id}/")
+
+        body = response.content.decode()
+        assert response.status_code == 200
+        assert "Used in usage journeys" in body
+        assert "Test Journey" in body
+        assert f"/model_builder/update-dict-count/{journey_id}/{step_id}/" in body
+        assert f"/model_builder/unlink-dict-entry/{journey_id}/{step_id}/" in body
+
+    def test_job_panel_renders_step_membership_section_with_add_to_step_select(self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        journey_id = _efootprint_obj_by_name(model_web, "UsageJourney", "Test Journey").id
+        step_id = _efootprint_obj_by_name(model_web, "UsageJourneyStep", "Test Step").id
+        job_id = _efootprint_obj_by_name(model_web, "Job", "Test Job").id
+        second_step_id = _create_object_in_session(
+            client,
+            create_post_data_from_class_default_values("Second Step", "UsageJourneyStep", jobs=""),
+            parent_id=journey_id,
+        )
+
+        response = client.get(f"/model_builder/open-edit-object-panel/{job_id}/")
+
+        body = response.content.decode()
+        assert response.status_code == 200
+        assert "Used in usage journey steps" in body
+        assert f"/model_builder/update-dict-count/{step_id}/{job_id}/" in body
+        assert f"/model_builder/unlink-dict-entry/{step_id}/{job_id}/" in body
+        assert "Add to step" in body
+        assert f'<option value="{second_step_id}">Second Step</option>' in body
+        # No recurrent server need exists, so the job's other membership section is not rendered.
+        assert "Used in recurrent server needs" not in body

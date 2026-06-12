@@ -76,6 +76,25 @@ class TestEdgeDeviceGroupWeb:
         assert sorted(device.efootprint_id for device in filtered) == sorted(
             [free_device.efootprint_id, shared_device.efootprint_id])
 
+    # --- dict_membership_sections ---
+
+    def test_dict_membership_sections_exclude_self_and_ancestors_from_joinable_groups(self, minimal_model_web):
+        campus = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Campus"))
+        building = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Building"))
+        floor = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Floor"))
+        annex = minimal_model_web.add_new_efootprint_object_to_system(EdgeDeviceGroup("Annex"))
+
+        campus.modeling_obj.sub_group_counts[building.modeling_obj] = SourceValue(1 * u.dimensionless)
+        building.modeling_obj.sub_group_counts[floor.modeling_obj] = SourceValue(2 * u.dimensionless)
+
+        sections = floor.dict_membership_sections
+
+        assert len(sections) == 1
+        assert sections[0]["attr_name"] == "sub_group_counts"
+        assert sections[0]["memberships"] == [
+            {"parent_id": building.efootprint_id, "parent_name": "Building", "count": 2.0}]
+        assert [parent["name"] for parent in sections[0]["available_parents"]] == ["Annex"]
+
     # --- pre_delete ---
 
     def test_pre_delete_removes_group_from_parent_group_dicts(self):

@@ -13,22 +13,14 @@ class EdgeDeviceGroupWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
     def template_name(self):
         return "edge_device_group"
 
-    @property
-    def _parent_group_membership_dict(self) -> str:
-        return "sub_group_counts"
-
     def _ancestor_ids(self) -> set:
         return {group.id for group in self.modeling_obj._find_all_ancestor_groups()}
 
-    def get_edition_context_overrides(self) -> dict:
-        context = super().get_edition_context_overrides()
+    def filter_available_membership_parents(self, attr_name, candidate_parents):
+        candidates = super().filter_available_membership_parents(attr_name, candidate_parents)
         # A group cannot join itself or one of its descendants (cycle prevention).
         ancestor_ids = self._ancestor_ids()
-        context["available_groups_to_join"] = [
-            g for g in context["available_groups_to_join"]
-            if g.efootprint_id != self.efootprint_id and g.efootprint_id not in ancestor_ids
-        ]
-        return context
+        return [group for group in candidates if group.id not in ancestor_ids]
 
     def filter_dict_count_options(self, attr_name, available_options):
         options = super().filter_dict_count_options(attr_name, available_options)

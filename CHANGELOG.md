@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Up/down row reordering in the `dict_count` widget for order-meaningful dict relationships
   (`"ordered": true` in `field_ui_config.json`, currently `uj_steps`), so journey steps can be
   reordered from the journey panel as they could with the previous list widget.
+- Child panels gain generic dict-membership sections: a step's panel lists the journeys that use it
+  ("Used in usage journeys"), a job's panel the steps and recurrent server needs that use it
+  ("Used in usage journey steps" / "Used in recurrent server needs"), each with per-parent count
+  edit, unlink, and an "Add to…" select — the same experience as edge devices' "Group membership",
+  which now renders through the same generic section. The dict-mutation endpoints
+  (`update-dict-count` / `link-dict-entry` / `unlink-dict-entry`) resolve the target dict attribute
+  from a cached, annotation-driven (parent class, child class) registry instead of
+  EdgeDeviceGroup-only logic, so they serve all weighted relationships; membership wording lives in
+  `field_ui_config.json` (`membership_title` / `add_to_label`, class-qualified where needed).
 
 ### Fixed
 - Weight entries built server-side (canvas-create / "Link existing") are labeled with the library's

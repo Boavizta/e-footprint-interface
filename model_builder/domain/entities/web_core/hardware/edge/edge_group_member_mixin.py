@@ -3,37 +3,16 @@ from model_builder.domain.services.group_membership_service import (
 )
 
 
-def _build_group_membership_row(group, magnitude) -> dict:
-    return {"group_id": group.id, "group_name": group.name, "count": magnitude}
-
-
 class EdgeGroupMemberMixin:
-    """Shared behavior for objects that can belong to EdgeDeviceGroups (devices and sub-groups)."""
+    """Shared behavior for objects that can belong to EdgeDeviceGroups (devices and sub-groups).
+
+    Edit-panel membership sections come from the generic `dict_membership_sections` on
+    `ModelingObjectWeb`; this mixin only keeps the creation-flow and deletion specifics.
+    """
 
     # The pre_delete hook below removes self from parent group dicts, so the generic delete flow
     # must not treat those dicts as child containers to edit (see DeleteObjectUseCase).
     handles_own_dict_memberships = True
-
-    @property
-    def _parent_group_membership_dict(self) -> str:
-        """Name of the ExplainableObjectDict attribute on the parent group that holds self."""
-        raise NotImplementedError
-
-    def get_edition_context_overrides(self) -> dict:
-        parent_groups = self.modeling_obj._find_parent_groups()
-        parent_ids = {group.id for group in parent_groups}
-        dict_attr = self._parent_group_membership_dict
-        available_groups_to_join = sorted(
-            [g for g in self.model_web.edge_device_groups if g.efootprint_id not in parent_ids],
-            key=lambda g: g.name,
-        )
-        return {
-            "group_memberships": [
-                _build_group_membership_row(group, getattr(group, dict_attr)[self.modeling_obj].value.magnitude)
-                for group in sorted(parent_groups, key=lambda g: g.name)
-            ],
-            "available_groups_to_join": available_groups_to_join,
-        }
 
     @classmethod
     def get_creation_context_overrides(cls, model_web) -> dict:

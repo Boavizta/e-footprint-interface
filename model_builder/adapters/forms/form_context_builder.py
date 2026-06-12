@@ -129,24 +129,36 @@ class FormContextBuilder:
 
     @staticmethod
     def build_group_membership_section_context(web_obj: "ModelingObjectWeb") -> dict:
-        """Build the group membership part of an edition context for a web object."""
-        context = {"object_to_edit": web_obj, **web_obj.get_edition_context_overrides()}
-        if context.get("group_memberships"):
-            context["group_memberships"] = FormContextBuilder.hydrate_group_memberships(
-                context["group_memberships"])
-        return context
+        """Build the dict-membership part of an edition context for a web object.
+
+        The domain provides the raw sections (one per dict relationship whose child annotation
+        matches the object's class); this hydrates them with UI wording from `field_ui_config.json`
+        and <input type=number>-ready count strings.
+        """
+        return {
+            "object_to_edit": web_obj,
+            "dict_membership_sections": [
+                FormContextBuilder._hydrate_membership_section(section)
+                for section in web_obj.dict_membership_sections],
+        }
 
     @staticmethod
-    def hydrate_group_memberships(group_memberships: list[dict]) -> list[dict]:
-        """Format raw magnitudes from the domain layer into <input type=number>-ready strings."""
-        return [
-            {
-                **membership,
-                "count": format_magnitude_for_number_input(membership["count"]),
-                "step": compatible_step_for_magnitude(membership["count"]),
-            }
-            for membership in group_memberships
-        ]
+    def _hydrate_membership_section(section: dict) -> dict:
+        config = FieldUIConfigProvider.get_config(section["attr_name"], section["parent_class_name"])
+        return {
+            **section,
+            "section_id": f"{section['parent_class_name']}-{section['attr_name']}",
+            "title": config.get("membership_title", "Membership"),
+            "add_to_label": config.get("add_to_label", "Add"),
+            "memberships": [
+                {
+                    **membership,
+                    "count": format_magnitude_for_number_input(membership["count"]),
+                    "step": compatible_step_for_magnitude(membership["count"]),
+                }
+                for membership in section["memberships"]
+            ],
+        }
 
     @staticmethod
     def _build_parent_group_membership_field(available_groups: list) -> dict | None:

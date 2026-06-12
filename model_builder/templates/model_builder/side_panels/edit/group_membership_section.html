@@ -1,34 +1,34 @@
 <div id="group-membership-section-{{ object_to_edit.efootprint_id }}">
-{% if group_memberships or available_groups_to_join %}
-    {% with panel_id=object_to_edit.efootprint_id %}
+{% with panel_id=object_to_edit.efootprint_id %}
+{% for section in dict_membership_sections %}
     <div class="group-membership-section border rounded-2 p-3 mb-3">
-        <h6 class="mb-2"><b>Group membership</b></h6>
-        {% for membership in group_memberships %}
+        <h6 class="mb-2"><b>{{ section.title }}</b></h6>
+        {% for membership in section.memberships %}
             <div class="group-membership-row"
-                 data-group-membership-name="{{ membership.group_name }}">
-                <span class="group-membership-name">{{ membership.group_name }}</span>
-                {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=membership.group_id entry_efootprint_id=panel_id entry_count=membership.count group_name=membership.group_name min_val=0 step=membership.step extra_class="" %}
+                 data-group-membership-name="{{ membership.parent_name }}">
+                <span class="group-membership-name">{{ membership.parent_name }}</span>
+                {% include 'model_builder/object_cards/partials/group_entry_count_unlink.html' with group_efootprint_id=membership.parent_id entry_efootprint_id=panel_id entry_count=membership.count group_name=membership.parent_name min_val=0 step=membership.step extra_class="" %}
             </div>
         {% endfor %}
-        {% if available_groups_to_join %}
+        {% if section.available_parents %}
             <div class="add-to-group-row d-flex align-items-center gap-2 mt-2">
-                <select id="add-to-group-select-{{ panel_id }}" name="parent_id"
+                <select id="add-to-select-{{ panel_id }}-{{ section.section_id }}" name="parent_id"
                         class="form-select form-select-sm flex-grow-1">
-                    {% for group in available_groups_to_join %}
-                        <option value="{{ group.efootprint_id }}">{{ group.name }}</option>
+                    {% for parent in section.available_parents %}
+                        <option value="{{ parent.efootprint_id }}">{{ parent.name }}</option>
                     {% endfor %}
                 </select>
                 <button type="button"
                         class="btn btn-sm btn-primary"
                         hx-post="/model_builder/link-dict-entry/{{ panel_id }}/"
-                        hx-include="#add-to-group-select-{{ panel_id }}"
+                        hx-include="#add-to-select-{{ panel_id }}-{{ section.section_id }}"
                         hx-swap="none"
                         hx-vals='js:{...recomputationVals()}'>
-                    Add to group
+                    {{ section.add_to_label }}
                 </button>
             </div>
         {% endif %}
     </div>
-    {% endwith %}
-{% endif %}
+{% endfor %}
+{% endwith %}
 </div>

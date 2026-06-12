@@ -5,7 +5,8 @@ This service handles the domain logic for finding the correct child attribute
 edit data to link a child object.
 """
 from dataclasses import dataclass
-from typing import List, Optional, TYPE_CHECKING, get_origin, get_args
+from functools import lru_cache
+from typing import List, Optional, Tuple, TYPE_CHECKING, get_origin, get_args
 
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -24,6 +25,47 @@ class LinkResult:
     attr_name: str
     edit_data: dict
     parent_web_obj: "ModelingObjectWeb"
+
+
+@lru_cache(maxsize=1)
+def dict_relationship_registry() -> Tuple[Tuple[type, str, type], ...]:
+    """(parent class, attr name, child class) for every `ExplainableObjectDict[X]` init annotation
+    across all modeling classes — the single source of truth for dict-relationship resolution."""
+    entries = []
+    for parent_class in MODELING_OBJECT_CLASSES_DICT.values():
+        for attr_name, param in get_init_signature_params(parent_class).items():
+            annotation_origin = get_origin(param.annotation)
+            if isinstance(annotation_origin, type) and issubclass(annotation_origin, ExplainableObjectDict):
+                type_arg = get_args(param.annotation)[0]
+                child_class = MODELING_OBJECT_CLASSES_DICT[type_arg] if isinstance(type_arg, str) else type_arg
+                entries.append((parent_class, attr_name, child_class))
+    return tuple(entries)
+
+
+def resolve_dict_attr(parent_obj: ModelingObject, key_obj: ModelingObject) -> str:
+    """Find the dict attribute on `parent_obj` that can hold `key_obj`, from the cached registry."""
+    matches = list(dict.fromkeys(
+        attr_name for parent_class, attr_name, child_class in dict_relationship_registry()
+        if isinstance(parent_obj, parent_class) and isinstance(key_obj, child_class)))
+    if len(matches) != 1:
+        raise ValueError(
+            f"Object {key_obj.id} cannot be unambiguously linked into a dict attribute of "
+            f"{type(parent_obj).__name__} {parent_obj.id} (matching attributes: {matches}).")
+    return matches[0]
+
+
+def dict_attr_names_for_class(parent_class: type) -> List[str]:
+    """Names of all `ExplainableObjectDict[X]` attributes declared by `parent_class`'s init."""
+    return list(dict.fromkeys(
+        attr_name for registry_parent_class, attr_name, _ in dict_relationship_registry()
+        if issubclass(parent_class, registry_parent_class)))
+
+
+def dict_membership_specs(child_class: type) -> List[Tuple[type, str]]:
+    """(parent class, dict attr name) pairs whose child annotation matches `child_class` —
+    the reverse view used by child-panel membership sections."""
+    return [(parent_class, attr_name) for parent_class, attr_name, registry_child_class
+            in dict_relationship_registry() if issubclass(child_class, registry_child_class)]
 
 
 def serialize_weighted_dict_entry(value) -> dict:

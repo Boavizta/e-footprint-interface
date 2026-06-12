@@ -28,23 +28,26 @@ class TestEdgeDeviceBaseWeb:
         model_web = _build_edge_snapshot_model_web()
         assert_creation_context_matches_snapshot(EdgeDeviceBaseWeb, model_web=model_web)
 
-    # --- get_edition_context_overrides ---
+    # --- dict_membership_sections ---
 
-    def test_get_edition_context_overrides_returns_group_memberships(self):
+    def test_dict_membership_sections_lists_parent_groups_and_joinable_groups(self):
         device = EdgeDevice.from_defaults("Shared Sensor", components=[])
         alpha = EdgeDeviceGroup("Alpha")
         beta = EdgeDeviceGroup("Beta")
+        empty = EdgeDeviceGroup("Empty")
         alpha.edge_device_counts[device] = SourceValue(2 * u.dimensionless)
         beta.edge_device_counts[device] = SourceValue(0.3 * u.dimensionless)
 
         model_web = MagicMock()
-        model_web.edge_device_groups = []
+        model_web.flat_efootprint_objs_dict = {obj.id: obj for obj in (device, alpha, beta, empty)}
         web_obj = EdgeDeviceBaseWeb(device, model_web)
 
-        assert web_obj.get_edition_context_overrides() == {
-            "group_memberships": [
-                {"group_id": alpha.id, "group_name": "Alpha", "count": 2.0},
-                {"group_id": beta.id, "group_name": "Beta", "count": 0.3},
+        assert web_obj.dict_membership_sections == [{
+            "parent_class_name": "EdgeDeviceGroup",
+            "attr_name": "edge_device_counts",
+            "memberships": [
+                {"parent_id": alpha.id, "parent_name": "Alpha", "count": 2.0},
+                {"parent_id": beta.id, "parent_name": "Beta", "count": 0.3},
             ],
-            "available_groups_to_join": [],
-        }
+            "available_parents": [{"efootprint_id": empty.id, "name": "Empty"}],
+        }]

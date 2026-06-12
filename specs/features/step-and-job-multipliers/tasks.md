@@ -82,6 +82,8 @@
 
 ## Task 4 — Generalize dict-relationship editing; membership sections (repo: e-footprint-interface)
 
+**Status:** Done
+
 **Goal:** The annotation-driven, cached (parent class, child class) → dict attribute resolution replaces the EdgeDeviceGroup-only logic in the dict-mutation endpoints, and child panels gain membership sections: "Used in usage journeys" (step), "Used in usage journey steps" / "Used in recurrent server needs" (job) — with per-parent count edit, unlink, and "Add to…" select.
 
 **Files touched:**

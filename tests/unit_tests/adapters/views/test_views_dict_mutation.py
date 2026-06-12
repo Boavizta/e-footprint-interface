@@ -1,4 +1,17 @@
+from copy import deepcopy
+
+import numpy as np
 import pytest
+from pint import Quantity
+from efootprint.abstract_modeling_classes.source_objects import SourceRecurrentValues, SourceValue
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
+from efootprint.constants.units import u
+from efootprint.core.hardware.edge.edge_storage import EdgeStorage
+from efootprint.core.hardware.server import Server
+from efootprint.core.hardware.storage import Storage
+from efootprint.core.usage.edge.recurrent_server_need import RecurrentServerNeed
+from efootprint.core.usage.job import Job
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -23,6 +36,33 @@ def _create_object_in_session(client, post_data: dict, parent_id: str | None = N
 
 def _model_web(client) -> ModelWeb:
     return ModelWeb(SessionSystemRepository(client.session))
+
+
+def _efootprint_obj_by_name(model_web: ModelWeb, class_str: str, name: str):
+    return next(obj for obj in model_web.get_efootprint_objects_from_efootprint_type(class_str) if obj.name == name)
+
+
+def _system_data_with_recurrent_server_need(minimal_system_data: dict) -> dict:
+    """Minimal system data extended with a free-floating RecurrentServerNeed and its job graph."""
+    storage = Storage.from_defaults("RSN Storage")
+    server = Server.from_defaults("RSN Server", storage=storage)
+    rsn_job = Job.from_defaults("RSN Job", server=server)
+    edge_storage = EdgeStorage.from_defaults("RSN Edge Storage", base_storage_need=SourceValue(100 * u.GB_stored))
+    computer = EdgeComputer.from_defaults(
+        "RSN Edge Computer", storage=edge_storage, base_compute_consumption=SourceValue(0.1 * u.cpu_core))
+    server_need = RecurrentServerNeed(
+        "Server Need",
+        edge_device=computer,
+        recurrent_volume_per_edge_device=SourceRecurrentValues(
+            Quantity(np.array([1] * 168, dtype=np.float32), u.occurrence)),
+        jobs=[rsn_job],
+    )
+    fragment = system_to_json(server_need, save_calculated_attributes=False)
+    system_data = deepcopy(minimal_system_data)
+    for class_key, objs in fragment.items():
+        if isinstance(objs, dict):
+            system_data.setdefault(class_key, {}).update(objs)
+    return system_data
 
 
 def _assert_error_modal_response(response, message: str) -> None:
@@ -171,3 +211,113 @@ class TestDictMutationViews:
         assert parent_group.sub_group_counts[child_group].value.magnitude == 1
         assert child_group.sub_group_counts == {}
         assert [root_group.efootprint_id for root_group in model_web.root_edge_device_groups] == [parent_group_id]
+
+
+@pytest.mark.django_db
+class TestWeightedRelationshipDictMutations:
+    """The generalized endpoints serve uj_steps and the two jobs relationships like edge group counts."""
+
+    def test_job_count_update_link_and_unlink_across_steps(self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        journey = _efootprint_obj_by_name(model_web, "UsageJourney", "Test Journey")
+        step_id = _efootprint_obj_by_name(model_web, "UsageJourneyStep", "Test Step").id
+        job_id = _efootprint_obj_by_name(model_web, "Job", "Test Job").id
+        second_step_id = _create_object_in_session(
+            client,
+            create_post_data_from_class_default_values("Second Step", "UsageJourneyStep", jobs=""),
+            parent_id=journey.id,
+        )
+
+        update_response = client.post(f"/model_builder/update-dict-count/{step_id}/{job_id}/", {"count": "2.5"})
+
+        assert update_response.status_code == 200
+        model_web = _model_web(client)
+        step, job = model_web.flat_efootprint_objs_dict[step_id], model_web.flat_efootprint_objs_dict[job_id]
+        assert step.jobs[job].value.magnitude == 2.5
+
+        link_response = client.post(f"/model_builder/link-dict-entry/{job_id}/", {"parent_id": second_step_id})
+
+        assert link_response.status_code == 200
+        model_web = _model_web(client)
+        job = model_web.flat_efootprint_objs_dict[job_id]
+        second_step = model_web.flat_efootprint_objs_dict[second_step_id]
+        assert second_step.jobs[job].value.magnitude == 1
+        assert second_step.jobs[job].label == "Times per step"
+        # Per-relationship independence: the multiplier in the first step is untouched.
+        assert model_web.flat_efootprint_objs_dict[step_id].jobs[job].value.magnitude == 2.5
+
+        unlink_response = client.post(f"/model_builder/unlink-dict-entry/{step_id}/{job_id}/")
+
+        assert unlink_response.status_code == 200
+        model_web = _model_web(client)
+        job = model_web.flat_efootprint_objs_dict[job_id]
+        assert job not in model_web.flat_efootprint_objs_dict[step_id].jobs
+        assert model_web.flat_efootprint_objs_dict[second_step_id].jobs[job].value.magnitude == 1
+
+    def test_step_weight_update_link_and_unlink_across_journeys(self, client, minimal_system_data):
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        journey_id = _efootprint_obj_by_name(model_web, "UsageJourney", "Test Journey").id
+        step_id = _efootprint_obj_by_name(model_web, "UsageJourneyStep", "Test Step").id
+        second_journey_id = _create_object_in_session(
+            client,
+            create_post_data_from_class_default_values("Second Journey", "UsageJourney", uj_steps=""),
+        )
+
+        update_response = client.post(f"/model_builder/update-dict-count/{journey_id}/{step_id}/", {"count": "0.5"})
+
+        assert update_response.status_code == 200
+        model_web = _model_web(client)
+        step = model_web.flat_efootprint_objs_dict[step_id]
+        assert model_web.flat_efootprint_objs_dict[journey_id].uj_steps[step].value.magnitude == 0.5
+
+        link_response = client.post(f"/model_builder/link-dict-entry/{step_id}/", {"parent_id": second_journey_id})
+
+        assert link_response.status_code == 200
+        model_web = _model_web(client)
+        step = model_web.flat_efootprint_objs_dict[step_id]
+        second_journey = model_web.flat_efootprint_objs_dict[second_journey_id]
+        assert second_journey.uj_steps[step].value.magnitude == 1
+        assert second_journey.uj_steps[step].label == "Times per journey"
+        assert model_web.flat_efootprint_objs_dict[journey_id].uj_steps[step].value.magnitude == 0.5
+
+        unlink_response = client.post(f"/model_builder/unlink-dict-entry/{journey_id}/{step_id}/")
+
+        assert unlink_response.status_code == 200
+        model_web = _model_web(client)
+        step = model_web.flat_efootprint_objs_dict[step_id]
+        assert step not in model_web.flat_efootprint_objs_dict[journey_id].uj_steps
+        assert model_web.flat_efootprint_objs_dict[second_journey_id].uj_steps[step].value.magnitude == 1
+
+    def test_recurrent_server_need_job_count_update_link_and_unlink(self, client, minimal_system_data):
+        _setup_session(client, _system_data_with_recurrent_server_need(minimal_system_data))
+        model_web = _model_web(client)
+        rsn_id = _efootprint_obj_by_name(model_web, "RecurrentServerNeed", "Server Need").id
+        rsn_job_id = _efootprint_obj_by_name(model_web, "Job", "RSN Job").id
+        step_job_id = _efootprint_obj_by_name(model_web, "Job", "Test Job").id
+
+        update_response = client.post(f"/model_builder/update-dict-count/{rsn_id}/{rsn_job_id}/", {"count": "4"})
+
+        assert update_response.status_code == 200
+        model_web = _model_web(client)
+        rsn_job = model_web.flat_efootprint_objs_dict[rsn_job_id]
+        assert model_web.flat_efootprint_objs_dict[rsn_id].jobs[rsn_job].value.magnitude == 4
+
+        link_response = client.post(f"/model_builder/link-dict-entry/{step_job_id}/", {"parent_id": rsn_id})
+
+        assert link_response.status_code == 200
+        model_web = _model_web(client)
+        step_job = model_web.flat_efootprint_objs_dict[step_job_id]
+        recurrent_server_need = model_web.flat_efootprint_objs_dict[rsn_id]
+        assert recurrent_server_need.jobs[step_job].value.magnitude == 1
+        assert recurrent_server_need.jobs[step_job].label == "Times per occurrence"
+
+        unlink_response = client.post(f"/model_builder/unlink-dict-entry/{rsn_id}/{step_job_id}/")
+
+        assert unlink_response.status_code == 200
+        model_web = _model_web(client)
+        step_job = model_web.flat_efootprint_objs_dict[step_job_id]
+        assert step_job not in model_web.flat_efootprint_objs_dict[rsn_id].jobs
+        # Still linked to its usage journey step, so the job survives the unlink.
+        assert step_job.name == "Test Job"

@@ -25,10 +25,6 @@ class EdgeDeviceBaseWeb(EdgeGroupMemberMixin, ModelingObjectWeb):
     def template_name(self):
         return "edge_device"
 
-    @property
-    def _parent_group_membership_dict(self) -> str:
-        return "edge_device_counts"
-
     def create_side_effects(self):
         from model_builder.domain.oob_region import OobRegion
         side_effects = super().create_side_effects()

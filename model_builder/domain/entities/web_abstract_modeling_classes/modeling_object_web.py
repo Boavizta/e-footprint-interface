@@ -167,13 +167,43 @@ class ModelingObjectWeb:
         """
         return {}  # Default: no special HTMX configuration
 
-    def get_edition_context_overrides(self) -> dict:
-        """Return object-specific additions for edit-panel rendering.
+    @property
+    def dict_membership_sections(self) -> List[dict]:
+        """Reverse view of `ExplainableObjectDict` relationships, for child-panel membership sections.
 
-        Adapters remain generic and ask the web wrapper for any extra context
-        needed by custom edit templates.
+        One section per (parent class, dict attr) pair whose child annotation matches this object's
+        class, listing current memberships (with their counts) and the parents it could still join.
         """
-        return {}
+        from model_builder.domain.services.object_linking_service import dict_membership_specs
+
+        sections = []
+        for parent_class, attr_name in dict_membership_specs(type(self._modeling_obj)):
+            parents = sorted(
+                (obj for obj in self.model_web.flat_efootprint_objs_dict.values() if isinstance(obj, parent_class)),
+                key=lambda parent: parent.name)
+            memberships = [
+                {"parent_id": parent.id, "parent_name": parent.name,
+                 "count": getattr(parent, attr_name)[self._modeling_obj].value.magnitude}
+                for parent in parents if self._modeling_obj in getattr(parent, attr_name)]
+            member_ids = {membership["parent_id"] for membership in memberships}
+            available_parents = self.filter_available_membership_parents(
+                attr_name, [parent for parent in parents if parent.id not in member_ids])
+            if memberships or available_parents:
+                sections.append({
+                    "parent_class_name": parent_class.__name__, "attr_name": attr_name,
+                    "memberships": memberships,
+                    "available_parents": [
+                        {"efootprint_id": parent.id, "name": parent.name} for parent in available_parents]})
+        return sections
+
+    def filter_available_membership_parents(self, attr_name: str, candidate_parents: list) -> list:
+        """Filter the parents offered in a membership section's "Add to…" select.
+
+        Default: exclude the object itself (no self-containment). Subclasses may override to apply
+        domain-specific cycle filters (e.g. excluding descendant groups).
+        """
+        del attr_name
+        return [parent for parent in candidate_parents if parent.id != self.efootprint_id]
 
     def _recompute_state_and_emit_oob_regions(self) -> list:
         """Diff post-mutation state vs. last-emitted state; return OOB regions for each flip.
