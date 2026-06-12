@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step and job multipliers — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  /* §4 mockup — approximates the model-builder canvas + side panel */
+  #mock-app { display: flex; gap: 1rem; align-items: flex-start; background: #f6f7f9;
+              border-radius: 8px; padding: 1rem; font-size: .85rem; }
+  #mock-app table { margin: .2rem 0 .4rem; }
+  #mock-app table, #mock-app th, #mock-app td { border: none; }
+  #mock-app th { background: transparent; color: #667085; font-weight: 500; font-size: .75rem;
+                 padding: .1rem .4rem; }
+  #mock-app td { padding: .2rem .4rem; vertical-align: middle; }
+  #mock-app input[type=number] { width: 4.2rem; padding: .15rem .3rem; border: 1px solid #ced4da;
+                                 border-radius: 6px; text-align: right; }
+  #mock-app input[type=text] { width: 100%; padding: .25rem .5rem; border: 1px solid #ced4da;
+                               border-radius: 6px; }
+  #mock-app [data-count] { color: #667085; margin-left: .5rem; white-space: nowrap;
+                           font-size: .85em; }
+  #mock-app [data-count] input { width: 3.4rem; padding: .05rem .25rem; }
+  #mock-panel [data-member] { display: flex; align-items: center; gap: .4rem;
+                              padding: .15rem .2rem; }
+  #mock-panel [data-member] span:first-child { flex: 1; }
+  #mock-panel button[data-add] { border: none; background: #2563eb; color: #fff;
+                                 border-radius: 6px; padding: .2rem .6rem; }
+  #mock-canvas { flex: 1.15; }
+  #mock-uj-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 10px;
+                  padding: .6rem .9rem; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+  #mock-uj-card > header { font-weight: 600; cursor: pointer; padding: .25rem .4rem;
+                           border-radius: 6px; }
+  #mock-uj-card > header:hover { background: #f2f6ff; }
+  #mock-steps { list-style: none; margin: .5rem 0 0 .55rem; padding: 0 0 0 1.1rem;
+                border-left: 2px dotted #c6cdd6; }
+  #mock-steps > li { margin: .55rem 0; }
+  #mock-steps > li > div { cursor: pointer; padding: .2rem .4rem; border-radius: 6px;
+                           position: relative; }
+  #mock-steps > li > div:hover { background: #f2f6ff; }
+  #mock-steps > li > div::before { content: "◉"; color: #7aa0f7; position: absolute;
+                                   left: -1.55rem; background: #fff; }
+  #mock-steps ul { list-style: none; display: flex; flex-direction: column; align-items: flex-end;
+                   gap: .3rem; margin: .35rem 0 .1rem; padding: 0; }
+  #mock-steps ul span[data-job] { border: 1px solid #e3e6ea; background: #fff; border-radius: 6px;
+                                  padding: .2rem .6rem; display: inline-flex; align-items: center; }
+  #mock-app [data-addition] { color: #98a2b3; font-size: .8rem; cursor: default; margin: .3rem 0 0; }
+  #mock-panel { flex: 1; background: #fff; border: 1px solid #e3e6ea; border-radius: 10px;
+                padding: .8rem .9rem; }
+  #mock-panel header { display: flex; justify-content: space-between; align-items: center;
+                       margin-bottom: .6rem; }
+  #mock-panel header span[data-icons] { color: #98a2b3; letter-spacing: .35rem; cursor: default; }
+  #mock-panel label { font-weight: 500; margin: .5rem 0 .15rem; display: block; }
+  #mock-panel [data-box] { background: #f6f7f9; border-radius: 8px; padding: .4rem; }
+  #mock-panel [data-addrow] { display: flex; gap: .4rem; margin: .4rem 0 .2rem; }
+  #mock-panel select { flex: 1; padding: .25rem .4rem; border: 1px solid #ced4da; border-radius: 6px;
+                       background: #fff; }
+  #mock-panel button[data-plus] { border: 1px solid #344054; background: #fff; border-radius: 6px;
+                                  width: 2rem; cursor: pointer; }
+  #mock-panel button[data-x] { border: none; background: none; color: #98a2b3; cursor: pointer; }
+  #mock-panel button[data-save] { width: 100%; border: none; border-radius: 999px;
+                                  background: #2563eb; color: #fff; padding: .45rem;
+                                  margin-top: .7rem; font-weight: 600; }
+  #mock-app [data-igroup] { display: inline-flex; }
+  #mock-app [data-igroup] input { border-radius: 6px 0 0 6px; }
+  #mock-app [data-igroup] span { border: 1px solid #ced4da; border-left: none;
+                                 border-radius: 0 6px 6px 0; background: #f6f7f9; color: #667085;
+                                 padding: .15rem .5rem; }
+</style>
+</head>
+<body>
+
+<h1>Step and job multipliers</h1>
+<p class="status">Status: Spec — under review · 2026-06-11</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <ul>
+    <li><strong>Problem.</strong> A usage journey in e-footprint describes the <em>average</em>
+    interaction a user has with the service. Today every step counts exactly once per journey, and
+    every job counts once per appearance in a step's job list. Two common modeling needs cannot be
+    expressed naturally:
+      <ul>
+        <li><em>"This job fires N times during this step"</em> — the only workaround is adding the
+        same job to the list N times, which is opaque in the UI (the same card repeated), tedious for
+        large N, and impossible for fractional averages (e.g. 2.5 retries on average).</li>
+        <li><em>"This step happens in only 50% of journeys"</em> — there is no workaround short of
+        manually pre-scaling the step's time spent and creating scaled copies of its jobs, which
+        destroys the legibility of the model.</li>
+      </ul>
+    </li>
+    <li><strong>Audience.</strong> Everyone who builds usage journeys: primarily the non-technical
+    product person composing an average journey in the interface ("search is used in every visit,
+    checkout in one visit out of ten"), and secondarily technical users driving the
+    <code>efootprint</code> library directly.</li>
+    <li><strong>Why now.</strong> Weighting within an average journey is a recurring need in real
+    modeling sessions; the duplication workaround scales badly and the "fraction of journeys"
+    case has no answer at all. A simple per-entry weight closes both gaps without introducing
+    branching-journey complexity.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <p>How do we know this feature is done? Each criterion must be testable.</p>
+  <ul>
+    <li>A modeler can attach a numeric multiplier (any value ≥ 0, fractions allowed) to each
+    <strong>job within a usage journey step</strong> — and, identically, to each job within a
+    recurrent server need on the edge side; the modeled number of job executions per journey
+    (resp. per need occurrence) scales accordingly.</li>
+    <li>A modeler can attach a weight (any value ≥ 0, fractions allowed) to each
+    <strong>step within a usage journey</strong>; the step's contribution to journey duration
+    <em>and</em> all of its job executions scale by that weight (a 0.5-weight step contributes half
+    its time and half its job runs to the average journey).</li>
+    <li>The two multipliers compose: a job with multiplier 3 in a step with weight 0.5 runs
+    1.5 times per average journey.</li>
+    <li>The multiplier belongs to the <strong>relationship</strong>, not the object: the same job
+    reused in two steps can carry a different multiplier in each, and the same step reused in two
+    journeys a different weight in each.</li>
+    <li>The default multiplier is 1 everywhere: a model built without touching multipliers computes
+    exactly the same results as today.</li>
+    <li>Existing saved models (JSON exports and in-flight sessions) keep loading without user action
+    and produce unchanged results.</li>
+    <li>Multipliers are explainable: the calculation explanation of journey duration and of job
+    occurrences cites the weight, like any other model parameter.</li>
+    <li>Export → import round-trips multipliers exactly.</li>
+    <li>In the interface, the multiplier is always visible on the canvas next to each step / job
+    entry and is editable from three consistent surfaces: inline on the canvas (with immediate
+    recalculation, no panel round-trip), in the parent's edit panel, and in each child's edit
+    panel — the same experience edge device group counts provide today.</li>
+    <li>A multiplier of 0 keeps the entry in the model but zeroes its contribution; negative or
+    non-numeric input is rejected with a clear validation message.</li>
+    <li>Existing list capabilities are unaffected: steps keep their meaningful order, and
+    adding / removing / reordering steps and jobs works as before.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
+  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
+  <code>plan.html</code>, not here.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Per-relationship multiplier on steps-within-journey and on jobs-within-step (web usage
+      journeys), and on jobs-within-recurrent-server-need (the edge→server bridge, which today
+      documents "add the same job multiple times" as its multiplicity idiom).</li>
+      <li>Calculation semantics in the modeling engine: journey duration, job occurrence counts,
+      and every downstream value (device occupancy, impact attribution) consistent with the
+      weights.</li>
+      <li>Persistence: multipliers survive save / load, and older saved models upgrade
+      automatically with all multipliers at 1.</li>
+      <li>Interface editing for both relationships on three consistent surfaces — inline on the
+      canvas (always visible), in the parent's panel, in each child's panel — with validation.
+      Steps/jobs and edge device group counts converge on one shared relationship-editing
+      experience; improvements made along the way benefit the edge surfaces too.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Multipliers on other list relationships (e.g. usage patterns → journeys, edge
+      functions → recurrent server needs). Edge-side intensity is already expressed through
+      recurrent hourly volumes and needs no per-entry weight.</li>
+      <li>Branching / conditional journeys (probability trees, alternative paths). Weights
+      approximate variability within a single average journey; modeling distinct journey variants
+      remains the job of separate usage journeys and usage patterns.</li>
+      <li>Per-usage-pattern overrides of a weight (the weight is fixed per relationship, not per
+      pattern).</li>
+      <li>Bulk re-normalization helpers (e.g. "make step weights sum to 1") — weights are free
+      values, not enforced probabilities.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The guiding decision: multipliers get <strong>one relationship-editing experience, offered on
+  three consistent surfaces</strong> — inline on the model-builder canvas, in the parent's side
+  panel, and in each child's side panel. This is exactly the experience edge device group counts
+  already provide; steps and jobs adopt it, and since the machinery becomes shared, any polish
+  lifts the edge experience too.</p>
+  <ul>
+    <li><strong>Canvas: an always-visible, directly editable "× n" count</strong> sits on every
+    step row of the journey accordion and every job chip of the step accordion — the same
+    inline-count pattern as edge device group entries (change → save → recalculation immediately,
+    no side panel, no Save button). The count is always shown, including when it is 1, so editing
+    it is always one click away and the affordance is discoverable. A count of 0 dims the entry:
+    still in the model, visibly contributing nothing. Unlike edge group entries, step rows and
+    job chips get <em>no</em> inline unlink (✕) on the canvas for now — removal stays in the side
+    panels, to avoid accidental unlinking on the busier journey canvas.</li>
+    <li><strong>Parent side panel: the existing child-list tables gain the numeric column.</strong>
+    The journey panel's steps table and the step panel's jobs table — today "selected entries +
+    remove" over a light-gray box, with an "Other existing ones you can reuse" dropdown below —
+    become weighted tables, like the edge group's counts table. Adding an entry starts it at
+    1.</li>
+    <li><strong>Child side panel: a membership section, mirroring "Group membership".</strong>
+    A step's panel lists the journeys that use it, each with its editable "times per journey" and
+    an unlink button, plus an "Add to journey" dropdown; a job's panel does the same for the steps
+    that use it. Same partial, same behavior as edge devices' group membership section.</li>
+    <li><strong>The steps table keeps journey order.</strong> Step order is meaningful (it drives
+    when each step happens within the journey), so rows render in journey order — unlike the
+    edge-device counts table, which is unordered and lists alphabetically.</li>
+    <li><strong>Creation panels include the field.</strong> When a step is created from the
+    journey card's "+ Add a usage journey step" (or a job from a step's add button), the creation
+    panel knows its parent, so it offers the multiplier field directly, prefilled at 1 — "this
+    job runs 3 times here" is one trip.</li>
+    <li><strong>Wording: "Times per journey" (steps), "Times per step" (jobs in a step),
+    "Times per occurrence" (jobs in a recurrent server need).</strong> One mental model — "how
+    many times does this happen here" — that reads naturally for counts (3 API calls) and
+    fractions alike (0.5 ≈ one journey out of two reaches checkout), and avoids the abstract
+    "weight".</li>
+    <li><strong>Validation:</strong> the numeric inputs reject negatives (<code>min="0"</code>,
+    like the existing counts widget, which snaps invalid input back to the previous value); the
+    model layer enforces the same rule server-side.</li>
+    <li><strong>Results stay explainable in place:</strong> the journey's weighted duration
+    appears in its panel's calculated-attributes section, derived from "times per journey × time
+    spent", like every other calculated value.</li>
+  </ul>
+  <p>The mockup below approximates the real canvas + side panel (Bootstrap look simplified) and is
+  interactive: edit the "×" counts directly on the canvas, or click <em>Average visit</em>, the
+  <em>Search</em> step, or the <em>Search query (API)</em> job chip to see the three panel views —
+  every surface edits the same value, so they stay in sync, and the journey duration follows.</p>
+  <div class="mockup" id="mock-app">
+    <div id="mock-canvas">
+      <article id="mock-uj-card">
+        <header onclick="mockShowPanel('journey')">⌄ Average visit</header>
+        <ol id="mock-steps">
+          <li id="row-step-browse">
+            <div onclick="mockShowPanel('journey')">Browse catalog
+              <span data-count>× <input type="number" data-sync="w-browse" value="1" min="0"
+                step="0.1" onclick="event.stopPropagation()"></span></div>
+          </li>
+          <li id="row-step-search">
+            <div onclick="mockShowPanel('step')">Search
+              <span data-count>× <input type="number" data-sync="w-search" value="1" min="0"
+                step="0.1" onclick="event.stopPropagation()"></span></div>
+            <ul>
+              <li><span data-job id="chip-job-query" onclick="mockShowPanel('job')">Search query (API)
+                <span data-count>× <input type="number" data-sync="m-query" value="3" min="0"
+                  step="0.5" onclick="event.stopPropagation()"></span></span></li>
+              <li><span data-job id="chip-job-thumb">Thumbnail load (CDN)
+                <span data-count>× <input type="number" data-sync="m-thumb" value="12" min="0"
+                  step="0.5" onclick="event.stopPropagation()"></span></span></li>
+              <li data-addition>⊕ Add a job</li>
+            </ul>
+          </li>
+          <li id="row-step-checkout">
+            <div onclick="mockShowPanel('journey')">Checkout
+              <span data-count>× <input type="number" data-sync="w-checkout" value="0.1" min="0"
+                step="0.1" onclick="event.stopPropagation()"></span></div>
+          </li>
+        </ol>
+        <p data-addition>⊕ Add a usage journey step</p>
+      </article>
+    </div>
+    <aside id="mock-panel">
+      <div id="mock-panel-journey">
+        <header><strong>Average visit</strong><span data-icons>🗑 ✕</span></header>
+        <label>Name</label>
+        <input type="text" value="Average visit">
+        <label>Usage journey steps</label>
+        <div data-box>
+          <table>
+            <thead><tr><th></th><th>Times per journey</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Browse catalog</td>
+                  <td><input type="number" data-sync="w-browse" value="1" min="0" step="0.1"></td>
+                  <td><button type="button" data-x>✕</button></td></tr>
+              <tr><td>Search</td>
+                  <td><input type="number" data-sync="w-search" value="1" min="0" step="0.1"></td>
+                  <td><button type="button" data-x>✕</button></td></tr>
+              <tr><td>Checkout</td>
+                  <td><input type="number" data-sync="w-checkout" value="0.1" min="0" step="0.1"></td>
+                  <td><button type="button" data-x>✕</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div data-addrow>
+          <select><option>Compare products</option></select>
+          <button type="button" data-plus>+</button>
+        </div>
+        <details>
+          <summary>Calculated attributes</summary>
+          <p>Duration: <strong id="mock-duration">4.2 min</strong><br>
+          <em>= Σ times per journey × time spent by user</em></p>
+        </details>
+        <button type="button" data-save>Save</button>
+      </div>
+      <div id="mock-panel-step" hidden>
+        <header><strong>Search</strong><span data-icons>🗑 ✕</span></header>
+        <label>Used in usage journeys</label>
+        <div data-box>
+          <div data-member><span>Average visit</span>
+            <input type="number" data-sync="w-search" value="1" min="0" step="0.1">
+            <button type="button" data-x>✕</button></div>
+        </div>
+        <label>Name</label>
+        <input type="text" value="Search">
+        <label>Time spent by user</label>
+        <span data-igroup><input type="number" value="1" min="0" step="0.1"><span>min</span></span>
+        <label>Jobs</label>
+        <div data-box>
+          <table>
+            <thead><tr><th></th><th>Times per step</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Search query (API)</td>
+                  <td><input type="number" data-sync="m-query" value="3" min="0" step="0.5"></td>
+                  <td><button type="button" data-x>✕</button></td></tr>
+              <tr><td>Thumbnail load (CDN)</td>
+                  <td><input type="number" data-sync="m-thumb" value="12" min="0" step="0.5"></td>
+                  <td><button type="button" data-x>✕</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div data-addrow>
+          <select><option>Autocomplete (API)</option></select>
+          <button type="button" data-plus>+</button>
+        </div>
+        <button type="button" data-save>Save</button>
+      </div>
+      <div id="mock-panel-job" hidden>
+        <header><strong>Search query (API)</strong><span data-icons>🗑 ✕</span></header>
+        <label>Used in usage journey steps</label>
+        <div data-box>
+          <div data-member><span>Search</span>
+            <input type="number" data-sync="m-query" value="3" min="0" step="0.5">
+            <button type="button" data-x>✕</button></div>
+          <div data-addrow>
+            <select><option>Checkout</option><option>Browse catalog</option></select>
+            <button type="button" data-add>Add to step</button>
+          </div>
+        </div>
+        <label>Name</label>
+        <input type="text" value="Search query (API)">
+        <p data-addition>… data transfer, compute and storage parameters as today …</p>
+        <button type="button" data-save>Save</button>
+      </div>
+    </aside>
+    <script>
+      (function () {
+        const stepMinutes = { "w-browse": 3, "w-search": 1, "w-checkout": 2 };
+        const fmt = (x) => (Math.round(x * 100) / 100).toString();
+        const val = (key) => {
+          const el = document.querySelector('#mock-app [data-sync="' + key + '"]');
+          return Math.max(0, parseFloat(el.value) || 0);
+        };
+        function refresh() {
+          let total = 0;
+          for (const key of Object.keys(stepMinutes)) {
+            const w = val(key);
+            total += w * stepMinutes[key];
+            document.getElementById("row-step-" + key.slice(2)).style.opacity = (w === 0) ? 0.45 : 1;
+          }
+          document.getElementById("mock-duration").textContent = fmt(total) + " min";
+          for (const key of ["m-query", "m-thumb"]) {
+            document.getElementById("chip-job-" + key.slice(2)).style.opacity =
+              (val(key) === 0) ? 0.45 : 1;
+          }
+        }
+        window.mockShowPanel = function (which) {
+          for (const panel of ["journey", "step", "job"]) {
+            document.getElementById("mock-panel-" + panel).hidden = (panel !== which);
+          }
+        };
+        document.querySelectorAll("#mock-app [data-sync]").forEach((el) => {
+          el.addEventListener("input", () => {
+            document.querySelectorAll('#mock-app [data-sync="' + el.dataset.sync + '"]')
+              .forEach((other) => { if (other !== el) { other.value = el.value; } });
+            refresh();
+          });
+        });
+        refresh();
+      })();
+    </script>
+  </div>
+  <p>What the mockup demonstrates, in spec terms: the same "times" value is editable in three
+  places — inline on the canvas (always visible, immediate recalculation), in the parent panel's
+  weighted table, and in the child panel's membership section — and all three stay in sync because
+  they are one relationship value. A 0 value dims the canvas entry; the weighted duration is a
+  calculated attribute of the journey panel. The membership sections also carry the unlink (✕)
+  and "add to" affordances, exactly like edge devices' group membership today.</p>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>The library is the domain truth</strong> (constitution §1.3): multiplier semantics,
+    validation, and explainability live in the <code>efootprint</code> library; the interface only
+    edits and displays them.</li>
+    <li><strong>Explainability:</strong> every computed value carries its derivation; multipliers
+    must appear in those derivations like any other parameter.</li>
+    <li><strong>HTMX-first</strong> (constitution §1.4): the editing surface is server-rendered
+    form fields with partial updates, no client-side data layer.</li>
+    <li><strong>Cross-repo delivery:</strong> the interface change depends on a released
+    <code>efootprint</code> version; <code>pyproject.toml</code> must reference PyPI before merge
+    (constitution §2.4). Development uses the editable local install per
+    <code>INSTALL.md</code>.</li>
+    <li><strong>Saved-model continuity:</strong> the library's JSON format versioning is the
+    upgrade path for pre-feature exports; no user-visible migration step.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ul>
+    <li>None at this stage — the §4 design decisions (wording, three editing surfaces, no canvas
+    unlink for steps/jobs, duration as a calculated attribute, dimmed 0-multiplier entries) are
+    settled.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <code>plan.html</code> for ordered steps and test gates.</li>
+    <li>Re-read the relevant spec files (<code>specs/architecture.md</code>,
+    <code>specs/conventions.md</code>) for code-style and architectural constraints — in both
+    repos, since this feature spans <code>e-footprint</code> and
+    <code>e-footprint-interface</code>.</li>
+  </ol>
+</section>
+
+</body>
+</html>
