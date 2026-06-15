@@ -22,7 +22,7 @@ Guiding principle: *no one left behind, depth available on demand.* Every profil
 - **Disabled-instead-of-error UX**: action buttons disable preemptively when prerequisites are missing, with a tooltip explaining what to do next.
 - **Session-driven state**: the current model lives in the Django session; downloads and uploads round-trip the full system state including UI configuration.
 - **Dict-based relationships** for hierarchical edge fleets (`EdgeDeviceGroup` with sub-groups and device counts).
-- **Forthcoming**: onboarding flow with starter templates, contextual help, web/edge mode toggle. See `roadmap.md` and `specs/features/tutorial-and-documentation/`.
+- **Onboarding and contextual help**: first-run template picker with starter templates, a guided tour, the help-drawer overlay, and a web/edge mode toggle. See `specs/architecture.md`.
 
 ## Out of scope (today, by deliberate choice)
 
