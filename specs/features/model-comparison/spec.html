@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model comparison — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  h3 { margin-top: 1.4rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Model comparison</h1>
+<p class="status">Status: Spec — approved, rev 4 (scoped to v1) · 2026-06-16 · §6 decisions resolved; diff matching id-first (§4.2/§4.3)</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <ul>
+    <li><strong>Problem.</strong> The interface holds exactly one model per session. Yet the
+    central question users bring to an impact tool is comparative: <em>"is design B better than
+    design A, and by how much?"</em> — on-premise vs cloud, web vs edge architecture, current
+    usage vs projected growth. Today, answering it means exporting one model, rebuilding or
+    re-importing the other, and comparing numbers across separate sessions, screenshots, or xlsx
+    files by hand. The comparison — the actual decision-support output — happens outside the
+    tool.</li>
+    <li><strong>Audience.</strong> All three mission personas. The non-technical product person
+    gets the most value: an absolute footprint figure is hard to act on, while a delta between
+    two concrete designs is directly actionable in a product discussion. Technical and
+    industrial users compare architecture alternatives (e.g. fleet compositions) the same
+    way.</li>
+    <li><strong>Why now.</strong> The single-model loop is mature — build, edit, real-time
+    results, import/export all work. Comparison is the natural next step on the
+    decision-support ladder, and it builds purely on existing capabilities (two instances of
+    what already exists, plus one unified view).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <p>How do we know this feature is done? Each criterion must be testable.</p>
+  <ul>
+    <li>From a normal single-model session, the user can add a second model in any of three
+    ways: <strong>duplicating</strong> the working model, <strong>importing</strong> a
+    previously exported model file, or <strong>starting fresh</strong> (blank or from a starter
+    template).</li>
+    <li>The user can <strong>switch</strong> between the two models at any time; the active
+    model offers the full existing builder experience (create / edit / delete objects, results
+    panel, xlsx export) with no feature loss compared to today.</li>
+    <li>Each model can be <strong>exported and imported independently</strong>. A file exported
+    from either slot opens correctly in a plain single-model session, and any pre-existing
+    single-model export imports into either slot — full round-trip compatibility with the
+    current file format.</li>
+    <li>The user can also export <strong>both models together as one workspace file</strong>,
+    and re-import that file later to restore both models in one action.</li>
+    <li>Each model is identified everywhere (switcher, comparison view, file names) by the
+    <strong>name of its modeled system</strong> — the same name the user already gives their
+    system today. When both systems happen to share a name, the UI disambiguates them
+    visibly.</li>
+    <li>A <strong>unified comparison view</strong> shows, for both models: headline totals with
+    the difference (absolute and %), a per-category breakdown of <em>what explains the
+    difference</em>, and compared versions of the emissions-over-time and cumulative-emissions
+    charts (§4).</li>
+    <li>The comparison view shows <strong>what differs between the two models' inputs</strong> —
+    changed assumption values and objects present in only one model. It shows the differences
+    directly (no "show identical rows" mode).</li>
+    <li>All compared aggregates are <strong>full-timespan sums</strong> over each model's own
+    modeling period; each model's card states its total and its period.</li>
+    <li>Both compared charts are <strong>magnitude-honest</strong>: the two models share scales
+    and legends, so relative sizes can be read directly.</li>
+    <li>An edit to either model is reflected in the comparison view the next time it is shown —
+    no stale results.</li>
+    <li>Both models, their names, and the active selection <strong>survive a page refresh</strong>
+    within the same session.</li>
+    <li>The user can <strong>remove</strong> the second model and return to a plain single-model
+    session.</li>
+    <li>A user who never adds a second model experiences today's flow <strong>unchanged</strong>
+    (no regression, no new mandatory UI steps).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
+  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
+  <code>plan.html</code>, not here. If you can't say it without naming a file, class, or method,
+  it's plan content.</blockquote>
+  <details open><summary>In scope (v1)</summary>
+    <ul>
+      <li>Holding <strong>two</strong> independent models in one session, one active for editing
+      at a time, with a visible switcher.</li>
+      <li>Creating the second model by duplication of the first, by file import, or from
+      blank/starter template; removing it to return to single-model mode.</li>
+      <li>Independent per-model import and export (existing file format, both directions),
+      <strong>plus</strong> a combined workspace export/import restoring both models at
+      once.</li>
+      <li>A dedicated full-page comparison view (the "Comparison dashboard" layout) containing:
+      headline totals + delta; per-category delta decomposition; compared emissions-over-time
+      chart; compared cumulative chart; and the input assumptions diff.</li>
+      <li>All comparison aggregates computed as full-timespan sums.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (v1) — see <a href="backlog.html">backlog.html</a></summary>
+    <ul>
+      <li><strong>Sankey repartition comparison</strong> (paired diagrams at shared flow
+      scale).</li>
+      <li><strong>Per-year / differing-timespan normalization</strong> — v1 uses full-timespan
+      sums and a shared calendar axis only.</li>
+      <li><strong>Δ-only per-period chart mode.</strong></li>
+      <li><strong>Cause linking</strong> (relating input diffs to impact categories) and any
+      computed attribution / sensitivity analysis.</li>
+      <li><strong>Verdict sentence / delta-first narrative ordering.</strong></li>
+      <li>Comparison-specific xlsx export (each model keeps its own).</li>
+      <li>Three or more models; copying/moving objects between models; merging models.</li>
+      <li>Persistent server-side model libraries and multi-user collaboration (constitution
+      out-of-scope).</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface — the crux of this feature</h2>
+
+  <p><strong>Chosen layout: the Comparison dashboard</strong> — a dedicated full-page view
+  reached from a third top-level tab, alongside the two model tabs. Per-model workspaces stay
+  exactly as today; the dashboard is additive. The two other layouts explored
+  (<a href="variation-1-results-panel-mode.html">results-panel mode</a>,
+  <a href="variation-3-delta-first.html">delta-first story</a>) were considered and not chosen;
+  <a href="variation-2-comparison-dashboard.html">variation 2</a> holds the fuller exploration of
+  this layout, including the deferred Sankey pairing and Δ-only toggle now in
+  <a href="backlog.html">backlog.html</a>.</p>
+
+  <h3>4.1 Workspace: switching, creating, importing, exporting</h3>
+  <div class="mockup">
+    <div style="display:flex; gap:.4rem; border-bottom:2px solid #ddd; padding-bottom:.4rem;">
+      <button id="tab-a">Streaming app</button>
+      <button id="tab-b">＋ Add a model to compare</button>
+      <button id="tab-cmp" disabled title="Available once a second model exists">⇄ Compare</button>
+    </div>
+
+    <div id="panel-a" style="padding:.8rem 0;">
+      <p style="margin:.2rem 0; color:#555;"><em>Today's builder, unchanged.</em> Per-model toolbar:</p>
+      <details style="display:inline-block; margin:.2rem 0;">
+        <summary>Download ▾</summary>
+        <div style="font-size:.9em;">
+          <p style="margin:.2rem 0;">⬇ This model — <em>same file format as today</em></p>
+          <p style="margin:.2rem 0;">⬇ Both models — <em>one workspace file</em></p>
+        </div>
+      </details>
+      <details style="display:inline-block; margin:.2rem 0;">
+        <summary>Upload ▾</summary>
+        <div style="font-size:.9em;">
+          <p style="margin:.2rem 0;">⬆ Replace this model — <em>accepts any single-model file</em></p>
+          <p style="margin:.2rem 0;">⬆ Open workspace file — <em>restores both models</em></p>
+        </div>
+      </details>
+      <div style="border:1px solid #ccc; border-radius:6px; padding:.5rem; background:#fafafa; color:#777;">
+        Builder canvas · results panel · <span style="color:#1a7f37;">total 1.24 t CO₂e/yr</span>
+      </div>
+    </div>
+
+    <div id="panel-add" hidden style="padding:.8rem 0;">
+      <p><strong>Add a second model</strong> — three ways in:</p>
+      <p>
+        <button onclick="mockCreateB('Copy of Streaming app')">⧉ Duplicate current model</button>
+        <button onclick="mockCreateB('Imported system')">⬆ Import from file…</button>
+        <button onclick="mockCreateB('New system')">✚ Start blank / from template</button>
+      </p>
+      <p style="color:#777; font-size:.9em;">The model's name is its system's name — duplicating
+      proposes a derived name, importing uses the file's system name.</p>
+    </div>
+
+    <div id="panel-b" hidden style="padding:.8rem 0;">
+      <p style="margin:.2rem 0; color:#555;"><em>Second model — same full builder, same toolbar,
+      plus:</em> <button>✕ Remove this model</button></p>
+      <div style="border:1px solid #ccc; border-radius:6px; padding:.5rem; background:#fafafa; color:#777;">
+        Independent canvas · <span style="color:#1a7f37;">total 0.87 t CO₂e/yr</span>
+      </div>
+    </div>
+
+    <div id="panel-cmp" hidden style="padding:.8rem 0; color:#555;">
+      The unified comparison dashboard — fully mocked in §4.2 below.
+    </div>
+
+    <script>
+      (function () {
+        var hasB = false;
+        var tabs = { a: document.getElementById('tab-a'),
+                     b: document.getElementById('tab-b'),
+                     cmp: document.getElementById('tab-cmp') };
+        var panels = { a: document.getElementById('panel-a'),
+                       add: document.getElementById('panel-add'),
+                       b: document.getElementById('panel-b'),
+                       cmp: document.getElementById('panel-cmp') };
+        function show(name) {
+          Object.keys(panels).forEach(function (k) { panels[k].hidden = (k !== name); });
+          Object.keys(tabs).forEach(function (k) { tabs[k].style.fontWeight = 'normal'; });
+          (tabs[name === 'add' ? 'b' : name]).style.fontWeight = '600';
+        }
+        window.mockCreateB = function (name) {
+          hasB = true; tabs.b.textContent = name; tabs.cmp.disabled = false; tabs.cmp.title = '';
+          show('b');
+        };
+        tabs.a.onclick = function () { show('a'); };
+        tabs.b.onclick = function () { show(hasB ? 'b' : 'add'); };
+        tabs.cmp.onclick = function () { if (hasB) show('cmp'); };
+        tabs.a.style.fontWeight = '600';
+      })();
+    </script>
+  </div>
+  <ul>
+    <li>One model is edited at a time — the builder screen stays exactly as rich as today, never
+    split.</li>
+    <li>The Compare tab is disabled with an explanatory tooltip until a second model exists
+    (disabled-instead-of-error principle).</li>
+    <li>Download/upload offer both granularities everywhere: this model (today's format) or the
+    whole workspace.</li>
+  </ul>
+
+  <h3>4.2 The comparison dashboard (canonical v1 mockup)</h3>
+  <p>One scrolling page, top to bottom: identity + KPI header, "what explains the difference"
+  decomposition, the two compared charts, then the assumptions diff. Hover the decomposition bars.</p>
+  <div class="mockup">
+
+    <div style="display:flex; gap:.4rem; border-bottom:2px solid #ddd; padding-bottom:.4rem;">
+      <button>Streaming app</button>
+      <button>Streaming app — edge caching</button>
+      <button style="font-weight:600;">⇄ Compare</button>
+    </div>
+
+    <!-- identity + KPI header -->
+    <div style="display:flex; gap:.6rem; align-items:stretch; margin-top:.8rem;">
+      <div style="flex:1; border:1px solid #ccc; border-left:5px solid #4878a8; border-radius:6px; padding:.5rem;">
+        <strong>Streaming app</strong><br>
+        <span style="font-size:1.15em;">3.72 t CO₂e</span><br>
+        <span style="font-size:.8em; color:#666;">2026–2028 · usage 2.13 t · fab. 1.59 t</span>
+      </div>
+      <div style="flex:1; border:1px solid #ccc; border-left:5px solid #e09f3e; border-radius:6px; padding:.5rem;">
+        <strong>Streaming app — edge caching</strong><br>
+        <span style="font-size:1.15em;">2.61 t CO₂e</span><br>
+        <span style="font-size:.8em; color:#666;">2026–2028 · usage 1.29 t · fab. 1.32 t</span>
+      </div>
+      <div style="flex:1; border:2px solid #2e7d32; border-radius:6px; padding:.5rem; color:#2e7d32; text-align:center;">
+        <strong style="font-size:1.3em;">−1.11 t</strong><br><strong>(−30 %)</strong><br>
+        <span style="font-size:.8em;">usage −0.84 t · fab. −0.27 t</span>
+      </div>
+    </div>
+    <p style="font-size:.8em; color:#888; margin:.3rem 0 0;">Δ convention: second model minus
+    first. Totals are full-timespan sums.</p>
+
+    <!-- decomposition -->
+    <p style="margin:1.2rem 0 .2rem;"><strong>What explains the difference</strong>
+    <span style="color:#777; font-size:.85em;">— per impact category, full timespan (hover a bar)</span></p>
+    <svg viewBox="0 0 480 160" width="100%" style="max-width:480px; display:block;">
+      <line x1="300" y1="8" x2="300" y2="146" stroke="#999"/>
+      <text x="296" y="156" font-size="9" text-anchor="end" fill="#2e7d32">← lower emissions</text>
+      <text x="304" y="156" font-size="9" fill="#c62828">higher →</text>
+      <text x="8" y="30" font-size="10" fill="#444">Servers &amp; storage usage</text>
+      <rect x="221" y="20" width="79" height="14" fill="#2e7d32" data-cat="servers-usage"/>
+      <text x="217" y="31" font-size="10" text-anchor="end" fill="#2e7d32">−660 kg</text>
+      <text x="8" y="56" font-size="10" fill="#444">Servers &amp; storage fabrication</text>
+      <rect x="264" y="46" width="36" height="14" fill="#2e7d32" data-cat="servers-fab"/>
+      <text x="260" y="57" font-size="10" text-anchor="end" fill="#2e7d32">−300 kg</text>
+      <text x="8" y="82" font-size="10" fill="#444">Network usage</text>
+      <rect x="271" y="72" width="29" height="14" fill="#2e7d32" data-cat="network"/>
+      <text x="267" y="83" font-size="10" text-anchor="end" fill="#2e7d32">−240 kg</text>
+      <text x="8" y="108" font-size="10" fill="#444">Edge devices (new in variant)</text>
+      <rect x="300" y="98" width="11" height="14" fill="#c62828" data-cat="edge"/>
+      <text x="316" y="109" font-size="10" fill="#c62828">+90 kg</text>
+      <text x="8" y="134" font-size="10" fill="#444">User devices</text>
+      <line x1="296" y1="124" x2="304" y2="124" stroke="#888" stroke-width="2"/>
+      <text x="310" y="128" font-size="10" fill="#888">no change</text>
+    </svg>
+    <p id="cmp-cat-caption" style="font-size:.85em; color:#555; min-height:1.2em; margin:.2rem 0;">
+      These category deltas are exact arithmetic on each model's results — they sum to −1.11 t.
+      (No cause-linking to inputs in v1.)
+    </p>
+
+    <!-- emissions over time -->
+    <p style="margin:1.2rem 0 .2rem;"><strong>CO2 emissions over time</strong>
+      <span style="color:#777; font-size:.85em;">— paired bars, shared axis &amp; legend (time granularity month/year kept as today)</span></p>
+    <svg viewBox="0 0 480 195" width="100%" style="max-width:480px; display:block;">
+      <line x1="50" y1="170" x2="470" y2="170" stroke="#999"/>
+      <line x1="50" y1="120" x2="470" y2="120" stroke="#eee"/><text x="46" y="123" font-size="9" text-anchor="end" fill="#888">500</text>
+      <line x1="50" y1="70" x2="470" y2="70" stroke="#eee"/><text x="46" y="73" font-size="9" text-anchor="end" fill="#888">1000</text>
+      <line x1="50" y1="20" x2="470" y2="20" stroke="#eee"/><text x="46" y="23" font-size="9" text-anchor="end" fill="#888">1500</text>
+      <rect x="70" y="107" width="40" height="63" fill="#4878a8"/><rect x="70" y="60" width="40" height="47" fill="#9db9d8"/>
+      <rect x="116" y="130" width="40" height="40" fill="#e09f3e"/><rect x="116" y="88" width="40" height="42" fill="#f0cf94"/>
+      <text x="113" y="184" font-size="10" text-anchor="middle" fill="#555">2026</text>
+      <rect x="230" y="99" width="40" height="71" fill="#4878a8"/><rect x="230" y="46" width="40" height="53" fill="#9db9d8"/>
+      <rect x="276" y="127" width="40" height="43" fill="#e09f3e"/><rect x="276" y="83" width="40" height="44" fill="#f0cf94"/>
+      <text x="273" y="184" font-size="10" text-anchor="middle" fill="#555">2027</text>
+      <rect x="390" y="91" width="40" height="79" fill="#4878a8"/><rect x="390" y="32" width="40" height="59" fill="#9db9d8"/>
+      <rect x="436" y="124" width="40" height="46" fill="#e09f3e"/><rect x="436" y="78" width="40" height="46" fill="#f0cf94"/>
+      <text x="433" y="184" font-size="10" text-anchor="middle" fill="#555">2028</text>
+      <text x="52" y="12" font-size="9" fill="#888">kg CO₂e — dark = usage, light = fabrication · one legend drives both models</text>
+    </svg>
+
+    <!-- cumulative -->
+    <p style="margin:1.2rem 0 .2rem;"><strong>Cumulative CO2 emissions over time</strong>
+      <span style="color:#777; font-size:.85em;">— overlay; shaded gap = emissions avoided to date; end gap = headline Δ</span></p>
+    <svg viewBox="0 0 500 195" width="100%" style="max-width:500px; display:block;">
+      <line x1="50" y1="170" x2="460" y2="170" stroke="#999"/>
+      <line x1="50" y1="130" x2="460" y2="130" stroke="#eee"/><text x="46" y="133" font-size="9" text-anchor="end" fill="#888">1 t</text>
+      <line x1="50" y1="90" x2="460" y2="90" stroke="#eee"/><text x="46" y="93" font-size="9" text-anchor="end" fill="#888">2 t</text>
+      <line x1="50" y1="50" x2="460" y2="50" stroke="#eee"/><text x="46" y="53" font-size="9" text-anchor="end" fill="#888">3 t</text>
+      <polygon points="50,170 183,126 316,76 450,21 450,66 316,102 183,137 50,170" fill="#2e7d32" opacity="0.12"/>
+      <polyline points="50,170 183,126 316,76 450,21" fill="none" stroke="#4878a8" stroke-width="2.5"/>
+      <polyline points="50,170 183,137 316,102 450,66" fill="none" stroke="#e09f3e" stroke-width="2.5"/>
+      <text x="452" y="24" font-size="9" fill="#4878a8">3.72 t</text>
+      <text x="452" y="69" font-size="9" fill="#e09f3e">2.61 t</text>
+    </svg>
+
+    <!-- assumptions diff -->
+    <p style="margin:1.2rem 0 .2rem;"><strong>What differs between the models</strong>
+    <span style="color:#777; font-size:.85em;">— inputs only, differences shown directly</span></p>
+    <table style="font-size:.85em;">
+      <thead><tr><th>Object</th><th>Attribute</th><th>Streaming app</th><th>— edge caching</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Video stream (Job)</td><td>Data transferred per call</td><td>800 MB</td><td><strong>250 MB</strong></td><td style="color:#b26a00;">changed</td></tr>
+        <tr><td>Video stream (Job)</td><td>Server processing time per call</td><td>2.5 s</td><td><strong>1.8 s</strong></td><td style="color:#b26a00;">changed</td></tr>
+        <tr><td>Edge cache node (EdgeDevice)</td><td>—</td><td style="color:#999;">absent</td><td>present</td><td style="color:#2e7d32;">only in B</td></tr>
+      </tbody>
+    </table>
+    <p style="color:#777; font-size:.85em;">Objects are matched by id first, then by name and type; unmatched
+    objects appear as "only in A / only in B". Identical inputs are not listed.</p>
+
+    <script>
+      (function () {
+        var info = {
+          'servers-usage': 'Servers & storage usage: 1590 → 930 kg (−660 over 2026–2028)',
+          'servers-fab': 'Servers & storage fabrication: 540 → 240 kg (−300)',
+          'network': 'Network usage: 330 → 90 kg (−240)',
+          'edge': 'Edge devices: 0 → 90 kg (+90, new in variant)'
+        };
+        var cap = document.getElementById('cmp-cat-caption');
+        var def = cap.textContent;
+        document.querySelectorAll('[data-cat]').forEach(function (el) {
+          el.addEventListener('mouseover', function () {
+            el.setAttribute('stroke', '#1a1a1a'); el.setAttribute('stroke-width', '1.5');
+            cap.textContent = info[el.getAttribute('data-cat')];
+          });
+          el.addEventListener('mouseout', function () {
+            el.removeAttribute('stroke'); el.removeAttribute('stroke-width');
+            cap.textContent = def;
+          });
+        });
+      })();
+    </script>
+  </div>
+
+  <h3>4.3 The comparison grammar — one rule per reused visualization</h3>
+  <table>
+    <tr><th>Today (one model)</th><th>Compared as</th><th>Key rule</th></tr>
+    <tr>
+      <td>Headline total (implicit in charts)</td>
+      <td>KPI strip: two model cards (total, usage/fab subtotals, timespan) + one delta card.</td>
+      <td>Delta shows absolute <em>and</em> relative; fixed sign convention ("second minus
+      first"); full-timespan sums.</td>
+    </tr>
+    <tr>
+      <td>— (not shown today)</td>
+      <td>"What explains the difference": horizontal diverging bars, one per impact category.</td>
+      <td>Exact arithmetic on each model's per-category results — sums to the headline delta.
+      Categories follow the existing usage/fabrication taxonomy. No cause-linking to inputs in
+      v1.</td>
+    </tr>
+    <tr>
+      <td>Yearly/monthly CO2 emissions (stacked bars, capsule legend split Usage/Fabrication)</td>
+      <td>Paired bars per time bucket (model A | model B side by side) on a shared calendar
+      axis.</td>
+      <td>One shared y-axis, one shared capsule legend driving both models' series; model
+      identity carried by a constant color pair. Where one model has no data for a period, that
+      bucket is simply blank.</td>
+    </tr>
+    <tr>
+      <td>Cumulative CO2 emissions (line)</td>
+      <td>Two curves overlaid; the area between them shaded — the vertical gap at any date reads
+      as "emissions avoided so far"; the end gap equals the headline delta.</td>
+      <td>End-of-curve labels carry the totals; same shared-axis rule.</td>
+    </tr>
+    <tr>
+      <td>Source table (inputs, sources, confidence)</td>
+      <td>Assumptions diff: objects matched by id first, then by name and type; rows = (object, attribute) with
+      both values; "only in A / only in B" for unmatched objects. Shows differences only.</td>
+      <td>This is the <em>input-side</em> comparison — "what did I change?", the counterpart of
+      "what did it change?".</td>
+    </tr>
+    <tr>
+      <td>Sankey analysis cards</td>
+      <td style="color:#888;">Deferred — see <a href="backlog.html">backlog.html</a> §1.</td>
+      <td style="color:#888;">Paired diagrams at a shared flow scale; not in v1.</td>
+    </tr>
+  </table>
+
+  <h3>4.4 Time spans — the v1 simplification</h3>
+  <p>v1 computes every aggregate as a <strong>full-timespan sum</strong> over each model's own
+  modeling period, and plots both time-series on a shared calendar axis. This is exact and needs
+  no normalization. Its honest limitation: when the two models cover <em>different</em> durations,
+  the headline delta compares totals accumulated over different lengths of time — each model's
+  card states its own period so the reader can see this. Normalization for differing timespans
+  (per-year basis, aligned starts) is deferred to <a href="backlog.html">backlog.html</a> §2.</p>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Session-driven state</strong> remains the persistence model: both models, their
+    names, and the active selection live in the session — no server-side library
+    (<code>constitution.md</code> §4). <code>mission.md</code> currently phrases session state as
+    "the current model lives in the Django session" (singular); that sentence needs a one-line
+    amendment when this ships. Not a constitutional conflict.</li>
+    <li><strong>File-format continuity.</strong> Per-model exports keep today's single-model
+    format; files must circulate freely between single-model and two-model sessions, both
+    directions. The combined workspace file is additive — it must not change the single-model
+    format.</li>
+    <li><strong>The library is the domain truth</strong> (<code>constitution.md</code> §1.3):
+    the comparison view presents and subtracts results computed by <code>efootprint</code>; it
+    introduces no new modeling logic. Per-category deltas are arithmetic on existing per-category
+    results; no attribution or sensitivity analysis is claimed.</li>
+    <li><strong>HTMX-first, no SPA</strong> (<code>constitution.md</code> §1.4) applies to the
+    switcher and the comparison dashboard like everywhere else.</li>
+    <li><strong>Magnitude honesty.</strong> Shared scales/legends in the two compared charts
+    (§4.3) are a hard requirement, not a styling preference — independently-scaled side-by-side
+    charts would visually lie.</li>
+    <li><strong>Performance.</strong> Session payload and recomputation surface roughly double.
+    Editing one model must not trigger recomputation of the other; switching models and opening
+    the comparison must stay responsive on typical models.</li>
+    <li>Existing flows (onboarding, recovery page, help drawer, xlsx export) keep working
+    unchanged in single-model sessions.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Resolved decisions</h2>
+  <p>Settled 2026-06-16 (were open questions in earlier revisions):</p>
+  <ul>
+    <li><strong>Decomposition granularity.</strong> The "what explains the difference" bars use the full
+    hardware-type taxonomy (servers/network/devices/edge × usage/fabrication), as shown in §4.2 — not a coarser
+    collapse.</li>
+    <li><strong>Differing-timespan rendering.</strong> Non-overlapping buckets are left <strong>blank</strong>; each
+    model card states its own period, so the asymmetry is documented without a greyed marker.</li>
+    <li><strong>Duplicate naming.</strong> Duplication proposes <strong>"Copy of {system name}"</strong>, editable by
+    the user afterwards.</li>
+    <li><strong>Assumptions diff matching.</strong> Objects are matched <strong>by id first, then by (name, type)</strong>
+    — robust to renames in the duplicate-then-edit workflow while still diffing independently-built models (§4.2, §4.3).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end. The chosen design is §4.2; <a href="backlog.html">backlog.html</a>
+    lists what was deliberately deferred.</li>
+    <li>The variation files (<a href="variation-1-results-panel-mode.html">1</a>,
+    <a href="variation-2-comparison-dashboard.html">2</a>,
+    <a href="variation-3-delta-first.html">3</a>) are the design exploration; variation 2 is the
+    chosen layout, simplified here.</li>
+    <li>Read <code>plan.html</code> (when written) for ordered steps and test gates.</li>
+    <li>Re-read the relevant spec files (<code>specs/architecture.md</code>,
+    <code>specs/conventions.md</code>) for code-style and architectural constraints.</li>
+  </ol>
+</section>
+
+</body>
+</html>

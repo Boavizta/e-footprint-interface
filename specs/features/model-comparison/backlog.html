@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model comparison — Backlog</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  .meta { color: #777; font-size: .9em; }
+</style>
+</head>
+<body>
+
+<h1>Model comparison — Backlog</h1>
+<p class="status">Deferred ideas · companion to <a href="spec.html">spec.html</a> · 2026-06-15</p>
+
+<p>Ideas explored during the spec/design pass that are <strong>deliberately out of the first
+iteration</strong>. Each is worth doing later; none blocks v1. The design work already done for
+several of these lives in the variation files, linked below, so we don't re-derive it.</p>
+
+<section>
+  <h2>1. Sankey repartition comparison</h2>
+  <p>Each Sankey analysis card becomes a <em>pair</em> of diagrams driven by one shared settings
+  form (phase filter, aggregation threshold, analyse-by chips), drawn at a
+  <strong>shared flow scale</strong> (identical px-per-kg) so the smaller model is visibly
+  thinner; hovering a node/flow highlights its counterpart and shows both values + delta.</p>
+  <p class="meta">Why deferred: the richest single block, and the per-category delta decomposition
+  in v1 already answers "where does the difference come from" without it. Design fully mocked in
+  <a href="variation-2-comparison-dashboard.html">variation 2</a> ("Impact repartition" block,
+  hover the flows).</p>
+  <p class="meta">Rejected sub-idea: a single merged "diff Sankey" — fragile when the two models'
+  structures diverge.</p>
+</section>
+
+<section>
+  <h2>2. Per-year / differing-timespan normalization</h2>
+  <p>v1 computes every difference as a <strong>full-timespan sum</strong> and plots time-series on
+  a shared calendar axis. That is honest only when the two models cover the same period. For
+  models of different durations, two refinements were designed:</p>
+  <ul>
+    <li><strong>Aligned-starts axis</strong> — x-axis = "years since each model's own start", so a
+    2-year and a 3-year model line up at year 1.</li>
+    <li><strong>Per-year-average aggregates</strong> — every KPI delta and decomposition bar
+    computed on a per-year basis and explicitly labeled, with each model's card still showing its
+    own absolute total and span.</li>
+  </ul>
+  <p class="meta">Why deferred: user chose full-timespan sums for v1 simplicity. Design lives in
+  the rev-2 spec history (§4.5 had a T1/T2/T3 toggle mockup).</p>
+</section>
+
+<section>
+  <h2>3. Δ-only per-period chart mode</h2>
+  <p>A toggle on the emissions-over-time chart that collapses the paired bars into one diverging
+  bar per time bucket (variant minus reference per period).</p>
+  <p class="meta">Why deferred: it is a per-period difference, in tension with v1's
+  full-timespan-sum framing. Mocked in <a href="variation-2-comparison-dashboard.html">variation
+  2</a> ("Δ only" radio).</p>
+</section>
+
+<section>
+  <h2>4. Cause linking (input diffs → impact categories)</h2>
+  <p>Inside each decomposition step, surface the <em>related input differences</em> — e.g. linking
+  "Network usage −240 kg" to "data transferred per call: 800 MB → 250 MB".</p>
+  <blockquote>Honesty constraint carried forward: this can only be presented as <em>"related
+  differences"</em>, matched through the object an input belongs to. It must never claim computed
+  attribution ("X kg of this step come from this input") — that needs sensitivity analysis, which
+  is out of scope.</blockquote>
+  <p class="meta">Why deferred: user moved it to backlog. Design lives in
+  <a href="variation-3-delta-first.html">variation 3</a> (waterfall step accordions).</p>
+</section>
+
+<section>
+  <h2>5. Verdict sentence &amp; delta-first narrative ordering</h2>
+  <p>An opening plain-language verdict ("variant emits 1.11 t less over 2026–2028") above a
+  clickable waterfall of <em>why</em>, with full charts collapsed below — answer-first reading
+  for the non-technical persona.</p>
+  <p class="meta">Why deferred: needs careful wording for the mixed-sign case (lower usage but
+  higher fabrication) before it reads honestly. Design lives in
+  <a href="variation-3-delta-first.html">variation 3</a>.</p>
+</section>
+
+<section>
+  <h2>6. Comparison-specific xlsx export</h2>
+  <p>A single spreadsheet of the comparison (both totals, the category decomposition, the
+  assumptions diff). v1 keeps each model's own xlsx export only.</p>
+</section>
+
+<section>
+  <h2>7. More than two models</h2>
+  <p>Three or more models compared at once. v1 is strictly two. This touches the switcher, the KPI
+  strip layout, and the diff table shape, so it is a genuine follow-up rather than a tweak.</p>
+</section>
+
+</body>
+</html>

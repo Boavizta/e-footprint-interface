@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model comparison — Variation 3: Delta-first story</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Variation 3 — Delta-first story</h1>
+<p class="status">Design variation · companion to <a href="spec.html">spec.html</a> · 2026-06-11</p>
+<blockquote><strong>Not chosen for v1.</strong> Variation 2 (comparison dashboard) is the v1
+layout. The delta-first verdict + waterfall and the cause-linking shown here are deferred to
+<a href="backlog.html">backlog.html</a> §4–5. Kept as a record of the design exploration.</blockquote>
+
+<section>
+  <h2>Concept</h2>
+  <p>Built for the primary persona (non-technical product person): the comparison page reads
+  <strong>answer first, evidence below</strong>. It opens with a one-sentence verdict, then a
+  waterfall showing <em>what explains the difference</em>, where each step is clickable and
+  unfolds the evidence behind it — including the <strong>input differences that caused it</strong>.
+  The full chart gallery (as in <a href="variation-2-comparison-dashboard.html">Variation 2</a>)
+  is still there, but collapsed at the bottom rather than leading. Access is the same third
+  top-level tab as Variation 2 — this variation differs in <em>content order and narrative</em>,
+  not in navigation.</p>
+</section>
+
+<section>
+  <h2>Mockup — click the waterfall steps</h2>
+  <div class="mockup">
+    <!-- verdict -->
+    <div style="border:2px solid #2e7d32; border-radius:8px; padding:.8rem 1rem; background:#f2f8f3;">
+      <span style="font-size:1.25em; color:#2e7d32;"><strong>▼ −30 %</strong></span>
+      &nbsp;<strong>"Streaming app — edge caching"</strong> emits
+      <strong>1.11 t CO₂e less</strong> than <strong>"Streaming app"</strong> over 2026–2028
+      (−0.37 t per year).
+    </div>
+
+    <!-- waterfall -->
+    <p style="margin:1rem 0 .2rem;"><strong>Where the difference comes from</strong>
+    <span style="color:#777; font-size:.85em;">(per year of operation — click a step)</span></p>
+    <svg viewBox="0 0 520 210" width="100%" style="max-width:520px; display:block;">
+      <line x1="20" y1="170" x2="505" y2="170" stroke="#999"/>
+      <g data-step="none" style="cursor:default;">
+        <rect x="30" y="46" width="60" height="124" fill="#4878a8"/>
+        <text x="60" y="40" font-size="10" text-anchor="middle" fill="#4878a8">1 240</text>
+        <text x="60" y="184" font-size="9" text-anchor="middle" fill="#555">Streaming app</text>
+      </g>
+      <line x1="90" y1="46" x2="110" y2="46" stroke="#aaa" stroke-dasharray="3 2"/>
+      <g data-step="servers-usage" style="cursor:pointer;">
+        <rect x="110" y="46" width="60" height="22" fill="#2e7d32"/>
+        <text x="140" y="40" font-size="10" text-anchor="middle" fill="#2e7d32">−220</text>
+        <text x="140" y="184" font-size="9" text-anchor="middle" fill="#555">Servers usage</text>
+      </g>
+      <line x1="170" y1="68" x2="190" y2="68" stroke="#aaa" stroke-dasharray="3 2"/>
+      <g data-step="servers-fab" style="cursor:pointer;">
+        <rect x="190" y="68" width="60" height="10" fill="#2e7d32"/>
+        <text x="220" y="62" font-size="10" text-anchor="middle" fill="#2e7d32">−100</text>
+        <text x="220" y="184" font-size="9" text-anchor="middle" fill="#555">Servers fab.</text>
+      </g>
+      <line x1="250" y1="78" x2="270" y2="78" stroke="#aaa" stroke-dasharray="3 2"/>
+      <g data-step="network" style="cursor:pointer;">
+        <rect x="270" y="78" width="60" height="8" fill="#2e7d32"/>
+        <text x="300" y="72" font-size="10" text-anchor="middle" fill="#2e7d32">−80</text>
+        <text x="300" y="184" font-size="9" text-anchor="middle" fill="#555">Network</text>
+      </g>
+      <line x1="330" y1="86" x2="350" y2="86" stroke="#aaa" stroke-dasharray="3 2"/>
+      <g data-step="edge" style="cursor:pointer;">
+        <rect x="350" y="83" width="60" height="3" fill="#c62828"/>
+        <text x="380" y="78" font-size="10" text-anchor="middle" fill="#c62828">+30</text>
+        <text x="380" y="184" font-size="9" text-anchor="middle" fill="#555">Edge devices</text>
+      </g>
+      <line x1="410" y1="83" x2="430" y2="83" stroke="#aaa" stroke-dasharray="3 2"/>
+      <g data-step="none" style="cursor:default;">
+        <rect x="430" y="83" width="60" height="87" fill="#e09f3e"/>
+        <text x="460" y="77" font-size="10" text-anchor="middle" fill="#e09f3e">870</text>
+        <text x="460" y="184" font-size="9" text-anchor="middle" fill="#555">— edge caching</text>
+      </g>
+      <text x="22" y="200" font-size="9" fill="#888">kg CO₂e per year · user devices omitted (no change)</text>
+    </svg>
+
+    <!-- drill-down accordions -->
+    <details id="step-servers-usage">
+      <summary>Servers &amp; storage usage — −220 kg/yr (−69 %)</summary>
+      <p style="font-size:.9em; margin:.4rem 0;">The variant's origin servers do far less work
+      per stream. <em>Mini-evidence: paired yearly bars for this category only.</em></p>
+      <p style="font-size:.9em; margin:.4rem 0;"><strong>Related input differences</strong>
+      (from the assumptions diff, same objects):</p>
+      <ul style="font-size:.9em;">
+        <li>Video stream (Job) · Server processing time per call: <code>2.5 s → 1.8 s</code></li>
+        <li>Video stream (Job) · Data transferred per call: <code>800 MB → 250 MB</code>
+        <span style="color:#b26a00;">(also affects Network)</span></li>
+      </ul>
+    </details>
+    <details id="step-servers-fab">
+      <summary>Servers &amp; storage fabrication — −100 kg/yr (−56 %)</summary>
+      <p style="font-size:.9em; margin:.4rem 0;">Lower compute demand means fewer server
+      instances to manufacture and amortize. Driven by the same job changes as servers usage.</p>
+    </details>
+    <details id="step-network">
+      <summary>Network usage — −80 kg/yr (−73 %)</summary>
+      <p style="font-size:.9em; margin:.4rem 0;"><strong>Related input differences:</strong></p>
+      <ul style="font-size:.9em;">
+        <li>Video stream (Job) · Data transferred per call: <code>800 MB → 250 MB</code></li>
+      </ul>
+    </details>
+    <details id="step-edge">
+      <summary>Edge devices — +30 kg/yr (new in variant)</summary>
+      <p style="font-size:.9em; margin:.4rem 0;">The cache hardware the variant adds:</p>
+      <ul style="font-size:.9em;">
+        <li>Edge cache node (EdgeDevice) · <span style="color:#2e7d32;">only in "— edge caching"</span>
+        — fabrication 10 kg/yr + usage 20 kg/yr</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>All comparison charts (collapsed by default)</summary>
+      <p style="font-size:.9em; color:#666;">The full gallery from
+      <a href="variation-2-comparison-dashboard.html">Variation 2</a>: paired yearly bars,
+      cumulative overlay, side-by-side Sankeys, complete assumptions diff.</p>
+    </details>
+
+    <script>
+      (function () {
+        document.querySelectorAll('[data-step]').forEach(function (g) {
+          var step = g.getAttribute('data-step');
+          if (step === 'none') return;
+          g.addEventListener('click', function () {
+            var d = document.getElementById('step-' + step);
+            if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+          });
+        });
+      })();
+    </script>
+  </div>
+</section>
+
+<section>
+  <h2>Honest caveats</h2>
+  <ul>
+    <li><strong>Category attribution is exact</strong>: the waterfall steps are the per-category
+    emission deltas, which are additive — no estimation involved.</li>
+    <li><strong>Cause linking is heuristic</strong>: an input difference is linked to a waterfall
+    step through the object it belongs to, but one input can affect several categories (data
+    transferred per call moves both Network and Servers). The UI must present these as "related
+    differences", never as computed attributions ("X kg of this step come from this input" is
+    <em>not</em> claimed — that would require sensitivity analysis, out of scope).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Assessment</h2>
+  <table>
+    <tr><th>Strengths</th><td>Answer-first reading order matches how a product team actually
+    consumes a comparison; the waterfall connects outputs to causes — the unique value a
+    modeling tool can add over two screenshots; degrades gracefully (charts still available
+    below).</td></tr>
+    <tr><td style="background:#f5f5f5; font-weight:600;">Weaknesses</td><td>Most novel = most
+    design risk; needs careful wording to keep cause-links honest (see caveats); more build
+    effort than reusing existing chart blocks; the verdict sentence needs a neutral form when
+    neither model is obviously "better".</td></tr>
+    <tr><td style="background:#f5f5f5; font-weight:600;">Best when</td><td>The comparison's job
+    is to support a decision and explain it — the typical "baseline vs variant"
+    scenario.</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

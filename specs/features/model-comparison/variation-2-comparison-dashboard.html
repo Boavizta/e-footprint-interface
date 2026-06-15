@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model comparison — Variation 2: Comparison dashboard</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Variation 2 — Comparison dashboard</h1>
+<p class="status">Design variation · companion to <a href="spec.html">spec.html</a> · 2026-06-11</p>
+<blockquote><strong>Chosen layout.</strong> The canonical v1 design lives in
+<a href="spec.html">spec.html</a> §4.2, simplified: this file's Sankey pairing, Δ-only toggle,
+per-year handling, swap control, and "only differences" filter are <em>deferred</em> to
+<a href="backlog.html">backlog.html</a>. Kept as the fuller exploration of this layout.</blockquote>
+
+<section>
+  <h2>Concept</h2>
+  <p>Comparison gets a <strong>dedicated full-page view</strong>, reached from a third top-level
+  tab next to the two model tabs. One scrolling dashboard holds everything: model identity
+  cards, headline totals with deltas, a "what explains the difference" decomposition, the
+  compared charts, paired Sankeys, and the assumptions diff. Per-model results panels stay
+  exactly as today inside each model's workspace — the dashboard is additive, a
+  <em>report-like</em> surface you could walk a stakeholder through top to bottom.</p>
+</section>
+
+<section>
+  <h2>Mockup — click the tabs, toggle the chart modes, hover the Sankeys</h2>
+  <div class="mockup">
+    <div style="display:flex; gap:.4rem; border-bottom:2px solid #ddd; padding-bottom:.4rem;">
+      <button id="v2-tab-a">Streaming app</button>
+      <button id="v2-tab-b">Streaming app — edge caching</button>
+      <button id="v2-tab-cmp" style="font-weight:600;">⇄ Compare</button>
+    </div>
+
+    <div id="v2-panel-model" hidden style="padding:.8rem 0; color:#777;">
+      Builder canvas of <strong id="v2-model-name">Streaming app</strong> — today's UI, with its
+      own slide-up results panel. Unchanged.
+    </div>
+
+    <div id="v2-panel-cmp" style="padding:.8rem 0;">
+
+      <!-- identity header -->
+      <div style="display:flex; gap:.6rem; align-items:stretch;">
+        <div style="flex:1; border:1px solid #ccc; border-left:5px solid #4878a8; border-radius:6px; padding:.5rem;">
+          <strong>Streaming app</strong><br>
+          <span style="font-size:.85em; color:#666;">2026–2028 · 3.72 t CO₂e · 1.24 t/yr avg</span>
+        </div>
+        <button title="Swap reference: deltas are read as 'second minus first'" style="align-self:center;">⇄ swap</button>
+        <div style="flex:1; border:1px solid #ccc; border-left:5px solid #e09f3e; border-radius:6px; padding:.5rem;">
+          <strong>Streaming app — edge caching</strong><br>
+          <span style="font-size:.85em; color:#666;">2026–2028 · 2.61 t CO₂e · 0.87 t/yr avg</span>
+        </div>
+        <div style="flex:1; border:2px solid #2e7d32; border-radius:6px; padding:.5rem; color:#2e7d32; text-align:center;">
+          <strong style="font-size:1.2em;">−1.11 t (−30 %)</strong><br>
+          <span style="font-size:.85em;">usage −0.84 t (−39 %) · fabrication −0.27 t (−17 %)</span>
+        </div>
+      </div>
+
+      <!-- decomposition -->
+      <p style="margin:1rem 0 .2rem;"><strong>What explains the difference</strong>
+      <span style="color:#777; font-size:.85em;">(per year of operation, hover the Sankeys below for the same categories)</span></p>
+      <svg viewBox="0 0 480 150" width="100%" style="max-width:480px; display:block;">
+        <line x1="300" y1="8" x2="300" y2="140" stroke="#999"/>
+        <text x="296" y="148" font-size="9" text-anchor="end" fill="#2e7d32">← lower emissions</text>
+        <text x="304" y="148" font-size="9" fill="#c62828">higher →</text>
+        <text x="8" y="30" font-size="10" fill="#444">Servers &amp; storage usage</text>
+        <rect x="212" y="20" width="88" height="14" fill="#2e7d32" data-cat="servers"/>
+        <text x="208" y="31" font-size="10" text-anchor="end" fill="#2e7d32">−220 kg</text>
+        <text x="8" y="56" font-size="10" fill="#444">Servers &amp; storage fabrication</text>
+        <rect x="260" y="46" width="40" height="14" fill="#2e7d32" data-cat="servers"/>
+        <text x="256" y="57" font-size="10" text-anchor="end" fill="#2e7d32">−100 kg</text>
+        <text x="8" y="82" font-size="10" fill="#444">Network usage</text>
+        <rect x="268" y="72" width="32" height="14" fill="#2e7d32" data-cat="network"/>
+        <text x="264" y="83" font-size="10" text-anchor="end" fill="#2e7d32">−80 kg</text>
+        <text x="8" y="108" font-size="10" fill="#444">Edge devices (new in variant)</text>
+        <rect x="300" y="98" width="12" height="14" fill="#c62828" data-cat="edge"/>
+        <text x="316" y="109" font-size="10" fill="#c62828">+30 kg</text>
+        <text x="8" y="134" font-size="10" fill="#444">User devices</text>
+        <line x1="296" y1="124" x2="304" y2="124" stroke="#888" stroke-width="2"/>
+        <text x="310" y="128" font-size="10" fill="#888">no change</text>
+      </svg>
+
+      <!-- emissions over time -->
+      <p style="margin:1rem 0 .2rem;"><strong>Yearly CO2 emissions</strong>
+        <label style="margin-left:1rem; font-size:.85em;"><input type="radio" name="v2mode" checked onclick="v2Mode('pairs')"> side by side</label>
+        <label style="margin-left:.6rem; font-size:.85em;"><input type="radio" name="v2mode" onclick="v2Mode('delta')"> Δ only</label>
+        <span style="color:#777; font-size:.85em; margin-left:1rem;">time granularity month/year kept as today</span>
+      </p>
+      <svg id="v2-pairs" viewBox="0 0 480 195" width="100%" style="max-width:480px; display:block;">
+        <line x1="50" y1="170" x2="470" y2="170" stroke="#999"/>
+        <line x1="50" y1="120" x2="470" y2="120" stroke="#eee"/><text x="46" y="123" font-size="9" text-anchor="end" fill="#888">500</text>
+        <line x1="50" y1="70" x2="470" y2="70" stroke="#eee"/><text x="46" y="73" font-size="9" text-anchor="end" fill="#888">1000</text>
+        <line x1="50" y1="20" x2="470" y2="20" stroke="#eee"/><text x="46" y="23" font-size="9" text-anchor="end" fill="#888">1500</text>
+        <rect x="70" y="107" width="40" height="63" fill="#4878a8"/><rect x="70" y="60" width="40" height="47" fill="#9db9d8"/>
+        <rect x="116" y="130" width="40" height="40" fill="#e09f3e"/><rect x="116" y="88" width="40" height="42" fill="#f0cf94"/>
+        <text x="113" y="184" font-size="10" text-anchor="middle" fill="#555">2026</text>
+        <rect x="230" y="99" width="40" height="71" fill="#4878a8"/><rect x="230" y="46" width="40" height="53" fill="#9db9d8"/>
+        <rect x="276" y="127" width="40" height="43" fill="#e09f3e"/><rect x="276" y="83" width="40" height="44" fill="#f0cf94"/>
+        <text x="273" y="184" font-size="10" text-anchor="middle" fill="#555">2027</text>
+        <rect x="390" y="91" width="40" height="79" fill="#4878a8"/><rect x="390" y="32" width="40" height="59" fill="#9db9d8"/>
+        <rect x="436" y="124" width="40" height="46" fill="#e09f3e"/><rect x="436" y="78" width="40" height="46" fill="#f0cf94"/>
+        <text x="433" y="184" font-size="10" text-anchor="middle" fill="#555">2028</text>
+        <text x="52" y="12" font-size="9" fill="#888">kg CO₂e — dark = usage, light = fabrication · one capsule legend drives both models' bars</text>
+      </svg>
+      <svg id="v2-delta" hidden viewBox="0 0 480 160" width="100%" style="max-width:480px; display:block;">
+        <line x1="50" y1="30" x2="470" y2="30" stroke="#999"/>
+        <text x="46" y="33" font-size="9" text-anchor="end" fill="#888">0</text>
+        <rect x="120" y="30" width="50" height="56" fill="#2e7d32"/><text x="145" y="98" font-size="10" text-anchor="middle" fill="#2e7d32">−280</text>
+        <text x="145" y="22" font-size="10" text-anchor="middle" fill="#555">2026</text>
+        <rect x="260" y="30" width="50" height="74" fill="#2e7d32"/><text x="285" y="116" font-size="10" text-anchor="middle" fill="#2e7d32">−370</text>
+        <text x="285" y="22" font-size="10" text-anchor="middle" fill="#555">2027</text>
+        <rect x="400" y="30" width="50" height="92" fill="#2e7d32"/><text x="425" y="134" font-size="10" text-anchor="middle" fill="#2e7d32">−460</text>
+        <text x="425" y="22" font-size="10" text-anchor="middle" fill="#555">2028</text>
+        <text x="52" y="150" font-size="9" fill="#888">kg CO₂e, variant minus reference — below zero = variant emits less</text>
+      </svg>
+
+      <!-- cumulative -->
+      <p style="margin:1rem 0 .2rem;"><strong>Cumulative CO2 emissions over time</strong></p>
+      <svg viewBox="0 0 500 195" width="100%" style="max-width:500px; display:block;">
+        <line x1="50" y1="170" x2="460" y2="170" stroke="#999"/>
+        <line x1="50" y1="130" x2="460" y2="130" stroke="#eee"/><text x="46" y="133" font-size="9" text-anchor="end" fill="#888">1 t</text>
+        <line x1="50" y1="90" x2="460" y2="90" stroke="#eee"/><text x="46" y="93" font-size="9" text-anchor="end" fill="#888">2 t</text>
+        <line x1="50" y1="50" x2="460" y2="50" stroke="#eee"/><text x="46" y="53" font-size="9" text-anchor="end" fill="#888">3 t</text>
+        <polygon points="50,170 183,126 316,76 450,21 450,66 316,102 183,137 50,170" fill="#2e7d32" opacity="0.12"/>
+        <polyline points="50,170 183,126 316,76 450,21" fill="none" stroke="#4878a8" stroke-width="2.5"/>
+        <polyline points="50,170 183,137 316,102 450,66" fill="none" stroke="#e09f3e" stroke-width="2.5"/>
+        <text x="340" y="55" font-size="9" fill="#2e7d32">shaded gap = avoided emissions to date</text>
+        <text x="452" y="24" font-size="9" fill="#4878a8">3.72 t</text>
+        <text x="452" y="69" font-size="9" fill="#e09f3e">2.61 t</text>
+      </svg>
+
+      <!-- sankey pair -->
+      <p style="margin:1rem 0 .2rem;"><strong>Impact repartition</strong>
+      <span style="color:#777; font-size:.85em;">— one settings card drives both diagrams; hover a flow</span></p>
+      <div style="border:1px solid #ddd; border-radius:6px; padding:.4rem .6rem; font-size:.85em; color:#555; display:flex; gap:1.2rem; flex-wrap:wrap;">
+        <span>Lifecycle phase: <code>All phases</code></span>
+        <span>Aggregation threshold: <code>1 %</code></span>
+        <span>Analyse by: <code>Object type</code></span>
+        <span style="color:#999;">(same controls as today's Sankey card — applied to both sides)</span>
+      </div>
+      <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:.4rem;">
+        <div>
+          <p style="margin:0; font-size:.85em; color:#4878a8;"><strong>Streaming app</strong> · 1.24 t/yr</p>
+          <svg viewBox="0 0 240 170" width="240" style="display:block;">
+            <rect x="20" y="23" width="26" height="124" fill="#4878a8" opacity=".85"/>
+            <polygon points="46,23 170,15 170,65 46,73" fill="#bbb" opacity=".6" data-cat="servers"/>
+            <rect x="170" y="15" width="26" height="50" fill="#888" data-cat="servers"/>
+            <text x="200" y="43" font-size="9" fill="#444">Servers 500</text>
+            <polygon points="46,73 170,73 170,136 46,136" fill="#bbb" opacity=".6" data-cat="devices"/>
+            <rect x="170" y="73" width="26" height="63" fill="#888" data-cat="devices"/>
+            <text x="200" y="107" font-size="9" fill="#444">Devices 630</text>
+            <polygon points="46,136 170,144 170,155 46,147" fill="#bbb" opacity=".6" data-cat="network"/>
+            <rect x="170" y="144" width="26" height="11" fill="#888" data-cat="network"/>
+            <text x="200" y="152" font-size="9" fill="#444">Network 110</text>
+          </svg>
+        </div>
+        <div>
+          <p style="margin:0; font-size:.85em; color:#e09f3e;"><strong>— edge caching</strong> · 0.87 t/yr</p>
+          <svg viewBox="0 0 240 170" width="240" style="display:block;">
+            <rect x="20" y="42" width="26" height="87" fill="#e09f3e" opacity=".85"/>
+            <polygon points="46,42 170,20 170,38 46,60" fill="#bbb" opacity=".6" data-cat="servers"/>
+            <rect x="170" y="20" width="26" height="18" fill="#888" data-cat="servers"/>
+            <text x="200" y="32" font-size="9" fill="#444">Servers 180</text>
+            <polygon points="46,60 170,44 170,107 46,123" fill="#bbb" opacity=".6" data-cat="devices"/>
+            <rect x="170" y="44" width="26" height="63" fill="#888" data-cat="devices"/>
+            <text x="200" y="78" font-size="9" fill="#444">Devices 630</text>
+            <polygon points="46,123 170,113 170,116 46,126" fill="#bbb" opacity=".6" data-cat="network"/>
+            <rect x="170" y="113" width="26" height="3" fill="#888" data-cat="network"/>
+            <text x="200" y="117" font-size="9" fill="#444">Network 30</text>
+            <polygon points="46,126 170,122 170,125 46,129" fill="#bbb" opacity=".6" data-cat="edge"/>
+            <rect x="170" y="122" width="26" height="3" fill="#888" data-cat="edge"/>
+            <text x="200" y="130" font-size="9" fill="#444">Edge 30</text>
+          </svg>
+        </div>
+      </div>
+      <p id="v2-sankey-caption" style="font-size:.85em; color:#555; min-height:1.2em; margin:.2rem 0;">
+        Both diagrams share one flow scale (here 1 px = 10 kg) — the variant is <em>visibly</em> thinner.
+      </p>
+
+      <!-- inputs diff -->
+      <p style="margin:1rem 0 .2rem;"><strong>What differs between the models</strong>
+        <label style="margin-left:1rem; font-size:.85em;"><input type="checkbox" id="v2-diff-only" checked> only differences</label>
+      </p>
+      <table style="font-size:.85em;">
+        <thead><tr><th>Object</th><th>Attribute</th><th>Streaming app</th><th>— edge caching</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Video stream (Job)</td><td>Data transferred per call</td><td>800 MB</td><td><strong>250 MB</strong></td><td style="color:#b26a00;">changed</td></tr>
+          <tr><td>Video stream (Job)</td><td>Server processing time per call</td><td>2.5 s</td><td><strong>1.8 s</strong></td><td style="color:#b26a00;">changed</td></tr>
+          <tr><td>Edge cache node (EdgeDevice)</td><td>—</td><td style="color:#999;">absent</td><td>present</td><td style="color:#2e7d32;">only in B</td></tr>
+          <tr class="v2-same"><td>Daily streaming sessions (UsagePattern)</td><td>Hourly visits</td><td colspan="2" style="text-align:center; color:#999;">identical</td><td style="color:#999;">same</td></tr>
+          <tr class="v2-same"><td>Origin server (Server)</td><td>Lifespan</td><td colspan="2" style="text-align:center; color:#999;">identical</td><td style="color:#999;">same</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      (function () {
+        var els = function (id) { return document.getElementById(id); };
+        function showTab(which) {
+          els('v2-panel-cmp').hidden = which !== 'cmp';
+          els('v2-panel-model').hidden = which === 'cmp';
+          if (which !== 'cmp')
+            els('v2-model-name').textContent = which === 'a' ? 'Streaming app' : 'Streaming app — edge caching';
+          ['a', 'b', 'cmp'].forEach(function (k) {
+            els('v2-tab-' + k).style.fontWeight = which === k ? '600' : 'normal';
+          });
+        }
+        els('v2-tab-a').onclick = function () { showTab('a'); };
+        els('v2-tab-b').onclick = function () { showTab('b'); };
+        els('v2-tab-cmp').onclick = function () { showTab('cmp'); };
+
+        window.v2Mode = function (m) {
+          els('v2-pairs').hidden = m !== 'pairs';
+          els('v2-delta').hidden = m !== 'delta';
+        };
+
+        var catInfo = {
+          servers: 'Servers & storage: 500 → 180 kg/yr (−320, −64 %)',
+          devices: 'User devices: 630 → 630 kg/yr (no change)',
+          network: 'Network: 110 → 30 kg/yr (−80, −73 %)',
+          edge: 'Edge devices: 0 → 30 kg/yr (+30, new in variant)'
+        };
+        var defaultCaption = els('v2-sankey-caption').textContent;
+        document.querySelectorAll('[data-cat]').forEach(function (el) {
+          el.addEventListener('mouseover', function () {
+            var cat = el.getAttribute('data-cat');
+            document.querySelectorAll('[data-cat="' + cat + '"]').forEach(function (m) {
+              m.setAttribute('stroke', '#1a1a1a'); m.setAttribute('stroke-width', '1.5');
+            });
+            els('v2-sankey-caption').textContent = catInfo[cat];
+          });
+          el.addEventListener('mouseout', function () {
+            document.querySelectorAll('[data-cat]').forEach(function (m) { m.removeAttribute('stroke'); m.removeAttribute('stroke-width'); });
+            els('v2-sankey-caption').textContent = defaultCaption;
+          });
+        });
+
+        els('v2-diff-only').onchange = function () {
+          document.querySelectorAll('.v2-same').forEach(function (r) { r.hidden = els('v2-diff-only').checked; });
+        };
+        els('v2-diff-only').onchange();
+      })();
+    </script>
+  </div>
+</section>
+
+<section>
+  <h2>Assessment</h2>
+  <table>
+    <tr><th>Strengths</th><td>Room for everything — wide charts, paired Sankeys, the diff table;
+    a single scrolling narrative that doubles as a stakeholder-facing report; per-model
+    workspaces stay untouched; each existing Sankey analysis card generalizes naturally to a
+    pair driven by one settings form.</td></tr>
+    <tr><td style="background:#f5f5f5; font-weight:600;">Weaknesses</td><td>A third top-level
+    surface to maintain and keep consistent with per-model results; risk of dashboard sprawl
+    as blocks accumulate; some content duplicated with per-model panels (same charts, compare
+    flavour).</td></tr>
+    <tr><td style="background:#f5f5f5; font-weight:600;">Best when</td><td>Comparison is a
+    first-class deliverable: studied, discussed, shown to others — not just glanced at while
+    editing.</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

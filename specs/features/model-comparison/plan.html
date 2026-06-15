@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model comparison — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  h3 { margin-top: 1.4rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  .new { color: #1a7f37; font-weight: 600; }
+  .mod { color: #b26a00; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Model comparison — Implementation plan</h1>
+<p class="status">Status: Plan — under review · 2026-06-16 · Spec: <a href="spec.html">spec.html</a> (rev 3, v1) · Backlog: <a href="backlog.html">backlog.html</a><br>
+Cross-repo: computation core in <code>e-footprint</code> (library), workspace/UI in <code>e-footprint-interface</code> · home stays here (interface-driven); one <code>tasks.md</code> covers both.</p>
+
+<section>
+  <h2>1. Approach</h2>
+  <p>The session moves from holding <em>one</em> model to holding a small <strong>workspace</strong> of
+  up to two model <strong>slots</strong> plus an active-slot pointer. Each slot keeps its own cached
+  blob (today's exact single-model payload), so editing one model never deserializes or recomputes the
+  other — the binding Redis-RAM / JSON-round-trip constraint stays respected. The 30&nbsp;MB Redis cap (<code>MAX_PAYLOAD_SIZE_MB</code>) becomes a <strong>shared budget across both slots' with-calculated-attributes payloads</strong> (the real Redis footprint), not a per-slot allowance. A new slot-aware
+  <strong>workspace repository</strong> owns the slot index and vends an ordinary per-slot
+  <code>ISystemRepository</code>; because that per-slot repository <em>defaults to the active slot</em>,
+  the ~25 existing <code>ModelWeb(repository)</code> call sites keep working unchanged — only the new
+  comparison view explicitly addresses both slots.</p>
+
+  <p>The builder UI gains a <strong>tab strip</strong> (Model A · Model B · ＋ Add · ⇄ Compare). Both
+  model canvases are rendered server-side and kept <strong>resident in the DOM</strong>, toggled
+  client-side — the same lazy-render-then-show/hide pattern the Results/Sources tabs already use, so
+  switching models costs no network round-trip and preserves each canvas's transient UI state. Only the
+  <strong>active</strong> canvas is editable; all chrome (side panel, help drawer, toolbar, results
+  panel) stays a single shared instance rebound to the active slot. DOM-id collisions between the two
+  resident canvases are avoided at a single chokepoint — the wrappers' <code>web_id</code> property (every card id,
+  derived id and leaderline anchor flows from it) — by prefixing it with the <strong>system id</strong>; the canvas
+  templates need no edits, and server routing is unaffected because it already uses a separate <code>efootprint_id</code>.
+  The underlying efootprint object ids are <em>preserved</em>
+  through duplication (a duplicate gets a fresh <em>system</em> id only), which is what lets the
+  comparison diff pair objects by identity. The workspace keeps the two slots' system ids distinct as a load-bearing
+  invariant — minting a fresh one on any collision (re-imported file, same template loaded twice) — since the
+  <code>web_id</code> prefix depends on it. The <strong>Compare</strong> tab is re-rendered fresh on
+  every visit (read-only, cheap), guaranteeing "no stale results" without keeping comparison DOM warm.</p>
+
+  <p>The comparison <strong>computation lives in e-footprint, not the interface</strong> (constitution §1.3 —
+  the library is the domain truth). A new <code>efootprint.comparison</code> capability — surfaced as
+  <code>system_a.compare_to(system_b)</code> returning a <code>SystemComparison</code> — computes the KPI
+  totals + deltas, the per-(category, phase) decomposition (from the library's own
+  <code>total_*_footprint_sum_over_period</code> dicts, which already sum to the total), the aligned/​cumulative
+  time-series, and the input diff (id-first, name+type fallback). It also ships <strong>simple matplotlib/plotly
+  plots</strong> so the comparison is useful directly in a Jupyter notebook or to a coding agent — even though the
+  web re-renders them. This makes the feature <strong>cross-repo</strong>: the interface side shrinks to a thin
+  adapter (<code>ComparisonService</code>) that calls the library and shapes its result into Chart.js JSON + the HTML
+  diff table — it re-implements rendering, never the modeling. No new modeling logic, no attribution claims.</p>
+
+  <svg viewBox="0 0 720 360" width="100%" style="max-width:720px; display:block; margin:1rem 0;">
+    <style>
+      .box{fill:#fff;stroke:#888;rx:6} .nw{fill:#eaf5ea;stroke:#2e7d32}
+      .lbl{font:12px system-ui;fill:#1a1a1a} .sm{font:10px system-ui;fill:#666}
+      .ar{stroke:#888;fill:none;marker-end:url(#a)}
+    </style>
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 z" fill="#888"/></marker></defs>
+
+    <rect class="box" x="10" y="20" width="200" height="92" rx="6"/>
+    <text class="lbl" x="20" y="40">Django session</text>
+    <text class="sm" x="20" y="58">workspace index:</text>
+    <text class="sm" x="20" y="73">slots=[0,1], active=0</text>
+    <text class="sm" x="20" y="96">cache: system_data:{sk}:&lt;slot&gt;</text>
+
+    <rect class="box nw" x="10" y="140" width="200" height="74" rx="6"/>
+    <text class="lbl" x="20" y="162">SessionWorkspaceRepository</text>
+    <text class="sm" x="20" y="180">list/active/add/remove slot</text>
+    <text class="sm" x="20" y="196">vends per-slot repo</text>
+
+    <rect class="box" x="10" y="250" width="95" height="64" rx="6"/>
+    <text class="sm" x="20" y="272">SystemRepo</text>
+    <text class="sm" x="20" y="287">slot 0</text>
+    <text class="sm" x="20" y="304">(active)</text>
+    <rect class="box" x="115" y="250" width="95" height="64" rx="6"/>
+    <text class="sm" x="125" y="272">SystemRepo</text>
+    <text class="sm" x="125" y="287">slot 1</text>
+
+    <line class="ar" x1="110" y1="112" x2="110" y2="140"/>
+    <line class="ar" x1="70" y1="214" x2="60" y2="250"/>
+    <line class="ar" x1="150" y1="214" x2="160" y2="250"/>
+
+    <rect class="box" x="270" y="250" width="150" height="64" rx="6"/>
+    <text class="lbl" x="280" y="272">ModelWeb(slot)</text>
+    <text class="sm" x="280" y="290">wrap · to_json ·</text>
+    <text class="sm" x="280" y="305">system_emissions</text>
+    <line class="ar" x1="210" y1="282" x2="270" y2="282"/>
+
+    <rect class="box" x="270" y="150" width="150" height="74" rx="6"/>
+    <text class="lbl" x="280" y="172">Builder tab</text>
+    <text class="sm" x="280" y="190">resident canvas</text>
+    <text class="sm" x="280" y="206">id={sys}-{obj}</text>
+    <line class="ar" x1="345" y1="250" x2="345" y2="224"/>
+
+    <rect class="box nw" x="470" y="250" width="160" height="64" rx="6"/>
+    <text class="lbl" x="480" y="270">ComparisonService</text>
+    <text class="sm" x="480" y="286">adapter →</text>
+    <text class="sm" x="480" y="300">efootprint.comparison</text>
+    <text class="sm" x="480" y="312">(SystemComparison)</text>
+    <line class="ar" x1="420" y1="282" x2="470" y2="282"/>
+    <text class="sm" x="430" y="276">A &amp; B</text>
+
+    <rect class="box nw" x="470" y="150" width="160" height="74" rx="6"/>
+    <text class="lbl" x="480" y="172">Compare dashboard</text>
+    <text class="sm" x="480" y="190">KPI · bars · charts</text>
+    <text class="sm" x="480" y="206">re-rendered on visit</text>
+    <line class="ar" x1="550" y1="250" x2="550" y2="224"/>
+
+    <rect class="box" x="470" y="20" width="240" height="74" rx="6"/>
+    <text class="lbl" x="480" y="42">result-charts.js (bundle)</text>
+    <text class="sm" x="480" y="60">paired bars · cumulative overlay</text>
+    <text class="sm" x="480" y="77">diverging decomposition bars</text>
+    <line class="ar" x1="550" y1="150" x2="550" y2="94"/>
+  </svg>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+
+  <h3>2.1 Persistence &amp; workspace (Q1 + Q2)</h3>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>model_builder/domain/interfaces/</code> — new <code>IWorkspaceRepository</code></td><td class="new">new</td>
+        <td>Domain port for the slot index: <code>list_slots()</code>, <code>active_slot()</code>,
+        <code>set_active_slot()</code>, <code>add_slot(system_data) → slot</code>, <code>remove_slot(slot)</code>,
+        <code>repository_for(slot) → ISystemRepository</code>. Keeps <code>ISystemRepository</code> single-model.</td></tr>
+      <tr><td><code>adapters/repositories/session_system_repository.py</code></td><td class="mod">modified</td>
+        <td>Becomes slot-aware: constructed for a slot (defaults to active). <code>_cache_key</code> →
+        <code>system_data:{session_key}:{slot}</code> for all slots (symmetric). One-release legacy read-fallback
+        (when slot 0 is empty, read the unsuffixed key once and write-through). <code>clear()</code> per slot.
+        Still computes its own with-calc payload size via <code>compute_json_size</code>, but the
+        <em>per-payload</em> cap moves up to the workspace budget — it reports its size and the workspace
+        enforces the summed limit (the <code>PayloadSizeLimitExceeded</code> raise relocates accordingly).</td></tr>
+      <tr><td><code>adapters/repositories/session_workspace_repository.py</code></td><td class="new">new</td>
+        <td>Implements <code>IWorkspaceRepository</code> over the Django session; stores the tiny index
+        (slot ids + active + each slot's last-saved with-calc byte size) in the session; vends
+        <code>SessionSystemRepository</code> bound to a slot. <strong>Owns the shared payload budget</strong>:
+        a save (or add/duplicate/import) is rejected when the <em>sum</em> of all slots' with-calc (Redis)
+        sizes would exceed <code>MAX_PAYLOAD_SIZE_MB</code> — the sibling sizes come from the index, so no
+        re-serialization of the untouched slot. <strong>Also the single enforcement point for the
+        distinct-system-id invariant</strong> (see §4): the add-to-slot path mints a fresh system id whenever an
+        incoming model's id already exists in another slot, covering every source (import, workspace import, template,
+        blank, duplicate).</td></tr>
+      <tr><td><code>adapters/repositories/in_memory_system_repository.py</code> + in-memory workspace</td><td class="mod">modified</td>
+        <td>Mirror slot-awareness for the integration test harness (constitution §1.2 interchangeability).</td></tr>
+      <tr><td><code>version_upgrade_handlers.py</code></td><td class="mod">modified</td>
+        <td>Home for the legacy-key migration note; remove the read-fallback the following release (documented inline).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Views, routing &amp; navigation (Q3)</h3>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>adapters/views/views.py</code> — <code>model_builder_main</code>, <code>render_model_builder</code>,
+        <code>load_system_into_session</code>, <code>reset_model</code></td><td class="mod">modified</td>
+        <td>Resolve the active slot; render the tab strip + <strong>both</strong> resident canvases (active visible).
+        <code>load_system_into_session</code> / <code>reset_model</code> operate on a target slot.</td></tr>
+      <tr><td><code>adapters/views/views_workspace.py</code> (or fold into views.py)</td><td class="new">new</td>
+        <td>New endpoints: <code>switch-model</code> (flip active slot server-side), <code>add-model</code>
+        (duplicate / import / blank), <code>remove-model</code>, <code>compare</code> (render dashboard).</td></tr>
+      <tr><td><code>model_builder/urls.py</code></td><td class="mod">modified</td>
+        <td>Register the new kebab-case routes; add <code>download-workspace</code> / <code>upload-workspace</code>.</td></tr>
+      <tr><td>~25 <code>ModelWeb(SessionSystemRepository(request.session))</code> call sites
+        (views.py, views_addition/edition/deletion/dict_mutation/onboarding, sankey_views.py)</td><td class="mod">modified</td>
+        <td>Mechanical: resolve the active-slot repository. Behaviour identical in single-model sessions
+        (the repo defaults to the active slot). Best done as one sweep (see <a href="#">conventions: systematic edits</a>).</td></tr>
+      <tr><td><code>adapters/views/views_onboarding.py</code>, <code>exception_handling.py</code></td><td class="mod">modified</td>
+        <td>Template picker / recovery become slot-aware (target slot; recovery offers per-slot raw download).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 Templates &amp; canvas id-namespacing</h3>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>templates/model_builder/model_builder_main.html</code></td><td class="mod">modified</td>
+        <td>Tab strip above the builder; two canvas containers (<code>#model-canva-{slot}</code>), active shown.
+        Shared <code>#sidePanel</code>, <code>#helpDrawer</code>, results panel stay singletons.</td></tr>
+      <tr><td>New partials: <code>components/model_tab_strip.html</code></td><td class="new">new</td>
+        <td>Tabs + ＋Add menu (Duplicate / Import / Blank) + ⇄Compare (disabled w/ tooltip until 2 models),
+        following the disabled-instead-of-error pattern.</td></tr>
+      <tr><td><code>modeling_object_web.py</code> — the <code>web_id</code> property (<strong>single chokepoint</strong>, not the templates)</td><td class="mod">modified</td>
+        <td>Prefix the object-card <code>web_id</code> (= <code>{class}-{efootprint_id}</code>) with the system id.
+        Every card id, derived id (<code>button-</code>/<code>flush-</code>/<code>icon-</code>), HTMX/hyperscript selector,
+        leaderline anchor (<code>:298</code>) and mirrored-card ref flows from it — so the <em>canvas templates need no
+        edits</em>. <strong>Server-safe:</strong> routing already uses <code>efootprint_id</code> (all URLs, <code>:132</code>)
+        and form-field names are independently <code>{class}_{attr}</code> — neither touches this <code>web_id</code>, so the
+        form parser is unaffected. Nuances: prefix <em>once</em> at the root (don't repeat it through the nested
+        <code>_in_{parent.web_id}</code>); confirm <code>links_to</code>/<code>icon_links_to</code> derive from
+        <code>web_id</code> so leaderline targets carry the prefix; <code>__hash__</code>/<code>__eq__</code> become
+        system-scoped (correct for two models — add a test). The other two <code>web_id</code>s (source-table
+        <code>ObjectLinkedToModelingObjWeb</code>, shared results panel; and form-field names) need no change.</td></tr>
+      <tr><td>Comparison templates: <code>compare/dashboard.html</code> + partials
+        (KPI strip, decomposition, paired chart, cumulative, assumptions diff)</td><td class="new">new</td>
+        <td>The §4.2 canonical layout. Static markup + the chart JSON payloads from <code>ComparisonService</code>.</td></tr>
+      <tr><td>Toolbar <code>upload_download_reboot_model_tooltips.html</code></td><td class="mod">modified</td>
+        <td>Download/Upload gain the two granularities (this model / whole workspace) per §4.1.</td></tr>
+      <tr><td><code>theme/static/scripts/</code> leader-line + tab-toggle JS</td><td class="mod">modified</td>
+        <td>Build/show leader lines for the visible canvas only; tear down / skip for the hidden one. Tab toggle
+        mirrors the Results/Sources <code>d-none/d-block</code> approach (hyperscript / vanilla, no SPA).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.4 Comparison — computation in <em>e-footprint</em> (library)</h3>
+  <p>The comparison core moves to the library so it is usable from a notebook / coding agent, not only the web
+  (constitution §1.3). The library already exposes the inputs (<code>total_*_footprint_sum_over_period</code>,
+  <code>all_linked_objects</code>, <code>calculated_attributes</code>) and already ships matplotlib/plotly/pandas as
+  hard deps with diff-plot precedent (<code>System.plot_emission_diffs</code>, <code>EmissionPlotter</code>).</p>
+  <table>
+    <thead><tr><th>Module / file (in <code>e-footprint</code>)</th><th>Change</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>efootprint/comparison/</code> — new subpackage; <code>SystemComparison</code></td><td class="new">new</td>
+        <td>Pure computation on two <code>System</code>s: totals + Δ (abs/%); per-(category, phase) decomposition from
+        each system's <code>total_energy_/fabrication_footprint_sum_over_period</code> dicts (already category-keyed,
+        already summing to the total — so the bars sum to the headline Δ by construction); aligned + cumulative
+        time-series on a shared calendar axis/unit. Category SSOT = <code>OBJECT_CATEGORIES</code>.</td></tr>
+      <tr><td><code>System.compare_to(other) → SystemComparison</code> (<code>core/system.py</code>)</td><td class="new">new</td>
+        <td>Notebook-friendly entry point, mirroring the existing <code>System.plot_*</code> methods. The whole feature
+        becomes <code>a.compare_to(b)</code> for a standalone user.</td></tr>
+      <tr><td>Input diff (in the comparison subpackage)</td><td class="new">new</td>
+        <td>Walk <code>all_linked_objects</code>, split inputs from computed via <code>calculated_attributes</code>;
+        <strong>match by object id first, then by (name, type)</strong>; emit changed-attribute rows (value+unit,
+        source/confidence) + "only in A / only in B". Domain truth — lives in the library.</td></tr>
+      <tr><td><code>SystemComparison.plot_*()</code> (matplotlib/plotly)</td><td class="new">new</td>
+        <td><strong>Simple notebook plots</strong>: emissions-over-time (paired), cumulative (overlay), decomposition
+        (diverging bars). Reuse existing deps + <code>EmissionPlotter</code> patterns. <em>The web does not use these</em>
+        — it re-renders in Chart.js — but they make the capability self-sufficient standalone.</td></tr>
+      <tr><td><code>duplicate_system(system) → System</code> (<code>api_utils/</code> or comparison)</td><td class="new">new</td>
+        <td>Serialize→deserialize round-trip (<code>system_to_json</code>/<code>json_to_system</code>),
+        <strong>mint a fresh System id, preserve all object ids</strong>. Generally useful standalone; the interface
+        calls it for "Duplicate". Round-trip naturally preserves object ids (good for id-first diffing). A sibling helper
+        (<code>assign_fresh_system_id(system)</code>) backs the workspace's distinct-system-id guard for the non-duplicate
+        paths (import / template / workspace import) — re-id-ing the System object, leaving object ids intact.</td></tr>
+      <tr><td><code>tests/test_system_comparison.py</code>; <code>pyproject.toml</code> minor bump; PyPI release</td><td class="new">new</td>
+        <td>Library unit tests + a MINOR version bump (e.g. 22.1.0) released to PyPI per <code>RELEASE_PROCESS.md</code>
+        — gates the interface side (see §3 sequencing).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.5 Comparison — adapter &amp; charts in <em>e-footprint-interface</em></h3>
+  <table>
+    <thead><tr><th>Module / file (in <code>e-footprint-interface</code>)</th><th>Change</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>domain/services/comparison_service.py</code></td><td class="new">new</td>
+        <td><strong>Thin adapter</strong>: calls <code>model_a.system.compare_to(model_b.system)</code> and shapes the
+        <code>SystemComparison</code> into Chart.js JSON payloads (paired bars, cumulative overlay, decomposition),
+        KPI-strip values, and the diff-table view model. No modeling logic; no Django imports.</td></tr>
+      <tr><td>Duplication wiring (use case / view)</td><td class="new">new</td>
+        <td>Calls the library <code>duplicate_system</code>; sets the proposed name <code>"Copy of {system name}"</code>
+        (user-editable). The distinct-system-id guard is <em>not</em> wired here per-path — it lives once in the
+        workspace add-to-slot path (§2.1), so import/template/duplicate all inherit it.</td></tr>
+      <tr><td><code>EmissionsCalculationService</code></td><td>reused</td>
+        <td>Single-model results unchanged. <em>Consolidation opportunity</em> (out of v1 scope): its invented
+        <code>"Servers_and_storage_energy"</code>-style keys could later defer to the library taxonomy now exercised by
+        the comparison — flagged in §4 to avoid drift, not refactored here.</td></tr>
+      <tr><td>result-charts TS source → <code>theme/static/bundles/result_charts.js</code></td><td class="mod">modified</td>
+        <td>New Chart.js variants: paired bars (one shared y-axis + one capsule legend driving both series),
+        cumulative overlay with shaded gap, horizontal diverging decomposition bars. Rebuilt via
+        <code>npm run build:result-charts</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.6 Import / export</h3>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>download_json</code> / <code>upload_json</code> (views.py)</td><td class="mod">modified</td>
+        <td>Operate on a target slot; <strong>single-model file format unchanged</strong> (round-trips both directions
+        with single-model sessions), exported <em>without</em> calculated attributes as today (recomputed on import).
+        Upload into a slot goes through the workspace add-to-slot path, so it inherits both the distinct-system-id guard
+        (§2.1/§4) and the size-check against the <em>remaining</em> workspace budget — no per-path collision logic here.</td></tr>
+      <tr><td><code>download_workspace</code> / <code>upload_workspace</code> (new)</td><td class="new">new</td>
+        <td>Additive envelope (format in §2.7) bundling both slots' single-model documents + the active pointer.
+        Re-import restores both slots in one action and enforces the shared budget <em>and</em> the distinct-system-id
+        invariant after recompute (the two embedded models may share an id). Must not alter the single-model format.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.7 Workspace file format</h3>
+  <p>The workspace file is a thin envelope wrapping <strong>two byte-for-byte single-model documents</strong> — so
+  the single-model format is untouched and the per-model import/serialization path is reused per element, not
+  re-implemented:</p>
+  <details open><summary>Envelope shape</summary>
+<pre style="background:#f4f4f4; padding:.6rem; border-radius:6px; overflow:auto; font-size:.85em;">{
+  "efootprint_workspace_version": "&lt;interface version&gt;",
+  "active_slot": 0,
+  "models": [
+    { /* slot 0: exact single-model export doc — efootprint_version, Sources,
+         &lt;object types&gt;, interface_config, efootprint_interface_version */ },
+    { /* slot 1: exact single-model export doc */ }
+  ]
+}</pre>
+  </details>
+  <ul>
+    <li><strong>Detection is content-based</strong> (authoritative): a top-level <code>models</code> key ⇒ workspace
+      file; its absence ⇒ single-model file. A distinct <code>.e-fw.json</code> extension (vs. today's
+      <code>.e-f.json</code>) is a UX hint only.</li>
+    <li><strong>Cross-format robustness</strong> (honest-error / disabled-instead-of-error): "Open workspace file" fed a
+      single-model file loads it into the active slot; "Replace this model" fed a workspace file errors with guidance
+      (or offers to open it as a workspace) rather than corrupting state.</li>
+    <li><strong>No calculated attributes</strong> in the file (each element is the without-calc single-model export);
+      they are recomputed on import, and only then does the shared budget apply.</li>
+    <li>Each model carries its own <code>interface_config</code> inside its element — no separate handling, Sankey
+      settings survive the round-trip per model as today.</li>
+    <li>Filename: <code>"{datetime} UTC workspace ({name A} vs {name B}).e-fw.json"</code> (sanitized/truncated like
+      the single-model name).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Cross-cutting concerns</h2>
+  <ul>
+    <li><strong>Tests.</strong>
+      <ul>
+        <li><em>Unit — e-footprint (library)</em> — <code>SystemComparison</code>: Δ arithmetic, decomposition sums to
+        the headline Δ, id-first diff with name+type fallback ("only in A/B"), aligned + cumulative series;
+        <code>duplicate_system</code> (fresh System id, preserved object ids); the notebook plot helpers smoke-render.</li>
+        <li><em>Unit — interface</em> — <code>ComparisonService</code> adapter (shapes a known <code>SystemComparison</code>
+        into the chart JSON / KPI / diff-table view model); slot-aware cache-key + legacy read-fallback; the workspace
+        index lifecycle (add / switch / remove); the <strong>shared-budget guard</strong> (summed with-calc size over
+        both slots is capped, not per slot).</li>
+        <li><em>Integration</em> — adapters→use cases→domain with the in-memory workspace, exercising
+        two-model add/switch/remove, per-slot + workspace export/import round-trips (incl. the
+        single-model-file-into-workspace and workspace-file-into-single-slot cross-format paths), the combined-budget
+        rejection on duplicate/import, and the single-model no-regression path (a session that never adds a second
+        model behaves exactly as today). Keep the Clean-Architecture no-Django-in-domain guard green.</li>
+        <li><em>E2E (Playwright, reserved for the critical flow)</em> — duplicate → edit B → open Compare → see Δ;
+        refresh preserves both models + active selection; remove B returns to single-model mode.</li>
+        <li><em>Jest</em> — the new chart variants' data-shaping (shared-scale paired bars, cumulative overlay).</li>
+      </ul>
+    </li>
+    <li><strong>Migrations.</strong> No Django model change. Session/cache shape changes are handled by the
+      <strong>one-release legacy-key read-fallback</strong> (Q2) — no destructive migration; in-flight sessions keep
+      their model across the cutover, then the fallback is removed the next release. The single-model <em>file</em>
+      format is untouched (constitution-level continuity requirement).</li>
+    <li><strong>Cross-repo sequencing.</strong> This is now a two-repo feature. The library change ships first: develop
+      against the editable local <code>efootprint</code> (workspace co-dev setup), then cut a MINOR release to PyPI; the
+      interface tasks land only once <code>pyproject.toml</code> references the released version (constitution §2.4 — no
+      editable path on <code>main</code>, enforced by the pyproject-parsing test). The single <code>tasks.md</code>
+      orders the library tasks before the interface tasks that consume them.</li>
+    <li><strong>Docs to follow (constitution §"documentation upkeep").</strong>
+      <ul>
+        <li><code>../e-footprint/specs/architecture.md</code> — document the new <code>comparison</code> capability
+        (<code>SystemComparison</code>, <code>System.compare_to</code>, <code>duplicate_system</code>, the notebook plots).</li>
+        <li><code>specs/architecture.md</code> (interface) — new "Workspace / multi-slot session" subsection (slot-aware
+        repository, resident-tab rendering, system-id DOM prefixing, the thin <code>ComparisonService</code> adapter).</li>
+        <li><code>specs/mission.md</code> — amend the singular "the current model lives in the Django session" line to
+        reflect a workspace of up to two models (spec §5 already flags this; it is not a constitutional conflict).</li>
+        <li><code>spec.html</code> §4.3 — update "matched by name and type" to "matched by id, then by name and type."</li>
+        <li><code>CHANGELOG.md</code> entries in <strong>both</strong> repos (constitution §2.6).</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Risks</h2>
+  <ul>
+    <li><strong>Duplicate DOM ids across resident canvases.</strong> The headline correctness risk. Mitigation:
+      system-id prefix on the <code>ModelingObjectWeb.web_id</code> chokepoint + preserved object ids + fresh system id
+      per slot; an E2E/Jest assertion that no id appears twice across the two canvases.</li>
+    <li><strong>Two slots with the <em>same</em> system id.</strong> The <code>web_id</code> prefix scheme above is only
+      safe while the two slots hold <em>distinct</em> system ids — but they easily won't: re-importing the same/lineage
+      file into the second slot, <strong>loading the same template into both slots</strong> (templates carry baked, stable
+      ids), or a workspace file whose two models share an id. Same id ⇒ identical <code>web_id</code> prefixes ⇒ the
+      collision returns. Mitigation: a <strong>single distinct-system-id invariant enforced in the workspace
+      repository's add-to-slot path</strong> (§2.1) — mint a fresh system id on any cross-slot collision, regardless of
+      source. <strong>Diff-safe</strong> because the comparison matches <em>object</em> ids, not the system id. Covered by
+      a "import the same file/template into both slots" integration test.</li>
+    <li><strong>OOB swaps targeting the wrong canvas.</strong> HTMX OOB resolves first-match-by-id, so the
+      <code>model_canvas</code> region (<code>oob_regions.py</code>) must emit the <em>active</em> slot's
+      <code>#model-canva-{slot}</code>. Shared chrome (results buttons, edge toggle) is a singleton, so it is unaffected.
+      Covered by a mutation-on-B-while-A-resident integration test.</li>
+    <li><strong>Call-site sweep regressions.</strong> ~25 <code>ModelWeb(repository)</code> sites change. Mitigation:
+      the per-slot repo defaults to the active slot so behaviour is identical in single-model sessions; the existing
+      suite is the regression net; do it as one mechanical sweep, not ad-hoc.</li>
+    <li><strong>Leader-line work for the hidden canvas.</strong> Lines must not be computed for the parked tab.
+      Mitigation: build/teardown keyed on tab visibility; the existing "rebuild on shown/hidden" hooks extend to tab switch.</li>
+    <li><strong>Payload / memory roughly doubles.</strong> Two slots cached + two canvases resident. Mitigation: per-slot
+      blobs mean only the active model is (de)serialized per edit; the <code>MAX_PAYLOAD_SIZE_MB</code> cap is enforced
+      as a <strong>shared budget on the summed with-calc (Redis) weight of both slots</strong> (not per slot, which
+      would double the real footprint); hidden DOM is cheap (no layout/paint).</li>
+    <li><strong>Duplicate / import can blow the budget instantly.</strong> Duplicating a large model roughly doubles
+      Redis use in one action. Mitigation: the ＋Add (duplicate) and second-slot import paths <em>pre-check</em> the
+      prospective summed size and refuse with a clear "the two models together would exceed N&nbsp;MB" message before
+      persisting — ideally surfaced as a disabled ＋Add option when the active model already nears half the budget.</li>
+    <li><strong>Diff "only in A/B" noise for independently-built models.</strong> id-first matching falls back to
+      (name, type); two from-scratch models still diff sensibly, but unrelated objects will read as A/B-only — expected,
+      not a bug.</li>
+    <li><strong>Cross-repo version coupling.</strong> The interface depends on the new library release; until it is on
+      PyPI, interface work runs on the editable local install and must not reach <code>main</code> with that path.
+      Mitigation: the §3 sequencing; the existing pyproject-parsing test guards the editable path.</li>
+    <li><strong>Taxonomy drift between comparison and single-model results.</strong> The library comparison derives
+      categories from <code>OBJECT_CATEGORIES</code>; the interface's single-model results still use
+      <code>EmissionsCalculationService</code>'s hand-rolled keys. Mitigation: align the comparison's category labels to
+      what the results panel already shows; consolidate the interface onto the library taxonomy later (out of v1 scope).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. Alternatives considered</h2>
+  <ul>
+    <li><strong>Single combined session blob</strong> <code>{models:{a,b}, active}</code> — rejected: every request
+      would (de)serialize both models and rewrite the larger blob on each edit, against the binding perf constraint.
+      Per-slot keys load/save only the edited model.</li>
+    <li><strong>Keep the legacy cache key for slot 0 (asymmetric)</strong> — rejected for long-term maintainability:
+      a permanent special case in the repository. Symmetric keys + a self-deleting one-release fallback give clean
+      addressing with no in-flight data loss.</li>
+    <li><strong>Full-content HTMX swap on every model switch</strong> — rejected: re-renders the builder, makes a
+      network call, and loses transient UI state on each switch. Resident tabs (the existing Results/Sources pattern)
+      avoid all three; the only added cost is id-namespacing, which the system-id prefix handles.</li>
+    <li><strong>Re-id objects on duplicate</strong> — rejected: it would destroy the shared object identity the
+      comparison diff relies on. Preserving object ids (new <em>system</em> id only) keeps id-based pairing intact.</li>
+    <li><strong>Name+type-only diff matching (as the spec literally states)</strong> — superseded: id-first is robust to
+      renames in the duplicate-then-edit workflow; name+type is kept only as the fallback for independent models.</li>
+    <li><strong>Keep the Compare dashboard resident/cached</strong> — rejected: violates "no stale results." It is
+      cheap to re-render on each visit (data already computed per model).</li>
+    <li><strong>Comparison logic in the interface domain (original draft)</strong> — superseded: putting the
+      computation in <code>efootprint</code> keeps it usable from a notebook / coding agent and honors §1.3 (library is
+      the domain truth). It costs a cross-repo release cycle, but the inputs and plotting deps already exist there, so
+      the marginal cost is low and the interface shrinks to an adapter.</li>
+    <li><strong>A single merged "diff system" instead of two live Systems</strong> — rejected (mirrors backlog's
+      rejected diff-Sankey): fragile when the two structures diverge. The comparison reads two independent Systems.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Constitutional notes</h2>
+  <ul>
+    <li><strong>§1.1 Clean Architecture.</strong> The interface <code>ComparisonService</code> (thin adapter) and the
+      workspace port live in <code>domain/</code> with zero Django imports; slot resolution and the session index live in
+      <code>adapters/</code>. The no-Django-in-domain integration guard must stay green.</li>
+    <li><strong>§1.2 Repository pattern.</strong> New <code>IWorkspaceRepository</code> port; session and in-memory
+      implementations stay interchangeable. <code>ISystemRepository</code> remains a single-model abstraction, now
+      slot-targeted.</li>
+    <li><strong>§1.3 Library is the domain truth — strengthened.</strong> The comparison <em>computation</em> (deltas,
+      decomposition, input diff, duplication) and its notebook plots live in <code>efootprint</code>, not the interface.
+      <code>ComparisonService</code> only adapts library output to the web (Chart.js JSON + HTML table). No new modeling,
+      no attribution/sensitivity claims. This is the §1.3-correct placement and the reason the feature is cross-repo.</li>
+    <li><strong>§1.4 HTMX-first, minimize JS.</strong> Resident tabs reuse the blessed Results/Sources show/hide
+      pattern — server-rendered HTML toggled client-side, <em>no</em> client-side data layer, no SPA framework. The tab
+      toggle and leader-line scoping are vanilla/hyperscript.</li>
+    <li><strong>§4 Out-of-scope — not relaxed.</strong> No multi-user collaboration, no server-side library, no SPA.
+      Therefore <strong>no constitutional amendment is required</strong>; the only doc edit is the
+      <code>mission.md</code> "singular session" line (a description, not a rule).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resolved decisions</h2>
+  <p>The spec's §6 open questions, plus the diff-matching question raised during planning, were settled on
+  2026-06-16:</p>
+  <table>
+    <thead><tr><th>Question</th><th>Decision</th><th>Implication</th></tr></thead>
+    <tbody>
+      <tr><td>Decomposition granularity</td>
+        <td><strong>Full taxonomy: hardware type × usage/fabrication</strong></td>
+        <td>Library <code>SystemComparison</code> emits per-(type, phase) deltas (from
+        <code>total_*_footprint_sum_over_period</code>) that sum to the headline Δ; the interface adapter feeds the §4.2
+        decomposition partial. Matches the canonical mockup.</td></tr>
+      <tr><td>Differing-timespan rendering</td>
+        <td><strong>Leave non-overlapping buckets blank</strong></td>
+        <td>No greyed placeholder; each model card states its own period. Simplest chart payload, no extra JS.</td></tr>
+      <tr><td>Duplicate naming default</td>
+        <td><strong>"Copy of {system name}"</strong></td>
+        <td>Duplication proposes this derived name, editable by the user afterwards.</td></tr>
+      <tr><td>Assumptions diff matching</td>
+        <td><strong>Id-first, then (name, type) fallback</strong></td>
+        <td>The library diff pairs by preserved object id, then by (name, type) for the remainder; rest = "only in A /
+        only in B". <strong>Spec §4.3 must change</strong> from "matched by name and type."</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Remaining gate.</strong> <code>spec.html</code> is still marked "under review, rev 3." Folding the four
+  decisions above into the spec (the §4.3 diff-matching edit + closing out §6) finalizes the v1 scope; confirm sign-off
+  before <code>spec-tasks</code> emits tasks.</p>
+</section>
+
+</body>
+</html>

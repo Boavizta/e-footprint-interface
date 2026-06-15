@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model comparison — Variation 1: Compare inside the Results panel</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Variation 1 — Compare inside the Results panel</h1>
+<p class="status">Design variation · companion to <a href="spec.html">spec.html</a> · 2026-06-11</p>
+<blockquote><strong>Not chosen.</strong> Variation 2 (comparison dashboard) is the v1 layout —
+see the canonical, simplified design in <a href="spec.html">spec.html</a> §4.2. This file is
+kept as a record of the design exploration.</blockquote>
+
+<section>
+  <h2>Concept</h2>
+  <p>Comparison is a <em>results activity</em>, so it lives where results already live: the
+  Results panel that slides over the builder. <strong>No new top-level surface.</strong> The
+  panel gains a <strong>scope selector</strong>: each model individually, or "Both (compare)".
+  The existing Results / Sources duality is preserved and becomes the comparison's structure:</p>
+  <ul>
+    <li><strong>Results + Both</strong> → output comparison (totals, charts, Sankeys).</li>
+    <li><strong>Sources + Both</strong> → <em>input</em> comparison: the assumptions-diff table
+    ("what differs between the two models"). The Sources tab already answers "what numbers went
+    in" for one model; in compare scope it answers "which inputs differ".</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Mockup — click tabs, scopes, and panel tabs</h2>
+  <div class="mockup">
+    <!-- top model switcher -->
+    <div style="display:flex; gap:.4rem; border-bottom:2px solid #ddd; padding-bottom:.4rem;">
+      <button id="v1-tab-a" style="font-weight:600;">Streaming app</button>
+      <button id="v1-tab-b">Streaming app — edge caching</button>
+      <span style="margin-left:auto; color:#888; font-size:.85em;">no third tab — that's the point</span>
+    </div>
+    <div style="border:1px solid #ccc; border-radius:6px; padding:.5rem; background:#fafafa; margin:.6rem 0; color:#777;">
+      Builder canvas of <strong id="v1-canvas-name">Streaming app</strong> (unchanged today's UI)
+    </div>
+
+    <!-- results panel -->
+    <div style="border:1px solid #bbb; border-radius:10px 10px 0 0; padding:.6rem; box-shadow:0 -2px 6px rgba(0,0,0,.08);">
+      <div style="display:flex; align-items:center; gap:.4rem; flex-wrap:wrap;">
+        <button id="v1-ptab-results" style="font-weight:600;">Results</button>
+        <button id="v1-ptab-sources">Sources</button>
+        <span style="margin-left:auto; font-size:.85em; color:#666;">Scope:</span>
+        <button id="v1-scope-a" style="border-radius:12px; font-weight:600;">Streaming app</button>
+        <button id="v1-scope-b" style="border-radius:12px;">— edge caching</button>
+        <button id="v1-scope-both" style="border-radius:12px;">⇄ Both</button>
+      </div>
+
+      <!-- single-model results -->
+      <div id="v1-single-results" style="padding:.6rem 0;">
+        <p style="color:#555; margin:.3rem 0;"><em>Scope = one model → exactly today's results
+        panel for <strong id="v1-single-name">Streaming app</strong>:</em> emissions bar chart,
+        cumulative curve, Sankey analysis cards. Nothing changes.</p>
+      </div>
+
+      <!-- single-model sources -->
+      <div id="v1-single-sources" hidden style="padding:.6rem 0;">
+        <p style="color:#555; margin:.3rem 0;"><em>Scope = one model → today's source table for
+        <strong id="v1-single-src-name">Streaming app</strong></em> (item, value, unit, source,
+        confidence…) + xlsx export. Unchanged.</p>
+      </div>
+
+      <!-- compare results -->
+      <div id="v1-cmp-results" hidden style="padding:.6rem 0;">
+        <div style="display:flex; gap:.5rem;">
+          <div style="flex:1; border:1px solid #ccc; border-radius:6px; padding:.4rem; text-align:center;">
+            <span style="color:#4878a8;">●</span> <strong>Streaming app</strong><br>3.72 t CO₂e · 2026–2028
+          </div>
+          <div style="flex:1; border:1px solid #ccc; border-radius:6px; padding:.4rem; text-align:center;">
+            <span style="color:#e09f3e;">●</span> <strong>— edge caching</strong><br>2.61 t CO₂e · 2026–2028
+          </div>
+          <div style="flex:1; border:2px solid #2e7d32; border-radius:6px; padding:.4rem; text-align:center; color:#2e7d32;">
+            <strong>Δ −1.11 t (−30 %)</strong><br><span style="font-size:.85em;">−0.37 t / year</span>
+          </div>
+        </div>
+
+        <p style="margin:.8rem 0 .2rem;"><strong>Yearly CO2 emissions</strong> — paired bars, shared scale &amp; legend</p>
+        <svg viewBox="0 0 480 195" width="100%" style="max-width:480px; display:block;">
+          <line x1="50" y1="170" x2="470" y2="170" stroke="#999"/>
+          <line x1="50" y1="120" x2="470" y2="120" stroke="#eee"/><text x="46" y="123" font-size="9" text-anchor="end" fill="#888">500</text>
+          <line x1="50" y1="70" x2="470" y2="70" stroke="#eee"/><text x="46" y="73" font-size="9" text-anchor="end" fill="#888">1000</text>
+          <line x1="50" y1="20" x2="470" y2="20" stroke="#eee"/><text x="46" y="23" font-size="9" text-anchor="end" fill="#888">1500</text>
+          <!-- 2026 -->
+          <rect x="70" y="107" width="40" height="63" fill="#4878a8"/><rect x="70" y="60" width="40" height="47" fill="#9db9d8"/>
+          <rect x="116" y="130" width="40" height="40" fill="#e09f3e"/><rect x="116" y="88" width="40" height="42" fill="#f0cf94"/>
+          <text x="113" y="184" font-size="10" text-anchor="middle" fill="#555">2026</text>
+          <!-- 2027 -->
+          <rect x="230" y="99" width="40" height="71" fill="#4878a8"/><rect x="230" y="46" width="40" height="53" fill="#9db9d8"/>
+          <rect x="276" y="127" width="40" height="43" fill="#e09f3e"/><rect x="276" y="83" width="40" height="44" fill="#f0cf94"/>
+          <text x="273" y="184" font-size="10" text-anchor="middle" fill="#555">2027</text>
+          <!-- 2028 -->
+          <rect x="390" y="91" width="40" height="79" fill="#4878a8"/><rect x="390" y="32" width="40" height="59" fill="#9db9d8"/>
+          <rect x="436" y="124" width="40" height="46" fill="#e09f3e"/><rect x="436" y="78" width="40" height="46" fill="#f0cf94"/>
+          <text x="433" y="184" font-size="10" text-anchor="middle" fill="#555">2028</text>
+          <text x="52" y="12" font-size="9" fill="#888">kg CO₂e — dark = usage, light = fabrication</text>
+        </svg>
+
+        <p style="margin:.8rem 0 .2rem;"><strong>Cumulative CO2 emissions</strong> — overlay, shaded gap = avoided emissions</p>
+        <svg viewBox="0 0 500 195" width="100%" style="max-width:500px; display:block;">
+          <line x1="50" y1="170" x2="460" y2="170" stroke="#999"/>
+          <line x1="50" y1="130" x2="460" y2="130" stroke="#eee"/><text x="46" y="133" font-size="9" text-anchor="end" fill="#888">1 t</text>
+          <line x1="50" y1="90" x2="460" y2="90" stroke="#eee"/><text x="46" y="93" font-size="9" text-anchor="end" fill="#888">2 t</text>
+          <line x1="50" y1="50" x2="460" y2="50" stroke="#eee"/><text x="46" y="53" font-size="9" text-anchor="end" fill="#888">3 t</text>
+          <polygon points="50,170 183,126 316,76 450,21 450,66 316,102 183,137 50,170" fill="#2e7d32" opacity="0.12"/>
+          <polyline points="50,170 183,126 316,76 450,21" fill="none" stroke="#4878a8" stroke-width="2.5"/>
+          <polyline points="50,170 183,137 316,102 450,66" fill="none" stroke="#e09f3e" stroke-width="2.5"/>
+          <text x="345" y="55" font-size="9" fill="#2e7d32">gap = avoided emissions to date</text>
+          <text x="452" y="24" font-size="9" fill="#4878a8">3.72 t</text>
+          <text x="452" y="69" font-size="9" fill="#e09f3e">2.61 t</text>
+        </svg>
+
+        <p style="margin:.8rem 0 .2rem;"><strong>Impact repartition</strong> — each Sankey analysis
+        card becomes a <em>pair</em> driven by one shared settings form (phase filter, threshold,
+        analyse-by chips apply to both diagrams), drawn at the same flow scale.</p>
+        <p style="color:#777; font-size:.9em; margin:.2rem 0;">(Full side-by-side Sankey demo in
+        <a href="variation-2-comparison-dashboard.html">Variation 2</a> — identical block.)</p>
+      </div>
+
+      <!-- compare sources = inputs diff -->
+      <div id="v1-cmp-sources" hidden style="padding:.6rem 0;">
+        <p style="margin:.2rem 0;"><strong>What differs between the models</strong> — the Sources
+        tab in compare scope becomes the assumptions diff:</p>
+        <label style="font-size:.9em;"><input type="checkbox" id="v1-diff-only" checked> Show only differences</label>
+        <table style="font-size:.85em;">
+          <thead><tr><th>Object</th><th>Attribute</th><th>Streaming app</th><th>— edge caching</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Video stream (Job)</td><td>Data transferred per call</td><td>800 MB</td><td><strong>250 MB</strong></td><td style="color:#b26a00;">changed</td></tr>
+            <tr><td>Video stream (Job)</td><td>Server processing time per call</td><td>2.5 s</td><td><strong>1.8 s</strong></td><td style="color:#b26a00;">changed</td></tr>
+            <tr><td>Edge cache node (EdgeDevice)</td><td>—</td><td style="color:#999;">absent</td><td>present</td><td style="color:#2e7d32;">only in B</td></tr>
+            <tr class="v1-same"><td>Daily streaming sessions (UsagePattern)</td><td>Hourly visits</td><td colspan="2" style="text-align:center; color:#999;">identical</td><td style="color:#999;">same</td></tr>
+            <tr class="v1-same"><td>Origin server (Server)</td><td>Lifespan</td><td colspan="2" style="text-align:center; color:#999;">identical</td><td style="color:#999;">same</td></tr>
+          </tbody>
+        </table>
+        <p style="color:#777; font-size:.85em;">Objects are matched by name and type; unmatched
+        objects appear as "only in A / only in B". xlsx export of the diff: out of scope this
+        iteration.</p>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var s = { ptab: 'results', scope: 'a' };
+        var els = function (id) { return document.getElementById(id); };
+        function render() {
+          var name = s.scope === 'b' ? 'Streaming app — edge caching' : 'Streaming app';
+          els('v1-single-name').textContent = name;
+          els('v1-single-src-name').textContent = name;
+          els('v1-single-results').hidden = !(s.ptab === 'results' && s.scope !== 'both');
+          els('v1-single-sources').hidden = !(s.ptab === 'sources' && s.scope !== 'both');
+          els('v1-cmp-results').hidden = !(s.ptab === 'results' && s.scope === 'both');
+          els('v1-cmp-sources').hidden = !(s.ptab === 'sources' && s.scope === 'both');
+          els('v1-ptab-results').style.fontWeight = s.ptab === 'results' ? '600' : 'normal';
+          els('v1-ptab-sources').style.fontWeight = s.ptab === 'sources' ? '600' : 'normal';
+          ['a', 'b', 'both'].forEach(function (k) {
+            els('v1-scope-' + k).style.fontWeight = s.scope === k ? '600' : 'normal';
+          });
+        }
+        els('v1-ptab-results').onclick = function () { s.ptab = 'results'; render(); };
+        els('v1-ptab-sources').onclick = function () { s.ptab = 'sources'; render(); };
+        ['a', 'b', 'both'].forEach(function (k) {
+          els('v1-scope-' + k).onclick = function () { s.scope = k; render(); };
+        });
+        els('v1-tab-a').onclick = function () {
+          els('v1-canvas-name').textContent = 'Streaming app';
+          els('v1-tab-a').style.fontWeight = '600'; els('v1-tab-b').style.fontWeight = 'normal';
+          s.scope = 'a'; render();
+        };
+        els('v1-tab-b').onclick = function () {
+          els('v1-canvas-name').textContent = 'Streaming app — edge caching';
+          els('v1-tab-b').style.fontWeight = '600'; els('v1-tab-a').style.fontWeight = 'normal';
+          s.scope = 'b'; render();
+        };
+        els('v1-diff-only').onchange = function () {
+          document.querySelectorAll('.v1-same').forEach(function (r) { r.hidden = els('v1-diff-only').checked; });
+        };
+        els('v1-diff-only').onchange();
+        render();
+      })();
+    </script>
+  </div>
+</section>
+
+<section>
+  <h2>Assessment</h2>
+  <table>
+    <tr><th>Strengths</th><td>Zero new navigation surface; comparison inherits every panel
+    behaviour (open/close, mobile layout, future panel features) for free; the Sources→diff
+    mapping is conceptually elegant; switching scope keeps the user's place (same tab, same
+    scroll intent).</td></tr>
+    <tr><td style="background:#f5f5f5; font-weight:600;">Weaknesses</td><td>Comparison content is
+    squeezed into a panel designed for one model's charts — side-by-side Sankeys and the diff
+    table want width; "Both" as a third pill is less discoverable than a dedicated tab; no
+    natural place for a delta-decomposition story (panel invites glancing, not reading).</td></tr>
+    <tr><td style="background:#f5f5f5; font-weight:600;">Best when</td><td>Comparison is treated
+    as a quick check while editing ("did my change help?") rather than a deliverable to study and
+    share.</td></tr>
+  </table>
+</section>
+
+</body>
+</html>
