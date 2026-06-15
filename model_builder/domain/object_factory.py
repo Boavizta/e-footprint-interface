@@ -204,7 +204,9 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
             or (isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)))
         if is_explainable_object_dict:
             new_entries = _build_explainable_object_dict_entries(value, model_web, attr_name)
-            if new_entries != current_value:
+            # Dict equality (!=) ignores key order, so a pure reorder would be missed. Compare the
+            # ordered items so reordering an ordered dict (e.g. usage journey steps) is detected.
+            if list(new_entries.items()) != list(current_value.items()):
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
                 # Rebuild with the current dict's concrete type so weighted dicts keep their validation
                 changes_list.append([current_value, type(current_value)(new_entries)])

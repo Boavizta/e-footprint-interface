@@ -112,7 +112,20 @@ def test_edit_usage_journey_reorders_steps(default_system_repository):
     assert all(entry["value"] == 1 for entry in created_entries.values())
     assert all(entry["label"] == "Times per journey" for entry in created_entries.values())
 
+    # Pure reorder: same steps, same counts, only the order changes. Dict equality ignores key
+    # order, so this is the case that regressed (order silently dropped).
     new_order = [step_2, step_3, step_1]
+    edit_object(
+        default_system_repository, uj_id, "UsageJourney",
+        {"uj_steps": json.dumps({step_2: 1, step_3: 1, step_1: 1})})
+
+    sd = default_system_repository.get_system_data()
+    assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == new_order
+
+    journey = ModelWeb(default_system_repository).get_web_object_from_efootprint_id(uj_id)
+    assert [step.id for step in journey.modeling_obj.uj_steps] == new_order
+
+    # A count change on top of the existing order still persists both.
     edit_object(
         default_system_repository, uj_id, "UsageJourney",
         {"uj_steps": json.dumps({step_2: 1, step_3: 2.5, step_1: 1})})
@@ -121,9 +134,6 @@ def test_edit_usage_journey_reorders_steps(default_system_repository):
     assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == new_order
     assert sd["UsageJourney"][uj_id]["uj_steps"][step_3]["value"] == 2.5
     assert sd["UsageJourney"][uj_id]["uj_steps"][step_3]["label"] == "Times per journey"
-
-    journey = ModelWeb(default_system_repository).get_web_object_from_efootprint_id(uj_id)
-    assert [step.id for step in journey.modeling_obj.uj_steps] == new_order
 
 
 def test_edit_usage_journey_remove_step_deletes_orphan(default_system_repository):
