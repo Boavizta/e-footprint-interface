@@ -11,7 +11,7 @@ class EdgeGroupMemberMixin:
     """
 
     # The pre_delete hook below removes self from parent group dicts, so the generic delete flow
-    # must not treat those dicts as child containers to edit (see DeleteObjectUseCase).
+    # must not treat those dicts as containers to edit (see DeleteObjectUseCase).
     handles_own_dict_memberships = True
 
     @classmethod

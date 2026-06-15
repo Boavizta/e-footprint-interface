@@ -21,7 +21,7 @@ class DeleteObjectInput:
 class DeleteCheckResult:
     """Result of checking if an object can be deleted."""
     can_delete: bool
-    is_list_deletion: bool = False
+    is_list_or_dict_deletion: bool = False
     blocking_containers: List[str] = field(default_factory=list)
     has_accordion_children: bool = False
     accordion_children_count: int = 0
@@ -85,10 +85,10 @@ class DeleteObjectUseCase:
         web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(web_obj.class_as_simple_str)
 
         list_containers, _, dict_containers, _ = self._container_removal_targets(web_obj, web_class)
-        child_containers = list_containers + dict_containers
+        list_or_dict_containers = list_containers + dict_containers
 
-        # Check for blocking containers (non-child references)
-        if web_obj.modeling_obj_containers and not child_containers:
+        # Check for blocking containers (direct references, not through list nor dict)
+        if web_obj.modeling_obj_containers and not list_or_dict_containers:
             # Check if class has custom blocking logic via can_delete hook
             if web_class and hasattr(web_class, 'can_delete'):
                 can_delete, blocking_names = web_class.can_delete(web_obj)
@@ -113,7 +113,7 @@ class DeleteObjectUseCase:
 
         return DeleteCheckResult(
             can_delete=True,
-            is_list_deletion=bool(child_containers),
+            is_list_or_dict_deletion=bool(list_or_dict_containers),
             has_accordion_children=has_children,
             accordion_children_count=len(accordion_children),
             accordion_children_class_type=children_class_type,

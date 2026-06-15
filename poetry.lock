@@ -1091,14 +1091,14 @@ opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-
 
 [[package]]
 name = "efootprint"
-version = "21.1.6"
+version = "22.0.1"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-21.1.6-py3-none-any.whl", hash = "sha256:c7ef6a2bfe80c28bced279f8188b7c93c87f56d379d258a99e5cba61a5054f55"},
-    {file = "efootprint-21.1.6.tar.gz", hash = "sha256:de9847ae34c305538302265ed1620194b9788634fe0a1bc247a99688007b1b19"},
+    {file = "efootprint-22.0.1-py3-none-any.whl", hash = "sha256:18f84d604cd61b35d6442bf4849821ea609ee3067aaa3b0f4bfa62f9b2c67939"},
+    {file = "efootprint-22.0.1.tar.gz", hash = "sha256:464f0b2232755abf112756e836a942f00ed385c7a1fe4fc33bc30e7678a37885"},
 ]
 
 [package.dependencies]
@@ -3480,14 +3480,14 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
-version = "9.0.3"
+version = "9.1.0"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "pytest-9.0.3-py3-none-any.whl", hash = "sha256:2c5efc453d45394fdd706ade797c0a81091eccd1d6e4bccfcd476e2b8e0ab5d9"},
-    {file = "pytest-9.0.3.tar.gz", hash = "sha256:b86ada508af81d19edeb213c681b1d48246c1a91d304c6c81a427674c17eb91c"},
+    {file = "pytest-9.1.0-py3-none-any.whl", hash = "sha256:8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32"},
+    {file = "pytest-9.1.0.tar.gz", hash = "sha256:41dd9148c08072446394cefd3d79701701335a9f4cae69ba92e39f6c7f5c061c"},
 ]
 
 [package.dependencies]
@@ -4522,4 +4522,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "39f0d5aeaf4a6e59f8f99a70e73c339ec3c71ea62f8e07af4959e9fd8ed44339"
+content-hash = "87a92f95e7305e879a54e92ba0c619e3aacddbcdf9838b119814c2866301191f"

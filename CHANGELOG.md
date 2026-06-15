@@ -4,51 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.7.0]
 
 ### Added
-- Canvas inline counts for step and job multipliers: every step row of a journey card and every job
-  chip of a step or recurrent-server-need card shows an always-visible, directly editable "× n"
-  count (change → save → recalculation immediately, no side panel). Unlike edge group entries, these
-  rows carry no inline unlink ✕ — removal stays in the side panels. A 0-count entry dims on the
-  canvas (still in the model, visibly contributing nothing).
-- Creation panels opened from a parent with a weighted dict relationship (add step from a journey,
-  add job from a step or recurrent server need) offer the multiplier field directly
-  ("Times per journey" / "Times per step" / "Times per occurrence"), prefilled at 1
-  (`parent_link_count`).
-- Up/down row reordering in the `dict_count` widget for order-meaningful dict relationships
-  (`"ordered": true` in `field_ui_config.json`, currently `uj_steps`), so journey steps can be
-  reordered from the journey panel as they could with the previous list widget.
-- Child panels gain generic dict-membership sections: a step's panel lists the journeys that use it
-  ("Used in usage journeys"), a job's panel the steps and recurrent server needs that use it
-  ("Used in usage journey steps" / "Used in recurrent server needs"), each with per-parent count
-  edit, unlink, and an "Add to…" select — the same experience as edge devices' "Group membership",
-  which now renders through the same generic section. The dict-mutation endpoints
-  (`update-dict-count` / `link-dict-entry` / `unlink-dict-entry`) resolve the target dict attribute
-  from a cached, annotation-driven (parent class, child class) registry instead of
-  EdgeDeviceGroup-only logic, so they serve all weighted relationships; membership wording lives in
-  `field_ui_config.json` (`membership_title` / `add_to_label`, class-qualified where needed).
-
-### Fixed
-- Weight entries built server-side (canvas-create / "Link existing") are labeled with the library's
-  static `weight_labels` wording (e.g. "Times per step") instead of "no label", and removing one
-  entry from a weighted dict no longer rewrites its siblings' weight sources to `user_data`
-  (sources now round-trip through container-removal deletes and link edits).
+- Step and job multipliers: you can now say how many times a step runs in a journey, and how many
+  times a job runs in a step or recurrent server need. The count shows as an editable "× n" right on
+  the canvas — change it and the model recalculates immediately. An entry set to 0 stays in the model
+  but dims to show it contributes nothing.
+- Journey steps can be reordered (up/down) directly from the journey panel.
+- A step's panel now lists the journeys that use it, and a job's panel lists the steps and recurrent
+  server needs that use it, each with an inline count, an unlink action, and an "Add to…" picker.
 
 ### Changed
-- Upgraded to e-footprint V22.0.0: `UsageJourney.uj_steps`, `UsageJourneyStep.jobs` and
-  `RecurrentServerNeed.jobs` are now weighted dicts (step-and-job-multipliers feature). The journey
-  panel's steps table and the step / recurrent-server-need panels' jobs tables render as weighted
-  `dict_count` tables ("Times per journey" / "Times per step" / "Times per occurrence" count columns),
-  with rows in journey order (the `dict_count` widget now renders rows in selected-map insertion order
-  for all dict fields, edge device groups included). Creating a step or job from the canvas links it
-  to its parent with count 1; "Link existing" on these relationships opens the weighted table.
-  Pre-feature JSONs (sessions, uploads, templates) upgrade automatically via the library's format-22
-  handler; the shipped introductory template JSONs were regenerated to the current format.
-  Count-column wording lives in `field_ui_config.json`, with `"ClassName.field"` class-qualified keys
-  for the `jobs` attribute shared across parent classes.
-- Remaining for release: pin `efootprint == 22.x` from PyPI in `pyproject.toml` / `poetry.lock`
-  (development used the editable local install).
+- Upgraded to e-footprint V22.0.0. Existing models (saved sessions, uploads, templates) open as
+  before and are upgraded automatically.
 
 ## [V1.6.6]
 

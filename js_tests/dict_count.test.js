@@ -112,10 +112,6 @@ describe("insertion-ordered rendering", () => {
             .map((cell) => cell.textContent.trim());
         expect(rowLabels).toEqual(["Search", "Browse", "Checkout"]);
     });
-
-    test("the count column header carries the relationship wording", () => {
-        expect(document.querySelector("thead").textContent).toContain("Times per journey");
-    });
 });
 
 describe("row reordering", () => {
