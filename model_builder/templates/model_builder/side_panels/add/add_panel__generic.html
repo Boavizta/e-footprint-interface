@@ -21,16 +21,16 @@
             hx-disabled-elt="button"
             hx-on::after-request="closeAndEmptySidePanel()"
     >
-        {% include "model_builder/side_panels/add/add_form_content.html" %}
         {% if parent_link_count_field %}
-            <div class="mb-3 mt-3">
-                <label class="form-label" for="parent_link_count">
+            <div class="dict-membership-row mb-3">
+                <label class="dict-membership-name mb-0" for="parent_link_count">
                     {{ parent_link_count_field.label }} ({{ parent_link_count_field.parent_name }})
                 </label>
-                <input type="number" class="form-control" id="parent_link_count" name="parent_link_count"
-                       value="1" min="0" step="0.1">
+                <input type="number" class="count-inline-edit form-control form-control-sm" id="parent_link_count"
+                       name="parent_link_count" value="1" min="0" step="0.1">
             </div>
         {% endif %}
+        {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>
     {% endblock %}
     {% if obj_formatting_data.post_addition_help %}
