@@ -9,7 +9,7 @@ the help drawer non-blockingly, and the IoT template lands with the edge toggle 
 import pytest
 from playwright.sync_api import expect
 
-from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.pages import ModelBuilderPage, card_id_selector
 from tests.e2e.utils import click_and_wait_for_htmx
 
 
@@ -29,7 +29,7 @@ class TestOnboardingPicker:
 
         # Picking the e-commerce template loads its working system onto the canvas.
         model_builder_page.pick_template("ecommerce")
-        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+        expect(page.locator(card_id_selector("UsageJourney")).first).to_be_visible()
 
     def test_start_from_scratch_loads_an_empty_canvas(self, model_builder_page: ModelBuilderPage):
         page = model_builder_page.page
@@ -38,20 +38,20 @@ class TestOnboardingPicker:
 
         model_builder_page.pick_template("scratch")
         # Empty baseline: no object cards on the canvas.
-        expect(page.locator("[id^='UsageJourney-']")).to_have_count(0)
-        expect(page.locator("[id^='Server-']")).to_have_count(0)
+        expect(page.locator(card_id_selector("UsageJourney"))).to_have_count(0)
+        expect(page.locator(card_id_selector("Server"))).to_have_count(0)
 
     def test_help_menu_reopens_picker_over_a_loaded_model(self, model_builder_page: ModelBuilderPage):
         page = model_builder_page.page
         page.goto("/model_builder/")
         model_builder_page.pick_template("ecommerce")
-        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+        expect(page.locator(card_id_selector("UsageJourney")).first).to_be_visible()
 
         # Re-open the picker mid-session without losing the current model.
         model_builder_page.open_template_picker_from_help_menu()
         expect(model_builder_page.template_picker).to_be_visible()
         model_builder_page.dismiss_template_picker_if_present()
-        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+        expect(page.locator(card_id_selector("UsageJourney")).first).to_be_visible()
 
     def test_picking_a_template_over_a_loaded_model_confirms_first(self, model_builder_page: ModelBuilderPage):
         """Regression: replacing a loaded model from the re-opened picker must confirm first.
@@ -63,7 +63,7 @@ class TestOnboardingPicker:
         page = model_builder_page.page
         page.goto("/model_builder/")
         model_builder_page.pick_template("ecommerce")
-        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+        expect(page.locator(card_id_selector("UsageJourney")).first).to_be_visible()
 
         # Re-open the picker over the now-loaded model and pick a different template.
         model_builder_page.open_template_picker_from_help_menu()
@@ -110,7 +110,7 @@ class TestOnboardingTour:
 
         # The flag is now set; re-entering the (now non-empty) builder must not re-run the tour.
         page.goto("/model_builder/")
-        expect(page.locator("[id^='UsageJourney-']").first).to_be_visible()
+        expect(page.locator(card_id_selector("UsageJourney")).first).to_be_visible()
         expect(model_builder_page.tour_popover).not_to_be_visible()
 
     def test_replay_from_help_menu_reopens_the_tour(self, model_builder_page: ModelBuilderPage):

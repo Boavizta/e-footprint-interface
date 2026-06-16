@@ -1,10 +1,13 @@
 {% load static %}
 {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+{% include 'model_builder/components/model_tab_strip.html' %}
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
-        <div class="d-flex flex-row" id="model-canva">
-            {% include 'model_builder/components/model_canvas_content.html' %}
+        {% for slot_entry in workspace_slots %}
+        <div class="d-flex flex-row {% if not slot_entry.is_active %}d-none{% endif %}" id="model-canva-{{ slot_entry.slot }}" data-model-canvas="{{ slot_entry.slot }}">
+            {% include 'model_builder/components/model_canvas_content.html' with model_web=slot_entry.model_web slot_suffix=slot_entry.suffix is_active_canvas=slot_entry.is_active %}
         </div>
+        {% endfor %}
     </div>
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-3" id="sidePanel"></div>
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"></div>

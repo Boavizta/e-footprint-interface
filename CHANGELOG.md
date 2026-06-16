@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Two-model builder: you can now add a second model to compare — by duplicating the current one,
+  importing a file, or starting blank — and switch between the two models from a tab strip above the
+  builder, with no page reload. Each model has the full builder (create / edit / delete, results,
+  import / export) and is edited independently. Both models, their names, and the active selection
+  survive a refresh, and you can remove the second model to return to a single-model session. The
+  ⇄ Compare tab is present but disabled until the comparison dashboard ships.
+
 ### Changed
 - Internal (no user-visible change): the session now holds a workspace of up to two model slots plus
   an active-slot pointer instead of a single model — groundwork for model comparison. System-data

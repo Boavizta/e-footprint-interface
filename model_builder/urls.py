@@ -6,6 +6,7 @@ import model_builder.adapters.views.views_dict_mutation
 import model_builder.adapters.views.views_edition
 import model_builder.adapters.views.views_help
 import model_builder.adapters.views.views_onboarding
+import model_builder.adapters.views.views_workspace
 from .adapters.views import views
 from .adapters.views import sankey_views
 
@@ -16,6 +17,11 @@ urlpatterns = [
     path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,
          name="load-template"),
     path("reset-model/", views.reset_model, name="reset-model"),
+    path("switch-model/", model_builder.adapters.views.views_workspace.switch_model, name="switch-model"),
+    path("add-model/", model_builder.adapters.views.views_workspace.add_model, name="add-model"),
+    path("open-add-model-import-panel/", model_builder.adapters.views.views_workspace.open_add_model_import_panel,
+         name="open-add-model-import-panel"),
+    path("remove-model/", model_builder.adapters.views.views_workspace.remove_model, name="remove-model"),
     path("recover/", views.recover_model, name="recover-model"),
     path("download-raw-json/", views.download_raw_json, name="download-raw-json"),
     path("open-create-object-panel/<object_type>/",

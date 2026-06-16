@@ -49,6 +49,17 @@ class WorkspaceRepositoryBase(IWorkspaceRepository):
         self.repository_for(slot).clear()
         self._deregister_slot(slot)
 
+    def distinctify_against_siblings(self, system_data: Dict[str, Any], slot: int) -> Dict[str, Any]:
+        """Return ``system_data`` with a system id distinct from every *other* occupied slot's.
+
+        Replaces (not adds) into ``slot`` go through here — loading a template or importing a file
+        into an existing slot while the sibling holds the same/lineage id would otherwise revive the
+        cross-canvas web_id collision the distinct-id invariant exists to prevent. ``add_slot`` keeps
+        its own guard; this is the same invariant for the in-place write paths.
+        """
+        siblings = [other for other in self.list_slots() if other != slot]
+        return self._ensure_distinct_system_id(system_data, sibling_slots=siblings)
+
     def _next_free_slot(self, slots: List[int]) -> Optional[int]:
         for candidate in range(MAX_SLOTS):
             if candidate not in slots:

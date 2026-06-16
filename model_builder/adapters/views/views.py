@@ -40,26 +40,81 @@ from model_builder.domain.services import (
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
-def load_system_into_session(repository, raw_system_data):
-    """Upgrade, recompute, wrap and persist a raw system dict into the session.
+def load_system_into_session(repository, raw_system_data, workspace=None):
+    """Upgrade, recompute, wrap and persist a raw system dict into a workspace slot.
 
-    Shared by reboot, template loading, and the empty-model initialization — the
-    one place that turns a serialized System into the session-backed current model.
+    Shared by reboot, template loading, and the empty-model initialization — the one place that
+    turns a serialized System into the session-backed current model. ``repository`` targets a slot
+    (the active slot by default). When ``workspace`` is given and holds a second model, the incoming
+    system id is made distinct from the sibling slot first, so loading the same template/file into
+    one slot while the other holds it never produces two slots with the same id (the web_id prefix
+    invariant — see workspace_base).
     """
     system_data = SessionSystemRepository.upgrade_system_data(raw_system_data)
     import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-    model_web = ModelWeb(repository, import_service.import_system(system_data))
+    system_data = import_service.import_system(system_data)
+    if workspace is not None:
+        system_data = workspace.distinctify_against_siblings(system_data, repository.slot)
+    model_web = ModelWeb(repository, system_data)
     model_web.persist_to_cache()
     gc.collect()
     return model_web
 
 
-def render_model_builder(request, model_web, show_template_picker):
-    """Render the builder canvas, optionally overlaying the first-run template picker."""
+def _requested_slot(request, workspace):
+    """Resolve a ``slot`` request param to an occupied slot, defaulting to the active slot."""
+    raw = request.GET.get("slot", request.POST.get("slot"))
+    if raw is None:
+        return workspace.active_slot()
+    try:
+        slot = int(raw)
+    except (TypeError, ValueError):
+        return workspace.active_slot()
+    return slot if slot in workspace.list_slots() else workspace.active_slot()
+
+
+def build_workspace_slots(workspace):
+    """Build a render-ready list of the workspace's slots: one wrapped model per occupied slot.
+
+    Each entry carries the slot index, its ``ModelWeb``, the system name, and whether it is active.
+    The active slot's model is the shared chrome's ``model_web`` (toolbar, results panel, picker).
+    """
+    active_slot = workspace.active_slot()
+    slots = []
+    for slot in workspace.list_slots():
+        model_web = ModelWeb(workspace.repository_for(slot))
+        is_active = slot == active_slot
+        slots.append({
+            "slot": slot,
+            "model_web": model_web,
+            "name": model_web.system.name,
+            "is_active": is_active,
+            # Active canvas keeps the canonical structural ids; parked canvas suffixes them by slot so
+            # nothing collides across the two resident canvases (see model_canvas_content.html).
+            "suffix": "" if is_active else f"-{slot}",
+        })
+    return slots
+
+
+def render_model_builder(request, model_web, show_template_picker, workspace=None):
+    """Render the builder canvas, optionally overlaying the first-run template picker.
+
+    Renders the tab strip plus one resident canvas per workspace slot (active visible). When no
+    ``workspace`` is given the caller already holds the active ``model_web`` only — a single-model
+    render, the degenerate single-slot case. ``model_web`` is always the active slot's model: the
+    shared chrome (toolbar, results panel, picker, tour) binds to it.
+    """
+    workspace_slots = build_workspace_slots(workspace) if workspace is not None else [
+        {"slot": getattr(model_web.repository, "slot", 0), "model_web": model_web,
+         "name": model_web.system.name, "is_active": True, "suffix": ""}]
+    active_slot = next(s["slot"] for s in workspace_slots if s["is_active"])
+
     model_is_empty = is_empty_model(model_web.system_data)
     context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
                "show_template_picker": show_template_picker,
                "model_is_empty": model_is_empty,
+               "workspace_slots": workspace_slots,
+               "active_slot": active_slot,
                "tour_steps": build_tour_steps(is_blank=model_is_empty)}
     if show_template_picker:
         context["template_picker_groups"] = build_picker_groups()
@@ -77,7 +132,8 @@ def render_model_builder(request, model_web, show_template_picker):
 
 @time_it
 def model_builder_main(request):
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.active_repository()
     try:
         model_web = ModelWeb(repository)
         if model_web.system_data is None:
@@ -100,7 +156,8 @@ def model_builder_main(request):
 
     # An empty model (fresh session, reset, or a returning user who never built anything) is met with
     # the template picker overlaid on the canvas; once there is content, entry goes straight to the model.
-    return render_model_builder(request, model_web, show_template_picker=is_empty_model(model_web.system_data))
+    return render_model_builder(
+        request, model_web, show_template_picker=is_empty_model(model_web.system_data), workspace=workspace)
 
 
 def recover_model(request):
@@ -118,7 +175,8 @@ def download_raw_json(request):
     download_json rebuilds the model (and would crash on a corrupt one); this serves the stored
     JSON verbatim so a user in a dead state can still save their work and attach it to a bug report.
     """
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.repository_for(_requested_slot(request, workspace))
     raw_system_data = repository.get_system_data()
     if raw_system_data is None:
         raise Http404("No model data found in the current session.")
@@ -136,13 +194,14 @@ def reset_model(request):
     POST-only: it destroys the session model, so it must not be reachable by a bare GET
     navigation. The toolbar reset button confirms first when the model is non-empty.
     """
-    repository = SessionWorkspaceRepository(request.session).active_repository()
-    model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.active_repository()
+    model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID), workspace=workspace)
     if request.headers.get("HX-Request") != "true":
         # Non-HTMX callers (e.g. the recovery page's plain form) get a clean redirect to a fresh
         # GET of the builder, rather than the toolbar's in-place fragment swap.
         return redirect("model-builder")
-    return render_model_builder(request, model_web, show_template_picker=True)
+    return render_model_builder(request, model_web, show_template_picker=True, workspace=workspace)
 
 
 def open_import_json_panel(request):
@@ -151,7 +210,9 @@ def open_import_json_panel(request):
 
 
 def download_json(request):
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    slot = _requested_slot(request, workspace)
+    repository = workspace.repository_for(slot)
     model_web = ModelWeb(repository)
     system = model_web.system
     system_data_without_calculated_attributes = model_web.to_json(save_calculated_attributes=False)
@@ -169,7 +230,8 @@ def download_json(request):
 
 @time_it
 def upload_json(request):
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.active_repository()
     import_error_message = ""
     data = None
 
@@ -192,6 +254,10 @@ def upload_json(request):
                 system_data = SessionSystemRepository.upgrade_system_data(data)
                 import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
                 system_data_with_calculated_attributes = import_service.import_system(system_data)
+                # "Replace this model" writes into the active slot; distinctify so importing the same
+                # file the sibling slot already holds doesn't produce two slots with one system id.
+                system_data_with_calculated_attributes = workspace.distinctify_against_siblings(
+                    system_data_with_calculated_attributes, repository.slot)
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
                 if "interface_config" in data:
                     repository.interface_config = data["interface_config"]
@@ -213,6 +279,8 @@ def upload_json(request):
     if model_web.system_data:
         context["model_web"] = model_web
         context["class_help_info"] = build_canvas_class_help_info()
+        context["workspace_slots"] = build_workspace_slots(workspace)
+        context["active_slot"] = workspace.active_slot()
 
     http_response = render(request, "model_builder/model_builder_main.html", context=context)
     http_response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})

@@ -67,6 +67,8 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 
 ## Task 3 — Interface: two-model builder — tabs, resident canvases, switch / add / remove (e-footprint-interface)
 
+**Status:** Done
+
 **Goal:** The first user-visible milestone — two independent models coexist in one session, each with the full builder, one active for editing, switchable with no network round-trip. The user can add the second model by duplication, import, or blank/template, and remove it to return to single-model mode. Solves the headline DOM-collision risk via the `web_id` system-id prefix chokepoint.
 
 **Files touched:**

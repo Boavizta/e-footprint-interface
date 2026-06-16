@@ -138,9 +138,27 @@ class ModelingObjectWeb:
 
     @property
     def web_id(self):
+        # Prefix the root card id with the system id so the two resident comparison canvases never
+        # collide (model-comparison Task 3). Every derived id (`button-`/`flush-`/`icon-`), HTMX/
+        # hyperscript selector, leaderline anchor and mirrored-card ref flows from web_id, so this one
+        # chokepoint namespaces them all; the canvas templates need no edits. The nested branch
+        # inherits the prefix through parent_container.web_id, so it is applied exactly once at the
+        # root. The distinct-system-id workspace invariant keeps the two slots' prefixes distinct.
         if self.parent_container is not None:
             return f"{self.class_as_simple_str}-{self._modeling_obj.id}_in_{self.parent_container.web_id}"
-        return f"{self.class_as_simple_str}-{self._modeling_obj.id}"
+        return f"{self._system_web_id_prefix}{self.class_as_simple_str}-{self._modeling_obj.id}"
+
+    @property
+    def _system_web_id_prefix(self) -> str:
+        """``sys-{system id}-`` — the namespace that disambiguates the two resident canvases.
+
+        The literal ``sys-`` is load-bearing: system ids are uuids that often start with a digit, and a
+        bare ``{system id}-…`` prefix would make the web_id an invalid CSS id selector — HTMX resolves
+        its OOB targets with ``querySelector('#'+id)``, which throws on a leading digit (object cards
+        used to start with the class name, always a letter). A constant letter-leading prefix keeps
+        every derived id a valid selector.
+        """
+        return f"sys-{self.model_web.system.efootprint_id}-"
 
     @property
     def value(self):

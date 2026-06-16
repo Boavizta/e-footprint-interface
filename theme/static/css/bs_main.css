@@ -20962,7 +20962,9 @@ input:disabled {
 
 /* CSS class use for Responsive or small screen */
 /*----------------------------------*/
-#model-canva {
+/* One resident canvas per workspace slot (model-comparison): style each #model-canva-{slot} via the
+   stable data-model-canvas attribute rather than the old single #model-canva id. */
+[data-model-canvas] {
   min-width: max-content;
   background-color: white;
   min-height: 100%;
@@ -21101,7 +21103,7 @@ input:disabled {
   }
 }
 @media (min-width: 992px) {
-  #model-canva {
+  [data-model-canvas] {
     width: 100%;
     flex-wrap: wrap;
     min-width: 0;
@@ -23020,8 +23022,8 @@ input:disabled {
   gap: 6px;
 }
 
-/* Edge modeling toggle: hide edge-paradigm add-buttons in the canvas when off. */
-body.edge-modeling-off #model-canva [data-modeling-paradigm=edge] {
+/* Edge modeling toggle: hide edge-paradigm add-buttons in the canvas when off (every slot canvas). */
+body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   display: none;
 }
 

@@ -12,7 +12,7 @@ from efootprint.core.usage.edge.edge_function import EdgeFunction
 from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 
 from tests.e2e.conftest import load_system_dict_into_browser
-from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.pages import ModelBuilderPage, card_id_selector
 from tests.e2e.pages.components import ObjectCard
 from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update, click_and_wait_for_htmx
 
@@ -257,7 +257,7 @@ class TestEdgeObjects:
 
         # Edit the edge function name
         old_name = "Mirrored function, referenced in journey 1 and 2"
-        function_cards = page.locator(f"div[id^='EdgeFunction-']").filter(has_text=old_name)
+        function_cards = page.locator(card_id_selector("EdgeFunction")).filter(has_text=old_name)
         expect(function_cards).to_have_count(2)
         function_card = ObjectCard(function_cards.first)
         function_card.click_edit_button()
@@ -268,7 +268,7 @@ class TestEdgeObjects:
         side_panel.submit_and_wait_for_close()
 
         # Verify the function is now shown with the new name
-        function_cards = page.locator(f"div[id^='EdgeFunction-']").filter(has_text=new_name)
+        function_cards = page.locator(card_id_selector("EdgeFunction")).filter(has_text=new_name)
         expect(function_cards).to_have_count(2)
 
         # Verify the old name no longer exists (card should not be found)

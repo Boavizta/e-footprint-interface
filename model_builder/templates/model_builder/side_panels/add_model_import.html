@@ -1,0 +1,28 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+{% load static %}
+
+{% comment %}
+Side panel for "Add a model to compare → Import from file" (model-comparison Task 3). Unlike
+import_model.html (which REPLACES the active model via upload-json), this ADDS a second model: it posts
+the file to add-model with source=import, which routes through the workspace add-to-slot path (distinct
+system id + shared-budget guard) and re-renders the builder with both canvases.
+{% endcomment %}
+
+{% block panel_body %}
+<form id="sidePanelForm" class="my-3"
+        hx-post="{% url 'add-model' %}"
+        hx-disabled-elt="button"
+        enctype="multipart/form-data"
+        hx-swap="innerHTML"
+        hx-target="#main-content-block">
+    <input type="hidden" name="source" value="import">
+    <div class="mb-3">
+        <label for="import-json-input" class="form-label">Choose a json file</label>
+        <input class="form-control" id="import-json-input" name="import-json-input" type="file" required>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>hidePanelResult();</script>
+{% endblock %}

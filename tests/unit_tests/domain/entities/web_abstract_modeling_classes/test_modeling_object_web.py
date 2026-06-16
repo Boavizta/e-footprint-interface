@@ -34,6 +34,13 @@ class StubModelingObject:
         object.__setattr__(self, key, value)
 
 
+def mock_model_web(system_id: str = "sys"):
+    """A model_web mock whose system id is fixed, so the web_id prefix is deterministic."""
+    model_web = MagicMock()
+    model_web.system.efootprint_id = system_id
+    return model_web
+
+
 class TestModelingObjectWeb:
     """Tests for ModelingObjectWeb behavior."""
 
@@ -167,27 +174,54 @@ class TestModelingObjectWeb:
     # --- equality + hash ---
 
     def test_equality_and_hash_use_web_id(self):
-        wrapper_a = ModelingObjectWeb(StubModelingObject("id1", "Thing"), MagicMock())
-        wrapper_b = ModelingObjectWeb(StubModelingObject("id1", "Thing"), MagicMock())
-        wrapper_c = ModelingObjectWeb(StubModelingObject("id2", "Thing"), MagicMock())
+        same_web = mock_model_web("sys")
+        wrapper_a = ModelingObjectWeb(StubModelingObject("id1", "Thing"), same_web)
+        wrapper_b = ModelingObjectWeb(StubModelingObject("id1", "Thing"), same_web)
+        wrapper_c = ModelingObjectWeb(StubModelingObject("id2", "Thing"), same_web)
 
         assert wrapper_a == wrapper_b
         assert wrapper_a != wrapper_c
         assert hash(wrapper_a) == hash(wrapper_b)
 
+    def test_equality_and_hash_are_system_scoped(self):
+        """The same object id under two different systems (the two comparison slots) is two distinct
+        web ids — so equal-id cards across the two resident canvases neither compare equal nor collide."""
+        wrapper_in_a = ModelingObjectWeb(StubModelingObject("id1", "Thing"), mock_model_web("aaa"))
+        wrapper_in_b = ModelingObjectWeb(StubModelingObject("id1", "Thing"), mock_model_web("bbb"))
+
+        assert wrapper_in_a.web_id == "sys-aaa-Thing-id1"
+        assert wrapper_in_b.web_id == "sys-bbb-Thing-id1"
+        assert wrapper_in_a != wrapper_in_b
+        assert hash(wrapper_in_a) != hash(wrapper_in_b)
+
     # --- web_id ---
 
-    def test_web_id_includes_list_container_when_present(self):
-        parent = ModelingObjectWeb(StubModelingObject("p1", "Parent"), MagicMock())
-        child = ModelingObjectWeb(StubModelingObject("c1", "Child"), MagicMock(), list_container=parent)
+    def test_web_id_prefixes_root_with_system_id(self):
+        wrapper = ModelingObjectWeb(StubModelingObject("id1", "Thing"), mock_model_web("abc"))
 
-        assert child.web_id == "Child-c1_in_Parent-p1"
+        assert wrapper.web_id == "sys-abc-Thing-id1"
+
+    def test_web_id_prefix_is_letter_leading_for_digit_system_ids(self):
+        """System ids are uuids that often start with a digit; the constant ``sys-`` keeps the web_id
+        a valid CSS id selector so HTMX OOB ``querySelector('#'+id)`` never throws."""
+        wrapper = ModelingObjectWeb(StubModelingObject("id1", "Thing"), mock_model_web("835a43b8-e25"))
+
+        assert wrapper.web_id == "sys-835a43b8-e25-Thing-id1"
+        assert wrapper.web_id[0].isalpha()
+
+    def test_web_id_includes_list_container_when_present(self):
+        """The system prefix is applied once at the root; the nested branch inherits it through the
+        parent's web_id rather than repeating it."""
+        parent = ModelingObjectWeb(StubModelingObject("p1", "Parent"), mock_model_web("abc"))
+        child = ModelingObjectWeb(StubModelingObject("c1", "Child"), mock_model_web("abc"), list_container=parent)
+
+        assert child.web_id == "Child-c1_in_sys-abc-Parent-p1"
 
     def test_web_id_includes_dict_container_when_present(self):
-        parent = ModelingObjectWeb(StubModelingObject("p1", "Parent"), MagicMock())
-        child = ModelingObjectWeb(StubModelingObject("c1", "Child"), MagicMock(), dict_container=parent)
+        parent = ModelingObjectWeb(StubModelingObject("p1", "Parent"), mock_model_web("abc"))
+        child = ModelingObjectWeb(StubModelingObject("c1", "Child"), mock_model_web("abc"), dict_container=parent)
 
-        assert child.web_id == "Child-c1_in_Parent-p1"
+        assert child.web_id == "Child-c1_in_sys-abc-Parent-p1"
 
     # --- template_name ---
 
@@ -246,10 +280,10 @@ class TestModelingObjectWeb:
             def links_to(self):
                 return "target"
 
-        wrapper = CustomWrapper(StubModelingObject("x1", "Sample"), MagicMock())
+        wrapper = CustomWrapper(StubModelingObject("x1", "Sample"), mock_model_web("abc"))
 
         assert wrapper.data_attributes_as_list_of_dict == [
-            {"id": "Sample-x1", "data-link-to": "target", "data-line-opt": "object-to-object"}
+            {"id": "sys-abc-Sample-x1", "data-link-to": "target", "data-line-opt": "object-to-object"}
         ]
 
     # --- list containers / mirrored cards ---

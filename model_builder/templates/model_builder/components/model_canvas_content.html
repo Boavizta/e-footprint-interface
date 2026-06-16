@@ -1,11 +1,22 @@
 {% load static label_filters %}
+{% comment %}
+Canvas contents for one workspace slot (model-comparison Task 3). Object-card ids are namespaced by
+the system-id prefix (web_id chokepoint), so they never collide across the two resident canvases. The
+structural ids here (lists, containers, add-buttons) are NOT web_id-derived, so they would collide —
+the ACTIVE slot renders them with their canonical ids (so every existing add/edit flow, Sortable, the
+tour and the E2E selectors keep working unchanged), and a PARKED slot renders the same elements with a
+`-{slot}` suffix. Each carries `data-canvas-id` so the client-side switch (model_builder_main.js) can
+migrate the canonical ids to whichever canvas becomes active, with no canvas re-render. `data-tour-target`
+is emitted on the active canvas only and migrated the same way.
+{% endcomment %}
+{% with sfx=""|add:slot_suffix %}
 {% with creation_constraints=model_web.creation_constraints %}
 <div class="equal-width p-2">
-    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-pattern-container" data-tour-target="usage-patterns">
+    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-pattern-container{{ sfx }}" data-canvas-id="usage-pattern-container" {% if is_active_canvas %}data-tour-target="usage-patterns"{% endif %}>
         <h5><b>Usage patterns</b></h5>
-        {% include 'model_builder/components/add_object_button.html' with btn_id="add_usage_pattern" hx_url="/model_builder/open-create-object-panel/UsagePattern/" label="Add usage pattern" btn_extra_classes="w-75 mb-1" disabled=creation_constraints.UsagePatternWeb.disabled disabled_reason="UsagePatternWeb"|constraint_tooltip class_name="UsagePattern" class_label=class_help_info.UsagePattern.label class_description=class_help_info.UsagePattern.description %}
-        <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="add_edge_usage_pattern" hx_url="/model_builder/open-create-object-panel/EdgeUsagePattern/" label="Add edge usage pattern" btn_extra_classes="w-75 mb-0" disabled=creation_constraints.EdgeUsagePatternWeb.disabled disabled_reason="EdgeUsagePatternWeb"|constraint_tooltip class_name="EdgeUsagePattern" class_label=class_help_info.EdgeUsagePattern.label class_description=class_help_info.EdgeUsagePattern.description %}</div>
-        <div id="up-list" class="list-group w-75 ps-0 pb-0 mt-3">
+        {% include 'model_builder/components/add_object_button.html' with btn_id="add_usage_pattern"|add:sfx canvas_id="add_usage_pattern" hx_url="/model_builder/open-create-object-panel/UsagePattern/" label="Add usage pattern" btn_extra_classes="w-75 mb-1" disabled=creation_constraints.UsagePatternWeb.disabled disabled_reason="UsagePatternWeb"|constraint_tooltip class_name="UsagePattern" class_label=class_help_info.UsagePattern.label class_description=class_help_info.UsagePattern.description %}
+        <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="add_edge_usage_pattern"|add:sfx canvas_id="add_edge_usage_pattern" hx_url="/model_builder/open-create-object-panel/EdgeUsagePattern/" label="Add edge usage pattern" btn_extra_classes="w-75 mb-0" disabled=creation_constraints.EdgeUsagePatternWeb.disabled disabled_reason="EdgeUsagePatternWeb"|constraint_tooltip class_name="EdgeUsagePattern" class_label=class_help_info.EdgeUsagePattern.label class_description=class_help_info.EdgeUsagePattern.description %}</div>
+        <div id="up-list{{ sfx }}" data-canvas-id="up-list" class="list-group w-75 ps-0 pb-0 mt-3">
             {% for usage_pattern in model_web.usage_patterns %}
             {% include 'model_builder/object_cards/basic_card.html' with object=usage_pattern %}
             {% endfor %}
@@ -16,11 +27,11 @@
     </div>
 </div>
 <div class="equal-width p-2">
-    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-journey-container" data-tour-target="usage-journeys">
+    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="usage-journey-container{{ sfx }}" data-canvas-id="usage-journey-container" {% if is_active_canvas %}data-tour-target="usage-journeys"{% endif %}>
          <h5><b>Usage journeys</b></h5>
-        {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-usage-journey" hx_url="/model_builder/open-create-object-panel/UsageJourney/" label="Add usage journey" btn_extra_classes="w-100 mb-1" class_name="UsageJourney" class_label=class_help_info.UsageJourney.label class_description=class_help_info.UsageJourney.description %}
-        <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-usage-journey" hx_url="/model_builder/open-create-object-panel/EdgeUsageJourney/" label="Add edge usage journey" btn_extra_classes="w-100 mb-0" class_name="EdgeUsageJourney" class_label=class_help_info.EdgeUsageJourney.label class_description=class_help_info.EdgeUsageJourney.description %}</div>
-        <div id="uj-list" class="list-group w-100 ps-0 mt-3">
+        {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-usage-journey"|add:sfx canvas_id="btn-add-usage-journey" hx_url="/model_builder/open-create-object-panel/UsageJourney/" label="Add usage journey" btn_extra_classes="w-100 mb-1" class_name="UsageJourney" class_label=class_help_info.UsageJourney.label class_description=class_help_info.UsageJourney.description %}
+        <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-usage-journey"|add:sfx canvas_id="btn-add-edge-usage-journey" hx_url="/model_builder/open-create-object-panel/EdgeUsageJourney/" label="Add edge usage journey" btn_extra_classes="w-100 mb-0" class_name="EdgeUsageJourney" class_label=class_help_info.EdgeUsageJourney.label class_description=class_help_info.EdgeUsageJourney.description %}</div>
+        <div id="uj-list{{ sfx }}" data-canvas-id="uj-list" class="list-group w-100 ps-0 mt-3">
             {% for usage_journey in model_web.usage_journeys %}
             {% include 'model_builder/object_cards/journey_card.html' with object=usage_journey %}
             {% endfor %}
@@ -31,30 +42,31 @@
     </div>
 </div>
 <div class="equal-width p-2">
-    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container" data-tour-target="infrastructure">
+    <div class="d-flex flex-column text-start rounded-4 list-object-efootprint px-4 pt-4 pb-2" id="server-container{{ sfx }}" data-canvas-id="server-container" {% if is_active_canvas %}data-tour-target="infrastructure"{% endif %}>
         <h5><b>Infrastructure</b></h5>
         <div class="d-grid gap-1 mb-3" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);">
-            {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-server" hx_url="/model_builder/open-create-object-panel/ServerBase/" label="Add server" btn_extra_classes="" class_name="ServerBase" class_label=class_help_info.ServerBase.label class_description=class_help_info.ServerBase.description %}
-            {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-external-api" hx_url="/model_builder/open-create-object-panel/ExternalAPI/" label="Add external API" btn_extra_classes="" class_name="ExternalAPI" class_label=class_help_info.ExternalAPI.label class_description=class_help_info.ExternalAPI.description %}
-            <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device" hx_url="/model_builder/open-create-object-panel/EdgeDeviceBase/" label="Add edge device" btn_extra_classes="" class_name="EdgeDeviceBase" class_label=class_help_info.EdgeDeviceBase.label class_description=class_help_info.EdgeDeviceBase.description %}</div>
-            <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device-group" hx_url="/model_builder/open-create-object-panel/EdgeDeviceGroup/" label="Add group" btn_extra_classes="" class_name="EdgeDeviceGroup" class_label=class_help_info.EdgeDeviceGroup.label class_description=class_help_info.EdgeDeviceGroup.description %}</div>
+            {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-server"|add:sfx canvas_id="btn-add-server" hx_url="/model_builder/open-create-object-panel/ServerBase/" label="Add server" btn_extra_classes="" class_name="ServerBase" class_label=class_help_info.ServerBase.label class_description=class_help_info.ServerBase.description %}
+            {% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-external-api"|add:sfx canvas_id="btn-add-external-api" hx_url="/model_builder/open-create-object-panel/ExternalAPI/" label="Add external API" btn_extra_classes="" class_name="ExternalAPI" class_label=class_help_info.ExternalAPI.label class_description=class_help_info.ExternalAPI.description %}
+            <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device"|add:sfx canvas_id="btn-add-edge-device" hx_url="/model_builder/open-create-object-panel/EdgeDeviceBase/" label="Add edge device" btn_extra_classes="" class_name="EdgeDeviceBase" class_label=class_help_info.EdgeDeviceBase.label class_description=class_help_info.EdgeDeviceBase.description %}</div>
+            <div data-modeling-paradigm="edge">{% include 'model_builder/components/add_object_button.html' with btn_id="btn-add-edge-device-group"|add:sfx canvas_id="btn-add-edge-device-group" hx_url="/model_builder/open-create-object-panel/EdgeDeviceGroup/" label="Add group" btn_extra_classes="" class_name="EdgeDeviceGroup" class_label=class_help_info.EdgeDeviceGroup.label class_description=class_help_info.EdgeDeviceGroup.description %}</div>
         </div>
-        <div id="external-api-list" class="list-group d-flex flew-column w-75 ms-25">
+        <div id="external-api-list{{ sfx }}" data-canvas-id="external-api-list" class="list-group d-flex flew-column w-75 ms-25">
             {% for external_api in model_web.external_apis %}
                 {% include 'model_builder/object_cards/basic_card.html' with object=external_api %}
             {% endfor %}
         </div>
-        <div id="server-list" class="list-group d-flex flew-column w-75 ms-25">
+        <div id="server-list{{ sfx }}" data-canvas-id="server-list" class="list-group d-flex flew-column w-75 ms-25">
             {% for server in model_web.servers %}
                 {% include 'model_builder/object_cards/server_card.html' with object=server %}
             {% endfor %}
         </div>
-        <div id="edge-device-groups-list" class="list-group d-flex flew-column w-75 ms-25">
+        <div id="edge-device-groups-list{{ sfx }}" data-canvas-id="edge-device-groups-list" class="list-group d-flex flew-column w-75 ms-25">
             {% include 'model_builder/object_cards/partials/root_edge_device_groups_list.html' %}
         </div>
-        <div id="edge-devices-list" class="list-group d-flex flew-column w-75 ms-25">
+        <div id="edge-devices-list{{ sfx }}" data-canvas-id="edge-devices-list" class="list-group d-flex flew-column w-75 ms-25">
             {% include 'model_builder/object_cards/partials/ungrouped_edge_devices_list.html' %}
         </div>
     </div>
 </div>
+{% endwith %}
 {% endwith %}

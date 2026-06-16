@@ -75,7 +75,7 @@ def _apply_source_editor(editor) -> None:
 def _save_reopen_server_form(model_builder: ModelBuilderPage) -> None:
     model_builder.side_panel.submit_and_wait_for_close()
     model_builder.page.reload()
-    model_builder.page.locator("#model-canva").wait_for(state="visible")
+    model_builder.page.locator("[data-model-canvas]:not(.d-none)").wait_for(state="visible")
     _open_server_form(model_builder)
 
 
@@ -312,7 +312,7 @@ class TestSourceMetadataSourceTable:
         _expect_source_block_not_reloaded(source_block)
 
         page.reload()
-        page.locator("#model-canva").wait_for(state="visible")
+        page.locator("[data-model-canvas]:not(.d-none)").wait_for(state="visible")
         _open_sources_tab(model_builder)
         expect(_source_row(page).locator(".confidence-badge")).to_have_attribute("data-level", "medium")
 

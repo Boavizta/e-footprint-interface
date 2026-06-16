@@ -1,0 +1,148 @@
+"""Workspace endpoints for the two-model comparison builder (model-comparison Task 3).
+
+Thin HTTP adapters over ``SessionWorkspaceRepository``:
+
+  - ``switch-model`` flips the active slot server-side (so a refresh restores the selection) and
+    rebinds the small shared chrome (system name, results buttons, edge toggle) via OOB swaps. The
+    two canvases stay resident; the visible one is toggled client-side, so the switch costs no
+    canvas re-render and preserves each canvas's transient UI state.
+  - ``add-model`` adds the second model by duplication, blank/scratch, or file import; the new model
+    becomes active. Every path goes through ``workspace.add_slot``, inheriting the distinct-system-id
+    invariant and the shared-budget pre-check (constitution / plan §2.1, §4).
+  - ``remove-model`` drops a slot, returning the workspace toward single-model mode.
+
+The ``compare`` endpoint is deferred to Task 4.
+"""
+import gc
+import json
+import os
+
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.comparison.duplication import duplicate_system
+
+from model_builder.adapters.repositories import SessionWorkspaceRepository, SessionSystemRepository
+from model_builder.adapters.views.views import load_system_into_session, render_model_builder
+from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.services import ProgressiveImportService, SCRATCH_ID, get_template_system_data
+
+
+def _rendered_shared_chrome_oob(model_web) -> str:
+    """OOB fragments that rebind the active-model chrome after a switch (no canvas re-render)."""
+    from model_builder.adapters.presenters.oob_regions import _render_results_buttons, _render_edge_modeling_toggle
+
+    system_name = (
+        f"<p id='system-name' class='m-0 pe-3 text-truncate' "
+        f"hx-swap-oob='outerHTML:#system-name'>{model_web.system.name}</p>")
+    return system_name + _render_results_buttons(model_web, {}) + _render_edge_modeling_toggle(model_web, {})
+
+
+@require_POST
+def switch_model(request):
+    """Flip the active slot and rebind the shared chrome; the canvas toggle is client-side."""
+    workspace = SessionWorkspaceRepository(request.session)
+    slot = int(request.POST["slot"])
+    if slot not in workspace.list_slots():
+        return HttpResponse(status=400)
+    workspace.set_active_slot(slot)
+
+    model_web = ModelWeb(workspace.repository_for(slot))
+    response = HttpResponse(_rendered_shared_chrome_oob(model_web))
+    response["HX-Trigger"] = json.dumps({"switchModelCanvas": {"slot": slot}})
+    return response
+
+
+def open_add_model_import_panel(request):
+    """Side panel for adding the second model from a file (distinct from "Replace this model")."""
+    return render(request, "model_builder/side_panels/add_model_import.html", context={
+        "header_name": "Add a model from a file", "save_button_label": "Add this model"})
+
+
+def _system_data_for_add(request, workspace):
+    """Build the without-calc single-model document for the model the user asked to add.
+
+    Three sources, all returning a recomputed (with-calc) document for ``add_slot`` to save:
+      - ``duplicate``: deep-copy the active model via the library ``duplicate_system`` (fresh system
+        id, object ids preserved) and propose the editable name ``"Copy of {name}"``;
+      - ``blank``: the empty scratch baseline;
+      - ``import``: an uploaded single-model file.
+    """
+    source = request.POST.get("source", "duplicate")
+
+    if source == "import":
+        file = request.FILES.get("import-json-input")
+        if not file or not file.name.lower().endswith(".json"):
+            raise ValueError("Invalid file format ! Please use a JSON file.")
+        raw = json.load(file)
+        file.close()
+        return SessionSystemRepository.upgrade_system_data(raw)
+
+    if source == "blank":
+        return get_template_system_data(SCRATCH_ID)
+
+    active_model = ModelWeb(workspace.active_repository())
+    duplicated = duplicate_system(active_model.system.modeling_obj)
+    system_data = system_to_json(duplicated, save_calculated_attributes=False)
+    system_block = system_data["System"][duplicated.id]
+    system_block["name"] = f"Copy of {active_model.system.name}"
+    return system_data
+
+
+@require_POST
+def add_model(request):
+    """Add a second model (duplicate / blank / import) and make it active."""
+    workspace = SessionWorkspaceRepository(request.session)
+    import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    try:
+        raw_system_data = _system_data_for_add(request, workspace)
+        with_calc = import_service.import_system(raw_system_data)
+        new_slot = workspace.add_slot(with_calc)
+    except Exception as e:
+        if os.environ.get("RAISE_EXCEPTIONS"):
+            raise
+        return _render_with_error(request, workspace, f"Could not add the model: {type(e).__name__}: {e}")
+    finally:
+        gc.collect()
+
+    workspace.set_active_slot(new_slot)
+    model_web = ModelWeb(workspace.repository_for(new_slot))
+    return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
+
+
+@require_POST
+def remove_model(request):
+    """Remove a slot and return to the surviving (now active) model."""
+    workspace = SessionWorkspaceRepository(request.session)
+    slot = int(request.POST["slot"])
+    try:
+        workspace.remove_slot(slot)
+    except ValueError as e:
+        if os.environ.get("RAISE_EXCEPTIONS"):
+            raise
+        return _render_with_error(request, workspace, str(e))
+
+    model_web = ModelWeb(workspace.active_repository())
+    return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
+
+
+def _render_with_error(request, workspace, message):
+    """Re-render the builder with an error modal (mirrors upload_json's failure path)."""
+    from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
+    from model_builder.adapters.views.views import build_workspace_slots
+
+    model_web = ModelWeb(workspace.active_repository())
+    context = {
+        "model_web": model_web,
+        "class_help_info": build_canvas_class_help_info(),
+        "workspace_slots": build_workspace_slots(workspace),
+        "active_slot": workspace.active_slot(),
+        "import_error_modal_id": "error-import-modal",
+        "import_error_message": message,
+    }
+    http_response = HttpResponse(render_to_string("model_builder/model_builder_main.html", context, request))
+    http_response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
+    http_response["HX-Trigger-After-Settle"] = json.dumps({"openModalDialog": {"modal_id": "error-import-modal"}})
+    return http_response

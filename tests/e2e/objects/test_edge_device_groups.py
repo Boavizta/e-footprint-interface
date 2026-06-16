@@ -145,7 +145,7 @@ class TestEdgeDeviceGroups:
 
         # Creating the group should immediately remove Rack A from the root list and the device from
         # the ungrouped list — no page reload required.
-        expect(model_builder.page.locator("#edge-device-groups-list > div[id^='EdgeDeviceGroup-']")).to_have_count(1)
+        expect(model_builder.page.locator("#edge-device-groups-list > div[id*='-EdgeDeviceGroup-']")).to_have_count(1)
         model_builder.ungrouped_edge_device_should_not_exist(existing_device_name)
 
         # Create a new edge device from the add panel and attach it to Building via
@@ -174,7 +174,7 @@ class TestEdgeDeviceGroups:
 
         building_card.open_accordion()
         building_card.get_nested_object_card("EdgeDeviceGroup", new_sub_group_name).should_exist()
-        expect(model_builder.page.locator("#edge-device-groups-list > div[id^='EdgeDeviceGroup-']")).to_have_count(1)
+        expect(model_builder.page.locator("#edge-device-groups-list > div[id*='-EdgeDeviceGroup-']")).to_have_count(1)
 
         # Deleting Building should promote Rack A back to the root list and restore the device to the
         # ungrouped list without a page reload.
@@ -183,7 +183,7 @@ class TestEdgeDeviceGroups:
         model_builder.side_panel.confirm_delete()
 
         expect(model_builder.page.locator("#edge-device-groups-list").locator(
-            "div[id^='EdgeDeviceGroup-']").filter(has_text="Building")).to_have_count(0)
+            "div[id*='-EdgeDeviceGroup-']").filter(has_text="Building")).to_have_count(0)
         model_builder.get_edge_device_group_card(existing_group_name).should_exist()
         model_builder.ungrouped_edge_device_should_exist(existing_device_name)
 

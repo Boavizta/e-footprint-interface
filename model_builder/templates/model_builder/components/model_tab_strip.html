@@ -1,0 +1,67 @@
+{% comment %}
+Model-comparison tab strip (Task 3): one tab per workspace slot, the +Add menu (Duplicate / Import /
+Blank) while a second model can still be added, a ✕Remove control once two models exist, and the
+⇄Compare tab — disabled with a tooltip until Task 4 ships the dashboard (disabled-instead-of-error).
+
+Switching is client-first: the tab POSTs to switch-model (which persists the active slot and rebinds
+the shared chrome via OOB), while the canvas show/hide is driven client-side by the switchModelCanvas
+trigger in model_builder_main.js, so no canvas is re-rendered. The strip only renders when a second
+model exists OR can be added; a single-model session that never adds one still shows the +Add affordance.
+{% endcomment %}
+{% load static %}
+<nav id="model-tab-strip" class="d-flex flex-row align-items-center gap-1 px-3 pt-2 border-bottom"
+     data-active-slot="{{ active_slot }}">
+    {% for slot_entry in workspace_slots %}
+    <button type="button"
+            class="btn btn-sm rounded-top px-3 model-tab {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}"
+            id="model-tab-{{ slot_entry.slot }}"
+            data-model-tab="{{ slot_entry.slot }}"
+            {% if slot_entry.is_active %}aria-current="true"{% endif %}
+            hx-post="{% url 'switch-model' %}"
+            hx-vals='{"slot": "{{ slot_entry.slot }}"}'
+            hx-swap="none">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=slot_entry.name extra_classes="d-inline-block" %}
+    </button>
+    {% endfor %}
+
+    {% if workspace_slots|length < 2 %}
+    <div class="dropdown">
+        <button class="btn btn-sm btn-link text-decoration-none dropdown-toggle" type="button"
+                id="add-model-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            ＋ Add a model to compare
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="add-model-toggle">
+            <li>
+                <button class="dropdown-item" type="button"
+                        hx-post="{% url 'add-model' %}" hx-vals='{"source": "duplicate"}'
+                        hx-target="#main-content-block" hx-swap="innerHTML">⧉ Duplicate current model</button>
+            </li>
+            <li>
+                <button class="dropdown-item" type="button" data-action="open-add-model-import">
+                    ⬆ Import from file…</button>
+            </li>
+            <li>
+                <button class="dropdown-item" type="button"
+                        hx-post="{% url 'add-model' %}" hx-vals='{"source": "blank"}'
+                        hx-target="#main-content-block" hx-swap="innerHTML">✚ Start blank / from template</button>
+            </li>
+        </ul>
+    </div>
+    {% else %}
+    <button type="button" class="btn btn-sm btn-link text-danger text-decoration-none ms-1"
+            id="remove-active-model"
+            hx-post="{% url 'remove-model' %}"
+            hx-vals='{"slot": "{{ active_slot }}"}'
+            hx-target="#main-content-block" hx-swap="innerHTML"
+            data-confirm-remove-model="Remove this model and return to a single-model session?">
+        ✕ Remove this model</button>
+    {% endif %}
+
+    <span class="ms-auto" {% if workspace_slots|length < 2 %}data-bs-toggle="tooltip" data-bs-placement="bottom"
+          title="Add a second model to compare"{% endif %}>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" id="compare-tab"
+                disabled
+                title="Comparison dashboard ships next — add a second model to enable it">
+            ⇄ Compare</button>
+    </span>
+</nav>

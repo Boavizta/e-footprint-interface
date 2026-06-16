@@ -17,13 +17,14 @@ from model_builder.domain.services import SCRATCH_ID, get_template_system_data
 
 def open_template_picker(request):
     """Re-open the picker over the current model (help menu)."""
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.active_repository()
     model_web = ModelWeb(repository)
     if model_web.system_data is None:
         # A cold visitor arriving via the home CTA has no session model yet; seed the empty
         # baseline so the canvas behind the picker renders.
         model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
-    return render_model_builder(request, model_web, show_template_picker=True)
+    return render_model_builder(request, model_web, show_template_picker=True, workspace=workspace)
 
 
 @require_POST
@@ -33,13 +34,14 @@ def load_template(request, template_id):
     POST-only: it replaces the session model, so it must not be reachable by a bare GET.
     The picker cards confirm first when the current model is non-empty.
     """
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.active_repository()
     try:
         raw_system_data = get_template_system_data(template_id)
     except KeyError:
         raise Http404(f"Unknown template: {template_id!r}")
-    model_web = load_system_into_session(repository, raw_system_data)
-    return render_model_builder(request, model_web, show_template_picker=False)
+    model_web = load_system_into_session(repository, raw_system_data, workspace=workspace)
+    return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
 
 
 def load_template_deeplink(request, template_id):

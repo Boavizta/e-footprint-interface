@@ -43,10 +43,18 @@ def _render_dict_membership_section(model_web, params) -> str:
 def _render_model_canvas(model_web, params) -> str:
     del params
     from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
+    # A mutation always targets the active slot's repository, so the canvas to refresh is the active
+    # slot's. HTMX OOB resolves first-match-by-id, so emitting #model-canva-{active} is what keeps a
+    # mutation on the active model from landing in the parked canvas (model-comparison Task 3 / plan §4).
+    slot = getattr(model_web.repository, "slot", 0)
+    # The active canvas always carries the canonical (unsuffixed) structural ids; a mutation only ever
+    # targets the active slot, so this re-render is the active canvas (slot_suffix="", is_active=True).
     content = render_to_string(
         "model_builder/components/model_canvas_content.html",
-        {"model_web": model_web, "class_help_info": build_canvas_class_help_info()})
-    return f"<div id='model-canva' class='d-flex flex-row' hx-swap-oob='innerHTML:#model-canva'>{content}</div>"
+        {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
+         "slot_suffix": "", "is_active_canvas": True})
+    return (f"<div id='model-canva-{slot}' class='d-flex flex-row' "
+            f"hx-swap-oob='innerHTML:#model-canva-{slot}'>{content}</div>")
 
 
 def _render_results_buttons(model_web, params) -> str:

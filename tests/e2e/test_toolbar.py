@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import expect
 
 from tests.e2e.conftest import load_system_dict_into_browser
-from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.pages import ModelBuilderPage, card_id_selector
 from tests.e2e.utils import click_and_wait_for_htmx, EMPTY_SYSTEM_DICT
 
 
@@ -26,8 +26,8 @@ class TestToolbarFeatures:
         # Verify model is reset to the empty default state (Step 6 slimmed the default to an empty System)
         expect(page.locator("div").filter(has_text="Test Usage Pattern")).not_to_be_visible()
         expect(page.locator("div").filter(has_text="Test Journey")).not_to_be_visible()
-        expect(page.locator("div[id^='UsageJourney-']")).to_have_count(0)
-        expect(page.locator("div[id^='UsagePattern-']")).to_have_count(0)
+        expect(page.locator(card_id_selector("UsageJourney"))).to_have_count(0)
+        expect(page.locator(card_id_selector("UsagePattern"))).to_have_count(0)
 
     def test_reboot_confirms_after_adding_to_initially_empty_model(self, empty_model_builder: ModelBuilderPage):
         """Regression: reboot must confirm once the model has content, even when the page loaded empty.
@@ -96,7 +96,7 @@ class TestToolbarFeatures:
 
         # Reload and verify name persists
         page.reload()
-        page.locator("#model-canva").wait_for(state="visible")
+        page.locator("[data-model-canvas]:not(.d-none)").wait_for(state="visible")
         expect(page.locator("#system-name")).to_contain_text(new_name)
 
     def test_import_json_replaces_existing_model(
@@ -138,8 +138,8 @@ class TestToolbarFeatures:
         page = empty_model.page
 
         # Verify no usage journeys or patterns exist initially
-        expect(page.locator("div[id^='UsageJourney-']")).to_have_count(0)
-        expect(page.locator("div[id^='UsagePattern-']")).to_have_count(0)
+        expect(page.locator(card_id_selector("UsageJourney"))).to_have_count(0)
+        expect(page.locator(card_id_selector("UsagePattern"))).to_have_count(0)
 
         # Import a system containing a usage journey
         empty_model.import_json_file(seeded_journey_json_path)

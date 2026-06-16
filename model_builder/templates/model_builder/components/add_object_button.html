@@ -8,7 +8,7 @@
       title="{{ disabled_reason }}"
       tabindex="0">
 <button class="btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row align-items-center px-0 py-2 w-100 min-w-0 overflow-hidden"
-        id="{{ btn_id }}"
+        id="{{ btn_id }}"{% if canvas_id %} data-canvas-id="{{ canvas_id }}"{% endif %}
         style="pointer-events: none;"
         disabled
 >
@@ -18,7 +18,7 @@
 </span>
 {% else %}
 <button class="btn bg-white dotted-border text-start h8 rounded-3 d-flex flex-row align-items-center px-0 py-2 flex-grow-1 min-w-0 overflow-hidden"
-        id="{{ btn_id }}"
+        id="{{ btn_id }}"{% if canvas_id %} data-canvas-id="{{ canvas_id }}"{% endif %}
         hx-get="{{ hx_url }}"
         hx-target="#sidePanel"
         hx-trigger="click"

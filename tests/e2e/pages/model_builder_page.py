@@ -6,6 +6,23 @@ from tests.e2e.pages.components.object_card import ObjectCard
 from tests.e2e.utils import click_and_wait_for_htmx
 
 
+def card_id_selector(object_type: str) -> str:
+    """CSS matching an object card's id for either canvas placement (model-comparison web_id prefix).
+
+    Root canvas cards are now namespaced ``{system id}-{class}-{efootprint id}`` and nested cards stay
+    ``{class}-{efootprint id}_in_{parent web_id}``. So a card of ``object_type`` is matched either by
+    its id starting with ``{class}-`` (nested) or containing ``-{class}-`` while not being nested
+    (root). The root branch excludes the derived sibling divs that embed the same web_id — ``flush-``
+    (accordion-collapse) and ``add-step-to-`` — leaving only the card root div; ``:not([id*='_in_'])``
+    stops a nested card whose ``_in_`` suffix embeds a parent's web_id from matching its parent's
+    class; the hyphen boundary keeps "UsageJourney" from matching "UsageJourneyStep" and "Server" from
+    matching "GPUServer".
+    """
+    root = (f"div[id*='-{object_type}-']"
+            ":not([id*='_in_']):not([id^='flush-']):not([id^='add-step-to-'])")
+    return f"div[id^='{object_type}-'], {root}"
+
+
 class ModelBuilderPage:
     """Page object for the main model builder interface.
 
@@ -16,7 +33,9 @@ class ModelBuilderPage:
     def __init__(self, page: Page):
         self.page = page
         self.side_panel = SidePanelPage(page)
-        self.canvas = page.locator("#model-canva")
+        # The builder now hosts one resident canvas per workspace slot (model-comparison); the active
+        # one is the visible (non-d-none) #model-canva-{slot}. A single-model session has just slot 0.
+        self.canvas = page.locator("[data-model-canvas]:not(.d-none)")
         self.template_picker = page.locator("#template-picker")
 
     def goto(self):
@@ -124,20 +143,19 @@ class ModelBuilderPage:
         Returns:
             ObjectCard instance for interacting with the card
         """
-        # Use CSS selector that matches the exact type prefix followed by hyphen
-        # This avoids matching "UsageJourneyStep" when looking for "UsageJourney"
-        locator = self.page.locator(f"div[id^='{object_type}-']").filter(has_text=name)
+        locator = self.page.locator(card_id_selector(object_type)).filter(has_text=name)
         return ObjectCard(locator)
 
     def get_edge_device_group_card(self, name: str) -> ObjectCard:
         """Get an edge device group card from the infrastructure column."""
-        locator = self.page.locator("#edge-device-groups-list").locator("div[id^='EdgeDeviceGroup-']").filter(has_text=name)
+        locator = self.page.locator("#edge-device-groups-list").locator(
+            card_id_selector("EdgeDeviceGroup")).filter(has_text=name)
         return ObjectCard(locator)
 
     def get_ungrouped_edge_device_card(self, name: str) -> ObjectCard:
         """Get an ungrouped edge device card from the infrastructure column."""
         locator = self.page.locator("#edge-devices-list").locator(
-            "div[id^='EdgeDevice-'], div[id^='EdgeComputer-'], div[id^='EdgeAppliance-']"
+            ", ".join(card_id_selector(t) for t in ("EdgeDevice", "EdgeComputer", "EdgeAppliance"))
         ).filter(has_text=name)
         return ObjectCard(locator)
 
@@ -149,7 +167,7 @@ class ModelBuilderPage:
 
     def object_should_not_exist(self, object_type: str, name: str):
         """Assert that an object card does not exist on the canvas."""
-        locator = self.page.locator(f"div[id^='{object_type}'] p").filter(has_text=name)
+        locator = self.page.locator(card_id_selector(object_type)).filter(has_text=name)
         expect(locator).not_to_be_visible()
         return self
 
@@ -161,7 +179,7 @@ class ModelBuilderPage:
     def ungrouped_edge_device_should_not_exist(self, name: str):
         """Assert that an edge device is not shown in the ungrouped infrastructure list."""
         expect(self.page.locator("#edge-devices-list").locator(
-            "div[id^='EdgeDevice-'], div[id^='EdgeComputer-'], div[id^='EdgeAppliance-']"
+            "div[id*='-EdgeDevice-'], div[id*='-EdgeComputer-'], div[id*='-EdgeAppliance-']"
         ).filter(has_text=name)).to_have_count(0)
         return self
 
@@ -201,6 +219,38 @@ class ModelBuilderPage:
         """Click the 'Add edge device' button (triggers HTMX)."""
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-add-edge-device"))
         return self.side_panel
+
+    # --- Model-comparison workspace tabs ---
+
+    def add_model_by_duplication(self):
+        """Open the +Add menu and duplicate the current model; the new model becomes active (slot 1)."""
+        self.page.locator("#add-model-toggle").click()
+        click_and_wait_for_htmx(self.page, self.page.locator(".dropdown-item", has_text="Duplicate current model"))
+        # The full builder re-rendered with both canvases; wait for the new active slot to settle.
+        expect(self.page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", "1")
+        self.page.locator("[data-model-canvas='1']").wait_for(state="visible")
+        return self
+
+    def switch_to_model(self, slot: int):
+        """Click a model tab to switch the active model (client-side canvas toggle + server persist)."""
+        click_and_wait_for_htmx(self.page, self.page.locator(f"[data-model-tab='{slot}']"))
+        expect(self.page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", str(slot))
+        self.page.locator(f"[data-model-canvas='{slot}']").wait_for(state="visible")
+        return self
+
+    def remove_active_model(self):
+        """Remove the active (second) model, confirming the discard, back to single-model mode."""
+        self.page.once("dialog", lambda dialog: dialog.accept())
+        click_and_wait_for_htmx(self.page, self.page.locator("#remove-active-model"))
+        expect(self.page.locator("[data-model-tab]")).to_have_count(1)
+        self.page.locator("[data-model-canvas]").first.wait_for(state="visible")
+        return self
+
+    def active_model_tab_count(self) -> int:
+        return self.page.locator("[data-model-tab]").count()
+
+    def active_slot(self) -> str:
+        return self.page.locator("#model-tab-strip").get_attribute("data-active-slot")
 
     # --- Result panel ---
 
