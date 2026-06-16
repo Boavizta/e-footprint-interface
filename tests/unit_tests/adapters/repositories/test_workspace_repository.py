@@ -75,6 +75,9 @@ class TestSlotAwareCacheKey:
         # Written through to the suffixed key and the legacy key is deleted (read at most once).
         assert "system_data:session-key:0" in sets
         assert deletes == ["system_data:session-key"]
+        # The budget bookkeeping migrates too: slot 0's size is recorded in the index, so the
+        # migrated payload counts against the shared budget on the next save.
+        assert WorkspaceIndex(session).slot_sizes()[0] > 0
 
     def test_no_legacy_fallback_for_slot_one(self):
         repo = SessionSystemRepository(DictSession(), slot=1)

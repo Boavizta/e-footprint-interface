@@ -77,9 +77,15 @@ def test_single_model_session_behaves_as_before(minimal_system_data):
     original_id = system_id_of(repo.get_system_data())
 
     model_web.persist_to_cache()  # an edit-save cycle
-    assert ws.list_slots() == [0]
+    assert ws.list_slots() == [0]  # no second slot was created
     assert ws.active_slot() == 0
-    assert system_id_of(repo.get_system_data()) == original_id  # no re-id, no second slot
+
+    # The persisted single-model payload stays loadable: same system id (no re-id), reads back
+    # non-None, and still builds a computable model — exactly today's single-slot round-trip.
+    persisted = repo.get_system_data()
+    assert persisted is not None
+    assert system_id_of(persisted) == original_id
+    assert ModelWeb(repo).system is not None
 
 
 def test_shared_budget_rejects_oversized_second_model(minimal_system_data):
