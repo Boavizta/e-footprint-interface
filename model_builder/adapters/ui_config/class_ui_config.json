@@ -97,7 +97,8 @@
     },
     "Service": {
         "label": "Service",
-        "type_object_available": "Available services for this server"
+        "type_object_available": "Available services for this server",
+        "pre_addition_help": "For now, only video streaming services are available."
     },
     "ExternalAPI": {
         "label": "External API",
