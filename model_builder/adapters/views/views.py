@@ -230,14 +230,17 @@ def open_import_json_panel(request):
               "header_name": "Open a file", "save_button_label": "Open"})
 
 
-def _single_model_document(repository) -> dict:
+def _single_model_document(repository, model_web=None) -> dict:
     """The exact single-model export document for one slot (no calculated attributes).
 
     Shared by ``download_json`` and the workspace export so each ``models[]`` element of the workspace
     file is byte-for-byte a single-model file (model-comparison §2.7) — the single-model format is
-    never re-implemented, just reused per element.
+    never re-implemented, just reused per element. ``model_web`` may be passed in to avoid hydrating
+    the slot twice (the workspace export needs the system name too).
     """
-    document = ModelWeb(repository).to_json(save_calculated_attributes=False)
+    if model_web is None:
+        model_web = ModelWeb(repository)
+    document = model_web.to_json(save_calculated_attributes=False)
     if repository.interface_config:
         document["interface_config"] = repository.interface_config
         document["efootprint_interface_version"] = interface_version
@@ -266,13 +269,17 @@ def download_workspace(request):
     """
     workspace = SessionWorkspaceRepository(request.session)
     slots = workspace.list_slots()
-    models = [_single_model_document(workspace.repository_for(slot)) for slot in slots]
-    names = [ModelWeb(workspace.repository_for(slot)).system.name for slot in slots]
-    active_slot = workspace.active_slot()
+    # Hydrate each slot once; both the export document and the system name come from the same ModelWeb.
+    models, names = [], []
+    for slot in slots:
+        repository = workspace.repository_for(slot)
+        model_web = ModelWeb(repository)
+        models.append(_single_model_document(repository, model_web))
+        names.append(model_web.system.name)
 
     envelope = {
         "efootprint_workspace_version": interface_version,
-        "active_slot": slots.index(active_slot),
+        "active_slot": slots.index(workspace.active_slot()),
         "models": models,
     }
     json_data = json.dumps(envelope, indent=4)
@@ -282,6 +289,7 @@ def download_workspace(request):
     filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC workspace ({descriptor})"))
     response["Content-Disposition"] = f"attachment; filename={filename}.e-fw.json"
     return response
+
 
 @time_it
 def upload_json(request):
