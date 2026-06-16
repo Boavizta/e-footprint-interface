@@ -225,23 +225,57 @@ def open_import_json_panel(request):
               "header_name": "Import a model", "save_button_label": "Use your model"})
 
 
+def _single_model_document(repository) -> dict:
+    """The exact single-model export document for one slot (no calculated attributes).
+
+    Shared by ``download_json`` and the workspace export so each ``models[]`` element of the workspace
+    file is byte-for-byte a single-model file (model-comparison §2.7) — the single-model format is
+    never re-implemented, just reused per element.
+    """
+    document = ModelWeb(repository).to_json(save_calculated_attributes=False)
+    if repository.interface_config:
+        document["interface_config"] = repository.interface_config
+        document["efootprint_interface_version"] = interface_version
+    return document
+
+
 def download_json(request):
     workspace = SessionWorkspaceRepository(request.session)
-    slot = _requested_slot(request, workspace)
-    repository = workspace.repository_for(slot)
-    model_web = ModelWeb(repository)
-    system = model_web.system
-    system_data_without_calculated_attributes = model_web.to_json(save_calculated_attributes=False)
-    if repository.interface_config:
-        system_data_without_calculated_attributes["interface_config"] = repository.interface_config
-        system_data_without_calculated_attributes["efootprint_interface_version"] = interface_version
-    json_data = json.dumps(system_data_without_calculated_attributes, indent=4)
+    repository = workspace.repository_for(_requested_slot(request, workspace))
+    system = ModelWeb(repository).system
+    json_data = json.dumps(_single_model_document(repository), indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
-    filename = f"{current_date_time} UTC {system.name}"
-    filename = sanitize_filename(filename)
-    filename = smart_truncate(filename)
+    filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC {system.name}"))
     response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"
+    return response
+
+
+def download_workspace(request):
+    """Export both models as one additive ``.e-fw.json`` workspace file (model-comparison §2.7).
+
+    Thin envelope around two byte-for-byte single-model documents plus the active-slot pointer; the
+    single-model format is untouched. Each element carries no calculated attributes (recomputed on
+    import). With a single-model session this exports one ``models[]`` element — re-importable into a
+    workspace just the same.
+    """
+    workspace = SessionWorkspaceRepository(request.session)
+    slots = workspace.list_slots()
+    models = [_single_model_document(workspace.repository_for(slot)) for slot in slots]
+    names = [ModelWeb(workspace.repository_for(slot)).system.name for slot in slots]
+    active_slot = workspace.active_slot()
+
+    envelope = {
+        "efootprint_workspace_version": interface_version,
+        "active_slot": slots.index(active_slot),
+        "models": models,
+    }
+    json_data = json.dumps(envelope, indent=4)
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+    response = HttpResponse(json_data, content_type="application/json")
+    descriptor = " vs ".join(names) if len(names) > 1 else names[0]
+    filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC workspace ({descriptor})"))
+    response["Content-Disposition"] = f"attachment; filename={filename}.e-fw.json"
     return response
 
 @time_it
@@ -264,6 +298,14 @@ def upload_json(request):
         finally:
             if file:
                 file.close()
+
+        if data and not import_error_message and isinstance(data, dict) and "models" in data:
+            # Content-based detection (model-comparison §2.7): a top-level `models` key means a
+            # workspace file. "Replace this model" must not corrupt state by treating it as a single
+            # model — fail safe with guidance to use "Open workspace file" instead (honest-error).
+            import_error_message = (
+                "This is a workspace file (it bundles two models). Use \"Open workspace file\" to "
+                "restore both models, not \"Replace this model\".")
 
         if data and not import_error_message:
             try:

@@ -39,6 +39,48 @@
             <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3 align-items-center">
                 {% include 'model_builder/components/edge_modeling_toggle.html' %}
                 {% include 'model_builder/components/help_menu.html' %}
+                {% comment %}
+                Upload/Download gain two granularities (this model / whole workspace) per spec §4.1, but
+                only once a second model exists — a single-model session keeps today's plain Import link
+                and `download-json/` export link unchanged (so the toolbar E2E selectors stay valid). The
+                workspace file is additive: the per-model paths (`open-import-json-panel`, `download-json/`)
+                are byte-for-byte today's single-model format; "Open workspace file" / "Both models" wrap
+                both. Content-based detection means either upload tolerates the other format gracefully.
+                {% endcomment %}
+                {% if workspace_slots|length > 1 %}
+                <li class="nav-item dropdown">
+                    <button class="nav-link d-flex flex-row gap-2 mx-2 dropdown-toggle" type="button"
+                            id="upload-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                            _="on click call collapseNavbarIfShown()">
+                        <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
+                        <p class="d-block d-lg-none mb-0">Import</p>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="upload-menu-toggle">
+                        <li>
+                            <button class="dropdown-item" type="button"
+                                    hx-get="{% url 'open-import-json-panel' %}"
+                                    hx-target="#sidePanel" hx-swap="innerHTML" hx-disabled-elt="button">
+                                ⬆ Replace this model</button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item" type="button" data-action="open-upload-workspace">
+                                ⬆ Open workspace file</button>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <button class="nav-link d-flex flex-row gap-2 mx-2 dropdown-toggle" type="button"
+                            id="download-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                            _="on click call collapseNavbarIfShown()">
+                        <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
+                        <p class="d-block d-lg-none mb-0">Export</p>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="download-menu-toggle">
+                        <li><a class="dropdown-item" href="download-json/" target="_blank">⬇ This model</a></li>
+                        <li><a class="dropdown-item" href="download-workspace/" target="_blank">⬇ Both models</a></li>
+                    </ul>
+                </li>
+                {% else %}
                 <li class="nav-item">
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"
@@ -73,6 +115,7 @@
                         </p>
                     </a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <button type="button"
                        id="btn-reboot-modeling"

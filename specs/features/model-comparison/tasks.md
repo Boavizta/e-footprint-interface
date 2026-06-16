@@ -127,6 +127,8 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 
 ## Task 5 — Interface: combined workspace file — export / import both models (e-footprint-interface)
 
+**Status:** Done
+
 **Goal:** Add the additive workspace file that bundles both models, restoring them in one action, and the two-granularity Download/Upload menu (this model / whole workspace). The single-model file format stays byte-for-byte unchanged and circulates freely between single- and two-model sessions, both directions.
 
 **Files touched:**

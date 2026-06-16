@@ -108,12 +108,22 @@
         }
     });
 
+    // Open a side panel from a toolbar/menu data-action (the dropdown items can't carry hx-* and live
+    // inside a Bootstrap menu that closes on click, so a delegated handler opens the panel instead).
+    const SIDE_PANEL_ACTIONS = {
+        "open-add-model-import": "/model_builder/open-add-model-import-panel/",
+        "open-upload-workspace": "/model_builder/open-upload-workspace-panel/",
+    };
     document.body.addEventListener("click", function (evt) {
-        const trigger = evt.target.closest('[data-action="open-add-model-import"]');
-        if (!trigger) return;
-        evt.preventDefault();
-        if (window.htmx) {
-            window.htmx.ajax("GET", "/model_builder/open-add-model-import-panel/", { target: "#sidePanel", swap: "innerHTML" });
+        for (const [action, url] of Object.entries(SIDE_PANEL_ACTIONS)) {
+            const trigger = evt.target.closest(`[data-action="${action}"]`);
+            if (trigger) {
+                evt.preventDefault();
+                if (window.htmx) {
+                    window.htmx.ajax("GET", url, { target: "#sidePanel", swap: "innerHTML" });
+                }
+                return;
+            }
         }
     });
 

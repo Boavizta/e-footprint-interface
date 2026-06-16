@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   cumulative charts paired on shared scales and a single legend so the two models read against each
   other, and a diff of what changed between the two models' inputs (differences only). The dashboard
   is rebuilt fresh each time it is opened, so an edit to either model is always reflected.
+- Combined workspace file: with two models present, Export and Import each offer two granularities —
+  this model (today's single-model file, unchanged) or the whole workspace. "Export ▸ Both models"
+  saves a single `.e-fw.json` file bundling both models and the active selection; "Import ▸ Open
+  workspace file" restores both in one action. Either upload tolerates the other format gracefully:
+  opening a single-model file loads it into the active model, and feeding a workspace file to "Replace
+  this model" explains how to open it instead rather than corrupting your model.
 
 ### Changed
 - Internal (no user-visible change): the session now holds a workspace of up to two model slots plus
