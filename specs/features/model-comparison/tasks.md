@@ -100,6 +100,8 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 
 ## Task 4 — Interface: comparison dashboard — adapter, view, charts (e-footprint-interface)
 
+**Status:** Done
+
 **Goal:** The payoff milestone — the ⇄Compare tab renders the §4.2 dashboard: KPI strip with delta, the "what explains the difference" decomposition, the paired emissions-over-time and cumulative charts (shared scales/legends), and the assumptions diff. Re-rendered fresh on every visit (no stale results). The interface stays a thin adapter over the library `SystemComparison` (constitution §1.3).
 
 **Files touched:**

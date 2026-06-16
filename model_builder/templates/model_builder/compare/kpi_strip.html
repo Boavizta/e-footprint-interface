@@ -1,0 +1,21 @@
+{% comment %}
+KPI strip (§4.2 identity + header): two model cards (total, usage/fab subtotals, timespan) and the
+headline delta card (absolute + relative, second-minus-first). The card left-border and the delta
+colour carry the constant model identity / direction. All values are pre-formatted by ComparisonService
+in one shared unit so the magnitudes read against each other.
+{% endcomment %}
+<div class="d-flex flex-column flex-md-row gap-2 align-items-stretch">
+    <div class="flex-fill border rounded p-2" style="border-left: 5px solid {{ comparison.colors.model_a }} !important;">
+        <strong>{% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_a.name %}</strong><br>
+        <span class="fs-5">{{ comparison.card_a.total_display }} CO₂e</span><br>
+        <span class="small text-muted">{{ comparison.card_a.period_label }} · usage {{ comparison.card_a.usage_display }} · fab. {{ comparison.card_a.fabrication_display }}</span>
+    </div>
+    <div class="flex-fill border rounded p-2" style="border-left: 5px solid {{ comparison.colors.model_b }} !important;">
+        <strong>{% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_b.name %}</strong><br>
+        <span class="fs-5">{{ comparison.card_b.total_display }} CO₂e</span><br>
+        <span class="small text-muted">{{ comparison.card_b.period_label }} · usage {{ comparison.card_b.usage_display }} · fab. {{ comparison.card_b.fabrication_display }}</span>
+    </div>
+    {% if comparison.delta.direction == 'higher' %}{% with delta_color=comparison.colors.higher %}{% include 'model_builder/compare/delta_card.html' %}{% endwith %}
+    {% else %}{% with delta_color=comparison.colors.lower %}{% include 'model_builder/compare/delta_card.html' %}{% endwith %}{% endif %}
+</div>
+<p class="small text-muted mt-1 mb-0">Δ convention: second model minus first. Totals are full-timespan sums.</p>

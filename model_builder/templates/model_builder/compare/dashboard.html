@@ -1,0 +1,51 @@
+{% comment %}
+Comparison dashboard (model-comparison Task 4) — the §4.2 canonical layout, one scrolling page:
+identity + KPI header, the "what explains the difference" decomposition, the paired emissions-over-time
+and cumulative charts (shared scales + one legend each — magnitude honesty), then the assumptions diff.
+
+Re-rendered fresh on every visit (views_workspace.compare): all values come from the ComparisonService
+view model in `comparison`, the two Chart.js payloads from `paired_chart_json` / `cumulative_chart_json`.
+The tab strip is shared with the builder; here the ⇄Compare tab is the active one.
+{% endcomment %}
+{% load static %}
+{% include 'model_builder/components/model_tab_strip.html' %}
+
+<div id="comparison-dashboard" class="text-start mx-auto px-3 px-xl-4 py-3 overflow-y-auto"
+     style="max-width: 1100px;"
+     data-paired-chart="{{ paired_chart_json }}"
+     data-cumulative-chart="{{ cumulative_chart_json }}"
+     data-decomposition-chart="{{ decomposition_chart_json }}">
+
+    {% include 'model_builder/compare/kpi_strip.html' %}
+    {% include 'model_builder/compare/decomposition.html' %}
+
+    <p class="mb-1 mt-4"><strong>CO2 emissions over time</strong>
+        <span class="text-muted small">— paired bars, shared axis &amp; legend (dark = usage, light = fabrication; one legend drives both models)</span></p>
+    <div class="content-result-chart">
+        <canvas id="comparisonPairedChart" aria-label="Paired emissions over time"></canvas>
+    </div>
+
+    <p class="mb-1 mt-4"><strong>Cumulative CO2 emissions over time</strong>
+        <span class="text-muted small">— overlay; the gap is emissions avoided to date; the end gap is the headline Δ</span></p>
+    <div class="content-result-chart">
+        <canvas id="comparisonCumulativeChart" aria-label="Cumulative emissions over time"></canvas>
+    </div>
+
+    {% include 'model_builder/compare/assumptions_diff.html' %}
+</div>
+
+<script>
+    // The result-charts bundle (loaded as a module in base.html) exposes the comparison chart builders
+    // on window once it has run. The dashboard is HTMX-swapped into #main-content-block, so drive the
+    // draw from the swapped-in payloads here, retrying briefly if the module is still evaluating.
+    (function () {
+        function draw() {
+            if (typeof window.drawComparisonCharts !== "function") {
+                window.setTimeout(draw, 30);
+                return;
+            }
+            window.drawComparisonCharts();
+        }
+        draw();
+    })();
+</script>

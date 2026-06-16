@@ -22,6 +22,7 @@ urlpatterns = [
     path("open-add-model-import-panel/", model_builder.adapters.views.views_workspace.open_add_model_import_panel,
          name="open-add-model-import-panel"),
     path("remove-model/", model_builder.adapters.views.views_workspace.remove_model, name="remove-model"),
+    path("compare/", model_builder.adapters.views.views_workspace.compare, name="compare-models"),
     path("recover/", views.recover_model, name="recover-model"),
     path("download-raw-json/", views.download_raw_json, name="download-raw-json"),
     path("open-create-object-panel/<object_type>/",

@@ -75,6 +75,7 @@ model_builder/
 - **`EditService`** — handles object editing with cascade cleanup.
 - **`SystemValidationService`** — validates system completeness (drives the "Get results" button state).
 - **`EmissionsCalculationService`** — calculates daily emissions timeseries.
+- **`ComparisonService`** — thin adapter shaping the library `SystemComparison` (`system_a.compare_to(system_b)`) into the comparison dashboard's view model (KPI values, three Chart.js payloads, diff table). Rendering only — no modeling logic, no Django imports.
 
 ### Web wrappers
 
@@ -188,7 +189,13 @@ DOM-id collisions between the two canvases are prevented two ways:
 
 OOB correctness: `oob_regions.py`'s `model_canvas` (and `edge_device_lists`) regions emit the **active** slot's `#model-canva-{slot}` / canonical list ids — a mutation always targets the active slot, and HTMX OOB is first-match-by-id, so it never lands in the parked canvas. Leader lines build only for the visible canvas: `leaderline_utils.js` already resolves endpoints inside a `d-none` subtree to `null`, so the hidden canvas's lines are skipped, and the switch re-runs `initModelBuilderMain` to draw the now-visible canvas's lines. CSS that targeted the old single `#model-canva` now targets `[data-model-canvas]` (compiled from `scss/custom.scss`).
 
-The thin `ComparisonService` adapter and the `compare` endpoint are deferred to the comparison-dashboard task.
+#### Comparison dashboard (`ComparisonService` adapter + chart variants)
+
+The ⇄Compare tab opens a full-page **comparison dashboard** (`templates/model_builder/compare/dashboard.html` + KPI/decomposition/diff partials), enabled only once two models exist (disabled-with-tooltip otherwise). The `compare` endpoint (`views_workspace.py`, route `compare-models`) wraps both slots' models, runs the library's `system_a.compare_to(system_b)` and shapes the resulting `SystemComparison` through the thin **`ComparisonService`** (`domain/services/comparison_service.py`). Per constitution §1.3 the comparison *computation* is the library's domain truth; `ComparisonService` re-implements **rendering only** — it shapes the library result into the KPI-strip values, three Chart.js JSON payloads, and the diff-table view model. It holds **no modeling logic and no Django imports** (it lives in `domain/`, the no-Django-in-domain guard covers it).
+
+The dashboard is **re-rendered fresh on every visit** (no cached comparison) so an edit to either model always shows up; it is loaded into `#main-content-block` via HTMX with `hx-push-url` (a `dashboard` flag in `base.html` re-renders it on a hard refresh). The shared tab strip is reused; from the dashboard a **model tab returns to the builder** (`model_comparison.js#switchToSlot` detects the absence of resident canvases and re-opens `/model_builder/`).
+
+Three Chart.js variants live in `theme/static/scripts/result_charts/comparison_charts.js` (bundled into `result_charts.js`; CommonJS like `display.js` so the pure `build*Config` builders are Jest-testable; `window.drawComparisonCharts` reads the dashboard's `data-*-chart` payloads and draws): **paired per-year bars** (one shared stacked y-axis + one legend over the four series, model identity by a constant colour pair, usage stacked on fabrication), **cumulative overlay** (two curves on one axis, the band between shaded), and **horizontal diverging decomposition bars**. **Magnitude honesty** (§4.3) — one shared scale and one legend per chart — is enforced by the builders, not styling. The decomposition's per-(category, phase) deltas sum to the headline Δ by construction (the library guarantees it; the adapter only drops zero-delta rows and merges Servers+Storage by display label, and pre-formats every KPI/decomposition figure in one shared display unit so the magnitudes read against each other).
 
 ## Relationship types
 

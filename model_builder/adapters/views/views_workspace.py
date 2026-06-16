@@ -1,4 +1,4 @@
-"""Workspace endpoints for the two-model comparison builder (model-comparison Task 3).
+"""Workspace endpoints for the two-model comparison builder (model-comparison Tasks 3–4).
 
 Thin HTTP adapters over ``SessionWorkspaceRepository``:
 
@@ -10,8 +10,9 @@ Thin HTTP adapters over ``SessionWorkspaceRepository``:
     becomes active. Every path goes through ``workspace.add_slot``, inheriting the distinct-system-id
     invariant and the shared-budget pre-check (constitution / plan §2.1, §4).
   - ``remove-model`` drops a slot, returning the workspace toward single-model mode.
-
-The ``compare`` endpoint is deferred to Task 4.
+  - ``compare`` renders the §4.2 comparison dashboard, **re-built fresh on every visit** (no stale
+    results): it shapes ``model_a.system.compare_to(model_b.system)`` through the thin
+    ``ComparisonService`` adapter (constitution §1.3 — the library is the domain truth).
 """
 import gc
 import json
@@ -25,9 +26,11 @@ from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.comparison.duplication import duplicate_system
 
 from model_builder.adapters.repositories import SessionWorkspaceRepository, SessionSystemRepository
-from model_builder.adapters.views.views import load_system_into_session, render_model_builder
+from model_builder.adapters.views.views import load_system_into_session, render_model_builder, build_workspace_slots
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.domain.services import ProgressiveImportService, SCRATCH_ID, get_template_system_data
+from model_builder.domain.services import (
+    ComparisonService, ProgressiveImportService, SCRATCH_ID, get_template_system_data)
+from utils import htmx_render
 
 
 def _rendered_shared_chrome_oob(model_web) -> str:
@@ -131,7 +134,6 @@ def remove_model(request):
 def _render_with_error(request, workspace, message):
     """Re-render the builder with an error modal (mirrors upload_json's failure path)."""
     from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
-    from model_builder.adapters.views.views import build_workspace_slots
 
     model_web = ModelWeb(workspace.active_repository())
     context = {
@@ -146,3 +148,33 @@ def _render_with_error(request, workspace, message):
     http_response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
     http_response["HX-Trigger-After-Settle"] = json.dumps({"openModalDialog": {"modal_id": "error-import-modal"}})
     return http_response
+
+
+def compare(request):
+    """Render the §4.2 comparison dashboard for the workspace's two models.
+
+    Built fresh on every visit (no stale results): the two slots' models are wrapped, compared via the
+    library's ``System.compare_to`` and shaped by the thin ``ComparisonService`` adapter. With fewer
+    than two models the Compare tab is disabled in the UI; a direct hit still falls back to the builder
+    rather than erroring (disabled-instead-of-error).
+    """
+    workspace = SessionWorkspaceRepository(request.session)
+    slots = workspace.list_slots()
+    if len(slots) < 2:
+        return render_model_builder(
+            request, ModelWeb(workspace.active_repository()), show_template_picker=False, workspace=workspace)
+
+    slot_a, slot_b = slots[0], slots[1]
+    model_a = ModelWeb(workspace.repository_for(slot_a))
+    model_b = ModelWeb(workspace.repository_for(slot_b))
+    comparison = ComparisonService().build(model_a, model_b)
+
+    context = {
+        "comparison": comparison,
+        "paired_chart_json": json.dumps(comparison.paired_chart),
+        "cumulative_chart_json": json.dumps(comparison.cumulative_chart),
+        "decomposition_chart_json": json.dumps(comparison.decomposition_chart),
+        "workspace_slots": build_workspace_slots(workspace),
+        "active_slot": workspace.active_slot(),
+    }
+    return htmx_render(request, "model_builder/compare/dashboard.html", context=context)

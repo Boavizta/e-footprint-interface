@@ -162,6 +162,50 @@ def test_mutation_on_active_model_targets_the_active_canvas(client, minimal_syst
 
 
 @pytest.mark.django_db
+def test_compare_renders_dashboard_with_both_models_and_headline_delta(client, minimal_system):
+    """With two models, /compare/ renders the §4.2 dashboard: both model cards, the headline Δ card,
+    and the decomposition. The endpoint runs the real System.compare_to through ComparisonService."""
+    _seed_active_slot(client, minimal_system)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 = "Copy of Test System"
+
+    response = client.get("/model_builder/compare/")
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert "comparison-dashboard" in html
+    assert "Test System" in html and "Copy of Test System" in html
+    assert "What explains the difference" in html
+    assert "What differs between the models" in html
+    # Chart payloads are emitted for the JS to draw (shared-scale paired bars + cumulative overlay).
+    assert "data-paired-chart" in html and "data-cumulative-chart" in html
+
+
+@pytest.mark.django_db
+def test_compare_reflects_an_edit_to_a_model_with_no_stale_results(client, minimal_system):
+    """An edit to either model must show up the next time Compare is opened — the dashboard is rebuilt
+    fresh from the current session each visit (no cached comparison)."""
+    _seed_active_slot(client, minimal_system)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 active
+
+    # Rename the active (second) model through the real edit flow.
+    client.post("/model_builder/save-system-name/", {"name": "Edge caching variant"})
+
+    response = client.get("/model_builder/compare/")
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert "Edge caching variant" in html  # the edit is reflected, not a stale "Copy of …"
+
+
+@pytest.mark.django_db
+def test_compare_with_one_model_falls_back_to_the_builder(client, minimal_system):
+    """A direct hit on /compare/ with only one model degrades to the builder rather than erroring
+    (disabled-instead-of-error; the Compare tab is disabled in the UI in this state)."""
+    _seed_active_slot(client, minimal_system)
+    response = client.get("/model_builder/compare/")
+    assert response.status_code == 200
+    assert "model-builder-page" in response.content.decode()
+
+
+@pytest.mark.django_db
 def test_per_model_export_round_trips_into_a_target_slot(client, minimal_system):
     """Each slot exports the single-model format and re-imports into the active slot unchanged
     (object ids preserved); the second slot's export carries its own system."""

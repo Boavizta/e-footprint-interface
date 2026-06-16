@@ -252,6 +252,12 @@ class ModelBuilderPage:
     def active_slot(self) -> str:
         return self.page.locator("#model-tab-strip").get_attribute("data-active-slot")
 
+    def open_compare(self):
+        """Click ⇄Compare and wait for the comparison dashboard to render."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#compare-tab"))
+        self.page.locator("#comparison-dashboard").wait_for(state="visible")
+        return self
+
     # --- Result panel ---
 
     def open_result_panel(self):

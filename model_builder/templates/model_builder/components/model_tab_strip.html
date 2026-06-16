@@ -57,11 +57,25 @@ model exists OR can be added; a single-model session that never adds one still s
         ✕ Remove this model</button>
     {% endif %}
 
+    {% comment %}
+    ⇄Compare opens the comparison dashboard, re-rendered fresh on every visit (no stale results). It is
+    enabled only once a second model exists; otherwise it stays disabled with an explanatory tooltip
+    (disabled-instead-of-error). The dashboard replaces the builder in #main-content-block and pushes
+    /compare/ to the URL so a refresh re-opens it.
+    {% endcomment %}
     <span class="ms-auto" {% if workspace_slots|length < 2 %}data-bs-toggle="tooltip" data-bs-placement="bottom"
           title="Add a second model to compare"{% endif %}>
+        {% if workspace_slots|length < 2 %}
         <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" id="compare-tab"
                 disabled
-                title="Comparison dashboard ships next — add a second model to enable it">
+                title="Add a second model to enable the comparison dashboard">
             ⇄ Compare</button>
+        {% else %}
+        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="compare-tab"
+                hx-get="{% url 'compare-models' %}"
+                hx-target="#main-content-block" hx-swap="innerHTML"
+                hx-push-url="{% url 'compare-models' %}">
+            ⇄ Compare</button>
+        {% endif %}
     </span>
 </nav>

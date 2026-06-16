@@ -5,6 +5,7 @@ These services contain domain logic that doesn't depend on Django or HTTP concer
 from model_builder.domain.services.object_linking_service import ObjectLinkingService
 from model_builder.domain.services.system_validation_service import SystemValidationService, ValidationResult, ValidationError
 from model_builder.domain.services.emissions_calculation_service import EmissionsCalculationService, EmissionsResult
+from model_builder.domain.services.comparison_service import ComparisonService, ComparisonView
 from model_builder.domain.services.edit_service import EditService, EditResult
 from model_builder.domain.services.progressive_import_service import ProgressiveImportService
 from model_builder.domain.services.empty_model import is_empty_model
@@ -17,6 +18,7 @@ __all__ = [
     "ObjectLinkingService",
     "SystemValidationService", "ValidationResult", "ValidationError",
     "EmissionsCalculationService", "EmissionsResult",
+    "ComparisonService", "ComparisonView",
     "EditService", "EditResult",
     "ProgressiveImportService",
     "is_empty_model",

@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { drawBarResultChart, displayLoaderResult, initializeResultCharts } from "./chart.js";
+import { drawComparisonCharts } from "./comparison_charts.js";
 
 // ============================================================================
 // Global Exports for HTML Event Handlers
@@ -29,6 +30,8 @@ function handleTemporalGranularityChange() {
 window.drawBarResultChart = drawBarResultChart;
 window.displayLoaderResult = displayLoaderResult;
 window.handleTemporalGranularityChange = handleTemporalGranularityChange;
+// The Compare dashboard (HTMX-swapped into #main-content-block) drives its own draw from this.
+window.drawComparisonCharts = drawComparisonCharts;
 
 // ============================================================================
 // Event Listeners

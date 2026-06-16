@@ -11,8 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   importing a file, or starting blank — and switch between the two models from a tab strip above the
   builder, with no page reload. Each model has the full builder (create / edit / delete, results,
   import / export) and is edited independently. Both models, their names, and the active selection
-  survive a refresh, and you can remove the second model to return to a single-model session. The
-  ⇄ Compare tab is present but disabled until the comparison dashboard ships.
+  survive a refresh, and you can remove the second model to return to a single-model session.
+- Comparison dashboard: with two models present, the ⇄ Compare tab opens a unified comparison view —
+  headline totals with the difference (absolute and %), a "what explains the difference" breakdown
+  per category and phase (which sums exactly to the headline difference), the emissions-over-time and
+  cumulative charts paired on shared scales and a single legend so the two models read against each
+  other, and a diff of what changed between the two models' inputs (differences only). The dashboard
+  is rebuilt fresh each time it is opened, so an edit to either model is always reflected.
 
 ### Changed
 - Internal (no user-visible change): the session now holds a workspace of up to two model slots plus

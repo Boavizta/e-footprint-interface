@@ -1,0 +1,9 @@
+{% comment %}
+The headline delta card. ``delta_color`` is set by the caller (green for a reduction, red for an
+increase) so the card's colour reads the direction of the change at a glance.
+{% endcomment %}
+<div class="flex-fill border border-2 rounded p-2 text-center" style="border-color: {{ delta_color }} !important; color: {{ delta_color }};">
+    <strong class="fs-4">{{ comparison.delta.absolute_display }}</strong><br>
+    <strong>({{ comparison.delta.relative_display }})</strong><br>
+    <span class="small">usage {{ comparison.delta.usage_display }} · fab. {{ comparison.delta.fabrication_display }}</span>
+</div>

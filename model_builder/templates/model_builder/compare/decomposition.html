@@ -1,0 +1,26 @@
+{% comment %}
+"What explains the difference" — horizontal diverging bars, one per impact category × phase (§4.2).
+These are exact arithmetic on each model's per-category results and sum to the headline Δ (the library
+guarantees it; ComparisonService drops only the zero-delta rows). The Chart.js bar chart is the primary
+view; the list below it is the no-JS / accessible fallback, also carrying the green(lower)/red(higher)
+direction colour. No cause-linking to inputs in v1.
+{% endcomment %}
+<p class="mb-1 mt-4"><strong>What explains the difference</strong>
+    <span class="text-muted small">— per impact category, full timespan</span></p>
+
+{% if comparison.decomposition %}
+<div class="content-result-chart" style="max-width: 560px;">
+    <canvas id="comparisonDecompositionChart" aria-label="Footprint difference by category and phase"></canvas>
+</div>
+<ul class="list-unstyled small mt-2 mb-1" id="comparison-decomposition-list">
+    {% for bar in comparison.decomposition %}
+    <li class="d-flex justify-content-between" style="max-width: 560px;">
+        <span>{{ bar.label }}</span>
+        <span style="color: {% if bar.direction == 'lower' %}{{ comparison.colors.lower }}{% else %}{{ comparison.colors.higher }}{% endif %};">{{ bar.delta_display }}</span>
+    </li>
+    {% endfor %}
+</ul>
+<p class="small text-muted mb-0">These category deltas are exact arithmetic on each model's results — they sum to {{ comparison.delta.absolute_display }}. (No cause-linking to inputs in v1.)</p>
+{% else %}
+<p class="text-muted small">No difference between the two models' category footprints.</p>
+{% endif %}

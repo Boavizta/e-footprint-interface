@@ -58,3 +58,40 @@ class TestModelComparisonWorkspace:
         model_builder.remove_active_model()
         assert model_builder.active_model_tab_count() == 1
         expect(page.locator("#add-model-toggle")).to_be_visible()
+
+    def test_compare_shows_the_headline_delta_and_reflects_edits(self, minimal_complete_model_builder):
+        """The Task-4 payoff flow: duplicate → edit B → open Compare → see the §4.2 dashboard with the
+        headline Δ; an edit to B is reflected the next time Compare opens (no stale results)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        # Compare is disabled in a single-model session.
+        expect(page.locator("#compare-tab")).to_be_disabled()
+
+        # Add the second model; Compare becomes enabled.
+        model_builder.add_model_by_duplication()
+        expect(page.locator("#compare-tab")).to_be_enabled()
+
+        # Open Compare → the §4.2 dashboard renders with both model cards and the headline Δ card.
+        model_builder.open_compare()
+        expect(page.locator("#comparison-dashboard")).to_be_visible()
+        expect(page.locator("#comparison-dashboard")).to_contain_text("CO₂e")          # KPI totals
+        expect(page.locator("#comparison-dashboard")).to_contain_text("What explains the difference")
+        # The paired and cumulative chart canvases are present (Chart.js draws into them client-side).
+        expect(page.locator("#comparisonPairedChart")).to_be_visible()
+        expect(page.locator("#comparisonCumulativeChart")).to_be_visible()
+
+        # A model tab leaves the dashboard and re-opens the builder on model B's slot.
+        model_builder.switch_to_model(1)
+        model_builder.canvas.wait_for(state="visible")
+
+        # Edit B's system name, then re-open Compare — the new name is reflected (no stale results).
+        new_name = "Edge caching variant"
+        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
+        page.locator("#sidePanel").wait_for(state="attached")
+        page.locator("#name").clear()
+        page.locator("#name").fill(new_name)
+        model_builder.side_panel.submit_and_wait_for_close()
+
+        model_builder.open_compare()
+        expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)

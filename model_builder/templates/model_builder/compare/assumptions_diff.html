@@ -1,0 +1,55 @@
+{% comment %}
+Assumptions diff (§4.2 / §4.3): the input-side comparison — "what did I change?". Rows are changed
+input attributes (both values shown) plus objects present in only one model. Objects are matched by id
+first, then by (name, type) in the library; identical inputs are not listed. Differences only — no
+"show identical rows" mode.
+{% endcomment %}
+{% load label_filters %}
+<p class="mb-1 mt-4"><strong>What differs between the models</strong>
+    <span class="text-muted small">— inputs only, differences shown directly</span></p>
+
+{% if comparison.diff_changed or comparison.diff_only_in_a or comparison.diff_only_in_b %}
+<table class="table table-sm small align-middle" id="comparison-diff-table">
+    <thead>
+        <tr>
+            <th>Object</th>
+            <th>Attribute</th>
+            <th>{% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_a.name %}</th>
+            <th>{% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_b.name %}</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in comparison.diff_changed %}
+        <tr>
+            <td>{{ row.object_label|class_label }}</td>
+            <td>{{ row.attribute|field_label }}</td>
+            <td>{{ row.value_a }}</td>
+            <td><strong>{{ row.value_b }}</strong></td>
+            <td style="color: {{ comparison.colors.higher }};">changed</td>
+        </tr>
+        {% endfor %}
+        {% for obj in comparison.diff_only_in_a %}
+        <tr>
+            <td>{{ obj.object_label }}</td>
+            <td>—</td>
+            <td>present</td>
+            <td class="text-muted">absent</td>
+            <td style="color: {{ comparison.colors.model_a }};">only in {{ comparison.card_a.name }}</td>
+        </tr>
+        {% endfor %}
+        {% for obj in comparison.diff_only_in_b %}
+        <tr>
+            <td>{{ obj.object_label }}</td>
+            <td>—</td>
+            <td class="text-muted">absent</td>
+            <td>present</td>
+            <td style="color: {{ comparison.colors.model_b }};">only in {{ comparison.card_b.name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="small text-muted mb-0">Objects are matched by id first, then by name and type; unmatched objects appear as "only in A / only in B". Identical inputs are not listed.</p>
+{% else %}
+<p class="text-muted small">The two models have identical inputs.</p>
+{% endif %}
