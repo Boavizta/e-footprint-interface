@@ -1,11 +1,11 @@
 """View-layer integration tests for the combined workspace file (model-comparison Task 5).
 
-Exercises the additive ``.e-fw.json`` workspace export/import and the cross-format robustness paths
-through real Django views + session:
+Exercises the additive ``.e-fw.json`` workspace export and the unified "Open file" import (upload-json
+content-routes on the ``models`` key — §4.1) through real Django views + session:
 
-  - workspace export → import restores both slots + the active pointer in one action;
-  - a single-model file fed to "Open workspace file" loads into the active slot (cross-format);
-  - a workspace file fed to "Replace this model" (upload-json) fails safe with guidance, no corruption;
+  - workspace export → "Open file" restores both slots + the active pointer in one action;
+  - "Open file" fed a workspace file in a single-model session restores both slots (becomes two-model);
+  - "Open file" fed a single-model file replaces the active model (single- or two-model session);
   - the combined budget is enforced on workspace import (summed with-calc over both slots);
   - the distinct-system-id invariant holds after importing a workspace whose two models share an id;
   - the single-model file format is byte-for-byte unchanged and round-trips both directions.
@@ -99,7 +99,7 @@ def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, min
 
     # Import it into a brand-new session.
     fresh = client.__class__()
-    response = _upload(fresh, "/model_builder/upload-workspace/", envelope, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-fw.json")
     assert response.status_code == 302  # redirects to the rebuilt builder
 
     restored = SessionWorkspaceRepository(fresh.session)
@@ -114,15 +114,15 @@ def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, min
 
 
 @pytest.mark.django_db
-def test_single_model_file_into_open_workspace_loads_into_active_slot(client, minimal_system):
-    """Cross-format robustness: "Open workspace file" fed a single-model file loads it into the active
-    slot rather than erroring (content-based detection: no top-level `models` key)."""
+def test_single_model_file_via_open_file_replaces_the_active_model(client, minimal_system):
+    """Unified "Open file" (upload-json) fed a single-model file replaces the active model — the single
+    model loads into the active slot (content-based detection: no top-level `models` key, §4.1)."""
     _seed_active_slot(client, minimal_system)
     single_doc = _download(client, "/model_builder/download-json/")
     assert "models" not in single_doc  # it is a single-model file
 
     fresh = client.__class__()
-    response = _upload(fresh, "/model_builder/upload-workspace/", single_doc, "model.e-f.json")
+    response = _upload(fresh, "/model_builder/upload-json/", single_doc, "model.e-f.json")
     assert response.status_code == 302
 
     restored = SessionWorkspaceRepository(fresh.session)
@@ -131,33 +131,25 @@ def test_single_model_file_into_open_workspace_loads_into_active_slot(client, mi
 
 
 @pytest.mark.django_db
-def test_workspace_file_into_replace_this_model_fails_safe(client, minimal_system):
-    """Cross-format robustness: a workspace file fed to "Replace this model" (upload-json) errors with
-    guidance and leaves the active model untouched (honest-error, no state corruption)."""
+def test_workspace_file_via_open_file_in_single_model_session_restores_both_slots(client, minimal_system):
+    """Unified "Open file" (upload-json) fed a workspace file in a single-model session restores both
+    slots and becomes a two-model session (content-routed on the `models` key, §4.1) — closing the gap
+    where a single-model session previously had no way to open a workspace file."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})
     workspace_file = _download(client, "/model_builder/download-workspace/")
 
+    # A plain single-model session opens the workspace file through the same "Open file" entry.
     fresh = client.__class__()
     _seed_active_slot(fresh, minimal_system)
-    untouched_id = system_id_of(SessionWorkspaceRepository(fresh.session).active_repository().get_system_data())
+    assert SessionWorkspaceRepository(fresh.session).list_slots() == [0]  # single-model to start
+    response = _upload(fresh, "/model_builder/upload-json/", workspace_file, "ws.e-fw.json")
+    assert response.status_code == 302  # restored, redirects to the rebuilt builder
 
-    # The modal path is the intended behaviour here, so let it render instead of raising.
-    fresh_no_raise = client.__class__()
-    _seed_active_slot(fresh_no_raise, minimal_system)
-    file = SimpleUploadedFile("ws.e-fw.json", json.dumps(workspace_file).encode(), content_type="application/json")
-    import os
-    os.environ.pop("RAISE_EXCEPTIONS", None)  # the autouse fixture set it; this path should not raise
-    response = fresh_no_raise.post("/model_builder/upload-json/", {"import-json-input": file})
-    os.environ["RAISE_EXCEPTIONS"] = "1"
-
-    assert response.status_code == 200
-    html = response.content.decode()
-    assert "workspace file" in html.lower()  # the guidance message
-    # The active model is still a single, intact, single-model session.
-    after = SessionWorkspaceRepository(fresh_no_raise.session)
-    assert after.list_slots() == [0]
-    assert system_id_of(after.active_repository().get_system_data()) == untouched_id
+    restored = SessionWorkspaceRepository(fresh.session)
+    assert restored.list_slots() == [0, 1]  # both slots restored
+    names = [ModelWeb(restored.repository_for(s)).system.name for s in restored.list_slots()]
+    assert names == ["Test System", "Copy of Test System"]
 
 
 @pytest.mark.django_db
@@ -177,7 +169,7 @@ def test_workspace_import_enforces_combined_budget(client, minimal_system, monke
 
     fresh = client.__class__()
     monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)  # exercise the graceful modal path
-    response = _upload(fresh, "/model_builder/upload-workspace/", envelope, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-fw.json")
     assert response.status_code == 200
     assert "too large" in response.content.decode().lower()  # the budget message
     # The first model loaded into slot 0 but the second was rejected before changing the slot index.
@@ -198,7 +190,7 @@ def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, 
                 "models": [single_doc, json.loads(json.dumps(single_doc))]}
 
     fresh = client.__class__()
-    response = _upload(fresh, "/model_builder/upload-workspace/", envelope, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-fw.json")
     assert response.status_code == 302
 
     restored = SessionWorkspaceRepository(fresh.session)
@@ -221,7 +213,7 @@ def test_single_model_format_is_unchanged_and_round_trips_both_directions(client
 
       - a per-slot export from a TWO-model session is structurally identical to the same model exported
         from a plain single-model session (no workspace contamination), and
-      - that single-model file imports cleanly into a plain single-model session via "Replace this model".
+      - that single-model file imports cleanly into a plain single-model session via "Open file".
     """
     # Single-model session export = the pre-Task-5 baseline.
     _seed_active_slot(client, minimal_system)
@@ -243,3 +235,25 @@ def test_single_model_format_is_unchanged_and_round_trips_both_directions(client
     restored = SessionWorkspaceRepository(fresh.session)
     assert restored.list_slots() == [0]
     assert ModelWeb(restored.active_repository()).system.name == "Test System"
+
+
+@pytest.mark.django_db
+def test_single_model_file_via_open_file_in_two_model_session_replaces_active_slot(client, minimal_system):
+    """Unified "Open file" fed a single-model file in a TWO-model session replaces the ACTIVE slot (and
+    only that slot) — "Open file" is open-into-here; adding a second model is the tab strip's job."""
+    _seed_active_slot(client, minimal_system)
+    client.post("/model_builder/add-model/", {"source": "blank"})  # slot 1 active, two-model session
+    workspace = SessionWorkspaceRepository(client.session)
+    assert workspace.list_slots() == [0, 1] and workspace.active_slot() == 1
+    slot_0_id_before = system_id_of(workspace.repository_for(0).get_system_data())
+
+    # A distinct single-model file (renamed) opened while slot 1 is active replaces slot 1 only.
+    single_doc = _download(client, "/model_builder/download-json/?slot=0")
+    single_doc["System"][next(iter(single_doc["System"]))]["name"] = "Opened Into Active"
+    response = _upload(client, "/model_builder/upload-json/", single_doc, "model.e-f.json")
+    assert response.status_code == 302
+
+    after = SessionWorkspaceRepository(client.session)
+    assert after.list_slots() == [0, 1]  # still two models, no third slot added
+    assert ModelWeb(after.repository_for(1)).system.name == "Opened Into Active"  # active slot replaced
+    assert system_id_of(after.repository_for(0).get_system_data()) == slot_0_id_before  # slot 0 untouched
