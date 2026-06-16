@@ -97,6 +97,11 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     real with-calc weight (the shared budget would otherwise under-count) and re-opening it needn't
     recompute from scratch. Routing through the library keeps it the source of truth for id semantics
     and regenerates any reference to the system id from the live object graph.
+
+    The interface-only metadata (``interface_config`` / ``efootprint_interface_version``) isn't part
+    of the efootprint object graph, so ``system_to_json`` drops it — carry it across explicitly so a
+    re-minted slot keeps its Sankey settings (the no-collision path preserves them by returning the
+    dict unchanged).
     """
     from efootprint.api_utils.json_to_system import json_to_system
     from efootprint.api_utils.system_to_json import system_to_json
@@ -107,4 +112,8 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
         system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     system = next(iter(response_objs["System"].values()))
     assign_fresh_system_id(system)
-    return system_to_json(system, save_calculated_attributes=True)
+    reserialized = system_to_json(system, save_calculated_attributes=True)
+    for metadata_key in ("interface_config", "efootprint_interface_version"):
+        if metadata_key in system_data:
+            reserialized[metadata_key] = system_data[metadata_key]
+    return reserialized

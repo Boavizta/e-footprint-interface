@@ -30,13 +30,20 @@ def raise_view_exceptions(monkeypatch):
     monkeypatch.setenv("RAISE_EXCEPTIONS", "1")
 
 
-def _seed_active_slot(client, system) -> None:
-    """Persist a built System into the active slot of the client's session (with-calc, recomputed)."""
+def _seed_active_slot(client, system, interface_config: dict = None) -> None:
+    """Persist a built System into the active slot of the client's session (with-calc, recomputed).
+
+    An optional ``interface_config`` (UI-only state, e.g. Sankey settings) is attached to the slot so
+    tests can assert it survives an export/import round-trip.
+    """
     raw = system_to_json(system, save_calculated_attributes=False)
     import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     with_calc = import_service.import_system(SessionSystemRepository.upgrade_system_data(raw))
     session = client.session
-    SessionWorkspaceRepository(session).active_repository().save_data(with_calc)
+    repository = SessionWorkspaceRepository(session).active_repository()
+    if interface_config is not None:
+        repository.interface_config = interface_config
+    repository.save_data(with_calc)
     session.save()
 
 
@@ -80,7 +87,10 @@ def test_workspace_export_is_an_envelope_of_two_single_model_documents(client, m
 
 @pytest.mark.django_db
 def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, minimal_system):
-    _seed_active_slot(client, minimal_system)
+    # Slot 0 carries UI-only interface_config (Sankey settings); it must survive the round-trip per
+    # slot (plan §2.7). Slot 1 is a duplicate, which carries its own interface_config too.
+    slot_0_config = {"sankey_diagrams": [{"id": "slot0cfg"}]}
+    _seed_active_slot(client, minimal_system, interface_config=slot_0_config)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 active = "Copy of …"
     workspace = SessionWorkspaceRepository(client.session)
     ids_before = [system_id_of(workspace.repository_for(s).get_system_data()) for s in workspace.list_slots()]
@@ -99,6 +109,8 @@ def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, min
     assert ids_after == ids_before  # both distinct system ids preserved through the round-trip
     names = [ModelWeb(restored.repository_for(s)).system.name for s in restored.list_slots()]
     assert names == ["Test System", "Copy of Test System"]
+    # interface_config is restored per slot (it was dropped before the #1 fix).
+    assert restored.repository_for(0).interface_config == slot_0_config
 
 
 @pytest.mark.django_db
@@ -177,8 +189,10 @@ def test_workspace_import_enforces_combined_budget(client, minimal_system, monke
 def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, minimal_system):
     """A workspace file whose two embedded models share a system id (e.g. a hand-edited file) must
     still produce two slots with distinct system ids — the add-to-slot path re-mints on collision."""
-    _seed_active_slot(client, minimal_system)
+    shared_config = {"sankey_diagrams": [{"id": "shared"}]}
+    _seed_active_slot(client, minimal_system, interface_config=shared_config)
     single_doc = _download(client, "/model_builder/download-json/")
+    assert single_doc["interface_config"] == shared_config  # the export carries it
     # Build a workspace whose two models are the SAME single-model document (same system id).
     envelope = {"efootprint_workspace_version": "x", "active_slot": 0,
                 "models": [single_doc, json.loads(json.dumps(single_doc))]}
@@ -195,6 +209,9 @@ def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, 
     # Object ids are preserved, so the comparison diff still pairs by identity.
     assert _object_ids(restored.repository_for(0).get_system_data()) == \
            _object_ids(restored.repository_for(1).get_system_data())
+    # interface_config survives the re-mint on the collision slot (with_fresh_system_id preserves it).
+    assert restored.repository_for(0).interface_config == shared_config
+    assert restored.repository_for(1).interface_config == shared_config
 
 
 @pytest.mark.django_db

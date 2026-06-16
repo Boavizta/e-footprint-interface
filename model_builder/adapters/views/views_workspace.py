@@ -97,8 +97,12 @@ def upload_workspace(request):
                 _restore_workspace(workspace, data)
             else:
                 # A single-model file opened here loads into the active slot, exactly like
-                # "Replace this model" — the cross-format-into-workspace path.
-                load_system_into_session(workspace.active_repository(), data, workspace=workspace)
+                # "Replace this model" — the cross-format-into-workspace path. Restore its
+                # interface_config too (set on the repository before persist) so Sankey settings survive.
+                active_repository = workspace.active_repository()
+                if "interface_config" in data:
+                    active_repository.interface_config = data["interface_config"]
+                load_system_into_session(active_repository, data, workspace=workspace)
             return redirect("model-builder")
     except Exception as e:
         if os.environ.get("RAISE_EXCEPTIONS"):
@@ -130,7 +134,14 @@ def _restore_workspace(workspace, data: dict) -> None:
         if slot != 0:
             workspace.remove_slot(slot)
 
-    load_system_into_session(workspace.repository_for(0), models[0])
+    # Each embedded model carries its own interface_config (Sankey settings etc.); restore it per slot
+    # so the round-trip preserves it as the single-model upload does (plan §2.7). Slot 0: set it on the
+    # repository before persist. Slot 1+: ProgressiveImportService already carries it into the with-calc
+    # dict, which add_slot's save writes through (and with_fresh_system_id preserves it on a re-mint).
+    slot_0_repository = workspace.repository_for(0)
+    if "interface_config" in models[0]:
+        slot_0_repository.interface_config = models[0]["interface_config"]
+    load_system_into_session(slot_0_repository, models[0])
     for model in models[1:]:
         import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
         workspace.add_slot(import_service.import_system(SessionSystemRepository.upgrade_system_data(model)))
