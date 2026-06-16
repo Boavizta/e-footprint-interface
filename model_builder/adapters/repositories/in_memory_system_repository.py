@@ -18,7 +18,7 @@ class InMemorySystemRepository(ISystemRepository):
     """In-memory implementation of system repository.
 
     This class stores system data in a simple Python dictionary, allowing
-    tests__old to run without Django sessions or any external infrastructure.
+    tests to run without Django sessions or any external infrastructure.
 
     Usage:
         # For testing

@@ -44,6 +44,8 @@ class WorkspaceRepositoryBase(IWorkspaceRepository):
         return new_slot
 
     def remove_slot(self, slot: int) -> None:
+        if self.list_slots() == [slot]:
+            raise ValueError("Cannot remove the only remaining slot: the workspace must never be empty.")
         self.repository_for(slot).clear()
         self._deregister_slot(slot)
 

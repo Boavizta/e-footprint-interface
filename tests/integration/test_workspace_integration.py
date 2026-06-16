@@ -6,6 +6,8 @@ port imports cleanly here, where Django is never set up).
 """
 import json
 
+import pytest
+
 from model_builder.adapters.repositories import InMemoryWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -36,6 +38,15 @@ def test_workspace_add_switch_remove(minimal_system_data):
     ws.remove_slot(1)
     assert ws.list_slots() == [0]
     assert ws.active_slot() == 0  # active falls back to the surviving slot
+
+
+def test_removing_the_only_slot_is_rejected(minimal_system_data):
+    """The workspace must never be empty: removing the sole remaining slot raises, so downstream code
+    can rely on slot 0 always existing."""
+    ws = InMemoryWorkspaceRepository(initial_data=minimal_system_data)
+    with pytest.raises(ValueError):
+        ws.remove_slot(0)
+    assert ws.list_slots() == [0]  # the rejected removal left the workspace intact
 
 
 def test_importing_same_template_into_both_slots_gets_distinct_system_ids():
