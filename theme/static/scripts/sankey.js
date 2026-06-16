@@ -265,17 +265,10 @@ document.body.addEventListener('htmx:beforeSwap', function(event) {
     }
 });
 
-// Scroll new cards into view, initialise Bootstrap tooltips, and render ECharts after HTMX settles
+// Initialise Bootstrap tooltips and render ECharts after HTMX settles
 document.body.addEventListener('htmx:afterSettle', function(event) {
     var el = event.detail.elt;
     renderSankeyPlots(el);
-    if (el && el.id && el.id === 'sankey-cards-container') {
-        var cards = el.querySelectorAll('.sankey-card');
-        if (cards.length > 0) {
-            var lastCard = cards[cards.length - 1];
-            lastCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-    }
     // Initialise Bootstrap tooltips for any newly inserted help icons.
     // Skip elements without a title — Bootstrap 5 throws when title resolves to null.
     if (el && window.bootstrap && bootstrap.Tooltip) {
