@@ -11,11 +11,14 @@ const {
 } = require("../theme/static/scripts/result_charts/comparison_charts.js");
 
 function pairedPayload() {
+    // A's usage/fabrication mix differs per year (usage-heavy 2026, fabrication-heavy 2027): the
+    // adapter ships the EXACT per-year split (from the library per-phase series), so the builder must
+    // carry the distinct per-year values through verbatim — never collapse them to one global ratio.
     return {
         labels: ["2026", "2027"],
         datasets: [
-            { label: "A usage", data: [100, 120], backgroundColor: "#4878a8", stack: "A" },
-            { label: "A fabrication", data: [50, 40], backgroundColor: "#9db9d8", stack: "A" },
+            { label: "A usage", data: [200, 30], backgroundColor: "#4878a8", stack: "A" },
+            { label: "A fabrication", data: [40, 130], backgroundColor: "#9db9d8", stack: "A" },
             { label: "B usage", data: [60, null], backgroundColor: "#e09f3e", stack: "B" },
             { label: "B fabrication", data: [40, null], backgroundColor: "#f0cf94", stack: "B" },
         ],
@@ -61,6 +64,14 @@ describe("buildPairedChartConfig", () => {
     test("passes blank (null) buckets through unchanged so non-covered years stay empty", () => {
         const config = buildPairedChartConfig(pairedPayload());
         expect(config.data.datasets[2].data).toEqual([60, null]);
+    });
+
+    test("carries the exact per-year usage/fab split through verbatim (no global-ratio flattening)", () => {
+        const config = buildPairedChartConfig(pairedPayload());
+        // A is usage-heavy in 2026 and fabrication-heavy in 2027 — the builder must keep each year's
+        // own split, not redistribute it by one period-wide ratio.
+        expect(config.data.datasets[0].data).toEqual([200, 30]); // A usage per year
+        expect(config.data.datasets[1].data).toEqual([40, 130]); // A fabrication per year
     });
 });
 

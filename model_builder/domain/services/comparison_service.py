@@ -169,13 +169,17 @@ class ComparisonService:
     def _format_displays(card_a, card_b, delta, decomposition):
         from efootprint.constants.units import u
         from efootprint.utils.display import (
-            best_display_unit, human_readable_unit, format_display_number, _round_to_sig_figs)
+            best_display_unit, human_readable_unit, format_display_number, format_quantity_for_display)
 
+        # One shared unit for the whole strip, picked from the larger total so every figure reads against
+        # it (magnitude honesty). Sig-fig rounding goes through the library's public
+        # ``format_quantity_for_display`` — converting its result back to the shared unit is safe because
+        # sig-fig rounding is scale-invariant, so the shared unit is preserved across the round-trip.
         unit = best_display_unit(max(card_a.total_kg, card_b.total_kg) * u.kg)
         unit_str = human_readable_unit(unit)
 
         def fmt(kg, signed=False):
-            magnitude = _round_to_sig_figs((kg * u.kg).to(unit).magnitude, 3)
+            magnitude = format_quantity_for_display((kg * u.kg).to(unit), 3).to(unit).magnitude
             sign = "+" if signed and magnitude > 0 else ""
             return f"{sign}{format_display_number(magnitude)} {unit_str}"
 
@@ -275,32 +279,29 @@ class ComparisonService:
 
         Both models bucket onto one shared yearly calendar axis (the union of their periods); a year
         outside a model's own modeling period is left blank (``null``), not a zero bar (§4.2 / §6).
-        One y-axis (kg), one legend over the four series, model identity by the constant colour pair —
-        the magnitude-honesty rule.
+        The usage / fabrication split is *exact per year*: the library's per-phase aligned series
+        (``usage_*`` / ``fabrication_*``) are summed per calendar year, never a single full-period
+        ratio applied to every year — so the dark / light segmentation reads truthfully even when a
+        model's mix shifts across years. One y-axis (kg), one legend over the four series, model
+        identity by the constant colour pair — the magnitude-honesty rule.
         """
         time_series = comparison.time_series
         years = self._shared_year_axis(comparison)
-        totals_a = _yearly_totals(time_series.start_date, time_series.values_a, years,
-                                  self._model_years(comparison.system_a))
-        totals_b = _yearly_totals(time_series.start_date, time_series.values_b, years,
-                                  self._model_years(comparison.system_b))
-        usage_share_a, usage_share_b = self._usage_share(comparison)
+        years_a = self._model_years(comparison.system_a)
+        years_b = self._model_years(comparison.system_b)
+
+        usage_a = _yearly_totals(time_series.start_date, time_series.usage_a, years, years_a)
+        fabrication_a = _yearly_totals(time_series.start_date, time_series.fabrication_a, years, years_a)
+        usage_b = _yearly_totals(time_series.start_date, time_series.usage_b, years, years_b)
+        fabrication_b = _yearly_totals(time_series.start_date, time_series.fabrication_b, years, years_b)
 
         return {
             "labels": [str(year) for year in years],
             "datasets": [
-                _bar_dataset(f"{comparison.system_a.name} usage",
-                             [_scaled(total, usage_share_a) for total in totals_a],
-                             MODEL_A_COLOR, stack="A"),
-                _bar_dataset(f"{comparison.system_a.name} fabrication",
-                             [_scaled(total, 1 - usage_share_a) for total in totals_a],
-                             MODEL_A_COLOR_LIGHT, stack="A"),
-                _bar_dataset(f"{comparison.system_b.name} usage",
-                             [_scaled(total, usage_share_b) for total in totals_b],
-                             MODEL_B_COLOR, stack="B"),
-                _bar_dataset(f"{comparison.system_b.name} fabrication",
-                             [_scaled(total, 1 - usage_share_b) for total in totals_b],
-                             MODEL_B_COLOR_LIGHT, stack="B"),
+                _bar_dataset(f"{comparison.system_a.name} usage", usage_a, MODEL_A_COLOR, stack="A"),
+                _bar_dataset(f"{comparison.system_a.name} fabrication", fabrication_a, MODEL_A_COLOR_LIGHT, stack="A"),
+                _bar_dataset(f"{comparison.system_b.name} usage", usage_b, MODEL_B_COLOR, stack="B"),
+                _bar_dataset(f"{comparison.system_b.name} fabrication", fabrication_b, MODEL_B_COLOR_LIGHT, stack="B"),
             ],
         }
 
@@ -345,15 +346,6 @@ class ComparisonService:
         end = start + timedelta(hours=hours - 1)
         return list(range(start.year, end.year + 1))
 
-    def _usage_share(self, comparison):
-        """Fraction of each model's total footprint that is usage (energy) — used to split the bars
-        into the dark usage / light fabrication stack while keeping the per-year total exact."""
-        def share(is_model_a):
-            usage, fab = self._usage_fabrication_split(comparison.decomposition, is_model_a)
-            total = usage + fab
-            return usage / total if total else 0.0
-        return share(True), share(False)
-
     # --- assumptions diff ----------------------------------------------------------------------
 
     def _diff(self, input_diff):
@@ -369,10 +361,6 @@ class ComparisonService:
 
 
 _ZERO_KG = 1e-9
-
-
-def _scaled(total: float, share: float) -> Optional[float]:
-    return None if total is None else total * share
 
 
 def _bar_dataset(label, data, color, stack) -> Dict:

@@ -49,14 +49,18 @@ def _hourly_summing_to(total, n_hours):
 
 
 def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
-                     changed=(), only_in_a=(), only_in_b=()):
+                     usage_front_load_a=False, changed=(), only_in_a=(), only_in_b=()):
     """A SystemComparison stub with the same attribute surface as the library object.
 
     ``decomposition`` is a fixed, deliberately mixed set of (category, phase) rows: a reduction in
     servers usage, an increase in edge fabrication, several unchanged rows, so the sum is a non-trivial
     Δ. The hourly time-series is *derived from* the decomposition totals (spread over the requested
     span), reproducing the library's own consistency between the per-category totals and the hourly
-    series — so the cumulative curve ends at each model's total, as in production.
+    series — so the cumulative curve ends at each model's total, as in production. The per-phase series
+    (``usage_*`` / ``fabrication_*``) carry each phase's own subtotal and sum to the combined total
+    hour-by-hour, mirroring the library's ``TimeSeries``. ``usage_front_load_a`` concentrates model A's
+    usage in the first half of its span (fabrication stays spread), so its per-year usage/fab mix is
+    non-uniform across years — the shape that distinguishes an exact per-year split from a global ratio.
     """
     start_a = start_a or datetime(2025, 1, 1, tzinfo=timezone.utc)
     start_b = start_b or datetime(2025, 1, 1, tzinfo=timezone.utc)
@@ -75,24 +79,43 @@ def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
         _row("EdgeDevices", "energy", before=0.0, after=0.0),
         _row("EdgeDevices", "fabrication", before=0.0, after=90.0),  # +90 increase, new in B
     ]
-    total_a = sum(row.delta.before for row in decomposition)
-    total_b = sum(row.delta.after for row in decomposition)
+    usage_a = sum(r.delta.before for r in decomposition if r.phase == "energy")
+    fab_a = sum(r.delta.before for r in decomposition if r.phase == "fabrication")
+    usage_b = sum(r.delta.after for r in decomposition if r.phase == "energy")
+    fab_b = sum(r.delta.after for r in decomposition if r.phase == "fabrication")
+    total_a = usage_a + fab_a
+    total_b = usage_b + fab_b
 
     # Each model's own (unaligned) span; default a single 24h day for both.
     n_a = hours_a if hours_a is not None else 24
     n_b = hours_b if hours_b is not None else 24
 
     # The library aligns both onto one calendar axis starting at the earliest start, zero-padding the
-    # gaps — reproduce that so the shared time-series is realistic.
+    # gaps — reproduce that so the shared time-series is realistic. Each phase is placed on that axis
+    # so usage + fabrication == the combined total per hour, exactly as the library guarantees.
     axis_start = min(start_a, start_b)
     offset_a = int((start_a - axis_start).total_seconds() // 3600)
     offset_b = int((start_b - axis_start).total_seconds() // 3600)
     length = max(offset_a + n_a, offset_b + n_b)
-    series_a = np.zeros(length, dtype="float32")
-    series_b = np.zeros(length, dtype="float32")
-    series_a[offset_a:offset_a + n_a] = _hourly_summing_to(total_a, n_a)
-    series_b[offset_b:offset_b + n_b] = _hourly_summing_to(total_b, n_b)
-    time_series = SimpleNamespace(start_date=axis_start, values_a=series_a, values_b=series_b)
+
+    def _phase_series(offset, n, amount, front_load):
+        series = np.zeros(length, dtype="float32")
+        if front_load and n > 1:
+            series[offset:offset + n // 2] = _hourly_summing_to(amount, n // 2)
+        else:
+            series[offset:offset + n] = _hourly_summing_to(amount, n)
+        return series
+
+    usage_series_a = _phase_series(offset_a, n_a, usage_a, usage_front_load_a)
+    fab_series_a = _phase_series(offset_a, n_a, fab_a, False)
+    usage_series_b = _phase_series(offset_b, n_b, usage_b, False)
+    fab_series_b = _phase_series(offset_b, n_b, fab_b, False)
+    series_a = usage_series_a + fab_series_a
+    series_b = usage_series_b + fab_series_b
+    time_series = SimpleNamespace(
+        start_date=axis_start, values_a=series_a, values_b=series_b,
+        usage_a=usage_series_a, usage_b=usage_series_b,
+        fabrication_a=fab_series_a, fabrication_b=fab_series_b)
 
     input_diff = SimpleNamespace(
         changed=[SimpleNamespace(
@@ -195,6 +218,33 @@ class TestPairedChart:
         assert b_usage[labels.index("2026")] is None
         # A does cover 2026, so its 2026 bucket is a real (possibly zero) value, not null.
         assert a_usage[labels.index("2026")] is not None
+
+    def test_per_year_usage_fab_split_is_exact_not_a_global_ratio(self):
+        """The #2 fix: the dark/light split is the exact per-year usage/fab split from the library's
+        per-phase series, not one full-period ratio applied to every year. Model A's usage is front-
+        loaded into 2025 while fabrication spreads across 2025+2026, so 2026 is fabrication-only — a
+        global ratio would instead paint 2026 with A's overall usage share."""
+        comparison = build_comparison(
+            hours_a=24 * 400, hours_b=24 * 400,   # both span 2025 + 2026
+            start_a=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            start_b=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            usage_front_load_a=True)
+        view = ComparisonService().build_from_comparison(comparison)
+        labels = view.paired_chart["labels"]
+        a_usage = view.paired_chart["datasets"][0]["data"]
+        a_fab = view.paired_chart["datasets"][1]["data"]
+        i2026 = labels.index("2026")
+
+        # 2026 is fabrication-only for A (usage was front-loaded into 2025) — exact per-year split.
+        assert a_usage[i2026] == pytest.approx(0.0, abs=1e-3)
+        assert a_fab[i2026] > 0
+        # A global ratio (usage / total over the whole period) would have stained 2026 with that share.
+        global_usage_share = view.card_a.usage_kg / view.card_a.total_kg
+        global_ratio_2026_usage = global_usage_share * (a_usage[i2026] + a_fab[i2026])
+        assert global_ratio_2026_usage > 1.0  # the wrong answer is materially non-zero
+        # And the per-year stacked total still reconstructs each model's grand total (heights exact).
+        a_total = sum((a_usage[i] or 0) + (a_fab[i] or 0) for i in range(len(labels)))
+        assert a_total == pytest.approx(view.card_a.total_kg)
 
 
 class TestCumulativeChart:
