@@ -1,7 +1,6 @@
 let resizeTimeout;
 let globalListenersInitialized = false;
 let currentScrollableArea = null;
-let currentScrollContainer = null;
 let rebuildAnimationFrameId = null;
 
 let dictLeaderLineOption = {
@@ -254,15 +253,10 @@ function attachScrollListeners() {
     // Attach scroll listeners only if DOM elements have changed (e.g., after JSON upload)
     // Old elements + their listeners are garbage collected when removed from DOM
     const newScrollableArea = document.querySelector('#model-canva-scrollable-area');
-    const newScrollContainer = document.querySelector('#model-canva');
 
     if (newScrollableArea && newScrollableArea !== currentScrollableArea) {
         newScrollableArea.addEventListener('scroll', updateLines);
         currentScrollableArea = newScrollableArea;
-    }
-    if (newScrollContainer && newScrollContainer !== currentScrollContainer) {
-        newScrollContainer.addEventListener('scroll', updateLines);
-        currentScrollContainer = newScrollContainer;
     }
 }
 
