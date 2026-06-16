@@ -106,15 +106,25 @@ class TestInMemorySystemRepositorySizeLimit:
         assert repository.get_system_data() == initial_data
 
 
+class DictSession(dict):
+    """A dict-backed stand-in for a Django session: real .get() so the workspace index reads as {}
+    (single-model: slot 0 active), with session_key and a no-op save()."""
+
+    def __init__(self):
+        super().__init__()
+        self.session_key = "session-key"
+        self.modified = False
+
+    def save(self):
+        pass
+
+
 class TestSessionSystemRepositorySizeLimit:
     """Tests for size limit enforcement in SessionSystemRepository."""
 
     def test_save_within_limit_succeeds(self):
         """Should save data when within the size limit."""
-        mock_session = MagicMock()
-        mock_session.session_key = "session-key"
-        mock_session.__contains__.return_value = False
-        repository = SessionSystemRepository(mock_session)
+        repository = SessionSystemRepository(DictSession())
 
         redis_cache = MagicMock()
         postgres_cache = MagicMock()
@@ -129,7 +139,7 @@ class TestSessionSystemRepositorySizeLimit:
             with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
                 repository.save_data(small_data)
 
-        cache_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:{mock_session.session_key}"
+        cache_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:session-key:0"
         redis_cache.set.assert_called_once_with(
             cache_key, small_data, timeout=SessionSystemRepository.REDIS_CACHE_TIMEOUT_SECONDS
         )
@@ -139,10 +149,7 @@ class TestSessionSystemRepositorySizeLimit:
 
     def test_save_exceeding_limit_raises_exception(self):
         """Should raise PayloadSizeLimitExceeded when data exceeds limit."""
-        mock_session = MagicMock()
-        mock_session.session_key = "session-key"
-        mock_session.__contains__.return_value = False
-        repository = SessionSystemRepository(mock_session)
+        repository = SessionSystemRepository(DictSession())
         redis_cache = MagicMock()
         postgres_cache = MagicMock()
 
@@ -164,10 +171,7 @@ class TestSessionSystemRepositorySizeLimit:
 
     def test_cache_not_written_when_limit_exceeded(self):
         """Should not write to caches when limit is exceeded."""
-        mock_session = MagicMock()
-        mock_session.session_key = "session-key"
-        mock_session.__contains__.return_value = False
-        repository = SessionSystemRepository(mock_session)
+        repository = SessionSystemRepository(DictSession())
         redis_cache = MagicMock()
         postgres_cache = MagicMock()
 

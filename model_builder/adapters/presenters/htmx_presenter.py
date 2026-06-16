@@ -40,9 +40,9 @@ class HtmxPresenter:
     def model_web(self) -> "ModelWeb":
         """Lazy-load ModelWeb instance. Only created when needed (e.g., for recomputation)."""
         if self._model_web is None:
-            from model_builder.adapters.repositories import SessionSystemRepository
+            from model_builder.adapters.repositories import SessionWorkspaceRepository
             from model_builder.domain.entities.web_core.model_web import ModelWeb
-            self._model_web = ModelWeb(SessionSystemRepository(self.request.session))
+            self._model_web = ModelWeb(SessionWorkspaceRepository(self.request.session).active_repository())
         return self._model_web
 
     def _constraint_toast_messages(self) -> list[str]:

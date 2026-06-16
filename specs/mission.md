@@ -20,7 +20,7 @@ Guiding principle: *no one left behind, depth available on demand.* Every profil
 - **Real-time recalculation** with explainable results: every value carries its derivation.
 - **Impact visualization**: Sankey diagrams, hourly emissions charts, source tables, xlsx export.
 - **Disabled-instead-of-error UX**: action buttons disable preemptively when prerequisites are missing, with a tooltip explaining what to do next.
-- **Session-driven state**: the current model lives in the Django session; downloads and uploads round-trip the full system state including UI configuration.
+- **Session-driven state**: the session holds a workspace of up to two models (one active for editing) plus the active-slot pointer; downloads and uploads round-trip the full system state including UI configuration.
 - **Dict-based relationships** for hierarchical edge fleets (`EdgeDeviceGroup` with sub-groups and device counts).
 - **Onboarding and contextual help**: first-run template picker with starter templates, a guided tour, the help-drawer overlay, and a web/edge mode toggle. See `specs/architecture.md`.
 

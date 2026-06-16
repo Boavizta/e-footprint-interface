@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Internal (no user-visible change): the session now holds a workspace of up to two model slots plus
+  an active-slot pointer instead of a single model — groundwork for model comparison. System-data
+  cache keys are slot-suffixed (`system_data:{session_key}:{slot}`), with a one-release read-fallback
+  that transparently migrates in-flight single-model sessions. Single-model sessions behave exactly
+  as before.
+
 ## [V1.8.0]
 
 ### Added

@@ -3,7 +3,7 @@ from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_data_parser import parse_count
 from model_builder.adapters.presenters import HtmxPresenter
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.application.use_cases.edit_object import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -58,7 +58,7 @@ def _run_edit_and_present(request, model_web: ModelWeb, parent_obj, form_data: d
 @render_exception_modal_if_error
 @time_it
 def update_dict_count(request, parent_id, key_id):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     parent_obj, key_obj = _load_parent_and_key(model_web, parent_id, key_id)
     attr_name = resolve_dict_attr(parent_obj, key_obj)
     count = parse_count(request.POST.get("count"), error_prefix="Count")
@@ -69,7 +69,7 @@ def update_dict_count(request, parent_id, key_id):
 @render_exception_modal_if_error
 @time_it
 def unlink_dict_entry(request, parent_id, key_id):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     parent_obj, key_obj = _load_parent_and_key(model_web, parent_id, key_id)
     attr_name = resolve_dict_attr(parent_obj, key_obj)
     form_data = _build_edit_form_data(parent_obj, attr_name, key_obj, None)
@@ -82,7 +82,7 @@ def link_dict_entry(request, key_id):
     parent_id = request.POST.get("parent_id")
     if not parent_id:
         raise ValueError("Missing parent_id in request body.")
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     parent_obj, key_obj = _load_parent_and_key(model_web, parent_id, key_id)
 
     if isinstance(key_obj, EdgeDeviceGroup) and isinstance(parent_obj, EdgeDeviceGroup) and (

@@ -44,8 +44,8 @@ def render_recovery_page(request, error=None, status=200):
     """
     has_saved_model = False
     try:
-        from model_builder.adapters.repositories import SessionSystemRepository
-        has_saved_model = SessionSystemRepository(request.session).has_system_data()
+        from model_builder.adapters.repositories import SessionWorkspaceRepository
+        has_saved_model = SessionWorkspaceRepository(request.session).active_repository().has_system_data()
     except Exception:
         pass
 

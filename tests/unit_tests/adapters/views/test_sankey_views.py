@@ -196,9 +196,19 @@ class TestSankeyCards:
         session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
         session.save()
 
+        # Slot-aware repo: the suffixed slot-0 key misses, so the model is served from the legacy
+        # unsuffixed key (the one-release fallback), and the sankey config is restored from the
+        # session interface-config fallback. Key on the cache key so the number of reads is not fixed.
+        suffixed_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:{client.session.session_key}:0"
+
+        def fake_get_with_source(_self, cache_key):
+            if cache_key == suffixed_key:
+                return None, None
+            return minimal_system_data, "memory"
+
         with patch(
             "model_builder.adapters.repositories.session_system_repository.CacheBackend.get_with_source",
-            side_effect=[(None, None), (minimal_system_data, "memory")],
+            autospec=True, side_effect=fake_get_with_source,
         ):
             response = client.get("/model_builder/sankey-cards/")
         content = response.content.decode()

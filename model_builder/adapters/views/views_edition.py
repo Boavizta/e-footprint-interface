@@ -6,7 +6,7 @@ from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.form_data_parser import parse_form_data
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -17,7 +17,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 @render_exception_modal_if_error
 @time_it
 def open_edit_object_panel(request, object_id):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
     form_builder = FormContextBuilder(model_web)
@@ -45,7 +45,7 @@ def open_edit_object_panel(request, object_id):
 @render_exception_modal_if_error
 @time_it
 def edit_object(request, object_id, trigger_result_display=False):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
 
     # 1. Get object type for parsing (adapter responsibility)
     model_web = ModelWeb(repository)
@@ -78,7 +78,7 @@ def open_link_existing_panel(request, parent_id, child_type_str):
     from model_builder.adapters.forms.form_field_generator import (
         build_dict_count_field_from_annotation, generate_select_multiple_field)
 
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     parent_obj = model_web.get_web_object_from_efootprint_id(parent_id)
 
     attr_name = next(
@@ -108,7 +108,7 @@ def open_link_existing_panel(request, parent_id, child_type_str):
 
 @render_exception_modal_if_error
 def open_panel_system_name(request):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     system_data = repository.get_system_data()
     return render(request, "model_builder/side_panels/rename_system.html",context={
         "header_name": "Rename your model",
@@ -117,7 +117,7 @@ def open_panel_system_name(request):
 
 
 def save_system_name(request):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     parsed_data = parse_form_data(request.POST, "System")
     edited_obj, *_ = edit_object_from_parsed_data(parsed_data, model_web.system, update_system_data=True)
     return HttpResponse(edited_obj.name)

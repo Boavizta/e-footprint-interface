@@ -9,6 +9,8 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 
 ## Task 1 — Library: `efootprint.comparison` capability + duplication helpers (e-footprint)
 
+**Status:** Done
+
 **Goal:** Add the domain-truth comparison computation and duplication helpers to the library, usable standalone from a notebook / coding agent, and release them to PyPI. The whole feature reduces to `a.compare_to(b)` and `duplicate_system(s)` for a standalone user; the interface becomes a thin adapter over this. No new modeling logic, no attribution/sensitivity claims (constitution §1.3).
 
 **Files touched (in `e-footprint`):**
@@ -35,6 +37,8 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 ---
 
 ## Task 2 — Interface: workspace persistence layer + active-slot call-site sweep (e-footprint-interface)
+
+**Status:** Done
 
 **Goal:** Move the session from holding one model to holding a workspace of up to two per-slot blobs plus an active-slot pointer, **without any user-visible change**. After this task a session that never adds a second model behaves exactly as today (the per-slot repo defaults to the active slot). This is the "infrastructure landed but unused" milestone — the single-model no-regression path is the gate.
 

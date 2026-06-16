@@ -13,7 +13,7 @@ from efootprint.utils.display import best_display_unit, human_readable_unit, dis
 from efootprint.utils.impact_repartition.sankey import ImpactRepartitionSankey
 from efootprint.utils.tools import time_it
 
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 from model_builder.adapters.ui_config.object_category_ui_config_provider import ObjectCategoryUIConfigProvider
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
@@ -317,7 +317,7 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 @time_it
 def sankey_diagram(request):
     card_id = request.POST.get("card_id", "")
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     system = list(model_web.response_objs["System"].values())[0]
 
@@ -396,7 +396,7 @@ def sankey_diagram(request):
 
 
 def sankey_form(request):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     present_classes = _get_present_classes(model_web)
     card_id = uuid.uuid4().hex[:8]
@@ -413,7 +413,7 @@ def sankey_form(request):
 
 def sankey_cards(request):
     """Return all saved Sankey cards, or a default one if none exist."""
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     saved_diagrams = repository.interface_config.get("sankey_diagrams", [])
 
     if not saved_diagrams:
@@ -451,7 +451,7 @@ def sankey_cards(request):
 def sankey_delete_card(request):
     """Delete a persisted Sankey card configuration."""
     card_id = request.POST.get("card_id", "")
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     config = repository.interface_config
     diagrams = config.get("sankey_diagrams", [])

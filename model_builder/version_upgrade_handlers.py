@@ -2,6 +2,16 @@ from efootprint.logger import logger
 from efootprint.api_utils.version_upgrade_handlers import rename_dict_key
 
 
+# --- One-release migration note: workspace slot-suffixed cache keys -----------------------------
+# The workspace (model-comparison feature) moved the system-data cache key from the unsuffixed
+# ``system_data:{session_key}`` to the slot-suffixed ``system_data:{session_key}:{slot}`` for all
+# slots. To avoid dropping in-flight single-model sessions across the cutover,
+# ``SessionSystemRepository`` reads the legacy unsuffixed key once for slot 0, writes it through to
+# the suffixed key, and deletes the legacy key (see ``_read_legacy_with_write_through``).
+# REMOVE that read-fallback (and this note) in the next release — by then no live session can still
+# hold a payload under the old key (it is gone after the cache TTL elapses).
+
+
 def _merge_or_rename(system_dict, old_key, new_key):
     """Rename dict key or merge into an existing one."""
     if new_key in system_dict:

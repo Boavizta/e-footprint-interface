@@ -19,7 +19,8 @@ from efootprint.utils.display import format_quantity_for_display, human_readable
 from efootprint.utils.tools import time_it
 from e_footprint_interface import __version__ as interface_version
 
-from model_builder.adapters.repositories import SessionSystemRepository, SessionCacheRepository
+from model_builder.adapters.repositories import (
+    SessionSystemRepository, SessionWorkspaceRepository, SessionCacheRepository)
 from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
 from model_builder.adapters.views.source_table_row_editor_context import build_source_table_row_editor_context
@@ -76,7 +77,7 @@ def render_model_builder(request, model_web, show_template_picker):
 
 @time_it
 def model_builder_main(request):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     try:
         model_web = ModelWeb(repository)
         if model_web.system_data is None:
@@ -117,7 +118,7 @@ def download_raw_json(request):
     download_json rebuilds the model (and would crash on a corrupt one); this serves the stored
     JSON verbatim so a user in a dead state can still save their work and attach it to a bug report.
     """
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     raw_system_data = repository.get_system_data()
     if raw_system_data is None:
         raise Http404("No model data found in the current session.")
@@ -135,7 +136,7 @@ def reset_model(request):
     POST-only: it destroys the session model, so it must not be reachable by a bare GET
     navigation. The toolbar reset button confirms first when the model is non-empty.
     """
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
     if request.headers.get("HX-Request") != "true":
         # Non-HTMX callers (e.g. the recovery page's plain form) get a clean redirect to a fresh
@@ -150,7 +151,7 @@ def open_import_json_panel(request):
 
 
 def download_json(request):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     system = model_web.system
     system_data_without_calculated_attributes = model_web.to_json(save_calculated_attributes=False)
@@ -168,7 +169,7 @@ def download_json(request):
 
 @time_it
 def upload_json(request):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     import_error_message = ""
     data = None
 
@@ -222,7 +223,7 @@ def upload_json(request):
 @render_exception_modal_if_error
 @time_it
 def result_chart(request):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     model_web.raise_incomplete_modeling_errors()
 
     http_response = htmx_render(
@@ -244,7 +245,7 @@ def get_calculus_graph(request, cache_key):
 
 @time_it
 def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
     iframe_height = 95
     cache_key = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -283,7 +284,7 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
 
 @time_it
 def download_sources(request):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     sources = []
 
     for web_explainable_quantity_source in model_web.web_explainable_quantities_sources:
@@ -343,21 +344,21 @@ def download_sources(request):
 
 @time_it
 def source_table(request):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     return render(request, "model_builder/result/source_table.html", {"model_web": model_web})
 
 
 @time_it
 def source_table_row_editor(request, object_id: str, attr_name: str):
     context = build_source_table_row_editor_context(
-        SessionSystemRepository(request.session), object_id, attr_name)
+        SessionWorkspaceRepository(request.session).active_repository(), object_id, attr_name)
     return render(request, "model_builder/result/source_table_row_editor.html", context)
 
 
 @time_it
 def get_explainable_hourly_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     context, _ = prepare_timeseries_chart_context(
         model_web, efootprint_id, attr_name, prepare_hourly_quantity_data, id_of_key_in_dict)
 
@@ -372,7 +373,7 @@ def get_explainable_hourly_quantity_chart_and_explanation(
 @time_it
 def get_explainable_recurrent_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     context, _ = prepare_timeseries_chart_context(
         model_web, efootprint_id, attr_name, prepare_recurrent_quantity_data)
 
@@ -386,7 +387,7 @@ def get_explainable_recurrent_quantity_chart_and_explanation(
 
 @time_it
 def get_eco_logits_calculated_attribute_explanation(request, efootprint_id, attr_name):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
 
 
@@ -399,7 +400,7 @@ def get_eco_logits_calculated_attribute_explanation(request, efootprint_id, attr
 
 @time_it
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name, id_of_key_in_dict=None):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     explained_obj = get_web_explainable_from_attr(model_web, efootprint_id, attr_name, id_of_key_in_dict)
     literal_formula, ancestors_mapped_to_symbols_list = (
         explained_obj.compute_literal_formula_and_ancestors_mapped_to_symbols_list())

@@ -1,15 +1,17 @@
-"""In-memory implementation of ISystemRepository.
+"""In-memory implementation of ISystemRepository and IWorkspaceRepository.
 
-This implementation stores system data in memory, primarily for testing purposes.
-It allows unit tests__old to run without Django session infrastructure.
+These implementations store system data in memory, primarily for testing purposes.
+They allow the integration harness to run without Django session infrastructure
+(constitution §1.2: the in-memory and session repositories stay interchangeable).
 """
 from copy import deepcopy
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple
 
 from e_footprint_interface import __version__ as interface_version
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.interfaces import ISystemRepository
+from model_builder.adapters.repositories.workspace_base import WorkspaceRepositoryBase
 
 
 class InMemorySystemRepository(ISystemRepository):
@@ -110,3 +112,58 @@ class InMemorySystemRepository(ISystemRepository):
         """Clear system data from memory."""
         self._data = None
         self._interface_config = None
+
+
+class InMemoryWorkspaceRepository(WorkspaceRepositoryBase):
+    """In-memory workspace mirroring the session workspace for the integration harness.
+
+    Holds one ``InMemorySystemRepository`` per slot plus an active pointer, and enforces the shared
+    payload budget as the *summed* with-calc size over all slots (not per slot), matching the session
+    implementation. The distinct-system-id invariant comes from ``WorkspaceRepositoryBase``.
+    """
+
+    def __init__(self, initial_data: Optional[Dict[str, Any]] = None, max_payload_size_mb: Optional[float] = None):
+        self._max_payload_size_mb = max_payload_size_mb
+        self._slots: Dict[int, InMemorySystemRepository] = {0: InMemorySystemRepository(initial_data=initial_data)}
+        self._active = 0
+
+    def list_slots(self) -> List[int]:
+        return sorted(self._slots)
+
+    def active_slot(self) -> int:
+        return self._active
+
+    def set_active_slot(self, slot: int) -> None:
+        if slot not in self._slots:
+            raise ValueError(f"Cannot activate slot {slot}: not an occupied slot ({self.list_slots()}).")
+        self._active = slot
+
+    def repository_for(self, slot: int) -> ISystemRepository:
+        return self._slots.setdefault(slot, InMemorySystemRepository())
+
+    def add_slot(self, system_data: Dict[str, Any]) -> int:
+        self._check_summed_budget(system_data)
+        return super().add_slot(system_data)
+
+    def _register_slot(self, slot: int) -> None:
+        # repository_for already materialised the slot when add_slot saved into it.
+        self._slots.setdefault(slot, InMemorySystemRepository())
+
+    def _deregister_slot(self, slot: int) -> None:
+        self._slots.pop(slot, None)
+        if self._active == slot:
+            self._active = self.list_slots()[0] if self._slots else 0
+
+    def _check_summed_budget(self, incoming_data: Dict[str, Any]) -> None:
+        """Reject when the summed with-calc size over existing slots plus the incoming model exceeds
+        the budget — the in-memory mirror of the session shared-budget guard."""
+        if self._max_payload_size_mb is None:
+            return
+        total_bytes = compute_json_size(incoming_data).size_bytes
+        for repo in self._slots.values():
+            data = repo.get_system_data()
+            if data is not None:
+                total_bytes += compute_json_size(data).size_bytes
+        total_mb = total_bytes / (1024 * 1024)
+        if total_mb > self._max_payload_size_mb:
+            raise PayloadSizeLimitExceeded(total_mb, self._max_payload_size_mb)

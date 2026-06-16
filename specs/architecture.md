@@ -168,6 +168,15 @@ The `interface_config` is included in JSON exports (download) and restored on im
 
 Import recomputation payloads must be assembled from `efootprint.api_utils.system_to_json.system_to_json()` fragments (the connected `System` plus any orphaned objects) rather than hand-serializing objects in the interface. This keeps object serialization and top-level `Sources` hoisting owned by e-footprint and prevents dangling source references after calculated attributes are recomputed.
 
+### Workspace / multi-slot session
+
+The session holds a **workspace** of up to two model **slots** plus an active-slot pointer, not a single model (model-comparison feature). A single-model session is the degenerate case: one slot `[0]`, active 0 — behaviourally identical to before.
+
+- **`IWorkspaceRepository`** (`domain/interfaces/`) is the slot-index port: `list_slots`, `active_slot`, `set_active_slot`, `add_slot(system_data) → slot`, `remove_slot`, `repository_for(slot) → ISystemRepository`. `ISystemRepository` stays a single-model abstraction, now slot-targeted. Implementations: `SessionWorkspaceRepository` (production) and `InMemoryWorkspaceRepository` (integration harness) — interchangeable per constitution §1.2.
+- **Slot-aware cache keys.** `SessionSystemRepository` is bound to a slot (defaulting to the active slot, so the existing call sites resolve through `SessionWorkspaceRepository(session).active_repository()` unchanged) and keys its payload `system_data:{session_key}:{slot}` for **all** slots (symmetric). Slot 0 carries a **one-release legacy read-fallback**: an in-flight pre-workspace payload under the old unsuffixed `system_data:{session_key}` key is read once, written through to the suffixed key, and the legacy key deleted (see `version_upgrade_handlers.py`; removed next release).
+- **Shared payload budget.** The tiny **workspace index** (slot ids + active + each slot's last-saved with-calc byte size) lives in the session via `WorkspaceIndex`; the heavy per-slot payloads stay in the cache. `MAX_PAYLOAD_SIZE_MB` is enforced as a **shared budget over the summed with-calc weight of all slots** (sibling sizes read from the index — the untouched slot is never re-serialized), so editing one model never deserializes the other (binding Redis-RAM / JSON-round-trip constraint).
+- **Distinct-system-id invariant.** Two slots must never hold the same system id (the Task-3 `web_id` DOM prefix depends on it). `WorkspaceRepositoryBase.add_slot` is the **single enforcement point**: on any cross-slot id collision it mints a fresh **system** id via the library `efootprint.comparison.duplication.assign_fresh_system_id` (deserialize → re-id → reserialize), preserving every **object** id so the comparison diff still pairs by identity. This covers every add path (import, workspace import, template, blank, duplicate).
+
 ## Relationship types
 
 ### List-based children (standard pattern)

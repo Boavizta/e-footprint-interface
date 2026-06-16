@@ -5,7 +5,7 @@ from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.form_data_parser import parse_form_data
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
@@ -16,7 +16,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 @render_exception_modal_if_error
 @time_it
 def open_create_object_panel(request, object_type):
-    model_web = ModelWeb(SessionSystemRepository(request.session))
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     efootprint_class_web = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
     efootprint_id_of_parent_to_link_to = request.GET.get("efootprint_id_of_parent_to_link_to", None)
 
@@ -45,7 +45,7 @@ def open_create_object_panel(request, object_type):
 @render_exception_modal_if_error
 @time_it
 def add_object(request, object_type):
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
 
     # 1. Parse form data (adapter responsibility - before use case)
     parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))

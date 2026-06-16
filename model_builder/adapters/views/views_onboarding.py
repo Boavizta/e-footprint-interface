@@ -9,7 +9,7 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views.views import load_system_into_session, render_model_builder
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import SCRATCH_ID, get_template_system_data
@@ -17,7 +17,7 @@ from model_builder.domain.services import SCRATCH_ID, get_template_system_data
 
 def open_template_picker(request):
     """Re-open the picker over the current model (help menu)."""
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     if model_web.system_data is None:
         # A cold visitor arriving via the home CTA has no session model yet; seed the empty
@@ -33,7 +33,7 @@ def load_template(request, template_id):
     POST-only: it replaces the session model, so it must not be reachable by a bare GET.
     The picker cards confirm first when the current model is non-empty.
     """
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     try:
         raw_system_data = get_template_system_data(template_id)
     except KeyError:
@@ -50,7 +50,7 @@ def load_template_deeplink(request, template_id):
     to load (and a bare GET cannot run the picker's client-side replace-confirm), so it
     loads directly; an unknown id 404s like any other bad URL.
     """
-    repository = SessionSystemRepository(request.session)
+    repository = SessionWorkspaceRepository(request.session).active_repository()
     try:
         raw_system_data = get_template_system_data(template_id)
     except KeyError:
