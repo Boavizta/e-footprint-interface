@@ -1,7 +1,8 @@
 {% comment %}
 Model-comparison tab strip (Task 3): one tab per workspace slot, the +Add menu (Duplicate / Import /
 Blank) while a second model can still be added, a ✕Remove control once two models exist, and the
-⇄Compare tab — disabled with a tooltip until Task 4 ships the dashboard (disabled-instead-of-error).
+⇄Compare tab — enabled once two models exist AND both are complete enough to compute (`compare_enabled`),
+otherwise disabled with an explanatory tooltip (disabled-instead-of-error).
 
 Switching is client-first: the tab POSTs to switch-model (which persists the active slot and rebinds
 the shared chrome via OOB), while the canvas show/hide is driven client-side by the switchModelCanvas
@@ -59,16 +60,17 @@ model exists OR can be added; a single-model session that never adds one still s
 
     {% comment %}
     ⇄Compare opens the comparison dashboard, re-rendered fresh on every visit (no stale results). It is
-    enabled only once a second model exists; otherwise it stays disabled with an explanatory tooltip
-    (disabled-instead-of-error). The dashboard replaces the builder in #main-content-block and pushes
-    /compare/ to the URL so a refresh re-opens it.
+    enabled only once a second model exists AND both models are complete enough to compute (the same
+    readiness signal as the "Get results" button) — comparing an incomplete model would read a footprint
+    that doesn't exist. Otherwise it stays disabled with an explanatory tooltip (disabled-instead-of-
+    error). The dashboard replaces the builder in #main-content-block and pushes /compare/ to the URL so
+    a refresh re-opens it.
     {% endcomment %}
-    <span class="ms-auto" {% if workspace_slots|length < 2 %}data-bs-toggle="tooltip" data-bs-placement="bottom"
-          title="Add a second model to compare"{% endif %}>
-        {% if workspace_slots|length < 2 %}
+    <span class="ms-auto" {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"
+          title="{% if workspace_slots|length < 2 %}Add a second model to compare{% else %}Complete both models (each needs a computable footprint) to compare{% endif %}"{% endif %}>
+        {% if not compare_enabled %}
         <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" id="compare-tab"
-                disabled
-                title="Add a second model to enable the comparison dashboard">
+                disabled>
             ⇄ Compare</button>
         {% else %}
         <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="compare-tab"

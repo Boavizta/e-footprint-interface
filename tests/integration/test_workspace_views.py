@@ -8,6 +8,7 @@ invariants the feature hinges on:
 RAISE_EXCEPTIONS=1 so a crashing view surfaces as a non-200 instead of being absorbed into a modal.
 """
 import json
+import re
 from collections import Counter
 from html.parser import HTMLParser
 
@@ -203,6 +204,24 @@ def test_compare_with_one_model_falls_back_to_the_builder(client, minimal_system
     response = client.get("/model_builder/compare/")
     assert response.status_code == 200
     assert "model-builder-page" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_compare_with_an_incomplete_second_model_falls_back_to_the_builder(client, minimal_system):
+    """A blank second model has no computable footprint, so /compare/ must NOT run the comparison
+    (which would read a non-existent footprint and 500) — it falls back to the builder, and the Compare
+    tab is disabled in the UI (disabled-instead-of-error, constitution §3.1)."""
+    _seed_active_slot(client, minimal_system)
+    client.post("/model_builder/add-model/", {"source": "blank"})  # slot 1 = blank, not computable
+
+    response = client.get("/model_builder/compare/")
+    assert response.status_code == 200  # never 500s on an incomplete model
+    html = response.content.decode()
+    assert "model-builder-page" in html          # fell back to the builder
+    assert "comparison-dashboard" not in html    # the dashboard was not rendered
+    # The Compare tab itself is disabled instead of erroring.
+    compare_button = re.search(r'<button[^>]*id="compare-tab".*?</button>', html, re.DOTALL)
+    assert compare_button is not None and "disabled" in compare_button.group(0)
 
 
 @pytest.mark.django_db

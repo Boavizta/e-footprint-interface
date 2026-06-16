@@ -96,6 +96,21 @@ def build_workspace_slots(workspace):
     return slots
 
 
+def compare_enabled(workspace_slots) -> bool:
+    """Whether the ⇄Compare tab may be enabled: two models, both complete enough to compute.
+
+    Comparing reads each model's computed footprint, so an incomplete model (e.g. a freshly added blank
+    one) cannot be compared — gate on the same results-readiness signal as the "Get results" button
+    rather than on slot count, so the tab is disabled-instead-of-error (constitution §3.1, spec §4.2)
+    instead of 500-ing when the comparison runs.
+    """
+    from model_builder.domain.services import SystemValidationService
+    if len(workspace_slots) < 2:
+        return False
+    validator = SystemValidationService()
+    return all(validator.validate_for_computation(slot["model_web"]).is_valid for slot in workspace_slots)
+
+
 def render_model_builder(request, model_web, show_template_picker, workspace=None):
     """Render the builder canvas, optionally overlaying the first-run template picker.
 
@@ -114,6 +129,7 @@ def render_model_builder(request, model_web, show_template_picker, workspace=Non
                "show_template_picker": show_template_picker,
                "model_is_empty": model_is_empty,
                "workspace_slots": workspace_slots,
+               "compare_enabled": compare_enabled(workspace_slots),
                "active_slot": active_slot,
                "tour_steps": build_tour_steps(is_blank=model_is_empty)}
     if show_template_picker:
@@ -279,7 +295,9 @@ def upload_json(request):
     if model_web.system_data:
         context["model_web"] = model_web
         context["class_help_info"] = build_canvas_class_help_info()
-        context["workspace_slots"] = build_workspace_slots(workspace)
+        workspace_slots = build_workspace_slots(workspace)
+        context["workspace_slots"] = workspace_slots
+        context["compare_enabled"] = compare_enabled(workspace_slots)
         context["active_slot"] = workspace.active_slot()
 
     http_response = render(request, "model_builder/model_builder_main.html", context=context)

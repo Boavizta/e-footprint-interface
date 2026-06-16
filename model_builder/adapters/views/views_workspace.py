@@ -134,12 +134,15 @@ def remove_model(request):
 def _render_with_error(request, workspace, message):
     """Re-render the builder with an error modal (mirrors upload_json's failure path)."""
     from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
+    from model_builder.adapters.views.views import compare_enabled
 
     model_web = ModelWeb(workspace.active_repository())
+    workspace_slots = build_workspace_slots(workspace)
     context = {
         "model_web": model_web,
         "class_help_info": build_canvas_class_help_info(),
-        "workspace_slots": build_workspace_slots(workspace),
+        "workspace_slots": workspace_slots,
+        "compare_enabled": compare_enabled(workspace_slots),
         "active_slot": workspace.active_slot(),
         "import_error_modal_id": "error-import-modal",
         "import_error_message": message,
@@ -154,19 +157,21 @@ def compare(request):
     """Render the §4.2 comparison dashboard for the workspace's two models.
 
     Built fresh on every visit (no stale results): the two slots' models are wrapped, compared via the
-    library's ``System.compare_to`` and shaped by the thin ``ComparisonService`` adapter. With fewer
-    than two models the Compare tab is disabled in the UI; a direct hit still falls back to the builder
-    rather than erroring (disabled-instead-of-error).
+    library's ``System.compare_to`` and shaped by the thin ``ComparisonService`` adapter. The dashboard
+    is shown only when two models exist *and both are complete enough to compute* — the same readiness
+    signal that gates the ⇄Compare tab. Otherwise (one model, or an incomplete second model) it falls
+    back to the builder rather than erroring (disabled-instead-of-error, constitution §3.1): comparing
+    an incomplete model would read a footprint that does not exist and 500.
     """
+    from model_builder.adapters.views.views import compare_enabled
+
     workspace = SessionWorkspaceRepository(request.session)
-    slots = workspace.list_slots()
-    if len(slots) < 2:
+    workspace_slots = build_workspace_slots(workspace)
+    if not compare_enabled(workspace_slots):
         return render_model_builder(
             request, ModelWeb(workspace.active_repository()), show_template_picker=False, workspace=workspace)
 
-    slot_a, slot_b = slots[0], slots[1]
-    model_a = ModelWeb(workspace.repository_for(slot_a))
-    model_b = ModelWeb(workspace.repository_for(slot_b))
+    model_a, model_b = workspace_slots[0]["model_web"], workspace_slots[1]["model_web"]
     comparison = ComparisonService().build(model_a, model_b)
 
     context = {
@@ -174,7 +179,8 @@ def compare(request):
         "paired_chart_json": json.dumps(comparison.paired_chart),
         "cumulative_chart_json": json.dumps(comparison.cumulative_chart),
         "decomposition_chart_json": json.dumps(comparison.decomposition_chart),
-        "workspace_slots": build_workspace_slots(workspace),
+        "workspace_slots": workspace_slots,
+        "compare_enabled": True,
         "active_slot": workspace.active_slot(),
     }
     return htmx_render(request, "model_builder/compare/dashboard.html", context=context)
