@@ -92,9 +92,11 @@ def system_id_of(system_data: Optional[Dict[str, Any]]) -> Optional[str]:
 def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     """Re-id only the System object via the library helper, preserving every object id.
 
-    Deserialize → ``assign_fresh_system_id`` → reserialize without calculated attributes (they are
-    recomputed when the slot is loaded). Routing through the library keeps it the source of truth for
-    id semantics and regenerates any reference to the system id from the live object graph.
+    Deserialize (computing the system) → ``assign_fresh_system_id`` → reserialize *with* calculated
+    attributes, so the stored blob is a true with-calc payload: the slot's recorded size stays the
+    real with-calc weight (the shared budget would otherwise under-count) and re-opening it needn't
+    recompute from scratch. Routing through the library keeps it the source of truth for id semantics
+    and regenerates any reference to the system id from the live object graph.
     """
     from efootprint.api_utils.json_to_system import json_to_system
     from efootprint.api_utils.system_to_json import system_to_json
@@ -102,7 +104,7 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
     response_objs, _flat, _sd = json_to_system(
-        system_data, launch_system_computations=False, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+        system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     system = next(iter(response_objs["System"].values()))
     assign_fresh_system_id(system)
-    return system_to_json(system, save_calculated_attributes=False)
+    return system_to_json(system, save_calculated_attributes=True)

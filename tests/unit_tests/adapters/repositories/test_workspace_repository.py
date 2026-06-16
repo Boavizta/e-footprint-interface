@@ -193,6 +193,36 @@ class TestDistinctSystemIdInvariant:
         slot1 = ws.add_slot(distinct)
         assert _system_id_from(ws.repository_for(slot1).get_system_data()) == distinct_id
 
+    def test_reminted_slot_keeps_calculated_attributes(self, minimal_system):
+        """A collision re-id must not silently drop calculated attributes from the stored blob.
+
+        The re-id round-trips through the library; if it reserialized without calc, the slot's stored
+        payload (and so its recorded weight against the shared budget) would shrink to the without-calc
+        size. Feed ``add_slot`` a real with-calc document that collides with slot 0's id and assert the
+        stored payload is genuinely with-calc — heavier than the without-calc serialization of the same
+        system, and as heavy as a fresh with-calc serialization.
+        """
+        from efootprint.api_utils.system_to_json import system_to_json
+        from e_footprint_interface.json_payload_utils import compute_json_size
+        from model_builder.adapters.repositories import InMemoryWorkspaceRepository
+
+        with_calc = system_to_json(minimal_system, save_calculated_attributes=True)
+        without_calc = system_to_json(minimal_system, save_calculated_attributes=False)
+        with_calc_bytes = compute_json_size(with_calc).size_bytes
+        without_calc_bytes = compute_json_size(without_calc).size_bytes
+        assert with_calc_bytes > without_calc_bytes  # the fixture has calc attributes worth preserving
+
+        # Slot 0 holds the without-calc twin, so the with-calc add collides on system id and is re-minted.
+        ws = InMemoryWorkspaceRepository(initial_data=without_calc)
+        slot1 = ws.add_slot(with_calc)
+
+        stored = ws.repository_for(slot1).get_system_data()
+        assert _system_id_from(stored) != _system_id_from(without_calc)  # re-minted
+        # The stored payload is genuinely with-calc, not the without-calc twin; the slot's recorded
+        # weight against the shared budget is therefore the real with-calc size (set by save_data).
+        assert compute_json_size(stored).size_bytes > without_calc_bytes
+        assert compute_json_size(stored).size_bytes == with_calc_bytes
+
 
 def _system_id_from(system_data):
     if not system_data:
