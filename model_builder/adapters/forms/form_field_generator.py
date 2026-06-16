@@ -93,6 +93,10 @@ def build_dict_count_field_from_annotation(
         "options": options,
         "options_json": json.dumps(options),
         "selected_json": json.dumps(selected_counts),
+        # Nothing to pick and nothing already selected: the widget would only offer an empty
+        # dropdown, so hide it. The hidden input still submits an empty mapping, which matters
+        # for required attributes without a default (e.g. UsageJourney.uj_steps).
+        "hide_field": not options and not selected_counts,
     }
 
 
@@ -175,6 +179,10 @@ def generate_select_multiple_field(
         "unselected": unselected,
         "selected_json": json.dumps(selected),
         "unselected_json": json.dumps(unselected),
+        # Nothing to pick and nothing already linked: the widget would only show
+        # "No available options", so hide it. The hidden input still submits an empty list,
+        # which matters for required attributes without a default (e.g. EdgeFunction needs).
+        "hide_field": not selected and not unselected,
     }
 
 

@@ -12,6 +12,7 @@ from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.constants.units import u
 from efootprint.core.usage.usage_journey import UsageJourney
+from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
@@ -187,6 +188,18 @@ def system_with_uj_no_steps(model_builder_page: ModelBuilderPage):
 
 
 @pytest.fixture
+def system_with_uj_and_step(model_builder_page: ModelBuilderPage):
+    """Create a system with a UsageJourney that already contains one UsageJourneyStep."""
+    uj_step = UsageJourneyStep.from_defaults("Seeded step", jobs={})
+    uj = UsageJourney("Seeded UJ", uj_steps=[uj_step])
+
+    system_data = deepcopy(EMPTY_SYSTEM_DICT)
+    system_data.update(system_to_json(uj, save_calculated_attributes=False))
+
+    return load_system_dict_into_browser(model_builder_page, system_data)
+
+
+@pytest.fixture
 def system_with_custom_storage_unit(model_builder_page: ModelBuilderPage):
     """Create system with BoaviztaCloudServer with custom storage duration unit (month)."""
     # Create server with custom storage unit
@@ -204,40 +217,44 @@ def system_with_custom_storage_unit(model_builder_page: ModelBuilderPage):
 
 @pytest.mark.e2e
 class TestFormFieldEnablement:
-    """Tests for form field enablement based on available objects."""
+    """Tests that pickers with nothing to choose from are hidden rather than shown empty."""
 
-    def test_ujs_list_disabled_when_no_ujs_available(self, system_with_uj_no_steps: ModelBuilderPage):
-        """UJS select should be disabled when no UJS exist, enabled when creating new UJ."""
+    def test_uj_steps_picker_hidden_when_no_steps_available(self, system_with_uj_no_steps: ModelBuilderPage):
+        """With no UsageJourneyStep to pick, the uj_steps picker is hidden in edit and create forms."""
         model_builder = system_with_uj_no_steps
         side_panel = model_builder.side_panel
         page = model_builder.page
 
-        # Edit the existing UJ (which has no steps)
+        uj_steps_group = page.locator("#field-group-UsageJourney_uj_steps")
+
+        # Editing the stepless UJ: nothing to pick -> picker hidden entirely
         uj_card = model_builder.get_object_card("UsageJourney", "Test E2E UJ")
         uj_card.click_edit_button()
-
-        # UJS select should be disabled (no UJS to select)
-        ujs_select = page.locator("#select-new-object-UsageJourney_uj_steps")
-        expect(ujs_select).to_be_attached()
-        expect(ujs_select).to_be_disabled()
-
-        # Submit without changes
+        expect(uj_steps_group).to_be_hidden()
         side_panel.submit_and_wait_for_close()
 
-        # Create a UJS on this UJ
-        uj_card.click_add_step_button()
-        side_panel.submit_and_wait_for_close()
-
-        # Edit UJ again
-        uj_card.click_edit_button()
-
-        # Select should still be disabled (the created UJS belongs to this UJ)
-        expect(ujs_select).to_be_disabled()
-
-        # Now click "Add usage journey" button to create NEW UJ
+        # Creating the first UJ likewise has nothing to pick -> picker hidden
         page.locator("#btn-add-usage-journey").click()
+        expect(uj_steps_group).to_be_hidden()
 
-        # Now the select should be enabled (can select UJS from first UJ)
+    def test_uj_steps_picker_shown_when_steps_available(self, system_with_uj_and_step: ModelBuilderPage):
+        """Once a UsageJourneyStep exists, the uj_steps picker is shown."""
+        model_builder = system_with_uj_and_step
+        page = model_builder.page
+
+        uj_steps_group = page.locator("#field-group-UsageJourney_uj_steps")
+        ujs_select = page.locator("#select-new-object-UsageJourney_uj_steps")
+
+        # Editing the UJ that already contains the step: picker visible, but the only step is
+        # already selected so there is nothing left to add -> select disabled
+        uj_card = model_builder.get_object_card("UsageJourney", "Seeded UJ")
+        uj_card.click_edit_button()
+        expect(uj_steps_group).to_be_visible()
+        expect(ujs_select).to_be_disabled()
+
+        # Creating a NEW UJ: the existing step is selectable -> picker visible and enabled
+        page.locator("#btn-add-usage-journey").click()
+        expect(uj_steps_group).to_be_visible()
         expect(ujs_select).to_be_enabled()
 
 

@@ -46,7 +46,8 @@
                     }
                 ],
                 "selected_json": "[]",
-                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]"
+                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]",
+                "hide_field": false
             },
             {
                 "web_id": "EdgeFunction_recurrent_server_needs",
@@ -66,7 +67,8 @@
                     }
                 ],
                 "selected_json": "[]",
-                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]"
+                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]",
+                "hide_field": false
             }
         ],
         "advanced_fields": []

@@ -77,6 +77,8 @@ def convert_multiselect_to_single(field: dict) -> None:
     field.pop('unselected', None)
     field.pop('selected_json', None)
     field.pop('unselected_json', None)
+    # hide_field is a multiselect-only display flag; a single select makes its own choice.
+    field.pop('hide_field', None)
 
 
 def has_meaningful_dynamic_data(dynamic_form_data: dict) -> bool:

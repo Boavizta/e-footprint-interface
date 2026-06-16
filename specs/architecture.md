@@ -178,6 +178,8 @@ Most parent-child relationships use `List[ChildType]` constructor parameters. Ma
 - `edit_object` endpoint for mutations.
 - `child_sections` property on `ModelingObjectWeb` provides structured access with `linkable_existing_count`.
 
+Both the `select_multiple` and `dict_count` widgets carry a `hide_field` flag (set in `form_field_generator.py`, honored by `dynamic_form_field.html`): when there is nothing to pick and nothing already selected, the whole field group renders `d-none` rather than an empty "No available options" picker. The hidden input + init script stay in the DOM so the form still submits an empty value — required for attributes without a default (e.g. `UsageJourney.uj_steps`, `EdgeFunction` needs). The `multiselect_to_single` field transform drops the flag since a single select makes its own choice.
+
 ### Dict-based relationships (`ExplainableObjectDict`)
 
 Weighted dict relationships map each child to a dimensionless count `{object: count}`:

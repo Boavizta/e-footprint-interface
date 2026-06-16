@@ -59,7 +59,8 @@
                 "ordered": false,
                 "options": [],
                 "options_json": "[]",
-                "selected_json": "{}"
+                "selected_json": "{}",
+                "hide_field": true
             }
         ],
         "advanced_fields": []
