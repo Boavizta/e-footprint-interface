@@ -4,7 +4,8 @@ from efootprint.constants.sources import Sources
 from efootprint.builders.timeseries.explainable_hourly_quantities_from_form_inputs import \
     ExplainableHourlyQuantitiesFromFormInputs
 
-from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import UsagePatternWebBaseClass
+from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import (
+    UsagePatternWebBaseClass, default_modeling_start_date)
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 class UsagePatternWeb(UsagePatternWebBaseClass):
     default_values = {"hourly_usage_journey_starts": ExplainableHourlyQuantitiesFromFormInputs(
-        {"start_date": "2025-01-01", "modeling_duration_value": 3, "modeling_duration_unit": "year",
+        {"start_date": default_modeling_start_date(), "modeling_duration_value": 3, "modeling_duration_unit": "year",
          "net_growth_rate_in_percentage": 10, "net_growth_rate_timespan": "year",
          "initial_volume": None, "initial_volume_timespan": "month"}, source=Sources.USER_DATA)
     }

@@ -1,9 +1,15 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, List, Tuple, Optional
 
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
+
+
+def default_modeling_start_date() -> str:
+    """Default modeling start date: January 1st of the current year."""
+    return f"{datetime.now().year}-01-01"
 
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
