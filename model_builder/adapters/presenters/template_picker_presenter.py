@@ -1,10 +1,11 @@
 """Presenter turning the domain template catalog into picker-ready view models.
 
 The domain ``build_template_catalog`` returns raw entries carrying
-``showcased_concepts`` tokens and how-to ``doc_path``s. Resolving those into
-display chips (with the class UI label and a help-drawer target) and mkdocs
-deep-link URLs needs ``CLASS_UI_CONFIG`` and ``MKDOCS_BASE_URL``, which live in
-the adapter layer — so it happens here, not in the domain (constitution §1.1).
+``showcased_concepts`` tokens and the how-to ``related_guides`` that document each
+template. Resolving those into display chips (with the class UI label and a
+help-drawer target) and mkdocs deep-link URLs needs ``CLASS_UI_CONFIG`` and
+``MKDOCS_BASE_URL``, which live in the adapter layer — so it happens here, not in
+the domain (constitution §1.1).
 """
 from django.conf import settings
 
@@ -50,7 +51,8 @@ def build_picker_groups() -> list[dict]:
                 "icon": entry.icon,
                 "category": entry.category,
                 "chips": [_resolve_chip(token) for token in entry.showcased_concepts],
-                "doc_url": _doc_url(entry.doc_path) if entry.doc_path else None,
+                "guides": [{"name": guide.name, "doc_url": _doc_url(guide.doc_path)}
+                           for guide in entry.related_guides],
             })
         groups.append({"id": group.id, "title": group.title, "entries": entries})
     return groups

@@ -1,9 +1,10 @@
 """Integration tests for the first-run template-catalog service.
 
 Exercises the merge of the interface-owned introductory registry with the
-library's how-to public API (``list_how_to_templates`` / ``get_template``) and the
-``template_id`` → serialized-System resolution that backs the load endpoint. Runs
-pure domain — no Django scaffolding (constitution §1.1).
+library's how-to templates and how-to guides (``list_how_to_templates`` /
+``list_how_to_guides``) into a single picker group, plus the ``template_id`` →
+serialized-System resolution that backs the load endpoint. Runs pure domain — no
+Django scaffolding (constitution §1.1).
 """
 import pytest
 from efootprint.api_utils.json_to_system import json_to_system
@@ -13,40 +14,54 @@ from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 from model_builder.domain.services import (
-    OBSOLETE_HOW_TO_TEMPLATE_IDS, ProgressiveImportService, SCRATCH_ID, build_template_catalog,
-    get_template_system_data)
+    ProgressiveImportService, SCRATCH_ID, build_template_catalog, get_template_system_data)
 
 
-def test_catalog_has_introductory_howto_and_scratch_groups():
+def _catalog_entries() -> dict:
+    """All non-scratch entries keyed by id, flattened across groups."""
+    return {entry.id: entry
+            for group in build_template_catalog()
+            for entry in group.entries
+            if entry.category != "scratch"}
+
+
+def test_catalog_has_a_merged_templates_group_then_scratch():
     groups = {group.id: group for group in build_template_catalog()}
-    assert list(groups) == ["introductory", "how_to", "scratch"]
+    assert list(groups) == ["templates", "scratch"]
 
 
-def test_introductory_group_mirrors_the_registry():
+def test_templates_group_lists_introductory_then_how_to_templates():
     groups = {group.id: group for group in build_template_catalog()}
-    intro = groups["introductory"]
-    assert [e.id for e in intro.entries] == [t.id for t in INTRO_TEMPLATES]
-    for entry in intro.entries:
+    entries = groups["templates"].entries
+    expected = [t.id for t in INTRO_TEMPLATES] + [t.id for t in list_how_to_templates()]
+    assert [e.id for e in entries] == expected
+
+
+def test_introductory_entries_carry_their_picker_chips():
+    entries = _catalog_entries()
+    for t in INTRO_TEMPLATES:
+        entry = entries[t.id]
         assert entry.category == "introductory"
         assert entry.icon and entry.showcased_concepts  # carried through for the picker chips
-        assert entry.doc_path is None
 
 
-def test_howto_group_merges_library_public_api():
-    groups = {group.id: group for group in build_template_catalog()}
-    how_to = groups["how_to"]
-    expected_ids = [t.id for t in list_how_to_templates()
-                    if t.id not in OBSOLETE_HOW_TO_TEMPLATE_IDS]
-    assert [e.id for e in how_to.entries] == expected_ids
-    for entry in how_to.entries:
-        assert entry.category == "how_to"
-        assert entry.doc_path and entry.doc_path.endswith(".md")  # backs the mkdocs deep-link
+def test_ecommerce_card_references_the_database_and_server_to_server_guides():
+    """The two guides that share the e-commerce scenario both hang off its one card."""
+    ecommerce = _catalog_entries()["ecommerce"]
+    assert {g.doc_path for g in ecommerce.related_guides} == {
+        "database_modeling.md", "server_to_server_interaction.md"}
+    assert all(g.name for g in ecommerce.related_guides)  # display label for the footer link
 
 
-def test_howto_group_excludes_obsolete_web_database_perspective_templates():
-    groups = {group.id: group for group in build_template_catalog()}
-    how_to_ids = {entry.id for entry in groups["how_to"].entries}
-    assert how_to_ids.isdisjoint(OBSOLETE_HOW_TO_TEMPLATE_IDS)
+def test_machine_learning_card_references_its_single_guide():
+    ml = _catalog_entries()["machine_learning_workflow"]
+    assert [g.doc_path for g in ml.related_guides] == ["machine_learning_workflow.md"]
+
+
+def test_templates_without_a_how_to_page_carry_no_guides():
+    entries = _catalog_entries()
+    assert entries["ai_chatbot"].related_guides == ()
+    assert entries["iot_industrial"].related_guides == ()
 
 
 def test_scratch_group_is_the_empty_baseline_sentinel():
@@ -66,6 +81,12 @@ def test_get_template_system_data_resolves_a_loadable_system(template_id):
     assert class_obj_dict["System"]
 
 
+def test_every_card_resolves_to_a_loadable_template():
+    """No card can offer a scenario the load endpoint would 404 on."""
+    for template_id in _catalog_entries():
+        assert "System" in get_template_system_data(template_id)
+
+
 def test_machine_learning_template_survives_interface_persistence_round_trip():
     imported = ProgressiveImportService(max_payload_size_mb=30.0).import_system(
         get_template_system_data("machine_learning_workflow"))
@@ -83,9 +104,3 @@ def test_machine_learning_template_survives_interface_persistence_round_trip():
 def test_get_template_system_data_unknown_id_raises():
     with pytest.raises(KeyError):
         get_template_system_data("not-a-template")
-
-
-@pytest.mark.parametrize("template_id", sorted(OBSOLETE_HOW_TO_TEMPLATE_IDS))
-def test_get_template_system_data_obsolete_howto_id_raises(template_id):
-    with pytest.raises(KeyError):
-        get_template_system_data(template_id)

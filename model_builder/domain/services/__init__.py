@@ -9,7 +9,7 @@ from model_builder.domain.services.edit_service import EditService, EditResult
 from model_builder.domain.services.progressive_import_service import ProgressiveImportService
 from model_builder.domain.services.empty_model import is_empty_model
 from model_builder.domain.services.template_catalog_service import (
-    CatalogEntry, CatalogGroup, OBSOLETE_HOW_TO_TEMPLATE_IDS, SCRATCH_ID,
+    CatalogEntry, CatalogGroup, CatalogGuide, SCRATCH_ID,
     build_template_catalog, get_template_system_data,
 )
 
@@ -20,6 +20,6 @@ __all__ = [
     "EditService", "EditResult",
     "ProgressiveImportService",
     "is_empty_model",
-    "CatalogEntry", "CatalogGroup", "OBSOLETE_HOW_TO_TEMPLATE_IDS", "SCRATCH_ID",
+    "CatalogEntry", "CatalogGroup", "CatalogGuide", "SCRATCH_ID",
     "build_template_catalog", "get_template_system_data",
 ]

@@ -6,6 +6,7 @@ model land with the app chrome intact and the model preserved in the session —
 no separate partial-swap container to keep in sync.
 """
 from django.http import Http404
+from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -39,3 +40,20 @@ def load_template(request, template_id):
         raise Http404(f"Unknown template: {template_id!r}")
     model_web = load_system_into_session(repository, raw_system_data)
     return render_model_builder(request, model_web, show_template_picker=False)
+
+
+def load_template_deeplink(request, template_id):
+    """Shareable GET deep link behind the docs' "Load this scenario" links.
+
+    Loads the named scenario into the session and redirects to the canvas so the URL
+    settles on ``/model_builder/``. The link click is itself the user's explicit intent
+    to load (and a bare GET cannot run the picker's client-side replace-confirm), so it
+    loads directly; an unknown id 404s like any other bad URL.
+    """
+    repository = SessionSystemRepository(request.session)
+    try:
+        raw_system_data = get_template_system_data(template_id)
+    except KeyError:
+        raise Http404(f"Unknown template: {template_id!r}")
+    load_system_into_session(repository, raw_system_data)
+    return redirect("model-builder")

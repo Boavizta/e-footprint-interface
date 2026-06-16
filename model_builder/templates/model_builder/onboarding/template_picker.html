@@ -47,10 +47,12 @@ baseline. Closing the overlay just reveals the canvas behind it.
                             </span>
                             {% endif %}
                         </button>
-                        {% if entry.doc_url %}
-                        <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3">
-                            <a href="{{ entry.doc_url }}" target="_blank" rel="noopener noreferrer"
-                               class="small text-decoration-none">Read the guide ↗</a>
+                        {% if entry.guides %}
+                        <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3 d-flex flex-column gap-1">
+                            {% for guide in entry.guides %}
+                            <a href="{{ guide.doc_url }}" target="_blank" rel="noopener noreferrer"
+                               class="small text-decoration-none">{{ guide.name }} ↗</a>
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>

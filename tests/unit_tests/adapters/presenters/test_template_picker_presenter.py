@@ -3,9 +3,9 @@
 The presenter is the only place that turns raw catalog entries into picker view
 models: it resolves ``showcased_concepts`` tokens to display chips (``{class:X}``
 via ``CLASS_UI_CONFIG``, ``CONCEPTS`` keys via their label) and builds mkdocs
-deep-link URLs from how-to ``doc_path``s. The e2e render only smoke-tests that
-this doesn't crash; these tests pin the actual label/URL mapping so a wrong chip
-label or malformed doc link fails here.
+deep-link URLs from each entry's how-to ``related_guides``. The e2e render only
+smoke-tests that this doesn't crash; these tests pin the actual label/URL mapping
+so a wrong chip label or malformed doc link fails here.
 """
 from django.test import override_settings
 
@@ -44,18 +44,22 @@ def test_doc_url_handles_base_without_trailing_slash():
 
 
 @override_settings(MKDOCS_BASE_URL="https://docs.example.org")
-def test_build_picker_groups_resolves_chips_and_doc_urls():
-    groups = {group["id"]: group for group in build_picker_groups()}
+def test_build_picker_groups_resolves_chips_and_guide_urls():
+    entries = {entry["id"]: entry
+               for group in build_picker_groups()
+               for entry in group["entries"]}
 
-    intro_entries = groups["introductory"]["entries"]
-    assert intro_entries  # the registry ships at least one introductory template
-    for entry in intro_entries:
-        assert entry["chips"]  # introductory entries carry showcased concepts
-        assert all(chip["label"] for chip in entry["chips"])
-        assert entry["doc_url"] is None  # no mkdocs deep-link for introductory templates
+    # Introductory templates carry showcased-concept chips.
+    ecommerce = entries["ecommerce"]
+    assert ecommerce["chips"] and all(chip["label"] for chip in ecommerce["chips"])
 
-    how_to_entries = groups["how_to"]["entries"]
-    assert how_to_entries  # the library ships how-to templates
-    for entry in how_to_entries:
-        assert entry["doc_url"].startswith("https://docs.example.org/")
-        assert entry["doc_url"].endswith("/")
+    # The e-commerce card surfaces both how-to guides as resolved mkdocs deep links.
+    guide_urls = [g["doc_url"] for g in ecommerce["guides"]]
+    assert guide_urls == [
+        "https://docs.example.org/database_modeling/",
+        "https://docs.example.org/server_to_server_interaction/",
+    ]
+    assert all(g["name"] for g in ecommerce["guides"])
+
+    # A template with no how-to page surfaces no guide link.
+    assert entries["ai_chatbot"]["guides"] == []

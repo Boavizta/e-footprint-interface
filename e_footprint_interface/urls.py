@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.urls import include, path
 from . import views
+from model_builder.adapters.views.views_onboarding import load_template_deeplink
 
 
 urlpatterns = [
     path("", views.home, name="home"),
+    # Shareable deep link from the docs' "Load this scenario" links → load it and land on the canvas.
+    path("template/<str:template_id>/", load_template_deeplink, name="load-template-deeplink"),
     path("model_builder/", include("model_builder.urls")),
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
