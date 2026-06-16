@@ -18,6 +18,7 @@ what a usage journey or a server *is*. Two flavors share the same orientation st
 
 - ``usage-journeys`` — the usage-journey column (the recommended starting point)
 - ``infrastructure`` — the servers / edge-devices column
+- ``edge-modeling``  — the toolbar Edge-modeling toggle (collapses into the burger below ``lg``)
 - ``usage-patterns``  — the usage-patterns column
 - ``results``         — the results bar at the bottom
 - ``help-menu``       — the toolbar Help menu (replay tour, templates, docs)
@@ -60,6 +61,16 @@ _SHARED_STEPS = [
         "target": _sel("infrastructure"),
         "title": "Then the infrastructure",
         "body": "Add the servers, external APIs and edge devices your journeys rely on.",
+    },
+    {
+        "target": _sel("edge-modeling"),
+        # The toggle lives in the toolbar, which collapses into the burger below the lg
+        # breakpoint — point tour.js at the burger there (same fallback as the help-menu step).
+        "mobile_target": ".navbar-toggler",
+        "title": "Modeling deployed devices?",
+        "body": "Flip this toggle on to turn on edge modeling: the canvas then lets you add edge objects "
+                "— deployed hardware like IoT devices, sensors or industrial PCs — alongside the servers "
+                "your journeys call over the network. {doc:web_vs_edge|Web vs edge — read the deep dive}",
     },
     {
         "target": _sel("usage-patterns"),

@@ -9,7 +9,7 @@ import re
 from model_builder.adapters.ui_config.tour_steps import build_tour_steps
 
 _PLACEHOLDER_RE = re.compile(r"\{[a-z]+:[^}]+\}")
-_TOUR_TARGETS = {"usage-journeys", "infrastructure", "usage-patterns", "results", "help-menu"}
+_TOUR_TARGETS = {"usage-journeys", "infrastructure", "edge-modeling", "usage-patterns", "results", "help-menu"}
 
 
 def _targets(steps):
@@ -53,6 +53,18 @@ def test_help_step_opens_drawer_and_anchors_on_the_help_button():
     # resolved server-side like every other body so no raw placeholder reaches JS.
     assert "mobile_body" in help_steps[0]
     assert not _PLACEHOLDER_RE.search(help_steps[0]["mobile_body"])
+
+
+def test_edge_modeling_step_anchors_on_the_toggle_and_links_to_the_deep_dive():
+    edge_steps = [s for s in build_tour_steps(is_blank=False)
+                  if 'data-tour-target="edge-modeling"' in s["target"]]
+    assert len(edge_steps) == 1
+    step = edge_steps[0]
+    # The toolbar collapses into the burger below lg, so the step carries a mobile fallback.
+    assert step["mobile_target"] == ".navbar-toggler"
+    # The {doc:web_vs_edge} placeholder is resolved server-side into a web-vs-edge deep-link.
+    assert "web_vs_edge" in step["body"]
+    assert "<a href=" in step["body"]
 
 
 def test_help_menu_step_closes_the_drawer():

@@ -1,5 +1,6 @@
 {% if model_web %}
 <li id="edge-modeling-toggle-wrapper" class="nav-item d-flex align-items-center mx-2"
+    data-tour-target="edge-modeling"
     {% if oob %}hx-swap-oob="outerHTML:#edge-modeling-toggle-wrapper"{% endif %}>
     <div class="form-check form-switch mb-0 d-flex align-items-center">
         {% if model_web.has_edge_objects %}
