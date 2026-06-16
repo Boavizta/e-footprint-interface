@@ -34,24 +34,45 @@ def build_report_bug_url(error=None):
     return f"{GITHUB_NEW_ISSUE_URL}?{query}"
 
 
+def _slot_label(slot: int) -> str:
+    """Human label for a workspace slot on the recovery page: 0 → "A", 1 → "B"."""
+    return chr(ord("A") + slot)
+
+
 def render_recovery_page(request, error=None, status=200):
     """Render the self-contained recovery page (reset / download / report a bug).
 
     Used as the escape hatch from a dead state: the entry view falls back to it when the
     session model fails to deserialize, and the project-wide handler500 renders it in
-    production. It must never depend on the (possibly corrupt) model — it only reads whether
-    raw session data exists, defensively, so the download button can be offered.
+    production. It must never depend on the (possibly corrupt) model — it only reads the
+    workspace *index* (occupied slot ids + active pointer) and whether each slot's raw payload
+    exists, defensively, so a per-slot download link can be offered without ever deserializing.
     """
-    has_saved_model = False
+    recovery_slots = []
     try:
         from model_builder.adapters.repositories import SessionWorkspaceRepository
-        has_saved_model = SessionWorkspaceRepository(request.session).active_repository().has_system_data()
+        workspace = SessionWorkspaceRepository(request.session)
+        active_slot = workspace.active_slot()
+        for slot in workspace.list_slots():
+            # has_system_data is a cache existence check, not a deserialize — dead-state-safe.
+            if workspace.repository_for(slot).has_system_data():
+                recovery_slots.append(
+                    {"slot": slot, "label": _slot_label(slot), "is_active": slot == active_slot})
+        if not recovery_slots and workspace.active_repository().has_system_data():
+            # Index empty/out of sync but the active slot still has raw data: offer the single link.
+            recovery_slots = [{"slot": active_slot, "label": _slot_label(active_slot), "is_active": True}]
     except Exception:
-        pass
+        recovery_slots = []
+
+    # A single-slot session shows one unlabelled "Download your current model"; two slots get one
+    # labelled link each ("Download model A / B"), so neither model is lost from a dead state.
+    show_slot_labels = len(recovery_slots) > 1
 
     context = {
         "report_bug_url": build_report_bug_url(error),
-        "has_saved_model": has_saved_model,
+        "recovery_slots": recovery_slots,
+        "show_slot_labels": show_slot_labels,
+        "has_saved_model": bool(recovery_slots),
         "error_type": type(error).__name__ if error is not None else None,
     }
 

@@ -23,12 +23,12 @@
             </p>
 
             <div class="d-flex flex-column gap-3 w-100" style="max-width: 360px;">
-                {% if has_saved_model %}
-                <a href="{% url 'download-raw-json' %}"
+                {% for slot_entry in recovery_slots %}
+                <a href="{% url 'download-raw-json' %}?slot={{ slot_entry.slot }}"
                    class="btn btn-outline-secondary rounded-pill px-3 py-2">
-                    Download your current model
+                    {% if show_slot_labels %}Download model {{ slot_entry.label }}{% else %}Download your current model{% endif %}
                 </a>
-                {% endif %}
+                {% endfor %}
 
                 <a href="{{ report_bug_url }}" target="_blank" rel="noopener noreferrer"
                    class="btn btn-outline-secondary rounded-pill px-3 py-2">

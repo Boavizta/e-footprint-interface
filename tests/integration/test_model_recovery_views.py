@@ -16,7 +16,7 @@ import copy
 
 import pytest
 
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
 
 
 @pytest.fixture
@@ -79,6 +79,37 @@ def test_download_raw_json_serves_corrupt_data_verbatim(client, corrupt_system_d
     # Served straight from the session: the dropped class is still absent (no ModelWeb rebuild).
     assert "Storage" not in served
     assert "Server" in served
+
+
+@pytest.mark.django_db
+def test_recovery_offers_one_download_link_per_occupied_slot(client, corrupt_system_data, minimal_system_data):
+    """Two-model session: recovery must let the user rescue *each* slot's raw model, not just the
+    active one, so neither model is lost from a dead state (per-slot raw download, dead-state-safe)."""
+    session = client.session
+    workspace = SessionWorkspaceRepository(session)
+    workspace.active_repository().save_data(corrupt_system_data)  # slot 0 (corrupt)
+    workspace.add_slot(minimal_system_data)                        # slot 1 (distinct id, valid)
+    session.save()
+
+    response = client.get("/model_builder/recover/")
+    assert response.status_code == 200
+    content = response.content.decode()
+    # One labelled link per slot, each targeting that slot explicitly.
+    assert 'href="/model_builder/download-raw-json/?slot=0"' in content
+    assert 'href="/model_builder/download-raw-json/?slot=1"' in content
+    assert "Download model A" in content
+    assert "Download model B" in content
+
+
+@pytest.mark.django_db
+def test_recovery_single_slot_keeps_the_unlabelled_download_link(client, corrupt_system_data):
+    """A single-model session keeps the original unlabelled "Download your current model" wording."""
+    SessionSystemRepository(client.session).save_data(corrupt_system_data)
+
+    content = client.get("/model_builder/recover/").content.decode()
+    assert "Download your current model" in content
+    assert 'href="/model_builder/download-raw-json/?slot=0"' in content
+    assert "Download model A" not in content
 
 
 @pytest.mark.django_db
