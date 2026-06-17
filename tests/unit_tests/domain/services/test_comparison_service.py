@@ -278,3 +278,27 @@ class TestAssumptionsDiff:
         assert view.diff_changed == []
         assert view.diff_only_in_a == []
         assert view.diff_only_in_b == []
+
+    def test_changed_dict_weight_row_shows_both_counts(self):
+        """A changed usage-journey-step weight arrives as a normal changed row (the library labels it
+        '<weight label> (<key name>)' with the dimensionless counts as the two values)."""
+        comparison = build_comparison(changed=[
+            {"object_class": "UsageJourney", "attribute": "Times per journey (Watch a video)",
+             "value_a": "1", "value_b": "3"}])
+        view = ComparisonService().build_from_comparison(comparison)
+        assert len(view.diff_changed) == 1
+        row = view.diff_changed[0]
+        assert row.object_label == "UsageJourney"
+        assert row.attribute == "Times per journey (Watch a video)"
+        assert (row.value_a, row.value_b) == ("1", "3")
+
+    def test_dict_membership_add_renders_absent_side_as_em_dash(self):
+        """A dict key present in only one model arrives with a None count on the absent side; the adapter
+        renders it as an em-dash so the cell reads 'absent', not the literal 'None'."""
+        comparison = build_comparison(changed=[
+            {"object_class": "UsageJourneyStep", "attribute": "Times per step (extra job)",
+             "value_a": None, "value_b": "2"}])
+        view = ComparisonService().build_from_comparison(comparison)
+        row = view.diff_changed[0]
+        assert row.value_a == "—"
+        assert row.value_b == "2"

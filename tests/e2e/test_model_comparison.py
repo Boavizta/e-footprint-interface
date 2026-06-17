@@ -143,6 +143,36 @@ class TestModelComparisonWorkspace:
 
         assert not console_errors, f"Unexpected console errors on the Compare flow: {console_errors}"
 
+    def test_compare_surfaces_a_changed_usage_journey_step_weight(self, minimal_complete_model_builder):
+        """The dict-weight diff fix: duplicate, change a usage-journey-step's count on the copy only, open
+        Compare and see that weight difference in "What differs between the models" — the case that used to
+        show nothing (the count is an ExplainableObjectDict value the input diff used to skip)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        # Duplicate (the copy becomes active, slot 1) and bump its step count from 1 to 3 — the two models
+        # now differ ONLY by a uj_steps weight.
+        model_builder.add_model_by_duplication()
+        # The first count input on the active canvas is the step's "Times per journey" weight (a second,
+        # hidden one is the step→job count). hx-trigger="change" needs a real edit, so type and press Enter.
+        count_input = page.locator("[data-model-canvas='1'] input.count-inline-edit").first
+        count_input.wait_for(state="visible")
+        with page.expect_response(lambda r: "update-dict-count" in r.url):
+            count_input.click()
+            count_input.fill("3")
+            count_input.press("Enter")
+
+        model_builder.open_compare()
+
+        # The diff table shows the changed step weight (the library labels it "Times per journey (<step>)").
+        diff_table = page.locator("#comparison-diff-table")
+        expect(diff_table).to_be_visible()
+        changed_row = diff_table.locator("tbody tr", has_text="Times per journey")
+        expect(changed_row).to_have_count(1)
+        expect(changed_row).to_contain_text("1")
+        expect(changed_row).to_contain_text("3")
+        expect(changed_row).to_contain_text("changed")
+
     def test_compare_keeps_the_shared_toolbar_for_the_active_model(self, minimal_complete_model_builder):
         """Regression: the shared toolbar (system name, edge toggle, upload/download, "Show results")
         must persist on the Compare dashboard, bound to the active model — singleton-chrome design.

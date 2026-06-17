@@ -349,9 +349,13 @@ class ComparisonService:
     # --- assumptions diff ----------------------------------------------------------------------
 
     def _diff(self, input_diff):
+        # A dict-relationship count present in only one model arrives as a None on the absent side
+        # (e.g. a usage-journey step linked in B but not A): render it as an em-dash so the cell reads
+        # "absent" rather than the literal "None", consistent with the only-in rows below.
         changed = [
             DiffRow(object_label=row.object_class, attribute=row.attribute,
-                    value_a=row.value_a, value_b=row.value_b)
+                    value_a="—" if row.value_a is None else row.value_a,
+                    value_b="—" if row.value_b is None else row.value_b)
             for row in input_diff.changed]
         only_a = [DiffUnmatched(object_label=f"{obj.object_name} ({obj.object_class})")
                   for obj in input_diff.only_in_a]
