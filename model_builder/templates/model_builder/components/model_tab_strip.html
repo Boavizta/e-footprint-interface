@@ -1,6 +1,7 @@
 {% comment %}
-Model-comparison tab strip (Task 3, §4.2 layout): one tab per workspace slot, then the right-anchored
-⇄Compare tab. With two models the strip reads [ Model A ✕ ] [ Model B ✕ ] [ ⇄ Compare ]: each model
+Model-comparison tab strip (Task 3, §4.2 layout): one tab per workspace slot, then the ⇄Compare tab
+flush immediately to its right (same tab affordance, not a floated button). With two models the strip
+reads [ Model A ✕ ] [ Model B ✕ ] [ ⇄ Compare ] — three adjacent tabs: each model
 tab has its own browser-tab-style ✕ that removes that tab's slot (with a confirm), leaving the other
 model as the sole model. With one model it reads [ Model A ] [ ＋ Add ▾ ] [ ⇄ Compare (disabled) ] —
 no ✕ on the sole model (the workspace can never be empty). The +Add menu offers Duplicate / Import /
@@ -72,21 +73,25 @@ model exists OR can be added; a single-model session that never adds one still s
     {% endif %}
 
     {% comment %}
-    ⇄Compare opens the comparison dashboard, re-rendered fresh on every visit (no stale results), and sits
-    immediately to the right of the model tabs (right-anchored via ms-auto). It is enabled only once a
-    second model exists AND both models are complete enough to compute (the same readiness signal as the
-    "Get results" button) — comparing an incomplete model would read a footprint that doesn't exist.
-    Otherwise it stays disabled with an explanatory tooltip (disabled-instead-of-error). The dashboard
-    replaces the builder in #main-content-block and pushes /compare/ to the URL so a refresh re-opens it.
+    ⇄Compare opens the comparison dashboard, re-rendered fresh on every visit (no stale results). It reads
+    as a tab in the same row, flush immediately to the right of the last model tab (no gap / no
+    right-anchoring) — a `model-tab--compare` accent marks it as a different kind of destination. It is
+    enabled only once a second model exists AND both models are complete enough to compute (the same
+    readiness signal as the "Get results" button) — comparing an incomplete model would read a footprint
+    that doesn't exist. Otherwise it stays disabled with an explanatory tooltip (disabled-instead-of-
+    error). The dashboard replaces the builder in #main-content-block and pushes /compare/ to the URL so
+    a refresh re-opens it.
     {% endcomment %}
-    <span class="ms-auto" {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"
+    <span class="model-tab model-tab--compare d-inline-flex align-items-center rounded-top text-muted"
+          {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"
           title="{% if workspace_slots|length < 2 %}Add a second model to compare{% else %}Complete both models (each needs a computable footprint) to compare{% endif %}"{% endif %}>
         {% if not compare_enabled %}
-        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" id="compare-tab"
-                disabled>
+        <button type="button" class="btn btn-sm model-tab__label px-3 bg-transparent border-0 text-muted"
+                id="compare-tab" disabled>
             ⇄ Compare</button>
         {% else %}
-        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="compare-tab"
+        <button type="button" class="btn btn-sm model-tab__label px-3 bg-transparent border-0"
+                id="compare-tab"
                 hx-get="{% url 'compare-models' %}"
                 hx-target="#main-content-block" hx-swap="innerHTML"
                 hx-push-url="{% url 'compare-models' %}">

@@ -223,8 +223,9 @@ class TestModelComparisonWorkspace:
 
     def test_tab_strip_layout_two_models_then_one(self, minimal_complete_model_builder):
         """§4.2 tab-strip layout: with two models the order is [A ✕] [B ✕] [Compare] — every model tab
-        has its own browser-tab-style ✕ and Compare is right-anchored after them; with one model it's
-        [A] [+Add] [Compare disabled] with no ✕ on the sole model."""
+        has its own browser-tab-style ✕ and Compare reads as a tab flush immediately to the right of the
+        last model tab (not a floated/right-anchored button); with one model it's [A] [+Add] [Compare
+        disabled] with no ✕ on the sole model."""
         model_builder = minimal_complete_model_builder
         page = model_builder.page
 
@@ -244,11 +245,28 @@ class TestModelComparisonWorkspace:
             expect(page.locator(f"#remove-model-tab-{slot}")).to_be_visible()
         expect(page.locator("#compare-tab")).to_be_enabled()
 
-        # DOM order: model tabs, then the Compare tab last (right-anchored after the second model).
+        # DOM order: model tabs, then the Compare tab last.
         tab_order = page.eval_on_selector_all(
             "#model-tab-strip [data-model-tab], #model-tab-strip #compare-tab",
             "els => els.map(e => e.id)")
         assert tab_order == ["model-tab-0", "model-tab-1", "compare-tab"], tab_order
+
+        # Compare reads as a tab (shares the .model-tab affordance, accented as a destination) and sits
+        # flush right after the last model tab — not floated to the edge (no margin-left:auto gap).
+        tab_layout = page.evaluate(
+            """() => {
+                const cmp = document.getElementById('compare-tab').closest('.model-tab');
+                const lastModelTab = document.getElementById('model-tab-1').closest('.model-tab');
+                const gap = cmp.getBoundingClientRect().left - lastModelTab.getBoundingClientRect().right;
+                return {
+                    isCompareTab: cmp.classList.contains('model-tab') && cmp.classList.contains('model-tab--compare'),
+                    gap,
+                    marginLeft: getComputedStyle(cmp).marginLeft,
+                };
+            }""")
+        assert tab_layout["isCompareTab"], tab_layout
+        assert tab_layout["gap"] < 12, f"Compare not flush after the last model tab: {tab_layout}"
+        assert tab_layout["marginLeft"] != "auto", tab_layout
 
     def test_remove_non_active_model_keeps_active(self, minimal_complete_model_builder):
         """Removing the NON-active model via its ✕ leaves the current active model active; removing the

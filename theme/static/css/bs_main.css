@@ -20697,6 +20697,21 @@ input:disabled {
   color: var(--bs-danger) !important;
 }
 
+/* ⇄Compare reads as a tab in the same row (flush after the last model tab via the shared .model-tab
+   layout), with a primary accent marking it as a different kind of destination than a model tab. */
+.model-tab--compare .model-tab__label {
+  color: var(--new-primary);
+  font-weight: 600;
+}
+.model-tab--compare .model-tab__label:not(:disabled):hover {
+  color: var(--new-primary);
+  background-color: var(--new-light-primary) !important;
+}
+.model-tab--compare .model-tab__label:disabled {
+  color: var(--gray-300);
+  opacity: 1;
+}
+
 /* Keep the full assumptions-diff (and any tail content) scrollable clear of the floating result button,
    which is absolutely positioned over the bottom var(--open-result-btn) of #model-builder-page. */
 #comparison-dashboard {
