@@ -238,10 +238,14 @@ class ModelBuilderPage:
         self.page.locator(f"[data-model-canvas='{slot}']").wait_for(state="visible")
         return self
 
-    def remove_active_model(self):
-        """Remove the active (second) model, confirming the discard, back to single-model mode."""
+    def remove_second_model(self):
+        """Remove the second model via the browser-tab-style ✕ on its tab, confirming the discard.
+
+        The ✕ lives on the Model B (last) tab and removes that slot regardless of which model is
+        active; afterwards the workspace is back in single-model mode with the +Add affordance.
+        """
         self.page.once("dialog", lambda dialog: dialog.accept())
-        click_and_wait_for_htmx(self.page, self.page.locator("#remove-active-model"))
+        click_and_wait_for_htmx(self.page, self.page.locator(".model-tab__close"))
         expect(self.page.locator("[data-model-tab]")).to_have_count(1)
         self.page.locator("[data-model-canvas]").first.wait_for(state="visible")
         return self

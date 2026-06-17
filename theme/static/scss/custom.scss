@@ -456,6 +456,28 @@ input:disabled{
     position: relative;
 }
 
+/* Model-comparison tab strip: each tab is a wrapper carrying the active styling (so it spans the label
+   and, on the second model, the browser-tab-style ✕), with the clickable label and ✕ as flat children. */
+.model-tab {
+    cursor: default;
+
+    .model-tab__label {
+        box-shadow: none;
+    }
+
+    /* The ✕ is muted until hovered/focused, like a browser tab's close affordance. */
+    .model-tab__close {
+        line-height: 1;
+        opacity: 0.6;
+
+        &:hover,
+        &:focus {
+            opacity: 1;
+            color: var(--bs-danger) !important;
+        }
+    }
+}
+
 #sidePanel {
     border: none;
     border-left: 2px solid var(--gray-200);

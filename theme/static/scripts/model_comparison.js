@@ -74,8 +74,11 @@
             const isTarget = String(canvas.dataset.modelCanvas) === String(slot);
             canvas.classList.toggle("d-none", !isTarget);
         });
-        document.querySelectorAll("[data-model-tab]").forEach(tab => {
-            const isTarget = String(tab.dataset.modelTab) === String(slot);
+        document.querySelectorAll("[data-model-tab]").forEach(label => {
+            const isTarget = String(label.dataset.modelTab) === String(slot);
+            // The active styling (background, border, weight) lives on the tab wrapper so it spans both
+            // the label and the ✕; fall back to the label itself if a future tab has no wrapper.
+            const tab = label.closest(".model-tab") || label;
             tab.classList.toggle("fw-bold", isTarget);
             tab.classList.toggle("bg-white", isTarget);
             tab.classList.toggle("border", isTarget);

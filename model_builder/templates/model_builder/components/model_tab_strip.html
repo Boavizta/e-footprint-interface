@@ -1,8 +1,11 @@
 {% comment %}
-Model-comparison tab strip (Task 3): one tab per workspace slot, the +Add menu (Duplicate / Import /
-Blank) while a second model can still be added, a ✕Remove control once two models exist, and the
-⇄Compare tab — enabled once two models exist AND both are complete enough to compute (`compare_enabled`),
-otherwise disabled with an explanatory tooltip (disabled-instead-of-error).
+Model-comparison tab strip (Task 3, §4.2 layout): one tab per workspace slot, then the right-anchored
+⇄Compare tab. With two models the strip reads [ Model A ] [ Model B ✕ ] [ ⇄ Compare ]: removing the
+second model is a browser-tab-style ✕ on the Model B tab itself (it removes that tab's slot, with a
+confirm). With one model it reads [ Model A ] [ ＋ Add ▾ ] [ ⇄ Compare (disabled) ]: the +Add menu
+offers Duplicate / Import / Blank. ⇄Compare is enabled only once two models exist AND both are complete
+enough to compute (`compare_enabled`), otherwise disabled with an explanatory tooltip
+(disabled-instead-of-error).
 
 Switching is client-first: the tab POSTs to switch-model (which persists the active slot and rebinds
 the shared chrome via OOB), while the canvas show/hide is driven client-side by the switchModelCanvas
@@ -13,16 +16,32 @@ model exists OR can be added; a single-model session that never adds one still s
 <nav id="model-tab-strip" class="d-flex flex-row align-items-center gap-1 px-3 pt-2 border-bottom"
      data-active-slot="{{ active_slot }}">
     {% for slot_entry in workspace_slots %}
-    <button type="button"
-            class="btn btn-sm rounded-top px-3 model-tab {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}"
-            id="model-tab-{{ slot_entry.slot }}"
-            data-model-tab="{{ slot_entry.slot }}"
-            {% if slot_entry.is_active %}aria-current="true"{% endif %}
-            hx-post="{% url 'switch-model' %}"
-            hx-vals='{"slot": "{{ slot_entry.slot }}"}'
-            hx-swap="none">
-        {% include 'model_builder/components/truncating_text.html' with visible_text=slot_entry.name extra_classes="d-inline-block" %}
-    </button>
+    {% comment %}
+    With two models the second (last) tab carries the ✕ remove control inside it (browser-tab style):
+    the label region switches to that model, the ✕ removes that slot. They are sibling controls in one
+    visually-unified tab so the ✕ click never triggers the label's switch-model POST.
+    {% endcomment %}
+    <span class="model-tab d-inline-flex align-items-center rounded-top {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}{% if forloop.last and workspace_slots|length > 1 %} model-tab--closable{% endif %}">
+        <button type="button"
+                class="btn btn-sm model-tab__label px-3 bg-transparent border-0 {% if slot_entry.is_active %}fw-bold{% else %}text-muted{% endif %}"
+                id="model-tab-{{ slot_entry.slot }}"
+                data-model-tab="{{ slot_entry.slot }}"
+                {% if slot_entry.is_active %}aria-current="true"{% endif %}
+                hx-post="{% url 'switch-model' %}"
+                hx-vals='{"slot": "{{ slot_entry.slot }}"}'
+                hx-swap="none">
+            {% include 'model_builder/components/truncating_text.html' with visible_text=slot_entry.name extra_classes="d-inline-block" %}
+        </button>
+        {% if forloop.last and workspace_slots|length > 1 %}
+        <button type="button" class="btn btn-sm model-tab__close border-0 px-2 text-muted"
+                id="remove-model-tab-{{ slot_entry.slot }}"
+                aria-label="Remove this model"
+                hx-post="{% url 'remove-model' %}"
+                hx-vals='{"slot": "{{ slot_entry.slot }}"}'
+                hx-target="#main-content-block" hx-swap="innerHTML"
+                data-confirm-remove-model="Remove this model and return to a single-model session?">✕</button>
+        {% endif %}
+    </span>
     {% endfor %}
 
     {% if workspace_slots|length < 2 %}
@@ -48,23 +67,15 @@ model exists OR can be added; a single-model session that never adds one still s
             </li>
         </ul>
     </div>
-    {% else %}
-    <button type="button" class="btn btn-sm btn-link text-danger text-decoration-none ms-1"
-            id="remove-active-model"
-            hx-post="{% url 'remove-model' %}"
-            hx-vals='{"slot": "{{ active_slot }}"}'
-            hx-target="#main-content-block" hx-swap="innerHTML"
-            data-confirm-remove-model="Remove this model and return to a single-model session?">
-        ✕ Remove this model</button>
     {% endif %}
 
     {% comment %}
-    ⇄Compare opens the comparison dashboard, re-rendered fresh on every visit (no stale results). It is
-    enabled only once a second model exists AND both models are complete enough to compute (the same
-    readiness signal as the "Get results" button) — comparing an incomplete model would read a footprint
-    that doesn't exist. Otherwise it stays disabled with an explanatory tooltip (disabled-instead-of-
-    error). The dashboard replaces the builder in #main-content-block and pushes /compare/ to the URL so
-    a refresh re-opens it.
+    ⇄Compare opens the comparison dashboard, re-rendered fresh on every visit (no stale results), and sits
+    immediately to the right of the model tabs (right-anchored via ms-auto). It is enabled only once a
+    second model exists AND both models are complete enough to compute (the same readiness signal as the
+    "Get results" button) — comparing an incomplete model would read a footprint that doesn't exist.
+    Otherwise it stays disabled with an explanatory tooltip (disabled-instead-of-error). The dashboard
+    replaces the builder in #main-content-block and pushes /compare/ to the URL so a refresh re-opens it.
     {% endcomment %}
     <span class="ms-auto" {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"
           title="{% if workspace_slots|length < 2 %}Add a second model to compare{% else %}Complete both models (each needs a computable footprint) to compare{% endif %}"{% endif %}>

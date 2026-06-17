@@ -53,11 +53,14 @@ class TestModelComparisonWorkspace:
         expect(page.locator("[data-model-canvas='0']")).to_be_visible()
         expect(page.locator("[data-model-canvas='1']")).to_be_hidden()
 
-        # Switch to B and remove it — back to single-model mode with the +Add affordance restored.
+        # The second model tab carries the browser-tab-style ✕; removing it via that ✕ returns to a
+        # single-model session with the +Add affordance restored and the ✕ gone.
         model_builder.switch_to_model(1)
-        model_builder.remove_active_model()
+        expect(page.locator(".model-tab__close")).to_be_visible()
+        model_builder.remove_second_model()
         assert model_builder.active_model_tab_count() == 1
         expect(page.locator("#add-model-toggle")).to_be_visible()
+        expect(page.locator(".model-tab__close")).to_have_count(0)
 
     def test_compare_shows_the_headline_delta_and_reflects_edits(self, minimal_complete_model_builder):
         """The Task-4 payoff flow: duplicate → edit B → open Compare → see the §4.2 dashboard with the
@@ -217,3 +220,32 @@ class TestModelComparisonWorkspace:
         page.locator("#lineChart").wait_for(state="visible")
 
         assert not console_errors, f"Unexpected console errors on the Compare toolbar flow: {console_errors}"
+
+    def test_tab_strip_layout_two_models_then_one(self, minimal_complete_model_builder):
+        """§4.2 tab-strip layout: with two models the order is [A] [B ✕] [Compare] — the remove control
+        is a browser-tab-style ✕ on the second (last) model tab and Compare is right-anchored after it;
+        with one model it's [A] [+Add] [Compare disabled] with no ✕."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        # Single model: no ✕, the +Add menu, Compare disabled.
+        expect(page.locator(".model-tab__close")).to_have_count(0)
+        expect(page.locator("#add-model-toggle")).to_be_visible()
+        expect(page.locator("#compare-tab")).to_be_disabled()
+
+        model_builder.add_model_by_duplication()
+
+        # Two models: the ✕ is on the second model tab (and only there); Compare is enabled.
+        expect(page.locator("[data-model-tab]")).to_have_count(2)
+        expect(page.locator(".model-tab__close")).to_have_count(1)
+        second_tab = page.locator(".model-tab").nth(1)
+        expect(second_tab.locator("[data-model-tab='1']")).to_have_count(1)
+        expect(second_tab.locator(".model-tab__close")).to_have_count(1)
+        expect(page.locator("#compare-tab")).to_be_enabled()
+
+        # DOM order: model tabs, then the Compare tab last (right-anchored after the second model).
+        tab_order = page.eval_on_selector_all(
+            "#model-tab-strip [data-model-tab], #model-tab-strip #compare-tab",
+            "els => els.map(e => e.id)")
+        assert tab_order == ["model-tab-0", "model-tab-1", "compare-tab"], tab_order
+
