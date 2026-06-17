@@ -98,6 +98,20 @@
         }
     });
 
+    // Leaving the builder for a canvas-less layout (the ⇄Compare dashboard) tears down the builder's
+    // leader lines. The lines' SVGs live on <body>, outside #main-content-block, so the dashboard swap
+    // does not remove them — and each LeaderLine keeps its own resize/scroll listeners that would then
+    // recompute against now-disconnected anchors and throw ("disconnected element" / "Cannot read
+    // properties of null"). Removing them on the swap into a no-canvas layout is the only reliable fix
+    // (our updateLines guard can't stop the library's internal listeners). Builder→builder swaps keep
+    // their canvases, so this never strips lines that initModelBuilderMain is about to reuse.
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        if (event.target && event.target.id !== "main-content-block") return;
+        if (!document.querySelector("[data-model-canvas]") && typeof window.removeAllLines === "function") {
+            window.removeAllLines();
+        }
+    });
+
     // Confirm before removing the second model (live-state confirm, body-delegated so it survives swaps).
     document.body.addEventListener("htmx:confirm", function (evt) {
         const elt = evt.target.closest("[data-confirm-remove-model]");

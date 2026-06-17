@@ -45,15 +45,23 @@ def _rendered_shared_chrome_oob(model_web) -> str:
 
 @require_POST
 def switch_model(request):
-    """Flip the active slot and rebind the shared chrome; the canvas toggle is client-side."""
+    """Flip the active slot and rebind the shared chrome; the canvas toggle is client-side.
+
+    Clicking a model tab on the Compare dashboard means "leave the comparison and edit this model":
+    the dashboard has none of the builder chrome (#system-name, the results buttons, the edge toggle),
+    so emitting the chrome OOB there would fire htmx:oobErrorNoTarget for every fragment. On Compare we
+    only persist the slot and let the client fully reload the builder via the switchModelCanvas trigger
+    (model_comparison.js) — no chrome to rebind, no OOB.
+    """
     workspace = SessionWorkspaceRepository(request.session)
     slot = int(request.POST["slot"])
     if slot not in workspace.list_slots():
         return HttpResponse(status=400)
     workspace.set_active_slot(slot)
 
-    model_web = ModelWeb(workspace.repository_for(slot))
-    response = HttpResponse(_rendered_shared_chrome_oob(model_web))
+    on_compare = (request.headers.get("HX-Current-URL", "")).rstrip("/").endswith("/compare")
+    body = "" if on_compare else _rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot)))
+    response = HttpResponse(body)
     response["HX-Trigger"] = json.dumps({"switchModelCanvas": {"slot": slot}})
     return response
 

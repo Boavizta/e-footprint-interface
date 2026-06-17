@@ -95,3 +95,50 @@ class TestModelComparisonWorkspace:
 
         model_builder.open_compare()
         expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)
+
+    def test_compare_renders_charts_with_no_leader_lines_or_console_errors(
+            self, minimal_complete_model_builder):
+        """Regression for the Compare-page leader-line / chart bug (post-Task-4 fix).
+
+        Switching to the canvas-less Compare dashboard used to leave the builder's leader lines orphaned
+        on <body>; their internal resize/scroll listeners then threw on disconnected anchors (uncaught
+        ``Cannot read properties of null``), which could abort chart init, while a model tab on the
+        dashboard POSTed switch-model whose chrome OOB fragments had no targets (``oobErrorNoTarget``).
+
+        Guards: opening Compare (and switching back across A/B/Compare, including a resize on the
+        dashboard) produces no uncaught console error, the comparison chart canvases hold live Chart.js
+        instances, and no builder leader-line SVG survives onto the dashboard.
+        """
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        console_errors: list[str] = []
+        page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+        page.on("pageerror", lambda exc: console_errors.append(str(exc)))
+
+        model_builder.add_model_by_duplication()
+
+        # Enter Compare: charts draw, builder leader lines are gone, and a dashboard resize (the action
+        # that crashed against disconnected anchors) is clean.
+        model_builder.open_compare()
+        page.wait_for_function(
+            "() => window.charts && window.charts['comparisonPairedChart']"
+            " && window.charts['comparisonCumulativeChart']")
+        assert page.evaluate("document.querySelectorAll('svg.leader-line').length") == 0
+        page.set_viewport_size({"width": 1000, "height": 720})
+        page.set_viewport_size({"width": 1440, "height": 900})
+
+        # A model tab leaves the dashboard for the builder — no chrome-OOB-without-target error — and the
+        # builder's leader lines rebuild on the now-visible canvas.
+        model_builder.switch_to_model(0)
+        model_builder.canvas.wait_for(state="visible")
+        page.wait_for_function("() => document.querySelectorAll('svg.leader-line').length > 0")
+
+        # Bounce among the three tabs once more to catch any residual orphaned-line / OOB noise.
+        model_builder.switch_to_model(1)
+        model_builder.open_compare()
+        page.wait_for_function("() => window.charts && window.charts['comparisonPairedChart']")
+        model_builder.switch_to_model(1)
+        model_builder.canvas.wait_for(state="visible")
+
+        assert not console_errors, f"Unexpected console errors on the Compare flow: {console_errors}"

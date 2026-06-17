@@ -141,6 +141,11 @@ function buildLineRegistry(lineSpecs) {
 
     lineSpecs.forEach(({fromElement, targets, optLine}) => {
         targets.forEach(toElement => {
+            // Both endpoints must still be in the live DOM: LeaderLine throws ("A disconnected element
+            // was passed.") on a detached anchor, which would otherwise abort the whole rebuild batch.
+            if (!fromElement.isConnected || !toElement.isConnected) {
+                return;
+            }
             if (!nextLines[fromElement.id]) {
                 nextLines[fromElement.id] = [];
             }
