@@ -15,10 +15,14 @@ function expandRightColumn() {
         btn.classList.remove("w-100");
         btn.classList.add("result-width");
     }
+    // The canvas scroll wrapper is builder-only; on the Compare dashboard the side panel opens over the
+    // comparison content (no canvas to reflow), so skip the reflow + line update when it is absent.
     const canvas = document.getElementById("model-canva-scrollable-area");
-    canvas.classList.remove("w-100");
-    canvas.classList.add("side-panel-open");
-    updateLines();
+    if (canvas) {
+        canvas.classList.remove("w-100");
+        canvas.classList.add("side-panel-open");
+        updateLines();
+    }
 }
 
 function collapseRightColumn() {
@@ -33,9 +37,11 @@ function collapseRightColumn() {
         btn.classList.add("w-100");
     }
     const canvas = document.getElementById("model-canva-scrollable-area");
-    canvas.classList.remove("side-panel-open");
-    canvas.classList.add("w-100");
-    updateLines();
+    if (canvas) {
+        canvas.classList.remove("side-panel-open");
+        canvas.classList.add("w-100");
+        updateLines();
+    }
 }
 
 function openSidePanel() {

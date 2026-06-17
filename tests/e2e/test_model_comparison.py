@@ -142,3 +142,48 @@ class TestModelComparisonWorkspace:
         model_builder.canvas.wait_for(state="visible")
 
         assert not console_errors, f"Unexpected console errors on the Compare flow: {console_errors}"
+
+    def test_compare_keeps_the_shared_toolbar_for_the_active_model(self, minimal_complete_model_builder):
+        """Regression: the shared toolbar (system name, edge toggle, upload/download, "Show results")
+        must persist on the Compare dashboard, bound to the active model — singleton-chrome design.
+
+        It used to vanish because the dashboard rendered without the builder's toolbar/side-panel/result
+        chrome. Guards: the toolbar and its system name (showing the *active* model) are present on
+        Compare, and its actions (rename → #sidePanel, "Show results" → #result-block) work over the
+        dashboard with no uncaught console error or missing-target.
+        """
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        console_errors: list[str] = []
+        page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+        page.on("pageerror", lambda exc: console_errors.append(str(exc)))
+
+        # Duplicate (B becomes active) and rename B so we can assert the toolbar shows the *active* model.
+        model_builder.add_model_by_duplication()
+        new_name = "Edge caching variant"
+        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
+        page.locator("#sidePanel").wait_for(state="attached")
+        page.locator("#name").clear()
+        page.locator("#name").fill(new_name)
+        model_builder.side_panel.submit_and_wait_for_close()
+
+        model_builder.open_compare()
+
+        # The toolbar persists on the dashboard, bound to the active model (B).
+        expect(page.locator("#toolbar-nav")).to_be_visible()
+        expect(page.locator("#system-name")).to_contain_text(new_name)
+        expect(page.locator("#show-results-toolbar-btn")).to_be_visible()
+        expect(page.locator("#edge-modeling-toggle-wrapper")).to_be_visible()
+
+        # The rename side panel opens over the dashboard (its layout helper must tolerate the absent
+        # builder canvas), then closes cleanly.
+        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
+        page.locator("#sidePanel #name").wait_for(state="visible")
+        model_builder.side_panel.close()
+
+        # "Show results" opens the active model's result panel over the dashboard.
+        click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
+        page.locator("#lineChart").wait_for(state="visible")
+
+        assert not console_errors, f"Unexpected console errors on the Compare toolbar flow: {console_errors}"

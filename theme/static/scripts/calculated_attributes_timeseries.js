@@ -51,15 +51,19 @@ window.calculatedAttributesChart = null;
 
 function openCalculatedAttributesChart() {
    let element = document.getElementById("chart-calculated-attribute");
-    if(element.classList.contains("d-none")){
+    // The calculated-attribute chart is a canvas-card feature; its container is builder-only, so this
+    // is a no-op on the Compare dashboard (no cards to open a chart from).
+    if (element && element.classList.contains("d-none")){
         element.classList.remove("d-none");
         element.classList.add("d-flex");
     }
 }
 
 function closeCalculatedAttributesChart() {
+    // Reached from the shared openSidePanel; on the Compare dashboard the builder-only container is
+    // absent, so guard it (still tear down any leftover chart instance below).
     let element = document.getElementById("chart-calculated-attribute");
-    if(element.classList.contains("d-flex")){
+    if (element && element.classList.contains("d-flex")){
         element.classList.remove("d-flex");
         element.classList.add("d-none");
     }

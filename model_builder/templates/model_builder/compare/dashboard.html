@@ -5,34 +5,58 @@ and cumulative charts (shared scales + one legend each — magnitude honesty), t
 
 Re-rendered fresh on every visit (views_workspace.compare): all values come from the ComparisonService
 view model in `comparison`, the two Chart.js payloads from `paired_chart_json` / `cumulative_chart_json`.
-The tab strip is shared with the builder; here the ⇄Compare tab is the active one.
+
+The shared chrome — the toolbar (system name, edge toggle, upload/download, "Show results"), the tab
+strip, and the side-panel / help-drawer / result-panel containers — is rendered here too, bound to the
+*active* model (`model_web`), so it persists across the Model A / Model B / ⇄Compare tabs exactly as on
+a model tab (singleton-chrome design). The dashboard is HTMX-swapped into #main-content-block, so the
+chrome is part of that swap rather than a true DOM singleton; keeping it identical to the builder's keeps
+every toolbar action (rename, upload, reboot, help, Show results) working with no missing OOB targets.
 {% endcomment %}
 {% load static %}
+{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
 {% include 'model_builder/components/model_tab_strip.html' %}
 
-<div id="comparison-dashboard" class="text-start mx-auto px-3 px-xl-4 py-3 overflow-y-auto"
-     style="max-width: 1100px;"
-     data-paired-chart="{{ paired_chart_json }}"
-     data-cumulative-chart="{{ cumulative_chart_json }}"
-     data-decomposition-chart="{{ decomposition_chart_json }}">
+<div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
+    <div id="comparison-dashboard" class="text-start mx-auto px-3 px-xl-4 py-3 overflow-y-auto"
+         style="max-width: 1100px;"
+         data-paired-chart="{{ paired_chart_json }}"
+         data-cumulative-chart="{{ cumulative_chart_json }}"
+         data-decomposition-chart="{{ decomposition_chart_json }}">
 
-    {% include 'model_builder/compare/kpi_strip.html' %}
-    {% include 'model_builder/compare/decomposition.html' %}
+        {% include 'model_builder/compare/kpi_strip.html' %}
+        {% include 'model_builder/compare/decomposition.html' %}
 
-    <p class="mb-1 mt-4"><strong>CO2 emissions over time</strong>
-        <span class="text-muted small">— paired bars, shared axis &amp; legend (dark = usage, light = fabrication; one legend drives both models)</span></p>
-    <div class="content-result-chart">
-        <canvas id="comparisonPairedChart" aria-label="Paired emissions over time"></canvas>
+        <p class="mb-1 mt-4"><strong>CO2 emissions over time</strong>
+            <span class="text-muted small">— paired bars, shared axis &amp; legend (dark = usage, light = fabrication; one legend drives both models)</span></p>
+        <div class="content-result-chart">
+            <canvas id="comparisonPairedChart" aria-label="Paired emissions over time"></canvas>
+        </div>
+
+        <p class="mb-1 mt-4"><strong>Cumulative CO2 emissions over time</strong>
+            <span class="text-muted small">— overlay; the gap is emissions avoided to date; the end gap is the headline Δ</span></p>
+        <div class="content-result-chart">
+            <canvas id="comparisonCumulativeChart" aria-label="Cumulative emissions over time"></canvas>
+        </div>
+
+        {% include 'model_builder/compare/assumptions_diff.html' %}
     </div>
 
-    <p class="mb-1 mt-4"><strong>Cumulative CO2 emissions over time</strong>
-        <span class="text-muted small">— overlay; the gap is emissions avoided to date; the end gap is the headline Δ</span></p>
-    <div class="content-result-chart">
-        <canvas id="comparisonCumulativeChart" aria-label="Cumulative emissions over time"></canvas>
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-3" id="sidePanel"></div>
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"></div>
+    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
+        {% include 'model_builder/components/results_bar_button.html' %}
+        <div id="result-block" class="bg-transparent overflow-y-auto overflow-x-hidden pt-1"></div>
     </div>
-
-    {% include 'model_builder/compare/assumptions_diff.html' %}
 </div>
+
+{% include 'model_builder/components/toast.html' %}
+
+<div id="modal-container"></div>
+<div id="loader-container"></div>
+
+{% include "model_builder/modals/import_error_modal.html" with modal_id=import_error_modal_id message=import_error_message %}
+{% include "model_builder/modals/warn_before_side_panel_closing_modal.html" with message="The currently opened side panel has pending changes. Would you like to continue and lose them ?" modal_id="unsavedModal" %}
 
 <script>
     // The result-charts bundle (loaded as a module in base.html) exposes the comparison chart builders
