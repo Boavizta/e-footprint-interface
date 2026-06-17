@@ -53,11 +53,11 @@ class TestModelComparisonWorkspace:
         expect(page.locator("[data-model-canvas='0']")).to_be_visible()
         expect(page.locator("[data-model-canvas='1']")).to_be_hidden()
 
-        # The second model tab carries the browser-tab-style ✕; removing it via that ✕ returns to a
-        # single-model session with the +Add affordance restored and the ✕ gone.
+        # Each model tab carries its own browser-tab-style ✕ (one per model); removing the active model
+        # (slot 1) returns to a single-model session with the +Add affordance restored and no ✕ left.
         model_builder.switch_to_model(1)
-        expect(page.locator(".model-tab__close")).to_be_visible()
-        model_builder.remove_second_model()
+        expect(page.locator(".model-tab__close")).to_have_count(2)
+        model_builder.remove_model(1)
         assert model_builder.active_model_tab_count() == 1
         expect(page.locator("#add-model-toggle")).to_be_visible()
         expect(page.locator(".model-tab__close")).to_have_count(0)
@@ -222,9 +222,9 @@ class TestModelComparisonWorkspace:
         assert not console_errors, f"Unexpected console errors on the Compare toolbar flow: {console_errors}"
 
     def test_tab_strip_layout_two_models_then_one(self, minimal_complete_model_builder):
-        """§4.2 tab-strip layout: with two models the order is [A] [B ✕] [Compare] — the remove control
-        is a browser-tab-style ✕ on the second (last) model tab and Compare is right-anchored after it;
-        with one model it's [A] [+Add] [Compare disabled] with no ✕."""
+        """§4.2 tab-strip layout: with two models the order is [A ✕] [B ✕] [Compare] — every model tab
+        has its own browser-tab-style ✕ and Compare is right-anchored after them; with one model it's
+        [A] [+Add] [Compare disabled] with no ✕ on the sole model."""
         model_builder = minimal_complete_model_builder
         page = model_builder.page
 
@@ -235,12 +235,13 @@ class TestModelComparisonWorkspace:
 
         model_builder.add_model_by_duplication()
 
-        # Two models: the ✕ is on the second model tab (and only there); Compare is enabled.
+        # Two models: each model tab carries its own ✕ (one per tab); Compare is enabled.
         expect(page.locator("[data-model-tab]")).to_have_count(2)
-        expect(page.locator(".model-tab__close")).to_have_count(1)
-        second_tab = page.locator(".model-tab").nth(1)
-        expect(second_tab.locator("[data-model-tab='1']")).to_have_count(1)
-        expect(second_tab.locator(".model-tab__close")).to_have_count(1)
+        expect(page.locator(".model-tab__close")).to_have_count(2)
+        for slot in (0, 1):
+            tab = page.locator(f"#model-tab-{slot}").locator("xpath=ancestor::span[contains(@class,'model-tab')][1]")
+            expect(tab.locator(".model-tab__close")).to_have_count(1)
+            expect(page.locator(f"#remove-model-tab-{slot}")).to_be_visible()
         expect(page.locator("#compare-tab")).to_be_enabled()
 
         # DOM order: model tabs, then the Compare tab last (right-anchored after the second model).
@@ -248,6 +249,30 @@ class TestModelComparisonWorkspace:
             "#model-tab-strip [data-model-tab], #model-tab-strip #compare-tab",
             "els => els.map(e => e.id)")
         assert tab_order == ["model-tab-0", "model-tab-1", "compare-tab"], tab_order
+
+    def test_remove_non_active_model_keeps_active(self, minimal_complete_model_builder):
+        """Removing the NON-active model via its ✕ leaves the current active model active; removing the
+        active model promotes the survivor. Each ✕ targets its own slot (per-tab remove, not "active")."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        # Duplicate → B (slot 1) is active. Switch so A (slot 0) is active, then remove the NON-active B.
+        model_builder.add_model_by_duplication()
+        model_builder.switch_to_model(0)
+        assert model_builder.active_slot() == "0"
+        model_builder.remove_model(1)
+        assert model_builder.active_model_tab_count() == 1
+        # The surviving sole model is A, still active.
+        assert model_builder.active_slot() == "0"
+        expect(page.locator("#system-name")).not_to_contain_text("Copy of")
+
+        # Re-add B (active), then remove the ACTIVE model (B, slot 1): A is promoted to the sole active.
+        model_builder.add_model_by_duplication()
+        assert model_builder.active_slot() == "1"
+        model_builder.remove_model(1)
+        assert model_builder.active_model_tab_count() == 1
+        assert model_builder.active_slot() == "0"
+        expect(page.locator("#system-name")).not_to_contain_text("Copy of")
 
     def test_compare_assumptions_diff_clears_the_results_button(self, minimal_complete_model_builder):
         """Bug A: the "What differs" section used to overflow under the floating results button. With a

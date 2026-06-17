@@ -1,11 +1,11 @@
 {% comment %}
 Model-comparison tab strip (Task 3, §4.2 layout): one tab per workspace slot, then the right-anchored
-⇄Compare tab. With two models the strip reads [ Model A ] [ Model B ✕ ] [ ⇄ Compare ]: removing the
-second model is a browser-tab-style ✕ on the Model B tab itself (it removes that tab's slot, with a
-confirm). With one model it reads [ Model A ] [ ＋ Add ▾ ] [ ⇄ Compare (disabled) ]: the +Add menu
-offers Duplicate / Import / Blank. ⇄Compare is enabled only once two models exist AND both are complete
-enough to compute (`compare_enabled`), otherwise disabled with an explanatory tooltip
-(disabled-instead-of-error).
+⇄Compare tab. With two models the strip reads [ Model A ✕ ] [ Model B ✕ ] [ ⇄ Compare ]: each model
+tab has its own browser-tab-style ✕ that removes that tab's slot (with a confirm), leaving the other
+model as the sole model. With one model it reads [ Model A ] [ ＋ Add ▾ ] [ ⇄ Compare (disabled) ] —
+no ✕ on the sole model (the workspace can never be empty). The +Add menu offers Duplicate / Import /
+Blank. ⇄Compare is enabled only once two models exist AND both are complete enough to compute
+(`compare_enabled`), otherwise disabled with an explanatory tooltip (disabled-instead-of-error).
 
 Switching is client-first: the tab POSTs to switch-model (which persists the active slot and rebinds
 the shared chrome via OOB), while the canvas show/hide is driven client-side by the switchModelCanvas
@@ -17,11 +17,13 @@ model exists OR can be added; a single-model session that never adds one still s
      data-active-slot="{{ active_slot }}">
     {% for slot_entry in workspace_slots %}
     {% comment %}
-    With two models the second (last) tab carries the ✕ remove control inside it (browser-tab style):
-    the label region switches to that model, the ✕ removes that slot. They are sibling controls in one
-    visually-unified tab so the ✕ click never triggers the label's switch-model POST.
+    Once two models exist, EVERY model tab carries its own browser-tab-style ✕ (so it is obvious each
+    ✕ removes its own model, not an ambiguous "the active one"): the label region switches to that model,
+    the ✕ removes that tab's slot. They are sibling controls in one visually-unified tab so the ✕ click
+    never triggers the label's switch-model POST. The sole model in a single-model session has no ✕ —
+    the workspace can never be empty (server-side invariant), surfaced as an absent control.
     {% endcomment %}
-    <span class="model-tab d-inline-flex align-items-center rounded-top {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}{% if forloop.last and workspace_slots|length > 1 %} model-tab--closable{% endif %}">
+    <span class="model-tab d-inline-flex align-items-center rounded-top {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}{% if workspace_slots|length > 1 %} model-tab--closable{% endif %}">
         <button type="button"
                 class="btn btn-sm model-tab__label px-3 bg-transparent border-0 {% if slot_entry.is_active %}fw-bold{% else %}text-muted{% endif %}"
                 id="model-tab-{{ slot_entry.slot }}"
@@ -32,10 +34,10 @@ model exists OR can be added; a single-model session that never adds one still s
                 hx-swap="none">
             {% include 'model_builder/components/truncating_text.html' with visible_text=slot_entry.name extra_classes="d-inline-block" %}
         </button>
-        {% if forloop.last and workspace_slots|length > 1 %}
+        {% if workspace_slots|length > 1 %}
         <button type="button" class="btn btn-sm model-tab__close border-0 px-2 text-muted"
                 id="remove-model-tab-{{ slot_entry.slot }}"
-                aria-label="Remove this model"
+                aria-label="Remove {{ slot_entry.name }}"
                 hx-post="{% url 'remove-model' %}"
                 hx-vals='{"slot": "{{ slot_entry.slot }}"}'
                 hx-target="#main-content-block" hx-swap="innerHTML"
