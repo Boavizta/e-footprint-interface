@@ -211,14 +211,14 @@ files = [
 
 [[package]]
 name = "anyio"
-version = "4.13.0"
+version = "4.14.0"
 description = "High-level concurrency and networking framework on top of asyncio or Trio"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "anyio-4.13.0-py3-none-any.whl", hash = "sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708"},
-    {file = "anyio-4.13.0.tar.gz", hash = "sha256:334b70e641fd2221c1505b3890c69882fe4a2df910cba14d97019b90b24439dc"},
+    {file = "anyio-4.14.0-py3-none-any.whl", hash = "sha256:dd9b7a2a9799ed6552fde617b2c5df02b7fdd7d88392fc48101e51bae46164d9"},
+    {file = "anyio-4.14.0.tar.gz", hash = "sha256:b47c1f9ccf73e67021df785332508f99379c68fa7d0684e8e3492cb1d4b23f89"},
 ]
 
 [package.dependencies]
@@ -385,14 +385,14 @@ develop = ["aiomisc-pytest", "coveralls", "pylama[toml]", "pytest", "pytest-cov"
 
 [[package]]
 name = "certifi"
-version = "2026.5.20"
+version = "2026.6.17"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
 groups = ["main", "dev"]
 files = [
-    {file = "certifi-2026.5.20-py3-none-any.whl", hash = "sha256:3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897"},
-    {file = "certifi-2026.5.20.tar.gz", hash = "sha256:69dea482ab64caa7b9f6aba1c6bf48bb6a5448d1c0f1b17ab42ad8c763a5344d"},
+    {file = "certifi-2026.6.17-py3-none-any.whl", hash = "sha256:2227dcbaafe0d2f59279d1762ddddc37783ed4354594f194ffc31d20f41fc3db"},
+    {file = "certifi-2026.6.17.tar.gz", hash = "sha256:024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432"},
 ]
 
 [[package]]
@@ -1064,13 +1064,15 @@ testing = ["coverage[toml] (>=5.0a4)", "pytest (>=4.6.11)", "setuptools (>=71.0.
 
 [[package]]
 name = "ecologits"
-version = "0.10.2"
+version = "0.11.0"
 description = "EcoLogits tracks and estimates the energy consumption and environmental impacts of using generative AI models through APIs."
 optional = false
-python-versions = ">=3.10,<4"
+python-versions = "<4,>=3.10"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "ecologits-0.11.0-py3-none-any.whl", hash = "sha256:dabbba7864b8be33c5bba025ffcffccc0302086e23b12ae67f087ce554b23506"},
+    {file = "ecologits-0.11.0.tar.gz", hash = "sha256:bcd233c5b01c3cb8c98a7c1dc919668bf8528d23f667bd00769ca92d1254227b"},
+]
 
 [package.dependencies]
 packaging = ">=24.2,<25.0"
@@ -1087,41 +1089,31 @@ mistralai = ["mistralai (>=1.5.0,<2.0.0)"]
 openai = ["openai (>=1.66.0,<3.0.0)"]
 opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-otlp (>=1.32.1,<2.0.0)", "opentelemetry-sdk (>=1.32.1,<2.0.0)", "tiktoken (>=0.8.0,<0.13.0)"]
 
-[package.source]
-type = "git"
-url = "https://github.com/samuelrince/ecologits-private.git"
-reference = "feat/video-generation"
-resolved_reference = "4ef09dc0e718578d37e333726c9859c467bb7481"
-
 [[package]]
 name = "efootprint"
-version = "22.0.1"
+version = "22.2.0"
 description = "Digital service environmental footprint model"
 optional = false
-python-versions = "^3.12"
+python-versions = "<4.0,>=3.12"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "efootprint-22.2.0-py3-none-any.whl", hash = "sha256:08037c3bbd8cba1c0e7f552164e072a10875c68e40fa84beb26f8ab5764fb601"},
+    {file = "efootprint-22.2.0.tar.gz", hash = "sha256:747d173553ed6e3bab4bcd7fa26552069db5201f702cac896bcff1f200ae6e3f"},
+]
 
 [package.dependencies]
-boaviztapi = "^2"
-ciso8601 = "^2.3"
-ecologits = {git = "https://github.com/samuelrince/ecologits-private.git", rev = "feat/video-generation"}
-matplotlib = "^3.10"
-orjson = "^3.11"
-pandas = "^2"
-pint = "^0.25"
-plotly = "^6"
+boaviztapi = ">=2,<3"
+ciso8601 = ">=2.3,<3.0"
+ecologits = ">=0.11,<0.12"
+matplotlib = ">=3.10,<4.0"
+orjson = ">=3.11,<4.0"
+pandas = ">=2,<3"
+pint = ">=0.25,<0.26"
+plotly = ">=6,<7"
 pytz = "2024.1"
 pyvis = "0.3.2"
-requests = "^2.31"
-zstandard = "^0.23"
-
-[package.source]
-type = "git"
-url = "https://github.com/VincentVillet/e-footprint-private.git"
-reference = "ecologits-video"
-resolved_reference = "a67d7cbc03e34c83b5f116137da05c4b231bf840"
+requests = ">=2.31,<3.0"
+zstandard = ">=0.23,<0.24"
 
 [[package]]
 name = "et-xmlfile"
@@ -4530,4 +4522,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "a7dff8e0d649c9700436430ff47322e8e80f25229e6ff0c0065de5d066bac20b"
+content-hash = "a67728481fc9cbaad8930684396af605ca1dafc123b0264ad31284fb5d32d669"

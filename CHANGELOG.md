@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [V1.8.0]
+
+### Added
+- EcoLogits video-generation external API surfaced in the model builder: the `External API` catalog now offers a `Gen AI video external API` (`EcoLogitsVideoGenExternalAPI`) alongside the LLM one, with a provider → model → resolution cascade and a boolean `Generates audio` toggle. 
+
+### Changed
+- Default modeling start date to Jan 1st of the current year.
+- Removed auto-scrolling to sankey diagrams when opening the results panel.
+
 ## [V1.7.0]
 
 ### Added
@@ -37,19 +46,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Send canonical web_id in HTMX highlight headers to avoid nginx 502 on heavily-mirrored objects.
 
 ### Added
-- EcoLogits video-generation external API surfaced in the model builder: the `External API` catalog now offers a `Gen AI video external API` (`EcoLogitsVideoGenExternalAPI`) alongside the LLM one, with a provider → model → resolution cascade, a boolean `Generates audio` toggle, and datacenter location/PUE as advanced parameters. Jobs attached to it (`EcoLogitsVideoGenExternalAPIJob`) feed the standard results pipeline and round-trip through JSON persistence.
-- The video-generation Job form's `resolution` dropdown now offers only the resolutions valid for the chosen video API and repopulates when a different API is selected.
-
-## [Unreleased]
-
-### Added
 - Introductory modeling templates (classical e-commerce, AI chatbot, industrial IoT) and their typed
   registry — the interface-owned data layer behind the upcoming first-run template picker. The committed
   JSON snapshots are regenerated from Python scenario constructors with `python -m scripts.build_intro_templates`.
 - First-run template picker: entering the builder with an empty model overlays a picker offering the
   introductory templates, the library's how-to example systems (with mkdocs deep-links), and
   "Start from scratch". Picking a card loads that working system onto the canvas. A toolbar Help menu
-  (Replay tour · Open templates · Documentation) and a "Browse templates" CTA on the home page re-open
+  (Replay tour · Open templates · Documentation) on the home page re-open
   the picker at any time; first-run-seen state is recorded in localStorage.
 - First-run guided tour: after a template loads (or "Start from scratch"), a short non-blocking tour
   (driver.js) orients the user to the interface map, the recommended modeling order, and where contextual

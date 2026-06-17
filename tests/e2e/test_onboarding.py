@@ -2,10 +2,9 @@
 and the guided tour (auto-run, replay, non-blocking help step, IoT edge latch).
 
 Covers the critical first-run journey only (testing.md "minimal, non-redundant"): entering
-an empty model shows the picker; picking a card loads a working system; the home "Browse
-templates" CTA and the toolbar Help menu both re-open the picker; the guided tour auto-runs
-once, replays from the help menu, opens the help drawer non-blockingly, and the IoT template
-lands with the edge toggle latched on.
+an empty model shows the picker; picking a card loads a working system; the toolbar Help
+menu re-opens the picker; the guided tour auto-runs once, replays from the help menu, opens
+the help drawer non-blockingly, and the IoT template lands with the edge toggle latched on.
 """
 import pytest
 from playwright.sync_api import expect
@@ -41,12 +40,6 @@ class TestOnboardingPicker:
         # Empty baseline: no object cards on the canvas.
         expect(page.locator("[id^='UsageJourney-']")).to_have_count(0)
         expect(page.locator("[id^='Server-']")).to_have_count(0)
-
-    def test_home_browse_templates_cta_opens_the_picker(self, model_builder_page: ModelBuilderPage):
-        page = model_builder_page.page
-        page.goto("/")
-        page.locator("#btn-browse-templates").click()
-        expect(model_builder_page.template_picker).to_be_visible()
 
     def test_help_menu_reopens_picker_over_a_loaded_model(self, model_builder_page: ModelBuilderPage):
         page = model_builder_page.page

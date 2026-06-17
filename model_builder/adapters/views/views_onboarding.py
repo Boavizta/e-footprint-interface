@@ -16,7 +16,7 @@ from model_builder.domain.services import SCRATCH_ID, get_template_system_data
 
 
 def open_template_picker(request):
-    """Re-open the picker over the current model (help menu, home "Browse templates")."""
+    """Re-open the picker over the current model (help menu)."""
     repository = SessionSystemRepository(request.session)
     model_web = ModelWeb(repository)
     if model_web.system_data is None:

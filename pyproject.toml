@@ -5,7 +5,7 @@
 
 [tool.poetry]
 name = "efootprint-interface"
-version = "1.7.0"
+version = "1.8.0"
 description = "Digital service environmental footprint model interface"
 authors = ["Vincent Villet", "Clémence Knaébel", "Julien Houbart", "Jordane Frouin"]
 readme = "README.md"
@@ -39,9 +39,8 @@ exclude = '''
 
 [tool.poetry.dependencies]
 python = "^3.12"
-efootprint = {git = "https://github.com/VincentVillet/e-footprint-private.git", rev = "ecologits-video"}
 # efootprint = {path = "../e-footprint-ecologits-video", develop = true}  # local dev: swap back, do NOT commit
-# efootprint = "21.1.2"
+efootprint = "22.2.0"
 django= "^5.0"
 django-browser-reload = "^1.12.1"
 django-environ = "^0"
