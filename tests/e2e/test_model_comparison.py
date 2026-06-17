@@ -249,3 +249,33 @@ class TestModelComparisonWorkspace:
             "els => els.map(e => e.id)")
         assert tab_order == ["model-tab-0", "model-tab-1", "compare-tab"], tab_order
 
+    def test_compare_assumptions_diff_clears_the_results_button(self, minimal_complete_model_builder):
+        """Bug A: the "What differs" section used to overflow under the floating results button. With a
+        real diff present, the last diff row must sit fully above the results button when scrolled to
+        the bottom of the dashboard."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        # Create a one-row diff: duplicate, bump the copy's first step count so the models differ.
+        model_builder.add_model_by_duplication()
+        count_input = page.locator("[data-model-canvas='1'] input.count-inline-edit").first
+        count_input.wait_for(state="visible")
+        with page.expect_response(lambda r: "update-dict-count" in r.url):
+            count_input.click()
+            count_input.fill("7")
+            count_input.press("Enter")
+
+        model_builder.open_compare()
+        expect(page.locator("#comparison-diff-table")).to_be_visible()
+
+        # Scroll the dashboard to the bottom; the last diff row clears the floating results button.
+        cleared = page.evaluate(
+            """() => {
+                const dash = document.getElementById('comparison-dashboard');
+                dash.scrollTop = dash.scrollHeight;
+                const rows = document.querySelectorAll('#comparison-diff-table tbody tr');
+                const lastRow = rows[rows.length - 1].getBoundingClientRect();
+                const btn = document.getElementById('panel-result-btn').getBoundingClientRect();
+                return lastRow.bottom <= btn.top + 1;
+            }""")
+        assert cleared, "The last assumptions-diff row is occluded by the floating results button"

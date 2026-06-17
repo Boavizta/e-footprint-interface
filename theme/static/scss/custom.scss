@@ -478,6 +478,12 @@ input:disabled{
     }
 }
 
+/* Keep the full assumptions-diff (and any tail content) scrollable clear of the floating result button,
+   which is absolutely positioned over the bottom var(--open-result-btn) of #model-builder-page. */
+#comparison-dashboard {
+    padding-bottom: calc(var(--open-result-btn) + 1rem);
+}
+
 #sidePanel {
     border: none;
     border-left: 2px solid var(--gray-200);
