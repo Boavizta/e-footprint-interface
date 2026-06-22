@@ -48,8 +48,15 @@ class TestEdgeModelingToggle:
         toggle = page.locator("#edge-modeling-toggle")
         expect(toggle).to_be_disabled()
         expect(toggle).to_be_checked()
-        latch_content = toggle.get_attribute("data-bs-content")
-        assert latch_content == LATCH_POPOVER_CONTENT
+
+        # The save toast renders top-center and overlaps the navbar toggle (it auto-dismisses for a
+        # real user); remove it outright so it can't intercept the hover we're about to assert.
+        page.evaluate("document.querySelector('.toast-container')?.remove()")
+
+        # The latch popover explaining why the toggle is disabled must actually appear on hover.
+        # It lives on a focusable wrapper, not the input — a disabled control emits no pointer events.
+        page.locator("#edge-modeling-toggle-latch").hover()
+        expect(page.locator(".popover-body")).to_have_text(LATCH_POPOVER_CONTENT)
 
     def test_localStorage_off_hides_edge_buttons_on_reload(self, empty_model_builder: ModelBuilderPage):
         page = empty_model_builder.page
