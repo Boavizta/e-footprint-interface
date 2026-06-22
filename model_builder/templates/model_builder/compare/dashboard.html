@@ -14,8 +14,9 @@ chrome is part of that swap rather than a true DOM singleton; keeping it identic
 every toolbar action (rename, upload, reboot, help, Show results) working with no missing OOB targets.
 {% endcomment %}
 {% load static %}
-{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+{% comment %}Tab strip above the per-model toolbar (see model_builder_main.html).{% endcomment %}
 {% include 'model_builder/components/model_tab_strip.html' %}
+{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
 
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div id="comparison-dashboard" class="text-start mx-auto px-3 px-xl-4 pt-3 overflow-y-auto"

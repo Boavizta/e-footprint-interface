@@ -30,22 +30,19 @@ class TestModelComparisonWorkspace:
         expect(page.locator("[data-model-canvas='1']")).to_be_visible()
         expect(page.locator("[data-model-canvas='0']")).to_be_hidden()
 
-        # Edit the copy independently: rename its system.
+        # Edit the copy independently: rename it via the active tab's pencil.
         new_name = "Edge caching variant"
-        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
-        page.locator("#sidePanel").wait_for(state="attached")
-        page.locator("#name").clear()
-        page.locator("#name").fill(new_name)
-        model_builder.side_panel.submit_and_wait_for_close()
-        expect(page.locator("#system-name")).to_contain_text(new_name)
+        model_builder.rename_active_model(new_name)
+        expect(model_builder.active_model_name()).to_contain_text(new_name)
 
         # Refresh: both models, their names, and the active selection survive the reload.
         page.reload()
         model_builder.canvas.wait_for(state="visible")
         assert model_builder.active_model_tab_count() == 2
         assert model_builder.active_slot() == "1"
-        expect(page.locator("#system-name")).to_contain_text(new_name)
-        expect(page.locator("[data-model-tab='1']")).to_contain_text(new_name)
+        expect(model_builder.active_model_name()).to_contain_text(new_name)
+        # The tab carries a fixed role label, not the model name (slot 1 = "Comparison model").
+        expect(page.locator("[data-model-tab='1']")).to_contain_text("Comparison model")
 
         # Switch back to model A with no full reload (client-side canvas toggle).
         model_builder.switch_to_model(0)
@@ -90,11 +87,7 @@ class TestModelComparisonWorkspace:
 
         # Edit B's system name, then re-open Compare — the new name is reflected (no stale results).
         new_name = "Edge caching variant"
-        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
-        page.locator("#sidePanel").wait_for(state="attached")
-        page.locator("#name").clear()
-        page.locator("#name").fill(new_name)
-        model_builder.side_panel.submit_and_wait_for_close()
+        model_builder.rename_active_model(new_name)
 
         model_builder.open_compare()
         expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)
@@ -192,20 +185,17 @@ class TestModelComparisonWorkspace:
         page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
         page.on("pageerror", lambda exc: console_errors.append(str(exc)))
 
-        # Duplicate (B becomes active) and rename B so we can assert the toolbar shows the *active* model.
+        # Duplicate (B becomes active) and rename B so we can assert the chrome shows the *active* model.
         model_builder.add_model_by_duplication()
         new_name = "Edge caching variant"
-        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
-        page.locator("#sidePanel").wait_for(state="attached")
-        page.locator("#name").clear()
-        page.locator("#name").fill(new_name)
-        model_builder.side_panel.submit_and_wait_for_close()
+        model_builder.rename_active_model(new_name)
 
         model_builder.open_compare()
 
-        # The toolbar persists on the dashboard, bound to the active model (B).
+        # The toolbar persists on the dashboard, bound to the active model (B): its #system-name shows
+        # B's name and the toolbar actions stay available.
         expect(page.locator("#toolbar-nav")).to_be_visible()
-        expect(page.locator("#system-name")).to_contain_text(new_name)
+        expect(model_builder.active_model_name()).to_contain_text(new_name)
         expect(page.locator("#show-results-toolbar-btn")).to_be_visible()
         expect(page.locator("#edge-modeling-toggle-wrapper")).to_be_visible()
 
@@ -282,7 +272,7 @@ class TestModelComparisonWorkspace:
         assert model_builder.active_model_tab_count() == 1
         # The surviving sole model is A, still active.
         assert model_builder.active_slot() == "0"
-        expect(page.locator("#system-name")).not_to_contain_text("Copy of")
+        expect(model_builder.active_model_name()).not_to_contain_text("Copy of")
 
         # Re-add B (active), then remove the ACTIVE model (B, slot 1): A is promoted to the sole active.
         model_builder.add_model_by_duplication()
@@ -290,7 +280,7 @@ class TestModelComparisonWorkspace:
         model_builder.remove_model(1)
         assert model_builder.active_model_tab_count() == 1
         assert model_builder.active_slot() == "0"
-        expect(page.locator("#system-name")).not_to_contain_text("Copy of")
+        expect(model_builder.active_model_name()).not_to_contain_text("Copy of")
 
     def test_compare_assumptions_diff_clears_the_results_button(self, minimal_complete_model_builder):
         """Bug A: the "What differs" section used to overflow under the floating results button. With a

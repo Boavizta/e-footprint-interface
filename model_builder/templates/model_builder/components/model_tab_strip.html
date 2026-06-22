@@ -1,11 +1,14 @@
 {% comment %}
 Model-comparison tab strip (Task 3, §4.2 layout): one tab per workspace slot, then the ⇄Compare tab
-flush immediately to its right (same tab affordance, not a floated button). With two models the strip
-reads [ Model A ✕ ] [ Model B ✕ ] [ ⇄ Compare ] — three adjacent tabs: each model
-tab has its own browser-tab-style ✕ that removes that tab's slot (with a confirm), leaving the other
-model as the sole model. With one model it reads [ Model A ] [ ＋ Add ▾ ] [ ⇄ Compare (disabled) ] —
-no ✕ on the sole model (the workspace can never be empty). The +Add menu offers Duplicate / Import /
-Blank. ⇄Compare is enabled only once two models exist AND both are complete enough to compute
+flush immediately to its right (same tab affordance, not a floated button). Tabs carry **fixed role
+labels** ("Reference model" / "Comparison model" — first slot vs second, matching how compare() pairs
+A/B), not the model name, so they stay a bounded fixed width regardless of name length; the editable
+name lives in the toolbar below. With two models the strip reads
+[ Reference model ✕ ] [ Comparison model ✕ ] [ ⇄ Compare ] — three adjacent tabs: each model tab has its
+own browser-tab-style ✕ that removes that tab's slot (with a confirm), leaving the other model as the
+sole model. With one model it reads [ Reference model ] [ ＋ Add ▾ ] [ ⇄ Compare (disabled) ] — no ✕ on
+the sole model (the workspace can never be empty). The +Add menu offers Duplicate / Import / Blank.
+⇄Compare is enabled only once two models exist AND both are complete enough to compute
 (`compare_enabled`), otherwise disabled with an explanatory tooltip (disabled-instead-of-error).
 
 Switching is client-first: the tab POSTs to switch-model (which persists the active slot and rebinds
@@ -25,15 +28,21 @@ model exists OR can be added; a single-model session that never adds one still s
     the workspace can never be empty (server-side invariant), surfaced as an absent control.
     {% endcomment %}
     <span class="model-tab d-inline-flex align-items-center rounded-top {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}{% if workspace_slots|length > 1 %} model-tab--closable{% endif %}">
+        {% comment %}
+        Fixed role labels, not the model name: the first slot is the "Reference model", the second the
+        "Comparison model" (matching how compare() pairs workspace_slots[0]→A, [1]→B). This keeps the tabs
+        a fixed, bounded width — long model names can't stretch them — and the actual editable name lives
+        in the toolbar below (#system-name).
+        {% endcomment %}
         <button type="button"
-                class="btn btn-sm model-tab__label px-3 bg-transparent border-0 {% if slot_entry.is_active %}fw-bold{% else %}text-muted{% endif %}"
+                class="btn btn-sm model-tab__label px-3 bg-transparent border-0 text-truncate {% if slot_entry.is_active %}fw-bold{% else %}text-muted{% endif %}"
                 id="model-tab-{{ slot_entry.slot }}"
                 data-model-tab="{{ slot_entry.slot }}"
                 {% if slot_entry.is_active %}aria-current="true"{% endif %}
                 hx-post="{% url 'switch-model' %}"
                 hx-vals='{"slot": "{{ slot_entry.slot }}"}'
                 hx-swap="none">
-            {% include 'model_builder/components/truncating_text.html' with visible_text=slot_entry.name extra_classes="d-inline-block" %}
+            {% if forloop.first %}Reference model{% else %}Comparison model{% endif %}
         </button>
         {% if workspace_slots|length > 1 %}
         <button type="button" class="btn btn-sm model-tab__close border-0 px-2 text-muted"

@@ -75,29 +75,22 @@ class TestToolbarFeatures:
         assert not dialogs, "Rebooting an empty model should not prompt for confirmation"
 
     def test_change_system_name(self, minimal_complete_model_builder: ModelBuilderPage):
-        """System name can be changed and persists after reload."""
+        """The model can be renamed via the active tab's pencil, and the new name persists after reload."""
         model_builder = minimal_complete_model_builder
-        side_panel = model_builder.side_panel
         page = model_builder.page
 
         new_name = "My Custom System Name"
 
-        # Click change name button
-        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
-        page.locator("#sidePanel").wait_for(state="attached")
+        # Rename via the active tab's pencil (the toolbar no longer holds an editable system-name field).
+        model_builder.rename_active_model(new_name)
 
-        # Change the name
-        page.locator("#name").clear()
-        page.locator("#name").fill(new_name)
-        side_panel.submit_and_wait_for_close()
-
-        # Verify name changed
-        expect(page.locator("#system-name")).to_contain_text(new_name)
+        # Verify the active tab now shows the new name
+        expect(model_builder.active_model_name()).to_contain_text(new_name)
 
         # Reload and verify name persists
         page.reload()
         page.locator("[data-model-canvas]:not(.d-none)").wait_for(state="visible")
-        expect(page.locator("#system-name")).to_contain_text(new_name)
+        expect(model_builder.active_model_name()).to_contain_text(new_name)
 
     def test_import_json_replaces_existing_model(
             self, minimal_complete_model_builder: ModelBuilderPage, seeded_journey_json_path: str):

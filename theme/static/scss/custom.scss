@@ -465,6 +465,13 @@ input:disabled{
         box-shadow: none;
     }
 
+    /* Model tabs carry fixed role labels ("Reference model" / "Comparison model"), so pin a fixed width
+       and ellipsize: a long model name can never stretch a tab (the name lives in the toolbar instead).
+       The ⇄Compare tab keeps its natural width (it is sized to its own label). */
+    &:not(.model-tab--compare) .model-tab__label {
+        width: 11rem;
+    }
+
     /* The ✕ is muted until hovered/focused, like a browser tab's close affordance. */
     .model-tab__close {
         line-height: 1;

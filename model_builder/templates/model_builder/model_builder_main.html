@@ -1,6 +1,11 @@
 {% load static %}
-{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+{% comment %}
+The tab strip (model selector) renders above the per-model action toolbar: the toolbar's controls are
+all scoped to the active model, so the thing that picks the active model sits on top (browser-tab
+pattern — tab strip, then the active tab's toolbar beneath it).
+{% endcomment %}
 {% include 'model_builder/components/model_tab_strip.html' %}
+{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
         {% for slot_entry in workspace_slots %}

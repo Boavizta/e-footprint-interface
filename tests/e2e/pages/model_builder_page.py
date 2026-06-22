@@ -257,6 +257,19 @@ class ModelBuilderPage:
     def active_slot(self) -> str:
         return self.page.locator("#model-tab-strip").get_attribute("data-active-slot")
 
+    def active_model_name(self):
+        """Locator for the active model's name (shown/edited in the toolbar; tabs carry fixed role labels)."""
+        return self.page.locator("#system-name")
+
+    def rename_active_model(self, new_name: str):
+        """Rename the active model via the toolbar's editable system-name field."""
+        click_and_wait_for_htmx(self.page, self.page.locator("#btn-change-system-name"))
+        self.page.locator("#sidePanel #name").wait_for(state="visible")
+        self.page.locator("#name").clear()
+        self.page.locator("#name").fill(new_name)
+        self.side_panel.submit_and_wait_for_close()
+        return self
+
     def open_compare(self):
         """Click ⇄Compare and wait for the comparison dashboard to render."""
         click_and_wait_for_htmx(self.page, self.page.locator("#compare-tab"))

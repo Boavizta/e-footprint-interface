@@ -1,6 +1,11 @@
 {% load static %}
 <nav id="toolbar-nav" class="navbar navbar-expand-lg bg-white z-3 pt-lg-3 py-2 py-lg-0 px-lg-4 mobile-toolbar-border">
     <div class="container-fluid d-flex align-items-center justify-content-between flex-nowrap">
+        {% comment %}
+        The active model's name is shown/edited here (left of the toolbar, same row as the edge toggle).
+        The tab strip above carries fixed role labels ("Reference model" / "Comparison model"), so the
+        actual name lives only here — no redundancy, and long names never stretch the tabs.
+        {% endcomment %}
         <!-- Mobile: logo icon (hidden on desktop where the main navbar has it) -->
         <a class="d-lg-none flex-shrink-0 me-2" href="/" aria-label="Home">
             <img width="28" height="28" src="{% static 'icons/sidenav/e-footprint-logo.svg' %}" alt="e-footprint" />
