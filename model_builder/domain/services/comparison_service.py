@@ -171,10 +171,11 @@ class ComparisonService:
         from efootprint.utils.display import (
             best_display_unit, human_readable_unit, format_display_number, format_quantity_for_display)
 
-        # One shared unit for the whole strip, picked from the larger total so every figure reads against
-        # it (magnitude honesty). Sig-fig rounding goes through the library's public
-        # ``format_quantity_for_display`` — converting its result back to the shared unit is safe because
-        # sig-fig rounding is scale-invariant, so the shared unit is preserved across the round-trip.
+        # One shared unit for the KPI strip (the two cards + the headline Δ), picked from the larger
+        # total so every figure reads against it (magnitude honesty). Sig-fig rounding goes through the
+        # library's public ``format_quantity_for_display`` — converting its result back to the shared
+        # unit is safe because sig-fig rounding is scale-invariant, so the shared unit is preserved
+        # across the round-trip.
         unit = best_display_unit(max(card_a.total_kg, card_b.total_kg) * u.kg)
         unit_str = human_readable_unit(unit)
 
@@ -182,6 +183,14 @@ class ComparisonService:
             magnitude = format_quantity_for_display((kg * u.kg).to(unit), 3).to(unit).magnitude
             sign = "+" if signed and magnitude > 0 else ""
             return f"{sign}{format_display_number(magnitude)} {unit_str}"
+
+        # The decomposition rows span very different magnitudes (a few grams of network impact next to
+        # half a tonne of device fabrication), so each gets its own best unit and rounding via the
+        # library's display helpers rather than being forced onto the strip's shared unit.
+        def fmt_best_signed(kg):
+            quantity = format_quantity_for_display(kg * u.kg, 3)
+            sign = "+" if quantity.magnitude > 0 else ""
+            return f"{sign}{format_display_number(quantity.magnitude)} {human_readable_unit(quantity.units)}"
 
         for card in (card_a, card_b):
             card.total_display = fmt(card.total_kg)
@@ -196,7 +205,7 @@ class ComparisonService:
         delta.direction = "lower" if delta.absolute_kg < 0 else ("higher" if delta.absolute_kg > 0 else "")
 
         for bar in decomposition:
-            bar.delta_display = fmt(bar.delta_kg, signed=True)
+            bar.delta_display = fmt_best_signed(bar.delta_kg)
             bar.direction = "lower" if bar.delta_kg < 0 else "higher"
 
     # --- KPI strip -----------------------------------------------------------------------------
