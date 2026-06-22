@@ -85,6 +85,12 @@ def render_exception_modal(request, exception):
     http_response = render(request, "model_builder/modals/exception_modal.html", {
         "modal_id": "model-builder-modal", "message": exception})
 
+    # The modal is delivered entirely out-of-band into #modal-container, so the main response body is
+    # empty. Without this, that empty body would be swapped into the triggering element's target —
+    # harmless for transient side panels, but it would wipe #main-content-block for views that target
+    # the whole builder (add-model / remove-model). HX-Reswap: none suppresses the main swap; OOB
+    # swaps are still processed, so the modal appears and the canvas is left untouched.
+    http_response["HX-Reswap"] = "none"
     http_response["HX-Trigger-After-Settle"] = json.dumps({"openModalDialog": {"modal_id": "model-builder-modal"}})
 
     return http_response

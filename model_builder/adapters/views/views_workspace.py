@@ -16,16 +16,15 @@ Thin HTTP adapters over ``SessionWorkspaceRepository``:
 """
 import gc
 import json
-import os
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.comparison.duplication import duplicate_system
 
 from model_builder.adapters.repositories import SessionWorkspaceRepository, SessionSystemRepository
+from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.adapters.views.views import load_system_into_session, render_model_builder, build_workspace_slots
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import (
@@ -136,6 +135,7 @@ def _system_data_for_add(request, workspace):
     return system_data
 
 
+@render_exception_modal_if_error
 @require_POST
 def add_model(request):
     """Add a second model (duplicate / blank / import) and make it active."""
@@ -145,10 +145,6 @@ def add_model(request):
         raw_system_data = _system_data_for_add(request, workspace)
         with_calc = import_service.import_system(raw_system_data)
         new_slot = workspace.add_slot(with_calc)
-    except Exception as e:
-        if os.environ.get("RAISE_EXCEPTIONS"):
-            raise
-        return _render_with_error(request, workspace, f"Could not add the model: {type(e).__name__}: {e}")
     finally:
         gc.collect()
 
@@ -157,42 +153,16 @@ def add_model(request):
     return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
 
 
+@render_exception_modal_if_error
 @require_POST
 def remove_model(request):
     """Remove a slot and return to the surviving (now active) model."""
     workspace = SessionWorkspaceRepository(request.session)
     slot = int(request.POST["slot"])
-    try:
-        workspace.remove_slot(slot)
-    except ValueError as e:
-        if os.environ.get("RAISE_EXCEPTIONS"):
-            raise
-        return _render_with_error(request, workspace, str(e))
+    workspace.remove_slot(slot)
 
     model_web = ModelWeb(workspace.active_repository())
     return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
-
-
-def _render_with_error(request, workspace, message):
-    """Re-render the builder with an error modal (mirrors upload_json's failure path)."""
-    from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
-    from model_builder.adapters.views.views import compare_enabled
-
-    model_web = ModelWeb(workspace.active_repository())
-    workspace_slots = build_workspace_slots(workspace, active_model_web=model_web)
-    context = {
-        "model_web": model_web,
-        "class_help_info": build_canvas_class_help_info(),
-        "workspace_slots": workspace_slots,
-        "compare_enabled": compare_enabled(workspace_slots),
-        "active_slot": workspace.active_slot(),
-        "import_error_modal_id": "error-import-modal",
-        "import_error_message": message,
-    }
-    http_response = HttpResponse(render_to_string("model_builder/model_builder_main.html", context, request))
-    http_response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})
-    http_response["HX-Trigger-After-Settle"] = json.dumps({"openModalDialog": {"modal_id": "error-import-modal"}})
-    return http_response
 
 
 def compare(request):

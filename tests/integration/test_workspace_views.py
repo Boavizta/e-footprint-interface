@@ -102,6 +102,34 @@ def test_add_blank_creates_second_slot(client, minimal_system):
 
 
 @pytest.mark.django_db
+def test_add_model_error_surfaces_oob_modal_without_wiping_the_builder(client, minimal_system, monkeypatch):
+    """A failing add-model returns the OOB exception modal with ``HX-Reswap: none`` so the modal
+    overlays the (untouched) builder instead of the empty response body wiping #main-content-block.
+
+    Guards the @render_exception_modal_if_error path for full-builder-target views (add/remove),
+    which the decorator only serves correctly because of the HX-Reswap: none header. The autouse
+    fixture forces RAISE_EXCEPTIONS=1 (errors bubble); unset it so the decorator renders the modal.
+    """
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    _seed_active_slot(client, minimal_system)
+
+    # source=import with no uploaded file raises ValueError("Invalid file format ...") in the view.
+    response = client.post("/model_builder/add-model/", {"source": "import"})
+    body = response.content.decode()
+
+    assert response.status_code == 200
+    assert response["HX-Reswap"] == "none"                       # the main swap is suppressed...
+    assert 'id="modal-container"' in body and "hx-swap-oob" in body  # ...so the modal lands OOB
+    assert 'id="model-builder-modal"' in body
+    assert "Invalid file format" in body                         # the exception message reaches the modal
+    assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+    # Canvas-wipe guard: the builder is NOT re-rendered, so no canvas markup is in the response body...
+    assert "data-model-canvas" not in body
+    # ...and the workspace is untouched (still a single slot, nothing half-added).
+    assert SessionWorkspaceRepository(client.session).list_slots() == [0]
+
+
+@pytest.mark.django_db
 def test_no_dom_id_collides_across_two_resident_canvases(client, minimal_system):
     """The headline correctness risk: both canvases render in one document, so a duplicated structural
     or object-card id would silently break HTMX/leaderlines. The add response renders both canvases."""
