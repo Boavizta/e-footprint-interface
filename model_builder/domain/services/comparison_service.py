@@ -179,14 +179,15 @@ class ComparisonService:
         unit = best_display_unit(max(card_a.total_kg, card_b.total_kg) * u.kg)
         unit_str = human_readable_unit(unit)
 
-        def fmt(kg, signed=False):
+        def fmt(kg):
             magnitude = format_quantity_for_display((kg * u.kg).to(unit), 3).to(unit).magnitude
-            sign = "+" if signed and magnitude > 0 else ""
-            return f"{sign}{format_display_number(magnitude)} {unit_str}"
+            return f"{format_display_number(magnitude)} {unit_str}"
 
-        # The decomposition rows span very different magnitudes (a few grams of network impact next to
-        # half a tonne of device fabrication), so each gets its own best unit and rounding via the
-        # library's display helpers rather than being forced onto the strip's shared unit.
+        # The decomposition rows AND the headline Δ span very different magnitudes (a few grams of
+        # network impact next to half a tonne of device fabrication), so each gets its own best unit and
+        # rounding via the library's display helpers rather than the strip's shared unit. This is also
+        # what keeps the Δ figures clean: forcing a small value into the shared unit and converting back
+        # leaves float-representation noise (e.g. "0.5710000000000001 t" instead of "+571 kg").
         def fmt_best_signed(kg):
             quantity = format_quantity_for_display(kg * u.kg, 3)
             sign = "+" if quantity.magnitude > 0 else ""
@@ -197,9 +198,9 @@ class ComparisonService:
             card.usage_display = fmt(card.usage_kg)
             card.fabrication_display = fmt(card.fabrication_kg)
 
-        delta.absolute_display = fmt(delta.absolute_kg, signed=True)
-        delta.usage_display = fmt(delta.usage_kg, signed=True)
-        delta.fabrication_display = fmt(delta.fabrication_kg, signed=True)
+        delta.absolute_display = fmt_best_signed(delta.absolute_kg)
+        delta.usage_display = fmt_best_signed(delta.usage_kg)
+        delta.fabrication_display = fmt_best_signed(delta.fabrication_kg)
         delta.relative_display = (
             "" if delta.relative is None else f"{'+' if delta.relative > 0 else ''}{round(delta.relative * 100)} %")
         delta.direction = "lower" if delta.absolute_kg < 0 else ("higher" if delta.absolute_kg > 0 else "")

@@ -10,6 +10,18 @@ first, then by (name, type) in the library; identical inputs are not listed. Dif
 
 {% if comparison.diff_changed or comparison.diff_only_in_a or comparison.diff_only_in_b %}
 <table class="table table-sm small align-middle" id="comparison-diff-table">
+    {% comment %}
+    Fixed column widths (table-layout: fixed in custom.scss): a long system name in a header or in the
+    "only in <name>" status cell can't stretch the table — the header names truncate with a tooltip, the
+    body cells wrap. Mirrors the .source-table fixed-layout pattern.
+    {% endcomment %}
+    <colgroup>
+        <col style="width: 24%;">
+        <col style="width: 22%;">
+        <col style="width: 18%;">
+        <col style="width: 18%;">
+        <col style="width: 18%;">
+    </colgroup>
     <thead>
         <tr>
             <th>Object</th>

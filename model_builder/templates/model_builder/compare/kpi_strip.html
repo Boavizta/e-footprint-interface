@@ -5,13 +5,13 @@ colour carry the constant model identity / direction. All values are pre-formatt
 in one shared unit so the magnitudes read against each other.
 {% endcomment %}
 <div class="d-flex flex-column flex-md-row gap-2 align-items-stretch">
-    <div class="flex-fill border rounded p-2" style="border-left: 5px solid {{ comparison.colors.model_a }} !important;">
-        <strong>{% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_a.name %}</strong><br>
+    <div class="kpi-model-card border rounded p-2" style="border-left: 5px solid {{ comparison.colors.model_a }} !important;">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_a.name extra_classes="fw-bold" %}
         <span class="fs-5">{{ comparison.card_a.total_display }} CO₂e</span><br>
         <span class="small text-muted">{{ comparison.card_a.period_label }} · usage {{ comparison.card_a.usage_display }} · fab. {{ comparison.card_a.fabrication_display }}</span>
     </div>
-    <div class="flex-fill border rounded p-2" style="border-left: 5px solid {{ comparison.colors.model_b }} !important;">
-        <strong>{% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_b.name %}</strong><br>
+    <div class="kpi-model-card border rounded p-2" style="border-left: 5px solid {{ comparison.colors.model_b }} !important;">
+        {% include 'model_builder/components/truncating_text.html' with visible_text=comparison.card_b.name extra_classes="fw-bold" %}
         <span class="fs-5">{{ comparison.card_b.total_display }} CO₂e</span><br>
         <span class="small text-muted">{{ comparison.card_b.period_label }} · usage {{ comparison.card_b.usage_display }} · fab. {{ comparison.card_b.fabrication_display }}</span>
     </div>

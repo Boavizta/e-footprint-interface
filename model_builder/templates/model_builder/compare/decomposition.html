@@ -9,12 +9,12 @@ direction colour. No cause-linking to inputs in v1.
     <span class="text-muted small">— per impact category, full timespan</span></p>
 
 {% if comparison.decomposition %}
-<div class="content-result-chart" style="max-width: 560px;">
+<div class="content-result-chart">
     <canvas id="comparisonDecompositionChart" aria-label="Footprint difference by category and phase"></canvas>
 </div>
 <ul class="list-unstyled small mt-2 mb-1" id="comparison-decomposition-list">
     {% for bar in comparison.decomposition %}
-    <li class="d-flex justify-content-between" style="max-width: 560px;">
+    <li class="d-flex justify-content-between">
         <span>{{ bar.label }}</span>
         <span style="color: {% if bar.direction == 'lower' %}{{ comparison.colors.lower }}{% else %}{{ comparison.colors.higher }}{% endif %};">{{ bar.delta_display }}</span>
     </li>

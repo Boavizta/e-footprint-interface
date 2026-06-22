@@ -510,6 +510,29 @@ input:disabled{
     padding-bottom: calc(var(--open-result-btn) + 1rem);
 }
 
+/* KPI strip — the two model cards are equal fixed-width shares (flex-basis 0) with min-width:0 so a long
+   system name truncates (with tooltip) instead of stretching the card. The headline Δ card grows less
+   (flex-grow 0.7) so it reads as a narrower summary beside the two model boxes. */
+.kpi-model-card {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.kpi-delta-card {
+    flex: 0.7 1 0;
+    min-width: 0;
+}
+
+/* "What differs" diff table — fixed column widths (mirrors .source-table) so a long system name, in a
+   header or in the "only in <name>" status cell, can't stretch the table: header names truncate with a
+   tooltip (truncating_text), body cells wrap. */
+#comparison-diff-table {
+    table-layout: fixed;
+    width: 100%;
+
+    th, td { overflow-wrap: anywhere; }
+}
+
 #sidePanel {
     border: none;
     border-left: 2px solid var(--gray-200);
