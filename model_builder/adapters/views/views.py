@@ -73,17 +73,24 @@ def _requested_slot(request, workspace):
     return slot if slot in workspace.list_slots() else workspace.active_slot()
 
 
-def build_workspace_slots(workspace):
+def build_workspace_slots(workspace, active_model_web=None):
     """Build a render-ready list of the workspace's slots: one wrapped model per occupied slot.
 
     Each entry carries the slot index, its ``ModelWeb``, the system name, and whether it is active.
     The active slot's model is the shared chrome's ``model_web`` (toolbar, results panel, picker).
+
+    ``active_model_web`` is the caller's already-built ``ModelWeb`` for the active slot (held for the
+    shared chrome). Passing it in lets the active slot reuse that instance instead of deserializing the
+    same model a second time, so a render builds each model once rather than the active one twice.
     """
     active_slot = workspace.active_slot()
     slots = []
     for slot in workspace.list_slots():
-        model_web = ModelWeb(workspace.repository_for(slot))
         is_active = slot == active_slot
+        if is_active and active_model_web is not None:
+            model_web = active_model_web
+        else:
+            model_web = ModelWeb(workspace.repository_for(slot))
         slots.append({
             "slot": slot,
             "model_web": model_web,
@@ -119,7 +126,7 @@ def render_model_builder(request, model_web, show_template_picker, workspace=Non
     render, the degenerate single-slot case. ``model_web`` is always the active slot's model: the
     shared chrome (toolbar, results panel, picker, tour) binds to it.
     """
-    workspace_slots = build_workspace_slots(workspace) if workspace is not None else [
+    workspace_slots = build_workspace_slots(workspace, active_model_web=model_web) if workspace is not None else [
         {"slot": getattr(model_web.repository, "slot", 0), "model_web": model_web,
          "name": model_web.system.name, "is_active": True, "suffix": ""}]
     active_slot = next(s["slot"] for s in workspace_slots if s["is_active"])
@@ -359,7 +366,7 @@ def upload_json(request):
     if model_web.system_data:
         context["model_web"] = model_web
         context["class_help_info"] = build_canvas_class_help_info()
-        workspace_slots = build_workspace_slots(workspace)
+        workspace_slots = build_workspace_slots(workspace, active_model_web=model_web)
         context["workspace_slots"] = workspace_slots
         context["compare_enabled"] = compare_enabled(workspace_slots)
         context["active_slot"] = workspace.active_slot()

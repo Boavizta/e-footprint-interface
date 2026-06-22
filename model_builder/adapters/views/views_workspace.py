@@ -176,7 +176,7 @@ def _render_with_error(request, workspace, message):
     from model_builder.adapters.views.views import compare_enabled
 
     model_web = ModelWeb(workspace.active_repository())
-    workspace_slots = build_workspace_slots(workspace)
+    workspace_slots = build_workspace_slots(workspace, active_model_web=model_web)
     context = {
         "model_web": model_web,
         "class_help_info": build_canvas_class_help_info(),
