@@ -49,6 +49,29 @@ class WorkspaceRepositoryBase(IWorkspaceRepository):
         self.repository_for(slot).clear()
         self._deregister_slot(slot)
 
+    def drop_expired_slots(self) -> List[int]:
+        """Forget index slots whose cached payload has expired (the session index outlives cache TTLs).
+
+        The workspace index lives in the long-lived Django session; each slot's heavy payload lives in
+        the Redis/Postgres cache with far shorter TTLs (minutes/hours). After enough idle time the index
+        can still list a slot whose payload is gone — an unrecoverable model. Reconcile by dropping such
+        slot(s) so the workspace collapses to its surviving model(s) instead of trying to hydrate a
+        vanished one (which would raise ``SessionExpiredError`` off an un-hydrated ``ModelWeb`` and 500
+        the entry view in ``build_workspace_slots``). The active pointer follows onto a survivor.
+
+        When *every* slot is empty, all but the active slot are dropped and the active slot is kept
+        (still empty): the workspace must never be slot-less, and the caller re-seeds that active slot
+        to the scratch baseline exactly as for a brand-new session. Returns the dropped slot ids.
+        """
+        occupied = [slot for slot in self.list_slots() if self.repository_for(slot).has_system_data()]
+        survivors = occupied or [self.active_slot()]
+        dropped = [slot for slot in self.list_slots() if slot not in survivors]
+        for slot in dropped:
+            self._deregister_slot(slot)
+        if self.active_slot() not in survivors:
+            self.set_active_slot(survivors[0])
+        return dropped
+
     def distinctify_against_siblings(self, system_data: Dict[str, Any], slot: int) -> Dict[str, Any]:
         """Return ``system_data`` with a system id distinct from every *other* occupied slot's.
 

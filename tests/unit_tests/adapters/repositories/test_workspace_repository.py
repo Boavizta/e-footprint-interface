@@ -224,6 +224,54 @@ class TestDistinctSystemIdInvariant:
         assert compute_json_size(stored).size_bytes == with_calc_bytes
 
 
+# --------------------------------------------------------------------------- #
+# Index↔cache reconciliation: the session index outlives the cache TTLs, so it can list a slot whose
+# payload has expired. drop_expired_slots collapses the workspace to its surviving model(s) instead of
+# leaving build_workspace_slots to 500 on an un-hydrated ModelWeb. Simulated here by clearing a slot's
+# data (payload gone) while it stays listed in the index (in-memory clear() leaves the slot occupied).
+# --------------------------------------------------------------------------- #
+class TestDropExpiredSlots:
+    def _two_slot_workspace(self, minimal_system_data):
+        from model_builder.adapters.repositories import InMemoryWorkspaceRepository
+        ws = InMemoryWorkspaceRepository(initial_data=minimal_system_data)
+        ws.add_slot(minimal_system_data)  # slot 1, distinct id
+        assert ws.list_slots() == [0, 1]
+        return ws
+
+    def test_expired_parked_slot_is_dropped_active_kept(self, minimal_system_data):
+        ws = self._two_slot_workspace(minimal_system_data)
+        ws.repository_for(1).clear()  # parked slot's payload expired, still indexed
+
+        assert ws.drop_expired_slots() == [1]
+        assert ws.list_slots() == [0]
+        assert ws.active_slot() == 0
+
+    def test_expired_active_slot_dropped_active_follows_survivor(self, minimal_system_data):
+        ws = self._two_slot_workspace(minimal_system_data)
+        ws.set_active_slot(0)
+        ws.repository_for(0).clear()  # the active slot is the one that expired
+
+        assert ws.drop_expired_slots() == [0]
+        assert ws.list_slots() == [1]
+        assert ws.active_slot() == 1  # active follows onto the surviving model
+
+    def test_all_slots_expired_keeps_active_for_reseeding(self, minimal_system_data):
+        ws = self._two_slot_workspace(minimal_system_data)
+        ws.repository_for(0).clear()
+        ws.repository_for(1).clear()
+
+        # Every slot is empty: keep the active slot (to be re-seeded to scratch by the caller),
+        # drop the rest — the workspace must never be slot-less.
+        assert ws.drop_expired_slots() == [1]
+        assert ws.list_slots() == [0]
+        assert ws.active_slot() == 0
+
+    def test_no_expiry_is_a_noop(self, minimal_system_data):
+        ws = self._two_slot_workspace(minimal_system_data)
+        assert ws.drop_expired_slots() == []
+        assert ws.list_slots() == [0, 1]
+
+
 def _system_id_from(system_data):
     if not system_data:
         return None

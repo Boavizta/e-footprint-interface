@@ -149,6 +149,11 @@ def render_model_builder(request, model_web, show_template_picker, workspace=Non
 @time_it
 def model_builder_main(request):
     workspace = SessionWorkspaceRepository(request.session)
+    # The workspace index lives in the long-lived session, but each slot's payload lives in the
+    # Redis/Postgres cache with far shorter TTLs. A returning user whose parked model expired would
+    # otherwise leave the index listing a slot with no data, and build_workspace_slots would 500 on
+    # its un-hydrated ModelWeb. Reconcile the index to the surviving slot(s) before hydrating anything.
+    workspace.drop_expired_slots()
     repository = workspace.active_repository()
     try:
         model_web = ModelWeb(repository)

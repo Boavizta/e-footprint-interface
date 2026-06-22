@@ -238,3 +238,61 @@ def test_per_model_export_round_trips_into_a_target_slot(client, minimal_system)
                               else exported.content)
     assert "System" in exported_doc and "efootprint_version" in exported_doc
     assert "interface_config" not in exported_doc or isinstance(exported_doc["interface_config"], dict)
+
+
+@pytest.mark.django_db
+def test_entry_view_collapses_workspace_when_a_parked_slot_cache_expired(client, minimal_system):
+    """A returning user whose parked model's cache lapsed lands on the survivor, not a 500.
+
+    The session index outlives the slots' cache payloads (Redis/Postgres TTLs are far shorter than the
+    session). Regression: build_workspace_slots hydrated the now-empty slot and read .system on its
+    un-hydrated ModelWeb, raising SessionExpiredError outside model_builder_main's try/except -> 500.
+    """
+    from model_builder.adapters.repositories.cache_backend import CacheBackend
+
+    _seed_active_slot(client, minimal_system)                        # slot 0 (the model that survives)
+    client.post("/model_builder/add-model/", {"source": "blank"})   # slot 1 (parked model that expires)
+    session = client.session
+    workspace = SessionWorkspaceRepository(session)
+    assert workspace.list_slots() == [0, 1]
+    workspace.set_active_slot(0)
+    session.save()
+
+    # Drop slot 1's payload from both caches while the session index still lists it (TTL expiry).
+    CacheBackend().delete(workspace.repository_for(1)._cache_key())
+
+    response = client.get("/model_builder/")
+
+    assert response.status_code == 200  # was a 500 before the index↔cache reconciliation
+    # The dead slot is reconciled out of the index; the workspace collapses to the surviving model.
+    assert SessionWorkspaceRepository(client.session).list_slots() == [0]
+
+
+@pytest.mark.django_db
+def test_entry_view_reseeds_when_every_slot_cache_expired(client, minimal_system):
+    """The real returning-user case: a few days idle expires *both* slots (identical TTLs), so nothing
+    survives. The entry view must drop the dead parked slot, re-seed the empty active slot to the
+    scratch baseline, and render — not 500. The blank model offered on the recovery page is that
+    re-seed, not recovered data.
+    """
+    from model_builder.adapters.repositories.cache_backend import CacheBackend
+
+    _seed_active_slot(client, minimal_system)                        # slot 0
+    client.post("/model_builder/add-model/", {"source": "blank"})   # slot 1
+    session = client.session
+    workspace = SessionWorkspaceRepository(session)
+    workspace.set_active_slot(0)
+    session.save()
+    assert workspace.list_slots() == [0, 1]
+
+    # Both payloads expire from both caches while the session index still lists both slots.
+    CacheBackend().delete(workspace.repository_for(0)._cache_key())
+    CacheBackend().delete(workspace.repository_for(1)._cache_key())
+
+    response = client.get("/model_builder/")
+
+    assert response.status_code == 200  # was a 500 (build_workspace_slots crashed on the empty slots)
+    # Collapsed to a single slot, whose now-empty active model was re-seeded to the scratch baseline.
+    workspace_after = SessionWorkspaceRepository(client.session)
+    assert workspace_after.list_slots() == [0]
+    assert workspace_after.active_repository().has_system_data()
