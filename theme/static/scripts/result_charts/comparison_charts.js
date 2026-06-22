@@ -24,6 +24,19 @@ const SHARED_FONT = {
 const GRID_COLOR = "rgba(0, 0, 0, 0.05)";
 const TICK_COLOR = "#6b7280";
 
+// Tooltip that prints the adapter's pre-formatted figure (``dataset.valueLabels``, shaped with the
+// library's best-unit + sig-fig helpers) instead of Chart.js's raw number, so hovers read in the same
+// units as the rest of the dashboard. Falls back to the default formatted value if none was shipped.
+const FORMATTED_VALUE_TOOLTIP = {
+    callbacks: {
+        label(context) {
+            const labels = context.dataset.valueLabels;
+            const display = labels && labels[context.dataIndex] != null ? labels[context.dataIndex] : context.formattedValue;
+            return `${context.dataset.label}: ${display}`;
+        },
+    },
+};
+
 /**
  * Paired per-year bars on one shared y-axis (kg), one legend over the four series.
  * @param {Object} payload - {labels, datasets:[A usage, A fab, B usage, B fab]} from the adapter.
@@ -57,7 +70,10 @@ function buildPairedChartConfig(payload) {
                 },
             },
             // One legend driving both models' series.
-            plugins: { legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } } },
+            plugins: {
+                legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } },
+                tooltip: FORMATTED_VALUE_TOOLTIP,
+            },
         },
     };
 }
@@ -96,7 +112,10 @@ function buildCumulativeChartConfig(payload) {
                     ticks: { font: SHARED_FONT, color: TICK_COLOR },
                 },
             },
-            plugins: { legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } } },
+            plugins: {
+                legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } },
+                tooltip: FORMATTED_VALUE_TOOLTIP,
+            },
         },
     };
 }

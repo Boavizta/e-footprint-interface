@@ -202,6 +202,17 @@ class TestPairedChart:
                       for i in range(len(view.paired_chart["labels"])))
         assert a_total == pytest.approx(view.card_a.total_kg)
 
+    def test_each_bucket_carries_a_formatted_tooltip_figure(self, view):
+        """Each per-year value ships a display string (best unit + sig figs) for the tooltip; blank
+        (non-covered) buckets carry None, never a stray number."""
+        for dataset in view.paired_chart["datasets"]:
+            assert len(dataset["valueLabels"]) == len(dataset["data"])
+            for value, label in zip(dataset["data"], dataset["valueLabels"]):
+                if value is None:
+                    assert label is None
+                else:
+                    assert label and label[0].isdigit() and " " in label  # e.g. "200 kg" / "1.2 t"
+
     def test_non_overlapping_years_are_blank_not_zero(self):
         """Model A covers into 2026; B stays in 2025 — the 2026 bucket must be null for B (§6)."""
         comparison = build_comparison(

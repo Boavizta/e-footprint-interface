@@ -381,11 +381,28 @@ _ZERO_KG = 1e-9
 
 
 def _bar_dataset(label, data, color, stack) -> Dict:
-    return {"label": label, "data": data, "backgroundColor": color, "stack": stack}
+    return {"label": label, "data": data, "backgroundColor": color, "stack": stack,
+            "valueLabels": [_format_kg_value(value) for value in data]}
 
 
 def _line_dataset(label, data, color) -> Dict:
-    return {"label": label, "data": data, "borderColor": color, "backgroundColor": color}
+    return {"label": label, "data": data, "borderColor": color, "backgroundColor": color,
+            "valueLabels": [_format_kg_value(value) for value in data]}
+
+
+def _format_kg_value(kg) -> Optional[str]:
+    """One kg CO₂e magnitude as a display string (best unit + 3 sig figs), via the library helpers.
+
+    Mirrors the KPI/decomposition formatting (unsigned) so the time-series tooltips read in the same
+    units as the rest of the dashboard. ``None`` for blank (non-covered) buckets, which carry no
+    tooltip anyway."""
+    if kg is None:
+        return None
+    from efootprint.constants.units import u
+    from efootprint.utils.display import (
+        format_quantity_for_display, format_display_number, human_readable_unit)
+    quantity = format_quantity_for_display(kg * u.kg, 3)
+    return f"{format_display_number(quantity.magnitude)} {human_readable_unit(quantity.units)}"
 
 
 def _sum_by_year(start_date: datetime, hourly_values) -> Dict[int, float]:

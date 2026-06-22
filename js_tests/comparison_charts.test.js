@@ -17,10 +17,10 @@ function pairedPayload() {
     return {
         labels: ["2026", "2027"],
         datasets: [
-            { label: "A usage", data: [200, 30], backgroundColor: "#4878a8", stack: "A" },
-            { label: "A fabrication", data: [40, 130], backgroundColor: "#9db9d8", stack: "A" },
-            { label: "B usage", data: [60, null], backgroundColor: "#e09f3e", stack: "B" },
-            { label: "B fabrication", data: [40, null], backgroundColor: "#f0cf94", stack: "B" },
+            { label: "A usage", data: [200, 30], backgroundColor: "#4878a8", stack: "A", valueLabels: ["200 kg", "30 kg"] },
+            { label: "A fabrication", data: [40, 130], backgroundColor: "#9db9d8", stack: "A", valueLabels: ["40 kg", "130 kg"] },
+            { label: "B usage", data: [60, null], backgroundColor: "#e09f3e", stack: "B", valueLabels: ["60 kg", null] },
+            { label: "B fabrication", data: [40, null], backgroundColor: "#f0cf94", stack: "B", valueLabels: ["40 kg", null] },
         ],
     };
 }
@@ -29,8 +29,8 @@ function cumulativePayload() {
     return {
         labels: ["2026", "2027"],
         datasets: [
-            { label: "A", data: [150, 310], borderColor: "#4878a8", backgroundColor: "#4878a8" },
-            { label: "B", data: [100, 200], borderColor: "#e09f3e", backgroundColor: "#e09f3e" },
+            { label: "A", data: [150, 310], borderColor: "#4878a8", backgroundColor: "#4878a8", valueLabels: ["150 kg", "310 kg"] },
+            { label: "B", data: [100, 200], borderColor: "#e09f3e", backgroundColor: "#e09f3e", valueLabels: ["100 kg", "200 kg"] },
         ],
     };
 }
@@ -78,6 +78,13 @@ describe("buildPairedChartConfig", () => {
         expect(config.data.datasets[0].data).toEqual([200, 30]); // A usage per year
         expect(config.data.datasets[1].data).toEqual([40, 130]); // A fabrication per year
     });
+
+    test("tooltip prints the adapter's pre-formatted figure, not the raw number", () => {
+        const config = buildPairedChartConfig(pairedPayload());
+        const label = config.options.plugins.tooltip.callbacks.label;
+        const context = { dataset: config.data.datasets[0], dataIndex: 0, formattedValue: "200" };
+        expect(label(context)).toBe("A usage: 200 kg");
+    });
 });
 
 describe("buildCumulativeChartConfig", () => {
@@ -107,6 +114,13 @@ describe("buildCumulativeChartConfig", () => {
         const config = buildCumulativeChartConfig(cumulativePayload());
         expect(config.data.datasets[0].borderColor).toBe("#4878a8");
         expect(config.data.datasets[1].borderColor).toBe("#e09f3e");
+    });
+
+    test("tooltip prints the adapter's pre-formatted figure, not the raw number", () => {
+        const config = buildCumulativeChartConfig(cumulativePayload());
+        const label = config.options.plugins.tooltip.callbacks.label;
+        const context = { dataset: config.data.datasets[1], dataIndex: 1, formattedValue: "200" };
+        expect(label(context)).toBe("B: 200 kg");
     });
 });
 
