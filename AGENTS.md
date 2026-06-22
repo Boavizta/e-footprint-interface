@@ -4,9 +4,12 @@ This file orients agents and contributors. It is intentionally short. Substance 
 
 ## Read this first
 
-1. **`specs/constitution.md`** — the project's immutable rules. Every change respects them.
-2. **`specs/mission.md`** — what e-footprint-interface is and isn't.
-3. The companion library: `../e-footprint/` (or upstream PyPI). The interface assumes familiarity with the library's modeling concepts; when in doubt, read `../e-footprint/specs/architecture.md`.
+**Always begin any codebase exploration by reading `specs/architecture.md`.** It maps the Clean Architecture layers, web wrappers, render layer, and the named patterns (OOB regions, dict relationships, the edge-paradigm toggle, etc.), so it usually points straight at the file you need — start there before grepping.
+
+1. **`specs/architecture.md`** — the structural map; your entry point for finding where anything lives.
+2. **`specs/constitution.md`** — the project's immutable rules. Every change respects them.
+3. **`specs/mission.md`** — what e-footprint-interface is and isn't.
+4. The companion library: `../e-footprint/` (or upstream PyPI). The interface assumes familiarity with the library's modeling concepts; when in doubt, read `../e-footprint/specs/architecture.md`.
 
 ## Where things live
 
