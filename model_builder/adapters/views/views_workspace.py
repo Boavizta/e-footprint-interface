@@ -45,12 +45,13 @@ def _rendered_shared_chrome_oob(model_web) -> str:
 
 @require_POST
 def switch_model(request):
-    """Flip the active slot and rebind the shared chrome; the canvas toggle is client-side.
+    """Flip the active slot and (on the builder) rebind the shared chrome; the canvas toggle is client-side.
 
-    The shared toolbar chrome (#system-name, the results buttons, the edge toggle) is present on both
-    the builder and the Compare dashboard, so the OOB rebind always has its targets — on the builder it
-    flips the visible canvas's chrome, on Compare it updates the active-model chrome before the
-    switchModelCanvas trigger reloads the builder on that slot (model_comparison.js).
+    On the **builder**, the small shared chrome (#system-name, the results buttons, the edge toggle) is
+    OOB-rebound for the now-active model. The **Compare dashboard** is a self-contained view with no
+    per-model chrome — a model tab there reloads the builder on the new slot (model_comparison.js), so it
+    sends ``skip_chrome`` and we emit only the ``switchModelCanvas`` trigger; emitting chrome OOB there
+    would just hit missing targets (``oobErrorNoTarget``).
     """
     workspace = SessionWorkspaceRepository(request.session)
     slot = int(request.POST["slot"])
@@ -58,8 +59,10 @@ def switch_model(request):
         return HttpResponse(status=400)
     workspace.set_active_slot(slot)
 
-    model_web = ModelWeb(workspace.repository_for(slot))
-    response = HttpResponse(_rendered_shared_chrome_oob(model_web))
+    if request.POST.get("skip_chrome"):
+        response = HttpResponse("")
+    else:
+        response = HttpResponse(_rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot))))
     response["HX-Trigger"] = json.dumps({"switchModelCanvas": {"slot": slot}})
     return response
 
@@ -213,13 +216,8 @@ def compare(request):
     model_a, model_b = workspace_slots[0]["model_web"], workspace_slots[1]["model_web"]
     comparison = ComparisonService().build(model_a, model_b)
 
-    # The shared toolbar (system name, edge toggle, upload/download, "Show results") persists on the
-    # dashboard, bound to the active model — same singleton chrome as a model tab. `model_web` is that
-    # active slot's model so the toolbar reads the right name / results readiness.
-    active_slot = workspace.active_slot()
-    active_model_web = next(
-        (slot["model_web"] for slot in workspace_slots if slot["is_active"]), model_a)
-
+    # The comparison view is self-contained — no per-model toolbar/results to bind — so it needs only the
+    # comparison view model, the tab strip's slots, and the active slot (for the active-tab highlight).
     context = {
         "comparison": comparison,
         "paired_chart_json": json.dumps(comparison.paired_chart),
@@ -227,7 +225,6 @@ def compare(request):
         "decomposition_chart_json": json.dumps(comparison.decomposition_chart),
         "workspace_slots": workspace_slots,
         "compare_enabled": True,
-        "active_slot": active_slot,
-        "model_web": active_model_web,
+        "active_slot": workspace.active_slot(),
     }
     return htmx_render(request, "model_builder/compare/dashboard.html", context=context)

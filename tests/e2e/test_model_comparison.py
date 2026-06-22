@@ -98,8 +98,9 @@ class TestModelComparisonWorkspace:
 
         Switching to the canvas-less Compare dashboard used to leave the builder's leader lines orphaned
         on <body>; their internal resize/scroll listeners then threw on disconnected anchors (uncaught
-        ``Cannot read properties of null``), which could abort chart init, while a model tab on the
-        dashboard POSTed switch-model whose chrome OOB fragments had no targets (``oobErrorNoTarget``).
+        ``Cannot read properties of null``), which could abort chart init. The comparison view carries no
+        per-model chrome, and its model tabs POST switch-model with ``skip_chrome`` so the switch emits no
+        chrome OOB at a missing target (``oobErrorNoTarget``).
 
         Guards: opening Compare (and switching back across A/B/Compare, including a resize on the
         dashboard) produces no uncaught console error, the comparison chart canvases hold live Chart.js
@@ -169,14 +170,11 @@ class TestModelComparisonWorkspace:
         expect(changed_row).to_contain_text("3")
         expect(changed_row).to_contain_text("changed")
 
-    def test_compare_keeps_the_shared_toolbar_for_the_active_model(self, minimal_complete_model_builder):
-        """Regression: the shared toolbar (system name, edge toggle, upload/download, "Show results")
-        must persist on the Compare dashboard, bound to the active model — singleton-chrome design.
-
-        It used to vanish because the dashboard rendered without the builder's toolbar/side-panel/result
-        chrome. Guards: the toolbar and its system name (showing the *active* model) are present on
-        Compare, and its actions (rename → #sidePanel, "Show results" → #result-block) work over the
-        dashboard with no uncaught console error or missing-target.
+    def test_compare_is_a_self_contained_view_without_model_chrome(self, minimal_complete_model_builder):
+        """The Compare dashboard is self-contained: it carries the tab strip but NOT the per-model
+        toolbar (tools / system name) nor the floating "Show results" button — those are model-scoped and
+        live on the builder. The model names still appear (in the KPI cards), and opening Compare raises
+        no console error (the dashboard's switch POSTs skip_chrome so no chrome OOB hits a missing target).
         """
         model_builder = minimal_complete_model_builder
         page = model_builder.page
@@ -185,31 +183,25 @@ class TestModelComparisonWorkspace:
         page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
         page.on("pageerror", lambda exc: console_errors.append(str(exc)))
 
-        # Duplicate (B becomes active) and rename B so we can assert the chrome shows the *active* model.
         model_builder.add_model_by_duplication()
         new_name = "Edge caching variant"
         model_builder.rename_active_model(new_name)
 
         model_builder.open_compare()
 
-        # The toolbar persists on the dashboard, bound to the active model (B): its #system-name shows
-        # B's name and the toolbar actions stay available.
-        expect(page.locator("#toolbar-nav")).to_be_visible()
-        expect(model_builder.active_model_name()).to_contain_text(new_name)
-        expect(page.locator("#show-results-toolbar-btn")).to_be_visible()
-        expect(page.locator("#edge-modeling-toggle-wrapper")).to_be_visible()
+        # No per-model chrome on the comparison view.
+        expect(page.locator("#toolbar-nav")).to_have_count(0)
+        expect(page.locator("#system-name")).to_have_count(0)
+        expect(page.locator("#show-results-toolbar-btn")).to_have_count(0)
+        expect(page.locator("#edge-modeling-toggle-wrapper")).to_have_count(0)
+        expect(page.locator("#panel-result-btn")).to_have_count(0)
+        expect(page.locator("#sidePanel")).to_have_count(0)
 
-        # The rename side panel opens over the dashboard (its layout helper must tolerate the absent
-        # builder canvas), then closes cleanly.
-        click_and_wait_for_htmx(page, page.locator("#btn-change-system-name"))
-        page.locator("#sidePanel #name").wait_for(state="visible")
-        model_builder.side_panel.close()
+        # The tab strip stays (to navigate back / re-compare) and the renamed model shows in the KPI cards.
+        expect(page.locator("#model-tab-strip")).to_be_visible()
+        expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)
 
-        # "Show results" opens the active model's result panel over the dashboard.
-        click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
-        page.locator("#lineChart").wait_for(state="visible")
-
-        assert not console_errors, f"Unexpected console errors on the Compare toolbar flow: {console_errors}"
+        assert not console_errors, f"Unexpected console errors on the Compare view: {console_errors}"
 
     def test_tab_strip_layout_two_models_then_one(self, minimal_complete_model_builder):
         """§4.2 tab-strip layout: with two models the order is [A ✕] [B ✕] [Compare] — every model tab
@@ -281,34 +273,3 @@ class TestModelComparisonWorkspace:
         assert model_builder.active_model_tab_count() == 1
         assert model_builder.active_slot() == "0"
         expect(model_builder.active_model_name()).not_to_contain_text("Copy of")
-
-    def test_compare_assumptions_diff_clears_the_results_button(self, minimal_complete_model_builder):
-        """Bug A: the "What differs" section used to overflow under the floating results button. With a
-        real diff present, the last diff row must sit fully above the results button when scrolled to
-        the bottom of the dashboard."""
-        model_builder = minimal_complete_model_builder
-        page = model_builder.page
-
-        # Create a one-row diff: duplicate, bump the copy's first step count so the models differ.
-        model_builder.add_model_by_duplication()
-        count_input = page.locator("[data-model-canvas='1'] input.count-inline-edit").first
-        count_input.wait_for(state="visible")
-        with page.expect_response(lambda r: "update-dict-count" in r.url):
-            count_input.click()
-            count_input.fill("7")
-            count_input.press("Enter")
-
-        model_builder.open_compare()
-        expect(page.locator("#comparison-diff-table")).to_be_visible()
-
-        # Scroll the dashboard to the bottom; the last diff row clears the floating results button.
-        cleared = page.evaluate(
-            """() => {
-                const dash = document.getElementById('comparison-dashboard');
-                dash.scrollTop = dash.scrollHeight;
-                const rows = document.querySelectorAll('#comparison-diff-table tbody tr');
-                const lastRow = rows[rows.length - 1].getBoundingClientRect();
-                const btn = document.getElementById('panel-result-btn').getBoundingClientRect();
-                return lastRow.bottom <= btn.top + 1;
-            }""")
-        assert cleared, "The last assumptions-diff row is occluded by the floating results button"

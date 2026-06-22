@@ -6,17 +6,14 @@ and cumulative charts (shared scales + one legend each — magnitude honesty), t
 Re-rendered fresh on every visit (views_workspace.compare): all values come from the ComparisonService
 view model in `comparison`, the two Chart.js payloads from `paired_chart_json` / `cumulative_chart_json`.
 
-The shared chrome — the toolbar (system name, edge toggle, upload/download, "Show results"), the tab
-strip, and the side-panel / help-drawer / result-panel containers — is rendered here too, bound to the
-*active* model (`model_web`), so it persists across the Model A / Model B / ⇄Compare tabs exactly as on
-a model tab (singleton-chrome design). The dashboard is HTMX-swapped into #main-content-block, so the
-chrome is part of that swap rather than a true DOM singleton; keeping it identical to the builder's keeps
-every toolbar action (rename, upload, reboot, help, Show results) working with no missing OOB targets.
+This is a **self-contained comparison view**: it carries only the tab strip (to switch back to a model
+or re-open Compare), not the per-model toolbar (tools / system name) nor the floating "Show results"
+button — those are model-scoped and live on the builder. A model tab here reloads the builder on the
+chosen slot (model_comparison.js), which restores that chrome; the tab strip is rendered with
+`on_dashboard=True` so its switch POSTs `skip_chrome` and no chrome OOB is emitted at a missing target.
 {% endcomment %}
 {% load static %}
-{% comment %}Tab strip above the per-model toolbar (see model_builder_main.html).{% endcomment %}
-{% include 'model_builder/components/model_tab_strip.html' %}
-{% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+{% include 'model_builder/components/model_tab_strip.html' with on_dashboard=True %}
 
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div id="comparison-dashboard" class="text-start mx-auto px-3 px-xl-4 pt-3 overflow-y-auto"
@@ -41,13 +38,6 @@ every toolbar action (rename, upload, reboot, help, Show results) working with n
         </div>
 
         {% include 'model_builder/compare/assumptions_diff.html' %}
-    </div>
-
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-3" id="sidePanel"></div>
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"></div>
-    <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn">
-        {% include 'model_builder/components/results_bar_button.html' %}
-        <div id="result-block" class="bg-transparent overflow-y-auto overflow-x-hidden pt-1"></div>
     </div>
 </div>
 

@@ -504,10 +504,9 @@ input:disabled{
     }
 }
 
-/* Keep the full assumptions-diff (and any tail content) scrollable clear of the floating result button,
-   which is absolutely positioned over the bottom var(--open-result-btn) of #model-builder-page. */
+/* A little breathing room below the last section — the comparison view has no floating result button. */
 #comparison-dashboard {
-    padding-bottom: calc(var(--open-result-btn) + 1rem);
+    padding-bottom: 1rem;
 }
 
 /* KPI strip — the two model cards are equal fixed-width shares (flex-basis 0) with min-width:0 so a long

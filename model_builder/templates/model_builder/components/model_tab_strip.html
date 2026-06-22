@@ -40,7 +40,7 @@ model exists OR can be added; a single-model session that never adds one still s
                 data-model-tab="{{ slot_entry.slot }}"
                 {% if slot_entry.is_active %}aria-current="true"{% endif %}
                 hx-post="{% url 'switch-model' %}"
-                hx-vals='{"slot": "{{ slot_entry.slot }}"}'
+                hx-vals='{"slot": "{{ slot_entry.slot }}"{% if on_dashboard %}, "skip_chrome": "1"{% endif %}}'
                 hx-swap="none">
             {% if forloop.first %}Reference model{% else %}Comparison model{% endif %}
         </button>

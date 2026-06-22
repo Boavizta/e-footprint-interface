@@ -126,10 +126,20 @@ def test_switch_model_flips_active_slot_and_emits_canvas_toggle(client, minimal_
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # active is now slot 1
     assert SessionWorkspaceRepository(client.session).active_slot() == 1
 
+    # Builder switch: rebinds the shared chrome via OOB (so the visible canvas's chrome updates).
     response = client.post("/model_builder/switch-model/", {"slot": "0"})
     assert response.status_code == 200
     assert SessionWorkspaceRepository(client.session).active_slot() == 0  # persisted for refresh
     assert json.loads(response["HX-Trigger"]) == {"switchModelCanvas": {"slot": 0}}
+    assert b"hx-swap-oob" in response.content and b"system-name" in response.content
+
+    # Compare-dashboard switch (skip_chrome): only the canvas-toggle trigger, no chrome OOB — the
+    # dashboard has no chrome targets, so emitting OOB would just hit missing targets (oobErrorNoTarget).
+    response = client.post("/model_builder/switch-model/", {"slot": "1", "skip_chrome": "1"})
+    assert response.status_code == 200
+    assert SessionWorkspaceRepository(client.session).active_slot() == 1
+    assert json.loads(response["HX-Trigger"]) == {"switchModelCanvas": {"slot": 1}}
+    assert response.content == b""
 
 
 @pytest.mark.django_db
