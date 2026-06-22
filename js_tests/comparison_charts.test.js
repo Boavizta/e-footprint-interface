@@ -38,7 +38,12 @@ function cumulativePayload() {
 function decompositionPayload() {
     return {
         labels: ["Servers & storage usage", "Edge devices fabrication"],
-        datasets: [{ label: "Δ", data: [-660, 90], backgroundColor: ["#2e7d32", "#c62828"] }],
+        datasets: [{
+            label: "Δ",
+            data: [-660, 90],
+            backgroundColor: ["#2e7d32", "#c62828"],
+            valueLabels: ["−660 kg", "+90 kg"],
+        }],
     };
 }
 
@@ -91,6 +96,13 @@ describe("buildCumulativeChartConfig", () => {
         expect(config.data.datasets[1].fill).toMatchObject({ target: 0 });
     });
 
+    test("gap colour tracks Δ: red when B is above A (more), green when below (a reduction)", () => {
+        const config = buildCumulativeChartConfig(cumulativePayload());
+        const { above, below } = config.data.datasets[1].fill;
+        expect(above).toBe("rgba(198,40,40,0.12)"); // B above A ⇒ emits more ⇒ red
+        expect(below).toBe("rgba(46,125,50,0.12)"); // B below A ⇒ a reduction ⇒ green
+    });
+
     test("keeps the model identity colours on the curves", () => {
         const config = buildCumulativeChartConfig(cumulativePayload());
         expect(config.data.datasets[0].borderColor).toBe("#4878a8");
@@ -107,5 +119,14 @@ describe("buildDecompositionChartConfig", () => {
         expect(config.data.datasets[0].backgroundColor).toEqual(["#2e7d32", "#c62828"]);
         // No legend (the colour itself reads the direction); one shared value axis.
         expect(config.options.plugins.legend.display).toBe(false);
+        // No tooltip — the tip labels already print each Δ, so a hover would only repeat them.
+        expect(config.options.plugins.tooltip.enabled).toBe(false);
+    });
+
+    test("registers the value-labels plugin so each bar prints its Δ at the tip", () => {
+        const config = buildDecompositionChartConfig(decompositionPayload());
+        expect(config.plugins.map((p) => p.id)).toContain("decompositionValueLabels");
+        // The display strings the plugin prints ride along on the dataset, untouched by the builder.
+        expect(config.data.datasets[0].valueLabels).toEqual(["−660 kg", "+90 kg"]);
     });
 });

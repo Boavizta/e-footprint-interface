@@ -154,7 +154,9 @@ class ComparisonService:
         """A horizontal diverging bar chart: one bar per non-zero category × phase, signed.
 
         Reductions (B < A) are green and point left, increases red and point right; the bars sum to
-        the headline Δ (the zero-delta rows are the only ones dropped). One value axis (kg).
+        the headline Δ (the zero-delta rows are the only ones dropped). One value axis (kg). Each bar
+        carries its pre-formatted Δ (``delta_display``) so the chart can print it at the bar tip — the
+        figures that used to sit in a list below the chart. Requires ``_format_displays`` to have run.
         """
         return {
             "labels": [bar.label for bar in bars],
@@ -162,6 +164,7 @@ class ComparisonService:
                 "label": "Δ by category and phase",
                 "data": [bar.delta_kg for bar in bars],
                 "backgroundColor": [LOWER_COLOR if bar.delta_kg < 0 else HIGHER_COLOR for bar in bars],
+                "valueLabels": [bar.delta_display for bar in bars],
             }],
         }
 
