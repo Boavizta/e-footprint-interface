@@ -85,8 +85,9 @@ class DecompositionBar:
 
 @dataclass
 class DiffRow:
-    """A changed input attribute between the paired objects."""
-    object_label: str
+    """A changed input attribute between the paired objects (``object_name`` identifies the instance —
+    not its class — since two objects of the same class can both change)."""
+    object_name: str
     attribute: str
     value_a: Optional[str]
     value_b: Optional[str]
@@ -94,8 +95,10 @@ class DiffRow:
 
 @dataclass
 class DiffUnmatched:
-    """An object present in only one model."""
-    object_label: str
+    """An object present in only one model — its instance name and its (simple) class, kept apart so
+    the table can show the class through its UI label."""
+    object_name: str
+    object_class: str
 
 
 @dataclass
@@ -376,15 +379,17 @@ class ComparisonService:
     def _diff(self, input_diff):
         # A dict-relationship count present in only one model arrives as a None on the absent side
         # (e.g. a usage-journey step linked in B but not A): render it as an em-dash so the cell reads
-        # "absent" rather than the literal "None", consistent with the only-in rows below.
+        # "absent" rather than the literal "None". The Object column shows the instance name; the two
+        # models' names normally agree (a rename is not a diff — the library excludes ``name``), so the
+        # A-side name with a B fallback is the object's identity.
         changed = [
-            DiffRow(object_label=row.object_class, attribute=row.attribute,
+            DiffRow(object_name=row.object_name_a or row.object_name_b, attribute=row.attribute,
                     value_a="—" if row.value_a is None else row.value_a,
                     value_b="—" if row.value_b is None else row.value_b)
             for row in input_diff.changed]
-        only_a = [DiffUnmatched(object_label=f"{obj.object_name} ({obj.object_class})")
+        only_a = [DiffUnmatched(object_name=obj.object_name, object_class=obj.object_class)
                   for obj in input_diff.only_in_a]
-        only_b = [DiffUnmatched(object_label=f"{obj.object_name} ({obj.object_class})")
+        only_b = [DiffUnmatched(object_name=obj.object_name, object_class=obj.object_class)
                   for obj in input_diff.only_in_b]
         return changed, only_a, only_b
 

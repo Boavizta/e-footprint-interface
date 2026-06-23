@@ -20738,14 +20738,14 @@ input:disabled {
   min-width: 0;
 }
 
-/* "What differs" diff table — fixed column widths (mirrors .source-table) so a long system name, in a
-   header or in the "only in <name>" status cell, can't stretch the table: header names truncate with a
-   tooltip (truncating_text), body cells wrap. */
-#comparison-diff-table {
+/* "What differs" diff sub-tables — fixed column widths (mirrors .source-table) so a long system name,
+   in a header or in the "Only in" cell, can't stretch the table: header names truncate with a tooltip
+   (truncating_text), body cells wrap. Shared by both the changed-attributes and only-in sub-tables. */
+.comparison-diff-table {
   table-layout: fixed;
   width: 100%;
 }
-#comparison-diff-table th, #comparison-diff-table td {
+.comparison-diff-table th, .comparison-diff-table td {
   overflow-wrap: anywhere;
 }
 

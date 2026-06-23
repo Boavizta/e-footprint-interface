@@ -146,8 +146,8 @@ def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
 @pytest.fixture
 def view():
     comparison = build_comparison(
-        changed=[{"object_class": "Job", "attribute": "data_transferred",
-                  "value_a": "800 megabyte", "value_b": "250 megabyte"}],
+        changed=[{"object_class": "Job", "object_name_a": "Stream video", "object_name_b": "Stream video",
+                  "attribute": "data_transferred", "value_a": "800 megabyte", "value_b": "250 megabyte"}],
         only_in_b=[{"object_class": "EdgeDevice", "object_name": "Edge cache node"}])
     return ComparisonService().build_from_comparison(comparison)
 
@@ -305,17 +305,19 @@ class TestAxisUnit:
 
 
 class TestAssumptionsDiff:
-    def test_changed_rows_show_both_values_only(self, view):
+    def test_changed_rows_identify_the_object_by_name_and_show_both_values(self, view):
         assert len(view.diff_changed) == 1
         row = view.diff_changed[0]
-        assert row.object_label == "Job"
+        assert row.object_name == "Stream video"  # the instance name, not its class
         assert row.attribute == "data_transferred"
         assert (row.value_a, row.value_b) == ("800 megabyte", "250 megabyte")
 
-    def test_only_in_b_objects_are_listed_with_label(self, view):
+    def test_only_in_objects_keep_name_and_class_apart(self, view):
         assert view.diff_only_in_a == []
         assert len(view.diff_only_in_b) == 1
-        assert view.diff_only_in_b[0].object_label == "Edge cache node (EdgeDevice)"
+        only = view.diff_only_in_b[0]
+        assert only.object_name == "Edge cache node"
+        assert only.object_class == "EdgeDevice"
 
     def test_identical_inputs_produce_no_rows(self):
         view = ComparisonService().build_from_comparison(build_comparison())
@@ -327,12 +329,12 @@ class TestAssumptionsDiff:
         """A changed usage-journey-step weight arrives as a normal changed row (the library labels it
         '<weight label> (<key name>)' with the dimensionless counts as the two values)."""
         comparison = build_comparison(changed=[
-            {"object_class": "UsageJourney", "attribute": "Times per journey (Watch a video)",
-             "value_a": "1", "value_b": "3"}])
+            {"object_class": "UsageJourney", "object_name_a": "Watch videos", "object_name_b": "Watch videos",
+             "attribute": "Times per journey (Watch a video)", "value_a": "1", "value_b": "3"}])
         view = ComparisonService().build_from_comparison(comparison)
         assert len(view.diff_changed) == 1
         row = view.diff_changed[0]
-        assert row.object_label == "UsageJourney"
+        assert row.object_name == "Watch videos"
         assert row.attribute == "Times per journey (Watch a video)"
         assert (row.value_a, row.value_b) == ("1", "3")
 

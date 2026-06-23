@@ -161,14 +161,15 @@ class TestModelComparisonWorkspace:
 
         model_builder.open_compare()
 
-        # The diff table shows the changed step weight (the library labels it "Times per journey (<step>)").
-        diff_table = page.locator("#comparison-diff-table")
+        # The changed-attributes sub-table shows the step weight (the library labels it
+        # "Times per journey (<step>)"); the difference type is carried by the sub-table, so there is no
+        # status column to assert on.
+        diff_table = page.locator("#comparison-changed-table")
         expect(diff_table).to_be_visible()
         changed_row = diff_table.locator("tbody tr", has_text="Times per journey")
         expect(changed_row).to_have_count(1)
         expect(changed_row).to_contain_text("1")
         expect(changed_row).to_contain_text("3")
-        expect(changed_row).to_contain_text("changed")
 
     def test_compare_is_a_self_contained_view_without_model_chrome(self, minimal_complete_model_builder):
         """The Compare dashboard is self-contained: it carries the tab strip but NOT the per-model
