@@ -21,6 +21,7 @@ what a usage journey or a server *is*. Two flavors share the same orientation st
 - ``edge-modeling``  — the toolbar Edge-modeling toggle (collapses into the burger below ``lg``)
 - ``usage-patterns``  — the usage-patterns column
 - ``results``         — the results bar at the bottom
+- ``comparison``      — the model-comparison tab strip (＋Add a model / ⇄Compare; collapses into the burger below ``lg``)
 - ``help-menu``       — the toolbar Help menu (replay tour, templates, docs)
 
 The help step is the one exception: it anchors on the "?" help button beside the
@@ -81,6 +82,16 @@ _SHARED_STEPS = [
         "target": _sel("results"),
         "title": "Watch the results add up",
         "body": "Once the model is complete, its environmental footprint appears here.",
+    },
+    {
+        "target": _sel("comparison"),
+        # The tab strip is hidden below lg (it lives in the toolbar burger there) — point tour.js at
+        # the burger as a fallback, the same pattern as the edge-modeling and help-menu steps.
+        "mobile_target": ".navbar-toggler",
+        "title": "Compare two scenarios side by side",
+        "body": "You're not limited to one model. Add a second one here, then open the Compare view to "
+                "see both footprints next to each other — the headline difference, what drives it, and "
+                "how their assumptions differ.",
     },
     {
         "target": _HELP_BUTTON_SEL,

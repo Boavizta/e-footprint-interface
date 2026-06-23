@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   cumulative charts paired on shared scales and a single legend so the two models read against each
   other, and a diff of what changed between the two models' inputs (differences only). The dashboard
   is rebuilt fresh each time it is opened, so an edit to either model is always reflected.
+- Guided tour: the first-run builder tour now includes a step introducing model comparison — it points
+  at the model tab strip (or the menu on narrow screens) and explains you can add a second model and
+  open the Compare view to see both footprints side by side.
 - Combined comparison file: with two models present, "Export ▸ Both models" saves a single `.e-f.json`
   file bundling both models and the active selection (the per-model "This model" export is unchanged).
   A single "Open file" upload accepts either format and does the right thing automatically — a

@@ -233,7 +233,8 @@ def render_dict_count(field_ctx):
 # attribute rename fails the test) and wrap it in stand-in anchors mirroring the column ids.
 _TOUR_TARGET_STANDIN = "".join(
     f'<div data-tour-target="{target}"></div>'
-    for target in ("usage-journeys", "infrastructure", "edge-modeling", "usage-patterns", "results", "help-menu")
+    for target in ("usage-journeys", "infrastructure", "edge-modeling", "usage-patterns", "results",
+                   "comparison", "help-menu")
 )
 
 

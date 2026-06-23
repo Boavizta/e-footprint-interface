@@ -89,7 +89,8 @@ class TestOnboardingTour:
         page = model_builder_page.page
         page.goto("/model_builder/")
         model_builder_page.pick_template("ecommerce")
-        for target in ("usage-journeys", "infrastructure", "edge-modeling", "usage-patterns", "results", "help-menu"):
+        for target in ("usage-journeys", "infrastructure", "edge-modeling", "usage-patterns", "results",
+                       "comparison", "help-menu"):
             expect(page.locator(f"[data-tour-target='{target}']")).to_have_count(1)
 
     def test_tour_auto_runs_after_a_template_loads(self, model_builder_page: ModelBuilderPage):

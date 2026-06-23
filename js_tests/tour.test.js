@@ -58,7 +58,7 @@ describe("readTourSteps", () => {
     test("parses the server-rendered JSON payload", () => {
         mount("tour_loaded");
         const steps = tour.readTourSteps();
-        expect(steps.length).toBe(7);
+        expect(steps.length).toBe(8);
         expect(steps[0].title).toBe("Start in the middle: usage journeys");
     });
 
@@ -188,7 +188,7 @@ describe("runTour", () => {
         mount("tour_loaded");
         tour.runTour();
         expect(window.driver.js.driver).toHaveBeenCalledTimes(1);
-        expect(lastDriverConfig.steps.length).toBe(7);
+        expect(lastDriverConfig.steps.length).toBe(8);
         expect(driveCalls).toBe(1);
     });
 
