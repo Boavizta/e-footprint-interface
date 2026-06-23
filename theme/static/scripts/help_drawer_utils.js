@@ -87,7 +87,10 @@
        model being left. Close it on a model switch so it never lingers over the now-active canvas
        (mirrors the side-panel/results-panel close in model_comparison.js's switchToSlot). */
     document.body.addEventListener("switchModelCanvas", function () {
-        if (!document.getElementById("helpDrawer").classList.contains("d-none")) {
+        // The Compare dashboard is canvas-less and carries no help drawer; a model tab fired here
+        // still dispatches switchModelCanvas, so guard on presence (mirrors model_comparison.js).
+        const helpDrawer = document.getElementById("helpDrawer");
+        if (helpDrawer && !helpDrawer.classList.contains("d-none")) {
             closeHelpDrawer();
         }
     });

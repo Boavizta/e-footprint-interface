@@ -316,7 +316,11 @@ class ModelBuilderPage:
 
     def open_import_panel(self):
         """Open the JSON import panel."""
-        click_and_wait_for_htmx(self.page, self.page.locator("button[hx-get*='open-import-json-panel']"))
+        # Scope to the toolbar button: the empty-model template picker also carries an
+        # open-import-json-panel card ("Load a json file"), so an unscoped selector is ambiguous.
+        toolbar_import_button = self.page.locator(
+            "button[data-location='upload_download_reboot_model_tooltips'][hx-get*='open-import-json-panel']")
+        click_and_wait_for_htmx(self.page, toolbar_import_button)
         self.page.locator("input[type='file']").wait_for(state="attached")
         return self.side_panel
 
