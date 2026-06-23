@@ -14,15 +14,18 @@ from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 from model_builder.domain.services import (
-    ProgressiveImportService, SCRATCH_ID, build_template_catalog, get_template_system_data)
+    ProgressiveImportService, SCRATCH_ID, UPLOAD_ID, build_template_catalog, get_template_system_data)
 
 
 def _catalog_entries() -> dict:
-    """All non-scratch entries keyed by id, flattened across groups."""
+    """All loadable template entries keyed by id, flattened across groups.
+
+    Excludes the non-loadable action cards (scratch baseline, json upload).
+    """
     return {entry.id: entry
             for group in build_template_catalog()
             for entry in group.entries
-            if entry.category != "scratch"}
+            if entry.category not in ("scratch", "upload")}
 
 
 def test_catalog_has_a_merged_templates_group_then_scratch():
@@ -64,11 +67,12 @@ def test_templates_without_a_how_to_page_carry_no_guides():
     assert entries["iot_industrial"].related_guides == ()
 
 
-def test_scratch_group_is_the_empty_baseline_sentinel():
+def test_scratch_group_offers_the_empty_baseline_and_json_upload():
     groups = {group.id: group for group in build_template_catalog()}
     scratch_entries = groups["scratch"].entries
-    assert [e.id for e in scratch_entries] == [SCRATCH_ID]
+    assert [e.id for e in scratch_entries] == [SCRATCH_ID, UPLOAD_ID]
     assert scratch_entries[0].category == "scratch"
+    assert scratch_entries[1].category == "upload"
 
 
 @pytest.mark.parametrize("template_id", ["scratch", "ecommerce", "ai_chatbot", "iot_industrial",

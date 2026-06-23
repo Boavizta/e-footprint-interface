@@ -26,6 +26,7 @@ from efootprint.modeling_templates import (
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 
 SCRATCH_ID = "scratch"
+UPLOAD_ID = "upload"
 
 # The "Start from scratch" baseline — a truly empty named System.
 DEFAULT_SYSTEM_DATA_PATH = Path(__file__).resolve().parents[1] / "reference_data" / "default_system_data.json"
@@ -85,6 +86,8 @@ def build_template_catalog() -> tuple[CatalogGroup, ...]:
     scratch = (
         CatalogEntry(SCRATCH_ID, "Start from scratch",
                      "An empty model. We'll show you where to begin.", "scratch", icon="+"),
+        CatalogEntry(UPLOAD_ID, "Load a json file",
+                     "Open an existing model exported as .e-f.json.", "upload", icon="↥"),
     )
     return (
         CatalogGroup("templates", "Templates", introductory + how_to),
