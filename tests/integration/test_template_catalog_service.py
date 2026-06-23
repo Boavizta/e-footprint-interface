@@ -4,7 +4,7 @@ Exercises the merge of the interface-owned introductory registry with the
 library's how-to templates and how-to guides (``list_how_to_templates`` /
 ``list_how_to_guides``) into a single picker group, plus the ``template_id`` →
 serialized-System resolution that backs the load endpoint. Runs pure domain — no
-Django scaffolding (constitution §1.1).
+Django scaffolding.
 """
 import pytest
 from efootprint.api_utils.json_to_system import json_to_system

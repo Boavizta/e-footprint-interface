@@ -1,4 +1,4 @@
-// Model-comparison workspace UI (Task 3): client-side model switching across two resident canvases.
+// Model-comparison workspace UI: client-side model switching across two resident canvases.
 //
 // Both canvases live in the DOM at once; switching is a visibility toggle (no canvas re-render), so it
 // is instant and preserves each canvas's transient state. The catch: the active canvas must carry the

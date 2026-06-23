@@ -1,4 +1,4 @@
-"""Unit tests for the workspace persistence layer (model-comparison Task 2).
+"""Unit tests for the workspace persistence layer.
 
 Covers the slot-aware cache key + one-release legacy read-fallback, the workspace index lifecycle
 (add / switch / remove), the shared payload budget (summed over slots, not per slot), and the

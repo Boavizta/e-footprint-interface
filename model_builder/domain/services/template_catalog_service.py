@@ -27,7 +27,7 @@ from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLAT
 
 SCRATCH_ID = "scratch"
 
-# The "Start from scratch" baseline — a truly empty named System (Task 1).
+# The "Start from scratch" baseline — a truly empty named System.
 DEFAULT_SYSTEM_DATA_PATH = Path(__file__).resolve().parents[1] / "reference_data" / "default_system_data.json"
 
 

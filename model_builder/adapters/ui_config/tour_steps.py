@@ -6,7 +6,7 @@ body may contain ``{kind:target}`` placeholders, resolved server-side through th
 same ``EFOOTPRINT_DESCRIPTION_PROVIDER`` the rest of the UI uses
 (``tour_steps.html`` renders the result as JSON for ``tour.js``).
 
-The tour deliberately carries no domain-concept prose (spec §3 out-of-scope): it
+The tour deliberately carries no domain-concept prose: it
 points at the canvas columns and the existing help affordances, never re-explaining
 what a usage journey or a server *is*. Two flavors share the same orientation steps:
 
@@ -119,7 +119,7 @@ _SHARED_STEPS = [
     },
 ]
 
-# The blank flavor ends on a concrete first action (spec §6: "create a usage journey").
+# The blank flavor ends on a concrete first action ("create a usage journey").
 _BLANK_FIRST_ACTION_STEP = {
     "target": _sel("usage-journeys"),
     "title": "Your first step",

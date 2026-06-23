@@ -45,7 +45,7 @@ def _render_model_canvas(model_web, params) -> str:
     from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
     # A mutation always targets the active slot's repository, so the canvas to refresh is the active
     # slot's. HTMX OOB resolves first-match-by-id, so emitting #model-canva-{active} is what keeps a
-    # mutation on the active model from landing in the parked canvas (model-comparison Task 3 / plan §4).
+    # mutation on the active model from landing in the parked canvas.
     slot = getattr(model_web.repository, "slot", 0)
     # The active canvas always carries the canonical (unsuffixed) structural ids; a mutation only ever
     # targets the active slot, so this re-render is the active canvas (slot_suffix="", is_active=True).

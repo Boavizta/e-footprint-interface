@@ -80,7 +80,7 @@ class TestVideoExternalAPIObjects:
         model_builder.object_should_exist("EcoLogitsVideoGenExternalAPI", second_api_name)
 
         # Step 3: Create a job; the resolution datalist must offer exactly the chosen API's valid
-        # resolutions (Task 5 cross-object cascade) and repopulate when a different API is selected.
+        # resolutions and repopulate when a different API is selected.
         uj_step_card = model_builder.get_object_card("UsageJourneyStep", uj_step_name)
         uj_step_card.click_add_job_button()
         page.locator("#server_or_external_api").wait_for(state="attached")

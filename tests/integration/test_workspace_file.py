@@ -1,7 +1,7 @@
-"""View-layer integration tests for the combined workspace file (model-comparison Task 5).
+"""View-layer integration tests for the combined workspace file.
 
 Exercises the additive ``.e-f.json`` comparison export and the unified "Open file" import (upload-json
-content-routes on the ``models`` key — §4.1) through real Django views + session:
+content-routes on the ``models`` key) through real Django views + session:
 
   - comparison export → "Open file" restores both slots + the active pointer in one action;
   - "Open file" fed a comparison file in a single-model session restores both slots (becomes two-model);
@@ -69,7 +69,7 @@ def _upload(client, url, payload: dict, filename: str):
 
 @pytest.mark.django_db
 def test_workspace_export_is_an_envelope_of_two_single_model_documents(client, minimal_system):
-    """Download Both models → the §2.7 envelope: version, active pointer, and two models[] that are
+    """Download both models → the envelope: version, active pointer, and two models[] that are
     each a byte-for-byte single-model document (no calculated attributes)."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 active
@@ -88,7 +88,7 @@ def test_workspace_export_is_an_envelope_of_two_single_model_documents(client, m
 @pytest.mark.django_db
 def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, minimal_system):
     # Slot 0 carries UI-only interface_config (Sankey settings); it must survive the round-trip per
-    # slot (plan §2.7). Slot 1 is a duplicate, which carries its own interface_config too.
+    # slot. Slot 1 is a duplicate, which carries its own interface_config too.
     slot_0_config = {"sankey_diagrams": [{"id": "slot0cfg"}]}
     _seed_active_slot(client, minimal_system, interface_config=slot_0_config)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 active = "Copy of …"
@@ -116,7 +116,7 @@ def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, min
 @pytest.mark.django_db
 def test_single_model_file_via_open_file_replaces_the_active_model(client, minimal_system):
     """Unified "Open file" (upload-json) fed a single-model file replaces the active model — the single
-    model loads into the active slot (content-based detection: no top-level `models` key, §4.1)."""
+    model loads into the active slot (content-based detection: no top-level `models` key)."""
     _seed_active_slot(client, minimal_system)
     single_doc = _download(client, "/model_builder/download-json/")
     assert "models" not in single_doc  # it is a single-model file
@@ -133,7 +133,7 @@ def test_single_model_file_via_open_file_replaces_the_active_model(client, minim
 @pytest.mark.django_db
 def test_workspace_file_via_open_file_in_single_model_session_restores_both_slots(client, minimal_system):
     """Unified "Open file" (upload-json) fed a workspace file in a single-model session restores both
-    slots and becomes a two-model session (content-routed on the `models` key, §4.1) — closing the gap
+    slots and becomes a two-model session (content-routed on the `models` key) — closing the gap
     where a single-model session previously had no way to open a workspace file."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})
@@ -155,7 +155,7 @@ def test_workspace_file_via_open_file_in_single_model_session_restores_both_slot
 @pytest.mark.django_db
 def test_workspace_import_enforces_combined_budget(client, minimal_system, monkeypatch):
     """The shared budget is summed over both slots on workspace import: a file whose two models fit
-    individually but not together is rejected (constitution / plan §4). The over-budget add fails
+    individually but not together is rejected (the combined budget is summed over both slots). The over-budget add fails
     gracefully into the error modal (not a 500), leaving the session a clean single-model workspace."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})
@@ -208,14 +208,14 @@ def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, 
 
 @pytest.mark.django_db
 def test_single_model_format_is_unchanged_and_round_trips_both_directions(client, minimal_system):
-    """The single-model file format is byte-for-byte unchanged by Task 5 and circulates freely between
+    """The single-model file format is unchanged and circulates freely between
     single- and two-model sessions, both directions:
 
       - a per-slot export from a TWO-model session is structurally identical to the same model exported
         from a plain single-model session (no workspace contamination), and
       - that single-model file imports cleanly into a plain single-model session via "Open file".
     """
-    # Single-model session export = the pre-Task-5 baseline.
+    # Single-model session export baseline.
     _seed_active_slot(client, minimal_system)
     single_session_doc = _download(client, "/model_builder/download-json/")
 

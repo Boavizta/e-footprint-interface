@@ -1,4 +1,4 @@
-"""E2E for the two-model comparison builder (model-comparison Task 3).
+"""E2E for the two-model comparison builder.
 
 The critical flow reserved for Playwright: duplicate the working model, edit the copy, refresh and
 see both models + the active selection survive, then remove the copy to return to single-model mode.
@@ -60,8 +60,8 @@ class TestModelComparisonWorkspace:
         expect(page.locator(".model-tab__close")).to_have_count(0)
 
     def test_compare_shows_the_headline_delta_and_reflects_edits(self, minimal_complete_model_builder):
-        """The Task-4 payoff flow: duplicate → edit B → open Compare → see the §4.2 dashboard with the
-        headline Δ; an edit to B is reflected the next time Compare opens (no stale results)."""
+        """Duplicate → edit B → open Compare → see the comparison dashboard with the headline Δ;
+        an edit to B is reflected the next time Compare opens (no stale results)."""
         model_builder = minimal_complete_model_builder
         page = model_builder.page
 
@@ -72,7 +72,7 @@ class TestModelComparisonWorkspace:
         model_builder.add_model_by_duplication()
         expect(page.locator("#compare-tab")).to_be_enabled()
 
-        # Open Compare → the §4.2 dashboard renders with both model cards and the headline Δ card.
+        # Open Compare → the dashboard renders with both model cards and the headline Δ card.
         model_builder.open_compare()
         expect(page.locator("#comparison-dashboard")).to_be_visible()
         expect(page.locator("#comparison-dashboard")).to_contain_text("CO₂e")          # KPI totals
@@ -204,7 +204,7 @@ class TestModelComparisonWorkspace:
         assert not console_errors, f"Unexpected console errors on the Compare view: {console_errors}"
 
     def test_tab_strip_layout_two_models_then_one(self, minimal_complete_model_builder):
-        """§4.2 tab-strip layout: with two models the order is [A ✕] [B ✕] [Compare] — every model tab
+        """Tab-strip layout: with two models the order is [A ✕] [B ✕] [Compare] — every model tab
         has its own browser-tab-style ✕ and Compare reads as a tab flush immediately to the right of the
         last model tab (not a floated/right-anchored button); with one model it's [A] [+Add] [Compare
         disabled] with no ✕ on the sole model."""

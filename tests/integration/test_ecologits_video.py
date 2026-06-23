@@ -107,7 +107,7 @@ def test_video_system_round_trips_through_persistence():
 
     # The persisted JSON must carry the Job's per-call calculated attributes, not just its
     # inputs — otherwise a reload would silently recompute them and an emissions>0 check
-    # could not tell preservation from recomputation (constitution §2.3).
+    # could not tell preservation from recomputation.
     persisted = repository.get_system_data()
     (job_data,) = persisted["EcoLogitsVideoGenExternalAPIJob"].values()
     for calc_attr in ("generation_latency", "request_energy", "request_usage_gwp", "request_embodied_gwp"):

@@ -1,4 +1,4 @@
-"""Unit tests for the guided-tour step copy (Step 6 Task 3).
+"""Unit tests for the guided-tour step copy.
 
 The tour carries map/order copy only; these guard that both flavors resolve, that placeholders
 are expanded server-side (no raw {kind:target} reaches JS), and that the blank flavor adds the

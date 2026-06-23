@@ -1,26 +1,26 @@
 """Thin adapter shaping the library ``SystemComparison`` for the comparison dashboard.
 
-The comparison *computation* is the library's domain truth (constitution §1.3): this service calls
+The comparison *computation* is the library's domain truth: this service calls
 ``system_a.compare_to(system_b)`` and re-implements **rendering only** — it shapes the resulting
 ``SystemComparison`` into the view model the dashboard template needs: the KPI-strip values, the
-Chart.js JSON for the three §4.2 chart variants (paired bars, cumulative overlay, diverging
-decomposition), and the assumptions-diff table rows. No modeling logic, no attribution claims, no
-Django imports — it lives in ``domain/`` and stays usable from a plain ``System`` pair.
+Chart.js JSON for the three chart variants (paired bars, cumulative overlay, diverging decomposition),
+and the assumptions-diff table rows. No modeling logic, no attribution claims, no Django imports — it
+lives in ``domain/`` and stays usable from a plain ``System`` pair.
 
-Magnitude honesty (§4.3) is enforced here, not in styling: the paired bars and the cumulative overlay
-each carry a single shared y-axis unit and one legend for both models; model identity is a constant
-colour pair. The decomposition is grouped to the §4.2 display categories (Servers + Storage merged)
-but only by relabelling — every per-(category, phase) delta still appears exactly once, so the bars
-sum to the headline Δ by construction (the library guarantees the underlying rows do).
+Magnitude honesty is enforced here, not in styling: the paired bars and the cumulative overlay each
+carry a single shared y-axis unit and one legend for both models; model identity is a constant colour
+pair. The decomposition is grouped to display categories (Servers + Storage merged) but only by
+relabelling — every per-(category, phase) delta still appears exactly once, so the bars sum to the
+headline Δ by construction (the library guarantees the underlying rows do).
 """
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List, Optional
 
 # Constant model-identity colours, shared across every chart (the KPI cards' left border, both chart
-# series, the cumulative curves). Model A is the cool blue, model B the warm amber — the same pairing
-# the §4.2 mockup uses. Usage is the saturated tone, fabrication the lighter tint of the same hue, so
-# one capsule legend (Usage / Fabrication × A / B) reads across both models.
+# series, the cumulative curves). Model A is the cool blue, model B the warm amber. Usage is the
+# saturated tone, fabrication the lighter tint of the same hue, so one capsule legend
+# (Usage / Fabrication × A / B) reads across both models.
 MODEL_A_COLOR = "#4878a8"
 MODEL_A_COLOR_LIGHT = "#9db9d8"
 MODEL_B_COLOR = "#e09f3e"
@@ -29,9 +29,9 @@ MODEL_B_COLOR_LIGHT = "#f0cf94"
 LOWER_COLOR = "#2e7d32"   # B emits less than A (a reduction) — green
 HIGHER_COLOR = "#c62828"  # B emits more than A (an increase) — red
 
-# The §4.2 decomposition collapses the six library hardware categories to the four display rows of the
-# mockup, merging Servers + Storage into one "Servers & storage" line. Relabelling only — the
-# underlying per-(category, phase) deltas are summed per display group, so the bars still total Δ.
+# The decomposition collapses the six library hardware categories to four display rows, merging
+# Servers + Storage into one "Servers & storage" line. Relabelling only — the underlying
+# per-(category, phase) deltas are summed per display group, so the bars still total Δ.
 DISPLAY_CATEGORY_LABELS = {
     "Servers": "Servers & storage",
     "Storage": "Servers & storage",
@@ -100,7 +100,7 @@ class DiffUnmatched:
 
 @dataclass
 class ComparisonView:
-    """The full view model the §4.2 dashboard renders."""
+    """The full view model the comparison dashboard renders."""
     card_a: KpiCard
     card_b: KpiCard
     delta: KpiDelta
@@ -264,7 +264,7 @@ class ComparisonService:
     # --- decomposition (diverging bars) --------------------------------------------------------
 
     def _decomposition_bars(self, decomposition) -> List[DecompositionBar]:
-        """Diverging bars per §4.2 display category × phase, dropping zero-delta rows.
+        """Diverging bars per display category × phase, dropping zero-delta rows.
 
         Merges Servers + Storage by label, sums each display group, and keeps only non-zero movers
         (a row with no change is "no change", not a zero bar). The dropped rows are exactly the
@@ -294,7 +294,7 @@ class ComparisonService:
         """Per-year paired bars: model A | model B per year, dark = usage, light = fabrication.
 
         Both models bucket onto one shared yearly calendar axis (the union of their periods); a year
-        outside a model's own modeling period is left blank (``null``), not a zero bar (§4.2 / §6).
+        outside a model's own modeling period is left blank (``null``), not a zero bar.
         The usage / fabrication split is *exact per year*: the library's per-phase aligned series
         (``usage_*`` / ``fabrication_*``) are summed per calendar year, never a single full-period
         ratio applied to every year — so the dark / light segmentation reads truthfully even when a
@@ -395,8 +395,8 @@ _ZERO_KG = 1e-9
 def _axis_unit_fields(representative_kg) -> Dict:
     """The value-axis display unit for a chart, picked from its largest magnitude (in kg).
 
-    The chart data stays in kg — so the magnitude-honesty maths and the per-point ``valueLabels`` are
-    untouched — and these two fields only tell the JS how to *label* the axis: ``axisUnit`` for the
+    The chart data stays in kg — so the magnitude-honesty arithmetic and the per-point ``valueLabels``
+    are untouched — and these two fields only tell the JS how to *label* the axis: ``axisUnit`` for the
     title and ``axisScale`` (multiply a kg tick by it) for the tick numbers. So a comparison whose
     values run to thousands of tonnes reads on a tonne axis instead of a six-figure kg one, adapting
     to the scope of the values rather than always showing kg.
@@ -448,7 +448,7 @@ def _yearly_totals(start_date, hourly_values, axis_years, model_years):
     """Per-year totals on the shared ``axis_years``; ``None`` for years outside ``model_years``.
 
     A year a model does not cover is blank (``None``), distinct from a covered year that happens to
-    be zero — the §6 "leave non-overlapping buckets blank" rule. ``model_years`` is the model's own
+    be zero — non-overlapping buckets are left blank, not zeroed. ``model_years`` is the model's own
     (unaligned) coverage; the aligned ``hourly_values`` are summed by their own calendar year.
     """
     by_year = _sum_by_year(start_date, hourly_values)

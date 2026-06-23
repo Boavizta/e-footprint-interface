@@ -5,7 +5,7 @@ The domain ``build_template_catalog`` returns raw entries carrying
 template. Resolving those into display chips (with the class UI label and a
 help-drawer target) and mkdocs deep-link URLs needs ``CLASS_UI_CONFIG`` and
 ``MKDOCS_BASE_URL``, which live in the adapter layer — so it happens here, not in
-the domain (constitution §1.1).
+the domain.
 """
 from django.conf import settings
 

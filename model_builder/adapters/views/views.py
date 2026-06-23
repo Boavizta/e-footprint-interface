@@ -108,7 +108,7 @@ def compare_enabled(workspace_slots) -> bool:
 
     Comparing reads each model's computed footprint, so an incomplete model (e.g. a freshly added blank
     one) cannot be compared — gate on the same results-readiness signal as the "Get results" button
-    rather than on slot count, so the tab is disabled-instead-of-error (constitution §3.1, spec §4.2)
+    rather than on slot count, so the tab is disabled-instead-of-error
     instead of 500-ing when the comparison runs.
     """
     from model_builder.domain.services import SystemValidationService
@@ -236,7 +236,7 @@ def open_import_json_panel(request):
     """Side panel for the unified "Open file" upload — accepts a single-model or a workspace file.
 
     ``upload_json`` content-detects which (the `models` key) and routes: a workspace file restores
-    both slots, a single-model file replaces the active model (model-comparison §2.7, §4.1).
+    both slots, a single-model file replaces the active model.
     """
     return render(request, "model_builder/side_panels/import_model.html", context={
               "header_name": "Open a file", "save_button_label": "Open"})
@@ -246,7 +246,7 @@ def _single_model_document(repository, model_web=None) -> dict:
     """The exact single-model export document for one slot (no calculated attributes).
 
     Shared by ``download_json`` and the workspace export so each ``models[]`` element of the workspace
-    file is byte-for-byte a single-model file (model-comparison §2.7) — the single-model format is
+    file is byte-for-byte a single-model file — the single-model format is
     never re-implemented, just reused per element. ``model_web`` may be passed in to avoid hydrating
     the slot twice (the workspace export needs the system name too).
     """
@@ -272,7 +272,7 @@ def download_json(request):
 
 
 def download_workspace(request):
-    """Export both models as one additive ``.e-f.json`` comparison file (model-comparison §2.7).
+    """Export both models as one additive ``.e-f.json`` comparison file.
 
     Thin envelope around two byte-for-byte single-model documents plus the active-slot pointer; the
     single-model format is untouched. Each element carries no calculated attributes (recomputed on
@@ -325,8 +325,8 @@ def upload_json(request):
                 file.close()
 
         if data and not import_error_message:
-            # Content-based detection (model-comparison §2.7): a top-level `models` key means a
-            # comparison file, anything else a single-model file. "Open file" routes either: a
+            # Content-based detection: a top-level `models` key means a comparison file, anything
+            # else a single-model file. "Open file" routes either: a
             # comparison file restores both slots, a single-model file replaces the active model. Both
             # share the `.e-f.json` extension, so detection is purely on the file's content.
             try:

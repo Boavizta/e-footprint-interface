@@ -1,8 +1,8 @@
 // ============================================================================
-// Comparison dashboard charts (model-comparison Task 4)
+// Comparison dashboard charts
 // ============================================================================
 //
-// Three Chart.js variants for the §4.2 dashboard, all magnitude-honest (§4.3): a single shared y-axis
+// Three Chart.js variants for the comparison dashboard, all magnitude-honest: a single shared y-axis
 // and one legend per chart, so the two models' magnitudes read directly against each other. Model
 // identity is carried by a constant colour pair baked into the payload by the ComparisonService
 // adapter — never by per-chart auto-colours.

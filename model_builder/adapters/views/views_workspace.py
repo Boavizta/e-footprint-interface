@@ -1,4 +1,4 @@
-"""Workspace endpoints for the two-model comparison builder (model-comparison Tasks 3–4).
+"""Workspace endpoints for the two-model comparison builder.
 
 Thin HTTP adapters over ``SessionWorkspaceRepository``:
 
@@ -8,11 +8,11 @@ Thin HTTP adapters over ``SessionWorkspaceRepository``:
     canvas re-render and preserves each canvas's transient UI state.
   - ``add-model`` adds the second model by duplication, blank/scratch, or file import; the new model
     becomes active. Every path goes through ``workspace.add_slot``, inheriting the distinct-system-id
-    invariant and the shared-budget pre-check (constitution / plan §2.1, §4).
+    invariant and the shared-budget pre-check.
   - ``remove-model`` drops a slot, returning the workspace toward single-model mode.
-  - ``compare`` renders the §4.2 comparison dashboard, **re-built fresh on every visit** (no stale
+  - ``compare`` renders the comparison dashboard, **re-built fresh on every visit** (no stale
     results): it shapes ``model_a.system.compare_to(model_b.system)`` through the thin
-    ``ComparisonService`` adapter (constitution §1.3 — the library is the domain truth).
+    ``ComparisonService`` adapter (the library is the domain truth).
 """
 import gc
 import json
@@ -107,7 +107,7 @@ def _restore_workspace(workspace, data: dict) -> None:
             workspace.remove_slot(slot)
 
     # Each embedded model carries its own interface_config (Sankey settings etc.); restore it per slot
-    # so the round-trip preserves it as the single-model upload does (plan §2.7). Slot 0: set it on the
+    # so the round-trip preserves it as the single-model upload does. Slot 0: set it on the
     # repository before persist. Slot 1+: ProgressiveImportService already carries it into the with-calc
     # dict, which add_slot's save writes through (and with_fresh_system_id preserves it on a re-mint).
     slot_0_repository = workspace.repository_for(0)
@@ -184,14 +184,14 @@ def remove_model(request):
 
 
 def compare(request):
-    """Render the §4.2 comparison dashboard for the workspace's two models.
+    """Render the comparison dashboard for the workspace's two models.
 
     Built fresh on every visit (no stale results): the two slots' models are wrapped, compared via the
     library's ``System.compare_to`` and shaped by the thin ``ComparisonService`` adapter. The dashboard
     is shown only when two models exist *and both are complete enough to compute* — the same readiness
     signal that gates the ⇄Compare tab. Otherwise (one model, or an incomplete second model) it falls
-    back to the builder rather than erroring (disabled-instead-of-error, constitution §3.1): comparing
-    an incomplete model would read a footprint that does not exist and 500.
+    back to the builder rather than erroring (disabled-instead-of-error): comparing an incomplete model
+    would read a footprint that does not exist and 500.
     """
     from model_builder.adapters.views.views import compare_enabled
 

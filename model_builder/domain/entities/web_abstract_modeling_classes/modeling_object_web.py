@@ -139,7 +139,7 @@ class ModelingObjectWeb:
     @property
     def web_id(self):
         # Prefix the root card id with the system id so the two resident comparison canvases never
-        # collide (model-comparison Task 3). Every derived id (`button-`/`flush-`/`icon-`), HTMX/
+        # collide. Every derived id (`button-`/`flush-`/`icon-`), HTMX/
         # hyperscript selector, leaderline anchor and mirrored-card ref flows from web_id, so this one
         # chokepoint namespaces them all; the canvas templates need no edits. The nested branch
         # inherits the prefix through parent_container.web_id, so it is applied exactly once at the

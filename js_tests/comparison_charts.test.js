@@ -1,7 +1,7 @@
-// Jest coverage for the comparison dashboard chart builders (model-comparison Task 4).
+// Jest coverage for the comparison dashboard chart builders.
 //
 // The builders are pure (DOM-free): given the ComparisonService payload they return a Chart.js config.
-// These tests pin the magnitude-honesty contract (§4.3) that the builders must not break — a single
+// These tests pin the magnitude-honesty contract that the builders must not break — a single
 // shared y-axis and one legend per chart — and the shaping each variant does on the payload.
 
 const {

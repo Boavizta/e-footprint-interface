@@ -4,7 +4,7 @@
    loads, after "Start from scratch", or when the model already had content) this
    records `efootprint_onboarding_seen` and emits an `onboarding:first-run` event.
    It defers while the template picker still overlays the canvas, so the guided tour
-   (Step 6 Task 3) that listens for that event auto-runs on the loaded canvas, not on
+   The guided tour that listens for that event auto-runs on the loaded canvas, not on
    the bare picker. The picker itself is server-driven and does not depend on this flag.
    IIFE + custom-event, nothing on `window`. See conventions.md → JavaScript. */
 (function () {

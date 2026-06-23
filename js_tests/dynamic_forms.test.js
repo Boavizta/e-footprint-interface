@@ -1,7 +1,7 @@
 // initDynamicForm wires datalist cascades. This exercises the single-hop path that
 // still ships (parent select -> child datalist): changing the parent repopulates the
 // child datalist from the parent's value and clears the child input. (The three-level
-// chain propagation was removed in the ecologits-video-generation Task 4 cleanup — no
+// chain propagation was removed in the ecologits-video-generation cleanup — no
 // single form ever holds a three-level chain.)
 
 require("../theme/static/scripts/dynamic_forms.js");

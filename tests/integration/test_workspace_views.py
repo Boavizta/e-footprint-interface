@@ -1,4 +1,4 @@
-"""View-layer integration tests for the two-model workspace endpoints (model-comparison Task 3).
+"""View-layer integration tests for the two-model workspace endpoints.
 
 Exercises switch / add / remove through real Django views + session, plus the two correctness
 invariants the feature hinges on:
@@ -202,7 +202,7 @@ def test_mutation_on_active_model_targets_the_active_canvas(client, minimal_syst
 
 @pytest.mark.django_db
 def test_compare_renders_dashboard_with_both_models_and_headline_delta(client, minimal_system):
-    """With two models, /compare/ renders the §4.2 dashboard: both model cards, the headline Δ card,
+    """With two models, /compare/ renders the comparison dashboard: both model cards, the headline Δ card,
     and the decomposition. The endpoint runs the real System.compare_to through ComparisonService."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 = "Copy of Test System"
@@ -248,7 +248,7 @@ def test_compare_with_one_model_falls_back_to_the_builder(client, minimal_system
 def test_compare_with_an_incomplete_second_model_falls_back_to_the_builder(client, minimal_system):
     """A blank second model has no computable footprint, so /compare/ must NOT run the comparison
     (which would read a non-existent footprint and 500) — it falls back to the builder, and the Compare
-    tab is disabled in the UI (disabled-instead-of-error, constitution §3.1)."""
+    tab is disabled in the UI (disabled-instead-of-error)."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "blank"})  # slot 1 = blank, not computable
 

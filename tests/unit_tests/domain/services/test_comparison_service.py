@@ -1,4 +1,4 @@
-"""Unit tests for the ComparisonService dashboard adapter (model-comparison Task 4).
+"""Unit tests for the ComparisonService dashboard adapter.
 
 The library ``SystemComparison`` is the domain truth; these tests pin the *shaping* this thin adapter
 does on top of it. We feed a hand-built comparison stub with the exact attribute shape the library
@@ -219,7 +219,7 @@ class TestPairedChart:
                     assert label and label[0].isdigit() and " " in label  # e.g. "200 kg" / "1.2 t"
 
     def test_non_overlapping_years_are_blank_not_zero(self):
-        """Model A covers into 2026; B stays in 2025 — the 2026 bucket must be null for B (§6)."""
+        """Model A covers into 2026; B stays in 2025 — the 2026 bucket must be null for B."""
         comparison = build_comparison(
             hours_a=24 * 400,                   # ~13 months from 2025-01-01 → spans 2025 + 2026
             hours_b=24 * 30,                    # ~1 month → 2025 only
@@ -279,7 +279,7 @@ class TestCumulativeChart:
 class TestAxisUnit:
     """The value-axis unit adapts to each chart's scope (``axisScale`` is the kg → display-unit
     factor for the axis ticks). The chart data itself stays in kg — only the axis label adapts — so
-    the magnitude-honesty invariants above hold."""
+    the magnitude-honesty invariants above hold (chart data stays in kg, only axis labels adapt)."""
 
     def test_decomposition_axis_follows_its_deltas_not_the_totals(self, view):
         # The fixture's totals are ~3.9 t (so the totals charts read in tonnes), but its deltas top

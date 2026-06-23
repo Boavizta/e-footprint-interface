@@ -2,7 +2,7 @@
 
 Each committed JSON must load through the interface's real import path
 (``ProgressiveImportService``) and produce a non-empty computed footprint —
-the spec success criterion "complete, working system... results compute without
+the success criterion "complete, working system... results compute without
 error". Fails if a template stops loading or computing after a library schema
 change (re-run ``python -m scripts.build_intro_templates`` to regenerate).
 """

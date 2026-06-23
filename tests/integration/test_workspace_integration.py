@@ -1,4 +1,4 @@
-"""Integration tests for the workspace persistence layer (model-comparison Task 2).
+"""Integration tests for the workspace persistence layer.
 
 Runs adapters → domain through the in-memory workspace, with no Django session scaffolding — so it
 doubles as the Clean-Architecture no-Django-in-domain guard for ``IWorkspaceRepository`` (the domain

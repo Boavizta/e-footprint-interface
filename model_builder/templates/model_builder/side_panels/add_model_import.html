@@ -2,7 +2,7 @@
 {% load static %}
 
 {% comment %}
-Side panel for "Add a model to compare → Import from file" (model-comparison Task 3). Unlike
+Side panel for "Add a model to compare → Import from file". Unlike
 import_model.html (which REPLACES the active model via upload-json), this ADDS a second model: it posts
 the file to add-model with source=import, which routes through the workspace add-to-slot path (distinct
 system id + shared-budget guard) and re-renders the builder with both canvases.

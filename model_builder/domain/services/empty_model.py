@@ -1,6 +1,6 @@
 """Predicate that decides whether the builder was entered with an empty model.
 
-The first-run template picker is shown whenever the model is empty (spec §4). A
+The first-run template picker is shown whenever the model is empty. A
 serialized system carries metadata keys (``efootprint_version``, ``Sources``,
 ``interface_config``, ``efootprint_interface_version``) alongside the efootprint
 *object* blocks, whose keys are efootprint class names. The model is "empty" when

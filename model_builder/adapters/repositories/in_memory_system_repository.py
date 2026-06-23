@@ -2,7 +2,7 @@
 
 These implementations store system data in memory, primarily for testing purposes.
 They allow the integration harness to run without Django session infrastructure
-(constitution §1.2: the in-memory and session repositories stay interchangeable).
+(the in-memory and session repositories stay interchangeable).
 """
 from copy import deepcopy
 from typing import Dict, Any, List, Optional, Tuple

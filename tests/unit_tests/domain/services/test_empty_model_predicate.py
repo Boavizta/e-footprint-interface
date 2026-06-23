@@ -4,7 +4,7 @@ The predicate is "true when there is no content". Its robustness comes from keyi
 off efootprint *class* names rather than a hardcoded metadata exclusion list — so a
 new top-level metadata key can never be mistaken for content. The drift guard below
 asserts the serializer's metadata keys stay outside the class set, which is what
-keeps them excluded (plan §4 risk "empty-model predicate drift").
+keeps them excluded (guards against "empty-model predicate drift").
 """
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
 

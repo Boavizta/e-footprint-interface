@@ -1,5 +1,5 @@
-// Jest coverage for the two-canvas id-namespacing the comparison workspace depends on
-// (model-comparison Task 3). The headline correctness risk is two resident canvases sharing a DOM id;
+// Jest coverage for the two-canvas id-namespacing the comparison workspace depends on.
+// The headline correctness risk is two resident canvases sharing a DOM id;
 // the active canvas owns the canonical structural ids and the parked one suffixes them by slot, with
 // the canonical ids migrating on switch. These tests assert that migration keeps every id unique.
 
