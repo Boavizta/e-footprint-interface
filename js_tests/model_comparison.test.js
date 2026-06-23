@@ -83,3 +83,66 @@ test("switching back and forth keeps ids unique throughout", () => {
     expect(document.querySelector('[data-model-canvas="0"]').querySelector("#up-list")).not.toBeNull();
     expect(document.querySelector('[data-model-canvas="1"]').querySelector("#up-list-1")).not.toBeNull();
 });
+
+// The results panel is a singleton bound to the active slot, so switching must collapse it — otherwise
+// the still-open panel covers the now-active canvas and the OOB-rebound bar floats mid-air over it.
+test("switching collapses an open results panel (singleton bound to the active slot)", () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="result-block">some model results</div>');
+    window.hidePanelResult = jest.fn();
+    switchToSlot("1");
+    expect(window.hidePanelResult).toHaveBeenCalledTimes(1);
+});
+
+test("switching does not touch a closed results panel (empty #result-block)", () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="result-block"></div>');
+    window.hidePanelResult = jest.fn();
+    switchToSlot("1");
+    expect(window.hidePanelResult).not.toHaveBeenCalled();
+});
+
+// The side panel is a singleton bound to the active slot: an open edit form belongs to the model being
+// left, so switching must close it (a stale-model save would otherwise target the wrong model).
+test("switching closes an open side panel (singleton bound to the active slot)", () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="sidePanel"></div>');  // open = no d-none
+    window.closeAndEmptySidePanel = jest.fn();
+    switchToSlot("1");
+    expect(window.closeAndEmptySidePanel).toHaveBeenCalledTimes(1);
+});
+
+test("switching leaves a closed side panel (d-none) untouched", () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="sidePanel" class="d-none"></div>');
+    window.closeAndEmptySidePanel = jest.fn();
+    switchToSlot("1");
+    expect(window.closeAndEmptySidePanel).not.toHaveBeenCalled();
+});
+
+// remove-model replaces the whole builder (discarding an open side panel). It keeps its own destructive
+// confirm rather than the shared unsaved modal, so the two never stack — instead the unsaved-changes
+// warning is folded into that single dialog when the open panel is dirty.
+function fireRemoveConfirm() {
+    document.body.insertAdjacentHTML("beforeend",
+        '<button id="rm" data-confirm-remove-model="Remove this model?"></button>');
+    const event = new CustomEvent("htmx:confirm", { bubbles: true, cancelable: true });
+    const issueRequest = jest.fn();
+    Object.defineProperty(event, "detail", { value: { issueRequest } });
+    document.getElementById("rm").dispatchEvent(event);
+    return { issueRequest };
+}
+
+test("remove-model confirm folds in the unsaved-changes warning when the panel is dirty", () => {
+    window.isSidePanelFormModified = () => true;
+    let asked = null;
+    window.confirm = (m) => { asked = m; return false; };  // user declines
+    const { issueRequest } = fireRemoveConfirm();
+    expect(asked).toBe("Remove this model? You also have unsaved changes in the open panel that will be lost.");
+    expect(issueRequest).not.toHaveBeenCalled();
+});
+
+test("remove-model confirm is the plain message when the panel is clean; Yes issues the request", () => {
+    window.isSidePanelFormModified = () => false;
+    let asked = null;
+    window.confirm = (m) => { asked = m; return true; };  // user confirms
+    const { issueRequest } = fireRemoveConfirm();
+    expect(asked).toBe("Remove this model?");
+    expect(issueRequest).toHaveBeenCalledWith(true);
+});

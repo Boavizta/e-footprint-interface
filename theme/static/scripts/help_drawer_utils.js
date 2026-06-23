@@ -82,4 +82,13 @@
             closeHelpDrawer();
         }
     });
+
+    /* The help drawer is a singleton bound to the active slot — its class help page belongs to the
+       model being left. Close it on a model switch so it never lingers over the now-active canvas
+       (mirrors the side-panel/results-panel close in model_comparison.js's switchToSlot). */
+    document.body.addEventListener("switchModelCanvas", function () {
+        if (!document.getElementById("helpDrawer").classList.contains("d-none")) {
+            closeHelpDrawer();
+        }
+    });
 })();

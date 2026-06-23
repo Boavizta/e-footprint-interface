@@ -87,6 +87,23 @@
         });
         strip.dataset.activeSlot = slot;
 
+        // The side panel, help drawer and results panel are singletons bound to the active slot, so
+        // their open content (an object's edit form, a class help page, a model's chart) belongs to the
+        // model we are leaving — leaving them open strands stale content over the now-active canvas (and
+        // a side-panel save would target the wrong model). Close them so the now-active model starts
+        // clean. The help drawer self-closes from its own module on this same switch event.
+        const sidePanel = document.getElementById("sidePanel");
+        if (sidePanel && !sidePanel.classList.contains("d-none") && typeof window.closeAndEmptySidePanel === "function") {
+            window.closeAndEmptySidePanel();
+        }
+        // Results: the switch OOB-rebinds the (newly visible) "Results" bar over the still-open panel,
+        // leaving the bar mid-air above a blank canvas. A non-empty #result-block is the open signal
+        // that survives that OOB clobber.
+        const resultBlock = document.getElementById("result-block");
+        if (resultBlock && resultBlock.innerHTML.trim() !== "" && typeof window.hidePanelResult === "function") {
+            window.hidePanelResult();
+        }
+
         // Sortable and leader lines were wired against the previously-visible canvas; re-init so the
         // now-active canvas's lists are draggable and only its (visible) lines are drawn.
         if (typeof window.initModelBuilderMain === "function") {
@@ -116,11 +133,18 @@
     });
 
     // Confirm before removing the second model (live-state confirm, body-delegated so it survives swaps).
+    // remove-model replaces the whole builder, discarding an open side panel. It has its own destructive
+    // confirm (not the shared unsaved modal), so the two never stack; instead fold the unsaved-changes
+    // warning into this single dialog when the open panel has pending edits.
     document.body.addEventListener("htmx:confirm", function (evt) {
         const elt = evt.target.closest("[data-confirm-remove-model]");
         if (!elt) return;
         evt.preventDefault();
-        if (window.confirm(elt.getAttribute("data-confirm-remove-model"))) {
+        let message = elt.getAttribute("data-confirm-remove-model");
+        if (typeof window.isSidePanelFormModified === "function" && window.isSidePanelFormModified()) {
+            message += " You also have unsaved changes in the open panel that will be lost.";
+        }
+        if (window.confirm(message)) {
             evt.detail.issueRequest(true);
         }
     });
