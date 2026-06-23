@@ -8,6 +8,13 @@ lifecycle) operate on the same index, so the active slot and the shared budget s
 
 A session with no index behaves as a single-model session: one slot ``[0]`` active, which is exactly
 today's behaviour.
+
+**Slot order is role order, not numeric order.** Position 0 in ``slots`` is the Reference model,
+position 1 the Comparison (that is how the tab strip labels them and how ``compare()`` pairs
+``workspace_slots[0]→A``, ``[1]→B``). New slots **append**; a removed slot's position collapses. The
+list is therefore deliberately *never sorted*: after removing the Reference (slot 0), the survivor sits
+in slot 1 yet must stay role-first, and a newly added model reuses the freed slot number 0 — sorting
+would re-promote that new model to the Reference position (the model-comparison re-add bug).
 """
 from typing import Dict, List
 
@@ -50,7 +57,9 @@ class WorkspaceIndex:
         slots = self.slots()
         if slot not in slots:
             slots.append(slot)
-        index["slots"] = sorted(slots)
+        # Append, never sort: ``slots`` order is role order (see module docstring). A new model reusing a
+        # freed lower slot number must stay role-last, not jump ahead of a promoted survivor.
+        index["slots"] = slots
         index.setdefault("active", 0)
         index.setdefault("sizes", {})
         self._write(index)
@@ -75,7 +84,10 @@ class WorkspaceIndex:
         sizes[str(slot)] = size_bytes
         index["sizes"] = sizes
         if slot not in self.slots():
-            index["slots"] = sorted(set(self.slots() + [slot]))
+            # Append, never sort (role order — see module docstring): ``add_slot`` saves a new slot's
+            # payload (recording its size here) *before* registering it, so this is often the first
+            # writer to list the slot, and it must list it role-last just as ``add_slot`` would.
+            index["slots"] = self.slots() + [slot]
         index.setdefault("active", 0)
         self._write(index)
 

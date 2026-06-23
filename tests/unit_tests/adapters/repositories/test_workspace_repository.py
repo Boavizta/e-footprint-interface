@@ -106,6 +106,29 @@ class TestWorkspaceIndexLifecycle:
         assert index.slots() == [0]
         assert index.active_slot() == 0  # active falls back to a surviving slot
 
+    def test_readded_slot_keeps_role_order_not_numeric_order(self):
+        # Slot order is role order: position 0 = Reference, 1 = Comparison. Removing the Reference
+        # (slot 0) promotes the survivor (slot 1) to role-first; a newly added model reuses the freed
+        # slot number 0 but must append as the Comparison, not sort ahead to retake the Reference slot.
+        index = WorkspaceIndex(DictSession())
+        index.add_slot(0)
+        index.add_slot(1)
+        index.remove_slot(0)
+        assert index.slots() == [1]                # the survivor is now role-first (the Reference)
+        index.add_slot(0)                          # a new model reuses the freed slot number 0
+        assert index.slots() == [1, 0]             # role order preserved (NOT numeric [0, 1])
+
+    def test_set_slot_size_for_reused_slot_appends_in_role_order(self):
+        # save_data records a new slot's size (via set_slot_size) before add_slot registers it, so the
+        # size writer is often the first to list a reused slot — it must append in role order too.
+        index = WorkspaceIndex(DictSession())
+        index.add_slot(0)
+        index.add_slot(1)
+        index.remove_slot(0)
+        assert index.slots() == [1]
+        index.set_slot_size(0, 123)
+        assert index.slots() == [1, 0]             # appended, not sorted back to [0, 1]
+
     def test_cannot_activate_unoccupied_slot(self):
         index = WorkspaceIndex(DictSession())
         with pytest.raises(ValueError):
@@ -270,6 +293,29 @@ class TestDropExpiredSlots:
         ws = self._two_slot_workspace(minimal_system_data)
         assert ws.drop_expired_slots() == []
         assert ws.list_slots() == [0, 1]
+
+
+# --------------------------------------------------------------------------- #
+# Role order survives a remove-then-re-add through the full workspace repository (the reported
+# model-comparison bug: removing the Reference then adding a new model must yield Reference=survivor,
+# Comparison=new — not the new model silently retaking the Reference position via the reused slot 0).
+# --------------------------------------------------------------------------- #
+class TestRoleOrderSurvivesRemoveAndReadd:
+    def test_new_model_after_removing_reference_is_the_comparison(self, minimal_system_data):
+        from model_builder.adapters.repositories import InMemoryWorkspaceRepository
+
+        ws = InMemoryWorkspaceRepository(initial_data=minimal_system_data)
+        ws.add_slot(minimal_system_data)               # slot 1 = Comparison
+        assert ws.list_slots() == [0, 1]
+
+        ws.remove_slot(0)                              # suppress the Reference; the Comparison survives
+        assert ws.list_slots() == [1]                  # survivor is now role-first (the Reference)
+        assert ws.active_slot() == 1
+
+        new_slot = ws.add_slot(minimal_system_data)    # add a new model — reuses the freed slot number 0
+        assert new_slot == 0
+        # Role order keeps the survivor first; the new model is the Comparison, NOT a re-promoted Reference.
+        assert ws.list_slots() == [1, 0]
 
 
 def _system_id_from(system_data):

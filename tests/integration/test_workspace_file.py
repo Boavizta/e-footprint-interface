@@ -153,6 +153,28 @@ def test_workspace_file_via_open_file_in_single_model_session_restores_both_slot
 
 
 @pytest.mark.django_db
+def test_open_workspace_file_after_suppressing_reference_restores_both_slots(client, minimal_system):
+    """Regression: opening a workspace file when the sole surviving slot is slot 1 must restore both
+    slots. Suppressing the Reference (slot 0 cross) promotes the Comparison into slot 1; _restore_workspace
+    used to assume slot 0 existed and called remove_slot on the lone slot 1 → "can't drop the only slot"."""
+    _seed_active_slot(client, minimal_system)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})  # two-model session
+    workspace_file = _download(client, "/model_builder/download-workspace/")
+
+    # Suppress the Reference (slot 0): the Comparison is promoted and now lives alone in slot 1.
+    client.post("/model_builder/remove-model/", {"slot": "0"})
+    assert SessionWorkspaceRepository(client.session).list_slots() == [1]  # the case that used to break
+
+    response = _upload(client, "/model_builder/upload-json/", workspace_file, "ws.e-f.json")
+    assert response.status_code == 302  # restored without error (no "can't drop the only slot")
+
+    restored = SessionWorkspaceRepository(client.session)
+    assert restored.list_slots() == [0, 1]  # cleanly re-packed to a canonical two-slot workspace
+    names = [ModelWeb(restored.repository_for(s)).system.name for s in restored.list_slots()]
+    assert names == ["Test System", "Copy of Test System"]
+
+
+@pytest.mark.django_db
 def test_workspace_import_enforces_combined_budget(client, minimal_system, monkeypatch):
     """The shared budget is summed over both slots on workspace import: a file whose two models fit
     individually but not together is rejected (the combined budget is summed over both slots). The over-budget add fails

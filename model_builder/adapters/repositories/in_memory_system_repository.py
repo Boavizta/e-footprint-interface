@@ -128,7 +128,10 @@ class InMemoryWorkspaceRepository(WorkspaceRepositoryBase):
         self._active = 0
 
     def list_slots(self) -> List[int]:
-        return sorted(self._slots)
+        # Dict insertion order is role order (see WorkspaceIndex docstring): a slot re-added after a
+        # removal lands at the end, mirroring the session index's append-don't-sort behaviour. Never
+        # sort — that would re-promote a model added into a reused lower slot to the Reference position.
+        return list(self._slots)
 
     def active_slot(self) -> int:
         return self._active

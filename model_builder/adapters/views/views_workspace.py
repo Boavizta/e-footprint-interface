@@ -93,18 +93,23 @@ def open_add_model_import_panel(request):
 def _restore_workspace(workspace, data: dict) -> None:
     """Restore both slots from a workspace envelope, then set the active pointer.
 
-    The first model is loaded into slot 0 (replacing whatever is there); any remaining models are
-    added through ``add_slot`` so the distinct-system-id guard and the shared budget both apply (and
-    so a save that would blow the budget is rejected before the index changes). Existing extra slots
-    are cleared first so re-importing always lands a clean two-slot workspace.
+    The whole workspace is replaced. Every existing slot's *data* is discarded first (rather than
+    ``remove_slot``-ing the non-zero slots), which serves two purposes: the shared budget starts clean
+    so loading model[0] is weighed alone, and it sidesteps ``remove_slot``'s "can't drop the only slot"
+    guard — that guard fires when the sole surviving slot is slot 1, the state reached by suppressing the
+    Reference (slot 0) so the Comparison is promoted into slot 1 (slot order is role order, not numeric —
+    see ``workspace_index``). model[0] is then loaded into slot 0, re-establishing it so the leftover
+    slot can be dropped safely; any remaining models are added through ``add_slot`` so the
+    distinct-system-id guard and the shared budget both apply (a save that would blow the budget is
+    rejected before the index changes). The import therefore always lands a clean, canonically-packed
+    ``[0, 1]`` workspace regardless of the layout it replaces.
     """
     models = data.get("models") or []
     if not models:
         raise ValueError("Workspace file contains no models.")
 
     for slot in workspace.list_slots():
-        if slot != 0:
-            workspace.remove_slot(slot)
+        workspace.repository_for(slot).clear()
 
     # Each embedded model carries its own interface_config (Sankey settings etc.); restore it per slot
     # so the round-trip preserves it as the single-model upload does. Slot 0: set it on the
@@ -114,6 +119,9 @@ def _restore_workspace(workspace, data: dict) -> None:
     if "interface_config" in models[0]:
         slot_0_repository.interface_config = models[0]["interface_config"]
     load_system_into_session(slot_0_repository, models[0])
+    for slot in workspace.list_slots():
+        if slot != 0:
+            workspace.remove_slot(slot)
     for model in models[1:]:
         import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
         workspace.add_slot(import_service.import_system(SessionSystemRepository.upgrade_system_data(model)))
