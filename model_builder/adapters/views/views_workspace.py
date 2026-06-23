@@ -32,14 +32,24 @@ from model_builder.domain.services import (
 from utils import htmx_render
 
 
-def _rendered_shared_chrome_oob(model_web) -> str:
-    """OOB fragments that rebind the active-model chrome after a switch (no canvas re-render)."""
+def _rendered_shared_chrome_oob(model_web, role_label=None) -> str:
+    """OOB fragments that rebind the active-model chrome after a switch (no canvas re-render).
+
+    ``role_label`` ("Reference"/"Comparison") rebinds the mobile-only role pill next to #system-name so
+    it tracks the now-active model; None (single-model session) skips it — there is no pill to retarget.
+    """
     from model_builder.adapters.presenters.oob_regions import _render_results_buttons, _render_edge_modeling_toggle
 
     system_name = (
         f"<p id='system-name' class='m-0 pe-3 text-truncate' "
         f"hx-swap-oob='outerHTML:#system-name'>{model_web.system.name}</p>")
-    return system_name + _render_results_buttons(model_web, {}) + _render_edge_modeling_toggle(model_web, {})
+    chrome = system_name + _render_results_buttons(model_web, {}) + _render_edge_modeling_toggle(model_web, {})
+    if role_label is not None:
+        chrome += (
+            f"<span id='active-model-role' "
+            f"class='badge rounded-pill bg-light text-secondary border d-lg-none align-self-center me-2 flex-shrink-0' "
+            f"hx-swap-oob='outerHTML:#active-model-role'>{role_label}</span>")
+    return chrome
 
 
 @require_POST
@@ -61,7 +71,10 @@ def switch_model(request):
     if request.POST.get("skip_chrome"):
         response = HttpResponse("")
     else:
-        response = HttpResponse(_rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot))))
+        slots = workspace.list_slots()
+        role_label = ("Reference" if slot == slots[0] else "Comparison") if len(slots) > 1 else None
+        response = HttpResponse(
+            _rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot)), role_label))
     response["HX-Trigger"] = json.dumps({"switchModelCanvas": {"slot": slot}})
     return response
 

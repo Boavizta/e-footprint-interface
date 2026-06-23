@@ -10,6 +10,18 @@
         <a class="d-lg-none flex-shrink-0 me-2" href="/" aria-label="Home">
             <img width="28" height="28" src="{% static 'icons/sidenav/e-footprint-logo.svg' %}" alt="e-footprint" />
         </a>
+        {% comment %}
+        Mobile-only role pill: with the tab strip hidden on <lg, this is the always-visible "which model
+        am I editing" signal (Reference vs Comparison). It is a *sibling* of #system-name, never a child,
+        so the rename flow (innerHTML-swaps #system-name) and the model-switch flow (outerHTML-OOBs
+        #system-name) never touch it; only a switch updates it, via its own #active-model-role OOB
+        fragment. Role is the active slot's position (first = Reference), so renaming — which changes the
+        name, not the slot — leaves it correct by construction. Only meaningful with two models.
+        {% endcomment %}
+        {% if workspace_slots|length > 1 %}
+        <span id="active-model-role"
+              class="badge rounded-pill bg-light text-secondary border d-lg-none align-self-center me-2 flex-shrink-0">{% if active_slot == workspace_slots.0.slot %}Reference{% else %}Comparison{% endif %}</span>
+        {% endif %}
         <div class="navbar-brand position-relative overflow-hidden" style="min-width: 0;" role="button"
                 id="btn-change-system-name"
                 hx-get="{% url 'open-panel-system-name' %}"
@@ -42,6 +54,71 @@
         </button>
         <div class="collapse navbar-collapse justify-content-end mt-1 m-lg-0" id="navbarSupportedContent">
             <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3 align-items-center">
+                {% comment %}
+                Mobile-only "Models" group (model-comparison): the tab strip is hidden on <lg, so model
+                selection / +Add / ⇄Compare live in the burger here alongside the other workspace actions.
+                d-lg-none keeps it out of the desktop toolbar (navbar-expand-lg shows this <ul> inline
+                there), where the tab strip already owns these. Switch buttons POST switch-model exactly
+                like a tab (client-side canvas toggle via the switchModelCanvas trigger); model_comparison.js
+                keeps their active marker in sync. With one model the group offers the +Add options instead.
+                {% endcomment %}
+                <li class="nav-item d-lg-none">
+                    <span class="nav-link text-uppercase small text-muted mx-2 mb-0 pe-none">Models</span>
+                </li>
+                {% if workspace_slots|length > 1 %}
+                    {% for slot_entry in workspace_slots %}
+                    <li class="nav-item d-lg-none">
+                        <button type="button"
+                                class="nav-link d-flex flex-row gap-2 mx-2 {% if slot_entry.is_active %}fw-bold{% endif %}"
+                                data-burger-model-tab="{{ slot_entry.slot }}"
+                                hx-post="{% url 'switch-model' %}"
+                                hx-vals='{"slot": "{{ slot_entry.slot }}"}'
+                                hx-swap="none"
+                                _="on click call collapseNavbarIfShown()">
+                            <span class="model-burger-marker">{% if slot_entry.is_active %}●{% else %}○{% endif %}</span>
+                            <span>{% if forloop.first %}Reference model{% else %}Comparison model{% endif %}</span>
+                        </button>
+                    </li>
+                    {% endfor %}
+                    <li class="nav-item d-lg-none">
+                        {% if compare_enabled %}
+                        <button type="button" class="nav-link d-flex flex-row gap-2 mx-2"
+                                hx-get="{% url 'compare-models' %}"
+                                hx-target="#main-content-block" hx-swap="innerHTML"
+                                hx-push-url="{% url 'compare-models' %}"
+                                _="on click call collapseNavbarIfShown()">
+                            <span>⇄</span><span>Compare</span>
+                        </button>
+                        {% else %}
+                        <button type="button" class="nav-link d-flex flex-row gap-2 mx-2 disabled text-muted" disabled>
+                            <span>⇄</span><span>Compare</span>
+                        </button>
+                        <span class="d-block small text-muted mx-2 mb-1">Complete both models to compare</span>
+                        {% endif %}
+                    </li>
+                {% else %}
+                    <li class="nav-item d-lg-none">
+                        <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
+                                hx-post="{% url 'add-model' %}" hx-vals='{"source": "duplicate"}'
+                                hx-target="#main-content-block" hx-swap="innerHTML"
+                                _="on click call collapseNavbarIfShown()">
+                            <span>⧉</span><span>Duplicate current model</span></button>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
+                                data-action="open-add-model-import"
+                                _="on click call collapseNavbarIfShown()">
+                            <span>⬆</span><span>Import a model to compare…</span></button>
+                    </li>
+                    <li class="nav-item d-lg-none">
+                        <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
+                                hx-post="{% url 'add-model' %}" hx-vals='{"source": "blank"}'
+                                hx-target="#main-content-block" hx-swap="innerHTML"
+                                _="on click call collapseNavbarIfShown()">
+                            <span>✚</span><span>Add a blank model to compare</span></button>
+                    </li>
+                {% endif %}
+                <li class="nav-item d-lg-none"><hr class="dropdown-divider my-1"></li>
                 {% include 'model_builder/components/edge_modeling_toggle.html' %}
                 {% include 'model_builder/components/help_menu.html' %}
                 {% comment %}
