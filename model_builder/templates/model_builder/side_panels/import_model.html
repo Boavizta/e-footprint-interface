@@ -3,8 +3,8 @@
 
 {% comment %}
 Unified "Open file" panel (model-comparison §4.1). Posts to upload-json, which content-detects the
-file: a single-model file (.e-f.json) replaces the active model; a workspace file (.e-fw.json, a
-top-level `models` key) restores both slots. Detection is on content, not extension.
+file: a single-model file replaces the active model; a comparison file (a top-level `models` key)
+restores both slots. Both share the .e-f.json extension, so detection is on content, not extension.
 {% endcomment %}
 {% block panel_body %}
 <form id="sidePanelForm" class="my-3"
@@ -14,7 +14,7 @@ top-level `models` key) restores both slots. Detection is on content, not extens
         hx-swap="innerHTML"
         hx-target="#main-content-block">
     <div class="mb-3">
-        <label for="import-json-input" class="form-label">Choose a file (.e-f.json or .e-fw.json)</label>
+        <label for="import-json-input" class="form-label">Choose a file (.e-f.json)</label>
         <input  class="form-control" id="import-json-input" name="import-json-input" type="file" required>
         {% if uploadError %}
             <p id="importModalPanelError" class="text-center font-bold text-red-1">{{uploadError}}</p>

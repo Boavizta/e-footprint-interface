@@ -1,10 +1,10 @@
 """View-layer integration tests for the combined workspace file (model-comparison Task 5).
 
-Exercises the additive ``.e-fw.json`` workspace export and the unified "Open file" import (upload-json
+Exercises the additive ``.e-f.json`` comparison export and the unified "Open file" import (upload-json
 content-routes on the ``models`` key — §4.1) through real Django views + session:
 
-  - workspace export → "Open file" restores both slots + the active pointer in one action;
-  - "Open file" fed a workspace file in a single-model session restores both slots (becomes two-model);
+  - comparison export → "Open file" restores both slots + the active pointer in one action;
+  - "Open file" fed a comparison file in a single-model session restores both slots (becomes two-model);
   - "Open file" fed a single-model file replaces the active model (single- or two-model session);
   - the combined budget is enforced on workspace import (summed with-calc over both slots);
   - the distinct-system-id invariant holds after importing a workspace whose two models share an id;
@@ -99,7 +99,7 @@ def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, min
 
     # Import it into a brand-new session.
     fresh = client.__class__()
-    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-f.json")
     assert response.status_code == 302  # redirects to the rebuilt builder
 
     restored = SessionWorkspaceRepository(fresh.session)
@@ -143,7 +143,7 @@ def test_workspace_file_via_open_file_in_single_model_session_restores_both_slot
     fresh = client.__class__()
     _seed_active_slot(fresh, minimal_system)
     assert SessionWorkspaceRepository(fresh.session).list_slots() == [0]  # single-model to start
-    response = _upload(fresh, "/model_builder/upload-json/", workspace_file, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", workspace_file, "ws.e-f.json")
     assert response.status_code == 302  # restored, redirects to the rebuilt builder
 
     restored = SessionWorkspaceRepository(fresh.session)
@@ -169,7 +169,7 @@ def test_workspace_import_enforces_combined_budget(client, minimal_system, monke
 
     fresh = client.__class__()
     monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)  # exercise the graceful modal path
-    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-f.json")
     assert response.status_code == 200
     assert "too large" in response.content.decode().lower()  # the budget message
     # The first model loaded into slot 0 but the second was rejected before changing the slot index.
@@ -190,7 +190,7 @@ def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, 
                 "models": [single_doc, json.loads(json.dumps(single_doc))]}
 
     fresh = client.__class__()
-    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-fw.json")
+    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-f.json")
     assert response.status_code == 302
 
     restored = SessionWorkspaceRepository(fresh.session)

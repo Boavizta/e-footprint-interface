@@ -272,7 +272,7 @@ def download_json(request):
 
 
 def download_workspace(request):
-    """Export both models as one additive ``.e-fw.json`` workspace file (model-comparison §2.7).
+    """Export both models as one additive ``.e-f.json`` comparison file (model-comparison §2.7).
 
     Thin envelope around two byte-for-byte single-model documents plus the active-slot pointer; the
     single-model format is untouched. Each element carries no calculated attributes (recomputed on
@@ -298,8 +298,8 @@ def download_workspace(request):
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
     descriptor = " vs ".join(names) if len(names) > 1 else names[0]
-    filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC workspace ({descriptor})"))
-    response["Content-Disposition"] = f"attachment; filename={filename}.e-fw.json"
+    filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC comparison ({descriptor})"))
+    response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"
     return response
 
 
@@ -326,9 +326,9 @@ def upload_json(request):
 
         if data and not import_error_message:
             # Content-based detection (model-comparison §2.7): a top-level `models` key means a
-            # workspace file, anything else a single-model file. "Open file" routes either: a workspace
-            # file restores both slots, a single-model file replaces the active model. Detection is on
-            # the file's content, not its extension (the `.e-fw.json` extension is only a UX hint).
+            # comparison file, anything else a single-model file. "Open file" routes either: a
+            # comparison file restores both slots, a single-model file replaces the active model. Both
+            # share the `.e-f.json` extension, so detection is purely on the file's content.
             try:
                 if isinstance(data, dict) and "models" in data:
                     # Restore both slots through the workspace add-to-slot path (shared budget +

@@ -312,9 +312,9 @@ Cross-repo: computation core in <code>e-footprint</code> (library), workspace/UI
 }</pre>
   </details>
   <ul>
-    <li><strong>Detection is content-based</strong> (authoritative): a top-level <code>models</code> key ⇒ workspace
-      file; its absence ⇒ single-model file. A distinct <code>.e-fw.json</code> extension (vs. today's
-      <code>.e-f.json</code>) is a UX hint only.</li>
+    <li><strong>Detection is content-based</strong> (authoritative): a top-level <code>models</code> key ⇒ comparison
+      file; its absence ⇒ single-model file. Both formats share the <code>.e-f.json</code> extension, so content is
+      the only signal.</li>
     <li><strong>Cross-format robustness</strong> (honest-error / disabled-instead-of-error): "Open workspace file" fed a
       single-model file loads it into the active slot; "Replace this model" fed a workspace file errors with guidance
       (or offers to open it as a workspace) rather than corrupting state.</li>
@@ -322,7 +322,7 @@ Cross-repo: computation core in <code>e-footprint</code> (library), workspace/UI
       they are recomputed on import, and only then does the shared budget apply.</li>
     <li>Each model carries its own <code>interface_config</code> inside its element — no separate handling, Sankey
       settings survive the round-trip per model as today.</li>
-    <li>Filename: <code>"{datetime} UTC workspace ({name A} vs {name B}).e-fw.json"</code> (sanitized/truncated like
+    <li>Filename: <code>"{datetime} UTC comparison ({name A} vs {name B}).e-f.json"</code> (sanitized/truncated like
       the single-model name).</li>
   </ul>
 </section>

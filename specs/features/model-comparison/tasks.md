@@ -132,9 +132,9 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 **Goal:** Add the additive workspace file that bundles both models, restoring them in one action, and the two-granularity Download/Upload menu (this model / whole workspace). The single-model file format stays byte-for-byte unchanged and circulates freely between single- and two-model sessions, both directions.
 
 **Files touched:**
-- `download_workspace` / `upload_workspace` — new endpoints (`views.py` / `views_workspace.py`) producing/consuming the §2.7 envelope (`efootprint_workspace_version`, `active_slot`, `models[]` of two byte-for-byte single-model documents, no calculated attributes; recomputed on import, then the shared budget + distinct-system-id invariant apply). Filename `"{datetime} UTC workspace ({name A} vs {name B}).e-fw.json"`.
+- `download_workspace` / `upload_workspace` — new endpoints (`views.py` / `views_workspace.py`) producing/consuming the §2.7 envelope (`efootprint_workspace_version`, `active_slot`, `models[]` of two byte-for-byte single-model documents, no calculated attributes; recomputed on import, then the shared budget + distinct-system-id invariant apply). Filename `"{datetime} UTC comparison ({name A} vs {name B}).e-f.json"`.
 - `model_builder/urls.py` — `download-workspace` / `upload-workspace` routes.
-- Content-based detection: a top-level `models` key ⇒ workspace file; `.e-fw.json` extension is a UX hint only. Cross-format robustness: "Open workspace file" fed a single-model file loads it into the active slot; "Replace this model" fed a workspace file errors with guidance (honest-error / disabled-instead-of-error) rather than corrupting state.
+- Content-based detection: a top-level `models` key ⇒ comparison file; both formats share the `.e-f.json` extension, so content is the only signal. Cross-format robustness: "Open file" fed a single-model file loads it into the active slot; "Replace this model" fed a comparison file errors with guidance (honest-error / disabled-instead-of-error) rather than corrupting state.
 - `templates/.../upload_download_reboot_model_tooltips.html` — Download/Upload gain the two granularities (this model / whole workspace) per §4.1.
 - `CHANGELOG.md` in both repos (constitution §2.6).
 
@@ -142,7 +142,7 @@ Cross-repo feature. Task 1 lands in **`e-footprint`** (library); Tasks 2–5 lan
 - Integration — per-slot + workspace export/import round-trips, including the single-model-file-into-workspace and workspace-file-into-single-slot cross-format paths; combined-budget rejection on duplicate/import; distinct-system-id enforced after a workspace import whose two models share an id; the single-model file format is unchanged (round-trips with single-model sessions both directions).
 
 **Acceptance:**
-- The user can export both models as one `.e-fw.json` workspace file and re-import it to restore both slots + the active pointer in one action.
+- The user can export both models as one `.e-f.json` comparison file and re-import it to restore both slots + the active pointer in one action.
 - Any single-model file imports into either slot; any per-slot export opens in a plain single-model session — full round-trip compatibility.
 - The combined file never alters the single-model format; cross-format mismatches fail safely with guidance.
 

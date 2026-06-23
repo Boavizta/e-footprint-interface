@@ -18,11 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   cumulative charts paired on shared scales and a single legend so the two models read against each
   other, and a diff of what changed between the two models' inputs (differences only). The dashboard
   is rebuilt fresh each time it is opened, so an edit to either model is always reflected.
-- Combined workspace file: with two models present, "Export ▸ Both models" saves a single `.e-fw.json`
+- Combined comparison file: with two models present, "Export ▸ Both models" saves a single `.e-f.json`
   file bundling both models and the active selection (the per-model "This model" export is unchanged).
   A single "Open file" upload accepts either format and does the right thing automatically — a
-  single-model file replaces the current model, a workspace file restores both models in one action —
-  so a workspace file can be opened from any session, including a fresh single-model one. Each model's
+  single-model file replaces the current model, a comparison file restores both models in one action —
+  so a comparison file can be opened from any session, including a fresh single-model one. Each model's
   view settings (e.g. Sankey configuration) are preserved through the round-trip.
 
 ### Changed
