@@ -33,7 +33,7 @@ horizontally scrollable so every tab (incl. ⇄Compare) stays reachable on a nar
     never triggers the label's switch-model POST. The sole model in a single-model session has no ✕ —
     the workspace can never be empty (server-side invariant), surfaced as an absent control.
     {% endcomment %}
-    <span class="model-tab d-inline-flex align-items-center rounded-top {% if slot_entry.is_active %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}{% if workspace_slots|length > 1 %} model-tab--closable{% endif %}">
+    <span class="model-tab d-inline-flex align-items-center rounded-top {% if slot_entry.is_active and not on_dashboard %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}{% if workspace_slots|length > 1 %} model-tab--closable{% endif %}">
         {% comment %}
         Fixed role labels, not the model name: the first slot is the "Reference model", the second the
         "Comparison model" (matching how compare() pairs workspace_slots[0]→A, [1]→B). This keeps the tabs
@@ -41,10 +41,10 @@ horizontally scrollable so every tab (incl. ⇄Compare) stays reachable on a nar
         in the toolbar below (#system-name).
         {% endcomment %}
         <button type="button"
-                class="btn btn-sm model-tab__label px-3 bg-transparent border-0 text-truncate {% if slot_entry.is_active %}fw-bold{% else %}text-muted{% endif %}"
+                class="btn btn-sm model-tab__label px-3 bg-transparent border-0 text-truncate {% if slot_entry.is_active and not on_dashboard %}fw-bold{% else %}text-muted{% endif %}"
                 id="model-tab-{{ slot_entry.slot }}"
                 data-model-tab="{{ slot_entry.slot }}"
-                {% if slot_entry.is_active %}aria-current="true"{% endif %}
+                {% if slot_entry.is_active and not on_dashboard %}aria-current="true"{% endif %}
                 hx-post="{% url 'switch-model' %}"
                 hx-vals='{"slot": "{{ slot_entry.slot }}"{% if on_dashboard %}, "skip_chrome": "1"{% endif %}}'
                 hx-swap="none">
@@ -97,7 +97,7 @@ horizontally scrollable so every tab (incl. ⇄Compare) stays reachable on a nar
     error). The dashboard replaces the builder in #main-content-block and pushes /compare/ to the URL so
     a refresh re-opens it.
     {% endcomment %}
-    <span class="model-tab model-tab--compare d-inline-flex align-items-center rounded-top text-muted"
+    <span class="model-tab model-tab--compare d-inline-flex align-items-center rounded-top {% if on_dashboard %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}"
           {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"
           title="{% if workspace_slots|length < 2 %}Add a second model to compare{% else %}Complete both models (each needs a computable footprint) to compare{% endif %}"{% endif %}>
         {% if not compare_enabled %}
@@ -107,6 +107,7 @@ horizontally scrollable so every tab (incl. ⇄Compare) stays reachable on a nar
         {% else %}
         <button type="button" class="btn btn-sm model-tab__label px-3 bg-transparent border-0"
                 id="compare-tab"
+                {% if on_dashboard %}autofocus{% endif %}
                 hx-get="{% url 'compare-models' %}"
                 hx-target="#main-content-block" hx-swap="innerHTML"
                 hx-push-url="{% url 'compare-models' %}">
