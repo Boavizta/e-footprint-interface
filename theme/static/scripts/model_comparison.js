@@ -85,14 +85,6 @@
             tab.classList.toggle("border-bottom-0", isTarget);
             tab.classList.toggle("text-muted", !isTarget);
         });
-        // Keep the mobile burger's model entries in sync (the tab strip is hidden on <lg there). Same
-        // switchModelCanvas signal, no re-render — bold the active model and flip its ●/○ marker.
-        document.querySelectorAll("[data-burger-model-tab]").forEach(item => {
-            const isTarget = String(item.dataset.burgerModelTab) === String(slot);
-            item.classList.toggle("fw-bold", isTarget);
-            const marker = item.querySelector(".model-burger-marker");
-            if (marker) marker.textContent = isTarget ? "●" : "○";
-        });
         strip.dataset.activeSlot = slot;
 
         // Sortable and leader lines were wired against the previously-visible canvas; re-init so the

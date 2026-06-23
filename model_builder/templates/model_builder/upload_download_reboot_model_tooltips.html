@@ -49,31 +49,17 @@
         <div class="collapse navbar-collapse justify-content-end mt-1 m-lg-0" id="navbarSupportedContent">
             <ul class="navbar-nav mb-2 mb-lg-0 bg-white z-3 align-items-center">
                 {% comment %}
-                Mobile-only "Models" group (model-comparison): the tab strip is hidden on <lg, so model
-                selection / +Add / ⇄Compare live in the burger here alongside the other workspace actions.
-                d-lg-none keeps it out of the desktop toolbar (navbar-expand-lg shows this <ul> inline
-                there), where the tab strip already owns these. Switch buttons POST switch-model exactly
-                like a tab (client-side canvas toggle via the switchModelCanvas trigger); model_comparison.js
-                keeps their active marker in sync. With one model the group offers the +Add options instead.
+                Mobile-only "Models" group (model-comparison): the tab strip is hidden on <lg, so the
+                model-scoped comparison actions live in the burger here alongside the other workspace
+                actions. d-lg-none keeps it out of the desktop toolbar (navbar-expand-lg shows this <ul>
+                inline there), where the tab strip already owns these. Switching is NOT here — it lives on
+                the always-visible role pill (active_model_role.html); the burger hosts ⇄Compare once two
+                models exist, or the +Add options while there is still only one.
                 {% endcomment %}
                 <li class="nav-item d-lg-none">
                     <span class="nav-link text-uppercase small text-muted mx-2 mb-0 pe-none">Models</span>
                 </li>
                 {% if workspace_slots|length > 1 %}
-                    {% for slot_entry in workspace_slots %}
-                    <li class="nav-item d-lg-none">
-                        <button type="button"
-                                class="nav-link d-flex flex-row gap-2 mx-2 {% if slot_entry.is_active %}fw-bold{% endif %}"
-                                data-burger-model-tab="{{ slot_entry.slot }}"
-                                hx-post="{% url 'switch-model' %}"
-                                hx-vals='{"slot": "{{ slot_entry.slot }}"}'
-                                hx-swap="none"
-                                _="on click call collapseNavbarIfShown()">
-                            <span class="model-burger-marker">{% if slot_entry.is_active %}●{% else %}○{% endif %}</span>
-                            <span>{% if forloop.first %}Reference model{% else %}Comparison model{% endif %}</span>
-                        </button>
-                    </li>
-                    {% endfor %}
                     <li class="nav-item d-lg-none">
                         {% if compare_enabled %}
                         <button type="button" class="nav-link d-flex flex-row gap-2 mx-2"
