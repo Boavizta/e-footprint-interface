@@ -90,7 +90,8 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
     IntroTemplate(
         id="ai_chatbot",
         name="AI chatbot",
-        description="A chatbot served by a web app that routes simple and complex prompts to small and large LLM APIs.",
+        description="A chatbot served by a web app that routes simple and complex prompts to small and large LLM APIs, "
+                    "and generates a video.",
         icon="🤖",
         showcased_concepts=("web_service", "llm_inference", "{class:ExternalAPI}", "{class:BoaviztaCloudServer}"),
         json_path=HERE / "ai_chatbot.json",
