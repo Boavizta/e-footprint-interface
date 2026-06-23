@@ -49,7 +49,7 @@ def _hourly_summing_to(total, n_hours):
 
 
 def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
-                     usage_front_load_a=False, changed=(), only_in_a=(), only_in_b=()):
+                     usage_front_load_a=False, kg_scale=1.0, changed=(), only_in_a=(), only_in_b=()):
     """A SystemComparison stub with the same attribute surface as the library object.
 
     ``decomposition`` is a fixed, deliberately mixed set of (category, phase) rows: a reduction in
@@ -79,6 +79,11 @@ def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
         _row("EdgeDevices", "energy", before=0.0, after=0.0),
         _row("EdgeDevices", "fabrication", before=0.0, after=90.0),  # +90 increase, new in B
     ]
+    # ``kg_scale`` blows every figure up (e.g. ×1000 → tonne-scale) so the same fixture can exercise
+    # the axis-unit adaptation without re-stating the row set.
+    if kg_scale != 1.0:
+        for r in decomposition:
+            r.delta = _delta(r.delta.before * kg_scale, r.delta.after * kg_scale)
     usage_a = sum(r.delta.before for r in decomposition if r.phase == "energy")
     fab_a = sum(r.delta.before for r in decomposition if r.phase == "fabrication")
     usage_b = sum(r.delta.after for r in decomposition if r.phase == "energy")
@@ -269,6 +274,34 @@ class TestCumulativeChart:
         datasets = view.cumulative_chart["datasets"]
         assert datasets[0]["borderColor"] == MODEL_A_COLOR
         assert datasets[1]["borderColor"] == MODEL_B_COLOR
+
+
+class TestAxisUnit:
+    """The value-axis unit adapts to each chart's scope (``axisScale`` is the kg → display-unit
+    factor for the axis ticks). The chart data itself stays in kg — only the axis label adapts — so
+    the magnitude-honesty invariants above hold."""
+
+    def test_decomposition_axis_follows_its_deltas_not_the_totals(self, view):
+        # The fixture's totals are ~3.9 t (so the totals charts read in tonnes), but its deltas top
+        # out at 660 kg — the decomposition axis must follow the deltas it draws, staying in kg.
+        assert view.decomposition_chart["axisUnit"] == "kg"
+        assert view.decomposition_chart["axisScale"] == pytest.approx(1.0)
+        assert view.paired_chart["axisUnit"] == "t"
+        assert view.cumulative_chart["axisUnit"] == "t"
+
+    def test_small_comparison_keeps_a_kg_axis(self):
+        view = ComparisonService().build_from_comparison(build_comparison(kg_scale=0.1))
+        for chart in (view.decomposition_chart, view.paired_chart, view.cumulative_chart):
+            assert chart["axisUnit"] == "kg"
+            assert chart["axisScale"] == pytest.approx(1.0)
+
+    def test_tonne_scale_comparison_reads_on_a_tonne_axis(self):
+        view = ComparisonService().build_from_comparison(build_comparison(kg_scale=1000.0))
+        for chart in (view.decomposition_chart, view.paired_chart, view.cumulative_chart):
+            assert chart["axisUnit"] == "t"
+            assert chart["axisScale"] == pytest.approx(0.001)
+        # The data is still kg — a tick value times axisScale is what the axis prints (e.g. 660 t).
+        assert view.decomposition_chart["datasets"][0]["data"][0] == pytest.approx(930_000.0 - 1_590_000.0)
 
 
 class TestAssumptionsDiff:

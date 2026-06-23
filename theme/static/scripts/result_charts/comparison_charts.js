@@ -37,6 +37,19 @@ const FORMATTED_VALUE_TOOLTIP = {
     },
 };
 
+// Format a value-axis tick in the chart's shared display unit. The data rides in kg; the adapter
+// ships ``axisScale`` (the kg → display-unit factor) and ``axisUnit`` (the axis-title label) so a
+// tonne-scale comparison reads on a tonne axis instead of a six-figure kg one. The unit lives in the
+// axis title, so a tick is just the scaled number with its float-conversion noise trimmed.
+function formatAxisTick(value, scale) {
+    return Number((value * (scale || 1)).toPrecision(6)).toLocaleString("en-US");
+}
+
+// The axis title carries the chart's shared unit (``axisUnit``, falling back to kg for older payloads).
+function axisTitle(payload, suffix) {
+    return `${payload.axisUnit || "kg"} CO₂e${suffix}`;
+}
+
 /**
  * Paired per-year bars on one shared y-axis (kg), one legend over the four series.
  * @param {Object} payload - {labels, datasets:[A usage, A fab, B usage, B fab]} from the adapter.
@@ -64,9 +77,12 @@ function buildPairedChartConfig(payload) {
                 y: {
                     stacked: true,
                     beginAtZero: true,
-                    title: { display: true, text: "kg CO₂e", font: SHARED_FONT, color: TICK_COLOR },
+                    title: { display: true, text: axisTitle(payload, ""), font: SHARED_FONT, color: TICK_COLOR },
                     grid: { color: GRID_COLOR },
-                    ticks: { font: SHARED_FONT, color: TICK_COLOR },
+                    ticks: {
+                        font: SHARED_FONT, color: TICK_COLOR,
+                        callback: (value) => formatAxisTick(value, payload.axisScale),
+                    },
                 },
             },
             // One legend driving both models' series.
@@ -107,9 +123,12 @@ function buildCumulativeChartConfig(payload) {
                 x: { grid: { display: false }, ticks: { font: SHARED_FONT, color: TICK_COLOR } },
                 y: {
                     beginAtZero: true,
-                    title: { display: true, text: "kg CO₂e", font: SHARED_FONT, color: TICK_COLOR },
+                    title: { display: true, text: axisTitle(payload, ""), font: SHARED_FONT, color: TICK_COLOR },
                     grid: { color: GRID_COLOR },
-                    ticks: { font: SHARED_FONT, color: TICK_COLOR },
+                    ticks: {
+                        font: SHARED_FONT, color: TICK_COLOR,
+                        callback: (value) => formatAxisTick(value, payload.axisScale),
+                    },
                 },
             },
             plugins: {
@@ -172,9 +191,15 @@ function buildDecompositionChartConfig(payload) {
                 x: {
                     // Headroom on both ends so the tip labels are not clipped at the chart edge.
                     grace: "10%",
-                    title: { display: true, text: "kg CO₂e difference (B − A)", font: SHARED_FONT, color: TICK_COLOR },
+                    title: {
+                        display: true, text: axisTitle(payload, " difference (B − A)"),
+                        font: SHARED_FONT, color: TICK_COLOR,
+                    },
                     grid: { color: GRID_COLOR },
-                    ticks: { font: SHARED_FONT, color: TICK_COLOR },
+                    ticks: {
+                        font: SHARED_FONT, color: TICK_COLOR,
+                        callback: (value) => formatAxisTick(value, payload.axisScale),
+                    },
                 },
                 y: { grid: { display: false }, ticks: { font: SHARED_FONT, color: TICK_COLOR } },
             },

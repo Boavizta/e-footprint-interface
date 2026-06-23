@@ -38,6 +38,8 @@ function cumulativePayload() {
 function decompositionPayload() {
     return {
         labels: ["Servers & storage usage", "Edge devices fabrication"],
+        axisUnit: "kg",
+        axisScale: 1,
         datasets: [{
             label: "Δ",
             data: [-660, 90],
@@ -142,5 +144,34 @@ describe("buildDecompositionChartConfig", () => {
         expect(config.plugins.map((p) => p.id)).toContain("decompositionValueLabels");
         // The display strings the plugin prints ride along on the dataset, untouched by the builder.
         expect(config.data.datasets[0].valueLabels).toEqual(["−660 kg", "+90 kg"]);
+    });
+});
+
+describe("adaptive value-axis unit", () => {
+    // The data rides in kg; the adapter ships axisUnit (axis-title label) + axisScale (kg → unit
+    // factor) so a tonne-scale comparison reads on a tonne axis instead of a six-figure kg one.
+    const valueAxis = {
+        decomposition: (p) => buildDecompositionChartConfig(p).options.scales.x,
+        paired: (p) => buildPairedChartConfig(p).options.scales.y,
+        cumulative: (p) => buildCumulativeChartConfig(p).options.scales.y,
+    };
+    const tonne = (payload) => ({ ...payload, axisUnit: "t", axisScale: 0.001 });
+
+    test("axis title carries the payload's unit, defaulting to kg when none is shipped", () => {
+        expect(valueAxis.paired(pairedPayload()).title.text).toBe("kg CO₂e");
+        expect(valueAxis.cumulative(tonne(cumulativePayload())).title.text).toBe("t CO₂e");
+        expect(valueAxis.decomposition(tonne(decompositionPayload())).title.text).toBe("t CO₂e difference (B − A)");
+        // A payload with no axisUnit (older shape) still reads kg rather than "undefined".
+        const legacy = { ...decompositionPayload() };
+        delete legacy.axisUnit;
+        expect(valueAxis.decomposition(legacy).title.text).toBe("kg CO₂e difference (B − A)");
+    });
+
+    test("tick callback scales the kg value into the axis unit (660000 kg → 660 on a t axis)", () => {
+        const tick = valueAxis.decomposition(tonne(decompositionPayload())).ticks.callback;
+        expect(tick(-660000)).toBe("-660");
+        expect(tick(1000000)).toBe("1,000");
+        // No scale shipped ⇒ the kg value passes through unchanged.
+        expect(valueAxis.paired(pairedPayload()).ticks.callback(200)).toBe("200");
     });
 });

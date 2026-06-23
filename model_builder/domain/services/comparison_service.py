@@ -154,12 +154,15 @@ class ComparisonService:
         """A horizontal diverging bar chart: one bar per non-zero category × phase, signed.
 
         Reductions (B < A) are green and point left, increases red and point right; the bars sum to
-        the headline Δ (the zero-delta rows are the only ones dropped). One value axis (kg). Each bar
-        carries its pre-formatted Δ (``delta_display``) so the chart can print it at the bar tip — the
-        figures that used to sit in a list below the chart. Requires ``_format_displays`` to have run.
+        the headline Δ (the zero-delta rows are the only ones dropped). One value axis, whose unit
+        adapts to the largest delta (``_axis_unit_fields``) so a tonne-scale comparison reads on a
+        tonne axis, not a six-figure kg one. Each bar carries its pre-formatted Δ (``delta_display``)
+        so the chart can print it at the bar tip — the figures that used to sit in a list below the
+        chart. Requires ``_format_displays`` to have run.
         """
         return {
             "labels": [bar.label for bar in bars],
+            **_axis_unit_fields(max((abs(bar.delta_kg) for bar in bars), default=0.0)),
             "datasets": [{
                 "label": "Δ by category and phase",
                 "data": [bar.delta_kg for bar in bars],
@@ -308,8 +311,14 @@ class ComparisonService:
         usage_b = _yearly_totals(time_series.start_date, time_series.usage_b, years, years_b)
         fabrication_b = _yearly_totals(time_series.start_date, time_series.fabrication_b, years, years_b)
 
+        # The axis tops out at the tallest stacked bar (a model's usage+fabrication in one year), so
+        # derive the display unit from that — not the grand total, which sums across years.
+        stack_heights = [(u_val or 0.0) + (f_val or 0.0)
+                         for usage, fab in ((usage_a, fabrication_a), (usage_b, fabrication_b))
+                         for u_val, f_val in zip(usage, fab)]
         return {
             "labels": [str(year) for year in years],
+            **_axis_unit_fields(max(stack_heights, default=0.0)),
             "datasets": [
                 _bar_dataset(f"{comparison.system_a.name} usage", usage_a, MODEL_A_COLOR, stack="A"),
                 _bar_dataset(f"{comparison.system_a.name} fabrication", fabrication_a, MODEL_A_COLOR_LIGHT, stack="A"),
@@ -331,8 +340,11 @@ class ComparisonService:
                                    self._model_years(comparison.system_a))
         cum_b = _yearly_cumulative(time_series.start_date, time_series.values_b, years,
                                    self._model_years(comparison.system_b))
+        # The curves peak at each model's running total; the axis unit follows the larger peak.
+        peak = max((v for series in (cum_a, cum_b) for v in series if v is not None), default=0.0)
         return {
             "labels": [str(year) for year in years],
+            **_axis_unit_fields(peak),
             "datasets": [
                 _line_dataset(comparison.system_a.name, cum_a, MODEL_A_COLOR),
                 _line_dataset(comparison.system_b.name, cum_b, MODEL_B_COLOR),
@@ -378,6 +390,23 @@ class ComparisonService:
 
 
 _ZERO_KG = 1e-9
+
+
+def _axis_unit_fields(representative_kg) -> Dict:
+    """The value-axis display unit for a chart, picked from its largest magnitude (in kg).
+
+    The chart data stays in kg — so the magnitude-honesty maths and the per-point ``valueLabels`` are
+    untouched — and these two fields only tell the JS how to *label* the axis: ``axisUnit`` for the
+    title and ``axisScale`` (multiply a kg tick by it) for the tick numbers. So a comparison whose
+    values run to thousands of tonnes reads on a tonne axis instead of a six-figure kg one, adapting
+    to the scope of the values rather than always showing kg.
+    """
+    from efootprint.constants.units import u
+    from efootprint.utils.display import best_display_unit, human_readable_unit
+    # An empty / all-zero chart has no scale to adapt to — keep the plain kg axis rather than letting
+    # ``best_display_unit`` floor a zero magnitude to milligrams.
+    unit = u.kg if not representative_kg else best_display_unit(representative_kg * u.kg)
+    return {"axisUnit": human_readable_unit(unit), "axisScale": (1 * u.kg).to(unit).magnitude}
 
 
 def _bar_dataset(label, data, color, stack) -> Dict:
