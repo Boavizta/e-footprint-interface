@@ -19,6 +19,7 @@ import json
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.comparison.duplication import duplicate_system
@@ -32,24 +33,29 @@ from model_builder.domain.services import (
 from utils import htmx_render
 
 
-def _rendered_shared_chrome_oob(model_web, role_label=None) -> str:
-    """OOB fragments that rebind the active-model chrome after a switch (no canvas re-render).
-
-    ``role_label`` ("Reference"/"Comparison") rebinds the mobile-only role pill next to #system-name so
-    it tracks the now-active model; None (single-model session) skips it — there is no pill to retarget.
-    """
+def _rendered_shared_chrome_oob(model_web) -> str:
+    """OOB fragments that rebind the active-model chrome after a switch (no canvas re-render)."""
     from model_builder.adapters.presenters.oob_regions import _render_results_buttons, _render_edge_modeling_toggle
 
     system_name = (
         f"<p id='system-name' class='m-0 pe-3 text-truncate' "
         f"hx-swap-oob='outerHTML:#system-name'>{model_web.system.name}</p>")
-    chrome = system_name + _render_results_buttons(model_web, {}) + _render_edge_modeling_toggle(model_web, {})
-    if role_label is not None:
-        chrome += (
-            f"<span id='active-model-role' "
-            f"class='badge rounded-pill bg-light text-secondary border d-lg-none align-self-center me-2 flex-shrink-0' "
-            f"hx-swap-oob='outerHTML:#active-model-role'>{role_label}</span>")
-    return chrome
+    return system_name + _render_results_buttons(model_web, {}) + _render_edge_modeling_toggle(model_web, {})
+
+
+def _rendered_active_model_role_oob(workspace, active_slot) -> str:
+    """OOB rebind of the mobile active-model switcher (role pill → switch dropdown) after a slot switch.
+
+    Regenerates the whole dropdown so its label and its "switch to the other model" target both track the
+    now-active slot. Empty for single-model sessions — there is no switcher to retarget.
+    """
+    slots = workspace.list_slots()
+    if len(slots) < 2:
+        return ""
+    return render_to_string(
+        "model_builder/components/active_model_role.html",
+        {"workspace_slots": [{"slot": s, "is_active": s == active_slot} for s in slots],
+         "active_slot": active_slot, "oob": True})
 
 
 @require_POST
@@ -71,10 +77,9 @@ def switch_model(request):
     if request.POST.get("skip_chrome"):
         response = HttpResponse("")
     else:
-        slots = workspace.list_slots()
-        role_label = ("Reference" if slot == slots[0] else "Comparison") if len(slots) > 1 else None
         response = HttpResponse(
-            _rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot)), role_label))
+            _rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot)))
+            + _rendered_active_model_role_oob(workspace, slot))
     response["HX-Trigger"] = json.dumps({"switchModelCanvas": {"slot": slot}})
     return response
 

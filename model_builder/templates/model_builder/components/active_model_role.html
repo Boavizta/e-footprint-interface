@@ -1,0 +1,31 @@
+{% comment %}
+Mobile-only active-model switcher (model-comparison). Always visible next to #system-name on <lg, where
+the tab strip is hidden: the pill shows the active model's role (Reference/Comparison) and, clicked, drops
+the "switch to the other model" option. It is a *sibling* of #system-name (never a child), so the rename
+flow (innerHTML-swaps #system-name) and the switch flow (outerHTML-OOBs #system-name) never touch it;
+switch_model rebinds this whole dropdown via its own OOB fragment (oob=True), so both the pill label and
+the switch-to target track the now-active model. Role is the active slot's position (first = Reference),
+so renaming — which changes the name, not the slot — leaves it correct by construction. Two models only.
+{% endcomment %}
+{% if workspace_slots|length > 1 %}
+<div class="dropdown d-lg-none align-self-center me-2 flex-shrink-0" id="active-model-role"{% if oob %} hx-swap-oob="true"{% endif %}>
+    <button type="button"
+            class="badge rounded-pill bg-light text-secondary border dropdown-toggle"
+            data-bs-toggle="dropdown" aria-expanded="false"
+            aria-label="Active model — switch model">
+        {% if active_slot == workspace_slots.0.slot %}Reference{% else %}Comparison{% endif %}
+    </button>
+    <ul class="dropdown-menu">
+        {% for slot_entry in workspace_slots %}{% if not slot_entry.is_active %}
+        <li>
+            <button type="button" class="dropdown-item"
+                    hx-post="{% url 'switch-model' %}"
+                    hx-vals='{"slot": "{{ slot_entry.slot }}"}'
+                    hx-swap="none">
+                Switch to {% if forloop.first %}Reference{% else %}Comparison{% endif %} model
+            </button>
+        </li>
+        {% endif %}{% endfor %}
+    </ul>
+</div>
+{% endif %}

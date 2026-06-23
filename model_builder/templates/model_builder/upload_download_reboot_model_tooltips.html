@@ -11,17 +11,11 @@
             <img width="28" height="28" src="{% static 'icons/sidenav/e-footprint-logo.svg' %}" alt="e-footprint" />
         </a>
         {% comment %}
-        Mobile-only role pill: with the tab strip hidden on <lg, this is the always-visible "which model
-        am I editing" signal (Reference vs Comparison). It is a *sibling* of #system-name, never a child,
-        so the rename flow (innerHTML-swaps #system-name) and the model-switch flow (outerHTML-OOBs
-        #system-name) never touch it; only a switch updates it, via its own #active-model-role OOB
-        fragment. Role is the active slot's position (first = Reference), so renaming — which changes the
-        name, not the slot — leaves it correct by construction. Only meaningful with two models.
+        Mobile-only active-model switcher (role pill → "switch to" dropdown). With the tab strip hidden
+        on <lg this is both the always-visible "which model am I editing" signal and the quickest way to
+        switch. A sibling of #system-name; switch_model OOB-rebinds it. See the partial for details.
         {% endcomment %}
-        {% if workspace_slots|length > 1 %}
-        <span id="active-model-role"
-              class="badge rounded-pill bg-light text-secondary border d-lg-none align-self-center me-2 flex-shrink-0">{% if active_slot == workspace_slots.0.slot %}Reference{% else %}Comparison{% endif %}</span>
-        {% endif %}
+        {% include 'model_builder/components/active_model_role.html' %}
         <div class="navbar-brand position-relative overflow-hidden" style="min-width: 0;" role="button"
                 id="btn-change-system-name"
                 hx-get="{% url 'open-panel-system-name' %}"
