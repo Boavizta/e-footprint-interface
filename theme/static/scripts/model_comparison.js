@@ -53,11 +53,11 @@
         // On the Compare dashboard there are no resident canvases — clicking a model tab means "leave
         // the comparison and edit this model". The switch-model POST already persisted the active slot,
         // so reload the builder (which opens on that slot). Guard on canvas presence, not a flag, so the
-        // shared tab strip stays unchanged.
+        // shared tab strip stays unchanged. No URL to reconcile: Compare deliberately does not push
+        // /compare/ (see model_tab_strip.html), so the bar already reads /model_builder/.
         if (!document.querySelector("[data-model-canvas]")) {
             if (window.htmx) {
                 window.htmx.ajax("GET", "/model_builder/", { target: "#main-content-block", swap: "innerHTML" });
-                window.history.pushState({}, "", "/model_builder/");
             }
             return;
         }

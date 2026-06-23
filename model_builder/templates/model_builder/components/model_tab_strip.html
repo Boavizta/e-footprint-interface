@@ -94,8 +94,12 @@ horizontally scrollable so every tab (incl. ⇄Compare) stays reachable on a nar
     enabled only once a second model exists AND both models are complete enough to compute (the same
     readiness signal as the "Get results" button) — comparing an incomplete model would read a footprint
     that doesn't exist. Otherwise it stays disabled with an explanatory tooltip (disabled-instead-of-
-    error). The dashboard replaces the builder in #main-content-block and pushes /compare/ to the URL so
-    a refresh re-opens it.
+    error). The dashboard replaces the builder in #main-content-block but deliberately does NOT push
+    /compare/ to the URL: it is an ephemeral projection of two models (rebuilt fresh, never a navigable
+    resource — no model slot gets its own URL either, the active slot is server-side state), and the
+    compare view skips the drop_expired_slots + recovery fallback that model_builder_main has, so a
+    refresh of a pushed /compare/ would 500 once a slot's cache TTL lapses. Leaving the URL at
+    /model_builder/ means a refresh always lands on the self-healing builder, Compare one click away.
     {% endcomment %}
     <span class="model-tab model-tab--compare d-inline-flex align-items-center rounded-top {% if on_dashboard %}fw-bold bg-white border border-bottom-0{% else %}text-muted{% endif %}"
           {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"
@@ -109,8 +113,7 @@ horizontally scrollable so every tab (incl. ⇄Compare) stays reachable on a nar
                 id="compare-tab"
                 {% if on_dashboard %}autofocus{% endif %}
                 hx-get="{% url 'compare-models' %}"
-                hx-target="#main-content-block" hx-swap="innerHTML"
-                hx-push-url="{% url 'compare-models' %}">
+                hx-target="#main-content-block" hx-swap="innerHTML">
             ⇄ Compare</button>
         {% endif %}
     </span>
