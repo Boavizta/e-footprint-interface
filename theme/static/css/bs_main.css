@@ -22710,11 +22710,6 @@ input:disabled {
   color: var(--new-primary);
 }
 
-#btn-add-edge-device-group {
-  border-color: var(--new-primary) !important;
-  color: var(--new-primary) !important;
-}
-
 .dict-membership-row {
   display: flex;
   align-items: center;
