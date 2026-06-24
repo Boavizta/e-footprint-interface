@@ -137,7 +137,6 @@ function resolveLeaderLineTargets(fromElement) {
 
 function buildLineRegistry(lineSpecs) {
     const nextLines = {};
-    const layer = document.getElementById("leaderlines-layer");
 
     lineSpecs.forEach(({fromElement, targets, optLine}) => {
         targets.forEach(toElement => {
@@ -151,8 +150,7 @@ function buildLineRegistry(lineSpecs) {
             }
             nextLines[fromElement.id].push(
                 new LeaderLine(fromElement, toElement, {
-                    ...dictLeaderLineOption[optLine],
-                    parent: layer
+                    ...dictLeaderLineOption[optLine]
                 })
             );
         });

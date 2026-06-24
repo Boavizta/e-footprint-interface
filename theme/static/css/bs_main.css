@@ -20658,12 +20658,6 @@ input:disabled {
   animation: none;
 }
 
-#leaderlines-layer {
-  pointer-events: none;
-  z-index: 0 !important;
-  overflow: hidden;
-}
-
 .leader-line {
   z-index: 0 !important;
   pointer-events: none !important;
@@ -20677,13 +20671,13 @@ input:disabled {
   position: relative;
 }
 
-/* The leader-line build bundled here ignores the `parent` option and appends every line <svg> straight
-   to <body> (position:absolute, z-index 0), so #leaderlines-layer never actually clips them. Lines are
-   instead masked by the opaque chrome bars painted above them: the navbar/loading-bar (z-2) and the
-   per-model toolbar (z-3, bg-white). The tab strip is the one chrome bar that was left static/transparent,
-   so lines that ride up as the canvas scrolls bleed over the tabs. Give it the same treatment: an opaque
-   background and a z-index ABOVE the toolbar (4 > 3) — the latter so the +Add dropdown, which opens down
-   over the toolbar, isn't trapped behind it once the strip becomes its own stacking context. */
+/* The leader-line build bundled here appends every line <svg> straight to <body> (position:absolute,
+   z-index 0) with no clipping layer of its own, so lines are masked only by the opaque chrome bars
+   painted above them: the navbar/loading-bar (z-2) and the per-model toolbar (z-3, bg-white). The tab
+   strip is the one chrome bar that was left static/transparent, so lines that ride up as the canvas
+   scrolls bleed over the tabs. Give it the same treatment: an opaque background and a z-index ABOVE the
+   toolbar (4 > 3) — the latter so the +Add dropdown, which opens down over the toolbar, isn't trapped
+   behind it once the strip becomes its own stacking context. */
 #model-tab-strip {
   position: relative;
   z-index: 4;
