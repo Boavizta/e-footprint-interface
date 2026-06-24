@@ -19,11 +19,21 @@
         const userPreference = readEdgeModelingPreference();
         const effectiveOn = latched || userPreference === "on";
 
+        const stateChanged = document.body.classList.contains("edge-modeling-on") !== effectiveOn;
+
         document.body.classList.toggle("edge-modeling-on", effectiveOn);
         document.body.classList.toggle("edge-modeling-off", !effectiveOn);
 
         if (toggle) {
             toggle.checked = effectiveOn;
+        }
+
+        // Toggling hides/shows the edge-paradigm add-buttons (display:none), which reflows the
+        // canvas and leaves the leader lines between cards stale — same as an accordion show/hide.
+        // Rebuild only when the state actually flips (not on every htmx:afterSettle), and only when
+        // the leaderline module is loaded (absent on the Compare dashboard and in JS unit tests).
+        if (stateChanged && typeof window.scheduleRebuildAllLeaderLines === "function") {
+            window.scheduleRebuildAllLeaderLines();
         }
     }
 

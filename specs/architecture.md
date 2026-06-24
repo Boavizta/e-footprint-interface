@@ -303,7 +303,7 @@ When OOB card swaps re-render a card, accordion open/close state is preserved au
 
 ### Leaderline target resolution
 
-Leaderlines use a "deepest visible anchor" pattern for target-side resolution: if the target element is hidden inside a collapsed accordion, the line ends on the nearest visible `.leaderline-anchor` ancestor instead. Lines are rebuilt broadly on `shown.bs.collapse` / `hidden.bs.collapse` events. Source-side semantics are unchanged.
+Leaderlines use a "deepest visible anchor" pattern for target-side resolution: if the target element is hidden inside a collapsed accordion, the line ends on the nearest visible `.leaderline-anchor` ancestor instead. Lines are rebuilt broadly on `shown.bs.collapse` / `hidden.bs.collapse` events. Source-side semantics are unchanged. The edge-modeling toggle (`edge_modeling_toggle.js`) reflows the canvas by `display:none`-ing the edge-paradigm add-buttons, so it calls `scheduleRebuildAllLeaderLines()` whenever `body.edge-modeling-on/off` actually flips (guarded — the module is absent on the Compare dashboard and in JS unit tests).
 
 ### Truncated-text tooltip pattern
 
