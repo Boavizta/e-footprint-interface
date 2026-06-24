@@ -24,7 +24,10 @@ function initTruncatedTextTooltips(root = document) {
         bootstrap.Tooltip.getOrCreateInstance(element, {
             container: "body",
             delay: { show: 0, hide: 0 },
-            trigger: "hover"
+            trigger: "hover",
+            // animation: false keeps hide() synchronous so its cleanup can't be deferred past an
+            // HTMX swap that disposes the instance (see bootstrap_widgets.js disposeShownWidgets).
+            animation: false
         });
     });
 }

@@ -1,4 +1,6 @@
-const { initBootstrapWidgets, disposeShownWidgets } = require("../theme/static/scripts/bootstrap_widgets.js");
+const {
+    initBootstrapWidgets, disposeShownWidgets, hardenAgainstDisposedTipEvents,
+} = require("../theme/static/scripts/bootstrap_widgets.js");
 
 let popoverCalls;
 let tooltipCalls;
@@ -118,4 +120,59 @@ test("disposeShownWidgets no-ops when bootstrap is undefined", () => {
     delete global.bootstrap;
     document.body.innerHTML = `<button aria-describedby="tooltip1"></button>`;
     expect(() => disposeShownWidgets(document)).not.toThrow();
+});
+
+test("initBootstrapWidgets creates non-animated tooltips (synchronous hide)", () => {
+    // animation: false keeps hide() synchronous, so its cleanup can't be deferred past a swap
+    // that disposes the instance (which would then throw on a nulled _element).
+    document.body.innerHTML = `<button id="t" data-bs-toggle="tooltip" title="x"></button>`;
+    initBootstrapWidgets(document);
+    expect(tooltipCalls[0].config).toMatchObject({ animation: false });
+});
+
+describe("hardenAgainstDisposedTipEvents", () => {
+    // Simulate the two Bootstrap methods that throw when a disposed instance (Bootstrap nulls every
+    // own property on dispose) is re-entered by a trailing hover/focus event after an HTMX swap.
+    function makeProto() {
+        const calls = [];
+        const proto = {
+            _isWithActiveTrigger() { return Object.values(this._activeTrigger).includes(true); },
+            hide() { this._element.removeAttribute("aria-describedby"); calls.push("hide"); },
+            _leave() { calls.push("leave"); },
+            _enter() { calls.push("enter"); },
+            show() { calls.push("show"); },
+            toggle() { calls.push("toggle"); },
+        };
+        return { proto, calls };
+    }
+
+    test("a disposed instance no-ops instead of throwing; a live one runs the original", () => {
+        const { proto, calls } = makeProto();
+        global.bootstrap = { Tooltip: { prototype: proto } };
+        hardenAgainstDisposedTipEvents();
+
+        const live = Object.assign(Object.create(proto), {
+            _element: { removeAttribute: () => {} }, _activeTrigger: { hover: true } });
+        expect(live._isWithActiveTrigger()).toBe(true);
+        expect(() => live.hide()).not.toThrow();
+        expect(calls).toContain("hide");
+
+        const dead = Object.assign(Object.create(proto), { _element: null, _activeTrigger: null });
+        expect(dead._isWithActiveTrigger()).toBe(false);   // boolean, not a throw
+        ["hide", "_leave", "_enter", "show", "toggle"].forEach(m => expect(() => dead[m]()).not.toThrow());
+    });
+
+    test("installs once (idempotent, no double-wrap)", () => {
+        const { proto } = makeProto();
+        global.bootstrap = { Tooltip: { prototype: proto } };
+        hardenAgainstDisposedTipEvents();
+        const wrapped = proto.hide;
+        hardenAgainstDisposedTipEvents();
+        expect(proto.hide).toBe(wrapped);
+    });
+
+    test("no-ops when bootstrap is undefined", () => {
+        delete global.bootstrap;
+        expect(() => hardenAgainstDisposedTipEvents()).not.toThrow();
+    });
 });

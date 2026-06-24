@@ -34,8 +34,12 @@
         }
         if (bootstrap.Tooltip) {
             collectMatches(scope, TOOLTIP_SELECTOR)
+                // animation: false keeps hide() synchronous. An animated hide defers its cleanup
+                // (this._element.removeAttribute(...)) past the fade via executeAfterTransition; if an
+                // HTMX swap disposes the instance in that window, the deferred callback throws on a
+                // nulled _element. No fade ⇒ no deferred callback ⇒ no race (see disposeShownWidgets).
                 .forEach(el => bootstrap.Tooltip.getOrCreateInstance(
-                    el, { container: "body", trigger: "hover" }));
+                    el, { container: "body", trigger: "hover", animation: false }));
         }
     }
 
@@ -57,6 +61,37 @@
         });
     }
 
+    // Make a disposed tooltip/popover instance inert to trailing interaction events.
+    //
+    // disposeShownWidgets() (above) disposes a shown tip on htmx:beforeSwap so it can't orphan in
+    // <body>. But the same DOM mutation that removes the trigger generates a trailing hover/focus
+    // event (mouseleave/focusout) that Bootstrap dispatches *after* the dispose, re-entering the
+    // just-disposed instance. dispose() nulls every own property (BaseComponent zeroes them via
+    // getOwnPropertyNames), so the re-entered handler hits `Object.values(this._activeTrigger)` →
+    // "Cannot convert undefined or null to object" in _isWithActiveTrigger, or `this._element
+    // .removeAttribute(...)` → "...reading 'removeAttribute'" in the hide path. Guard the interaction
+    // entry points so a dead instance (no _element) no-ops instead of throwing. Popover inherits
+    // Tooltip.prototype, so this one patch covers both. Installed once, idempotently.
+    function hardenAgainstDisposedTipEvents() {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) return;
+        const proto = bootstrap.Tooltip.prototype;
+        if (proto._efDisposedGuardInstalled) return;
+        proto._efDisposedGuardInstalled = true;
+        ["_enter", "_leave", "show", "hide", "toggle", "_isWithActiveTrigger"].forEach(name => {
+            const original = proto[name];
+            if (typeof original !== "function") return;
+            proto[name] = function (...args) {
+                if (this._element == null || this._activeTrigger == null) {
+                    // _isWithActiveTrigger must stay boolean; the rest are void.
+                    return name === "_isWithActiveTrigger" ? false : undefined;
+                }
+                return original.apply(this, args);
+            };
+        });
+    }
+
+    hardenAgainstDisposedTipEvents();
+
     document.addEventListener("DOMContentLoaded", () => initBootstrapWidgets(document));
     document.body.addEventListener("htmx:afterSettle", (event) => {
         initBootstrapWidgets(event.detail && event.detail.elt ? event.detail.elt : document);
@@ -67,6 +102,6 @@
     });
 
     if (typeof module !== "undefined" && module.exports) {
-        module.exports = { initBootstrapWidgets, disposeShownWidgets };
+        module.exports = { initBootstrapWidgets, disposeShownWidgets, hardenAgainstDisposedTipEvents };
     }
 })();
