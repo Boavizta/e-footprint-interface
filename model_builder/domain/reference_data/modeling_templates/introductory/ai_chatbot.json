@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "22.2.0",
+    "efootprint_version": "22.2.1",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -110,7 +110,7 @@
                     "label": "Times per journey",
                     "source": "hypothesis"
                 },
-                "Generate-a-1s-video": {
+                "Generate-a-5s-video": {
                     "value": 1.0,
                     "unit": "dimensionless",
                     "label": "Times per journey",
@@ -253,9 +253,9 @@
                 }
             }
         },
-        "Generate-a-1s-video": {
-            "name": "Generate a 1s video",
-            "id": "Generate-a-1s-video",
+        "Generate-a-5s-video": {
+            "name": "Generate a 5s video",
+            "id": "Generate-a-5s-video",
             "user_time_spent": {
                 "value": 1.0,
                 "unit": "minute",
@@ -637,7 +637,7 @@
             "output_token_count": {
                 "value": 10000.0,
                 "unit": "dimensionless",
-                "label": "Output token count for gpt-4.1",
+                "label": "Output token count for gpt-5.5",
                 "source": "hypothesis"
             }
         }
@@ -668,7 +668,7 @@
                 "source": "hypothesis"
             },
             "model_name": {
-                "value": "gpt-4.1",
+                "value": "gpt-5.5",
                 "label": "Model used",
                 "source": "hypothesis"
             }
@@ -713,7 +713,7 @@
                 "source": "hypothesis"
             },
             "duration": {
-                "value": 1.0,
+                "value": 5.0,
                 "unit": "second",
                 "label": "Video duration",
                 "source": "hypothesis"

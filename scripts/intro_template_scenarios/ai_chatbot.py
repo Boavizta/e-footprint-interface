@@ -46,7 +46,7 @@ def build_system() -> System:
     big_llm = EcoLogitsGenAIExternalAPI(
         "Big LLM API",
         provider=SourceObject("openai"),
-        model_name=SourceObject("gpt-4.1"))
+        model_name=SourceObject("gpt-5.5"))
     video_llm = EcoLogitsVideoGenExternalAPI(
         "GenAI video API",
         provider=SourceObject("klingai"),
@@ -93,7 +93,7 @@ def build_system() -> System:
         output_token_count=SourceValue(10000 * u.dimensionless))
     video_generation_job = EcoLogitsVideoGenExternalAPIJob(
         "GenAI video generation", external_api=video_llm, resolution=SourceObject("720p (1280 x 720)"),
-        duration=SourceValue(1 * u.s), with_audio=SourceObject(True))
+        duration=SourceValue(5 * u.s), with_audio=SourceObject(True))
 
     open_step = UsageJourneyStep.from_defaults("Open the assistant", jobs=[open_chat_job])
     quick_question_step = UsageJourneyStep.from_defaults(
@@ -101,7 +101,7 @@ def build_system() -> System:
     detailed_question_step = UsageJourneyStep.from_defaults(
         "Ask a detailed question", jobs=[detailed_request_job, route_question_job, detailed_answer_job])
     video_generation_step = UsageJourneyStep.from_defaults(
-        "Generate a 1s video", jobs=[video_generation_job, render_video_job]
+        "Generate a 5s video", jobs=[video_generation_job, render_video_job]
     )
     journey = UsageJourney(
         "Chatbot conversation",
