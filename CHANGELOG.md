@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.9.0]
 
 ### Added
 - Two-model builder: you can now add a second model to compare — by duplicating the current one,
@@ -27,13 +27,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   single-model file replaces the current model, a comparison file restores both models in one action —
   so a comparison file can be opened from any session, including a fresh single-model one. Each model's
   view settings (e.g. Sankey configuration) are preserved through the round-trip.
-
-### Changed
-- Internal (no user-visible change): the session now holds a workspace of up to two model slots plus
-  an active-slot pointer instead of a single model — groundwork for model comparison. System-data
-  cache keys are slot-suffixed (`system_data:{session_key}:{slot}`), with a one-release read-fallback
-  that transparently migrates in-flight single-model sessions. Single-model sessions behave exactly
-  as before.
 
 ## [V1.8.0]
 
