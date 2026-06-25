@@ -8,6 +8,7 @@ const {
     buildPairedChartConfig,
     buildCumulativeChartConfig,
     buildDecompositionChartConfig,
+    destroyComparisonCharts,
 } = require("../theme/static/scripts/result_charts/comparison_charts.js");
 
 function pairedPayload() {
@@ -144,6 +145,31 @@ describe("buildDecompositionChartConfig", () => {
         expect(config.plugins.map((p) => p.id)).toContain("decompositionValueLabels");
         // The display strings the plugin prints ride along on the dataset, untouched by the builder.
         expect(config.data.datasets[0].valueLabels).toEqual(["−660 kg", "+90 kg"]);
+    });
+});
+
+describe("destroyComparisonCharts", () => {
+    // The comparison view is emptied on leave (its canvases removed); the three Chart instances must be
+    // .destroy()-ed and cleared so they don't stay registered against orphaned canvases and leak/recollide
+    // on the next open.
+    const CHART_KEYS = ["comparisonPairedChart", "comparisonCumulativeChart", "comparisonDecompositionChart"];
+
+    test("destroys and clears every tracked comparison chart", () => {
+        const destroyed = [];
+        window.charts = {};
+        CHART_KEYS.forEach((key) => {
+            window.charts[key] = { destroy: () => destroyed.push(key) };
+        });
+
+        destroyComparisonCharts();
+
+        expect(destroyed.sort()).toEqual([...CHART_KEYS].sort());
+        CHART_KEYS.forEach((key) => expect(window.charts[key]).toBeNull());
+    });
+
+    test("is a no-op when no comparison charts are tracked (idempotent on reopen/leave)", () => {
+        window.charts = {};
+        expect(() => destroyComparisonCharts()).not.toThrow();
     });
 });
 

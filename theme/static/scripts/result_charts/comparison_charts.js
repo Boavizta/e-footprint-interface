@@ -230,6 +230,15 @@ function renderChart(canvasId, config) {
 }
 
 /**
+ * Destroy all three comparison charts. The comparison view is emptied on leave, so its canvases are
+ * removed from the DOM; without this the Chart.js instances stay registered against the orphaned
+ * canvases and leak (and re-collide on the next open). Called when the comparison view is dismissed.
+ */
+function destroyComparisonCharts() {
+    COMPARISON_CHART_KEYS.forEach(destroyComparisonChart);
+}
+
+/**
  * Read the dashboard's swapped-in payloads and (re)draw all three comparison charts. Re-entrant: the
  * Compare tab re-renders fresh on every visit, so any prior chart instances are destroyed first.
  */
@@ -257,4 +266,5 @@ module.exports = {
     buildCumulativeChartConfig,
     buildDecompositionChartConfig,
     drawComparisonCharts,
+    destroyComparisonCharts,
 };

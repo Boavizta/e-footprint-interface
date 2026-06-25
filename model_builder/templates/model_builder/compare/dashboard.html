@@ -6,16 +6,15 @@ and cumulative charts (shared scales + one legend each — magnitude honesty), t
 Re-rendered fresh on every visit (views_workspace.compare): all values come from the ComparisonService
 view model in `comparison`, the two Chart.js payloads from `paired_chart_json` / `cumulative_chart_json`.
 
-This is a **self-contained comparison view**: it carries only the tab strip (to switch back to a model
-or re-open Compare), not the per-model toolbar (tools / system name) nor the floating "Show results"
-button — those are model-scoped and live on the builder. A model tab here reloads the builder on the
-chosen slot (model_comparison.js), which restores that chrome; the tab strip is rendered with
-`on_dashboard=True` so its switch POSTs `skip_chrome` and no chrome OOB is emitted at a missing target.
+This fragment is swapped into the resident `#comparison-view` sibling below the builder's tab strip; the
+one builder tab strip stays live above (model_comparison.js reveals this view and hides the builder
+chrome). It carries no tab strip of its own and no per-model toolbar (tools / system name) nor the
+floating "Show results" button — those are model-scoped and live on the builder, which stays resident
+(hidden) so a model tab dismisses this view client-side, no reload.
 {% endcomment %}
 {% load static %}
-{% include 'model_builder/components/model_tab_strip.html' with on_dashboard=True %}
 
-<div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
+<div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="comparison-page">
     <div id="comparison-dashboard" class="text-start mx-auto px-3 px-xl-4 pt-3 overflow-y-auto"
          style="max-width: 800px;"
          data-paired-chart="{{ paired_chart_json }}"
@@ -41,18 +40,10 @@ chosen slot (model_comparison.js), which restores that chrome; the tab strip is 
     </div>
 </div>
 
-{% include 'model_builder/components/toast.html' %}
-
-<div id="modal-container"></div>
-<div id="loader-container"></div>
-
-{% include "model_builder/modals/import_error_modal.html" with modal_id=import_error_modal_id message=import_error_message %}
-{% include "model_builder/modals/warn_before_side_panel_closing_modal.html" with message="The currently opened side panel has pending changes. Would you like to continue and lose them ?" modal_id="unsavedModal" %}
-
 <script>
     // The result-charts bundle (loaded as a module in base.html) exposes the comparison chart builders
-    // on window once it has run. The dashboard is HTMX-swapped into #main-content-block, so drive the
-    // draw from the swapped-in payloads here, retrying briefly if the module is still evaluating.
+    // on window once it has run. The dashboard is HTMX-swapped into #comparison-view, so drive the draw
+    // from the swapped-in payloads here, retrying briefly if the module is still evaluating.
     (function () {
         function draw() {
             if (typeof window.drawComparisonCharts !== "function") {

@@ -4,6 +4,10 @@ The critical flow reserved for Playwright: duplicate the working model, edit the
 see both models + the active selection survive, then remove the copy to return to single-model mode.
 This is the headline user-visible milestone, and it exercises the resident-canvas DOM in a real browser
 (where a duplicate id would actually break HTMX/leaderlines, unlike a server-render assertion).
+
+The comparison dashboard is a resident in-flow sibling of the canvases: opening Compare hides the
+builder chrome and reveals the #comparison-view block; a model tab dismisses it client-side (reveal the
+canvas), with no /model_builder/ reload — the perf win these tests guard.
 """
 import pytest
 from playwright.sync_api import expect
@@ -94,17 +98,16 @@ class TestModelComparisonWorkspace:
 
     def test_compare_renders_charts_with_no_leader_lines_or_console_errors(
             self, minimal_complete_model_builder):
-        """Regression for the Compare-page leader-line / chart bug (post-Task-4 fix).
+        """Regression for the Compare-page leader-line / chart bug.
 
-        Switching to the canvas-less Compare dashboard used to leave the builder's leader lines orphaned
-        on <body>; their internal resize/scroll listeners then threw on disconnected anchors (uncaught
-        ``Cannot read properties of null``), which could abort chart init. The comparison view carries no
-        per-model chrome, and its model tabs POST switch-model with ``skip_chrome`` so the switch emits no
-        chrome OOB at a missing target (``oobErrorNoTarget``).
+        Opening Compare hides the resident canvas (d-none) and tears down the builder's leader lines —
+        their SVGs live on <body>, and their internal resize/scroll listeners would otherwise throw on
+        disconnected anchors (uncaught ``Cannot read properties of null``), which could abort chart init.
+        On dismiss the builder's lines rebuild on the now-visible canvas.
 
         Guards: opening Compare (and switching back across A/B/Compare, including a resize on the
         dashboard) produces no uncaught console error, the comparison chart canvases hold live Chart.js
-        instances, and no builder leader-line SVG survives onto the dashboard.
+        instances, and no builder leader-line SVG survives while the comparison view is shown.
         """
         model_builder = minimal_complete_model_builder
         page = model_builder.page
@@ -171,11 +174,12 @@ class TestModelComparisonWorkspace:
         expect(changed_row).to_contain_text("1")
         expect(changed_row).to_contain_text("3")
 
-    def test_compare_is_a_self_contained_view_without_model_chrome(self, minimal_complete_model_builder):
-        """The Compare dashboard is self-contained: it carries the tab strip but NOT the per-model
-        toolbar (tools / system name) nor the floating "Show results" button — those are model-scoped and
-        live on the builder. The model names still appear (in the KPI cards), and opening Compare raises
-        no console error (the dashboard's switch POSTs skip_chrome so no chrome OOB hits a missing target).
+    def test_compare_hides_the_per_model_chrome_while_the_builder_stays_resident(
+            self, minimal_complete_model_builder):
+        """While Compare is open, the per-model chrome (toolbar / system name / "Show results" button /
+        side panel) is hidden, not destroyed — the builder stays resident behind the comparison view so a
+        model tab dismisses it client-side. The model names still appear (in the KPI cards), and opening
+        Compare raises no console error.
         """
         model_builder = minimal_complete_model_builder
         page = model_builder.page
@@ -190,19 +194,71 @@ class TestModelComparisonWorkspace:
 
         model_builder.open_compare()
 
-        # No per-model chrome on the comparison view.
-        expect(page.locator("#toolbar-nav")).to_have_count(0)
-        expect(page.locator("#system-name")).to_have_count(0)
-        expect(page.locator("#show-results-toolbar-btn")).to_have_count(0)
-        expect(page.locator("#edge-modeling-toggle-wrapper")).to_have_count(0)
-        expect(page.locator("#panel-result-btn")).to_have_count(0)
-        expect(page.locator("#sidePanel")).to_have_count(0)
+        # The per-model chrome is hidden (the toolbar and the canvas region carry d-none) but still
+        # resident — the builder is not torn down, so dismissing is a client-side reveal.
+        expect(page.locator("#toolbar-nav")).to_be_hidden()
+        expect(page.locator("#model-builder-page")).to_be_hidden()
+        expect(page.locator("#comparison-view")).to_be_visible()
 
         # The tab strip stays (to navigate back / re-compare) and the renamed model shows in the KPI cards.
         expect(page.locator("#model-tab-strip")).to_be_visible()
         expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)
 
         assert not console_errors, f"Unexpected console errors on the Compare view: {console_errors}"
+
+    def test_dismissing_compare_is_client_side_with_no_builder_reload(self, minimal_complete_model_builder):
+        """The headline perf win: opening Compare keeps the builder DOM resident, so dismissing to a model
+        is a client-side reveal — no GET /model_builder/ in the network log, and the same canvas element
+        is revealed (identity preserved, never re-rendered)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        model_builder.add_model_by_duplication()
+
+        # Tag the resident canvas so we can prove the SAME element is revealed after dismiss (no re-render).
+        page.evaluate("document.querySelector('[data-model-canvas=\"1\"]').dataset.identityProbe = 'kept'")
+
+        model_builder.open_compare()
+
+        builder_reloads: list[str] = []
+        page.on("request", lambda req: builder_reloads.append(req.url)
+                if req.url.rstrip("/").endswith("/model_builder") else None)
+
+        # Dismiss back to the active model (slot 1) — a client-side reveal.
+        model_builder.switch_to_model(1)
+        model_builder.canvas.wait_for(state="visible")
+        expect(page.locator("#comparison-view")).to_be_hidden()
+        expect(page.locator("#model-builder-page")).to_be_visible()
+
+        # No /model_builder/ reload fired, and the canvas is the same element (identity probe survived).
+        assert builder_reloads == [], f"Unexpected /model_builder/ reload(s): {builder_reloads}"
+        assert page.evaluate(
+            "document.querySelector('[data-model-canvas=\"1\"]').dataset.identityProbe") == "kept"
+
+    def test_reopening_compare_shows_fresh_values_after_an_edit_no_chart_leak(
+            self, minimal_complete_model_builder):
+        """Reopening Compare reflects an edit (rebuilt fresh) and re-creates exactly three live charts —
+        the previous instances were destroyed on dismiss (no Chart.js canvas-registry leak)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        model_builder.add_model_by_duplication()
+        model_builder.open_compare()
+        page.wait_for_function(
+            "() => window.charts && window.charts['comparisonPairedChart']"
+            " && window.charts['comparisonCumulativeChart']")
+
+        # Dismiss to model B, edit it, reopen Compare — the charts are destroyed on leave and re-created.
+        model_builder.switch_to_model(1)
+        model_builder.canvas.wait_for(state="visible")
+        # The dismiss destroys the comparison charts so they don't leak across reopen.
+        assert page.evaluate("() => !window.charts['comparisonPairedChart']")
+
+        new_name = "Edge caching variant"
+        model_builder.rename_active_model(new_name)
+        model_builder.open_compare()
+        expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)  # fresh values
+        page.wait_for_function("() => window.charts && window.charts['comparisonPairedChart']")
 
     def test_tab_strip_layout_two_models_then_one(self, minimal_complete_model_builder):
         """Tab-strip layout: with two models the order is [A ✕] [B ✕] [Compare] — every model tab

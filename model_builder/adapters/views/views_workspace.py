@@ -62,13 +62,12 @@ def _rendered_active_model_role_oob(workspace, active_slot) -> str:
 @require_POST
 @time_it
 def switch_model(request):
-    """Flip the active slot and (on the builder) rebind the shared chrome; the canvas toggle is client-side.
+    """Flip the active slot and rebind the shared chrome; the canvas toggle is client-side.
 
-    On the **builder**, the small shared chrome (#system-name, the results buttons, the edge toggle) is
-    OOB-rebound for the now-active model. The **Compare dashboard** is a self-contained view with no
-    per-model chrome — a model tab there reloads the builder on the new slot (model_comparison.js), so it
-    sends ``skip_chrome`` and we emit only the ``switchModelCanvas`` trigger; emitting chrome OOB there
-    would just hit missing targets (``oobErrorNoTarget``).
+    The small shared chrome (#system-name, the results buttons, the edge toggle) is OOB-rebound for the
+    now-active model, and the ``switchModelCanvas`` trigger drives the client-side canvas reveal. Every
+    switch lands on the resident builder (the Compare view is dismissed client-side first, revealing the
+    builder), so the chrome targets are always present.
     """
     workspace = SessionWorkspaceRepository(request.session)
     slot = int(request.POST["slot"])
@@ -76,12 +75,9 @@ def switch_model(request):
         return HttpResponse(status=400)
     workspace.set_active_slot(slot)
 
-    if request.POST.get("skip_chrome"):
-        response = HttpResponse("")
-    else:
-        response = HttpResponse(
-            _rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot)))
-            + _rendered_active_model_role_oob(workspace, slot))
+    response = HttpResponse(
+        _rendered_shared_chrome_oob(ModelWeb(workspace.repository_for(slot)))
+        + _rendered_active_model_role_oob(workspace, slot))
     response["HX-Trigger"] = json.dumps({"switchModelCanvas": {"slot": slot}})
     return response
 
@@ -201,17 +197,18 @@ def compare(request):
     Built fresh on every visit (no stale results): the two slots' models are wrapped, compared via the
     library's ``System.compare_to`` and shaped by the thin ``ComparisonService`` adapter. The dashboard
     is shown only when two models exist *and both are complete enough to compute* — the same readiness
-    signal that gates the ⇄Compare tab. Otherwise (one model, or an incomplete second model) it falls
-    back to the builder rather than erroring (disabled-instead-of-error): comparing an incomplete model
-    would read a footprint that does not exist and 500.
+    signal that gates the ⇄Compare tab. Otherwise (one model, or an incomplete second model) it returns
+    an empty response rather than erroring (disabled-instead-of-error): the dashboard swaps into the
+    resident ``#comparison-view`` sibling, so rendering a full builder there would nest a builder inside
+    the comparison block. This path is defensive only — the ⇄Compare tab is already disabled in that
+    state, so it is unreachable from the UI.
     """
     from model_builder.adapters.views.views import compare_enabled
 
     workspace = SessionWorkspaceRepository(request.session)
     workspace_slots = build_workspace_slots(workspace)
     if not compare_enabled(workspace_slots):
-        return render_model_builder(
-            request, ModelWeb(workspace.active_repository()), show_template_picker=False, workspace=workspace)
+        return HttpResponse("")
 
     model_a, model_b = workspace_slots[0]["model_web"], workspace_slots[1]["model_web"]
     comparison = ComparisonService().build(model_a, model_b)

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare view as a resident sibling — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  figure { margin: 1.2rem 0; }
+  figcaption { color: #666; font-size: .85rem; margin-top: .3rem; }
+</style>
+</head>
+<body>
+
+<h1>Compare view as a resident sibling — Implementation plan</h1>
+<p class="status">Status: Plan — under review · 2026-06-25 · <strong>No spec</strong> (technical optimization, no functional change — follows on from <a href="../model-comparison/plan.html">model-comparison</a>)</p>
+<p class="status">Folder slug is <code>compare-overlay-layer</code>, but “layer” here means an <strong>in-flow sibling block</strong> toggled by <code>display</code> — <em>not</em> an absolutely-positioned overlay (see §5).</p>
+
+<section>
+  <h2>1. Approach</h2>
+  <p>Today the ⇄Compare tab does <code>hx-get /compare/</code> with <code>hx-target="#main-content-block" hx-swap="innerHTML"</code>, which <strong>replaces the whole builder — including the two resident canvases</strong>. That destruction is the <em>only</em> reason returning to a model needs a full reload: with no resident canvas to reveal, <code>switchToSlot</code> (<code>model_comparison.js</code>) falls back to <code>htmx.ajax("GET","/model_builder/")</code>, which re-hydrates one or two <code>ModelWeb</code> objects from JSON and re-renders the whole builder (the ~1.2&nbsp;s <code>model_builder_main</code> in production logs). The cost is the bare <code>json_to_system</code> deserialization, not computation (computed attributes are cached).</p>
+
+  <p>Make the comparison view a <strong>third resident sibling alongside the two canvases</strong>, in normal document flow below the tab strip. Opening Compare hides the canvas region (and the model toolbar) with <code>d-none</code> and shows the comparison block; switching to a model hides the comparison block and un-hides that canvas — the exact <code>display</code> toggle the two canvases already use. No canvas is destroyed, so returning to a model is a client-side reveal, not a reload. The comparison fragment is still fetched fresh from <code>/compare/</code> on every open and emptied (its three Chart.js instances destroyed) on leave, so “no stale results” is unchanged — only the canvases persist.</p>
+
+  <p>Because every model tab now reveals a resident canvas (never a canvas-less reload), the <code>skip_chrome</code> branch and the canvas-absent reload branch both disappear, and the comparison view stops carrying its own duplicate tab strip. There is <strong>one tab strip in the DOM at all times</strong>. Opening Compare <strong>hides the ⇄Compare tab</strong> and clears the active-model highlight; dismissing restores them — the same client-side <code>display</code>/class toggling a model switch already does. Hiding ⇄Compare while comparing also leaves just the two fixed-width model tabs, so on mobile both fit at once — removing the horizontal scroll the three-tab strip needs today to reach the Reference model.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 250" width="100%" role="img" aria-label="Before: dashboard swap destroys canvases. After: comparison view is a resident sibling, canvas hidden.">
+      <style>
+        .strip{fill:#eef3fb;stroke:#7a9bd4}
+        .canvas{fill:#f3f7f1;stroke:#8bb37e}
+        .cmp{fill:#fdebd0;stroke:#d9a441}
+        .hid{fill:#f6f6f6;stroke:#bbb;stroke-dasharray:4 3}
+        .t{font:12px system-ui;fill:#222}
+        .tt{font:bold 12px system-ui;fill:#222}
+        .mut{font:11px system-ui;fill:#888}
+        .arr{stroke:#c0392b;stroke-width:1.4;fill:none;marker-end:url(#a)}
+      </style>
+      <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c0392b"/></marker></defs>
+
+      <text x="20" y="22" class="tt">Today — swap into #main-content-block</text>
+      <rect x="20" y="34" width="220" height="26" class="strip"/><text x="30" y="51" class="t">tab strip + toolbar</text>
+      <rect x="20" y="62" width="220" height="70" class="canvas"/><text x="30" y="92" class="t">resident canvases</text>
+      <text x="30" y="110" class="mut">(both slots, one visible)</text>
+      <path class="arr" d="M130,140 L130,168"/>
+      <rect x="20" y="172" width="220" height="58" class="cmp"/><text x="30" y="196" class="t">dashboard REPLACES it</text>
+      <text x="30" y="214" class="mut">canvases destroyed → reload to return</text>
+
+      <text x="430" y="22" class="tt">After — resident sibling, in flow</text>
+      <rect x="430" y="34" width="220" height="26" class="strip"/><text x="440" y="51" class="t">tab strip (one, always live)</text>
+      <rect x="430" y="62" width="220" height="40" class="hid"/><text x="440" y="86" class="mut">toolbar + canvases — d-none (resident)</text>
+      <rect x="430" y="106" width="220" height="60" class="cmp"/><text x="440" y="132" class="t">#comparison-view (shown)</text>
+      <text x="440" y="150" class="mut">in flow, below strip · emptied on leave</text>
+    </svg>
+    <figcaption>The canvases survive (hidden), the comparison view sits where they were. Returning to a model is a <code>display</code> toggle, not a reload — and being in-flow, it never floats over the leader lines, so there is no z-index to manage.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change type</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>theme/templates/model_builder/model_builder_main.html</code></td>
+        <td>modified</td>
+        <td>Add an empty <code>#comparison-view</code> block as a <strong>flow sibling</strong> below the tab strip (next to the toolbar + <code>#model-builder-page</code>), starting <code>d-none</code>. This is the swap target.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/compare/dashboard.html</code></td>
+        <td>modified</td>
+        <td>Drop the <code>{% include model_tab_strip … on_dashboard=True %}</code> (the builder strip stays live above). Otherwise unchanged — KPI/decomposition/charts/diff and the chart-draw script remain.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/components/model_tab_strip.html</code></td>
+        <td>modified</td>
+        <td>⇄Compare tab → <code>hx-target="#comparison-view"</code> (keeps its <code>#compare-tab</code> id as the JS hide/show hook). Model tabs drop the <code>skip_chrome</code> hx-val and the <code>on_dashboard</code> highlight branches. Remove the now-dead <code>on_dashboard</code> parameter usage (strip is never rendered in a dashboard context anymore).</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/model_comparison.js</code></td>
+        <td>modified</td>
+        <td>Core change. <code>openCompareView</code> (on the <code>#comparison-view</code> swap): hide the toolbar + canvas region (<code>d-none</code>), hide the ⇄Compare tab, clear the active-model highlight, tear down leader lines. It does <strong>not</strong> close the side panel / help drawer / results — they’re preserved (hidden) so a same-slot return resumes them intact. A <strong>capture-phase</strong> model-tab click handler (when the comparison view is open) <code>dismissCompareView()</code> first — un-hide the builder, reveal the previously-active model + its open panel, empty <code>#comparison-view</code> (destroy charts), rebuild lines: <em>same slot</em> → <code>preventDefault</code> (no POST; the panel resumes, no warning); <em>other slot</em> → let the <code>/switch-model/</code> POST proceed, so the unsaved-changes modal lands over the <strong>now-revealed edited model</strong>, not over the dashboard. <code>switchToSlot</code> then handles the cross-slot switch as today (close panel, reveal other canvas). Rewire the <code>htmx:afterSwap</code> leader-line teardown to key off the comparison-view swap (target <code>#comparison-view</code>) rather than “no canvas present.”</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/result_charts/comparison_charts.js</code> (+ <code>drawComparisonCharts</code>)</td>
+        <td>modified</td>
+        <td>Track the three created <code>Chart</code> instances and expose <code>destroyComparisonCharts()</code> so the leave path can <code>.destroy()</code> them (avoid Chart.js canvas-registry leaks across reopen).</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/adapters/views/views_workspace.py</code> — <code>switch_model</code></td>
+        <td>modified</td>
+        <td>Remove the <code>skip_chrome</code> branch; every switch renders the shared-chrome OOB (the dismiss now wants the now-active model’s chrome, like a builder switch). Update the docstring.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/adapters/views/views_workspace.py</code> — <code>compare</code></td>
+        <td>modified</td>
+        <td>The <code>not compare_enabled</code> fallback must no longer render a full builder into the comparison target (it would nest a builder inside <code>#comparison-view</code>). Return an empty/closing response instead — the path is defensive only (the ⇄Compare tab is already disabled when not enabled).</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scss/custom.scss</code></td>
+        <td>modified</td>
+        <td>Two small things, no z-index: (a) reveal the shared tab strip on mobile while comparing (flip its <code>d-none d-lg-flex</code> to the <code>flex-nowrap overflow-x-auto</code> treatment the dashboard already uses), keyed on a <code>.comparing</code> wrapper/body class; (b) any sizing for <code>#comparison-view</code>. Recompile <code>bs_main.css</code> via the SCSS pipeline (never hand-edit the compiled CSS).</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/side_panel_utils.js</code> — <code>PANEL_DISCARDING_PATHS</code></td>
+        <td>modified</td>
+        <td>Remove <code>/compare/</code>. Opening Compare no longer destroys the builder, so it discards no panel edits — the warning is no longer warranted there. The set keeps <code>/switch-model/</code> (cross-slot dismiss still discards) and the +Add paths.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/help_drawer_utils.js</code></td>
+        <td>review only</td>
+        <td>Its <code>switchModelCanvas</code> guard on <code>#helpDrawer</code> presence still holds (the drawer stays in the resident builder). Confirm no change needed.</td>
+      </tr>
+      <tr>
+        <td><code>theme/templates/base.html</code></td>
+        <td>modified</td>
+        <td>Remove the <code>{% elif dashboard %}</code> server-side full-page dashboard branch — unreachable once Compare is only ever an HTMX sibling-swap. Confirm no view passes <code>dashboard=True</code> to a full-page render.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Cross-cutting concerns</h2>
+  <ul>
+    <li><strong>Mobile dismiss (preserve today’s behavior on the unified strip).</strong> A mobile-visible <code>flex-nowrap overflow-x-auto</code> strip already exists today — but it’s the <em>dashboard’s own</em> strip (rendered with <code>on_dashboard=True</code>); the builder strip is <code>d-none d-lg-flex</code> (desktop-only, since mobile switches via the toolbar burger). This refactor deletes that second strip, so the single strip must <strong>reproduce</strong> the existing behavior: while <code>.comparing</code>, reveal the one strip on mobile (the toolbar/burger is hidden then). No new control — same affordance, carried by a class toggle instead of a separate strip. <strong>Improvement:</strong> because ⇄Compare is hidden while comparing, the strip is down to two fixed-width model tabs, which both fit on a phone — removing today’s scroll-left-to-reach-Reference.</li>
+    <li><strong>Leader lines.</strong> Builder lines live on <code>&lt;body&gt;</code> with their own resize/scroll listeners. On open, call <code>removeAllLines()</code> (the canvas goes <code>d-none</code>); on dismiss, <code>switchToSlot</code> already calls <code>initModelBuilderMain()</code>, which rebuilds the visible canvas’s lines. This reuses the existing parked-canvas line lifecycle — no new mechanism, and because the comparison view is in flow it never overlaps the lines.</li>
+    <li><strong>Unsaved-edits gate (reworked — the resident builder makes opening Compare non-destructive).</strong> Because the side panel now survives behind the comparison view, opening Compare discards nothing, so <code>/compare/</code> leaves <code>PANEL_DISCARDING_PATHS</code>; the discard decision moves to the moment a discard actually happens — a cross-slot <code>/switch-model/</code> (which stays guarded). Same-slot dismiss is client-side only (no POST), so it can’t trip that guard and falsely warn about losing edits while returning to the model that keeps them. On a cross-slot dismiss the comparison view is torn down <em>first</em>, so the warning is anchored on the edited model, not shown over the dashboard.
+      <table>
+        <thead><tr><th>Action</th><th>Request</th><th>Guarded?</th><th>Side panel</th></tr></thead>
+        <tbody>
+          <tr><td>Open Compare</td><td><code>/compare/</code></td><td>no (removed)</td><td>preserved (hidden)</td></tr>
+          <tr><td>Dismiss → same model</td><td>client-side, no POST</td><td>n/a</td><td>resumes intact</td></tr>
+          <tr><td>Dismiss → other model</td><td><code>/switch-model/</code></td><td>yes (after view torn down)</td><td>warn, then close</td></tr>
+        </tbody>
+      </table>
+    </li>
+    <li><strong>Tests.</strong>
+      <ul>
+        <li><em>Jest:</em> new <code>destroyComparisonCharts()</code> unit; the capture-phase dismiss handler — same-slot click <code>preventDefault</code>s and resumes the panel; other-slot click tears down the view then lets the request through.</li>
+        <li><em>Integration:</em> <code>switch_model</code> always emits shared-chrome OOB now (no <code>skip_chrome</code>); <code>compare</code> not-enabled fallback returns the closing response, not a builder; <code>/compare/</code> absent from <code>PANEL_DISCARDING_PATHS</code> (the path-set assertion test).</li>
+        <li><em>E2E (critical flow):</em> Compare → click a model tab returns to the builder with <strong>no <code>/model_builder/</code> reload</strong> (assert the network call is absent / canvas element identity preserved); reopen Compare shows fresh values after editing a model; <strong>opening Compare with a modified panel does not warn and the panel survives</strong>; same-slot dismiss resumes the panel without a warning; cross-slot dismiss shows the unsaved modal <strong>over the revealed edited model</strong>; mobile dismiss path.</li>
+      </ul>
+    </li>
+    <li><strong>Migrations:</strong> none (no JSON/DB schema change).</li>
+    <li><strong>Docs:</strong> update <code>specs/architecture.md</code> → “Two resident canvases” + “Comparison dashboard” subsections (the comparison view is now a resident in-flow sibling toggled with the canvases, not a <code>#main-content-block</code> replacement; <code>skip_chrome</code> and the canvas-absent reload removed) and the line listing <code>PANEL_DISCARDING_PATHS</code> as <code>{switch-model, compare, +add}</code> → drop <code>compare</code>. Plus the <code>CHANGELOG.md</code> entry.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Risks</h2>
+  <ul>
+    <li><strong>Chart.js leak on reopen.</strong> Emptying the comparison view’s DOM without <code>.destroy()</code> leaves orphaned Chart instances bound to removed canvases. Mitigated by <code>destroyComparisonCharts()</code> on leave.</li>
+    <li><strong>Dismiss-before-warn ordering.</strong> Anchoring the unsaved-changes modal on the edited model (not the dashboard) relies on the capture-phase tab-click handler tearing down the comparison view <em>before</em> htmx’s bubble-phase request fires its <code>htmx:confirm</code> guard. Verify the modal lands over the revealed model, that “Continue” still re-fires the exact <code>/switch-model/</code> request (<code>issueRequest(true)</code>), and that “Cancel” leaves the user anchored on that model (comparison already dismissed). (The earlier “stale panel” risk is gone: same-slot reappearance is the same model — desired — and cross-slot is closed by the switch teardown.)</li>
+    <li><strong>Memory: builder + comparison resident together.</strong> Both canvases plus the ~95&nbsp;KB comparison fragment + 3 charts coexist while Compare is open. Acceptable (the fragment is emptied on leave), but note it.</li>
+    <li><strong>Flow/layout regression.</strong> The builder uses flexbox with no height variables (<code>flex: 1 1 0; min-height: 0;</code>). The comparison view must drop into the same flex parent and scroll internally (<code>#comparison-dashboard</code> already <code>overflow-y-auto</code>) without reintroducing height vars. Low risk — verify the toolbar+canvas <code>d-none</code> reclaims space cleanly.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. Alternatives considered</h2>
+  <ul>
+    <li><strong>Absolutely-positioned overlay floating over the canvas.</strong> Rejected (earlier draft of this plan). A floating layer stacks against the leader-line SVGs on <code>&lt;body&gt;</code>, which the “No clipping container” rule keeps off the chrome only via opaque, higher-z bars (navbar <code>z-2</code>, toolbar <code>z-3</code>, strip <code>z-4</code>) — forcing a z-index threaded between <code>z-3</code> and <code>z-4</code>, and a separate mobile-dismiss affordance. The in-flow sibling avoids both entirely: real content with real height overlaps nothing.</li>
+    <li><strong>Move the toggle-vs-reload decision into <code>switch_model</code> (server <code>HX-Location</code>).</strong> Rejected in discussion: couples a state-write endpoint to layout ids it can’t observe, and splits the “react to switch” logic across two mechanisms. Doesn’t address the root cost (canvas destruction).</li>
+    <li><strong>Keep the comparison view’s own self-contained tab strip and just stop destroying the builder.</strong> Rejected: two <code>#model-tab-strip</code> ids in the DOM at once (the switch JS depends on <code>getElementById</code>). The single-strip model is cleaner and removes <code>on_dashboard</code> entirely.</li>
+    <li><strong>Keep canvases but re-fetch chrome only.</strong> Rejected: doesn’t remove the reload; the win comes specifically from not destroying the canvases.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Constitutional notes</h2>
+  <ul>
+    <li><strong>§1.4 HTMX-first; minimize JS.</strong> Roughly JS-neutral: deletes the canvas-absent reload branch and the <code>skip_chrome</code> path, adds an <code>openCompareView</code>/<code>dismissCompareView</code> pair and a capture-phase tab-click handler — all small <code>display</code> toggles in the same vein as the existing model-active toggle in <code>switchToSlot</code>. No new client-side routing or data layer.</li>
+    <li><strong>§1.3 Library is domain truth.</strong> Untouched — the comparison is still computed by <code>System.compare_to</code> via <code>ComparisonService</code>; only the render container changes.</li>
+    <li><strong>§2 Quality gates.</strong> No Django-model change (no migration). CHANGELOG entry required; pytest + Jest green; <code>pyproject.toml</code> back on PyPI <code>efootprint</code> before merge.</li>
+    <li>No §4 rule relaxed; no constitutional amendment needed.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Decisions (resolved)</h2>
+  <ul>
+    <li><strong>Toolbar while comparing → hidden (<code>d-none</code>).</strong> Keeps the comparison self-contained (no per-model chrome over a two-model view), restored on dismiss. One display toggle.</li>
+    <li><strong>Hidden canvas region → <code>d-none</code>.</strong> Dismiss becomes a pure reveal; leader lines are torn down on open and rebuilt on dismiss regardless.</li>
+    <li><strong><code>{% elif dashboard %}</code> branch in <code>base.html</code> → removed.</strong> Compare is only ever an in-flow sibling swap, so the full-page dashboard render is unreachable. Delete the branch and confirm no view passes <code>dashboard=True</code> to a full-page render.</li>
+  </ul>
+</section>
+
+</body>
+</html>

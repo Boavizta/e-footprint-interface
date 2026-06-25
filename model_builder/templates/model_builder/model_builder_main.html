@@ -26,6 +26,14 @@ pattern — tab strip, then the active tab's toolbar beneath it).
     {% include 'model_builder/onboarding/tour_steps.html' %}
 </div>
 
+{% comment %}
+The comparison dashboard is a resident in-flow sibling of the canvases: ⇄Compare swaps its fragment in
+here and model_comparison.js reveals it while hiding the toolbar + #model-builder-page. Dismissing to a
+model re-hides it and reveals the canvas — a client-side toggle, never a builder reload. Empty (and
+d-none) until Compare is opened.
+{% endcomment %}
+<div id="comparison-view" class="d-none position-relative mx-0 d-flex flex-column overflow-hidden w-100"></div>
+
 <button id="model-scroll-to-right"
     class="d-block d-lg-none position-absolute top-50 end-0 top-0 border-0 rounded-start-circle bg-white border shadow text-black py-3 ps-2 pe-1 z-1"
         onclick="scrollToRight()"

@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { drawBarResultChart, displayLoaderResult, initializeResultCharts } from "./chart.js";
-import { drawComparisonCharts } from "./comparison_charts.js";
+import { drawComparisonCharts, destroyComparisonCharts } from "./comparison_charts.js";
 
 // ============================================================================
 // Global Exports for HTML Event Handlers
@@ -30,8 +30,10 @@ function handleTemporalGranularityChange() {
 window.drawBarResultChart = drawBarResultChart;
 window.displayLoaderResult = displayLoaderResult;
 window.handleTemporalGranularityChange = handleTemporalGranularityChange;
-// The Compare dashboard (HTMX-swapped into #main-content-block) drives its own draw from this.
+// The Compare dashboard (HTMX-swapped into the resident #comparison-view) drives its own draw from
+// this; dismissing the comparison view destroys the charts (model_comparison.js) so they don't leak.
 window.drawComparisonCharts = drawComparisonCharts;
+window.destroyComparisonCharts = destroyComparisonCharts;
 
 // ============================================================================
 // Event Listeners

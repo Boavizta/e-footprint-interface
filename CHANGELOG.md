@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Comparison view performance: opening the ⇄ Compare view now keeps the model builder in place behind
+  it instead of replacing it, so returning to a model is instant — no page reload and no model
+  reloading from storage. No change to what you see; the comparison is still rebuilt fresh each time it
+  is opened, and opening Compare still closes the open side panel as before.
+
 ## [V1.9.0]
 
 ### Added

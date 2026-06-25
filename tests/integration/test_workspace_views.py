@@ -8,7 +8,6 @@ invariants the feature hinges on:
 RAISE_EXCEPTIONS=1 so a crashing view surfaces as a non-200 instead of being absorbed into a modal.
 """
 import json
-import re
 from collections import Counter
 from html.parser import HTMLParser
 
@@ -154,20 +153,20 @@ def test_switch_model_flips_active_slot_and_emits_canvas_toggle(client, minimal_
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # active is now slot 1
     assert SessionWorkspaceRepository(client.session).active_slot() == 1
 
-    # Builder switch: rebinds the shared chrome via OOB (so the visible canvas's chrome updates).
+    # Every switch lands on the resident builder (the comparison view is dismissed client-side first),
+    # so the switch always rebinds the shared chrome via OOB (so the visible canvas's chrome updates).
     response = client.post("/model_builder/switch-model/", {"slot": "0"})
     assert response.status_code == 200
     assert SessionWorkspaceRepository(client.session).active_slot() == 0  # persisted for refresh
     assert json.loads(response["HX-Trigger"]) == {"switchModelCanvas": {"slot": 0}}
     assert b"hx-swap-oob" in response.content and b"system-name" in response.content
 
-    # Compare-dashboard switch (skip_chrome): only the canvas-toggle trigger, no chrome OOB — the
-    # dashboard has no chrome targets, so emitting OOB would just hit missing targets (oobErrorNoTarget).
-    response = client.post("/model_builder/switch-model/", {"slot": "1", "skip_chrome": "1"})
+    # The reverse switch behaves identically — there is no chrome-less switch path anymore.
+    response = client.post("/model_builder/switch-model/", {"slot": "1"})
     assert response.status_code == 200
     assert SessionWorkspaceRepository(client.session).active_slot() == 1
     assert json.loads(response["HX-Trigger"]) == {"switchModelCanvas": {"slot": 1}}
-    assert response.content == b""
+    assert b"hx-swap-oob" in response.content and b"system-name" in response.content
 
 
 @pytest.mark.django_db
@@ -203,11 +202,15 @@ def test_mutation_on_active_model_targets_the_active_canvas(client, minimal_syst
 @pytest.mark.django_db
 def test_compare_renders_dashboard_with_both_models_and_headline_delta(client, minimal_system):
     """With two models, /compare/ renders the comparison dashboard: both model cards, the headline Δ card,
-    and the decomposition. The endpoint runs the real System.compare_to through ComparisonService."""
+    and the decomposition. The endpoint runs the real System.compare_to through ComparisonService.
+
+    Compare is only ever reached via HTMX (the ⇄Compare tab swaps the fragment into the resident
+    #comparison-view), so request it with the HX-Request header to get the fragment, not the full page.
+    """
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 = "Copy of Test System"
 
-    response = client.get("/model_builder/compare/")
+    response = client.get("/model_builder/compare/", HTTP_HX_REQUEST="true")
     assert response.status_code == 200
     html = response.content.decode()
     assert "comparison-dashboard" in html
@@ -228,38 +231,35 @@ def test_compare_reflects_an_edit_to_a_model_with_no_stale_results(client, minim
     # Rename the active (second) model through the real edit flow.
     client.post("/model_builder/save-system-name/", {"name": "Edge caching variant"})
 
-    response = client.get("/model_builder/compare/")
+    response = client.get("/model_builder/compare/", HTTP_HX_REQUEST="true")
     assert response.status_code == 200
     html = response.content.decode()
     assert "Edge caching variant" in html  # the edit is reflected, not a stale "Copy of …"
 
 
 @pytest.mark.django_db
-def test_compare_with_one_model_falls_back_to_the_builder(client, minimal_system):
-    """A direct hit on /compare/ with only one model degrades to the builder rather than erroring
-    (disabled-instead-of-error; the Compare tab is disabled in the UI in this state)."""
+def test_compare_with_one_model_returns_an_empty_response(client, minimal_system):
+    """A direct hit on /compare/ with only one model returns an empty response rather than erroring
+    (disabled-instead-of-error; the Compare tab is disabled in the UI in this state). The dashboard
+    swaps into the resident #comparison-view sibling, so rendering a builder there would nest a builder
+    inside the comparison block — the empty response is the no-op the disabled tab implies."""
     _seed_active_slot(client, minimal_system)
     response = client.get("/model_builder/compare/")
     assert response.status_code == 200
-    assert "model-builder-page" in response.content.decode()
+    assert response.content == b""
 
 
 @pytest.mark.django_db
-def test_compare_with_an_incomplete_second_model_falls_back_to_the_builder(client, minimal_system):
+def test_compare_with_an_incomplete_second_model_returns_an_empty_response(client, minimal_system):
     """A blank second model has no computable footprint, so /compare/ must NOT run the comparison
-    (which would read a non-existent footprint and 500) — it falls back to the builder, and the Compare
-    tab is disabled in the UI (disabled-instead-of-error)."""
+    (which would read a non-existent footprint and 500) — it returns an empty response (the dashboard
+    target stays empty), and the Compare tab is disabled in the UI (disabled-instead-of-error)."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "blank"})  # slot 1 = blank, not computable
 
     response = client.get("/model_builder/compare/")
     assert response.status_code == 200  # never 500s on an incomplete model
-    html = response.content.decode()
-    assert "model-builder-page" in html          # fell back to the builder
-    assert "comparison-dashboard" not in html    # the dashboard was not rendered
-    # The Compare tab itself is disabled instead of erroring.
-    compare_button = re.search(r'<button[^>]*id="compare-tab".*?</button>', html, re.DOTALL)
-    assert compare_button is not None and "disabled" in compare_button.group(0)
+    assert response.content == b""      # no comparison rendered (and no builder nested inside the view)
 
 
 @pytest.mark.django_db

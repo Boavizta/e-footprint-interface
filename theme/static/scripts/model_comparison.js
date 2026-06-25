@@ -1,4 +1,5 @@
-// Model-comparison workspace UI: client-side model switching across two resident canvases.
+// Model-comparison workspace UI: client-side model switching across two resident canvases, plus the
+// resident comparison view.
 //
 // Both canvases live in the DOM at once; switching is a visibility toggle (no canvas re-render), so it
 // is instant and preserves each canvas's transient state. The catch: the active canvas must carry the
@@ -8,6 +9,12 @@
 // (and tour targets) from the old active canvas to the new one. Object-card ids are already namespaced
 // by the system-id web_id prefix, so they are never touched here.
 //
+// The comparison dashboard is a third resident sibling: an empty `#comparison-view` block in normal
+// flow below the tab strip. Opening Compare hides the toolbar + canvas region and shows that block
+// (the same `display` toggle the canvases use); dismissing to a model hides it again and reveals the
+// canvas — a client-side reveal, never a reload. The comparison fragment is fetched fresh each open and
+// emptied (its three Chart.js instances destroyed) on leave, so results are never stale.
+//
 // IIFE + data-action dispatch per conventions.md (keeps window clean, survives HTMX swaps).
 (function () {
     "use strict";
@@ -16,9 +23,13 @@
         return document.querySelector(`[data-model-canvas="${slot}"]`);
     }
 
-    function activeCanvas() {
-        const strip = document.getElementById("model-tab-strip");
-        return strip ? canvasFor(strip.dataset.activeSlot) : null;
+    function comparisonView() {
+        return document.getElementById("comparison-view");
+    }
+
+    function comparisonIsOpen() {
+        const view = comparisonView();
+        return !!view && !view.classList.contains("d-none");
     }
 
     // Re-key a canvas's structural elements. When `canonical`, restore the bare data-canvas-id (the
@@ -46,24 +57,104 @@
         });
     }
 
+    // Toggle the active-model styling on the tab whose slot matches (or clear it entirely when `slot` is
+    // null — the state while the comparison view is open, since no model is being edited).
+    function highlightActiveTab(slot) {
+        document.querySelectorAll("[data-model-tab]").forEach(label => {
+            const isTarget = slot !== null && String(label.dataset.modelTab) === String(slot);
+            // The active styling (background, border, weight) lives on the tab wrapper so it spans both
+            // the label and the ✕; fall back to the label itself if a future tab has no wrapper.
+            const tab = label.closest(".model-tab") || label;
+            tab.classList.toggle("fw-bold", isTarget);
+            tab.classList.toggle("bg-white", isTarget);
+            tab.classList.toggle("border", isTarget);
+            tab.classList.toggle("border-bottom-0", isTarget);
+            tab.classList.toggle("text-muted", !isTarget);
+        });
+    }
+
+    // Show/hide the builder chrome (toolbar + canvas region) opposite the comparison view, and flip the
+    // `.comparing` body class the SCSS keys the mobile strip reveal on.
+    function setBuilderHidden(hidden) {
+        ["toolbar-nav", "model-builder-page"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle("d-none", hidden);
+        });
+        document.body.classList.toggle("comparing", hidden);
+    }
+
+    // Open the comparison view (driven by the swap into #comparison-view). Hide the builder chrome, hide
+    // the ⇄Compare tab, clear the active-model highlight, and tear down the builder's leader lines (the
+    // canvas is now d-none; the lines' SVGs live on <body> and would otherwise recompute against
+    // disconnected anchors). The side panel / help drawer / results panel are closed too — opening
+    // Compare discards them, exactly as before.
+    function openCompareView() {
+        setBuilderHidden(true);
+
+        const compareTab = document.getElementById("compare-tab");
+        const compareWrapper = compareTab ? compareTab.closest(".model-tab") : null;
+        if (compareWrapper) compareWrapper.classList.add("d-none");
+
+        highlightActiveTab(null);
+
+        const sidePanel = document.getElementById("sidePanel");
+        if (sidePanel && !sidePanel.classList.contains("d-none") && typeof window.closeAndEmptySidePanel === "function") {
+            window.closeAndEmptySidePanel();
+        }
+        const resultBlock = document.getElementById("result-block");
+        if (resultBlock && resultBlock.innerHTML.trim() !== "" && typeof window.hidePanelResult === "function") {
+            window.hidePanelResult();
+        }
+
+        if (typeof window.removeAllLines === "function") {
+            window.removeAllLines();
+        }
+    }
+
+    // Dismiss the comparison view: reveal the builder, restore the ⇄Compare tab and the active-model
+    // highlight, then empty #comparison-view (destroying its three charts so Chart.js doesn't leak
+    // canvas registrations across reopen). The caller (switchToSlot) rebuilds the visible canvas's lines.
+    function dismissCompareView() {
+        setBuilderHidden(false);
+
+        const compareTab = document.getElementById("compare-tab");
+        const compareWrapper = compareTab ? compareTab.closest(".model-tab") : null;
+        if (compareWrapper) compareWrapper.classList.remove("d-none");
+
+        const strip = document.getElementById("model-tab-strip");
+        if (strip) highlightActiveTab(strip.dataset.activeSlot);
+
+        if (typeof window.destroyComparisonCharts === "function") {
+            window.destroyComparisonCharts();
+        }
+        const view = comparisonView();
+        if (view) {
+            view.innerHTML = "";
+            view.classList.add("d-none");
+        }
+    }
+
     function switchToSlot(slot) {
         const strip = document.getElementById("model-tab-strip");
         if (!strip) return;
 
-        // On the Compare dashboard there are no resident canvases — clicking a model tab means "leave
-        // the comparison and edit this model". The switch-model POST already persisted the active slot,
-        // so reload the builder (which opens on that slot). Guard on canvas presence, not a flag, so the
-        // shared tab strip stays unchanged. No URL to reconcile: Compare deliberately does not push
-        // /compare/ (see model_tab_strip.html), so the bar already reads /model_builder/.
-        if (!document.querySelector("[data-model-canvas]")) {
-            if (window.htmx) {
-                window.htmx.ajax("GET", "/model_builder/", { target: "#main-content-block", swap: "innerHTML" });
-            }
-            return;
+        // A model tab clicked while the comparison view is open means "leave the comparison and edit this
+        // model". Dismiss the view first (reveal the builder, rebuild lines below) so the rest of the
+        // switch runs against the now-visible canvases — a same-slot click then early-returns into the
+        // already-revealed model, with no canvas re-render and no reload.
+        if (comparisonIsOpen()) {
+            dismissCompareView();
         }
 
         const previousSlot = strip.dataset.activeSlot;
-        if (String(previousSlot) === String(slot)) return;
+        if (String(previousSlot) === String(slot)) {
+            // Same slot — but if we just came back from the comparison view, the visible canvas's lines
+            // were torn down on open and must be rebuilt before bailing out.
+            if (typeof window.initModelBuilderMain === "function") {
+                window.initModelBuilderMain();
+            }
+            return;
+        }
 
         // Hand the canonical ids from the outgoing canvas back to suffixed form, then promote the
         // incoming canvas to canonical — order matters so the canonical ids never momentarily collide.
@@ -74,17 +165,7 @@
             const isTarget = String(canvas.dataset.modelCanvas) === String(slot);
             canvas.classList.toggle("d-none", !isTarget);
         });
-        document.querySelectorAll("[data-model-tab]").forEach(label => {
-            const isTarget = String(label.dataset.modelTab) === String(slot);
-            // The active styling (background, border, weight) lives on the tab wrapper so it spans both
-            // the label and the ✕; fall back to the label itself if a future tab has no wrapper.
-            const tab = label.closest(".model-tab") || label;
-            tab.classList.toggle("fw-bold", isTarget);
-            tab.classList.toggle("bg-white", isTarget);
-            tab.classList.toggle("border", isTarget);
-            tab.classList.toggle("border-bottom-0", isTarget);
-            tab.classList.toggle("text-muted", !isTarget);
-        });
+        highlightActiveTab(slot);
         strip.dataset.activeSlot = slot;
 
         // The side panel, help drawer and results panel are singletons bound to the active slot, so
@@ -118,17 +199,13 @@
         }
     });
 
-    // Leaving the builder for a canvas-less layout (the ⇄Compare dashboard) tears down the builder's
-    // leader lines. The lines' SVGs live on <body>, outside #main-content-block, so the dashboard swap
-    // does not remove them — and each LeaderLine keeps its own resize/scroll listeners that would then
-    // recompute against now-disconnected anchors and throw ("disconnected element" / "Cannot read
-    // properties of null"). Removing them on the swap into a no-canvas layout is the only reliable fix
-    // (our updateLines guard can't stop the library's internal listeners). Builder→builder swaps keep
-    // their canvases, so this never strips lines that initModelBuilderMain is about to reuse.
+    // The comparison fragment is swapped into the resident #comparison-view block; reveal it and hide
+    // the builder around it (openCompareView). Builder→builder swaps and the OOB-only switch never hit
+    // this block, so the toggle fires exactly when Compare opens.
     document.body.addEventListener("htmx:afterSwap", function (event) {
-        if (event.target && event.target.id !== "main-content-block") return;
-        if (!document.querySelector("[data-model-canvas]") && typeof window.removeAllLines === "function") {
-            window.removeAllLines();
+        if (event.target && event.target.id === "comparison-view") {
+            event.target.classList.remove("d-none");
+            openCompareView();
         }
     });
 
@@ -161,6 +238,6 @@
     });
 
     if (typeof module !== "undefined" && module.exports) {
-        module.exports = { rekeyCanvas, switchToSlot };
+        module.exports = { rekeyCanvas, switchToSlot, openCompareView, dismissCompareView };
     }
 })();

@@ -450,6 +450,15 @@ input:disabled{
     position: relative;
 }
 
+/* The comparison dashboard is a resident in-flow sibling of #model-builder-page in the same
+   flex-column #main-content-block: it takes the remaining height and scrolls internally
+   (#comparison-dashboard is overflow-y-auto), mirroring the builder page's box so dismissing one and
+   revealing the other reclaims the space cleanly — no height variables, no overlay, no z-index. */
+#comparison-view{
+    flex: 1 1 0;
+    min-height: 0;
+}
+
 /* The leader-line build bundled here appends every line <svg> straight to <body> (position:absolute,
    z-index 0) with no clipping layer of its own, so lines are masked only by the opaque chrome bars
    painted above them: the navbar/loading-bar (z-2) and the per-model toolbar (z-3, bg-white). The tab
@@ -461,6 +470,19 @@ input:disabled{
     position: relative;
     z-index: map-get($zindex-levels, 4);
     background-color: #fff;
+}
+
+/* While the comparison view is open (body.comparing, set by model_comparison.js) the per-model toolbar
+   and its mobile burger are hidden, so the otherwise desktop-only tab strip (d-none d-lg-flex) must
+   surface on mobile to keep a model tab reachable — kept flex-nowrap + horizontally scrollable so the
+   tabs don't wrap on a narrow screen. With ⇄Compare hidden while comparing there are only the two
+   fixed-width model tabs, so both fit at once. */
+@media (max-width: 991.98px) {
+    body.comparing #model-tab-strip {
+        display: flex !important;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
 }
 
 /* Model-comparison tab strip: each tab is a wrapper carrying the active styling (so it spans the label
