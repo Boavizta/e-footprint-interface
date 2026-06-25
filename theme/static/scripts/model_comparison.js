@@ -142,15 +142,18 @@
         // model". Dismiss the view first (reveal the builder, rebuild lines below) so the rest of the
         // switch runs against the now-visible canvases — a same-slot click then early-returns into the
         // already-revealed model, with no canvas re-render and no reload.
-        if (comparisonIsOpen()) {
+        const cameFromCompare = comparisonIsOpen();
+        if (cameFromCompare) {
             dismissCompareView();
         }
 
         const previousSlot = strip.dataset.activeSlot;
         if (String(previousSlot) === String(slot)) {
-            // Same slot — but if we just came back from the comparison view, the visible canvas's lines
-            // were torn down on open and must be rebuilt before bailing out.
-            if (typeof window.initModelBuilderMain === "function") {
+            // Same slot. Only rebuild lines if we just came back from the comparison view (the visible
+            // canvas's lines were torn down on open); an ordinary redundant same-slot click stays a no-op
+            // — re-initialising the whole builder on every such click would needlessly re-wire Sortable
+            // and rebuild every leader line.
+            if (cameFromCompare && typeof window.initModelBuilderMain === "function") {
                 window.initModelBuilderMain();
             }
             return;

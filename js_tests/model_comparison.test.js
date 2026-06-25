@@ -191,6 +191,22 @@ describe("resident comparison view toggle", () => {
         expect(window.destroyComparisonCharts).toHaveBeenCalledTimes(1);
     });
 
+    test("an ordinary same-slot click (comparison not open) stays a no-op — no builder re-init", () => {
+        // The active model tab still POSTs switch-model (so switchModelCanvas fires for the active slot)
+        // even when nothing is being dismissed; re-initialising the whole builder on every such redundant
+        // click would needlessly re-wire Sortable and rebuild every leader line. With the comparison view
+        // closed, the same-slot switch must early-return without touching initModelBuilderMain.
+        const initSpy = jest.fn();
+        window.initModelBuilderMain = initSpy;
+        const canvasBefore = document.querySelector('[data-model-canvas="0"]');
+
+        switchToSlot("0");  // active slot, comparison view never opened
+
+        expect(initSpy).not.toHaveBeenCalled();                 // no re-init on a plain same-slot click
+        expect(document.querySelector('[data-model-canvas="0"]')).toBe(canvasBefore);
+        expect(canvasBefore.classList.contains("d-none")).toBe(false);
+    });
+
     test("a cross-slot model tab dismisses the view then switches to the other canvas — no reload", () => {
         window.destroyComparisonCharts = jest.fn();
         window.htmx = { ajax: jest.fn() };
