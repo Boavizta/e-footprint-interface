@@ -39,6 +39,8 @@
 
 ## Task 2 — Non-destructive Compare + dismiss-before-warn
 
+**Status:** Done.
+
 **Goal:** Layer the panel-preservation UX on the now-resident builder: opening Compare no longer discards the side panel (it survives hidden), returning to the same model resumes it intact, and a cross-slot dismiss tears the dashboard down first so the unsaved-changes warning is anchored on the edited model rather than shown over the comparison.
 
 **Files touched:**

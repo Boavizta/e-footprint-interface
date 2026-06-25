@@ -238,6 +238,16 @@ class ModelBuilderPage:
         self.page.locator(f"[data-model-canvas='{slot}']").wait_for(state="visible")
         return self
 
+    def dismiss_compare_to_active_model(self, slot: int):
+        """Leave Compare by clicking the ALREADY-active model's tab. This is a pure client-side reveal —
+        no switch-model POST fires (the comparison view is dismissed and the resident canvas revealed),
+        so unlike switch_to_model it must not wait for an HTMX response."""
+        self.page.locator(f"[data-model-tab='{slot}']").click()
+        self.page.locator("#comparison-view").wait_for(state="hidden")
+        self.page.locator(f"[data-model-canvas='{slot}']").wait_for(state="visible")
+        expect(self.page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", str(slot))
+        return self
+
     def remove_model(self, slot: int):
         """Remove a specific model via the browser-tab-style ✕ on its own tab, confirming the discard.
 

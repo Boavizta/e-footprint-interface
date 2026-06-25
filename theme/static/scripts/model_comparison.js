@@ -15,6 +15,12 @@
 // canvas — a client-side reveal, never a reload. The comparison fragment is fetched fresh each open and
 // emptied (its three Chart.js instances destroyed) on leave, so results are never stale.
 //
+// Opening Compare is non-destructive: the side panel / help drawer / results all live inside the hidden
+// builder page, so they survive behind the dashboard. A capture-phase model-tab handler dismisses the
+// dashboard before HTMX's switch request runs — a same-slot click then resumes the preserved panel with
+// no POST and no unsaved warning, while a cross-slot click lets the switch (and its unsaved guard) run
+// over the now-revealed edited model.
+//
 // IIFE + data-action dispatch per conventions.md (keeps window clean, survives HTMX swaps).
 (function () {
     "use strict";
@@ -86,8 +92,9 @@
     // Open the comparison view (driven by the swap into #comparison-view). Hide the builder chrome, hide
     // the ⇄Compare tab, clear the active-model highlight, and tear down the builder's leader lines (the
     // canvas is now d-none; the lines' SVGs live on <body> and would otherwise recompute against
-    // disconnected anchors). The side panel / help drawer / results panel are closed too — opening
-    // Compare discards them, exactly as before.
+    // disconnected anchors). Opening Compare is now non-destructive: the side panel / help drawer /
+    // results panel all live inside the (now d-none) builder page, so they ride along hidden and survive
+    // intact — a same-slot return reveals them exactly as they were left, with no warning.
     function openCompareView() {
         setBuilderHidden(true);
 
@@ -96,15 +103,6 @@
         if (compareWrapper) compareWrapper.classList.add("d-none");
 
         highlightActiveTab(null);
-
-        const sidePanel = document.getElementById("sidePanel");
-        if (sidePanel && !sidePanel.classList.contains("d-none") && typeof window.closeAndEmptySidePanel === "function") {
-            window.closeAndEmptySidePanel();
-        }
-        const resultBlock = document.getElementById("result-block");
-        if (resultBlock && resultBlock.innerHTML.trim() !== "" && typeof window.hidePanelResult === "function") {
-            window.hidePanelResult();
-        }
 
         if (typeof window.removeAllLines === "function") {
             window.removeAllLines();
@@ -139,9 +137,10 @@
         if (!strip) return;
 
         // A model tab clicked while the comparison view is open means "leave the comparison and edit this
-        // model". Dismiss the view first (reveal the builder, rebuild lines below) so the rest of the
-        // switch runs against the now-visible canvases — a same-slot click then early-returns into the
-        // already-revealed model, with no canvas re-render and no reload.
+        // model". The capture-phase tab handler below normally dismisses the view *before* the switch
+        // request fires (so a cross-slot unsaved warning anchors on the revealed model, not the dashboard);
+        // this is the same teardown done defensively, idempotent if the view is already dismissed. After
+        // it, the rest of the switch runs against the now-visible canvases.
         const cameFromCompare = comparisonIsOpen();
         if (cameFromCompare) {
             dismissCompareView();
@@ -201,6 +200,39 @@
             switchToSlot(slot);
         }
     });
+
+    // Capture-phase model-tab handler, active only while the comparison view is open. A model tab means
+    // "leave Compare and edit this model", so dismiss the dashboard *first* — before HTMX's bubble-phase
+    // switch-model POST and its unsaved-changes guard run. The dismiss reveals the previously-active
+    // canvas, so we rebuild its leader lines here; then the two outcomes diverge:
+    //   • Same slot  → the model we are returning to. No switch is needed (its canvas + open panel are
+    //     simply revealed by the dismiss), so preventDefault the click: no /switch-model/ POST, hence no
+    //     spurious unsaved warning about losing edits while returning to the model that keeps them.
+    //   • Other slot → let the POST proceed. With the dashboard already torn down, the switch's unsaved
+    //     modal lands over the now-revealed edited model (not over the comparison); switchToSlot then
+    //     performs the actual cross-slot reveal on the resulting switchModelCanvas trigger (and rebuilds
+    //     the now-active canvas's lines). If the user cancels that warning instead, they stay anchored on
+    //     this revealed model — with its lines already rebuilt here.
+    // Capture phase so it runs ahead of HTMX's document-level (bubble-phase) request handling.
+    document.addEventListener("click", function (event) {
+        if (!comparisonIsOpen()) return;
+        const label = event.target.closest("[data-model-tab]");
+        if (!label) return;
+
+        const strip = document.getElementById("model-tab-strip");
+        const previousSlot = strip ? strip.dataset.activeSlot : null;
+        const isSameSlot = String(label.dataset.modelTab) === String(previousSlot);
+
+        dismissCompareView();
+        if (typeof window.initModelBuilderMain === "function") {
+            window.initModelBuilderMain();
+        }
+
+        if (isSameSlot) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }, true);
 
     // The comparison fragment is swapped into the resident #comparison-view block; reveal it and hide
     // the builder around it (openCompareView). Builder→builder swaps and the OOB-only switch never hit

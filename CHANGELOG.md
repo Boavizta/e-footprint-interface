@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Comparison view performance: opening the ⇄ Compare view now keeps the model builder in place behind
   it instead of replacing it, so returning to a model is instant — no page reload and no model
   reloading from storage. No change to what you see; the comparison is still rebuilt fresh each time it
-  is opened, and opening Compare still closes the open side panel as before.
+  is opened.
+- Opening ⇄ Compare no longer discards your work: an open side panel (including unsaved edits) now
+  survives hidden behind the comparison view, so opening Compare never shows an "unsaved changes"
+  warning. Returning to the same model resumes the panel exactly as you left it. Leaving to the *other*
+  model still warns about unsaved edits — now anchored on the model you were editing — and continuing
+  switches while cancelling keeps you on it.
 
 ## [V1.9.0]
 

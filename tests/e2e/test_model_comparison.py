@@ -85,8 +85,9 @@ class TestModelComparisonWorkspace:
         expect(page.locator("#comparisonPairedChart")).to_be_visible()
         expect(page.locator("#comparisonCumulativeChart")).to_be_visible()
 
-        # A model tab leaves the dashboard and re-opens the builder on model B's slot.
-        model_builder.switch_to_model(1)
+        # The active model's own tab leaves the dashboard and re-reveals its (resident) canvas — a
+        # client-side dismiss with no switch-model POST (slot 1 is already active).
+        model_builder.dismiss_compare_to_active_model(1)
         model_builder.canvas.wait_for(state="visible")
 
         # Edit B's system name, then re-open Compare — the new name is reflected (no stale results).
@@ -138,7 +139,7 @@ class TestModelComparisonWorkspace:
         model_builder.switch_to_model(1)
         model_builder.open_compare()
         page.wait_for_function("() => window.charts && window.charts['comparisonPairedChart']")
-        model_builder.switch_to_model(1)
+        model_builder.dismiss_compare_to_active_model(1)  # same-slot dismiss: client-side, no POST
         model_builder.canvas.wait_for(state="visible")
 
         assert not console_errors, f"Unexpected console errors on the Compare flow: {console_errors}"
@@ -224,8 +225,8 @@ class TestModelComparisonWorkspace:
         page.on("request", lambda req: builder_reloads.append(req.url)
                 if req.url.rstrip("/").endswith("/model_builder") else None)
 
-        # Dismiss back to the active model (slot 1) — a client-side reveal.
-        model_builder.switch_to_model(1)
+        # Dismiss back to the active model (slot 1) — a client-side reveal, no switch-model POST.
+        model_builder.dismiss_compare_to_active_model(1)
         model_builder.canvas.wait_for(state="visible")
         expect(page.locator("#comparison-view")).to_be_hidden()
         expect(page.locator("#model-builder-page")).to_be_visible()
@@ -248,8 +249,9 @@ class TestModelComparisonWorkspace:
             "() => window.charts && window.charts['comparisonPairedChart']"
             " && window.charts['comparisonCumulativeChart']")
 
-        # Dismiss to model B, edit it, reopen Compare — the charts are destroyed on leave and re-created.
-        model_builder.switch_to_model(1)
+        # Dismiss to model B (the active slot), edit it, reopen Compare — the charts are destroyed on leave
+        # and re-created. The dismiss to the active model is client-side, no switch-model POST.
+        model_builder.dismiss_compare_to_active_model(1)
         model_builder.canvas.wait_for(state="visible")
         # The dismiss destroys the comparison charts so they don't leak across reopen.
         assert page.evaluate("() => !window.charts['comparisonPairedChart']")
@@ -306,6 +308,103 @@ class TestModelComparisonWorkspace:
         assert tab_layout["isCompareTab"], tab_layout
         assert tab_layout["gap"] < 12, f"Compare not flush after the last model tab: {tab_layout}"
         assert tab_layout["marginLeft"] != "auto", tab_layout
+
+    def _open_modified_side_panel(self, model_builder):
+        """Open an Add-Usage-Journey side panel and mark it modified (clicking the name field tags the
+        form modified, the same way the unsaved-changes guard is exercised elsewhere)."""
+        model_builder.click_add_usage_journey()
+        model_builder.page.locator("#UsageJourney_name").wait_for(state="visible")
+        model_builder.page.locator("#UsageJourney_name").click()  # onclick tags the form modified
+
+    def test_opening_compare_with_a_modified_panel_does_not_warn_and_keeps_the_panel(
+            self, minimal_complete_model_builder):
+        """Opening Compare is non-destructive: a modified side panel survives hidden behind the comparison
+        view (no unsaved-changes warning, the panel is never emptied)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        model_builder.add_model_by_duplication()
+        self._open_modified_side_panel(model_builder)
+
+        model_builder.open_compare()
+
+        # No warning, and the panel rode along hidden inside the (now d-none) builder — still populated.
+        expect(page.locator("#unsavedModal.show")).not_to_be_visible()
+        expect(page.locator("#comparison-view")).to_be_visible()
+        assert page.evaluate(
+            "() => document.querySelector('#sidePanel #UsageJourney_name') !== null"), \
+            "the side panel was discarded on opening Compare"
+
+    def test_same_slot_dismiss_resumes_the_panel_without_warning_or_switch_post(
+            self, minimal_complete_model_builder):
+        """Returning to the SAME model from Compare is a pure client-side reveal: the preserved panel
+        resumes, with no unsaved-changes warning and no /switch-model/ POST."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        model_builder.add_model_by_duplication()  # slot 1 active
+        self._open_modified_side_panel(model_builder)
+        model_builder.open_compare()
+
+        switch_posts: list[str] = []
+        page.on("request", lambda req: switch_posts.append(req.url) if "/switch-model/" in req.url else None)
+
+        # Click the active model's own tab — the capture handler dismisses Compare and preventDefaults the
+        # click, so no switch request fires.
+        page.locator("[data-model-tab='1']").click()
+        expect(page.locator("#comparison-view")).to_be_hidden()
+        expect(page.locator("#model-builder-page")).to_be_visible()
+
+        # The panel resumed intact and no warning was shown; no switch-model POST went out.
+        expect(page.locator("#unsavedModal.show")).not_to_be_visible()
+        expect(page.locator("#sidePanel #UsageJourney_name")).to_be_visible()
+        assert switch_posts == [], f"Unexpected /switch-model/ POST(s) on a same-slot dismiss: {switch_posts}"
+
+    def test_cross_slot_dismiss_warns_over_the_revealed_model_then_continue_switches(
+            self, minimal_complete_model_builder):
+        """Dismissing to the OTHER model tears the dashboard down first, so the unsaved-changes modal lands
+        over the revealed edited model; Continue then re-fires the switch and lands on the other model."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        model_builder.add_model_by_duplication()  # slot 1 active
+        self._open_modified_side_panel(model_builder)
+        model_builder.open_compare()
+
+        # Click the OTHER model's tab — the capture handler dismisses Compare (revealing the edited model),
+        # then the switch's unsaved guard shows the modal over it (not over the comparison).
+        page.locator("[data-model-tab='0']").click()
+        expect(page.locator("#unsavedModal.show")).to_be_visible()
+        expect(page.locator("#comparison-view")).to_be_hidden()       # warning anchored on the revealed model
+        expect(page.locator("#model-builder-page")).to_be_visible()
+        assert model_builder.active_slot() == "1"                     # not switched yet
+
+        # Continue re-fires the deferred /switch-model/ and lands on the other model.
+        page.locator("#continue-unsaved-modal").click()
+        expect(page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", "0")
+        expect(page.locator("[data-model-canvas='0']")).to_be_visible()
+
+    def test_cross_slot_dismiss_cancel_keeps_the_user_on_the_revealed_edited_model(
+            self, minimal_complete_model_builder):
+        """On the cross-slot warning, Cancel leaves the user anchored on the revealed edited model with the
+        comparison already dismissed (the switch was never issued)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        model_builder.add_model_by_duplication()  # slot 1 active
+        self._open_modified_side_panel(model_builder)
+        model_builder.open_compare()
+
+        page.locator("[data-model-tab='0']").click()
+        expect(page.locator("#unsavedModal.show")).to_be_visible()
+
+        page.locator("#cancel-unsaved-modal").click()
+        expect(page.locator("#unsavedModal.show")).not_to_be_visible()
+        # The comparison stays dismissed and the user is still on the edited model (slot 1), panel intact.
+        expect(page.locator("#comparison-view")).to_be_hidden()
+        assert model_builder.active_slot() == "1"
+        expect(page.locator("[data-model-canvas='1']")).to_be_visible()
+        expect(page.locator("#sidePanel #UsageJourney_name")).to_be_visible()
 
     def test_remove_non_active_model_keeps_active(self, minimal_complete_model_builder):
         """Removing the NON-active model via its ✕ leaves the current active model active; removing the

@@ -223,6 +223,53 @@ describe("resident comparison view toggle", () => {
         expect(duplicateIds()).toEqual([]);                     // canonical ids migrated cleanly
     });
 
+    // The capture-phase model-tab click handler runs while Compare is open, ahead of HTMX's bubble-phase
+    // switch-model POST. It dismisses the dashboard first so a cross-slot unsaved warning anchors on the
+    // revealed model; a same-slot click needs no switch, so it is preventDefaulted (no POST, panel resumes,
+    // no warning). Dispatch a real bubbling+cancelable click so capture-phase + preventDefault are exercised.
+    function clickModelTab(slot) {
+        const label = document.querySelector(`[data-model-tab="${slot}"]`);
+        const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+        label.dispatchEvent(event);
+        return event;
+    }
+
+    test("a same-slot tab click dismisses the view, preventDefaults (no POST), and resumes the panel", () => {
+        window.destroyComparisonCharts = jest.fn();
+        const initSpy = jest.fn();
+        window.initModelBuilderMain = initSpy;
+        // An open side panel sits inside the (hidden) builder page; it must survive the dismiss untouched.
+        document.getElementById("model-builder-page").insertAdjacentHTML(
+            "beforeend", '<div id="sidePanel">edit form</div>');
+        window.closeAndEmptySidePanel = jest.fn();
+
+        enterComparing();
+        const event = clickModelTab("0");  // active slot
+
+        expect(event.defaultPrevented).toBe(true);                          // no switch-model POST fires
+        expect(document.getElementById("comparison-view").classList.contains("d-none")).toBe(true);
+        expect(document.getElementById("model-builder-page").classList.contains("d-none")).toBe(false);
+        // The panel is resumed intact, never closed/emptied.
+        expect(window.closeAndEmptySidePanel).not.toHaveBeenCalled();
+        expect(document.getElementById("sidePanel").innerHTML).toBe("edit form");
+        expect(initSpy).toHaveBeenCalled();                                 // visible canvas's lines rebuilt
+        expect(window.destroyComparisonCharts).toHaveBeenCalledTimes(1);
+    });
+
+    test("a cross-slot tab click tears down the view but lets the click (the switch POST) through", () => {
+        window.destroyComparisonCharts = jest.fn();
+        window.initModelBuilderMain = jest.fn();
+
+        enterComparing();
+        const event = clickModelTab("1");  // other slot
+
+        expect(event.defaultPrevented).toBe(false);                        // the switch-model POST proceeds
+        // The dashboard is torn down first, so the switch's unsaved modal would land over the revealed model.
+        expect(document.getElementById("comparison-view").classList.contains("d-none")).toBe(true);
+        expect(document.getElementById("model-builder-page").classList.contains("d-none")).toBe(false);
+        expect(window.destroyComparisonCharts).toHaveBeenCalledTimes(1);
+    });
+
     test("the htmx:afterSwap into #comparison-view reveals it and opens the view", () => {
         const view = document.getElementById("comparison-view");
         view.innerHTML = '<div id="comparison-dashboard"></div>';

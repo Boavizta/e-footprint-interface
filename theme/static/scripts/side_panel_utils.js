@@ -117,20 +117,23 @@ document.body.addEventListener("htmx:beforeRequest", function (event) {
 });
 
 // Pre-navigation unsaved-changes guard. Leaving the active model with the side panel open silently
-// discards its edits. Switching models (switch-model), opening the Compare dashboard (compare/) and the
-// +Add actions (add-model for Duplicate/Blank, open-add-model-import-panel for Import) all either
-// re-render the builder or swap the side panel without going through the #sidePanel-targeted
-// beforeRequest guard above, so it misses them. htmx:confirm fires before the request, so we defer it
-// behind the shared unsaved modal and only let it through on "Continue" (issueRequest re-fires the
-// exact request). On cancel it is never issued, so the panel and its edits survive. Matching on the
-// request path (not a DOM element) covers every entry point — tab strip, mobile pill, burger.
-// (remove-model also discards the panel but has its own destructive confirm in model_comparison.js,
+// discards its edits. Switching models (switch-model) and the +Add actions (add-model for
+// Duplicate/Blank, open-add-model-import-panel for Import) all either re-render the builder or swap the
+// side panel without going through the #sidePanel-targeted beforeRequest guard above, so it misses them.
+// htmx:confirm fires before the request, so we defer it behind the shared unsaved modal and only let it
+// through on "Continue" (issueRequest re-fires the exact request). On cancel it is never issued, so the
+// panel and its edits survive. Matching on the request path (not a DOM element) covers every entry
+// point — tab strip, mobile pill, burger.
+// (Opening the Compare dashboard is NOT guarded: the comparison view is a resident sibling, so the side
+// panel survives hidden behind it and a same-slot return resumes it intact — opening Compare discards
+// nothing. A cross-slot dismiss does discard, but it goes out as /switch-model/, which IS guarded.
+// remove-model also discards the panel but has its own destructive confirm in model_comparison.js,
 // made unsaved-aware there to avoid stacking two dialogs on one click; reset/template-load are exempt —
 // they obviously discard the current model, so a separate unsaved warning would be noise.)
-// Request URL path segments (not Django route names: e.g. the Compare route is named "compare-models"
-// but served at /compare/). Slash-delimited so they can't partial-match a neighbouring path.
+// Request URL path segments (not Django route names). Slash-delimited so they can't partial-match a
+// neighbouring path.
 const PANEL_DISCARDING_PATHS = [
-    "/switch-model/", "/compare/", "/add-model/", "/open-add-model-import-panel/",
+    "/switch-model/", "/add-model/", "/open-add-model-import-panel/",
 ];
 let pendingNavRequest = null;
 

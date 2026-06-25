@@ -1,8 +1,9 @@
 // Pre-navigation unsaved-changes guard: leaving the active model with a modified side-panel form
-// (switch-model, or opening the Compare dashboard) must be deferred behind the shared unsaved modal,
-// not fired immediately. These requests do NOT target #sidePanel, so the older #sidePanel-targeted
-// beforeRequest guard misses them; this one hooks htmx:confirm (fires before the request) and only
-// lets it through on "Continue". remove-model is handled separately (model_comparison.js).
+// (switch-model, +Add) must be deferred behind the shared unsaved modal, not fired immediately. These
+// requests do NOT target #sidePanel, so the older #sidePanel-targeted beforeRequest guard misses them;
+// this one hooks htmx:confirm (fires before the request) and only lets it through on "Continue".
+// Opening Compare is NOT guarded (the side panel survives hidden behind the resident comparison view);
+// remove-model is handled separately (model_comparison.js).
 
 function modalDom() {
     document.body.innerHTML = `
@@ -56,12 +57,15 @@ test("a modified switch is deferred behind the unsaved modal", () => {
         .toBe("proceedWithPendingNavigation()");
 });
 
-test("a modified Compare navigation is also deferred behind the unsaved modal", () => {
+// Opening Compare no longer discards the panel: the comparison view is a resident sibling, so a modified
+// panel survives hidden behind it and a same-slot return resumes it intact. So /compare/ must NOT be
+// intercepted — guarding it would falsely warn about losing edits that aren't being lost.
+test("a modified Compare navigation is NOT intercepted (Compare is non-destructive)", () => {
     const { tagFormAsModified } = require("../theme/static/scripts/side_panel_utils.js");
     tagFormAsModified();
     const { event } = fireNavConfirm("/model_builder/compare/");  // route name compare-models, path /compare/
-    expect(event.defaultPrevented).toBe(true);
-    expect(shownTimes).toBe(1);
+    expect(event.defaultPrevented).toBe(false);
+    expect(shownTimes).toBe(0);
 });
 
 test.each([
