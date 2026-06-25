@@ -23,6 +23,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.comparison.duplication import duplicate_system
+from efootprint.utils.tools import time_it
 
 from model_builder.adapters.repositories import SessionWorkspaceRepository, SessionSystemRepository
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
@@ -59,6 +60,7 @@ def _rendered_active_model_role_oob(workspace, active_slot) -> str:
 
 
 @require_POST
+@time_it
 def switch_model(request):
     """Flip the active slot and (on the builder) rebind the shared chrome; the canvas toggle is client-side.
 
@@ -191,6 +193,8 @@ def remove_model(request):
     return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
 
 
+@render_exception_modal_if_error
+@time_it
 def compare(request):
     """Render the comparison dashboard for the workspace's two models.
 
