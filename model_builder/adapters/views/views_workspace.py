@@ -31,7 +31,6 @@ from model_builder.adapters.views.views import load_system_into_session, render_
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import (
     ComparisonService, ProgressiveImportService, SCRATCH_ID, get_template_system_data)
-from utils import htmx_render
 
 
 def _rendered_shared_chrome_oob(model_web) -> str:
@@ -194,6 +193,10 @@ def remove_model(request):
 def compare(request):
     """Render the comparison dashboard for the workspace's two models.
 
+    A pure HX fragment swapped into the resident ``#comparison-view`` sibling — plain ``render`` (not
+    ``htmx_render``): there is no full-page Compare route, so it must not fall through to the
+    base.html branch on a non-HX request.
+
     Built fresh on every visit (no stale results): the two slots' models are wrapped, compared via the
     library's ``System.compare_to`` and shaped by the thin ``ComparisonService`` adapter. The dashboard
     is shown only when two models exist *and both are complete enough to compute* — the same readiness
@@ -213,15 +216,14 @@ def compare(request):
     model_a, model_b = workspace_slots[0]["model_web"], workspace_slots[1]["model_web"]
     comparison = ComparisonService().build(model_a, model_b)
 
-    # The comparison view is self-contained — no per-model toolbar/results to bind — so it needs only the
-    # comparison view model, the tab strip's slots, and the active slot (for the active-tab highlight).
+    # The comparison view is self-contained — no tab strip or per-model chrome of its own (those stay
+    # resident in the hidden builder) — so it needs only the comparison view model and the chart payloads.
+    # Plain render (not htmx_render): this is a pure HX fragment swapped into #comparison-view, never a
+    # full-page route, so it must not go through htmx_render's non-HX → base.html branch.
     context = {
         "comparison": comparison,
         "paired_chart_json": json.dumps(comparison.paired_chart),
         "cumulative_chart_json": json.dumps(comparison.cumulative_chart),
         "decomposition_chart_json": json.dumps(comparison.decomposition_chart),
-        "workspace_slots": workspace_slots,
-        "compare_enabled": True,
-        "active_slot": workspace.active_slot(),
     }
-    return htmx_render(request, "model_builder/compare/dashboard.html", context=context)
+    return render(request, "model_builder/compare/dashboard.html", context=context)

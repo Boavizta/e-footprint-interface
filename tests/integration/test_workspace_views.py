@@ -204,8 +204,8 @@ def test_compare_renders_dashboard_with_both_models_and_headline_delta(client, m
     """With two models, /compare/ renders the comparison dashboard: both model cards, the headline Δ card,
     and the decomposition. The endpoint runs the real System.compare_to through ComparisonService.
 
-    Compare is only ever reached via HTMX (the ⇄Compare tab swaps the fragment into the resident
-    #comparison-view), so request it with the HX-Request header to get the fragment, not the full page.
+    Compare is a pure HX fragment (plain render, never htmx_render), so it returns the same standalone
+    dashboard fragment whether or not the HX-Request header is present — no full-page base.html branch.
     """
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 = "Copy of Test System"
@@ -219,6 +219,25 @@ def test_compare_renders_dashboard_with_both_models_and_headline_delta(client, m
     assert "What differs between the models" in html
     # Chart payloads are emitted for the JS to draw (shared-scale paired bars + cumulative overlay).
     assert "data-paired-chart" in html and "data-cumulative-chart" in html
+
+
+@pytest.mark.django_db
+def test_compare_non_htmx_get_returns_the_standalone_fragment_not_a_blank_page(client, minimal_system):
+    """A non-HX GET to /compare/ (a stray direct hit) returns the same standalone dashboard fragment, not
+    a blank base.html page. Compare uses plain render (not htmx_render), so it never falls through to the
+    non-HX → base.html branch — there is no full-page Compare route and no dead `dashboard` flag."""
+    _seed_active_slot(client, minimal_system)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 = "Copy of Test System"
+
+    response = client.get("/model_builder/compare/")  # no HX-Request header
+    assert response.status_code == 200
+    html = response.content.decode()
+    # The dashboard fragment itself (its #comparison-page wrapper + KPI/chart markup), not a blank <main>.
+    assert 'id="comparison-page"' in html
+    assert "comparison-dashboard" in html
+    assert "data-paired-chart" in html
+    # It is the bare fragment, NOT the full page: base.html's shell (navbar / main-content-block) is absent.
+    assert "main-content-block" not in html
 
 
 @pytest.mark.django_db
