@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>e-footprint-interface — Design hub</title>
+<style>
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --accent:#2D4675; --lp:#e8eaf4; --edge:#7B5DC7; }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); max-width: 58rem; margin: 0 auto; padding: 2.4rem 1.2rem 4rem; }
+  h1 { font-size: 1.9rem; margin: 0 0 .2rem; }
+  .tagline { color: var(--muted); margin: 0 0 2rem; font-size: 1.02rem; }
+  h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+       margin: 2.4rem 0 .9rem; font-weight: 600; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .grid { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); }
+  .card { display: block; border: 1px solid var(--line); border-radius: 12px; padding: .9rem 1rem;
+          background: var(--card); color: var(--ink); transition: border-color .15s, transform .15s; }
+  a.card:hover { border-color: var(--accent); text-decoration: none; transform: translateY(-1px); }
+  .card .name { font-weight: 600; font-size: .98rem; display: flex; align-items: center;
+                justify-content: space-between; gap: .5rem; }
+  .card .desc { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+  .card.inert { opacity: .64; }
+
+  .pill { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .12rem .45rem; border-radius: 999px; white-space: nowrap; }
+  .pill.web      { background: var(--lp); color: var(--accent); }
+  .pill.edge     { background: #f3effb; color: var(--edge); }
+  .pill.todo     { background: #fef2f2; color: #dc2626; }
+  .pill.next     { background: var(--accent); color: #fff; }
+  .pill.soon     { background: #f3f2ef; color: #8a8a8a; }
+  .ord { font-size: .6rem; font-weight: 700; color: var(--faint); border: 1px solid var(--line);
+         border-radius: 6px; padding: .04rem .3rem; }
+
+  ol.flow { counter-reset: step; list-style: none; padding: 0; margin: .4rem 0 0; }
+  ol.flow li { counter-increment: step; position: relative; padding: .15rem 0 .15rem 1.9rem;
+               color: var(--muted); font-size: .9rem; }
+  ol.flow li::before { content: counter(step); position: absolute; left: 0; top: .15rem;
+               width: 1.3rem; height: 1.3rem; border-radius: 50%; background: var(--lp); color: var(--accent);
+               font-size: .72rem; font-weight: 700; display: grid; place-items: center; }
+  ol.flow li b { color: var(--ink); font-weight: 600; }
+
+  .note { border-left: 3px solid var(--line); padding: .3rem 0 .3rem 1rem; color: var(--muted);
+          font-size: .9rem; margin: 1rem 0; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
+           color: var(--faint); font-size: .8rem; }
+  code { background: #eef0f3; padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+</style>
+</head>
+<body>
+
+<h1>e-footprint-interface — Design hub</h1>
+<p class="tagline">The navigable index for design artefacts that engineering reads to know what to build, and design reads to know what already exists. Strategy &amp; rationale: <a href="README.md">README</a>.</p>
+
+<div class="note">
+  <b>Scope today.</b> The <b>journey set</b> is being authored. <a href="journeys/build-a-model.html">build-a-model</a> — the
+  core editing loop, covering both web and edge — is <b>live</b> and is the reference implementation (its
+  <code>&lt;style&gt;</code> block is the shared toolkit). The other four journeys are scoped below with a build order;
+  <b>tokens</b> and the <b>component inventory</b> are pre-staged and stay placeholders until they're stood up.
+</div>
+
+<h2>Journeys</h2>
+<p class="tagline" style="margin-bottom:1rem;font-size:.92rem;">One visual doc per core user flow: who &amp; why · screen sequence · key states · decisions taken. Authored at intent level — faithful to the deployed app. <b>Building a new one?</b> Follow <a href="journey-authoring.md">journey-authoring.md</a> (method, template, conventions) — and copy <code>build-a-model.html</code>'s style block.</p>
+<div class="grid">
+
+  <a class="card" href="journeys/build-a-model.html">
+    <div class="name">build-a-model <span class="pill web">Web + edge</span></div>
+    <div class="desc"><b>The core loop.</b> The three-column canvas → add an object in the side panel → edit it → delete it, with disabled-instead-of-error gating and in-place OOB canvas patches. Covers the Edge toggle and all relationship shapes (list, weighted dict, edge groups). The reference journey.</div>
+  </a>
+
+  <div class="card inert">
+    <div class="name">onboarding <span class="ord">2nd</span><span class="pill todo">To author</span></div>
+    <div class="desc">First run: home → <em>Start modeling</em> → template picker (starter templates / how-to guides / start from scratch) → land on the canvas → the guided tour, the help drawer, the web/edge toggle.</div>
+  </div>
+
+  <div class="card inert">
+    <div class="name">view-results <span class="ord">3rd</span><span class="pill todo">To author</span></div>
+    <div class="desc">The Results panel: the Sankey with its "Analyse by" chips, the hourly / cumulative / breakdown charts, click-to-explain modals (every value carries its derivation), the Sources tab, and xlsx export.</div>
+  </div>
+
+  <div class="card inert">
+    <div class="name">compare-models <span class="ord">4th</span><span class="pill todo">To author</span></div>
+    <div class="desc">The second model slot and the comparison dashboard: KPI strip, decomposition bars, paired &amp; cumulative emissions charts, assumptions diff table. Reached via the ⇄ Compare tab.</div>
+  </div>
+
+  <div class="card inert">
+    <div class="name">save-and-load <span class="ord">5th</span><span class="pill todo">To author</span></div>
+    <div class="desc">Persistence: download / upload a single model and the two-model workspace (<code>.e-f.json</code> round-trip including UI config), and the recovery page when a session model fails to deserialize.</div>
+  </div>
+
+</div>
+
+<h2>Tokens</h2>
+<div class="grid">
+  <a class="card inert" href="tokens.html">
+    <div class="name">tokens.html <span class="pill soon">Staged</span></div>
+    <div class="desc">Colors, type scale, spacing, radii. The values live in <code>theme/static/scss/custom.scss</code> (<code>--new-primary #2D4675</code>, the gray ramp, <code>--edge-paradigm-accent #7B5DC7</code>) on top of Bootstrap 5 — this doc will render them and capture the decisions. Placeholder until stood up.</div>
+  </a>
+</div>
+
+<h2>Components</h2>
+<div class="grid">
+  <div class="card inert">
+    <div class="name">component inventory <span class="pill soon">Staged</span></div>
+    <div class="desc">A catalogue of the recurring UI primitives — object cards, the dynamic form fields, the side panel, modals, the disabled-with-tooltip add button — rendered from the real templates so it can't lie. Indexed here once it exists.</div>
+  </div>
+</div>
+
+<h2>How journeys fit the workflow</h2>
+<ol class="flow">
+  <li><b>spec.html</b> — what the product does.</li>
+  <li><b>journeys/&lt;name&gt;.html</b> — how the user moves through it (this folder).</li>
+  <li><b>plan.html</b> — how code delivers it.</li>
+</ol>
+<p class="tagline" style="font-size:.9rem;margin-top:.8rem;">Specs and plans are already authored as self-contained HTML in this repo (<a href="../workflow.md">workflow.md</a>) — journeys are the same posture. See the <a href="README.md">README</a> for the sync protocol with design work.</p>
+
+<footer>
+  e-footprint-interface design hub · journeys in progress (build-a-model live) · tokens &amp; component inventory staged.
+</footer>
+
+</body>
+</html>
