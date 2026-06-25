@@ -154,6 +154,25 @@ describe("resident comparison view toggle", () => {
         expect(document.querySelectorAll(".model-tab.fw-bold").length).toBe(0);
     });
 
+    // Opening Compare is non-destructive: the side panel, help drawer and results panel all live inside
+    // #model-builder-page, which only goes d-none — they ride along hidden and survive intact (none is
+    // closed or emptied), so a same-slot return reveals them exactly as left.
+    test("opening Compare preserves an open help drawer and results panel hidden, never closing them", () => {
+        const page = document.getElementById("model-builder-page");
+        page.insertAdjacentHTML("beforeend", '<div id="helpDrawer">class help</div>');
+        page.insertAdjacentHTML("beforeend", '<div id="result-block">model results</div>');
+        window.closeHelpDrawer = jest.fn();
+        window.hidePanelResult = jest.fn();
+
+        enterComparing();
+
+        // Neither is closed; both keep their content, riding along inside the now-d-none builder page.
+        expect(window.closeHelpDrawer).not.toHaveBeenCalled();
+        expect(window.hidePanelResult).not.toHaveBeenCalled();
+        expect(document.getElementById("helpDrawer").innerHTML).toBe("class help");
+        expect(document.getElementById("result-block").innerHTML).toBe("model results");
+    });
+
     test("dismissing reveals the builder, restores the ⇄Compare tab + active highlight, empties the view", () => {
         window.destroyComparisonCharts = jest.fn();
         enterComparing();
@@ -170,52 +189,33 @@ describe("resident comparison view toggle", () => {
         expect(document.getElementById("comparison-view").classList.contains("d-none")).toBe(true);
     });
 
-    test("a same-slot model tab dismisses the comparison view and rebuilds lines — no reload", () => {
-        window.destroyComparisonCharts = jest.fn();
-        window.htmx = { ajax: jest.fn() };
-        const initSpy = jest.fn();
-        window.initModelBuilderMain = initSpy;
-        const canvasBefore = document.querySelector('[data-model-canvas="0"]');
-
-        enterComparing();
-        switchToSlot("0");  // the model tab fires switchModelCanvas for the active slot
-
-        // Reveal: the comparison view is gone, the builder is back, and the SAME canvas element is shown
-        // (client-side reveal, never a re-render / reload).
-        expect(document.getElementById("comparison-view").classList.contains("d-none")).toBe(true);
-        expect(document.getElementById("model-builder-page").classList.contains("d-none")).toBe(false);
-        expect(document.querySelector('[data-model-canvas="0"]')).toBe(canvasBefore);
-        expect(canvasBefore.classList.contains("d-none")).toBe(false);
-        expect(window.htmx.ajax).not.toHaveBeenCalled();        // no /model_builder/ reload
-        expect(initSpy).toHaveBeenCalled();                     // visible canvas's lines rebuilt
-        expect(window.destroyComparisonCharts).toHaveBeenCalledTimes(1);
-    });
-
-    test("an ordinary same-slot click (comparison not open) stays a no-op — no builder re-init", () => {
+    // switchToSlot is a plain client-side model switch with no Compare-awareness: the capture-phase tab
+    // handler (tested below) is the single owner of Compare-dismiss, and it always tears the view down
+    // before the /switch-model/ POST whose switchModelCanvas trigger drives switchToSlot — so Compare is
+    // never open by the time switchToSlot runs. These tests pin the plain same-slot no-op and the
+    // cross-slot canvas swap (the canonical-id migration the capture handler never touches).
+    test("an ordinary same-slot click stays a no-op — no builder re-init", () => {
         // The active model tab still POSTs switch-model (so switchModelCanvas fires for the active slot)
-        // even when nothing is being dismissed; re-initialising the whole builder on every such redundant
-        // click would needlessly re-wire Sortable and rebuild every leader line. With the comparison view
-        // closed, the same-slot switch must early-return without touching initModelBuilderMain.
+        // even when nothing changes; re-initialising the whole builder on every such redundant click would
+        // needlessly re-wire Sortable and rebuild every leader line, so the same-slot switch early-returns.
         const initSpy = jest.fn();
         window.initModelBuilderMain = initSpy;
         const canvasBefore = document.querySelector('[data-model-canvas="0"]');
 
-        switchToSlot("0");  // active slot, comparison view never opened
+        switchToSlot("0");  // active slot
 
         expect(initSpy).not.toHaveBeenCalled();                 // no re-init on a plain same-slot click
         expect(document.querySelector('[data-model-canvas="0"]')).toBe(canvasBefore);
         expect(canvasBefore.classList.contains("d-none")).toBe(false);
     });
 
-    test("a cross-slot model tab dismisses the view then switches to the other canvas — no reload", () => {
-        window.destroyComparisonCharts = jest.fn();
+    test("a cross-slot switch reveals the other canvas and migrates the canonical ids — no reload", () => {
+        // The capture handler has already dismissed Compare; switchToSlot then performs the plain switch.
         window.htmx = { ajax: jest.fn() };
         window.initModelBuilderMain = jest.fn();
 
-        enterComparing();
         switchToSlot("1");
 
-        expect(document.getElementById("comparison-view").classList.contains("d-none")).toBe(true);
         expect(document.querySelector('[data-model-canvas="1"]').classList.contains("d-none")).toBe(false);
         expect(document.querySelector('[data-model-canvas="0"]').classList.contains("d-none")).toBe(true);
         expect(document.getElementById("model-tab-strip").dataset.activeSlot).toBe("1");

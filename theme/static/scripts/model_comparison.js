@@ -136,25 +136,14 @@
         const strip = document.getElementById("model-tab-strip");
         if (!strip) return;
 
-        // A model tab clicked while the comparison view is open means "leave the comparison and edit this
-        // model". The capture-phase tab handler below normally dismisses the view *before* the switch
-        // request fires (so a cross-slot unsaved warning anchors on the revealed model, not the dashboard);
-        // this is the same teardown done defensively, idempotent if the view is already dismissed. After
-        // it, the rest of the switch runs against the now-visible canvases.
-        const cameFromCompare = comparisonIsOpen();
-        if (cameFromCompare) {
-            dismissCompareView();
-        }
-
+        // switchToSlot only runs off the switchModelCanvas trigger, which fires from a /switch-model/ POST
+        // — and the capture-phase tab handler below always dismisses the comparison view *before* that POST
+        // is issued, so Compare is never open here. switchToSlot is therefore a plain client-side model
+        // switch (the capture handler owns all Compare-dismiss).
         const previousSlot = strip.dataset.activeSlot;
         if (String(previousSlot) === String(slot)) {
-            // Same slot. Only rebuild lines if we just came back from the comparison view (the visible
-            // canvas's lines were torn down on open); an ordinary redundant same-slot click stays a no-op
-            // — re-initialising the whole builder on every such click would needlessly re-wire Sortable
-            // and rebuild every leader line.
-            if (cameFromCompare && typeof window.initModelBuilderMain === "function") {
-                window.initModelBuilderMain();
-            }
+            // Redundant same-slot click — a no-op. Re-initialising the whole builder on every such click
+            // would needlessly re-wire Sortable and rebuild every leader line.
             return;
         }
 
