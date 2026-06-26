@@ -20704,6 +20704,11 @@ input:disabled {
     flex-wrap: nowrap;
     overflow-x: auto;
   }
+  /* The ⇄Compare tab is hidden on mobile while comparing so only the two fixed-width model tabs show
+     (both fit at once); on desktop the tab stays, highlighted as the active destination. */
+  body.comparing .model-tab--compare {
+    display: none !important;
+  }
 }
 /* Model-comparison tab strip: each tab is a wrapper carrying the active styling (so it spans the label
    and, on the second model, the browser-tab-style ✕), with the clickable label and ✕ as flat children. */

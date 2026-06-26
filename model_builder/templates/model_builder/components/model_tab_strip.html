@@ -22,7 +22,7 @@ On mobile the builder hides the tab strip and surfaces model switching / +Add in
 instead (the strip's fixed-width tabs overflow a phone viewport). While the comparison view is open the
 toolbar/burger is hidden, so the SCSS reveals this one strip on mobile (`.comparing` → flex-nowrap +
 horizontally scrollable) so a model tab stays reachable on a narrow screen — there are only two
-fixed-width tabs then (⇄Compare is hidden while comparing), so both fit at once.
+fixed-width tabs then (⇄Compare is hidden on mobile while comparing), so both fit at once.
 {% endcomment %}
 <nav id="model-tab-strip" class="d-none d-lg-flex flex-row align-items-center gap-1 px-3 pt-2 border-bottom"
      data-active-slot="{{ active_slot }}" data-tour-target="comparison">
@@ -101,8 +101,9 @@ fixed-width tabs then (⇄Compare is hidden while comparing), so both fit at onc
     its own URL either, the active slot is server-side state), and the compare view skips the
     drop_expired_slots + recovery fallback that model_builder_main has, so a refresh of a pushed
     /compare/ would 500 once a slot's cache TTL lapses. Leaving the URL at /model_builder/ means a
-    refresh always lands on the self-healing builder, Compare one click away. model_comparison.js hides
-    this ⇄Compare tab while comparing (#compare-tab is its hide/show hook).
+    refresh always lands on the self-healing builder, Compare one click away. model_comparison.js now marks
+    this ⇄Compare tab active while comparing (#compare-tab is the hook), and CSS hides it on mobile so the
+    two model tabs fit.
     {% endcomment %}
     <span class="model-tab model-tab--compare d-inline-flex align-items-center rounded-top text-muted"
           {% if not compare_enabled %}data-bs-toggle="tooltip" data-bs-placement="bottom"

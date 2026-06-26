@@ -62,9 +62,14 @@
                 {% if workspace_slots|length > 1 %}
                     <li class="nav-item d-lg-none">
                         {% if compare_enabled %}
+                        {% comment %}
+                        Swaps into the resident #comparison-view (the same flow as the desktop ⇄Compare tab),
+                        so openCompareView fires off the htmx:afterSwap keyed on #comparison-view and the
+                        builder is hidden, not destroyed.
+                        {% endcomment %}
                         <button type="button" class="nav-link d-flex flex-row gap-2 mx-2"
                                 hx-get="{% url 'compare-models' %}"
-                                hx-target="#main-content-block" hx-swap="innerHTML"
+                                hx-target="#comparison-view" hx-swap="innerHTML"
                                 _="on click call collapseNavbarIfShown()">
                             <span>⇄</span><span>Compare</span>
                         </button>

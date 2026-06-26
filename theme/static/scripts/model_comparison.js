@@ -63,6 +63,21 @@
         });
     }
 
+    // Toggle the active-tab styling (background, border, weight) on a tab wrapper. Shared by the model
+    // tabs and the ⇄Compare tab so both wear the same active highlight.
+    function setTabActive(tab, active) {
+        tab.classList.toggle("fw-bold", active);
+        tab.classList.toggle("bg-white", active);
+        tab.classList.toggle("border", active);
+        tab.classList.toggle("border-bottom-0", active);
+        tab.classList.toggle("text-muted", !active);
+    }
+
+    // The ⇄Compare tab's wrapper (null-safe — the tab may be absent in a single-model session).
+    function compareTabWrapper() {
+        return document.getElementById("compare-tab")?.closest(".model-tab");
+    }
+
     // Toggle the active-model styling on the tab whose slot matches (or clear it entirely when `slot` is
     // null — the state while the comparison view is open, since no model is being edited).
     function highlightActiveTab(slot) {
@@ -70,12 +85,7 @@
             const isTarget = slot !== null && String(label.dataset.modelTab) === String(slot);
             // The active styling (background, border, weight) lives on the tab wrapper so it spans both
             // the label and the ✕; fall back to the label itself if a future tab has no wrapper.
-            const tab = label.closest(".model-tab") || label;
-            tab.classList.toggle("fw-bold", isTarget);
-            tab.classList.toggle("bg-white", isTarget);
-            tab.classList.toggle("border", isTarget);
-            tab.classList.toggle("border-bottom-0", isTarget);
-            tab.classList.toggle("text-muted", !isTarget);
+            setTabActive(label.closest(".model-tab") || label, isTarget);
         });
     }
 
@@ -89,35 +99,35 @@
         document.body.classList.toggle("comparing", hidden);
     }
 
-    // Open the comparison view (driven by the swap into #comparison-view). Hide the builder chrome, hide
-    // the ⇄Compare tab, clear the active-model highlight, and tear down the builder's leader lines (the
-    // canvas is now d-none; the lines' SVGs live on <body> and would otherwise recompute against
-    // disconnected anchors). Opening Compare is now non-destructive: the side panel / help drawer /
-    // results panel all live inside the (now d-none) builder page, so they ride along hidden and survive
-    // intact — a same-slot return reveals them exactly as they were left, with no warning.
+    // Open the comparison view (driven by the swap into #comparison-view). Hide the builder chrome, clear
+    // the active-model highlight, mark the ⇄Compare tab active (it stays visible + highlighted on desktop
+    // as the active destination; CSS hides it on mobile so the two model tabs fit), and tear down the
+    // builder's leader lines (the canvas is now d-none; the lines' SVGs live on <body> and would otherwise
+    // recompute against disconnected anchors). Opening Compare is now non-destructive: the side panel /
+    // help drawer / results panel all live inside the (now d-none) builder page, so they ride along hidden
+    // and survive intact — a same-slot return reveals them exactly as they were left, with no warning.
     function openCompareView() {
         setBuilderHidden(true);
 
-        const compareTab = document.getElementById("compare-tab");
-        const compareWrapper = compareTab ? compareTab.closest(".model-tab") : null;
-        if (compareWrapper) compareWrapper.classList.add("d-none");
-
         highlightActiveTab(null);
+
+        const compareWrapper = compareTabWrapper();
+        if (compareWrapper) setTabActive(compareWrapper, true);
 
         if (typeof window.removeAllLines === "function") {
             window.removeAllLines();
         }
     }
 
-    // Dismiss the comparison view: reveal the builder, restore the ⇄Compare tab and the active-model
-    // highlight, then empty #comparison-view (destroying its three charts so Chart.js doesn't leak
-    // canvas registrations across reopen). The caller (switchToSlot) rebuilds the visible canvas's lines.
+    // Dismiss the comparison view: reveal the builder, clear the ⇄Compare tab's active styling and restore
+    // the active-model highlight, then empty #comparison-view (destroying its three charts so Chart.js
+    // doesn't leak canvas registrations across reopen). The caller (switchToSlot) rebuilds the visible
+    // canvas's lines.
     function dismissCompareView() {
         setBuilderHidden(false);
 
-        const compareTab = document.getElementById("compare-tab");
-        const compareWrapper = compareTab ? compareTab.closest(".model-tab") : null;
-        if (compareWrapper) compareWrapper.classList.remove("d-none");
+        const compareWrapper = compareTabWrapper();
+        if (compareWrapper) setTabActive(compareWrapper, false);
 
         const strip = document.getElementById("model-tab-strip");
         if (strip) highlightActiveTab(strip.dataset.activeSlot);

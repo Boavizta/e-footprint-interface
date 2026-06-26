@@ -205,7 +205,46 @@ class TestModelComparisonWorkspace:
         expect(page.locator("#model-tab-strip")).to_be_visible()
         expect(page.locator("#comparison-dashboard")).to_contain_text(new_name)
 
+        # On desktop the ⇄Compare tab stays visible and carries the active highlight (the active destination).
+        expect(page.locator("#compare-tab")).to_be_visible()
+        assert page.evaluate(
+            "document.getElementById('compare-tab').closest('.model-tab').classList.contains('bg-white')"), \
+            "the ⇄Compare tab is not highlighted as active on desktop while comparing"
+
         assert not console_errors, f"Unexpected console errors on the Compare view: {console_errors}"
+
+    def test_compare_on_mobile_uses_the_resident_flow_and_hides_the_compare_tab(
+            self, minimal_complete_model_builder):
+        """On a phone viewport the burger ⇄Compare entry uses the resident-sibling flow (swaps into
+        #comparison-view), so the builder is hidden — not destroyed — and the revealed mobile strip shows
+        only the two fixed-width model tabs (⇄Compare is hidden on mobile while comparing)."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+
+        # Build the two-model state at the default (desktop) viewport — the #add-model-toggle helper is
+        # desktop-only — then shrink to a phone viewport.
+        model_builder.add_model_by_duplication()
+        page.set_viewport_size({"width": 390, "height": 844})
+
+        # Tag the builder so we can prove it is hidden, not destroyed, by the resident flow.
+        page.evaluate("document.getElementById('model-builder-page').dataset.identityProbe = 'kept'")
+
+        # Open the burger and click its ⇄Compare entry (the mobile entry point).
+        page.locator("#toolbar-nav .navbar-toggler").click()
+        compare_btn = page.locator("#navbarSupportedContent").get_by_role("button", name="Compare")
+        click_and_wait_for_htmx(page, compare_btn)
+        page.locator("#comparison-dashboard").wait_for(state="visible")
+
+        # Resident flow: the comparison view shows, the builder is hidden but NOT destroyed (probe survives).
+        expect(page.locator("#comparison-view")).to_be_visible()
+        expect(page.locator("#model-builder-page")).to_be_hidden()
+        assert page.evaluate(
+            "document.getElementById('model-builder-page').dataset.identityProbe") == "kept"
+
+        # The revealed mobile strip shows only the two fixed-width model tabs; ⇄Compare is hidden on mobile.
+        expect(page.locator("#model-tab-strip")).to_be_visible()
+        expect(page.locator("[data-model-tab]")).to_have_count(2)
+        expect(page.locator("#compare-tab")).to_be_hidden()
 
     def test_dismissing_compare_is_client_side_with_no_builder_reload(self, minimal_complete_model_builder):
         """The headline perf win: opening Compare keeps the builder DOM resident, so dismissing to a model

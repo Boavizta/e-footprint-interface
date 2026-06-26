@@ -39,7 +39,7 @@ function twoCanvasDom() {
 }
 
 // Put the DOM into the comparing state: the comparison fragment swapped in, the view shown, the builder
-// hidden and the ⇄Compare tab hidden — the state model_comparison.js's afterSwap handler produces.
+// hidden and the ⇄Compare tab marked active — the state model_comparison.js's afterSwap handler produces.
 function enterComparing() {
     const view = document.getElementById("comparison-view");
     view.classList.remove("d-none");
@@ -143,15 +143,21 @@ test("switching leaves a closed side panel (d-none) untouched", () => {
 // ⇄Compare tab and shows the view; a model tab then dismisses it client-side (reveal the canvas, no
 // reload). These tests pin the toggle and the reveal-from-comparison-view switch branch.
 describe("resident comparison view toggle", () => {
-    test("opening Compare hides the builder + ⇄Compare tab and flips body.comparing", () => {
+    test("opening Compare hides the builder, marks ⇄Compare active, and flips body.comparing", () => {
         enterComparing();
         expect(document.getElementById("model-builder-page").classList.contains("d-none")).toBe(true);
         expect(document.getElementById("toolbar-nav").classList.contains("d-none")).toBe(true);
         expect(document.body.classList.contains("comparing")).toBe(true);
-        // ⇄Compare's own tab wrapper is hidden while comparing (so the strip is just the two model tabs).
-        expect(document.getElementById("compare-tab").closest(".model-tab").classList.contains("d-none")).toBe(true);
+        // ⇄Compare's own tab wrapper stays visible (desktop) and carries the active highlight while comparing;
+        // CSS hides it on mobile so the two model tabs fit.
+        const compareWrapper = document.getElementById("compare-tab").closest(".model-tab");
+        expect(compareWrapper.classList.contains("d-none")).toBe(false);
+        expect(compareWrapper.classList.contains("fw-bold")).toBe(true);
+        expect(compareWrapper.classList.contains("bg-white")).toBe(true);
         // No model tab carries the active highlight while comparing (no model is being edited).
-        expect(document.querySelectorAll(".model-tab.fw-bold").length).toBe(0);
+        document.querySelectorAll("[data-model-tab]").forEach(label => {
+            expect(label.closest(".model-tab").classList.contains("fw-bold")).toBe(false);
+        });
     });
 
     // Opening Compare is non-destructive: the side panel, help drawer and results panel all live inside
@@ -173,7 +179,7 @@ describe("resident comparison view toggle", () => {
         expect(document.getElementById("result-block").innerHTML).toBe("model results");
     });
 
-    test("dismissing reveals the builder, restores the ⇄Compare tab + active highlight, empties the view", () => {
+    test("dismissing reveals the builder, clears the ⇄Compare active styling + restores active highlight, empties the view", () => {
         window.destroyComparisonCharts = jest.fn();
         enterComparing();
         dismissCompareView();
@@ -181,7 +187,10 @@ describe("resident comparison view toggle", () => {
         expect(document.getElementById("model-builder-page").classList.contains("d-none")).toBe(false);
         expect(document.getElementById("toolbar-nav").classList.contains("d-none")).toBe(false);
         expect(document.body.classList.contains("comparing")).toBe(false);
-        expect(document.getElementById("compare-tab").closest(".model-tab").classList.contains("d-none")).toBe(false);
+        // ⇄Compare's wrapper stays visible but its active styling is cleared on dismiss.
+        const compareWrapper = document.getElementById("compare-tab").closest(".model-tab");
+        expect(compareWrapper.classList.contains("d-none")).toBe(false);
+        expect(compareWrapper.classList.contains("fw-bold")).toBe(false);
         // The active slot (0) regains its highlight; the charts are destroyed and the view emptied.
         expect(document.querySelector('[data-model-tab="0"]').closest(".model-tab").classList.contains("fw-bold")).toBe(true);
         expect(window.destroyComparisonCharts).toHaveBeenCalledTimes(1);
