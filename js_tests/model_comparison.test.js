@@ -10,13 +10,13 @@ function twoCanvasDom() {
     document.body.innerHTML = `
         <nav id="model-tab-strip" data-active-slot="0">
             <span class="model-tab fw-bold bg-white border border-bottom-0">
-                <button data-model-tab="0"></button>
+                <button class="model-tab__label fw-bold" data-model-tab="0"></button>
             </span>
             <span class="model-tab text-muted">
-                <button data-model-tab="1"></button>
+                <button class="model-tab__label text-muted" data-model-tab="1"></button>
             </span>
             <span class="model-tab model-tab--compare text-muted">
-                <button id="compare-tab"></button>
+                <button class="model-tab__label" id="compare-tab"></button>
             </span>
         </nav>
         <nav id="toolbar-nav"></nav>
@@ -99,6 +99,22 @@ test("switching to slot 1 migrates the canonical ids and never collides", () => 
     expect(document.getElementById("model-tab-strip").dataset.activeSlot).toBe("1");
 });
 
+// The visible bold lives on the inner .model-tab__label button (a .btn pins its own font-weight, so the
+// wrapper's fw-bold never reaches the text). switch-model never re-renders the strip, so the label bold
+// must follow the switch client-side — otherwise the page-render active label stays bold forever.
+test("switching moves the bold to the newly-active tab's label, not just its wrapper", () => {
+    const refLabel = document.querySelector('[data-model-tab="0"]');
+    const compLabel = document.querySelector('[data-model-tab="1"]');
+    expect(refLabel.classList.contains("fw-bold")).toBe(true);   // slot 0 active at render
+
+    switchToSlot("1");
+
+    expect(refLabel.classList.contains("fw-bold")).toBe(false);  // Reference label de-emphasised
+    expect(refLabel.classList.contains("text-muted")).toBe(true);
+    expect(compLabel.classList.contains("fw-bold")).toBe(true);  // Comparison label now bold
+    expect(compLabel.classList.contains("text-muted")).toBe(false);
+});
+
 test("switching back and forth keeps ids unique throughout", () => {
     switchToSlot("1");
     switchToSlot("0");
@@ -154,9 +170,14 @@ describe("resident comparison view toggle", () => {
         expect(compareWrapper.classList.contains("d-none")).toBe(false);
         expect(compareWrapper.classList.contains("fw-bold")).toBe(true);
         expect(compareWrapper.classList.contains("bg-white")).toBe(true);
-        // No model tab carries the active highlight while comparing (no model is being edited).
+        // No model tab carries the active highlight while comparing (no model is being edited) — neither
+        // the wrapper nor the inner label button. The label check is the regression guard: the strip is
+        // never re-rendered on switch, so the server-baked fw-bold on the originally-active label (slot 0
+        // = "Reference model") would otherwise stay bold here — and surface on mobile, where body.comparing
+        // reveals the strip but hides the ⇄Compare tab (the bug: the Reference tab bold behind Compare).
         document.querySelectorAll("[data-model-tab]").forEach(label => {
             expect(label.closest(".model-tab").classList.contains("fw-bold")).toBe(false);
+            expect(label.classList.contains("fw-bold")).toBe(false);
         });
     });
 

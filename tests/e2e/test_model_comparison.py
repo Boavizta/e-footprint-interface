@@ -246,6 +246,18 @@ class TestModelComparisonWorkspace:
         expect(page.locator("[data-model-tab]")).to_have_count(2)
         expect(page.locator("#compare-tab")).to_be_hidden()
 
+        # No model tab is emphasised while comparing (no model is being edited) — neither the wrapper nor
+        # the inner label button. The label is the regression guard: the visible bold lives there (a .btn
+        # pins its own font-weight, so the wrapper's fw-bold never reaches the text), and switch-model
+        # never re-renders the strip — so without a client-side sync the slot that was active at page
+        # render would keep its bold label here, surfacing on mobile as a wrongly-emphasised tab behind
+        # Compare (the "Reference tab stays bold" bug).
+        assert page.evaluate(
+            "Array.from(document.querySelectorAll('[data-model-tab]')).every("
+            "l => !l.classList.contains('fw-bold') "
+            "&& !l.closest('.model-tab').classList.contains('fw-bold'))"), \
+            "a model tab is still emphasised (bold) while comparing on mobile"
+
     def test_dismissing_compare_is_client_side_with_no_builder_reload(self, minimal_complete_model_builder):
         """The headline perf win: opening Compare keeps the builder DOM resident, so dismissing to a model
         is a client-side reveal — no GET /model_builder/ in the network log, and the same canvas element

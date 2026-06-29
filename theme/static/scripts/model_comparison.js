@@ -65,12 +65,25 @@
 
     // Toggle the active-tab styling (background, border, weight) on a tab wrapper. Shared by the model
     // tabs and the ⇄Compare tab so both wear the same active highlight.
+    //
+    // The visible bold/mute lives on the inner .model-tab__label button, NOT the wrapper: a Bootstrap
+    // .btn pins its own font-weight, so the wrapper's fw-bold never reaches the label text. The server
+    // bakes fw-bold/text-muted onto the label too, and switch-model never re-renders the strip — so
+    // unless we sync the label here, the slot that was active at page-render time keeps its bold label
+    // across every client-side switch (the Reference tab staying bold behind the comparison view on
+    // mobile was this bug). Toggle the label in lock-step with the wrapper.
     function setTabActive(tab, active) {
         tab.classList.toggle("fw-bold", active);
         tab.classList.toggle("bg-white", active);
         tab.classList.toggle("border", active);
         tab.classList.toggle("border-bottom-0", active);
         tab.classList.toggle("text-muted", !active);
+
+        const label = tab.querySelector(".model-tab__label");
+        if (label) {
+            label.classList.toggle("fw-bold", active);
+            label.classList.toggle("text-muted", !active);
+        }
     }
 
     // The ⇄Compare tab's wrapper (null-safe — the tab may be absent in a single-model session).
