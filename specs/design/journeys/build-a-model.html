@@ -185,6 +185,12 @@
   .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
   .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
   .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
   /* real dropdowns (unit / type / object pickers) */
   select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
         border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
@@ -729,6 +735,37 @@
   </div>
 </div>
 
+<!-- inline weight edits on the canvas -->
+<h3 style="font-size:1.05rem;margin:1.8rem 0 .2rem">On the canvas — edit the weight in place, no panel</h3>
+<p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .4rem">The weight of a dict membership isn't only editable in a panel. Wherever a
+   weighted-dict child is shown <b>nested on the canvas</b> — a <b>step</b> under its journey, a <b>job</b> under its step, a
+   <b>device or sub-group</b> inside an edge device group — its count is editable <b>right there</b> as an always-visible
+   <b>× n</b> field. Changing it writes the <em>same</em> count the panel widgets do and recomputes in place — no panel, no
+   reload. So the same weight has a <b>third editor</b> alongside the two panels above; all three stay in sync.</p>
+
+<div class="cmp">
+  <div class="cmpcol">
+    <p class="ttl">Steps &amp; jobs <span class="kind">· count-only</span></p>
+    <div class="pcard">
+      <div class="ocard"><span class="ic">⤳</span> Purchase journey <span class="pencil">✎</span></div>
+      <div class="ocard nested"><span class="ic">▥</span> Browse catalog <span class="icnt"><span class="mult">×</span><input class="cnt" value="1"></span></div>
+      <div class="ocard nested"><span class="ic">▥</span> Add to cart <span class="icnt"><span class="mult">×</span><input class="cnt" value="2"></span></div>
+      <div class="ocard nested"><span class="ic">▥</span> Checkout <span class="icnt"><span class="mult">×</span><input class="cnt" value="1"></span></div>
+    </div>
+    <div class="mock-help"><span class="lbl">Steps &amp; jobs</span>A step nested under its journey — and a <b>job</b> under its step — shows its weight as an inline <b>× n</b> (here <em>"Times per journey"</em>). <b>Count-only</b>: no inline remove, detaching stays in the panels. Setting it to <b>0</b> greys the row without unlinking.</div>
+  </div>
+
+  <div class="cmpcol">
+    <p class="ttl">Edge device group <span class="kind">· count + unlink</span></p>
+    <div class="pcard">
+      <div class="ocard"><span class="ic edge">▦</span> Sensor fleet <span class="pencil">✎</span></div>
+      <div class="ocard nested"><span class="ic edge">▤</span> Temp sensor <span class="icnt"><span class="mult">×</span><input class="cnt" value="40"><span class="rm">×</span></span></div>
+      <div class="ocard nested"><span class="ic edge">▤</span> Gateway <span class="icnt"><span class="mult">×</span><input class="cnt" value="2"><span class="rm">×</span></span></div>
+    </div>
+    <div class="mock-help edge"><span class="lbl">Edge group</span>Devices and sub-groups inside a group card carry the same inline <b>× n</b>, <b>plus an inline ✕</b> to detach right on the canvas (minimum <b>1</b>). The whole fleet tree is tunable without opening a panel.</div>
+  </div>
+</div>
+
 <!-- ============ DECISIONS ============ -->
 <h2 class="sec">Decisions taken</h2>
 <table>
@@ -764,7 +801,7 @@
         </table>
       </dd>
       <dt>Relationships</dt>
-      <dd>Widgets: <code>select_object.html</code> (single), <code>select_multiple.html</code> (list), <code>dict_count.html</code> (weighted dict). Reverse view: <code>dict_membership_section.html</code> + <code>dict_entry_count_unlink.html</code>. Registry (one source of truth): <code>object_linking_service.dict_relationship_registry()</code> — every <code>ExplainableObjectDict[X]</code> as <code>(parent, attr, child)</code>; serialization preserves untouched entries' weight/label/source. Routes <code>update-dict-count</code> / <code>link-dict-entry</code> / <code>unlink-dict-entry</code>, <code>open-link-existing-panel</code>. Per-attribute config (label, count_label, <code>ordered</code>, membership_title, add_to_label): <code>field_ui_config.json</code>. Single-link FKs are kept out of edit forms via <code>attributes_to_skip_in_forms</code> (a list typed attribute can be coerced to a single select by <code>convert_multiselect_to_single</code>). Canvas inline counts: <code>inline_count.html</code>; an emptied list/dict submits explicitly (<code>addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption()</code>) so a cleared relationship sticks. Real examples — list: <code>EdgeUsageJourney.edge_functions</code>; weighted dict: <code>UsageJourney.uj_steps</code> (ordered, "Times per journey"), <code>UsageJourneyStep.jobs</code> ("Times per step"); nested: <code>EdgeDeviceGroup.edge_device_counts</code> + <code>sub_group_counts</code> ("Count in group").</dd>
+      <dd>Widgets: <code>select_object.html</code> (single), <code>select_multiple.html</code> (list), <code>dict_count.html</code> (weighted dict). Reverse view: <code>dict_membership_section.html</code> + <code>dict_entry_count_unlink.html</code>. Registry (one source of truth): <code>object_linking_service.dict_relationship_registry()</code> — every <code>ExplainableObjectDict[X]</code> as <code>(parent, attr, child)</code>; serialization preserves untouched entries' weight/label/source. Routes <code>update-dict-count</code> / <code>link-dict-entry</code> / <code>unlink-dict-entry</code>, <code>open-link-existing-panel</code>. Per-attribute config (label, count_label, <code>ordered</code>, membership_title, add_to_label): <code>field_ui_config.json</code>. Single-link FKs are kept out of edit forms via <code>attributes_to_skip_in_forms</code> (a list typed attribute can be coerced to a single select by <code>convert_multiselect_to_single</code>). Canvas inline counts (the <em>× n</em> on nested cards): <code>inline_count.html</code> wraps <code>dict_entry_count_unlink.html</code> with <code>count_only=True</code> for step / job rows (min 0; 0 adds <code>dict-entry-zero</code>), while <code>group_entry_row.html</code> renders it <em>with</em> the unlink ✕ for edge-group entries (min 1); both <code>hx-post</code> to <code>update-dict-count</code> on change with <code>hx-swap="none"</code>. An emptied list/dict submits explicitly (<code>addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption()</code>) so a cleared relationship sticks. Real examples — list: <code>EdgeUsageJourney.edge_functions</code>; weighted dict: <code>UsageJourney.uj_steps</code> (ordered, "Times per journey"), <code>UsageJourneyStep.jobs</code> ("Times per step"); nested: <code>EdgeDeviceGroup.edge_device_counts</code> + <code>sub_group_counts</code> ("Count in group").</dd>
       <dt>Edge (Phase E)</dt>
       <dd><code>edge_modeling_toggle.html</code>; edge Add buttons / lists live behind <code>data-modeling-paradigm="edge"</code>; <code>edge_device_group_card.html</code>; recurrent-need gating in <code>constraint_messages.py</code>.</dd>
       <dt>Two consistency alignments made in code</dt>
