@@ -43,7 +43,7 @@
         </svg>
     </button>
 </div>
-<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}"></div>
+<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}" data-ordered="{{ field.ordered|yesno:"true,false" }}"></div>
 <div id="unselected_data_{{ field.web_id }}" data-json="{{ field.unselected_json }}"></div>
 <input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value="">
 

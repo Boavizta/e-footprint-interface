@@ -175,6 +175,9 @@ def generate_select_multiple_field(
         "label": field_config.get("label", attr_name),
         "tooltip": EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(class_name, attr_name),
         "input_type": "select_multiple",
+        # Reorder controls show only where order is meaningful — same `ordered` flag as dict_count,
+        # so the two relationship widgets behave consistently (default unordered).
+        "ordered": field_config.get("ordered", False),
         "selected": selected,
         "unselected": unselected,
         "selected_json": json.dumps(selected),

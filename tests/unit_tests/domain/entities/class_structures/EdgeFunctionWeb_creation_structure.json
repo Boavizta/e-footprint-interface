@@ -34,6 +34,7 @@
                 "label": "recurrent edge resource needs",
                 "tooltip": "Recurring resource needs running on edge hardware: CPU, RAM, storage, or whole-device workloads (see <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"RecurrentEdgeDeviceNeed\">Recurrent edge device need</button> subclasses).",
                 "input_type": "select_multiple",
+                "ordered": false,
                 "selected": [],
                 "unselected": [
                     {
@@ -55,6 +56,7 @@
                 "label": "recurrent server needs",
                 "tooltip": "Recurring batches of server-side jobs triggered by this function (see <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"RecurrentServerNeed\">Recurrent server need</button>).",
                 "input_type": "select_multiple",
+                "ordered": false,
                 "selected": [],
                 "unselected": [
                     {

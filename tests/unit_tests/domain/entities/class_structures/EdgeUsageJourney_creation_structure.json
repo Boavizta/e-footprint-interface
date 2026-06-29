@@ -34,6 +34,7 @@
                 "label": "edge functions",
                 "tooltip": false,
                 "input_type": "select_multiple",
+                "ordered": false,
                 "selected": [],
                 "unselected": [
                     {
