@@ -162,6 +162,17 @@ describe("hardenAgainstDisposedTipEvents", () => {
         ["hide", "_leave", "_enter", "show", "toggle"].forEach(m => expect(() => dead[m]()).not.toThrow());
     });
 
+    test("pins _isAnimated() to false so hide()'s cleanup can't defer past a dispose", () => {
+        // Bootstrap defers hide()'s `this._element.removeAttribute(...)` behind the fade via
+        // _queueCallback(…, this._isAnimated()); an HTMX swap disposing the instance mid-fade then fires
+        // that closure on a nulled _element. Pinning _isAnimated false makes the cleanup run inline.
+        const { proto } = makeProto();
+        proto._isAnimated = () => true;  // an animated tip (config animation or a `fade`-classed template)
+        global.bootstrap = { Tooltip: { prototype: proto } };
+        hardenAgainstDisposedTipEvents();
+        expect(Object.create(proto)._isAnimated()).toBe(false);
+    });
+
     test("installs once (idempotent, no double-wrap)", () => {
         const { proto } = makeProto();
         global.bootstrap = { Tooltip: { prototype: proto } };

@@ -38,6 +38,8 @@
                 // (this._element.removeAttribute(...)) past the fade via executeAfterTransition; if an
                 // HTMX swap disposes the instance in that window, the deferred callback throws on a
                 // nulled _element. No fade ⇒ no deferred callback ⇒ no race (see disposeShownWidgets).
+                // (hardenAgainstDisposedTipEvents pins _isAnimated() false globally as the real backstop
+                // — this flag is the local, documented expression of the same intent.)
                 .forEach(el => bootstrap.Tooltip.getOrCreateInstance(
                     el, { container: "body", trigger: "hover", animation: false }));
         }
@@ -88,6 +90,18 @@
                 return original.apply(this, args);
             };
         });
+
+        // Force every tooltip/popover to hide synchronously, killing the deferred-cleanup race at its
+        // root. Bootstrap's hide() queues its cleanup (this._element.removeAttribute("aria-describedby"))
+        // behind the fade via _queueCallback(…, this._isAnimated()); when an HTMX swap disposes the
+        // instance during that fade, the trailing transitionend fires the queued closure on a nulled
+        // _element → "Cannot read properties of null (reading 'removeAttribute')". The guard above can't
+        // reach that closure (it isn't a prototype method). _isAnimated() returns true when config
+        // animation is on OR the tip carries the `fade` class, so a per-init `animation: false` is not
+        // enough — a hardcoded-`fade` template (or any init site that forgets the flag) still races.
+        // Pinning it false makes _queueCallback run cleanup inline, while _element is still live. Every
+        // tip in this app already opts out of animation, so this removes no intended fade.
+        proto._isAnimated = function () { return false; };
     }
 
     hardenAgainstDisposedTipEvents();
