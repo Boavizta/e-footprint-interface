@@ -57,10 +57,11 @@
 <p class="tagline">The navigable index for design artefacts that engineering reads to know what to build, and design reads to know what already exists. Strategy &amp; rationale: <a href="README.md">README</a>.</p>
 
 <div class="note">
-  <b>Scope today.</b> The <b>journey set</b> is being authored. <a href="journeys/build-a-model.html">build-a-model</a> — the
-  core editing loop, covering both web and edge — is <b>live</b> and is the reference implementation (its
-  <code>&lt;style&gt;</code> block is the shared toolkit). The other four journeys are scoped below with a build order;
-  <b>tokens</b> and the <b>component inventory</b> are pre-staged and stay placeholders until they're stood up.
+  <b>Scope today.</b> The <b>journey set is live</b> — <a href="journeys/build-a-model.html">build-a-model</a> (the core editing
+  loop, covering both web and edge) is the reference implementation, its <code>&lt;style&gt;</code> block the shared toolkit, and
+  <a href="journeys/onboarding.html">onboarding</a>, <a href="journeys/view-results.html">view-results</a>,
+  <a href="journeys/compare-models.html">compare-models</a> and <a href="journeys/save-and-load.html">save-and-load</a> are
+  authored against it. <b>tokens</b> and the <b>component inventory</b> are pre-staged and stay placeholders until they're stood up.
 </div>
 
 <h2>Journeys</h2>
@@ -72,25 +73,25 @@
     <div class="desc"><b>The core loop.</b> The three-column canvas → add an object in the side panel → edit it → delete it, with disabled-instead-of-error gating and in-place OOB canvas patches. Covers the Edge toggle and all relationship shapes (list, weighted dict, edge groups). The reference journey.</div>
   </a>
 
-  <div class="card inert">
-    <div class="name">onboarding <span class="ord">2nd</span><span class="pill todo">To author</span></div>
-    <div class="desc">First run: home → <em>Start modeling</em> → template picker (starter templates / how-to guides / start from scratch) → land on the canvas → the guided tour and the help drawer. (The web/edge toggle belongs to <em>build-a-model</em>, Phase E.)</div>
-  </div>
+  <a class="card" href="journeys/onboarding.html">
+    <div class="name">onboarding <span class="pill web">First run</span></div>
+    <div class="desc">First run: home → <em>Start modeling</em> → the template picker (templates / start from scratch / load a file) → land on the canvas → the guided tour and the help drawer. How the canvas itself steers the first move.</div>
+  </a>
 
-  <div class="card inert">
-    <div class="name">view-results <span class="ord">3rd</span><span class="pill todo">To author</span></div>
-    <div class="desc">The Results panel: the Sankey with its "Analyse by" chips, the hourly / cumulative / breakdown charts, click-to-explain modals (every value carries its derivation), the Sources tab, and xlsx export.</div>
-  </div>
+  <a class="card" href="journeys/view-results.html">
+    <div class="name">view-results</div>
+    <div class="desc">The Results panel: yearly &amp; cumulative emissions charts and the <em>Impact repartition</em> Sankey (with its "Analyse by" chips), value derivations via tooltips / inline formulas / the calculus graph, the Sources tab, and xlsx export.</div>
+  </a>
 
-  <div class="card inert">
-    <div class="name">compare-models <span class="ord">4th</span><span class="pill todo">To author</span></div>
-    <div class="desc">The second model slot and the comparison dashboard: KPI strip, decomposition bars, paired &amp; cumulative emissions charts, assumptions diff table. Reached via the ⇄ Compare tab.</div>
-  </div>
+  <a class="card" href="journeys/compare-models.html">
+    <div class="name">compare-models</div>
+    <div class="desc">The second model slot and the comparison dashboard: KPI strip, decomposition bars, paired &amp; cumulative emissions charts, assumptions diff. Reached via the ⇄ Compare tab — non-destructive, dismiss in place.</div>
+  </a>
 
-  <div class="card inert">
-    <div class="name">save-and-load <span class="ord">5th</span><span class="pill todo">To author</span></div>
-    <div class="desc">Persistence: download / upload a single model and the two-model workspace (<code>.e-f.json</code> round-trip including UI config), and the recovery page when a session model fails to deserialize.</div>
-  </div>
+  <a class="card" href="journeys/save-and-load.html">
+    <div class="name">save-and-load</div>
+    <div class="desc">Persistence by file: export / open a single model or the two-model workspace (<code>.e-f.json</code> round-trip including UI config), and the recovery page when a session model fails to deserialize.</div>
+  </a>
 
 </div>
 
@@ -119,7 +120,7 @@
 <p class="tagline" style="font-size:.9rem;margin-top:.8rem;">Specs and plans are already authored as self-contained HTML in this repo (<a href="../workflow.md">workflow.md</a>) — journeys are the same posture. See the <a href="README.md">README</a> for the sync protocol with design work.</p>
 
 <footer>
-  e-footprint-interface design hub · journeys in progress (build-a-model live) · tokens &amp; component inventory staged.
+  e-footprint-interface design hub · all five journeys live (build-a-model is the reference) · tokens &amp; component inventory staged.
 </footer>
 
 </body>

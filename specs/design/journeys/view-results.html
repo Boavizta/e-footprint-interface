@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — view-results</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- view-results only: the Results panel, charts, Sankey, sources & derivation ---- */
+  .rpanel { position: absolute; inset: 0; background: #fff; display: flex; flex-direction: column; }
+  .rphead { display: flex; align-items: center; gap: .5rem; padding: .4rem .55rem; border-bottom: 1px solid var(--line); }
+  .rphead .rt { font-size: .8rem; font-weight: 700; color: var(--ink); }
+  .rphead .chev { margin-left: auto; color: var(--muted); }
+  .subtabs { display: flex; gap: .3rem; }
+  .subtab { font-size: .62rem; padding: .16rem .5rem; border-radius: 7px; color: var(--faint); background: var(--g100); }
+  .subtab.on { background: var(--lp); color: var(--primary); font-weight: 600; }
+  .rpbody { padding: .5rem; overflow: auto; display: grid; gap: .5rem; }
+  /* chart cards */
+  .cbox { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .45rem .5rem; }
+  .cbox .ct { font-size: .68rem; font-weight: 600; color: var(--ink); }
+  .cbox .cu { font-size: .54rem; color: var(--faint); margin-bottom: .15rem; }
+  .cbox svg { display: block; width: 100%; height: auto; }
+  .cbox .crow { display: flex; align-items: center; justify-content: space-between; gap: .4rem; }
+  .slegend { display: flex; gap: 1rem; margin-top: .3rem; }
+  .slegend .gh { font-size: .5rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; margin-bottom: .12rem; }
+  .cap { display: inline-flex; align-items: center; gap: .22rem; font-size: .5rem; color: var(--muted); border: 1px solid var(--g200);
+         border-radius: 999px; padding: .03rem .32rem; margin: .06rem .12rem 0 0; }
+  .cap i { width: .5rem; height: .5rem; border-radius: 50%; display: inline-block; }
+  /* sankey */
+  .chips { display: flex; flex-wrap: wrap; gap: .25rem; }
+  .chip { font-size: .54rem; padding: .07rem .42rem; border-radius: 999px; border: 1px solid var(--g300); color: var(--faint); background: #fff; }
+  .chip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .skbox { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .45rem .5rem; }
+  .skbox .crow { display: flex; align-items: flex-start; justify-content: space-between; gap: .4rem; }
+  .skdiagram svg { display: block; width: 100%; height: auto; }
+  .setrow { display: flex; align-items: center; gap: .4rem; margin: .22rem 0; }
+  .setrow .sk { flex: 0 0 5.6rem; font-weight: 700; color: var(--muted); font-size: .5rem; text-transform: uppercase; letter-spacing: .02em; }
+  .gear { color: var(--g400); font-size: .7rem; } .xdel { color: var(--g400); font-size: .72rem; }
+  .addview { display: flex; align-items: center; gap: .35rem; border: 2px dotted var(--g350); border-radius: 8px; padding: .3rem .45rem;
+             font-size: .62rem; color: var(--primary); background: #fff; }
+  .obanner { background: var(--newlight); border: 1px solid #cfe6ea; border-radius: 8px; padding: .4rem .5rem; font-size: .56rem; color: var(--muted); position: relative; }
+  .obanner b { color: var(--ink); } .obanner .x { position: absolute; top: .25rem; right: .4rem; color: var(--g350); }
+  /* sources table */
+  .srctab { width: 100%; border-collapse: collapse; font-size: .54rem; background: #fff; }
+  .srctab th, .srctab td { border: 1px solid var(--line); padding: .18rem .3rem; text-align: left; vertical-align: top; }
+  .srctab th { background: var(--g100); font-size: .48rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+  .badge-c { font-size: .48rem; border-radius: 999px; padding: .02rem .3rem; background: var(--ok-bg); color: var(--ok); white-space: nowrap; }
+  .seeg { color: var(--primary); white-space: nowrap; }
+  .xlsxbtn { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid var(--g400); border-radius: 7px; background: #fff;
+             color: var(--primary); font-size: .6rem; font-weight: 600; padding: .2rem .5rem; }
+  /* derivation: formula expander */
+  .formula { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .5rem .6rem; }
+  .formula .fh { font-size: .56rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; margin: .5rem 0 .15rem; }
+  .formula .fh:first-child { margin-top: 0; }
+  .formula .eq { font-family: ui-monospace, Menlo, monospace; font-size: .68rem; color: var(--ink); background: #fff;
+                 border: 1px solid var(--g200); border-radius: 5px; padding: .3rem .4rem; }
+  .formula .var { font-size: .64rem; color: var(--muted); margin: .08rem 0; } .formula .var b { color: var(--ink); }
+  .formula .glink { display: inline-block; margin-top: .35rem; color: var(--primary); font-size: .64rem; }
+  .syms { border-bottom: 1px dotted var(--g400); }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>view-results</h1>
+<p class="lede">The model is built — now <b>read its footprint</b>. <b>view-results</b> opens the Results panel over the canvas:
+  the <b>emissions over time</b> (yearly bars and a cumulative curve) and the <b>Impact repartition</b> Sankey that shows where the
+  CO₂e actually flows. Success isn't "a chart appeared" — it's <b>understanding the number and trusting it</b>: every value can be
+  traced to its inputs (a formula, a calculus graph, a cited source), filtered by the angle you care about, and exported. Results
+  open <b>in place</b> over a model that's already computable; the button stays <b>disabled with the live reason</b> until it is.</p>
+<p class="note">Faithful to the deployed app. Draws from the <b>Results</b> bar / <b>Show results</b> pill, the <code>result-chart</code>
+  panel and its graph + Sankey partials, the <code>source-table</code>, and the calculated-attribute explanation views. Note: value
+  derivations are <b>tooltips, inline expanders and a new-tab calculus graph</b> — not centered modals. Code-level pointers are
+  collected for agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+
+<!-- ============ PHASE A — THE GATE ============ -->
+<div class="phase">
+  <span class="tag">A · The gate</span><span class="conn">Results stays disabled — with the live reason — until the model computes</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — gated results -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span><span class="tbtn" style="width:auto;padding:0 .4rem;font-size:.6rem;color:var(--g400)">Show results</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:160px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="addbtn locked"><span class="plus">＋</span> Add usage pattern</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Purchase journey <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server <span class="pencil">✎</span></div></div>
+        </div>
+        <div class="resultsbar locked"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Two co-equal ways in, both <b>dimmed</b> here: the bottom <b>Results</b> bar and the toolbar <b>Show results</b> pill. Hovering either shows <b>the actual validation error</b> — e.g. <em>"No impact could be computed because the modeling is incomplete. Please make sure you have at least one usage pattern…"</em> — not generic copy.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>Results waits until the model computes</h3></div>
+    <p>Both entry points — the bottom bar and the toolbar pill — gate on the model being <b>computable</b>. While it isn't, they're
+       disabled and the tooltip is the <b>live reason</b> from validation, so the user reads exactly what's missing rather than a
+       flat "complete your model." It's the canvas's <em>disabled, never errored</em> rule, applied to results.</p>
+    <div class="states">
+      <div class="state"><span class="k">Two synced buttons</span><span class="v">The bottom <b>Results</b> bar and the toolbar <b>Show results</b> pill always agree — one shared region rebuilds both, so they never drift.</span></div>
+      <div class="state"><span class="k">Live reason</span><span class="v">The locked tooltip is the real validation text (missing usage pattern, a journey with no steps, …) — not a static string.</span></div>
+      <div class="state"><span class="k">Unlock = one beat</span><span class="v">When the last missing piece lands, both buttons enable and a toast fires: <em>"Your model is complete — results are now available."</em> Remove it and they re-lock with <em>"Results are no longer available."</em></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — OPEN RESULTS ============ -->
+<div class="phase">
+  <span class="tag">B · Open Results</span><span class="conn">the panel slides up · Results / Sources sub-tabs · emissions over time</span><span class="rule"></span>
+</div>
+
+<!-- screen 2 — results panel with the two charts -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:330px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Results</span><span class="subtabs"><span class="subtab on">Results</span><span class="subtab">Sources</span></span><span class="chev">﹀</span></div>
+          <div class="rpbody">
+            <div class="cbox">
+              <div class="crow"><span class="ct">Yearly CO2 emissions</span><select class="dd" style="font-size:.56rem;padding:.1rem 1rem .1rem .35rem"><option>Year</option><option>Month</option></select></div>
+              <div class="cu">t CO₂-eq</div>
+              <svg viewBox="0 0 320 80" role="img" aria-label="Yearly stacked emissions bars">
+                <line x1="14" y1="68" x2="316" y2="68" stroke="#D1D5DB"/>
+                <rect x="40" y="44" width="34" height="24" fill="#2D4675"/><rect x="40" y="34" width="34" height="10" fill="#7c91b6"/>
+                <rect x="110" y="38" width="34" height="30" fill="#2D4675"/><rect x="110" y="27" width="34" height="11" fill="#7c91b6"/>
+                <rect x="180" y="32" width="34" height="36" fill="#2D4675"/><rect x="180" y="20" width="34" height="12" fill="#7c91b6"/>
+                <rect x="250" y="28" width="34" height="40" fill="#2D4675"/><rect x="250" y="15" width="34" height="13" fill="#7c91b6"/>
+                <text x="57" y="77" font-size="7" fill="#6B7280" text-anchor="middle">2024</text><text x="127" y="77" font-size="7" fill="#6B7280" text-anchor="middle">2025</text>
+                <text x="197" y="77" font-size="7" fill="#6B7280" text-anchor="middle">2026</text><text x="267" y="77" font-size="7" fill="#6B7280" text-anchor="middle">2027</text>
+              </svg>
+            </div>
+            <div class="cbox">
+              <span class="ct">Cumulative CO2 emissions over time</span>
+              <div class="cu">t CO₂-eq</div>
+              <svg viewBox="0 0 320 70" role="img" aria-label="Cumulative emissions curve">
+                <line x1="14" y1="60" x2="316" y2="60" stroke="#D1D5DB"/>
+                <path d="M18 58 C 90 52, 150 40, 210 26 S 300 12, 306 10 L306 60 L18 60 Z" fill="#2D4675" opacity=".12"/>
+                <path d="M18 58 C 90 52, 150 40, 210 26 S 300 12, 306 10" fill="none" stroke="#2D4675" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="slegend">
+              <div><div class="gh">Fabrication</div><span class="cap"><i style="background:#7c91b6"></i>Servers and storage</span><span class="cap"><i style="background:#9aa7c2"></i>Devices</span></div>
+              <div><div class="gh">Usage</div><span class="cap"><i style="background:#2D4675"></i>Servers and storage</span><span class="cap"><i style="background:#4b5e8a"></i>Network</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking Results slides a panel up over the canvas. Header: <b>Results</b> with <b>Results</b> / <b>Sources</b> sub-tabs (client-side toggles). Two charts — <b>Yearly CO2 emissions</b> (a <b>Year / Month</b> select retitles it <em>Monthly…</em>) and <b>Cumulative CO2 emissions over time</b> — share a <b>split legend</b> grouped into <em>Fabrication</em> and <em>Usage</em>; each capsule toggles a series.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>Open Results — emissions over time</h3></div>
+    <p>Results opens <b>in place</b> — a panel over the canvas, not a new page. It leads with the two time views: a <b>stacked
+       yearly bar</b> (toggle to monthly) and a <b>cumulative curve</b>, both in the model's own display unit. The legend is split
+       into <b>Fabrication</b> and <b>Usage</b> so the two halves of the lifecycle read at a glance; clicking a capsule isolates or
+       hides a series.</p>
+    <div class="states">
+      <div class="state"><span class="k">In-place panel</span><span class="v">Slides up over the canvas (full-screen on mobile); a down-chevron / <em>Back to model</em> closes it. No URL change.</span></div>
+      <div class="state"><span class="k">Results / Sources tabs</span><span class="v">Client-side toggles; <b>Sources</b> is loaded lazily the first time it's opened (see Phase D).</span></div>
+      <div class="state"><span class="k">Granularity</span><span class="v">The <b>Year / Month</b> select redraws the bar and rewrites its title (<em>Yearly → Monthly CO2 emissions</em>). Default is Year.</span></div>
+      <div class="state"><span class="k">Split legend</span><span class="v">Series grouped under <b>Fabrication</b> / <b>Usage</b>; a capsule toggles its dataset, and hovering offers <b>Only</b> to isolate one.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — IMPACT REPARTITION (SANKEY) ============ -->
+<div class="phase">
+  <span class="tag">C · Impact repartition</span><span class="conn">the Sankey · Analyse by · stackable analysis views</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — sankey card -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:360px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Results</span><span class="subtabs"><span class="subtab on">Results</span><span class="subtab">Sources</span></span><span class="chev">﹀</span></div>
+          <div class="rpbody">
+            <div style="font-size:.7rem;font-weight:600">Impact repartition</div>
+            <div class="obanner"><span class="x">×</span><b>Sankey diagrams</b> show how your system's total CO₂ footprint flows from the whole down to individual components. Width = share of emissions. <em>Hover nodes &amp; flows for details; drag to rearrange.</em></div>
+            <div class="skbox">
+              <div class="crow"><div><div style="font-size:.6rem;font-weight:600">Impact repartition</div><div style="font-size:.5rem;color:var(--faint)">All phases</div></div><div><span class="gear">⚙</span> <span class="xdel">✕</span></div></div>
+              <div class="setrow"><span class="sk">Analyse by</span><span class="chips"><span class="chip on">Total impact</span><span class="chip on">Phase</span><span class="chip on">Usage journeys</span><span class="chip on">Steps / Functions</span><span class="chip on">Category</span><span class="chip on">Hardware</span><span class="chip">Usage patterns</span><span class="chip">Jobs / component needs</span></span></div>
+              <div class="setrow"><span class="sk">Lifecycle phase</span><select class="dd" style="font-size:.55rem;padding:.08rem 1rem .08rem .35rem"><option>All phases</option><option>Manufacturing only</option><option>Usage only</option></select></div>
+              <div class="setrow"><span class="sk">Aggregation</span><span style="flex:1;height:.3rem;background:var(--g200);border-radius:99px;position:relative"><span style="position:absolute;left:10%;top:-.12rem;width:.55rem;height:.55rem;border-radius:50%;background:var(--primary)"></span></span><span style="font-size:.52rem;color:var(--muted)">1%</span></div>
+              <div class="setrow"><span style="font-size:.55rem;color:var(--primary)">▶ Advanced options</span></div>
+              <div class="skdiagram">
+                <svg viewBox="0 0 320 110" role="img" aria-label="Sankey impact repartition">
+                  <rect x="14" y="36" width="9" height="40" fill="#2D4675"/>
+                  <path d="M23 40 C 80 40, 80 22, 140 22 L140 40 C 80 40, 80 56, 23 56 Z" fill="#2D4675" opacity=".22"/>
+                  <path d="M23 58 C 80 58, 80 74, 140 74 L140 88 C 80 78, 80 62, 23 70 Z" fill="#7B5DC7" opacity=".18"/>
+                  <rect x="140" y="20" width="9" height="22" fill="#2D4675"/><rect x="140" y="60" width="9" height="30" fill="#7B5DC7"/>
+                  <path d="M149 24 C 210 24, 210 16, 270 16 L270 30 C 210 32, 210 36, 149 38 Z" fill="#2D4675" opacity=".2"/>
+                  <path d="M149 66 C 210 66, 210 60, 270 58 L270 80 C 210 84, 210 84, 149 86 Z" fill="#7B5DC7" opacity=".16"/>
+                  <rect x="270" y="14" width="9" height="22" fill="#2D4675"/><rect x="270" y="56" width="9" height="26" fill="#7B5DC7"/>
+                  <text x="18" y="32" font-size="6" fill="#6B7280">Total</text><text x="138" y="16" font-size="6" fill="#6B7280">Journeys</text><text x="268" y="10" font-size="6" fill="#6B7280">Hardware</text>
+                </svg>
+              </div>
+            </div>
+            <div class="addview"><span class="plus" style="font-weight:700">＋</span> Add another analysis view</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Impact repartition</b> section: a dismissible explainer banner, then a Sankey <b>card</b>. <b>Analyse by</b> chips pick which columns appear (active = navy); <b>Lifecycle phase</b> and an <b>Aggregation</b> slider (group small flows into "Other") refine it; <b>Advanced options</b> hides excluded-types, headers and label length. <b>Add another analysis view</b> stacks a second card with its own settings.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Impact repartition — where the CO₂e flows</h3></div>
+    <p>The Sankey answers <b>"where does it come from?"</b> — flow width is share of emissions, from the whole system down to
+       components. <b>Analyse by</b> chips choose the columns (total → countries → journeys → steps → hardware → component
+       breakdown); the diagram <b>re-renders on every change</b>. The heavy repartition maths runs server-side; the browser only
+       lays the diagram out, with hover tooltips carrying each node's value and share.</p>
+    <div class="states">
+      <div class="state"><span class="k">Analyse by</span><span class="v">Chips toggle the columns shown left-to-right; only chips whose objects exist in the model appear. Default shows phase, journeys, steps, category &amp; hardware.</span></div>
+      <div class="state"><span class="k">Refine</span><span class="v"><b>Lifecycle phase</b> (All / Manufacturing only / Usage only) and an <b>Aggregation threshold</b> that folds sub-threshold flows into <em>"Other."</em></span></div>
+      <div class="state"><span class="k">Advanced</span><span class="v"><b>Excluded types</b> chips, a <b>Show</b> column-headers toggle, and a <b>Label length</b> cap.</span></div>
+      <div class="state"><span class="k">Stack views</span><span class="v"><b>Add another analysis view</b> appends an independent card; each card's settings <b>persist</b> across reloads and survive export / import.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE D — SOURCES & EXPORT ============ -->
+<div class="phase">
+  <span class="tag">D · Sources &amp; export</span><span class="conn">the inputs behind the number · edit metadata · export to xlsx</span><span class="rule"></span>
+</div>
+
+<!-- screen 4 — sources tab -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:280px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Results</span><span class="subtabs"><span class="subtab">Results</span><span class="subtab on">Sources</span></span><span class="chev">﹀</span></div>
+          <div class="rpbody">
+            <div><span class="xlsxbtn">⬇ Export to xslx</span></div>
+            <table class="srctab">
+              <tr><th>Item name</th><th>Attribute of</th><th>Value</th><th>Unit</th><th>Source</th><th>Confidence</th><th></th></tr>
+              <tr><td>RAM</td><td>Web server</td><td>128</td><td>GB</td><td>Boavizta</td><td><span class="badge-c">Confident</span></td><td>✎</td></tr>
+              <tr><td>Carbon intensity</td><td>France</td><td>56</td><td>g/kWh</td><td>RTE 2023</td><td><span class="badge-c">Confident</span></td><td>✎</td></tr>
+              <tr><td>Embodied emissions</td><td>Web server</td><td>1.2</td><td>t CO₂-eq</td><td class="seeg">(see graph)</td><td>—</td><td></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Sources</b> tab lists every input behind the model — <b>Item name · Attribute of · Value · Unit · Source · Confidence · Comment</b>. Input rows carry a <b>✎</b> to edit the source / confidence / comment inline (metadata-only, no recompute); <b>calculated</b> values show <b>(see graph)</b> instead. <b>Export to xslx</b> downloads the whole table.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>Sources — provenance, editable and exportable</h3></div>
+    <p>Numbers are only as trustworthy as their origins, so the <b>Sources</b> tab puts every input's provenance in one table:
+       its value, unit, cited source and a confidence badge. Input rows are <b>editable in place</b> — fixing a source or
+       confidence is a metadata-only change that doesn't recompute the model. Calculated values aren't sourced; they link to
+       their <b>(see graph)</b> derivation instead.</p>
+    <div class="states">
+      <div class="state"><span class="k">One row per input</span><span class="v">Item · Attribute of · Object type · Value · Unit · Source · Confidence · Comment.</span></div>
+      <div class="state"><span class="k">Inline edit</span><span class="v">The <b>✎</b> opens a row editor for source / confidence / comment; saving doesn't reload the table or recompute.</span></div>
+      <div class="state"><span class="k">Calculated rows</span><span class="v">Show <b>(see graph)</b> — a link to the value's full calculus graph — rather than a source.</span></div>
+      <div class="state"><span class="k">Export to xlsx</span><span class="v">The button (labelled <em>"Export to xslx"</em> in the app) downloads a sources spreadsheet. The model itself exports as JSON from the toolbar — see <a href="save-and-load.html">save-and-load</a>.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- derivation section -->
+<h2 class="sec">Every value carries its derivation</h2>
+<p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">A footprint you can't interrogate is a footprint you
+  can't trust. So every computed value can be <b>traced to its inputs</b> — but through <b>lightweight surfaces</b>, not a heavyweight
+  modal: <b>tooltips</b> on the charts and Sankey, an <b>inline formula expander</b> in an object's <em>Calculated attributes</em>, the
+  Sources <b>(see graph)</b> link, and the full <b>calculus graph</b> opened in a new tab.</p>
+
+<div class="cmp">
+  <div class="cmpcol">
+    <p class="ttl">Inline formula <span class="kind">· in the edit panel</span></p>
+    <div class="pcard">
+      <div class="phead"><b>Web server · embodied emissions</b></div>
+      <div class="formula">
+        <div class="fh">Input variables</div>
+        <div class="var"><b>m</b> = carbon footprint of fabrication · <b>u</b> = number of units · <b>t</b> = lifespan</div>
+        <div class="fh">Formula</div>
+        <div class="eq">embodied = <span class="syms">m</span> × <span class="syms">u</span> × (timespan / <span class="syms">t</span>)</div>
+        <div class="fh">Direct children</div>
+        <div class="var">used by → <b>Web server total emissions</b></div>
+        <a class="glink" href="#">See the calculus graph ↗</a>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">Inline formula</span>Open an object → <b>Calculated attributes</b> → a value's <b>formula icon</b> expands <b>Input variables</b>, the <b>Formula</b> (each symbol tooltipped), its <b>Direct children</b>, and a link to the graph. Reached from the edit panel, not the Results panel.</div>
+  </div>
+  <div class="cmpcol">
+    <p class="ttl">Calculus graph <span class="kind">· new tab</span></p>
+    <div class="pcard">
+      <div class="phead"><b>Calculus graph</b><span class="x">↗ new tab</span></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Calculus derivation graph" style="width:100%;height:auto">
+        <line x1="60" y1="30" x2="150" y2="60" stroke="#9CA3AF"/><line x1="60" y1="90" x2="150" y2="60" stroke="#9CA3AF"/>
+        <line x1="150" y1="60" x2="240" y2="60" stroke="#9CA3AF"/>
+        <circle cx="55" cy="30" r="13" fill="#e8eaf4" stroke="#2D4675"/><circle cx="55" cy="90" r="13" fill="#e8eaf4" stroke="#2D4675"/>
+        <circle cx="150" cy="60" r="15" fill="#e8eaf4" stroke="#2D4675"/><circle cx="245" cy="60" r="15" fill="#2D4675"/>
+        <text x="55" y="13" font-size="7" fill="#6B7280" text-anchor="middle">inputs</text>
+        <text x="150" y="40" font-size="7" fill="#6B7280" text-anchor="middle">×</text>
+        <text x="245" y="40" font-size="7" fill="#6B7280" text-anchor="middle">result</text>
+      </svg>
+    </div>
+    <div class="mock-help"><span class="lbl">Calculus graph</span>The full derivation tree — every ancestor input and operation down to the result — rendered as an interactive graph and opened in a <b>new browser tab</b> (cached server-side, served out of line so the panel payload stays small).</div>
+  </div>
+</div>
+
+<table>
+  <tr><th>Surface</th><th>Where</th><th>Shows</th></tr>
+  <tr><td><b>Tooltip</b></td><td>chart &amp; Sankey hover</td><td>a value + its share of total (Sankey: aggregated members too)</td></tr>
+  <tr><td><b>Inline formula</b></td><td>edit panel · Calculated attributes</td><td>input variables, the formula, direct children</td></tr>
+  <tr><td><b>(see graph)</b></td><td>Sources tab · calculated rows</td><td>jump to the calculus graph for that value</td></tr>
+  <tr><td><b>Calculus graph</b></td><td>new browser tab</td><td>the whole derivation tree, interactive</td></tr>
+</table>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>Results is disabled with the live validation reason — never offered then errored.</b></td><td>Opening results on an incomplete model would compute nothing. The button gates on computability and the tooltip is the actual error (which usage pattern / journey step is missing), so the user reads the fix — disabled-instead-of-error, with specifics.</td></tr>
+  <tr><td><b>Two synced entry points (bottom bar + toolbar pill), one shared region.</b></td><td>The bar is discoverable (swipe-up on mobile); the pill is always in reach. Both are rebuilt by a single region so their enabled/disabled state can never drift apart.</td></tr>
+  <tr><td><b>Results open in place over the canvas, not as a new page or URL.</b></td><td>The model stays loaded behind the panel; closing is instant and keeps context. Consistent with the rest of the app's no-reload, no-push-state behaviour.</td></tr>
+  <tr><td><b>Charts are drawn client-side; the Sankey's repartition maths runs server-side.</b></td><td>Chart.js builds the time charts from emissions data already in the page; the Sankey's heavy attribution is the library's, kept as the single source of modeling truth — the browser only lays it out and shows precomputed tooltips.</td></tr>
+  <tr><td><b>Sankey settings live in UI config, not in the model; views stack as independent cards.</b></td><td>An analysis angle is a viewing choice, not a model fact — so it persists per card across reloads and survives export/import without touching the model. Stacking cards beats one over-configurable diagram for comparing angles side by side.</td></tr>
+  <tr><td><b>Derivations use lightweight surfaces (tooltips, inline expanders, a new tab) — not a modal.</b></td><td>A glance wants a tooltip; the formula wants to stay next to the value; the full graph is large, so it's cached and opened out-of-line in a new tab. A heavyweight modal would interrupt the read and bloat the payload.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, the result-charts bundle, the Sankey pipeline &amp; the derivation views</span></summary>
+  <div class="pbody">
+    <p>Where this lives in code. Start with <code>specs/architecture.md</code> (render layer, OOB regions, <code>interface_config</code> / Sankey persistence). The gate &amp; live reason mirror <a href="build-a-model.html">build-a-model</a>'s Results bar.</p>
+    <dl>
+      <dt>The gate (Phase A)</dt>
+      <dd><code>components/results_bar_button.html</code> (<code>#btn-open-panel-result</code>) + <code>components/show_results_toolbar_button.html</code> (<code>#show-results-toolbar-btn</code>, label "Show results"), both gating on <code>creation_constraints["__results__"]</code>. Live reason from <code>ModelWeb._build_creation_constraints</code> → <code>SystemValidationService.validate_for_computation</code>. Lock/unlock toast: <code>results_buttons</code> OOB region (<code>modeling_object_web.py</code>, <code>oob_regions.py</code>) + <code>CONSTRAINT_MESSAGES["__results__"]</code> ("Your model is complete — results are now available" / "Results are no longer available").</dd>
+      <dt>Panel &amp; charts (Phase B)</dt>
+      <dd>Route <code>result-chart/</code> → <code>result_chart</code> (sets <code>HX-Trigger-After-Settle: triggerResultRendering</code>), template <code>result/result_panel.html</code> (Results/Sources sub-tabs, hyperscript toggle; Sources <code>hx-trigger="click once"</code>) → <code>result/result_graph.html</code>. Charts: the <b>result_charts</b> esbuild bundle (<code>theme/static/scripts/result_charts/{index,chart,config,legend,tooltip,display}.js</code> → <code>bundles/result_charts.js</code>), data = <code>window.emissions</code> (<code>ModelWeb.system_emissions</code>). Split legend = <code>legend.js</code> <code>splitCapsuleLegendPlugin</code>; panel slide = <code>hammer_utils.js</code> (<code>displayPanelResult</code> / <code>hidePanelResult</code>).</dd>
+      <dt>Sankey (Phase C)</dt>
+      <dd>Routes <code>sankey-cards/</code>, <code>sankey-form/</code>, <code>sankey-diagram/</code>, <code>sankey-delete-card/</code> in <code>adapters/views/sankey_views.py</code> (<code>ANALYSE_BY_CHIPS</code>, <code>DEFAULT_ACTIVE_COLUMNS</code>, <code>EXCLUDABLE_CLASSES</code>, <code>_build_sankey_payload</code> → library <code>ImpactRepartitionSankey</code>). Templates <code>result/sankey_section.html</code> / <code>sankey_card.html</code> / <code>sankey_diagram.html</code>; rendered by ECharts in <code>theme/static/scripts/sankey.js</code> (reads <code>data-sankey</code>; <code>sankeyToggleChip</code>). Settings persist in <code>repository.interface_config["sankey_diagrams"]</code>.</dd>
+      <dt>Sources &amp; export (Phase D)</dt>
+      <dd>Route <code>source-table/</code> → <code>source_table</code> (template <code>result/source_table.html</code>, rows <code>source_table_row.html</code>; inline editor <code>source-table-row-editor/&lt;id&gt;/&lt;attr&gt;/</code> → <code>source_table_row_editor.html</code>, metadata-only via <code>source_metadata.js</code>). Export <code>download-sources/</code> → <code>download_sources</code> (openpyxl, sheet "Sources"; button label literally "Export to xslx").</dd>
+      <dt>Derivation surfaces</dt>
+      <dd>Inline formula: <code>side_panels/edit/calculated_attributes_section.html</code> + <code>calculated_attributes/components/ancestors_formula_and_children.html</code> via <code>get_calculated_attribute_explanation/&lt;id&gt;/&lt;attr&gt;/</code> (<code>hx-trigger="click once"</code>). Hourly attrs add a timeseries chart (<code>get_explainable_hourly_quantity_chart_and_explanation/…</code>, <code>calculated_attributes_timeseries.js</code>). Calculus graph: <code>display-calculus-graph/&lt;id&gt;/&lt;attr&gt;/</code> builds the pyvis graph (library <code>build_calculus_graph</code>), caches it (<code>SessionCacheRepository</code> namespace <code>calculus_graph</code>), serves via <code>graph/&lt;cache_key&gt;</code> in an iframe, opened <code>target="_blank"</code>.</dd>
+      <dt>Not in the panel (clarifications)</dt>
+      <dd>No hourly chart in the Results panel — only yearly/monthly bar + cumulative line + Sankey; the only hourly chart is the per-attribute explain chart in the edit panel. No centered explain modal. The model exports as JSON (not xlsx); xlsx is sources-only.</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · view-results · read the footprint and trust it · faithful to the deployed app. Shares the canonical
+  <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>

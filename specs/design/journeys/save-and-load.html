@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — save-and-load</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- save-and-load only: export dropdown, file input, recovery page ---- */
+  .menu { position: absolute; z-index: 6; background: #fff; border: 1px solid var(--g300); border-radius: 9px;
+          box-shadow: 0 10px 26px rgba(17,25,40,.16); padding: .3rem; width: 10.5rem; }
+  .menu .mi { display: flex; align-items: center; gap: .4rem; font-size: .64rem; color: var(--ink); padding: .3rem .45rem; border-radius: 6px; }
+  .menu .mi + .mi { border-top: 1px solid var(--g100); }
+  .menu .mi .g { width: 1rem; text-align: center; color: var(--primary); flex: 0 0 auto; }
+  .fileinput { display: flex; align-items: center; gap: .45rem; border: 1px dashed var(--g350); border-radius: 8px;
+               padding: .5rem .55rem; font-size: .62rem; color: var(--faint); background: var(--g50); }
+  .fileinput .btn { border: 1px solid var(--g300); border-radius: 6px; padding: .12rem .45rem; font-size: .58rem; color: var(--ink); background: #fff; flex: 0 0 auto; }
+  .filechip { display: inline-flex; align-items: center; gap: .35rem; border: 1px solid var(--g300); border-radius: 8px;
+              padding: .25rem .5rem; font-size: .62rem; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .filechip .ext { color: var(--primary); font-weight: 700; }
+  /* recovery page */
+  .recpage { background: #fff; position: absolute; inset: 0; padding: 1.1rem .9rem; text-align: center; overflow: auto; }
+  .recpage .warn { font-size: 1.5rem; }
+  .recpage .rh { font-size: .9rem; font-weight: 700; color: var(--ink); margin: .25rem 0; }
+  .recpage .rb { font-size: .6rem; color: var(--muted); max-width: 21rem; margin: .25rem auto .4rem; line-height: 1.55; }
+  .recpage .err { font-size: .52rem; color: var(--faint); margin-bottom: .5rem; }
+  .recacts { display: flex; flex-direction: column; gap: .4rem; align-items: center; }
+  .recbtn { font-size: .62rem; border-radius: 7px; padding: .3rem .8rem; border: 1px solid var(--g300); background: #fff; color: var(--ink); }
+  .recbtn.green { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 600; }
+  .recbtn.link { border: none; color: var(--primary); padding: .15rem; }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>save-and-load</h1>
+<p class="lede">There are no accounts and no server-side library here — a model lives in your session, and <b>persisting it means
+  moving a file</b>. <b>save-and-load</b> is that round-trip: <b>Export</b> downloads a <code>.e-f.json</code>, <b>Open file</b> reads
+  one back, and a single model or the whole two-model workspace travels the same way. Success isn't "a file downloaded" — it's a
+  <b>faithful round-trip</b>: the model (and its Sankey/UI settings) comes back intact, recomputed and verified, and when a file
+  <em>can't</em> be opened the app <b>never loses your work</b> — it routes you to a recovery page that still hands it back.</p>
+<p class="note">Faithful to the deployed app. Draws from the per-model <b>toolbar</b> (<code>upload_download_reboot_model_tooltips.html</code>),
+  the <b>Open a file</b> side panel, the <code>download-json</code> / <code>download-workspace</code> / <code>upload-json</code> views, and
+  the standalone <code>recovery.html</code>. Code-level pointers — the file documents, content-routing, session persistence — are
+  collected for agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+
+<!-- ============ PHASE A — SAVE (EXPORT) ============ -->
+<div class="phase">
+  <span class="tag">A · Save — export a file</span><span class="conn">one model downloads directly · two models offer This / Both</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — export -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab">Reference model</span><span class="tab active">Comparison model</span><span class="tab compare">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn" style="width:auto;padding:0 .35rem;font-size:.58rem">Export ▾</span><span class="tbtn">⟳</span></div>
+      </div>
+      <div class="stage" style="min-height:180px">
+        <div class="canvas dim" style="min-height:180px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="menu" style="top:2.1rem; right:2.2rem">
+          <div class="mi"><span class="g">⬇</span> This model</div>
+          <div class="mi"><span class="g">⬇</span> Both models</div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>With one model the toolbar shows a direct <b>Export</b> (tooltip <em>"Export your model"</em>) that downloads it. With two, <b>Export ▾</b> opens a menu — <b>⬇ This model</b> or <b>⬇ Both models</b>. The file is named <code>{date} UTC {model name}.e-f.json</code> (a workspace is <code>… comparison (A vs B).e-f.json</code>).</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>Save = download a file</h3></div>
+    <p>"Save" is a download. A single-model session exports straight to a <code>.e-f.json</code>; a two-model session lets you take
+       <b>just the active model</b> or the <b>whole workspace</b> in one file. The export deliberately drops calculated attributes
+       (they're recomputed on load) and carries your UI settings along — so the file stays small but round-trips faithfully.</p>
+    <div class="states">
+      <div class="state"><span class="k">One model</span><span class="v">A direct <b>Export</b> link downloads the model immediately (new tab, no screen change).</span></div>
+      <div class="state"><span class="k">Two models</span><span class="v"><b>Export ▾</b> → <b>This model</b> (<code>download-json</code>) or <b>Both models</b> (<code>download-workspace</code>, one envelope).</span></div>
+      <div class="state"><span class="k">Filename</span><span class="v"><code>{date} UTC {name}.e-f.json</code> — timestamped, sanitized; a workspace names both models.</span></div>
+      <div class="state deferred"><span class="k">Sources xlsx</span><span class="v">A separate <em>"Export to xslx"</em> in the Results panel exports the sources table — not the model. See <a href="view-results.html">view-results</a>.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — LOAD (OPEN) ============ -->
+<div class="phase">
+  <span class="tag">B · Load — open a file</span><span class="conn">one side panel · routed by content · recomputed on the way in</span><span class="rule"></span>
+</div>
+
+<!-- screen 2 — open file panel -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:200px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="panel" style="width:62%">
+          <div class="phead"><b>Open a file</b><span class="x">×</span></div>
+          <div class="field"><label>Choose a file (.e-f.json)</label></div>
+          <div class="fileinput"><span class="btn">Choose file</span> No file selected</div>
+          <p class="helptxt">A single-model file replaces this model; a workspace file restores both models.</p>
+          <button class="savebtn">Open</button>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The toolbar <b>Open file</b> (upload icon, tooltip <em>"Open a file"</em>) opens a right-docked side panel titled <b>Open a file</b> — a native file input labelled <b>Choose a file (.e-f.json)</b> and an <b>Open</b> button. One panel handles both single-model and workspace files; the app routes by what's inside.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>Load = open a file</h3></div>
+    <p>One <b>Open file</b> entry handles everything. You pick a <code>.e-f.json</code> and hit <b>Open</b>; the app inspects the
+       contents and routes itself — a single-model file <b>replaces the active model</b>, a workspace file <b>restores both
+       slots</b>. Either way the model is re-deserialized and its calculated attributes <b>recomputed</b>, so what you see is
+       verified, not trusted from the file.</p>
+    <div class="states">
+      <div class="state"><span class="k">One entry, content-routed</span><span class="v">The same <b>Open</b> handles single vs workspace files — decided by the file's contents, not its name.</span></div>
+      <div class="state"><span class="k">Recomputed on load</span><span class="v">Calculated attributes are rebuilt on import; the model is migrated forward if it's from an older schema.</span></div>
+      <div class="state"><span class="k">Success</span><span class="v">A clean load redirects to a freshly rendered builder — the canvas comes back with the loaded model.</span></div>
+      <div class="state variant"><span class="k">Add-as-second is separate</span><span class="v">Importing a <em>second</em> model to compare is a different intent — the <b>＋ Add → Import from file…</b> panel (see <a href="compare-models.html">compare-models</a>). "Open file" opens-into-here; "Import" adds alongside.</span></div>
+      <div class="state"><span class="k">Bad file</span><span class="v">An unreadable or non-e-footprint file is rejected with an explained modal — never a broken canvas (fold below).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- bad-file fold -->
+<details class="fold">
+  <summary><span class="s-tag danger">Rejected</span> Bad file — explained, never broken <span class="s-sub">— the upload is validated before it can replace your model</span></summary>
+  <div class="fold-body">
+    <div class="screen">
+      <div class="mock-col">
+        <div class="win">
+          <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+          <div class="stage">
+            <div class="canvas dim" style="min-height:160px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+            <div class="modal-mock">
+              <div class="dialog">
+                <div class="warn">⚠️</div>
+                <p class="msg">Not a valid e-footprint file !</p>
+                <p class="sub">Please use only files generated by e-footprint or the interface.</p>
+                <div class="acts"><button class="ok">Go back</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-help"><span class="lbl">Bad file</span>Validation runs server-side before anything is replaced. A non-JSON file → <em>"Invalid file format ! Please use a JSON file"</em>; malformed JSON → <em>"Invalid JSON data"</em>; valid JSON that isn't an e-footprint model → <em>"Not a valid e-footprint file !"</em> Each surfaces as a centered modal with <b>Go back</b>; the current model is untouched.</div>
+      </div>
+      <div class="info-col">
+        <p>Because the file is validated and the model rebuilt before it can take over, a bad upload can never leave you on a broken
+           canvas. The error names what went wrong — wrong format, malformed JSON, or a valid file that isn't an e-footprint model —
+           and the only move is to back out; your current model stays exactly as it was.</p>
+        <div class="states">
+          <div class="state"><span class="k">Three checks</span><span class="v">Extension/format → JSON parse → e-footprint deserialize, each with its own message.</span></div>
+          <div class="state"><span class="k">No partial load</span><span class="v">The replace only happens after the new model is built successfully — a failure changes nothing.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- ============ PHASE C — RECOVERY ============ -->
+<div class="phase">
+  <span class="tag">C · When loading fails — recovery</span><span class="conn">the session model won't deserialize · get it back, don't lose it</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — recovery page -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:280px">
+        <div class="recpage">
+          <div class="warn">⚠️</div>
+          <div class="rh">Something went wrong loading your model</div>
+          <p class="rb">Your model couldn't be opened — it may be corrupt or built with an incompatible version. Your work is still stored; you can download it before resetting, and reporting the bug helps us fix it.</p>
+          <p class="err">(Error: KeyError)</p>
+          <div class="recacts">
+            <span class="recbtn">⬇ Download model A</span>
+            <span class="recbtn">⬇ Download model B</span>
+            <span class="recbtn link">Report this bug on GitHub ↗</span>
+            <span class="recbtn green">Reset to a blank model</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>When the stored model can't be deserialized, a standalone <b>recovery page</b> replaces the builder — <b>Something went wrong loading your model</b>. It offers a <b>raw download</b> per slot (<em>Download model A / B</em>, or <em>Download your current model</em>), <b>Report this bug on GitHub</b>, and <b>Reset to a blank model</b>. It never tries to render the broken model.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Recovery — get your work back, don't lose it</h3></div>
+    <p>If the session model can't be loaded — a corrupt file, an incompatible version — the app doesn't crash to a 500. It shows a
+       recovery page that is <b>fully decoupled from the model</b> (it has to render when the model is exactly what's broken). The
+       raw stored data is still there, so you can <b>download it verbatim</b> before resetting, and report the bug — with versions
+       and the error type only, never your model data or a traceback.</p>
+    <div class="states">
+      <div class="state"><span class="k">Decoupled by design</span><span class="v">The page reads only the slot index and a cache check — it never deserializes, so it works on a dead model.</span></div>
+      <div class="state"><span class="k">Raw download</span><span class="v">Per slot — <em>Download your current model</em> (one) or <em>Download model A / B</em> (two) — serves the stored JSON verbatim.</span></div>
+      <div class="state"><span class="k">Reset to blank</span><span class="v">A green <b>Reset to a blank model</b> (POST, confirmed) discards to an empty model and re-opens the picker.</span></div>
+      <div class="state"><span class="k">Safe bug report</span><span class="v">The GitHub link prefills versions + error type only, and asks you to attach the file you just downloaded — no data leaks into a public issue.</span></div>
+      <div class="state deferred"><span class="k">Always reachable</span><span class="v">Also at <code>/recover/</code> and as the production 500 handler — a read-only escape hatch that's always available.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- file format section -->
+<h2 class="sec">What's in the file</h2>
+<p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">One extension, <code>.e-f.json</code>, for both shapes —
+  the app routes by <b>content, not extension</b>, so a single-model session can still open a workspace file. Models export
+  <b>without calculated attributes</b> (recomputed on load) but <b>with their UI settings</b> (Sankey views, etc.), so an analysis
+  round-trips intact while the file stays small.</p>
+<table>
+  <tr><th>Shape</th><th>Contains</th><th>Notes</th></tr>
+  <tr><td><b>Single model</b><br><code>{date} UTC {name}.e-f.json</code></td><td>the model (no calculated attributes) + its <code>interface_config</code> (Sankey settings, …) + the interface version</td><td>opens by <b>replacing the active model</b></td></tr>
+  <tr><td><b>Workspace</b><br><code>… comparison (A vs B).e-f.json</code></td><td>an envelope: <code>{ active_slot, models: [ &lt;single-model doc&gt;, … ] }</code> — each entry byte-for-byte a single-model document</td><td>opens by <b>restoring both slots</b> and the active one</td></tr>
+  <tr><td><b>Recovered (raw)</b><br><code>… recovered-model.e-f.json</code></td><td>the stored session data <b>verbatim</b> — never rebuilt</td><td>served by the recovery page, even on a corrupt model</td></tr>
+</table>
+<p class="note" style="margin-top:.5rem">A model is held only in your <b>session</b> (a cache with a short TTL) — there's no account and no server-side saved-models library. Closing the tab and coming back later is exactly what export/import is for.</p>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>One <code>.e-f.json</code> extension for both single-model and workspace files; route by content, not extension.</b></td><td>A single-model session can still open a workspace file and vice-versa — the user never has to know which kind they have. The workspace file is an additive envelope of byte-for-byte single-model documents, so the single-model format is never re-implemented or allowed to drift.</td></tr>
+  <tr><td><b>Calculated attributes are stripped on export and recomputed on import.</b></td><td>Keeps files small and makes import authoritative — what you see is recomputed from inputs, not trusted from a possibly-stale or hand-edited file. UI-only state (<code>interface_config</code>) rides inside the file but the model never touches it; the session repository owns it.</td></tr>
+  <tr><td><b>Loading is POST-only; the recovery download and <code>/recover/</code> are GET.</b></td><td>A bare GET must not mutate the session model. But a read-only escape hatch has to stay reachable even when the model is what crashes the deserializer — so the recovery reads and the raw download are safe GETs that never build the model.</td></tr>
+  <tr><td><b>The recovery page is fully decoupled from the model.</b></td><td>It must render precisely when the model is broken, so it reads only the slot index + a cache-existence check and never deserializes. Anything that touched the model could fail the same way the builder just did.</td></tr>
+  <tr><td><b>The bug report carries versions and the error type only — no traceback, no model data.</b></td><td>The report opens a public GitHub issue; leaking model contents or a stack trace there would be a privacy and noise problem. The user is asked to attach the file they just downloaded if they choose to.</td></tr>
+  <tr><td><b>Destructive confirms are decided at click time from the live DOM, not baked into the markup.</b></td><td>The toolbar outlives partial swaps, so a baked-in <code>hx-confirm</code> would go stale; reset only prompts when the model is actually non-empty, read live at click time.</td></tr>
+  <tr><td><b>"Open file" (replace here) and "+Add → Import" (add as second) are distinct intents with separate panels.</b></td><td>Opening-into-the-current-slot and adding-a-second-model-to-compare are different actions; collapsing them into one would make it ambiguous whether a file replaces or augments your work.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— the file documents, content-routing, recovery &amp; session persistence</span></summary>
+  <div class="pbody">
+    <p>Where this lives in code. Start with <code>specs/architecture.md</code> ("Persistence and <code>interface_config</code>", the workspace / multi-slot session). The toolbar is <code>upload_download_reboot_model_tooltips.html</code> (Open file · Export / Export ▾ · Reset).</p>
+    <dl>
+      <dt>Export (Phase A)</dt>
+      <dd><code>download-json/</code> → <code>download_json</code> (<code>_single_model_document</code> = <code>model_web.to_json(save_calculated_attributes=False)</code> + <code>interface_config</code> + version; filename <code>{date} UTC {name}.e-f.json</code> via <code>sanitize_filename</code>/<code>smart_truncate</code>); <code>download-workspace/</code> → <code>download_workspace</code> (envelope <code>{efootprint_workspace_version, active_slot, models:[…]}</code>). Toolbar single <code>&lt;a&gt;</code> vs two-model <code>Export ▾</code> dropdown (<code>#download-menu-toggle</code>).</dd>
+      <dt>Open / upload (Phase B)</dt>
+      <dd><code>open-import-json-panel/</code> → <code>open_import_json_panel</code> → <code>side_panels/import_model.html</code> (<code>header_name="Open a file"</code>, <code>save_button_label="Open"</code>, label <em>Choose a file (.e-f.json)</em>, native <code>&lt;input type="file"&gt;</code>, no drag-drop). <code>upload-json/</code> → <code>upload_json</code>: content-routes on <code>"models" in data</code> → <code>views_workspace._restore_workspace</code>, else single-model (<code>upgrade_system_data</code> → <code>ProgressiveImportService.import_system</code> → <code>distinctify_against_siblings</code> → <code>persist_to_cache</code>) → <code>redirect("model-builder")</code>. Failure → re-render with <code>error-import-modal</code> (<code>modals/import_error_modal.html</code>); messages in <code>upload_json</code>.</dd>
+      <dt>Recovery &amp; reset (Phase C)</dt>
+      <dd><code>render_recovery_page</code> (from <code>model_builder_main</code>'s try/except), <code>recover/</code> → <code>recover_model</code>, project <code>handler500</code> → <code>server_error</code>; template <code>model_builder/recovery.html</code> (never references <code>model_web</code>). Raw download <code>download-raw-json/?slot=N</code> → <code>download_raw_json</code> (serves <code>get_system_data()</code> verbatim). Bug URL <code>build_report_bug_url</code> (versions + error type only). Reset <code>reset-model/</code> → <code>reset_model</code> (POST; scratch baseline; re-opens picker). Click-time confirms in <code>model_builder_main.js</code> (<code>data-confirm-when-model-not-empty</code>).</dd>
+      <dt>Persistence</dt>
+      <dd><code>adapters/repositories/session_system_repository.py</code> (cache key <code>system_data:{session}:{slot}</code>; Redis TTL 600s / Postgres 43200s; <code>save_data</code> merges <code>interface_config</code> + version; <code>MAX_PAYLOAD_SIZE_MB</code> ≈ 30, a <b>shared budget</b> across both slots → <code>PayloadSizeLimitExceeded</code> on save), <code>session_workspace_repository.py</code>, <code>workspace_index.py</code>; serialization/migration in <code>progressive_import_service.py</code>, <code>version_upgrade_handlers.py</code>; library <code>system_to_json</code>, <code>duplicate_system</code>.</dd>
+      <dt>Not built (clarifications)</dt>
+      <dd>No drag-and-drop and no client-side validation — a plain native file input, validated server-side only. No accounts / named server-side saved models — session cache only (a model is lost when its TTL lapses unless exported). The Sources <em>xlsx</em> is the only spreadsheet; the model itself is JSON.</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · save-and-load · a faithful file round-trip, with a recovery net · faithful to the deployed app. Shares the canonical
+  <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>

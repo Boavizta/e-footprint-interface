@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — compare-models</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- compare-models only: model tab strip extras, ＋Add menu, and the comparison dashboard ---- */
+  /* identity + delta colours, verbatim from comparison_service.py */
+  :root { --mA:#4878a8; --mA-l:#9db8d3; --mB:#e09f3e; --mB-l:#f0cf94; --lower:#2e7d32; --higher:#c62828; }
+  .tab .cx { margin-left: .3rem; color: var(--g350); }
+  .tab.compare.on { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600; }
+  /* ＋Add dropdown menu */
+  .menu { position: absolute; z-index: 6; background: #fff; border: 1px solid var(--g300); border-radius: 9px;
+          box-shadow: 0 10px 26px rgba(17,25,40,.16); padding: .3rem; width: 13.5rem; }
+  .menu .mi { display: flex; align-items: center; gap: .45rem; font-size: .66rem; color: var(--ink); padding: .32rem .45rem; border-radius: 6px; }
+  .menu .mi + .mi { border-top: 1px solid var(--g100); }
+  .menu .mi .g { width: 1.1rem; text-align: center; color: var(--primary); flex: 0 0 auto; }
+  /* dashboard surface (replaces the canvas while comparing) */
+  .dash { padding: .55rem; display: grid; gap: .5rem; background: var(--bg); }
+  .dash h6 { font-size: .72rem; margin: .15rem 0 .05rem; color: var(--ink); }
+  .dash h6 .sub { color: var(--faint); font-weight: 400; font-size: .9em; }
+  .dash .foot { font-size: .56rem; color: var(--faint); margin: .15rem 0 0; }
+  /* KPI strip */
+  .kpis { display: flex; gap: .4rem; }
+  .kpi { flex: 1 1 0; background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--g300);
+         border-radius: 8px; padding: .4rem .5rem; min-width: 0; }
+  .kpi.a { border-left-color: var(--mA); } .kpi.b { border-left-color: var(--mB); }
+  .kpi.delta { border: 1px solid var(--lower); border-left-width: 3px; }
+  .kpi .lbl2 { font-size: .52rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; }
+  .kpi .big { font-size: .92rem; font-weight: 700; color: var(--ink); margin-top: .1rem; }
+  .kpi.delta .big { color: var(--lower); }
+  .kpi .sub2 { font-size: .54rem; color: var(--muted); margin-top: .1rem; }
+  /* diverging decomposition bars */
+  .bars { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .55rem; }
+  .bar { display: grid; grid-template-columns: 6.8rem 1fr; align-items: center; gap: .45rem; margin: .25rem 0; }
+  .bar .lab { font-size: .58rem; color: var(--muted); text-align: right; }
+  .bar .track { position: relative; height: .85rem; }
+  .bar .track .ax { position: absolute; left: 50%; top: -.15rem; bottom: -.15rem; width: 1px; background: var(--g300); }
+  .bar .seg { position: absolute; top: .1rem; height: .65rem; border-radius: 2px; }
+  .bar .seg.dn { background: var(--lower); right: 50%; } .bar .seg.up { background: var(--higher); left: 50%; }
+  .bar .v { position: absolute; top: -.02rem; font-size: .52rem; color: var(--muted); white-space: nowrap; }
+  .bar .v.dn { right: 50%; margin-right: .15rem; transform: translateX(-100%); }
+  .bar .v.up { left: 50%; margin-left: .15rem; }
+  /* chart boxes (paired bars / cumulative overlay) */
+  .chartbox { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .55rem; }
+  .chartbox svg { display: block; width: 100%; height: auto; }
+  .lgnd { display: flex; gap: .55rem; flex-wrap: wrap; font-size: .54rem; color: var(--muted); margin-top: .25rem; }
+  .lgnd span { display: inline-flex; align-items: center; gap: .2rem; }
+  .lgnd i { width: .6rem; height: .6rem; border-radius: 2px; display: inline-block; }
+  /* diff tables inside the dashboard */
+  .difftab { width: 100%; border-collapse: collapse; background: #fff; font-size: .58rem; margin-top: .15rem; }
+  .difftab th, .difftab td { border: 1px solid var(--line); padding: .2rem .35rem; text-align: left; vertical-align: top; }
+  .difftab th { background: var(--g100); font-size: .5rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+  .difftab td b { color: var(--ink); }
+  .onlyA { color: var(--mA); font-weight: 600; } .onlyB { color: var(--mB); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>compare-models</h1>
+<p class="lede">You've built a model; now you want to know whether a change actually helps. <b>compare-models</b> sets two computable
+  models side by side and quantifies the difference — the common path is <b>duplicate the current one, tweak the copy, read the
+  delta</b>. Success isn't "two models open" — it's a <b>clear, honest comparison</b>: how much CO₂e separates them, what
+  explains the gap, and which inputs differ. Comparison is <b>additive and non-destructive</b> — both models stay exactly as you
+  left them; the dashboard is a fresh projection you open and dismiss without touching either.</p>
+<p class="note">Faithful to the deployed app. Draws from the model <b>tab strip</b>, the <b>＋ Add a model to compare</b> dropdown,
+  the <code>compare/</code> dashboard (KPI strip · decomposition · paired &amp; cumulative charts · assumptions diff) and the
+  comparison service. Code-level pointers — routes, the resident-sibling reveal, the comparison service — are collected for
+  agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+
+<!-- ============ PHASE A — ADD A MODEL TO COMPARE ============ -->
+<div class="phase">
+  <span class="tag">A · Add a model to compare</span><span class="conn">one model → Compare is gated · the ＋ tab makes a second</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — single model, Compare disabled -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add a model to compare ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:170px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◴</span> Daytime users <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Purchase journey <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server <span class="pencil">✎</span></div></div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>A single complete model. The <b>⇄ Compare</b> tab is greyed — comparison needs a second model — and hovering it says <em>"Add a second model to compare."</em> The way in is the <b>＋ Add a model to compare</b> tab.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>One model — Compare waits for a second</h3></div>
+    <p>Comparison is a two-model feature, so with one model the <b>⇄ Compare</b> tab is disabled-with-reason — the same
+       <em>disabled, never errored</em> rule that runs the canvas. The model itself is complete (its <b>Results</b> are live);
+       it just has nothing to be compared against yet.</p>
+    <div class="states">
+      <div class="state"><span class="k">Compare gated</span><span class="v">⇄ Compare is greyed; hovering names the unblock step — <em>"Add a second model to compare."</em></span></div>
+      <div class="state"><span class="k">Same readiness bar</span><span class="v">Compare keys off the <b>same computable check</b> as Results — comparing reads each model's footprint, so an incomplete model can't take part.</span></div>
+      <div class="state"><span class="k">The way in</span><span class="v">The <b>＋ Add a model to compare</b> tab is the single entry point to a second model.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- screen 2 — the ＋ Add dropdown -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add a model to compare ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span></div>
+      </div>
+      <div class="stage" style="min-height:190px">
+        <div class="canvas dim" style="min-height:190px">
+          <div class="col"><h5><b>Usage patterns</b></h5></div><div class="col"><h5><b>Usage journeys</b></h5></div><div class="col"><h5><b>Infrastructure</b></h5></div>
+        </div>
+        <div class="menu" style="top:2.1rem; left:6.4rem">
+          <div class="mi"><span class="g">⧉</span> Duplicate current model</div>
+          <div class="mi"><span class="g">⬆</span> Import from file…</div>
+          <div class="mi"><span class="g">✚</span> Start blank / from template</div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>＋ Add a model to compare</b> dropdown offers three ways to get a second model: <b>Duplicate current model</b> (named <em>Copy of {name}</em>), <b>Import from file…</b> (opens a side panel to upload a <code>.json</code>), or <b>Start blank / from template</b>. Whichever you pick becomes the <b>Comparison model</b> and the workspace re-renders with two tabs.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>Add the second model — usually a duplicate</h3></div>
+    <p>The common path is <b>Duplicate, then tweak</b>: it gives an apples-to-apples baseline so the only differences are the
+       ones you make. <b>Import</b> brings in an independently-built model; <b>Start blank</b> begins from scratch or a template.
+       Whichever you choose becomes the active <b>Comparison model</b> and the builder re-renders with two tabs.</p>
+    <div class="states">
+      <div class="state"><span class="k">Duplicate</span><span class="v">Deep-copies the current model as <em>"Copy of {name}"</em> — the editable name you'll then change.</span></div>
+      <div class="state"><span class="k">Import from file…</span><span class="v">Opens the <em>"Add a model from a file"</em> side panel — <em>Choose a json file</em> → <em>Add this model</em>.</span></div>
+      <div class="state"><span class="k">Start blank</span><span class="v">A scratch / template baseline, built up from nothing.</span></div>
+      <div class="state"><span class="k">New slot active</span><span class="v">The added model becomes the Comparison model; the whole builder re-renders. A failed add returns an error modal, not a broken page.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — TWO MODELS, ONE WORKSPACE ============ -->
+<div class="phase">
+  <span class="tag">B · Two models, one workspace</span><span class="conn">fixed-role tabs · switch in place · Compare unlocks when both compute</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — two models -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab">Reference model<span class="cx">✕</span></span><span class="tab active">Comparison model<span class="cx">✕</span></span><span class="tab compare">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:170px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◴</span> Daytime users <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Purchase journey <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Edge cache server <span class="pencil">✎</span></div></div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Two tabs now — fixed roles <b>Reference model</b> and <b>Comparison model</b>, each with an <b>✕</b> to remove. The name you edit lives in the toolbar, not the tab. Clicking a tab switches canvases instantly (no reload). With <b>both models computable</b>, <b>⇄ Compare</b> lights up.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Two models, one workspace</h3></div>
+    <p>The two models share one workspace; switching between them is a <b>client-side canvas reveal</b> — both stay live, nothing
+       re-renders, an open edit survives the switch. Tabs are <b>fixed role labels</b> (Reference / Comparison) so a long model
+       name never stretches them — the name sits in the toolbar. <b>⇄ Compare</b> enables only once <em>both</em> models compute.</p>
+    <div class="states">
+      <div class="state"><span class="k">Switch in place</span><span class="v">Clicking a tab reveals that model's canvas instantly — no reload, no re-render.</span></div>
+      <div class="state"><span class="k">Compare gating</span><span class="v">Enabled only if both models are computable; otherwise <em>"Complete both models (each needs a computable footprint) to compare."</em></span></div>
+      <div class="state"><span class="k">Remove a model</span><span class="v">A tab's <b>✕</b> confirms <em>"Remove this model and return to a single-model session?"</em> and drops back to one model.</span></div>
+      <div class="state variant"><span class="k">Mobile</span><span class="v">On small screens the tab strip hides; switching moves to a role pill — <em>"Switch to Reference model" / "Switch to Comparison model."</em></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — THE COMPARISON DASHBOARD ============ -->
+<div class="phase">
+  <span class="tag">C · The comparison dashboard</span><span class="conn">⇄ Compare reveals a resident dashboard in place</span><span class="rule"></span>
+</div>
+
+<!-- screen 4 — open Compare -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab">Reference model</span><span class="tab">Comparison model</span><span class="tab compare on">⇄ Compare</span></div>
+      </div>
+      <div class="stage">
+        <div class="dash">
+          <div class="kpis">
+            <div class="kpi a"><div class="lbl2">Reference model</div><div class="big">12.4 t</div><div class="sub2">2024–2030 · CO₂e</div></div>
+            <div class="kpi b"><div class="lbl2">Comparison model</div><div class="big">10.1 t</div><div class="sub2">2024–2030 · CO₂e</div></div>
+            <div class="kpi delta"><div class="lbl2">Δ second − first</div><div class="big">−2.3 t (−18%)</div><div class="sub2">usage −1.9 · fab. −0.4</div></div>
+          </div>
+          <div class="bars">
+            <h6>What explains the difference <span class="sub">— per impact category</span></h6>
+            <div class="bar"><span class="lab">Servers &amp; storage</span><span class="track"><span class="ax"></span><span class="seg dn" style="width:42%"></span><span class="v dn">−1.6 t</span></span></div>
+            <div class="bar"><span class="lab">Network</span><span class="track"><span class="ax"></span><span class="seg up" style="width:11%"></span><span class="v up">+0.4 t</span></span></div>
+          </div>
+          <div class="chartbox"><h6 style="margin-top:0">CO2 emissions over time</h6></div>
+          <div class="difftab" style="border:none"><h6 style="margin-top:0">What differs between the models</h6></div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking <b>⇄ Compare</b> reveals the <b>comparison dashboard</b> in place — one scrolling page, no per-model toolbar. Top to bottom: a <b>KPI strip</b>, <b>What explains the difference</b> (decomposition), the <b>CO2 emissions over time</b> paired chart, the <b>Cumulative</b> overlay, and <b>What differs between the models</b> (the inputs diff). Both models stay resident behind it.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>Compare — the dashboard, in place</h3></div>
+    <p><b>⇄ Compare</b> doesn't navigate; it <b>reveals a resident dashboard</b> over the hidden builder, rebuilt fresh from both
+       models each time. One identity-colour language runs throughout — <b>Reference blue, Comparison amber; reductions green,
+       increases red</b>. Every figure is a full-timespan sum, and the delta convention is fixed: <em>second model minus first</em>.</p>
+    <div class="states">
+      <div class="state"><span class="k">Reveal, not navigate</span><span class="v">The dashboard is a resident region toggled into view — so dismissing it is instant (Phase D). It isn't a URL.</span></div>
+      <div class="state"><span class="k">Colour language</span><span class="v">Reference <b style="color:#4878a8">blue</b>, Comparison <b style="color:#e09f3e">amber</b>; <b style="color:#2e7d32">lower/avoided green</b>, <b style="color:#c62828">higher red</b> — consistent across KPIs, bars and charts.</span></div>
+      <div class="state"><span class="k">Δ convention</span><span class="v"><em>"second model minus first. Totals are full-timespan sums."</em></span></div>
+      <div class="state"><span class="k">Rebuilt fresh</span><span class="v">Recomputed on every open, never cached — an honest projection of the two current models, not a stored report.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- dashboard anatomy -->
+<h2 class="sec">Inside the dashboard — top to bottom</h2>
+<p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">Five reads of the same comparison, coarse to
+  fine — <b>headline numbers</b>, then <b>what drives them</b>, then the <b>shape over time</b>, then the <b>exact input
+  differences</b>. Each carries its own caption and an honest-limitation footnote.</p>
+
+<div class="cmp" style="display:block">
+  <!-- KPI strip -->
+  <div style="margin-bottom:1.1rem">
+    <p class="ttl">① KPI strip <span class="kind">· the headline</span></p>
+    <div class="dash" style="padding:0">
+      <div class="kpis">
+        <div class="kpi a"><div class="lbl2">Reference model</div><div class="big">12.4 t CO₂e</div><div class="sub2">2024–2030 · usage 9.8 · fab. 2.6</div></div>
+        <div class="kpi b"><div class="lbl2">Comparison model</div><div class="big">10.1 t CO₂e</div><div class="sub2">2024–2030 · usage 7.9 · fab. 2.2</div></div>
+        <div class="kpi delta"><div class="lbl2">Δ second − first</div><div class="big">−2.3 t (−18%)</div><div class="sub2">usage −1.9 · fab. −0.4</div></div>
+      </div>
+      <p class="foot">Δ convention: second model minus first. Totals are full-timespan sums.</p>
+    </div>
+    <div class="mock-help" style="width:auto"><span class="lbl">KPI strip</span>Two model cards (left edge in each model's colour) and a <b>delta card</b> — absolute and relative difference, split into usage and fabrication. The delta card is <b>green when lower, red when higher</b>.</div>
+  </div>
+
+  <!-- decomposition -->
+  <div style="margin-bottom:1.1rem">
+    <p class="ttl">② What explains the difference <span class="kind">· decomposition</span></p>
+    <div class="bars">
+      <h6 style="margin-top:0">What explains the difference <span class="sub">— per impact category, full timespan</span></h6>
+      <div class="bar"><span class="lab">Servers &amp; storage</span><span class="track"><span class="ax"></span><span class="seg dn" style="width:44%"></span><span class="v dn">−1.6 t</span></span></div>
+      <div class="bar"><span class="lab">External APIs</span><span class="track"><span class="ax"></span><span class="seg dn" style="width:16%"></span><span class="v dn">−0.6 t</span></span></div>
+      <div class="bar"><span class="lab">User devices</span><span class="track"><span class="ax"></span><span class="seg dn" style="width:14%"></span><span class="v dn">−0.5 t</span></span></div>
+      <div class="bar"><span class="lab">Network</span><span class="track"><span class="ax"></span><span class="seg up" style="width:11%"></span><span class="v up">+0.4 t</span></span></div>
+    </div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Decomposition</span>Diverging bars per impact category — <b>green left = reduction, red right = increase</b> — each labelled with its Δ. Zero-difference categories drop out; the bars <b>sum to the headline Δ</b>. Empty state: <em>"No difference between the two models' category footprints."</em></div>
+  </div>
+
+  <!-- paired chart -->
+  <div style="margin-bottom:1.1rem">
+    <p class="ttl">③ CO2 emissions over time <span class="kind">· paired bars</span></p>
+    <div class="chartbox">
+      <h6 style="margin-top:0">CO2 emissions over time <span class="sub">— paired bars, shared axis &amp; legend (dark = usage, light = fabrication)</span></h6>
+      <svg viewBox="0 0 320 96" role="img" aria-label="Paired emissions bars per year">
+        <line x1="14" y1="84" x2="316" y2="84" stroke="#D1D5DB" stroke-width="1"/>
+        <!-- 2024 --><rect x="34" y="46" width="12" height="22" fill="#4878a8"/><rect x="34" y="36" width="12" height="10" fill="#9db8d3"/><rect x="48" y="52" width="12" height="16" fill="#e09f3e"/><rect x="48" y="44" width="12" height="8" fill="#f0cf94"/>
+        <!-- 2025 --><rect x="104" y="40" width="12" height="28" fill="#4878a8"/><rect x="104" y="29" width="12" height="11" fill="#9db8d3"/><rect x="118" y="48" width="12" height="20" fill="#e09f3e"/><rect x="118" y="39" width="12" height="9" fill="#f0cf94"/>
+        <!-- 2026 --><rect x="174" y="34" width="12" height="34" fill="#4878a8"/><rect x="174" y="22" width="12" height="12" fill="#9db8d3"/><rect x="188" y="44" width="12" height="24" fill="#e09f3e"/><rect x="188" y="34" width="12" height="10" fill="#f0cf94"/>
+        <!-- 2027 --><rect x="244" y="30" width="12" height="38" fill="#4878a8"/><rect x="244" y="17" width="12" height="13" fill="#9db8d3"/><rect x="258" y="40" width="12" height="28" fill="#e09f3e"/><rect x="258" y="29" width="12" height="11" fill="#f0cf94"/>
+        <text x="46" y="93" font-size="7" fill="#6B7280" text-anchor="middle">2024</text>
+        <text x="116" y="93" font-size="7" fill="#6B7280" text-anchor="middle">2025</text>
+        <text x="186" y="93" font-size="7" fill="#6B7280" text-anchor="middle">2026</text>
+        <text x="256" y="93" font-size="7" fill="#6B7280" text-anchor="middle">2027</text>
+      </svg>
+      <div class="lgnd"><span><i style="background:#4878a8"></i>Ref. usage</span><span><i style="background:#9db8d3"></i>Ref. fabrication</span><span><i style="background:#e09f3e"></i>Comp. usage</span><span><i style="background:#f0cf94"></i>Comp. fabrication</span></div>
+    </div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Paired chart</span>Per-year paired bars: each year has a <b>Reference</b> stack and a <b>Comparison</b> stack, <b>dark = usage, light = fabrication</b>. One shared legend drives both; years outside a model's period are blank, not zero.</div>
+  </div>
+
+  <!-- cumulative chart -->
+  <div style="margin-bottom:1.1rem">
+    <p class="ttl">④ Cumulative CO2 emissions over time <span class="kind">· overlay</span></p>
+    <div class="chartbox">
+      <h6 style="margin-top:0">Cumulative CO2 emissions over time <span class="sub">— the gap is emissions avoided to date; the end gap is the headline Δ</span></h6>
+      <svg viewBox="0 0 320 96" role="img" aria-label="Cumulative emissions overlay">
+        <line x1="14" y1="84" x2="316" y2="84" stroke="#D1D5DB" stroke-width="1"/>
+        <polygon points="20,78 90,60 170,40 250,24 306,14 306,28 250,40 170,54 90,68 20,79" fill="#2e7d32" opacity="0.16"/>
+        <polyline points="20,78 90,60 170,40 250,24 306,14" fill="none" stroke="#4878a8" stroke-width="2"/>
+        <polyline points="20,79 90,68 170,54 250,40 306,28" fill="none" stroke="#e09f3e" stroke-width="2"/>
+        <text x="308" y="12" font-size="6.5" fill="#4878a8">Ref.</text>
+        <text x="308" y="33" font-size="6.5" fill="#e09f3e">Comp.</text>
+      </svg>
+      <div class="lgnd"><span><i style="background:#4878a8"></i>Reference (cumulative)</span><span><i style="background:#e09f3e"></i>Comparison (cumulative)</span><span><i style="background:#2e7d32;opacity:.3"></i>Avoided to date</span></div>
+    </div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Cumulative chart</span>Two cumulative curves overlaid; the <b>shaded gap is emissions avoided (or added) to date</b> — green when the Comparison model is below, red when above. The <b>end gap equals the headline Δ.</b></div>
+  </div>
+
+  <!-- assumptions diff -->
+  <div>
+    <p class="ttl">⑤ What differs between the models <span class="kind">· the inputs diff</span></p>
+    <div class="bars">
+      <h6 style="margin-top:0">What differs between the models <span class="sub">— inputs only, differences shown directly</span></h6>
+      <div style="font-size:.56rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin:.3rem 0 .1rem">Changed attribute values</div>
+      <table class="difftab">
+        <tr><th>Object</th><th>Attribute</th><th>Reference model</th><th>Comparison model</th></tr>
+        <tr><td>Web server</td><td>RAM</td><td>128 GB</td><td><b>64 GB</b></td></tr>
+        <tr><td>Purchase journey</td><td>Data downloaded</td><td>5 MB</td><td><b>1.8 MB</b></td></tr>
+      </table>
+      <div style="font-size:.56rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin:.45rem 0 .1rem">Objects in only one model</div>
+      <table class="difftab">
+        <tr><th>Object</th><th>Object type</th><th>Only in</th></tr>
+        <tr><td>Edge cache server</td><td>Server</td><td class="onlyB">Comparison model</td></tr>
+      </table>
+      <p class="foot">Objects are matched by id first, then by name and type; renaming an object is not counted as a difference. Identical inputs are not listed.</p>
+    </div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Assumptions diff</span>Two tables — <b>Changed attribute values</b> (same object, different numbers; the second model's value bold) and <b>Objects in only one model</b>. Matched by <b>id first</b>, so a duplicate-then-rename isn't flagged as a change. Empty state: <em>"The two models have identical inputs."</em></div>
+  </div>
+</div>
+
+<!-- ============ PHASE D — DISMISS ============ -->
+<div class="phase">
+  <span class="tag">D · Dismiss</span><span class="conn">click a model tab · the builder comes back exactly as it was</span><span class="rule"></span>
+</div>
+
+<!-- screen 5 — dismiss -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference model<span class="cx">✕</span></span><span class="tab">Comparison model<span class="cx">✕</span></span><span class="tab compare">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:160px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◴</span> Daytime users <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Purchase journey <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server <span class="pencil">✎</span></div></div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking a <b>model tab</b> dismisses the dashboard and reveals that model — <b>instantly, client-side</b>. Anything you had open (a side panel mid-edit, the help drawer) was only hidden, so it <b>comes back exactly as it was</b>.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">5</span><h3>Dismiss — back to building, nothing lost</h3></div>
+    <p>Dismissing is the reveal in reverse: the builder was never torn down, just hidden, so an in-progress edit resumes intact
+       and the return is instant. Clicking the <em>same</em> model you came from warns about nothing; the only place an
+       unsaved-edit guard can fire is switching to the <em>other</em> model on the way out — see the mechanism below.</p>
+    <div class="states">
+      <div class="state"><span class="k">Instant return</span><span class="v">A client-side reveal — no reload; the dashboard fragment is emptied behind it.</span></div>
+      <div class="state"><span class="k">Nothing lost</span><span class="v">A side panel or help drawer open before Compare rode along hidden and resumes intact — opening Compare discards nothing.</span></div>
+      <div class="state"><span class="k">Cross-model guard</span><span class="v">Leaving to the <em>other</em> model can trip the unsaved-changes guard — landing over the now-revealed edited model (mechanism fold).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- zoom: the resident-sibling mechanism -->
+<details class="fold zoomfold">
+  <summary><span class="s-tag">Mechanism</span> Non-destructive Compare &amp; dismiss-before-warn <span class="s-sub">— why opening Compare loses nothing, and where the unsaved-edit guard fires</span></summary>
+  <div class="fold-body">
+    <div class="screen">
+      <div class="mock-col">
+        <div class="win">
+          <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+          <div class="stage" style="min-height:150px;padding:.5rem">
+            <div style="border:1px dashed var(--g350);border-radius:8px;padding:.4rem;margin-bottom:.4rem;opacity:.55;font-size:.62rem">
+              <b>#model-builder-page</b> <span style="color:var(--faint)">— hidden with <code>d-none</code>, kept resident</span>
+              <div class="ocard" style="margin-top:.3rem"><span class="ic">⤳</span> Purchase journey <span class="pencil">✎ open, mid-edit</span></div>
+            </div>
+            <div style="border:1px solid var(--primary);border-radius:8px;padding:.4rem;font-size:.62rem">
+              <b>#comparison-view</b> <span style="color:var(--faint)">— revealed sibling, the dashboard</span>
+            </div>
+          </div>
+        </div>
+        <div class="mock-help"><span class="lbl">Resident sibling</span>The dashboard is a <b>sibling</b> of the builder, not a replacement. Opening Compare only adds <code>d-none</code> to the builder; dismissing removes it. Both canvases — and any open panel — stay in the DOM the whole time.</div>
+      </div>
+      <div class="info-col">
+        <p>The old design swapped the dashboard into the main content block, destroying both canvases and forcing a ~1.2 s full
+           reload on return. Making <b>#comparison-view</b> a resident sibling toggled by visibility turns dismiss into an instant
+           client-side reveal — and makes opening Compare <b>non-destructive</b>: an open side panel rides along hidden.</p>
+        <div class="states">
+          <div class="state"><span class="k">Open = no warning</span><span class="v">Opening Compare discards nothing, so it deliberately does <b>not</b> trip the unsaved-changes guard.</span></div>
+          <div class="state"><span class="k">Dismiss, same model</span><span class="v">A capture-phase handler tears the dashboard down first, then <b>cancels</b> the navigation — the preserved panel just resumes. No warning.</span></div>
+          <div class="state"><span class="k">Dismiss, other model</span><span class="v">The switch proceeds; because switching <em>is</em> a discarding path, the guard — <em>"The currently opened side panel has pending changes. Would you like to continue and lose them ?"</em> (<b>No, Cancel</b> / <b>Yes, Continue</b>) — lands over the revealed edited model.</span></div>
+          <div class="state"><span class="k">Remove-model guard</span><span class="v">Removing a model has its own confirm, made unsaved-aware — it appends <em>"You also have unsaved changes in the open panel that will be lost."</em></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>Comparison is a dedicated dashboard tab — additive, not a split-screen or a results-panel mode.</b></td><td>The per-model workspaces stay exactly as they are; the dashboard is a third surface laid on top. A split-screen or a "compare mode" inside Results would entangle two models in one workspace and complicate every builder interaction.</td></tr>
+  <tr><td><b>⇄ Compare is disabled until two complete models exist — never offered then errored.</b></td><td>Comparing reads each model's footprint; an incomplete model has none. The tab gates on the same readiness as Results, and names the unblock step — the disabled-instead-of-error rule, applied to comparison.</td></tr>
+  <tr><td><b>The dashboard is a resident in-flow sibling, not a content swap or a floating overlay.</b></td><td>The old swap destroyed both canvases and cost a ~1.2 s reload on return. A floating overlay would fight the body-level leader-line SVGs and force a brittle z-index between the chrome bars. A resident sibling toggled by visibility makes dismiss instant and Compare non-destructive.</td></tr>
+  <tr><td><b>One tab strip — the dashboard owns none.</b></td><td>Two strips would mean duplicate element ids, breaking the id-based switch JS. The single strip stays visible while comparing (⇄ Compare highlighted) and is how you dismiss.</td></tr>
+  <tr><td><b>Compare is not a URL.</b></td><td>It's an ephemeral projection of two models, rebuilt fresh — not a navigable resource. And a refreshed <code>/compare/</code> would error once a model's session slot expires, so it deliberately doesn't push to the address bar.</td></tr>
+  <tr><td><b>Tabs are fixed role labels (Reference / Comparison), not model names.</b></td><td>A long name can't stretch a fixed-width tab; the editable name lives in the toolbar. Roles also map cleanly to the Δ convention (second minus first).</td></tr>
+  <tr><td><b>Figures are full-timespan sums (v1); decomposition merges Servers + Storage but keeps the full taxonomy.</b></td><td>Full-timespan sums are exact and need no normalization — the honest limitation is stated per card. Merging Servers + Storage by label keeps the bars readable while still summing exactly to the headline Δ.</td></tr>
+  <tr><td><b>The inputs diff matches objects by id first, then name + type.</b></td><td>The common workflow is duplicate-then-edit, so id-matching means a rename isn't reported as a change; falling back to name + type still diffs two independently-built models. Identical inputs are omitted to keep the diff to what matters.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, the resident-sibling reveal &amp; the comparison service behind the patterns above</span></summary>
+  <div class="pbody">
+    <p>Where this lives in code. Start with <code>specs/architecture.md</code> (the workspace / multi-slot session, two resident canvases + system-id DOM prefixing) and the feature specs <code>specs/features/model-comparison/</code> + <code>specs/features/compare-overlay-layer/</code>.</p>
+    <dl>
+      <dt>Tab strip, ＋Add &amp; gating (Phases A–B)</dt>
+      <dd><code>components/model_tab_strip.html</code> (fixed role labels, <code>＋ Add a model to compare</code> menu, the ✕ remove with <code>data-confirm-remove-model</code>, the <code>⇄ Compare</code> button + disabled tooltips), <code>components/active_model_role.html</code> (mobile role pill). Add routes <code>add-model/</code> (<code>source</code> = duplicate / blank / import), <code>open-add-model-import-panel/</code> → <code>side_panels/add_model_import.html</code>. Gate: <code>compare_enabled()</code> in <code>adapters/views/views.py</code> (runs <code>SystemValidationService.validate_for_computation</code> on both slots).</dd>
+      <dt>Slots &amp; switching</dt>
+      <dd><code>build_workspace_slots()</code> (per-slot <code>suffix</code> = "" active / "-{slot}" parked), <code>SessionWorkspaceRepository</code>. Switch route <code>switch-model/</code> → <code>switch_model</code> returns OOB chrome only + <code>HX-Trigger switchModelCanvas</code>; client reveal in <code>model_comparison.js</code> (<code>switchToSlot</code>, <code>rekeyCanvas</code>). Two resident <code>#model-canva-{slot}</code> in <code>model_builder_main.html</code>; parked structural ids get <code>-{slot}</code>, object cards a <code>sys-{system id}-</code> web_id prefix.</dd>
+      <dt>The dashboard (Phase C)</dt>
+      <dd>Route <code>compare/</code> (name <code>compare-models</code>) → <code>compare</code> in <code>views_workspace.py</code> (plain <code>render</code>, returns <code>""</code> if not enabled). Template <code>compare/dashboard.html</code> → <code>compare/kpi_strip.html</code> + <code>delta_card.html</code>, <code>decomposition.html</code>, inline chart <code>&lt;canvas&gt;</code>es, <code>assumptions_diff.html</code>. Data: <code>domain/services/comparison_service.py</code> (<code>ComparisonService.build</code> → library <code>compare_to</code>; colour constants; <code>_paired_chart</code> / <code>_cumulative_chart</code> / <code>_decomposition_chart</code>). Charts drawn by <code>result_charts/comparison_charts.js</code> (<code>buildPairedChartConfig</code> / <code>buildCumulativeChartConfig</code> / <code>buildDecompositionChartConfig</code> / <code>drawComparisonCharts</code>).</dd>
+      <dt>Reveal &amp; dismiss-before-warn (mechanism)</dt>
+      <dd><code>#comparison-view</code> is a resident sibling in <code>model_builder_main.html</code>; <code>model_comparison.js</code> — <code>openCompareView</code> / <code>dismissCompareView</code> (<code>d-none</code> toggle), <code>setBuilderHidden</code> (<code>body.comparing</code>), the capture-phase tab handler (same-slot <code>preventDefault</code>, cross-slot lets <code>switch-model</code> proceed), <code>htmx:afterSwap</code> reveal. Unsaved guard: <code>PANEL_DISCARDING_PATHS</code> in <code>side_panel_utils.js</code> (<code>/switch-model/</code>, <code>/add-model/</code>, <code>/open-add-model-import-panel/</code> — note <code>/compare/</code> is deliberately absent), modal copy in <code>modals/warn_before_side_panel_closing_modal.html</code>. SCSS: <code>custom.scss</code> <code>#comparison-view</code>, <code>body.comparing</code> mobile reveal, <code>.model-tab</code>.</dd>
+      <dt>Not in v1 (deferred)</dt>
+      <dd>Per-year / differing-timespan normalization (v1 is full-timespan sums; non-overlapping years render blank); a Δ-only per-period chart mode; Sankey repartition comparison; cause-linking input diffs to impact categories; a verdict sentence / delta-first ordering; a combined comparison xlsx; three+ models, and copy/move/merge between models (workspace is capped at two slots).</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · compare-models · two computable models side by side · faithful to the deployed app. Shares the canonical
+  <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>

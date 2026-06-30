@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — onboarding (first run)</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- onboarding only: home, the template picker, the guided tour & help drawer ---- */
+  .nav { display: flex; align-items: center; gap: .5rem; padding: .4rem .6rem; border-bottom: 1px solid var(--line); background: #fff; }
+  .nav .logo { font-weight: 700; font-size: .72rem; color: var(--primary); }
+  .nav .gh { margin-left: auto; font-size: .54rem; border: 1px solid var(--g300); border-radius: 999px; padding: .08rem .45rem; color: var(--muted); }
+  .hero { padding: 1rem .8rem; text-align: center; }
+  .hero h2 { font-size: .9rem; margin: .2rem 0; color: var(--ink); }
+  .hero .ld { font-size: .62rem; color: var(--muted); margin: .25rem auto .55rem; max-width: 21rem; }
+  .cta { display: inline-block; background: var(--primary); color: #fff; border-radius: 999px; font-size: .68rem; font-weight: 600; padding: .34rem .85rem; }
+  .herocards { display: flex; gap: .4rem; margin-top: .7rem; }
+  .herocard { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .4rem; font-size: .5rem; color: var(--muted); text-align: left; }
+  .herocard b { display: block; color: var(--ink); font-size: .55rem; margin-bottom: .12rem; }
+  /* template picker overlay */
+  .picker { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: flex; align-items: flex-start; justify-content: center; padding: .6rem; overflow: auto; }
+  .pwrap { background: #fff; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.25); width: 100%; padding: .7rem .75rem; }
+  .pwrap .ph { display: flex; align-items: center; gap: .4rem; }
+  .pwrap .ph b { font-size: .82rem; color: var(--ink); } .pwrap .ph .x { margin-left: auto; color: var(--faint); }
+  .pwrap .psub { font-size: .58rem; color: var(--faint); margin: .12rem 0 .5rem; }
+  .pgh { font-size: .54rem; text-transform: uppercase; letter-spacing: .04em; color: var(--faint); font-weight: 700; margin: .45rem 0 .25rem; }
+  .pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .pcardx { border: 1px solid var(--g300); border-radius: 9px; padding: .42rem .48rem; background: #fff; }
+  .pcardx.dash { border-style: dashed; }
+  .pcardx .pn { font-size: .62rem; font-weight: 600; color: var(--ink); }
+  .pcardx .pd { font-size: .5rem; color: var(--muted); margin: .12rem 0 .22rem; line-height: 1.4; }
+  .pchips { display: flex; flex-wrap: wrap; gap: .2rem; }
+  .pchip { font-size: .46rem; border: 1px solid var(--g200); border-radius: 999px; padding: .03rem .32rem; color: var(--faint); }
+  .pguide { font-size: .48rem; color: var(--primary); margin-top: .25rem; }
+  /* guided tour coachmark */
+  .tourpop { position: absolute; background: #fff; border-radius: 9px; box-shadow: 0 12px 30px rgba(0,0,0,.3); padding: .45rem .55rem; width: 13.5rem; z-index: 7; border: 1px solid var(--g200); }
+  .tourpop .tt { font-size: .62rem; font-weight: 700; color: var(--ink); }
+  .tourpop .tb { font-size: .52rem; color: var(--muted); margin: .15rem 0 .4rem; line-height: 1.45; }
+  .tourpop .ta { display: flex; gap: .35rem; justify-content: flex-end; align-items: center; }
+  .tourpop .ta .b { font-size: .5rem; border-radius: 6px; padding: .14rem .45rem; }
+  .tourpop .ta .next { background: var(--primary); color: #fff; font-weight: 600; } .tourpop .ta .skip { color: var(--faint); }
+  .tourpop .step-n { margin-right: auto; font-size: .48rem; color: var(--faint); }
+  .tourhi { outline: 2px solid var(--primary); outline-offset: 1px; border-radius: 10px; position: relative; z-index: 6; background: #fff; }
+  /* help drawer sections (drawer reuses the toolkit .panel) */
+  .hsec { margin-bottom: .55rem; }
+  .hsec .hh { font-size: .54rem; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: .02em; }
+  .hsec p { font-size: .58rem; color: var(--muted); margin: .12rem 0 0; line-height: 1.45; }
+  .hdocs { font-size: .58rem; color: var(--primary); margin-top: .3rem; }
+  .helpq { margin-left: auto; color: var(--g350); border: 1px solid var(--g300); border-radius: 50%; width: .95rem; height: .95rem;
+           display: inline-grid; place-items: center; font-size: .56rem; flex: 0 0 auto; }
+  /* toolbar Help menu pill */
+  .helpmenu { font-size: .6rem; color: var(--primary); border: 1px solid var(--g300); border-radius: 6px; padding: .06rem .4rem; }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>onboarding <span class="role">First run</span></h1>
+<p class="lede">The first ninety seconds. <b>onboarding</b> takes a newcomer from the <b>home page</b> to a <b>canvas they can
+  actually start on</b> — pick a starting point, land on a model (pre-filled or blank), and get oriented by a guided tour, with
+  help one click away at every step. Success isn't "they reached the builder" — it's <b>knowing where to begin</b>: the tour says
+  <em>start in the middle, with a usage journey</em>, the canvas steers them there by <b>disabling what isn't ready yet</b>, and
+  every concept has a help drawer behind a <b>?</b>.</p>
+<p class="note">Faithful to the deployed app. Draws from <code>home.html</code>, the first-run <b>template picker</b>
+  (<code>onboarding/template_picker.html</code>), the canvas, the driver.js <b>guided tour</b> (<code>tour_steps.py</code> +
+  <code>tour.js</code>) and the <b>help drawer</b>. Note: "how-to guides" are <b>not</b> a separate picker category — they attach to
+  template cards. Code-level pointers are collected for agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+
+<!-- ============ PHASE A — HOME → A STARTING POINT ============ -->
+<div class="phase">
+  <span class="tag">A · From home to a starting point</span><span class="conn">one CTA · then pick a template, scratch, or a file</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — home -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/</span></div>
+      <div class="nav"><span class="logo">e-footprint</span><span class="gh">View on GitHub</span></div>
+      <div class="hero">
+        <h2>Do you know the environmental footprint of your digital service?</h2>
+        <p class="ld">Model it, simulate changes before you make them, and prioritize the actions that actually reduce it.</p>
+        <span class="cta">Start modeling →</span>
+        <div class="herocards">
+          <div class="herocard"><b>Define your services</b>Usage journeys, volumes, geographies, and the infrastructure they run on.</div>
+          <div class="herocard"><b>Analyze impact</b>A breakdown of the impact across the whole system.</div>
+          <div class="herocard"><b>Simulate &amp; prioritize</b>Compare scenarios and find the highest-impact actions.</div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The home page — a single hero with one call to action, <b>Start modeling →</b>. No sign-up, no gate. Clicking it doesn't reload the page; it <b>swaps in</b> the builder and updates the address to <code>/model_builder/</code>.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>Start from the home page</h3></div>
+    <p>A newcomer arrives at a plain explainer page with exactly one next step. There's no account to create and nothing to
+       configure — the whole onboarding is built to get them to a working canvas fast (the site even tells them a first model
+       takes a team about half an hour).</p>
+    <div class="states">
+      <div class="state"><span class="k">One CTA</span><span class="v"><b>Start modeling →</b> — always enabled, the single path forward. No auth, no gate.</span></div>
+      <div class="state"><span class="k">In-place entry</span><span class="v">An HTMX swap into the main content, with the URL pushed to <code>/model_builder/</code> — not a full page navigation.</span></div>
+      <div class="state deferred"><span class="k">Deep link</span><span class="v">A docs link can open a named scenario directly (<code>/template/&lt;id&gt;/</code>), landing on a pre-filled canvas with <b>no picker</b> — the one deliberate GET-that-loads exception.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- screen 2 — template picker -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:330px">
+        <div class="canvas dim" style="min-height:330px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="picker">
+          <div class="pwrap">
+            <div class="ph"><b>Welcome to e-footprint</b><span class="x">×</span></div>
+            <div class="psub">Pick a starting point. You can change everything once it loads.</div>
+            <div class="pgh">Templates</div>
+            <div class="pgrid">
+              <div class="pcardx"><div class="pn">🛒 Classical e-commerce</div><div class="pd">A shopping journey served by a web app server calling a database server.</div><div class="pchips"><span class="pchip">Web service</span><span class="pchip">Cloud server</span><span class="pchip">Database</span></div><div class="pguide">How to model a database ↗</div></div>
+              <div class="pcardx"><div class="pn">🤖 AI chatbot</div><div class="pd">A chatbot routing simple and complex prompts to small and large LLM APIs.</div><div class="pchips"><span class="pchip">Web service</span><span class="pchip">LLM inference</span><span class="pchip">ExternalAPI</span></div></div>
+              <div class="pcardx"><div class="pn">📟 Industrial IoT</div><div class="pd">Factory sensors send readings to a server; analysts review it on a dashboard.</div><div class="pchips"><span class="pchip">Connected sensors</span><span class="pchip">Sensor uploads</span><span class="pchip">Analysis dashboard</span></div></div>
+              <div class="pcardx"><div class="pn">Machine learning workflow</div><div class="pd">Training on a GPUServer plus recurrent inference jobs.</div><div class="pguide">How to model a machine learning workflow ↗</div></div>
+            </div>
+            <div class="pgh">Or</div>
+            <div class="pgrid">
+              <div class="pcardx dash"><div class="pn">＋ Start from scratch</div><div class="pd">An empty model. We'll show you where to begin.</div></div>
+              <div class="pcardx dash"><div class="pn">↥ Load a json file</div><div class="pd">Open an existing model exported as .e-f.json.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Because the session model is empty, the builder opens with the <b>template picker</b> overlaid: <b>Welcome to e-footprint</b> · <em>"Pick a starting point. You can change everything once it loads."</em> Two groups — <b>Templates</b> (each with concept chips and how-to links) and <b>Or</b> (<b>Start from scratch</b> / <b>Load a json file</b>, both dashed).</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>Pick a starting point</h3></div>
+    <p>The picker appears <b>only when the model is empty</b> — a returning user with work in progress goes straight to their
+       canvas. A <b>template</b> pre-fills a realistic model to learn from; <b>Start from scratch</b> opens an empty one;
+       <b>Load a json file</b> opens the import panel. Whatever they choose re-renders the whole builder; closing with <b>×</b>
+       just reveals the empty canvas behind.</p>
+    <div class="states">
+      <div class="state"><span class="k">Shown when empty</span><span class="v">Driven by a server-side emptiness check, not a "seen" flag — so it can't be mistaken for real content, and never nags a returning user.</span></div>
+      <div class="state"><span class="k">Two groups</span><span class="v"><b>Templates</b> (e-commerce, AI chatbot, Industrial IoT, ML workflow) and <b>Or</b> (scratch / upload). How-to guides aren't a third group — they ride on template cards as <em>"… ↗"</em> links.</span></div>
+      <div class="state"><span class="k">Replace guard</span><span class="v">Re-opening the picker over a non-empty model first confirms <em>"This will replace your current model. Continue?"</em></span></div>
+      <div class="state"><span class="k">Upload card</span><span class="v"><b>Load a json file</b> opens the <em>"Open a file"</em> side panel and dismisses the picker — see <a href="save-and-load.html">save-and-load</a>.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — LAND ON THE CANVAS ============ -->
+<div class="phase">
+  <span class="tag">B · Land on the canvas</span><span class="conn">empty or pre-filled · the canvas steers the first move</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — landing canvas -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">My system</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span><span class="helpmenu">Help ▾</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:170px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="addbtn locked"><span class="plus">＋</span> Add usage pattern <span class="q">?</span></div><div class="lock-tip">Add a usage journey in the Usage journeys section first.</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="addbtn"><span class="plus">＋</span> Add usage journey <span class="q">?</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="addbtn"><span class="plus">＋</span> Add server <span class="q">?</span></div><div class="addbtn"><span class="plus">＋</span> Add external API <span class="q">?</span></div></div>
+        </div>
+        <div class="resultsbar locked"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>A scratch start lands on the empty <b>My system</b> canvas (a template would land it pre-filled). The canvas itself steers the first move: <b>Add usage journey</b> is enabled, while <b>Add usage pattern</b> is greyed with <em>"Add a usage journey … first."</em> The model name sits in the toolbar; <b>Results</b> is locked until it computes.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Land on the canvas — and know where to begin</h3></div>
+    <p>The newcomer arrives at the same three-column canvas the rest of the app uses (the <a href="build-a-model.html">build-a-model</a>
+       loop). It's either pre-filled from a template — a worked example to poke at — or the empty <b>My system</b>. Either way the
+       <em>disabled, never errored</em> rule does the teaching: the one always-available action is <b>Add usage journey</b>, the
+       recommended place to start.</p>
+    <div class="states">
+      <div class="state"><span class="k">Empty or pre-filled</span><span class="v">Scratch → empty <b>My system</b>; a template → a realistic model already on the canvas.</span></div>
+      <div class="state"><span class="k">Steered first move</span><span class="v"><b>Add usage journey</b> is never gated; <b>Add usage pattern</b> is, until a journey exists — the canvas points to the start.</span></div>
+      <div class="state"><span class="k">Name in the toolbar</span><span class="v">The model name lives in the toolbar (<em>My system</em> by default), not the tab — the tab carries a fixed role label.</span></div>
+      <div class="state"><span class="k">Help menu</span><span class="v">The toolbar <b>Help</b> menu is the home for replaying the tour, re-opening templates, or jumping to docs (Phase D).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — THE GUIDED TOUR ============ -->
+<div class="phase">
+  <span class="tag">C · The guided tour</span><span class="conn">auto-runs once · non-blocking coachmarks · replayable</span><span class="rule"></span>
+</div>
+
+<!-- screen 4 — tour coachmark -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">My system</span><span class="tab add">＋ Add ▾</span></div>
+        <div class="toolbar"><span class="tbtn">⟳</span><span class="helpmenu">Help ▾</span></div>
+      </div>
+      <div class="stage" style="min-height:200px">
+        <div class="canvas dim" style="min-height:200px">
+          <div class="col"><h5><b>Usage patterns</b></h5></div>
+          <div class="col tourhi"><h5><b>Usage journeys</b></h5><div class="addbtn"><span class="plus">＋</span> Add usage journey <span class="q">?</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5></div>
+        </div>
+        <div class="tourpop" style="top:3.4rem; right:1rem">
+          <div class="tt">Start in the middle: usage journeys</div>
+          <div class="tb">A usage journey is what a user actually does with your service. This column is your anchor — begin here, then build out the rest.</div>
+          <div class="ta"><span class="step-n">1 / 8</span><span class="b skip">Skip</span><span class="b next">Next →</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Once the picker is gone, a <b>guided tour</b> (driver.js coachmarks) auto-runs — but only the <b>first time, ever</b>. It highlights one piece of chrome at a time with a short tooltip and <b>Next</b>. It's <b>non-blocking</b>: clicking outside closes it, and the highlighted help stays usable.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>The guided tour — once, and replayable</h3></div>
+    <p>The tour orients the newcomer on a <em>real</em> canvas (it waits for the picker to clear). It walks the columns in modeling
+       order — <b>journeys → infrastructure → usage patterns → results</b> — then points out edge modeling, comparison, and where
+       help lives. It runs <b>once ever</b> and never nags again; the Help menu replays it on demand.</p>
+    <div class="states">
+      <div class="state"><span class="k">Once, ever</span><span class="v">Auto-runs a single time (remembered locally), deferred until the picker is gone so it never lands on the bare picker.</span></div>
+      <div class="state"><span class="k">The path</span><span class="v">Usage journeys → infrastructure → edge toggle → usage patterns → Results → Compare → the help "?" → the Help menu.</span></div>
+      <div class="state variant"><span class="k">Blank-model step</span><span class="v">On a scratch start it appends a first-action step: <em>"Suggested first step: create a usage journey."</em></span></div>
+      <div class="state"><span class="k">Non-blocking</span><span class="v">Overlay-click closes it; the toolbar and an open help drawer stay above the dim, so the user can explore mid-tour.</span></div>
+      <div class="state deferred"><span class="k">Mobile</span><span class="v">On phones the help step doesn't open the drawer (shows alternate copy); chrome anchors fall back to the menu button.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE D — HELP ON DEMAND ============ -->
+<div class="phase">
+  <span class="tag">D · Help on demand</span><span class="conn">a ? on every add · the help drawer · the Help menu</span><span class="rule"></span>
+</div>
+
+<!-- screen 5 — help drawer -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">My system</span><span class="tab add">＋ Add ▾</span></div>
+        <div class="toolbar"><span class="helpmenu">Help ▾</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:200px">
+          <div class="col"><h5><b>Usage patterns</b></h5></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="addbtn"><span class="plus">＋</span> Add usage journey <span class="helpq">?</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5></div>
+        </div>
+        <div class="panel" style="width:62%">
+          <div class="phead"><b>About Usage journey</b><span class="x">×</span></div>
+          <div class="hsec"><div class="hh">When to use</div><p>Model what a user actually does with your service — a sequence of steps, each calling jobs on your infrastructure.</p></div>
+          <div class="hsec"><div class="hh">Common pitfalls</div><p>Don't confuse a journey (what users do) with a usage pattern (how many users, and when).</p></div>
+          <div class="hsec"><div class="hh">Interactions</div><p>Steps run jobs on servers and edge functions; usage patterns point at a journey to drive it.</p></div>
+          <div class="hdocs">Read more in the docs ↗</div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Every <b>Add</b> button carries a <b>?</b> that opens the <b>help drawer</b> — <b>About {type}</b> with <b>When to use</b>, <b>Common pitfalls</b>, <b>Interactions</b>, and a docs link. It's an independent overlay (opening an edit panel closes it). The toolbar <b>Help</b> menu replays the tour, re-opens templates, or jumps to documentation.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">5</span><h3>Help, always one click away</h3></div>
+    <p>Depth is never more than a click off the canvas. Each object type has a <b>?</b> beside its Add button that opens a help
+       drawer explaining the concept — when to use it, what to watch for, how it connects — plus field tooltips and info icons in
+       the forms. The Help menu collects the meta-actions: replay the tour, re-open the templates, open the docs.</p>
+    <div class="states">
+      <div class="state"><span class="k">? on every add</span><span class="v">Opens <b>About {type}</b> — <b>When to use</b> · <b>Common pitfalls</b> · <b>Interactions</b> · a docs link. The same content the tour and field tooltips draw on.</span></div>
+      <div class="state"><span class="k">Independent overlay</span><span class="v">The drawer is its own panel; opening an edit side panel or switching model closes it, so the two never fight.</span></div>
+      <div class="state"><span class="k">Help menu</span><span class="v"><b>↺ Replay tour</b> · <b>▦ Open templates</b> · <b>📖 Documentation</b> — the home for re-orienting any time.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>The picker is shown by a server-side emptiness check, not a localStorage "seen" flag.</b></td><td>A returning user who never actually built anything still gets guided, and a metadata-only key can never be mistaken for real content. Tie the picker to the thing that matters — is there a model? — not to whether a browser has visited before.</td></tr>
+  <tr><td><b>The picker is an overlay rendered into the canvas, not a separate page or a Bootstrap modal.</b></td><td>Picking re-renders the whole builder in place, so the model and chrome stay intact; closing just reveals the canvas. A separate page would add a navigation and a reload to the very first step.</td></tr>
+  <tr><td><b>How-to guides attach to template cards as links — they're not a third picker category.</b></td><td>A guide isn't a starting model; several guides can describe one scenario. Keeping them as per-card <em>"… ↗"</em> links avoids duplicating cards and keeps the picker to two clean groups.</td></tr>
+  <tr><td><b>The tour auto-runs once, deferred until the picker is gone, and is non-blocking.</b></td><td>It must orient on a real canvas (never the bare picker), must never nag on return, and must not trap the user — overlay-click closes it and help stays reachable for its whole duration.</td></tr>
+  <tr><td><b>Tour copy lives server-side, resolved through the one description provider.</b></td><td>Concept prose has a single source of truth shared with the help drawer and tooltips; nothing about a domain concept is duplicated in JavaScript to drift out of date.</td></tr>
+  <tr><td><b>"Add usage journey" is never gated; "Add usage pattern" is gated until a journey exists.</b></td><td>The canvas itself teaches the recommended starting point — the tour's "start in the middle" — through disabled-instead-of-error, instead of relying on the user to read instructions.</td></tr>
+  <tr><td><b>Loading a model is POST-only; the docs deep link (<code>/template/&lt;id&gt;/</code>) is the one GET exception.</b></td><td>A bare GET must not mutate the session model — except a documentation link click is itself the user's intent and loading is idempotent, so the deep link is allowed to load and redirect.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, the picker catalog, the driver.js tour &amp; the help drawer</span></summary>
+  <div class="pbody">
+    <p>Where this lives in code. Start with <code>specs/architecture.md</code> ("First-run template picker", "Guided tour") and <code>specs/mission.md</code> (audience). The landing canvas is the <a href="build-a-model.html">build-a-model</a> loop.</p>
+    <dl>
+      <dt>Home → entry (Phase A)</dt>
+      <dd><code>e_footprint_interface/views.py::home</code> → <code>home.html</code> (CTA <code>#btn-start-modeling-my-service</code>, <code>hx-get model-builder</code> + <code>hx-push-url</code>); <code>theme/templates/{base,navbar,footer}.html</code>. Deep link <code>template/&lt;id&gt;/</code> → <code>load_template_deeplink</code> (GET load + redirect).</dd>
+      <dt>Picker (Phase A/B)</dt>
+      <dd><code>model_builder_main</code> seeds the scratch baseline and sets <code>show_template_picker=is_empty_model(...)</code> (<code>domain/services/empty_model.py</code>); <code>render_model_builder</code> adds <code>template_picker_groups=build_picker_groups()</code> (<code>adapters/presenters/template_picker_presenter.py</code> over <code>domain/services/template_catalog_service.py</code>; <code>SCRATCH_ID</code> / <code>UPLOAD_ID</code>; intro registry <code>domain/reference_data/modeling_templates/introductory/registry.py</code>; how-to from library <code>list_how_to_templates()</code>). Template <code>onboarding/template_picker.html</code>; cards <code>hx-post load-template/&lt;id&gt;</code> → <code>#main-content-block</code> with <code>data-confirm-when-model-not-empty="This will replace your current model. Continue?"</code>; routes <code>load-template/</code>, <code>open-template-picker/</code>, <code>reset-model/</code> in <code>views_onboarding.py</code> / <code>views.py</code>.</dd>
+      <dt>Landing canvas (Phase B)</dt>
+      <dd><code>components/model_canvas_content.html</code> (columns + <code>data-tour-target</code> on the active canvas), gating via <code>creation_constraints</code> + <code>constraint_messages.py</code>; toolbar <code>upload_download_reboot_model_tooltips.html</code>; scratch baseline name <em>My system</em> in <code>default_system_data.json</code>.</dd>
+      <dt>Guided tour (Phase C)</dt>
+      <dd>Copy: <code>adapters/ui_config/tour_steps.py::build_tour_steps(is_blank)</code> → <code>onboarding/tour_steps.html</code> (<code>&lt;script id="tour-steps-data"&gt;</code>). Engine: <code>theme/static/scripts/tour.js</code> over vendored <code>external_librairies/driver.iife.js</code> (CSS <code>driver.css</code> + non-blocking <code>tour.css</code>); auto-run via <code>onboarding_first_run.js</code> (localStorage <code>efootprint_onboarding_seen</code>, event <code>onboarding:first-run</code>). Anchors: <code>data-tour-target</code> = usage-journeys / infrastructure / usage-patterns / results / edge-modeling / comparison / help-menu.</dd>
+      <dt>Help drawer (Phase D)</dt>
+      <dd>Route <code>open-help-drawer/&lt;class&gt;/</code> → <code>views_help.open_help_drawer</code> → <code>help_drawer/{help_drawer_structure,class_help}.html</code> (sections "When to use" / "Common pitfalls" / "Interactions" + docs link; header "About {label}"). Content from <code>EFOOTPRINT_DESCRIPTION_PROVIDER</code> / <code>canvas_help_info.py</code>; the "?" in <code>components/add_object_button.html</code>; JS <code>help_drawer_utils.js</code> (<code>#helpDrawer</code> overlay, <code>data-action</code> dispatch). Help menu: <code>components/help_menu.html</code> (Replay tour / Open templates / Documentation).</dd>
+      <dt>Scope clarifications</dt>
+      <dd>The picker has <b>two</b> groups (Templates, Or), not three — how-to guides are card links, not a category. The only "coachmarks" are the driver.js tour. The picker <b>×</b> loads nothing (reveals the empty canvas). Mobile degrades the help tour step and falls back chrome anchors to the burger.</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · onboarding (first run) · home → a canvas you can start on · faithful to the deployed app. Shares the canonical
+  <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>
