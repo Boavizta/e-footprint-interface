@@ -32,7 +32,7 @@ Journeys slot into the four-stage SDD workflow ([`../workflow.md`](../workflow.m
 **Authoring one:** follow [`journey-authoring.md`](journey-authoring.md) — the method (ground every screen in the real templates/views, not just the spec), the shared HTML/CSS template (copy [`journeys/build-a-model.html`](journeys/build-a-model.html)'s `<style>` block), and the conventions. The journey set, with build order:
 
 - `journeys/build-a-model.html` — **the core loop, and the reference.** The three-column canvas → add an object via the side panel → edit → delete, with disabled-instead-of-error gating and in-place OOB canvas patches. Covers **both web and edge** (the Edge toggle adds object types, not a new loop) and the dedicated **Relationships** section unifying every connection shape (single link, list link, weighted dict, nested edge groups). Documented first because it exercises the most recurring UI regions; everything else reuses its components.
-- `onboarding` *(2nd)* — first run: home → *Start modeling* → the template picker → land on the canvas → the guided tour, help drawer, web/edge toggle.
+- `onboarding` *(2nd)* — first run: home → *Start modeling* → the template picker → land on the canvas → the guided tour and help drawer. (The web/edge toggle lives in `build-a-model`, Phase E — it's part of the build loop, not first-run onboarding.)
 - `view-results` *(3rd)* — the Results panel: the Sankey + "Analyse by" chips, the charts, click-to-explain modals, the Sources tab, xlsx export.
 - `compare-models` *(4th)* — the second model slot and the comparison dashboard (KPI strip, decomposition, paired & cumulative charts, diff table).
 - `save-and-load` *(5th)* — download / upload of a single model and the two-model workspace, and the recovery page.
