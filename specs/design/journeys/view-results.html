@@ -287,15 +287,6 @@
   .seeg { color: var(--primary); white-space: nowrap; }
   .xlsxbtn { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid var(--g400); border-radius: 7px; background: #fff;
              color: var(--primary); font-size: .6rem; font-weight: 600; padding: .2rem .5rem; }
-  /* derivation: formula expander */
-  .formula { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .5rem .6rem; }
-  .formula .fh { font-size: .56rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; margin: .5rem 0 .15rem; }
-  .formula .fh:first-child { margin-top: 0; }
-  .formula .eq { font-family: ui-monospace, Menlo, monospace; font-size: .68rem; color: var(--ink); background: #fff;
-                 border: 1px solid var(--g200); border-radius: 5px; padding: .3rem .4rem; }
-  .formula .var { font-size: .64rem; color: var(--muted); margin: .08rem 0; } .formula .var b { color: var(--ink); }
-  .formula .glink { display: inline-block; margin-top: .35rem; color: var(--primary); font-size: .64rem; }
-  .syms { border-bottom: 1px dotted var(--g400); }
 </style>
 </head>
 <body>
@@ -304,13 +295,14 @@
 <h1>view-results</h1>
 <p class="lede">The model is built — now <b>read its footprint</b>. <b>view-results</b> opens the Results panel over the canvas:
   the <b>emissions over time</b> (yearly bars and a cumulative curve) and the <b>Impact repartition</b> Sankey that shows where the
-  CO₂e actually flows. Success isn't "a chart appeared" — it's <b>understanding the number and trusting it</b>: every value can be
-  traced to its inputs (a formula, a calculus graph, a cited source), filtered by the angle you care about, and exported. Results
-  open <b>in place</b> over a model that's already computable; the button stays <b>disabled with the live reason</b> until it is.</p>
+  CO₂e actually flows. Success isn't "a chart appeared" — it's <b>reading the number, filtering it to the angle you care about, and
+  exporting it</b>. Trusting it — tracing any value back to its inputs — is the companion methodology journey
+  <a href="audit-a-result.html">audit-a-result</a>. Results open <b>in place</b> over a model that's already computable; the button
+  stays <b>disabled with the live reason</b> until it is.</p>
 <p class="note">Faithful to the deployed app. Draws from the <b>Results</b> bar / <b>Show results</b> pill, the <code>result-chart</code>
-  panel and its graph + Sankey partials, the <code>source-table</code>, and the calculated-attribute explanation views. Note: value
-  derivations are <b>tooltips, inline expanders and a new-tab calculus graph</b> — not centered modals. Code-level pointers are
-  collected for agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+  panel and its graph + Sankey partials, and the <code>source-table</code>. Value derivations (formulas, the calculus graph) live in
+  <a href="audit-a-result.html">audit-a-result</a>. Code-level pointers are collected for agents in
+  <a href="#pointers">Implementation pointers</a> at the foot.</p>
 
 <!-- ============ PHASE A — THE GATE ============ -->
 <div class="phase">
@@ -510,55 +502,13 @@
   </div>
 </div>
 
-<!-- derivation section -->
+<!-- derivation → its own journey -->
 <h2 class="sec">Every value carries its derivation</h2>
 <p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">A footprint you can't interrogate is a footprint you
-  can't trust. So every computed value can be <b>traced to its inputs</b> — but through <b>lightweight surfaces</b>, not a heavyweight
-  modal: <b>tooltips</b> on the charts and Sankey, an <b>inline formula expander</b> in an object's <em>Calculated attributes</em>, the
-  Sources <b>(see graph)</b> link, and the full <b>calculus graph</b> opened in a new tab.</p>
-
-<div class="cmp">
-  <div class="cmpcol">
-    <p class="ttl">Inline formula <span class="kind">· in the edit panel</span></p>
-    <div class="pcard">
-      <div class="phead"><b>Web server · embodied emissions</b></div>
-      <div class="formula">
-        <div class="fh">Input variables</div>
-        <div class="var"><b>m</b> = carbon footprint of fabrication · <b>u</b> = number of units · <b>t</b> = lifespan</div>
-        <div class="fh">Formula</div>
-        <div class="eq">embodied = <span class="syms">m</span> × <span class="syms">u</span> × (timespan / <span class="syms">t</span>)</div>
-        <div class="fh">Direct children</div>
-        <div class="var">used by → <b>Web server total emissions</b></div>
-        <a class="glink" href="#">See the calculus graph ↗</a>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">Inline formula</span>Open an object → <b>Calculated attributes</b> → a value's <b>formula icon</b> expands <b>Input variables</b>, the <b>Formula</b> (each symbol tooltipped), its <b>Direct children</b>, and a link to the graph. Reached from the edit panel, not the Results panel.</div>
-  </div>
-  <div class="cmpcol">
-    <p class="ttl">Calculus graph <span class="kind">· new tab</span></p>
-    <div class="pcard">
-      <div class="phead"><b>Calculus graph</b><span class="x">↗ new tab</span></div>
-      <svg viewBox="0 0 300 120" role="img" aria-label="Calculus derivation graph" style="width:100%;height:auto">
-        <line x1="60" y1="30" x2="150" y2="60" stroke="#9CA3AF"/><line x1="60" y1="90" x2="150" y2="60" stroke="#9CA3AF"/>
-        <line x1="150" y1="60" x2="240" y2="60" stroke="#9CA3AF"/>
-        <circle cx="55" cy="30" r="13" fill="#e8eaf4" stroke="#2D4675"/><circle cx="55" cy="90" r="13" fill="#e8eaf4" stroke="#2D4675"/>
-        <circle cx="150" cy="60" r="15" fill="#e8eaf4" stroke="#2D4675"/><circle cx="245" cy="60" r="15" fill="#2D4675"/>
-        <text x="55" y="13" font-size="7" fill="#6B7280" text-anchor="middle">inputs</text>
-        <text x="150" y="40" font-size="7" fill="#6B7280" text-anchor="middle">×</text>
-        <text x="245" y="40" font-size="7" fill="#6B7280" text-anchor="middle">result</text>
-      </svg>
-    </div>
-    <div class="mock-help"><span class="lbl">Calculus graph</span>The full derivation tree — every ancestor input and operation down to the result — rendered as an interactive graph and opened in a <b>new browser tab</b> (cached server-side, served out of line so the panel payload stays small).</div>
-  </div>
-</div>
-
-<table>
-  <tr><th>Surface</th><th>Where</th><th>Shows</th></tr>
-  <tr><td><b>Tooltip</b></td><td>chart &amp; Sankey hover</td><td>a value + its share of total (Sankey: aggregated members too)</td></tr>
-  <tr><td><b>Inline formula</b></td><td>edit panel · Calculated attributes</td><td>input variables, the formula, direct children</td></tr>
-  <tr><td><b>(see graph)</b></td><td>Sources tab · calculated rows</td><td>jump to the calculus graph for that value</td></tr>
-  <tr><td><b>Calculus graph</b></td><td>new browser tab</td><td>the whole derivation tree, interactive</td></tr>
-</table>
+  can't trust — so every value here can be <b>traced to its inputs</b>, through lightweight surfaces (tooltips, an inline formula
+  expander, the calculus graph) rather than a modal. That methodology — input <b>provenance</b> <em>and</em> output
+  <b>derivation</b> — has its own journey: <b><a href="audit-a-result.html">audit-a-result</a></b>. From here, its two entry
+  points are the Sources tab's <b>(see graph)</b> links and the edit panel's <em>Calculated attributes</em>.</p>
 
 <!-- ============ DECISIONS ============ -->
 <h2 class="sec">Decisions taken</h2>
@@ -587,7 +537,7 @@
       <dt>Sources &amp; export (Phase D)</dt>
       <dd>Route <code>source-table/</code> → <code>source_table</code> (template <code>result/source_table.html</code>, rows <code>source_table_row.html</code>; inline editor <code>source-table-row-editor/&lt;id&gt;/&lt;attr&gt;/</code> → <code>source_table_row_editor.html</code>, metadata-only via <code>source_metadata.js</code>). Export <code>download-sources/</code> → <code>download_sources</code> (openpyxl, sheet "Sources"; button label literally "Export to xslx").</dd>
       <dt>Derivation surfaces</dt>
-      <dd>Inline formula: <code>side_panels/edit/calculated_attributes_section.html</code> + <code>calculated_attributes/components/ancestors_formula_and_children.html</code> via <code>get_calculated_attribute_explanation/&lt;id&gt;/&lt;attr&gt;/</code> (<code>hx-trigger="click once"</code>). Hourly attrs add a timeseries chart (<code>get_explainable_hourly_quantity_chart_and_explanation/…</code>, <code>calculated_attributes_timeseries.js</code>). Calculus graph: <code>display-calculus-graph/&lt;id&gt;/&lt;attr&gt;/</code> builds the pyvis graph (library <code>build_calculus_graph</code>), caches it (<code>SessionCacheRepository</code> namespace <code>calculus_graph</code>), serves via <code>graph/&lt;cache_key&gt;</code> in an iframe, opened <code>target="_blank"</code>.</dd>
+      <dd>The formula expander and the calculus graph (and the <code>(see graph)</code> link on calculated source-table rows) are documented in <a href="audit-a-result.html#pointers">audit-a-result</a> — <code>calculated_attributes_section.html</code>, <code>get_calculated_attribute_explanation/…</code>, <code>display-calculus-graph/…</code>.</dd>
       <dt>Not in the panel (clarifications)</dt>
       <dd>No hourly chart in the Results panel — only yearly/monthly bar + cumulative line + Sankey; the only hourly chart is the per-attribute explain chart in the edit panel. No centered explain modal. The model exports as JSON (not xlsx); xlsx is sources-only.</dd>
     </dl>

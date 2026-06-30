@@ -60,8 +60,9 @@
   <b>Scope today.</b> The <b>journey set is live</b> — <a href="journeys/build-a-model.html">build-a-model</a> (the core editing
   loop, covering both web and edge) is the reference implementation, its <code>&lt;style&gt;</code> block the shared toolkit, and
   <a href="journeys/onboarding.html">onboarding</a>, <a href="journeys/view-results.html">view-results</a>,
-  <a href="journeys/compare-models.html">compare-models</a> and <a href="journeys/save-and-load.html">save-and-load</a> are
-  authored against it. <b>tokens</b> and the <b>component inventory</b> are pre-staged and stay placeholders until they're stood up.
+  <a href="journeys/audit-a-result.html">audit-a-result</a>, <a href="journeys/compare-models.html">compare-models</a> and
+  <a href="journeys/save-and-load.html">save-and-load</a> are authored against it. <b>tokens</b> and the <b>component inventory</b>
+  are pre-staged and stay placeholders until they're stood up.
 </div>
 
 <h2>Journeys</h2>
@@ -80,7 +81,12 @@
 
   <a class="card" href="journeys/view-results.html">
     <div class="name">view-results</div>
-    <div class="desc">The Results panel: yearly &amp; cumulative emissions charts and the <em>Impact repartition</em> Sankey (with its "Analyse by" chips), value derivations via tooltips / inline formulas / the calculus graph, the Sources tab, and xlsx export.</div>
+    <div class="desc">The Results panel: yearly &amp; cumulative emissions charts and the <em>Impact repartition</em> Sankey (with its "Analyse by" chips), the Sources tab, and xlsx export. Trusting the numbers is its companion, <em>audit-a-result</em>.</div>
+  </a>
+
+  <a class="card" href="journeys/audit-a-result.html">
+    <div class="name">audit-a-result <span class="pill web">Methodology</span></div>
+    <div class="desc">Trace any number to its inputs: <b>provenance</b> (every value's source &amp; confidence, the Sources view) and <b>derivation</b> (the inline formula → the calculus graph → cited inputs). The methodology home — currently distributed across the edit panel and Sources, poised to become first-class.</div>
   </a>
 
   <a class="card" href="journeys/compare-models.html">
@@ -120,7 +126,7 @@
 <p class="tagline" style="font-size:.9rem;margin-top:.8rem;">Specs and plans are already authored as self-contained HTML in this repo (<a href="../workflow.md">workflow.md</a>) — journeys are the same posture. See the <a href="README.md">README</a> for the sync protocol with design work.</p>
 
 <footer>
-  e-footprint-interface design hub · all five journeys live (build-a-model is the reference) · tokens &amp; component inventory staged.
+  e-footprint-interface design hub · all six journeys live (build-a-model is the reference) · tokens &amp; component inventory staged.
 </footer>
 
 </body>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — audit-a-result</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- audit-a-result only: provenance (source + confidence) & derivation surfaces ---- */
+  /* source + confidence on a value (in the form) */
+  .srcrow { display: flex; align-items: center; gap: .4rem; font-size: .58rem; color: var(--muted); margin-top: .25rem; flex-wrap: wrap; }
+  .srcrow .sl { font-size: .5rem; text-transform: uppercase; letter-spacing: .02em; color: var(--faint); font-weight: 700; }
+  .conf { font-size: .5rem; border-radius: 999px; padding: .04rem .4rem; border: 1px solid var(--g200); white-space: nowrap; }
+  .conf.ok { background: var(--ok-bg); color: var(--ok); border-color: #bbe7c6; }
+  .conf.warn { background: var(--amber-bg); color: var(--amber); border-color: #fde68a; }
+  .conf.none { background: var(--g100); color: var(--faint); }
+  /* sources table */
+  .srctab { width: 100%; border-collapse: collapse; font-size: .56rem; background: #fff; }
+  .srctab th, .srctab td { border: 1px solid var(--line); padding: .2rem .32rem; text-align: left; vertical-align: top; }
+  .srctab th { background: var(--g100); font-size: .5rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+  .seeg { color: var(--primary); white-space: nowrap; }
+  .xlsxbtn { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid var(--g400); border-radius: 7px; background: #fff;
+             color: var(--primary); font-size: .6rem; font-weight: 600; padding: .2rem .5rem; }
+  /* formula expander */
+  .formula { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .5rem .6rem; }
+  .formula .fh { font-size: .56rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; margin: .55rem 0 .15rem; }
+  .formula .fh:first-child { margin-top: 0; }
+  .formula .eq { font-family: ui-monospace, Menlo, monospace; font-size: .68rem; color: var(--ink); background: #fff;
+                 border: 1px solid var(--g200); border-radius: 5px; padding: .3rem .4rem; }
+  .formula .var { font-size: .64rem; color: var(--muted); margin: .08rem 0; } .formula .var b { color: var(--ink); }
+  .formula .glink { display: inline-block; margin-top: .4rem; color: var(--primary); font-size: .64rem; }
+  .syms { border-bottom: 1px dotted var(--g400); }
+  /* the audit trail chain (result ← formula ← inputs ← sources) */
+  .trail { display: flex; align-items: stretch; gap: .25rem; flex-wrap: wrap; margin: .3rem 0 1rem; }
+  .tnode { flex: 1 1 9rem; min-width: 8rem; background: #fff; border: 1px solid var(--g300); border-radius: 9px; padding: .5rem .55rem; }
+  .tnode .th { font-size: .56rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; }
+  .tnode .tv { font-size: .72rem; color: var(--ink); margin-top: .2rem; font-weight: 600; }
+  .tnode .ts { font-size: .62rem; color: var(--muted); margin-top: .15rem; }
+  .tarrow { align-self: center; color: var(--g400); font-weight: 700; font-size: 1rem; }
+  @media (max-width: 640px) { .tarrow { transform: rotate(90deg); } }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>audit-a-result <span class="role">Methodology</span></h1>
+<p class="lede">A footprint is only useful if you can <b>defend</b> it. <b>audit-a-result</b> is the methodology view: every number the
+  model produces can be <b>traced</b> — down through the formula that computed it to the <b>cited, confidence-rated inputs</b> it
+  rests on. Success isn't "a result appeared" — it's being able to answer <em>"where does this number come from, and how sure are
+  we?"</em> for any value on screen. The two halves are <b>provenance</b> (every input has a source &amp; confidence) and
+  <b>derivation</b> (every output explains itself), meeting in one unbroken trail.</p>
+<p class="note">Faithful to the deployed app. Draws from the quantity fields' <b>source / confidence</b>, the <b>Sources</b> tab
+  (<code>source-table</code>), the edit panel's <em>Calculated attributes</em> <b>formula expander</b>, and the <b>calculus graph</b>.
+  Derivations are <b>tooltips, inline expanders and a new-tab graph</b> — not modals. The surfaces are reached from
+  <a href="view-results.html">view-results</a> (Sources) and <a href="build-a-model.html">build-a-model</a> (the edit panel); this
+  journey is their methodology home. Code-level pointers for agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+
+<div class="designnote"><b class="h">Why its own journey.</b> Today these surfaces are <b>distributed</b> — provenance in the form
+  fields and the Sources tab, derivation in the edit panel — and easy to miss. As auditability grows into a first-class feature,
+  this is where the consolidated story belongs; the other journeys point here rather than re-explaining it.</div>
+
+<!-- ============ PHASE A — PROVENANCE ============ -->
+<div class="phase">
+  <span class="tag">A · Provenance</span><span class="conn">every input carries a source &amp; a confidence</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — source + confidence on a value -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:230px">
+        <div class="canvas dim" style="min-height:230px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="panel" style="width:64%">
+          <div class="phead"><b>Edit Web server</b><span class="x">×</span></div>
+          <div class="field qty"><label>RAM</label><div class="row"><span class="inp">128</span><select class="dd unit"><option>GB</option></select></div></div>
+          <div class="srcrow"><span class="sl">Source</span><span class="inp" style="padding:.15rem .4rem;font-size:.62rem">Boavizta</span></div>
+          <div class="srcrow"><span class="sl">Confidence</span><span class="conf ok">Confident</span><span class="conf warn">Uncertain</span><span class="conf none">Not provided</span></div>
+          <p class="helptxt">Source &amp; confidence are optional metadata on the value — they don't change the number, only how well it's backed.</p>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Every input value can carry its provenance, right on the field: a <b>source</b> (name + link) and a <b>confidence</b> — <em>Confident · Uncertain · Not provided</em>. It's optional but encouraged, so a number isn't a bare figure with no backing.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>Every input carries a source and a confidence</h3></div>
+    <p>Auditability starts at the input. Each quantity a modeller enters can be tagged with <b>where it came from</b> and <b>how
+       sure they are</b> — captured on the field itself while editing. It's metadata about the value, not a modeling input: it
+       describes how well the number is backed, without changing the number.</p>
+    <div class="states">
+      <div class="state"><span class="k">Per-value provenance</span><span class="v">A <b>source</b> (name + optional link) and a <b>confidence</b> attach to each input quantity.</span></div>
+      <div class="state"><span class="k">Confidence levels</span><span class="v">A qualitative flag — <b>Confident · Uncertain · Not provided</b> — not a false-precision number.</span></div>
+      <div class="state"><span class="k">Metadata, not input</span><span class="v">Editing source / confidence is a <b>metadata-only</b> change — it never recomputes the model.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- screen 2 — the Sources tab -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:250px">
+        <div class="rpanel" style="position:absolute;inset:0;background:#fff;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:.5rem;padding:.4rem .55rem;border-bottom:1px solid var(--line)"><span style="font-size:.8rem;font-weight:700">Results</span><span style="font-size:.62rem;color:var(--faint)">Results · </span><span style="font-size:.62rem;color:var(--primary);font-weight:600">Sources</span></div>
+          <div style="padding:.5rem;display:grid;gap:.4rem">
+            <div><span class="xlsxbtn">⬇ Export to xslx</span></div>
+            <table class="srctab">
+              <tr><th>Item name</th><th>Attribute of</th><th>Value</th><th>Unit</th><th>Source</th><th>Confidence</th><th></th></tr>
+              <tr><td>RAM</td><td>Web server</td><td>128</td><td>GB</td><td>Boavizta</td><td><span class="conf ok">Confident</span></td><td>✎</td></tr>
+              <tr><td>Carbon intensity</td><td>France</td><td>56</td><td>g/kWh</td><td>RTE 2023</td><td><span class="conf ok">Confident</span></td><td>✎</td></tr>
+              <tr><td>Lifespan</td><td>Web server</td><td>6</td><td>year</td><td>—</td><td><span class="conf warn">Uncertain</span></td><td>✎</td></tr>
+              <tr><td>Embodied emissions</td><td>Web server</td><td>1.2</td><td>t CO₂-eq</td><td class="seeg">(see graph)</td><td>—</td><td></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Sources</b> tab (in the Results panel) is the consolidated audit view — every input with its value, unit, <b>source</b> and <b>confidence</b>, editable inline via <b>✎</b>. <b>Calculated</b> values aren't sourced; they show <b>(see graph)</b> instead. <em>Export to xslx</em> takes the whole table.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>The Sources tab — provenance, consolidated</h3></div>
+    <p>Scattered field-level provenance is gathered into one place: the <b>Sources</b> tab of the Results panel lists every input
+       behind the model with its source and confidence, all editable in place. It's the auditor's-eye view — scan what's solid,
+       what's <em>Uncertain</em>, and what still has no source — and export it for a review.</p>
+    <div class="states">
+      <div class="state"><span class="k">One row per input</span><span class="v">Item · Attribute of · Value · Unit · Source · Confidence · Comment.</span></div>
+      <div class="state"><span class="k">Inline edit</span><span class="v"><b>✎</b> opens a row editor for source / confidence / comment; saving is metadata-only — no recompute, no table reload.</span></div>
+      <div class="state"><span class="k">Calculated rows</span><span class="v">Not sourced — they show <b>(see graph)</b>, a jump to the value's derivation (Phase C).</span></div>
+      <div class="state"><span class="k">Export</span><span class="v"><em>Export to xslx</em> downloads the table for offline review. Reached via <a href="view-results.html">Results → Sources</a>.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — DERIVATION ============ -->
+<div class="phase">
+  <span class="tag">B · Derivation</span><span class="conn">every calculated value explains itself</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — calculated attributes formula -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:290px">
+        <div class="canvas dim" style="min-height:290px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="panel" style="width:66%">
+          <div class="phead"><b>Edit Web server</b><span class="x">×</span></div>
+          <div class="accsec"><div class="h">Calculated attributes <span>▾</span></div>
+            <div class="b">
+              <div class="field"><label>Embodied emissions</label><div class="row"><span class="inp">1.2 t CO₂-eq</span><span style="color:var(--primary);font-size:.7rem">∑ ↗</span></div></div>
+              <div class="formula">
+                <div class="fh">Input variables</div>
+                <div class="var"><b>m</b> = carbon footprint of fabrication · <b>u</b> = number of units · <b>t</b> = lifespan</div>
+                <div class="fh">Formula</div>
+                <div class="eq">embodied = <span class="syms">m</span> × <span class="syms">u</span> × (timespan / <span class="syms">t</span>)</div>
+                <div class="fh">Direct children</div>
+                <div class="var">used by → <b>Web server total emissions</b></div>
+                <a class="glink" href="#">See the calculus graph ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Open any object → <b>Calculated attributes</b>. A value's <b>formula icon</b> (∑) expands its derivation in place: <b>Input variables</b> (each ancestor), the <b>Formula</b> (every symbol tooltipped), its <b>Direct children</b>, and a link to the full graph. It's read-only — there to audit, not edit.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Every calculated value explains itself</h3></div>
+    <p>A computed number isn't a black box. In an object's <b>Calculated attributes</b>, each derived value can be unfolded into
+       the exact <b>formula</b> that produced it, the <b>input variables</b> it draws on, and what it in turn <b>feeds</b>. The
+       symbols in the formula are tooltipped, so the equation reads on its own.</p>
+    <div class="states">
+      <div class="state"><span class="k">Formula in place</span><span class="v"><b>Input variables</b> · the <b>Formula</b> · its <b>Direct children</b> — expanded inline under the value, on demand.</span></div>
+      <div class="state"><span class="k">Hourly values</span><span class="v">Add a <b>timeseries chart</b> (daily-aggregated) alongside the formula, for values that vary over time.</span></div>
+      <div class="state"><span class="k">EcoLogits values</span><span class="v">Show the <b>EcoLogits computation code</b> rather than a symbolic formula — same intent, different engine.</span></div>
+      <div class="state"><span class="k">Read-only</span><span class="v">An audit surface, not an editor — it reflects the currently saved model. (The <a href="build-a-model.html">edit panel</a> hosts it.)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — THE FULL TRACE ============ -->
+<div class="phase">
+  <span class="tag">C · The full trace</span><span class="conn">the calculus graph — the whole derivation, in a new tab</span><span class="rule"></span>
+</div>
+
+<!-- screen 4 — calculus graph -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/graph/…</span></div>
+      <div class="stage" style="min-height:230px;background:#fff">
+        <div style="padding:.5rem .6rem;border-bottom:1px solid var(--line);font-size:.7rem;font-weight:600">Calculus graph — Web server embodied emissions</div>
+        <svg viewBox="0 0 360 180" role="img" aria-label="Calculus derivation graph" style="width:100%;height:auto;padding:.5rem">
+          <line x1="60" y1="40" x2="150" y2="90" stroke="#9CA3AF"/><line x1="60" y1="90" x2="150" y2="90" stroke="#9CA3AF"/><line x1="60" y1="140" x2="150" y2="90" stroke="#9CA3AF"/>
+          <line x1="165" y1="90" x2="255" y2="90" stroke="#9CA3AF"/><line x1="270" y1="90" x2="320" y2="90" stroke="#9CA3AF"/>
+          <circle cx="55" cy="40" r="14" fill="#e8eaf4" stroke="#2D4675"/><circle cx="55" cy="90" r="14" fill="#e8eaf4" stroke="#2D4675"/><circle cx="55" cy="140" r="14" fill="#e8eaf4" stroke="#2D4675"/>
+          <circle cx="157" cy="90" r="15" fill="#fff" stroke="#2D4675"/><circle cx="262" cy="90" r="15" fill="#e8eaf4" stroke="#2D4675"/><circle cx="328" cy="90" r="15" fill="#2D4675"/>
+          <text x="55" y="20" font-size="7" fill="#6B7280" text-anchor="middle">m · u · t</text>
+          <text x="157" y="90" font-size="9" fill="#2D4675" text-anchor="middle" dy="3">×</text>
+          <text x="262" y="72" font-size="7" fill="#6B7280" text-anchor="middle">embodied</text>
+          <text x="328" y="70" font-size="7" fill="#6B7280" text-anchor="middle">total</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span><b>See the calculus graph</b> opens the <b>whole derivation tree</b> in a new browser tab — every ancestor input and operation, down to the result, interactive (drag to explore). It's cached server-side and served out of line, so the panel payload stays small.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>The full trace — the calculus graph</h3></div>
+    <p>The inline formula shows one step; the <b>calculus graph</b> shows them all. Opened in a new tab, it's the complete tree
+       from the chosen value back through every operation to the raw inputs — the artefact you'd hand a reviewer who asks to see
+       the whole computation, not just the headline.</p>
+    <div class="states">
+      <div class="state"><span class="k">Whole tree</span><span class="v">Every ancestor input and operation down to the result — the full derivation, not one step.</span></div>
+      <div class="state"><span class="k">New tab</span><span class="v">Opens out of line so it never crowds the panel; interactive — drag to explore.</span></div>
+      <div class="state"><span class="k">Two ways in</span><span class="v">The formula's <b>See the calculus graph</b> link, and the Sources tab's <b>(see graph)</b> on calculated rows.</span></div>
+      <div class="state"><span class="k">Cached</span><span class="v">Built once and cached server-side, then served by key — the heavy artefact never bloats a normal response.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- the audit trail -->
+<h2 class="sec">The audit trail — from result to source</h2>
+<p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">Put the two halves together and any headline number
+  has an <b>unbroken trail</b>: the <b>result</b> ← the <b>formula</b> that made it ← its <b>input variables</b> ← each input's
+  <b>source &amp; confidence</b>. That's the whole point — no figure on screen is unaccountable.</p>
+<div class="trail">
+  <div class="tnode"><div class="th">Result</div><div class="tv">1.8 t CO₂-eq</div><div class="ts">Web server total emissions</div></div>
+  <span class="tarrow">←</span>
+  <div class="tnode"><div class="th">Formula</div><div class="tv" style="font-family:ui-monospace,Menlo,monospace;font-size:.6rem">embodied + usage</div><div class="ts">a calculated attribute</div></div>
+  <span class="tarrow">←</span>
+  <div class="tnode"><div class="th">Input variables</div><div class="tv" style="font-size:.6rem">m · u · t · carbon intensity</div><div class="ts">ancestor inputs</div></div>
+  <span class="tarrow">←</span>
+  <div class="tnode"><div class="th">Sources</div><div class="tv" style="font-size:.58rem">Boavizta <span class="conf ok">Confident</span></div><div class="ts">RTE 2023 <span class="conf ok">Confident</span></div></div>
+</div>
+
+<table>
+  <tr><th>Surface</th><th>Where</th><th>Shows</th></tr>
+  <tr><td><b>Tooltip</b></td><td>chart &amp; Sankey hover</td><td>a value + its share of total (Sankey: aggregated members too)</td></tr>
+  <tr><td><b>Source + confidence</b></td><td>the value's field, &amp; the Sources tab</td><td>provenance of an input — where it's from, how sure</td></tr>
+  <tr><td><b>Inline formula</b></td><td>edit panel · Calculated attributes</td><td>input variables, the formula, direct children</td></tr>
+  <tr><td><b>(see graph)</b></td><td>Sources tab · calculated rows</td><td>jump to the calculus graph for that value</td></tr>
+  <tr><td><b>Calculus graph</b></td><td>new browser tab</td><td>the whole derivation tree, interactive</td></tr>
+</table>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>Source &amp; confidence are metadata on a value; editing them never recomputes the model.</b></td><td>Provenance describes how well a number is backed, not the number itself — so a metadata-only edit (fixing a source, downgrading a confidence) is fast and side-effect-free, and the table doesn't reload.</td></tr>
+  <tr><td><b>Confidence is a qualitative flag — Confident / Uncertain / Not provided — not a percentage.</b></td><td>A made-up uncertainty number would imply rigour the input doesn't have. A three-level flag is honest, quick to set, and enough to triage what needs a better source.</td></tr>
+  <tr><td><b>Calculated values aren't sourced — they link to their derivation instead.</b></td><td>A derived number's "source" <em>is</em> its formula and the inputs beneath it. Asking for a citation on a computed value is a category error, so its row offers <b>(see graph)</b> rather than a source field.</td></tr>
+  <tr><td><b>Modeling truth — the formulas and the calculus graph — is the library's; the interface only renders it.</b></td><td>Derivations come straight from the engine that computed them, so they can't drift from what actually ran. The browser lays out and displays; it never re-derives.</td></tr>
+  <tr><td><b>Derivations escalate through lightweight surfaces — tooltip → inline formula → new-tab graph — never a modal.</b></td><td>A glance wants a tooltip; the formula wants to stay beside the value; the full tree is large, so it's cached and opened out of line. A heavyweight modal would interrupt the read and bloat every response.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— the provenance fields, the Sources table &amp; the derivation / calculus-graph views</span></summary>
+  <div class="pbody">
+    <p>Where this lives in code. Start with <code>specs/architecture.md</code> (the render layer; metadata-only edits). The surfaces are reached from <a href="view-results.html">view-results</a> (Sources) and <a href="build-a-model.html">build-a-model</a> (the edit panel's Calculated attributes).</p>
+    <dl>
+      <dt>Provenance (Phase A)</dt>
+      <dd>Source / confidence are fields on a quantity (rendered in the dynamic form fields). Consolidated view: route <code>source-table/</code> → <code>source_table</code> → <code>result/source_table.html</code> + <code>source_table_row.html</code>; inline editor <code>source-table-row-editor/&lt;id&gt;/&lt;attr&gt;/</code> → <code>source_table_row_editor.html</code>, posting via <code>edit-object</code> but <b>metadata-only</b> (no table reload — <code>source_metadata.js</code>). Export <code>download-sources/</code> → <code>download_sources</code> (openpyxl, sheet "Sources"; button label literally "Export to xslx"). Labels via <code>adapters/label_resolver.py</code>.</dd>
+      <dt>Derivation (Phase B)</dt>
+      <dd><code>side_panels/edit/calculated_attributes_section.html</code> (shown when <code>object_belongs_to_computable_system</code>) + <code>calculated_attributes/components/ancestors_formula_and_children.html</code> (Input Variables · Formula · Direct children) via <code>get_calculated_attribute_explanation/&lt;id&gt;/&lt;attr&gt;/</code> (<code>hx-trigger="click once"</code>). Hourly: <code>get_explainable_hourly_quantity_chart_and_explanation/…</code> → <code>calculated_attribute_chart.html</code> (<code>calculated_attributes_timeseries.js</code>). EcoLogits: <code>eco_logits_calculated_attribute_explanation.html</code>.</dd>
+      <dt>The calculus graph (Phase C)</dt>
+      <dd><code>display-calculus-graph/&lt;id&gt;/&lt;attr&gt;/</code> builds the pyvis graph (library <code>efootprint.utils.calculus_graph.build_calculus_graph</code>), caches the HTML (<code>SessionCacheRepository</code> namespace <code>calculus_graph</code>), serves it via <code>graph/&lt;cache_key&gt;</code> in an iframe (<code>calculus_graph.html</code>); links open <code>target="_blank"</code>.</dd>
+      <dt>Tooltips</dt>
+      <dd>Chart tooltips in the <code>result_charts</code> bundle (<code>tooltip.js</code> / <code>display.js</code>); Sankey node/link tooltips precomputed server-side in <code>adapters/views/sankey_views.py</code> and rendered by <code>sankey.js</code>.</dd>
+      <dt>Forward-looking</dt>
+      <dd>These surfaces are currently distributed across the Sources tab, the form fields and the edit panel. If auditability becomes a first-class destination (e.g. a dedicated audit view or a per-result "explain" entry point), this journey is the canonical description to evolve.</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · audit-a-result · provenance &amp; derivation — trust the number, defend it · faithful to the deployed app. Shares the
+  canonical <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>
