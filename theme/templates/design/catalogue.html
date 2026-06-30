@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{% static 'css/bs_main.css' %}">
 <style>
   /* The app pins html/body to a clipped full-height shell; a scrolling doc needs to undo that. */
-  html, body { overflow: auto !important; height: auto !important; position: static !important; background: #F9FAFB; }
+  html, body { overflow-x: hidden !important; overflow-y: auto !important; height: auto !important; position: static !important; background: #F9FAFB; }
   /* catalogue layout only (dc- prefixed to avoid clashing with the app's classes) */
   .dc-wrap { max-width: 72rem; margin: 0 auto; padding: 2.2rem 1.25rem 5rem; color: #111928;
              font-family: Inter, ui-sans-serif, system-ui, sans-serif; text-align: left; line-height: 1.6; }
@@ -58,7 +58,11 @@
   .dc-panelwrap { max-width: 32rem; border: 1px solid #D1D5DB; border-radius: 12px; background: #fff;
                   padding: .7rem .8rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
   /* breakpoint ruler — bars drawn at ACTUAL pixel width; the container scrolls left-right */
-  .dc-bps { overflow-x: auto; padding-bottom: .5rem; margin: .4rem 0 .3rem; border: 1px solid #E5E7EB; border-radius: 10px; padding: .6rem; background: #fff; }
+  /* full-bleed: the ruler strip spans the whole viewport width (breaks out of the centered column) */
+  .dc-bps { overflow-x: auto; padding: .8rem 1.25rem; background: #fff;
+            border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB;
+            width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+            margin-top: .6rem; margin-bottom: .4rem; }
   .dc-bprow { display: flex; align-items: center; gap: .6rem; width: max-content; margin: .4rem 0; }
   .dc-bptok { flex: 0 0 2.4rem; text-align: right; font-size: .68rem; font-weight: 700; color: #111928;
               font-family: ui-monospace, Menlo, monospace; position: sticky; left: 0; background: #fff; z-index: 1; }
