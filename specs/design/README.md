@@ -2,9 +2,9 @@
 
 Design strategy hub — the canonical, **visual** record of how the main usage journeys of e-footprint-interface work, and of the design decisions that become code. **[`index.html`](index.html) is the navigable entry point** to every artefact here; this README carries the strategy and rationale behind them.
 
-**Visual artefacts are HTML.** Journeys (and, later, tokens and the component inventory) are authored as self-contained HTML files — rendered, navigable, *seeable* — the same posture this repo already uses for `spec.html` / `plan.html` review docs (see [`../workflow.md`](../workflow.md)). No build step, no framework, no CDN: open the file in a browser.
+**Visual artefacts are HTML.** Journeys are authored as self-contained HTML files — rendered, navigable, *seeable* — the same posture this repo already uses for `spec.html` / `plan.html` review docs (see [`../workflow.md`](../workflow.md)). No build step, no framework, no CDN: open the file in a browser. Tokens and components are served live by the app at `/design` instead.
 
-**What's live now:** [`journeys/build-a-model.html`](journeys/build-a-model.html) — the core editing loop — is authored and is the **reference implementation** (its `<style>` block is the shared toolkit every other journey copies). The remaining five journeys are scoped in [`index.html`](index.html) with a build order. **Tokens** and the **component inventory** are pre-staged and remain placeholders until that work starts.
+**What's live now:** all six journeys are authored — [`build-a-model`](journeys/build-a-model.html) is the **reference** (its `<style>` block is the shared toolkit the others copy) — and **tokens + components** are the live `/design` route (see below). [`index.html`](index.html) indexes everything.
 
 > Engineer-first context: the maintainer is an engineer with no formal design background. This folder exists so design decisions land as durable repo artefacts that survive past any one conversation, rather than evaporating into chat history.
 
@@ -45,6 +45,18 @@ Tokens (colour, type scale, spacing, radii) and the component inventory are **no
 Why live, not static files: the page loads the app's own compiled CSS, so the **tokens are the real values** (`--new-primary #2D4675`, the `--gray-*` ramp, `--new-light-primary`, the orthogonal `--edge-paradigm-accent #7B5DC7`, the four-level `--conf-*` palette — all from `theme/static/scss/custom.scss`, the source of truth; never hand-edit `bs_main.css`). And it renders the **components from a real sample `ModelWeb`** (built from the maintained `ecommerce` intro template, in memory) through the real canvas and form pipeline — the live three-column canvas (cards, gated add buttons, relationships, inline counts) and a real edit side panel (fields, source/confidence, calculated attributes). So it **can't drift from what ships**, and there's nothing to hand-sync.
 
 The narrative **journeys** stay as static, version-controlled HTML under `journeys/` — they're flows and decisions, not live-renderable. There is no `tokens.html` / `components.html` anymore (folded into the live route).
+
+## What this is — and what would take it further
+
+This is the **documentation + foundations** of a (code-first) design system, not a fully governed one. **Present:** design **tokens** (real, in the SCSS, rendered live), the **components** (real templates, rendered live at `/design`), and the **patterns + decisions** (the journeys). That's the substance of a small design system for a single product.
+
+A fuller design system would add the following — none required for what's here to be useful, listed so the gap is explicit:
+
+- **Accessibility guidance** — contrast, focus order, keyboard. Not documented yet.
+- **Component-state coverage** — `/design` shows the cheap states live plus one sample model; modals, the full set of form-field types, and empty/loading/error states aren't each catalogued.
+- **Explicit principles / voice** — today the rationale is scattered across the journeys' *Decisions taken*; there's no standalone principles page.
+- **Design-tool counterpart** — the system lives in code only; no Figma library for designers who don't work in code.
+- **Governance** — versioning / changelog / a contribution gate, beyond the sync protocol below.
 
 ## What we deliberately do not version here
 
