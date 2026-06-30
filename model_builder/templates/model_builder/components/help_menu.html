@@ -1,6 +1,7 @@
 {% comment %}
-Toolbar help menu (next to the edge-modeling toggle): replay the guided tour, re-open the
-template picker, or jump to the docs. "Replay tour" carries data-action="replay-tour", which
+Toolbar help menu (next to the edge-modeling toggle): replay the guided tour or re-open the
+template picker. (Documentation lives in the navbar / mobile burger / home hero, not here.)
+"Replay tour" carries data-action="replay-tour", which
 tour.js dispatches to restart the overlay on the current model. "Open templates"
 re-renders the builder with the picker overlaid, preserving the current session model.
 {% endcomment %}
@@ -25,10 +26,6 @@ re-renders the builder with the picker overlaid, preserving the current session 
                     hx-target="#main-content-block"
                     hx-swap="innerHTML"
                     _="on click call collapseNavbarIfShown()">▦ Open templates</button>
-        </li>
-        <li>
-            <a class="dropdown-item" href="{{ MKDOCS_BASE_URL }}" target="_blank" rel="noopener noreferrer"
-               _="on click call collapseNavbarIfShown()">📖 Documentation</a>
         </li>
     </ul>
 </li>

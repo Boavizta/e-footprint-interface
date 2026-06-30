@@ -20634,6 +20634,24 @@ input:disabled {
   color: white;
 }
 
+/* Secondary CTA paired with .btn-cta-green: outlined at rest, fills with the brand green on
+   hover/focus so the two hero buttons (Start modeling / Documentation) read as a filled+ghost pair. */
+.btn-cta-green-outline {
+  background-color: transparent;
+  border-color: var(--gadrient-color-3);
+  color: var(--gadrient-color-3);
+}
+.btn-cta-green-outline:hover {
+  background-color: var(--gadrient-color-2);
+  border-color: var(--gadrient-color-2);
+  color: white;
+}
+.btn-cta-green-outline:active, .btn-cta-green-outline:focus {
+  background-color: var(--gadrient-color-2);
+  border-color: var(--gadrient-color-2);
+  color: white;
+}
+
 /* CSS Custom rules for model-builder page*/
 /*----------------------------------*/
 .home-img {
@@ -22795,6 +22813,34 @@ input:disabled {
 .custom-github-button:active {
   background-color: var(--gray-200);
   border-color: var(--gray-400);
+}
+
+/* Documentation link sitting beside .custom-github-button in the navbar: same pill shape, but a brand-green
+   accent so docs (the one we want surfaced) stands out from the neutral GitHub link without shouting. */
+.custom-doc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--gadrient-color-3);
+  background-color: var(--gray-50);
+  border: 1px solid var(--gadrient-color-3);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.custom-doc-button:hover {
+  background-color: var(--gadrient-color-3);
+  border-color: var(--gadrient-color-3);
+  color: #fff;
+}
+.custom-doc-button:active {
+  background-color: var(--gadrient-color-2);
+  border-color: var(--gadrient-color-2);
+  color: #fff;
 }
 
 /* ===== Source metadata widgets ===== */
