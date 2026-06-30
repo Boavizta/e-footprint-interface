@@ -286,9 +286,13 @@ The form generator injects this as `field["subfields"]` so templates can render 
   source-table JS updates already-known metadata display locally instead of reloading the full source table.
 - **Inline count edits skip the card swap.** `update_dict_count` passes `EditObjectInput(refresh_cards=False)`
   because the typed value is already in the DOM — re-rendering the parent card would clobber a *sibling* count
-  input being edited within the round-trip. A count of 0 that flips a creation constraint still repaints, via the
-  independent `model_canvas` OOB region. (`link_dict_entry`/`unlink_dict_entry` keep `refresh_cards=True`: they
-  add/remove a child card, so the canvas structure genuinely changes.)
+  input being edited within the round-trip. Because the card is not swapped, the `dict-entry-zero` dimming class
+  is toggled client-side: `dict_entry_count_unlink.html` carries a hyperscript `on change` (gated by the
+  `dim_target` param that `inline_count.html` sets to the card's `web_id`) that adds/removes the class when
+  `valueAsNumber` hits 0, staying in sync with the server's render of the class. A count of 0 that *also* flips a
+  creation constraint independently repaints via the `model_canvas` OOB region.
+  (`link_dict_entry`/`unlink_dict_entry` keep `refresh_cards=True`: they add/remove a child card, so the canvas
+  structure genuinely changes.)
 - **Templates.**
   - Base layouts in `theme/templates/` (e.g., `base.html`, `navbar.html`) with Bootstrap styling.
   - Feature templates and partials under `model_builder/templates/model_builder/`.

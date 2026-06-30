@@ -67,7 +67,8 @@ def update_dict_count(request, parent_id, key_id):
     form_data = _build_edit_form_data(parent_obj, attr_name, key_obj, count)
     # A magnitude-only edit is already reflected in the DOM (the user typed it), so don't swap the
     # parent card back — that would clobber a sibling count input being edited within the round-trip.
-    # A count of 0 that flips a creation constraint still repaints via the model_canvas OOB region.
+    # The 0-count dimming class is toggled client-side by inline_count.html; a count of 0 that also
+    # flips a creation constraint still repaints via the independent model_canvas OOB region.
     return _run_edit_and_present(request, model_web, parent_obj, form_data, key_id, refresh_cards=False)
 
 

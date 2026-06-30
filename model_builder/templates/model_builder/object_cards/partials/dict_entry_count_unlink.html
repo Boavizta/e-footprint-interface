@@ -5,6 +5,10 @@
        hx-post="/model_builder/update-dict-count/{{ parent_efootprint_id }}/{{ entry_efootprint_id }}/"
        hx-trigger="change"
        hx-swap="none"
+       {# A count edit posts with hx-swap="none" so the card is never swapped back. Dimming at 0 is a #}
+       {# pure function of the value the user typed, so toggle .dict-entry-zero client-side to stay in #}
+       {# sync with the server's render of the class (resource_need_card.html / journey_step_card.html). #}
+       {% if dim_target %}_="on change if my valueAsNumber is 0 add .dict-entry-zero to #{{ dim_target }} else remove .dict-entry-zero from #{{ dim_target }} end"{% endif %}
        hx-vals='js:{...recomputationVals()}'>
 {% if not count_only %}
 <button type="button"
