@@ -14,7 +14,13 @@ pattern — tab strip, then the active tab's toolbar beneath it).
         </div>
         {% endfor %}
     </div>
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-3" id="sidePanel"></div>
+    {% comment %}
+    z-2 (one below the per-model toolbar's z-3) so toolbar dropdowns that open downward over the panel —
+    e.g. the Help menu — paint on top instead of being trapped behind the panel at an equal z-index. Same
+    spirit as the tab-strip/+Add fix in custom.scss. Still above leader-lines (z-0) and the in-flow canvas;
+    the mobile/tablet media queries re-raise #sidePanel to a fixed-overlay z-index regardless.
+    {% endcomment %}
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel"></div>
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"></div>
     <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn" data-tour-target="results">
         {% include 'model_builder/components/results_bar_button.html' %}
