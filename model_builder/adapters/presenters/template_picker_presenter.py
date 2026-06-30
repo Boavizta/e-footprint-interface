@@ -8,6 +8,7 @@ help-drawer target) and mkdocs deep-link URLs needs ``CLASS_UI_CONFIG`` and
 the domain.
 """
 from django.conf import settings
+from efootprint.utils.placeholder_resolver import resolve_placeholders
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
 from model_builder.domain.reference_data.modeling_templates import CONCEPTS
@@ -15,6 +16,10 @@ from model_builder.domain.services import build_template_catalog
 
 _CLASS_TOKEN_PREFIX = "{class:"
 _CLASS_TOKEN_SUFFIX = "}"
+
+_TEXT_HANDLERS = {
+    "class": lambda name: CLASS_UI_CONFIG.get(name, {}).get("label", name),
+}
 
 
 def _resolve_chip(token: str) -> dict:
@@ -47,7 +52,7 @@ def build_picker_groups() -> list[dict]:
             entries.append({
                 "id": entry.id,
                 "name": entry.name,
-                "description": entry.description,
+                "description": resolve_placeholders(entry.description, _TEXT_HANDLERS),
                 "icon": entry.icon,
                 "category": entry.category,
                 "chips": [_resolve_chip(token) for token in entry.showcased_concepts],
