@@ -197,6 +197,7 @@ export const HARDWARE_TYPE_CONFIG = {
     Edge_devices_energy: {
         label: "Edge devices and storage usage",
         backgroundColor: "#5CB6B1",
+        isEdge: true,
     },
     Devices_energy: {
         label: "Devices usage",
@@ -217,6 +218,7 @@ export const HARDWARE_TYPE_CONFIG = {
     Edge_devices_fabrication: {
         label: "Edge devices and storage fabrication",
         backgroundColor: "#6595C8",
+        isEdge: true,
     },
     Devices_fabrication: {
         label: "Devices fabrication",

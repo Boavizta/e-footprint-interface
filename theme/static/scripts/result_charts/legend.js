@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { LEGEND_STYLES, LEGEND_CATEGORIES } from "./config.js";
+import { filterEdgeAwareItems } from "./legend_utils.js";
 
 /**
  * Apply styles from config object to an element
@@ -279,9 +280,14 @@ export const splitCapsuleLegendPlugin = {
         const sectionsContainer = document.createElement("div");
         applyStyles(sectionsContainer, LEGEND_STYLES.sectionsContainer);
 
+        // Hide edge-device items when edge modeling is not active (the toggle state is read
+        // from the body class set by edge_modeling_toggle.js before charts are rendered).
+        const edgeModelingOn = document.body.classList.contains("edge-modeling-on");
+        const visibleItems = filterEdgeAwareItems(legend.legendItems, chart.data.datasets, edgeModelingOn);
+
         // Split and render legend items by category
-        const usageItems = filterItemsByCategory(legend.legendItems, LEGEND_CATEGORIES.USAGE.key).reverse();
-        const fabricationItems = filterItemsByCategory(legend.legendItems, LEGEND_CATEGORIES.FABRICATION.key).reverse();
+        const usageItems = filterItemsByCategory(visibleItems, LEGEND_CATEGORIES.USAGE.key).reverse();
+        const fabricationItems = filterItemsByCategory(visibleItems, LEGEND_CATEGORIES.FABRICATION.key).reverse();
 
         if (fabricationItems.length > 0) {
             sectionsContainer.appendChild(
