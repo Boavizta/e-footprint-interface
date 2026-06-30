@@ -294,6 +294,32 @@ class TestWeightedRelationshipDictMutations:
         assert step not in model_web.flat_efootprint_objs_dict[journey_id].uj_steps
         assert model_web.flat_efootprint_objs_dict[second_journey_id].uj_steps[step].value.magnitude == 1
 
+    def test_count_update_does_not_rerender_sibling_cards(self, client, minimal_system_data):
+        """A magnitude-only count edit must not swap the parent card back: doing so would clobber a
+        sibling count input the user is editing within the round-trip. The sibling's card (and its
+        name) must be absent from the response entirely."""
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        journey = _efootprint_obj_by_name(model_web, "UsageJourney", "Test Journey")
+        step_id = _efootprint_obj_by_name(model_web, "UsageJourneyStep", "Test Step").id
+        _create_object_in_session(
+            client,
+            create_post_data_from_class_default_values("Sibling Step", "UsageJourneyStep", jobs=""),
+            parent_id=journey.id,
+        )
+
+        journey_web_id = _model_web(client).get_web_object_from_efootprint_id(journey.id).web_id
+
+        update_response = client.post(f"/model_builder/update-dict-count/{journey.id}/{step_id}/", {"count": "2"})
+
+        assert update_response.status_code == 200
+        body = update_response.content.decode()
+        # The sibling's card is not re-rendered (it would carry the sibling's count input), so a value
+        # being typed there can't be overwritten when this response lands.
+        assert "Sibling Step" not in body
+        # No parent journey card outerHTML swap at all.
+        assert f"outerHTML:#{journey_web_id}" not in body
+
     def test_recurrent_server_need_job_count_update_link_and_unlink(self, client, minimal_system_data):
         _setup_session(client, _system_data_with_recurrent_server_need(minimal_system_data))
         model_web = _model_web(client)

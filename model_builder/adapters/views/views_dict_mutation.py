@@ -43,13 +43,15 @@ def _build_edit_form_data(parent_obj, mutated_attr: str, mutated_key, new_count)
     return form_data
 
 
-def _run_edit_and_present(request, model_web: ModelWeb, parent_obj, form_data: dict, panel_object_id: str):
+def _run_edit_and_present(request, model_web: ModelWeb, parent_obj, form_data: dict, panel_object_id: str,
+                          refresh_cards: bool = True):
     use_case = EditObjectUseCase(model_web)
     # Preserve the side-panel sync side-effect: if a child object's edit panel is currently
     # open, its membership section needs to refresh too.
     extra_oob_regions = [OobRegion.make("dict_membership_section", object_id=panel_object_id)]
     output = use_case.execute(EditObjectInput(
-        object_id=parent_obj.id, form_data=form_data, extra_oob_regions=extra_oob_regions))
+        object_id=parent_obj.id, form_data=form_data, extra_oob_regions=extra_oob_regions,
+        refresh_cards=refresh_cards))
     presenter = HtmxPresenter(request, model_web)
     recompute = bool(request.POST.get("recomputation"))
     return presenter.present_edited_object(output, recompute=recompute)
@@ -63,7 +65,10 @@ def update_dict_count(request, parent_id, key_id):
     attr_name = resolve_dict_attr(parent_obj, key_obj)
     count = parse_count(request.POST.get("count"), error_prefix="Count")
     form_data = _build_edit_form_data(parent_obj, attr_name, key_obj, count)
-    return _run_edit_and_present(request, model_web, parent_obj, form_data, key_id)
+    # A magnitude-only edit is already reflected in the DOM (the user typed it), so don't swap the
+    # parent card back — that would clobber a sibling count input being edited within the round-trip.
+    # A count of 0 that flips a creation constraint still repaints via the model_canvas OOB region.
+    return _run_edit_and_present(request, model_web, parent_obj, form_data, key_id, refresh_cards=False)
 
 
 @render_exception_modal_if_error

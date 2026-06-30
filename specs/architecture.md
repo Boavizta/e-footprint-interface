@@ -284,6 +284,11 @@ The form generator injects this as `field["subfields"]` so templates can render 
 - **Metadata-only edits.** Parsed source metadata submissions (`_metadata_only`) are persisted through the normal
   edit use case, but the output sets `refresh_cards=False` so `HtmxPresenter` skips object-card OOB swaps;
   source-table JS updates already-known metadata display locally instead of reloading the full source table.
+- **Inline count edits skip the card swap.** `update_dict_count` passes `EditObjectInput(refresh_cards=False)`
+  because the typed value is already in the DOM — re-rendering the parent card would clobber a *sibling* count
+  input being edited within the round-trip. A count of 0 that flips a creation constraint still repaints, via the
+  independent `model_canvas` OOB region. (`link_dict_entry`/`unlink_dict_entry` keep `refresh_cards=True`: they
+  add/remove a child card, so the canvas structure genuinely changes.)
 - **Templates.**
   - Base layouts in `theme/templates/` (e.g., `base.html`, `navbar.html`) with Bootstrap styling.
   - Feature templates and partials under `model_builder/templates/model_builder/`.

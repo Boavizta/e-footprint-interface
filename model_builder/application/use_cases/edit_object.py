@@ -39,6 +39,9 @@ class EditObjectInput:
     object_id: str
     form_data: Dict[str, Any]  # Pre-parsed form data (clean attribute names)
     extra_oob_regions: List[OobRegion] = field(default_factory=list)
+    # Set False when the caller already reflects the change in the DOM and only needs
+    # persistence + side effects (e.g. inline count edits — see update_dict_count).
+    refresh_cards: bool = True
 
 
 @dataclass
@@ -109,5 +112,5 @@ class EditObjectUseCase:
             mirrored_cards=list(edited_obj.mirrored_cards),
             replaces_primary_render=edit_side_effects.replaces_primary_render,
             oob_regions=oob_regions,
-            refresh_cards=not metadata_only_edit,
+            refresh_cards=input_data.refresh_cards and not metadata_only_edit,
         )
