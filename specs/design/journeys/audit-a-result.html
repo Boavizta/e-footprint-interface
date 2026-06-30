@@ -250,9 +250,10 @@
   .srcrow { display: flex; align-items: center; gap: .4rem; font-size: .58rem; color: var(--muted); margin-top: .25rem; flex-wrap: wrap; }
   .srcrow .sl { font-size: .5rem; text-transform: uppercase; letter-spacing: .02em; color: var(--faint); font-weight: 700; }
   .conf { font-size: .5rem; border-radius: 999px; padding: .04rem .4rem; border: 1px solid var(--g200); white-space: nowrap; }
-  .conf.ok { background: var(--ok-bg); color: var(--ok); border-color: #bbe7c6; }
-  .conf.warn { background: var(--amber-bg); color: var(--amber); border-color: #fde68a; }
-  .conf.none { background: var(--g100); color: var(--faint); }
+  .conf.high { background: #e4f5ec; color: #087443; border-color: #bfe6d0; }
+  .conf.med { background: #fff4db; color: #8a5a00; border-color: #f4e2b0; }
+  .conf.low { background: #fdecea; color: #b42318; border-color: #f7cfca; }
+  .conf.none { background: #f1f3f5; color: #868e96; }
   /* sources table */
   .srctab { width: 100%; border-collapse: collapse; font-size: .56rem; background: #fff; }
   .srctab th, .srctab td { border: 1px solid var(--line); padding: .2rem .32rem; text-align: left; vertical-align: top; }
@@ -314,12 +315,12 @@
           <div class="phead"><b>Edit Web server</b><span class="x">×</span></div>
           <div class="field qty"><label>RAM</label><div class="row"><span class="inp">128</span><select class="dd unit"><option>GB</option></select></div></div>
           <div class="srcrow"><span class="sl">Source</span><span class="inp" style="padding:.15rem .4rem;font-size:.62rem">Boavizta</span></div>
-          <div class="srcrow"><span class="sl">Confidence</span><span class="conf ok">Confident</span><span class="conf warn">Uncertain</span><span class="conf none">Not provided</span></div>
+          <div class="srcrow"><span class="sl">Confidence</span><span class="conf high">High</span><span class="conf med">Medium</span><span class="conf low">Low</span><span class="conf none">Not set</span></div>
           <p class="helptxt">Source &amp; confidence are optional metadata on the value — they don't change the number, only how well it's backed.</p>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Every input value can carry its provenance, right on the field: a <b>source</b> (name + link) and a <b>confidence</b> — <em>Confident · Uncertain · Not provided</em>. It's optional but encouraged, so a number isn't a bare figure with no backing.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Every input value can carry its provenance, right on the field: a <b>source</b> (name + link) and a <b>confidence</b> — <em>High · Medium · Low · Not set</em>. It's optional but encouraged, so a number isn't a bare figure with no backing.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>Every input carries a source and a confidence</h3></div>
@@ -328,7 +329,7 @@
        describes how well the number is backed, without changing the number.</p>
     <div class="states">
       <div class="state"><span class="k">Per-value provenance</span><span class="v">A <b>source</b> (name + optional link) and a <b>confidence</b> attach to each input quantity.</span></div>
-      <div class="state"><span class="k">Confidence levels</span><span class="v">A qualitative flag — <b>Confident · Uncertain · Not provided</b> — not a false-precision number.</span></div>
+      <div class="state"><span class="k">Confidence levels</span><span class="v">A qualitative flag — <b>High · Medium · Low · Not set</b> — not a false-precision number.</span></div>
       <div class="state"><span class="k">Metadata, not input</span><span class="v">Editing source / confidence is a <b>metadata-only</b> change — it never recomputes the model.</span></div>
     </div>
   </div>
@@ -346,9 +347,9 @@
             <div><span class="xlsxbtn">⬇ Export to xslx</span></div>
             <table class="srctab">
               <tr><th>Item name</th><th>Attribute of</th><th>Value</th><th>Unit</th><th>Source</th><th>Confidence</th><th></th></tr>
-              <tr><td>RAM</td><td>Web server</td><td>128</td><td>GB</td><td>Boavizta</td><td><span class="conf ok">Confident</span></td><td>✎</td></tr>
-              <tr><td>Carbon intensity</td><td>France</td><td>56</td><td>g/kWh</td><td>RTE 2023</td><td><span class="conf ok">Confident</span></td><td>✎</td></tr>
-              <tr><td>Lifespan</td><td>Web server</td><td>6</td><td>year</td><td>—</td><td><span class="conf warn">Uncertain</span></td><td>✎</td></tr>
+              <tr><td>RAM</td><td>Web server</td><td>128</td><td>GB</td><td>Boavizta</td><td><span class="conf high">High</span></td><td>✎</td></tr>
+              <tr><td>Carbon intensity</td><td>France</td><td>56</td><td>g/kWh</td><td>RTE 2023</td><td><span class="conf high">High</span></td><td>✎</td></tr>
+              <tr><td>Lifespan</td><td>Web server</td><td>6</td><td>year</td><td>—</td><td><span class="conf low">Low</span></td><td>✎</td></tr>
               <tr><td>Embodied emissions</td><td>Web server</td><td>1.2</td><td>t CO₂-eq</td><td class="seeg">(see graph)</td><td>—</td><td></td></tr>
             </table>
           </div>
@@ -361,7 +362,7 @@
     <div class="step"><span class="n">2</span><h3>The Sources tab — provenance, consolidated</h3></div>
     <p>Scattered field-level provenance is gathered into one place: the <b>Sources</b> tab of the Results panel lists every input
        behind the model with its source and confidence, all editable in place. It's the auditor's-eye view — scan what's solid,
-       what's <em>Uncertain</em>, and what still has no source — and export it for a review.</p>
+       what's only <em>Low</em>, and what still has no source — and export it for a review.</p>
     <div class="states">
       <div class="state"><span class="k">One row per input</span><span class="v">Item · Attribute of · Value · Unit · Source · Confidence · Comment.</span></div>
       <div class="state"><span class="k">Inline edit</span><span class="v"><b>✎</b> opens a row editor for source / confidence / comment; saving is metadata-only — no recompute, no table reload.</span></div>
@@ -470,7 +471,7 @@
   <span class="tarrow">←</span>
   <div class="tnode"><div class="th">Input variables</div><div class="tv" style="font-size:.6rem">m · u · t · carbon intensity</div><div class="ts">ancestor inputs</div></div>
   <span class="tarrow">←</span>
-  <div class="tnode"><div class="th">Sources</div><div class="tv" style="font-size:.58rem">Boavizta <span class="conf ok">Confident</span></div><div class="ts">RTE 2023 <span class="conf ok">Confident</span></div></div>
+  <div class="tnode"><div class="th">Sources</div><div class="tv" style="font-size:.58rem">Boavizta <span class="conf high">High</span></div><div class="ts">RTE 2023 <span class="conf high">High</span></div></div>
 </div>
 
 <table>
@@ -487,7 +488,7 @@
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>Source &amp; confidence are metadata on a value; editing them never recomputes the model.</b></td><td>Provenance describes how well a number is backed, not the number itself — so a metadata-only edit (fixing a source, downgrading a confidence) is fast and side-effect-free, and the table doesn't reload.</td></tr>
-  <tr><td><b>Confidence is a qualitative flag — Confident / Uncertain / Not provided — not a percentage.</b></td><td>A made-up uncertainty number would imply rigour the input doesn't have. A three-level flag is honest, quick to set, and enough to triage what needs a better source.</td></tr>
+  <tr><td><b>Confidence is a qualitative flag — High / Medium / Low / Not set — not a percentage.</b></td><td>A made-up uncertainty number would imply rigour the input doesn't have. A four-level flag is honest, quick to set, and enough to triage what needs a better source.</td></tr>
   <tr><td><b>Calculated values aren't sourced — they link to their derivation instead.</b></td><td>A derived number's "source" <em>is</em> its formula and the inputs beneath it. Asking for a citation on a computed value is a category error, so its row offers <b>(see graph)</b> rather than a source field.</td></tr>
   <tr><td><b>Modeling truth — the formulas and the calculus graph — is the library's; the interface only renders it.</b></td><td>Derivations come straight from the engine that computed them, so they can't drift from what actually ran. The browser lays out and displays; it never re-derives.</td></tr>
   <tr><td><b>Derivations escalate through lightweight surfaces — tooltip → inline formula → new-tab graph — never a modal.</b></td><td>A glance wants a tooltip; the formula wants to stay beside the value; the full tree is large, so it's cached and opened out of line. A heavyweight modal would interrupt the read and bloat every response.</td></tr>
