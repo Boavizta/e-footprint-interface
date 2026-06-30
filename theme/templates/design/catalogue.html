@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design catalogue (live) — e-footprint</title>
+{# The app's compiled stylesheet — so every token below is the REAL value and every #}
+{# included partial gets its real styling. This is what makes the catalogue "can't lie". #}
+<link rel="stylesheet" href="{% static 'css/bs_main.css' %}">
+<style>
+  /* The app pins html/body to a clipped full-height shell; a scrolling doc needs to undo that. */
+  html, body { overflow: auto !important; height: auto !important; position: static !important; background: #F9FAFB; }
+  /* catalogue layout only (dc- prefixed to avoid clashing with the app's classes) */
+  .dc-wrap { max-width: 72rem; margin: 0 auto; padding: 2.2rem 1.25rem 5rem; color: #111928;
+             font-family: Inter, ui-sans-serif, system-ui, sans-serif; text-align: left; line-height: 1.6; }
+  .dc-wrap a { color: #2D4675; text-decoration: none; } .dc-wrap a:hover { text-decoration: underline; }
+  .dc-crumb { color: #6B7280; font-size: .85rem; margin: 0 0 1.1rem; }
+  .dc-wrap h1 { font-size: 1.9rem; margin: 0 0 .3rem; }
+  .dc-role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+             padding: .16rem .5rem; border-radius: 999px; background: #e8eaf4; color: #2D4675; vertical-align: middle; }
+  .dc-lede { color: #4B5563; max-width: 56rem; } .dc-lede b { color: #111928; }
+  .dc-note { color: #6B7280; font-size: .85rem; max-width: 56rem; margin: .6rem 0 0; }
+  .dc-live { background: #ecfdf3; border: 1px solid #bbe7c6; border-left: 3px solid #15803d; border-radius: 8px;
+             padding: .55rem .75rem; font-size: .88rem; color: #4B5563; margin: 1rem 0 0; max-width: 56rem; }
+  .dc-live b { color: #15803d; }
+  code { background: #F3F4F6; padding: .08rem .3rem; border-radius: 4px; font-size: .85em; font-family: ui-monospace, Menlo, monospace; }
+  h2.dc-sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: #6B7280; font-weight: 600;
+              margin: 2.6rem 0 .9rem; border-top: 1px solid #E5E7EB; padding-top: 1.3rem; }
+  .dc-kick { color: #4B5563; max-width: 56rem; margin: 0 0 1rem; font-size: .95rem; }
+  h3.dc-sub { font-size: .9rem; margin: 1.2rem 0 .5rem; }
+  /* swatches */
+  .dc-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .7rem; margin: .3rem 0 .6rem; }
+  .dc-sw { border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; background: #fff; }
+  .dc-sw .dc-chip { height: 60px; display: block; }
+  .dc-sw .dc-meta { padding: .4rem .5rem .5rem; }
+  .dc-sw .dc-nm { font-size: .72rem; font-weight: 600; }
+  .dc-sw .dc-vr { font-size: .6rem; color: #6B7280; font-family: ui-monospace, Menlo, monospace; word-break: break-all; display: block; }
+  .dc-ramp { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid #E5E7EB; margin: .3rem 0; }
+  .dc-ramp > div { flex: 1; min-height: 4rem; display: flex; flex-direction: column; justify-content: flex-end; padding: .45rem .4rem; }
+  .dc-ramp .rn { font-size: .6rem; font-weight: 700; font-family: ui-monospace, Menlo, monospace; }
+  /* type specimens */
+  .dc-spec { display: flex; align-items: baseline; gap: 1rem; padding: .45rem 0; border-bottom: 1px dashed #E5E7EB; }
+  .dc-spec .det { flex: 0 0 16rem; font-size: .68rem; color: #6B7280; font-family: ui-monospace, Menlo, monospace; }
+  /* component cards */
+  .dc-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1rem; align-items: start; }
+  .dc-comp { border: 1px solid #E5E7EB; border-radius: 12px; background: #fff; overflow: hidden; }
+  .dc-comp .ch { padding: .5rem .7rem; border-bottom: 1px solid #E5E7EB; display: flex; gap: .5rem; align-items: baseline; flex-wrap: wrap; }
+  .dc-comp .ch b { font-size: .84rem; } .dc-comp .ch .pt { margin-left: auto; font-size: .58rem; color: #6B7280; font-family: ui-monospace, Menlo, monospace; }
+  .dc-comp .cb { padding: .9rem .7rem; background: #F9FAFB; display: flex; flex-direction: column; gap: .55rem; align-items: stretch; }
+  .dc-comp .cd { padding: .45rem .7rem .6rem; font-size: .78rem; color: #4B5563; border-top: 1px solid #E5E7EB; }
+  .dc-row { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+  .dc-out { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: .3rem; }
+  .dc-out a { display: inline-flex; align-items: center; gap: .35rem; border: 1px solid #D1D5DB; border-radius: 8px;
+              padding: .4rem .7rem; font-size: .85rem; background: #fff; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid #E5E7EB; color: #6B7280; font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="dc-wrap">
+
+  <p class="dc-crumb">e-footprint · design catalogue</p>
+  <h1>Design catalogue <span class="dc-role">Live · contributors</span></h1>
+  <p class="dc-lede">A <b>live</b> view of the design system, rendered by the app itself — the tokens are the <b>real compiled CSS
+    values</b> and the components are the <b>real template partials</b>, so this page can't drift from what ships. It's reachable only
+    by typing <code>/design</code> (no nav link anywhere) and is meant for contributors.</p>
+  <p class="dc-note">The narrative <b>user-journey</b> docs (build-a-model, onboarding, view-results, audit-a-result, compare-models,
+    save-and-load) and the design rationale live in <code>specs/design/</code> in the repo — they're version-controlled documentation,
+    reviewed in PRs. This route is the complementary <em>live</em> surface for tokens and components.</p>
+  <div class="dc-live"><b>Live, not a mirror.</b> Change a token in <code>theme/static/scss/custom.scss</code> (recompiled to
+    <code>bs_main.css</code>) or a component partial under <code>model_builder/templates/</code>, and this page updates automatically —
+    nothing to hand-sync.</div>
+
+  <!-- ============ TOKENS ============ -->
+  <h2 class="dc-sec">Tokens</h2>
+
+  <h3 class="dc-sub">Brand &amp; surfaces</h3>
+  <p class="dc-kick">Rendered from the live <code>--new-primary</code>, <code>--new-light-primary</code>, <code>--new-light</code> and <code>--dark-blue</code> custom properties.</p>
+  <div class="dc-swatches">
+    <div class="dc-sw"><span class="dc-chip" style="background:var(--new-primary)"></span><div class="dc-meta"><div class="dc-nm">Primary (navy)</div><div class="dc-vr">--new-primary</div></div></div>
+    <div class="dc-sw"><span class="dc-chip" style="background:var(--new-light-primary);box-shadow:inset 0 0 0 1px #E5E7EB"></span><div class="dc-meta"><div class="dc-nm">Light primary</div><div class="dc-vr">--new-light-primary</div></div></div>
+    <div class="dc-sw"><span class="dc-chip" style="background:var(--new-light);box-shadow:inset 0 0 0 1px #E5E7EB"></span><div class="dc-meta"><div class="dc-nm">New light</div><div class="dc-vr">--new-light</div></div></div>
+    <div class="dc-sw"><span class="dc-chip" style="background:var(--dark-blue)"></span><div class="dc-meta"><div class="dc-nm">Ink (dark blue)</div><div class="dc-vr">--dark-blue</div></div></div>
+    <div class="dc-sw"><span class="dc-chip bg-radiant"></span><div class="dc-meta"><div class="dc-nm">Brand gradient</div><div class="dc-vr">.bg-radiant</div></div></div>
+  </div>
+
+  <h3 class="dc-sub">Gray ramp</h3>
+  <div class="dc-ramp">
+    <div style="background:var(--gray-50)"><span class="rn" style="color:#4B5563">50</span></div>
+    <div style="background:var(--gray-100)"><span class="rn" style="color:#4B5563">100</span></div>
+    <div style="background:var(--gray-200)"><span class="rn" style="color:#4B5563">200</span></div>
+    <div style="background:var(--gray-300)"><span class="rn" style="color:#1f2937">300</span></div>
+    <div style="background:var(--gray-350)"><span class="rn" style="color:#fff">350</span></div>
+    <div style="background:var(--gray-400)"><span class="rn" style="color:#fff">400</span></div>
+    <div style="background:var(--gray-500)"><span class="rn" style="color:#fff">500</span></div>
+  </div>
+
+  <h3 class="dc-sub">Edge-paradigm accent &amp; confidence palette</h3>
+  <p class="dc-kick">The edge marker (<code>--edge-paradigm-accent</code>) and the four-level confidence badge — both <b>real components/values</b> rendered live.</p>
+  <div class="dc-row">
+    <div class="dc-sw" style="width:9rem"><span class="dc-chip" style="background:var(--edge-paradigm-accent)"></span><div class="dc-meta"><div class="dc-nm">Edge accent</div><div class="dc-vr">--edge-paradigm-accent</div></div></div>
+    <div class="dc-row" style="gap:.5rem">
+      {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="tok_high" conf_name_prefix="tok_high" conf_current="high" conf_omit_menu=True %}
+      {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="tok_med" conf_name_prefix="tok_med" conf_current="medium" conf_omit_menu=True %}
+      {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="tok_low" conf_name_prefix="tok_low" conf_current="low" conf_omit_menu=True %}
+      {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="tok_none" conf_name_prefix="tok_none" conf_current="none" conf_omit_menu=True %}
+    </div>
+  </div>
+
+  <h3 class="dc-sub">Typography — fluid micro-headings</h3>
+  <p class="dc-kick">The real <code>.h6</code>–<code>.h8</code> classes (Inter; <code>clamp()</code> sizes). Resize the window to see them flex.</p>
+  <div class="dc-spec"><span class="h6" style="flex:1">The footprint of a digital service</span><span class="det">.h6 · weight 450</span></div>
+  <div class="dc-spec"><span class="h7" style="flex:1">The footprint of a digital service</span><span class="det">.h7 · weight 300</span></div>
+  <div class="dc-spec"><span class="h8" style="flex:1">The footprint of a digital service</span><span class="det">.h8 · weight 200</span></div>
+
+  <!-- ============ COMPONENTS ============ -->
+  <h2 class="dc-sec">Components <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#9CA3AF;font-size:.8rem">— real partials, sample data</span></h2>
+  <p class="dc-kick">Each card embeds the <b>real template partial</b> with small sample context. Markup and styling are exactly what ships
+    (so they can't drift); interactivity (tooltips, menus) is inert here since the app scripts aren't loaded.</p>
+  <div class="dc-gallery">
+
+    <div class="dc-comp">
+      <div class="ch"><b>Add button</b><span class="pt">components/add_object_button.html</span></div>
+      <div class="cb">
+        {% include "model_builder/components/add_object_button.html" with btn_id="dc-add-enabled" label="Add usage journey" hx_url="#" disabled=False class_name="UsageJourney" class_description="x" class_label="Usage journey" %}
+        {% include "model_builder/components/add_object_button.html" with btn_id="dc-add-disabled" label="Add usage pattern" disabled=True disabled_reason="Add a usage journey in the Usage journeys section first." %}
+      </div>
+      <div class="cd">Enabled and the <b>disabled-with-tooltip</b> state (the app's defining rule). The <b>?</b> opens the help drawer for that object type.</div>
+    </div>
+
+    <div class="dc-comp">
+      <div class="ch"><b>Results bar</b><span class="pt">components/results_bar_button.html</span></div>
+      <div class="cb">
+        <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=results_enabled %}</div>
+        <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=results_locked %}</div>
+      </div>
+      <div class="cd">Enabled vs <b>locked</b> (dimmed, with the live validation reason as its tooltip) — gating on the model being computable.</div>
+    </div>
+
+    <div class="dc-comp">
+      <div class="ch"><b>Confidence badge</b><span class="pt">dynamic_form_fields/confidence_badge.html</span></div>
+      <div class="cb">
+        <div class="dc-row" style="gap:.5rem">
+          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_high" conf_name_prefix="cmp_high" conf_current="high" conf_omit_menu=True %}
+          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_med" conf_name_prefix="cmp_med" conf_current="medium" conf_omit_menu=True %}
+          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_low" conf_name_prefix="cmp_low" conf_current="low" conf_omit_menu=True %}
+          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_none" conf_name_prefix="cmp_none" conf_current="none" conf_omit_menu=True %}
+        </div>
+      </div>
+      <div class="cd">The provenance badge on every input — <b>High · Medium · Low · Not set</b>. Audited in the <em>audit-a-result</em> journey.</div>
+    </div>
+
+  </div>
+
+  <!-- ============ IN CONTEXT ============ -->
+  <h2 class="dc-sec">Seen live, in context</h2>
+  <p class="dc-kick">The context-heavy primitives — object cards, the dynamic form fields, the side panel, modals, the canvas and the
+    relationship widgets — are best seen in their real setting rather than mocked here. They render with real model data in the
+    builder. (Promoting any of them to a sample-data card above is straightforward when it earns its keep.)</p>
+  <div class="dc-out">
+    <a href="/model_builder/">↗ Open the model builder (live components in context)</a>
+    <a href="/">↗ Home</a>
+  </div>
+  <p class="dc-note">For the catalogue's static counterpart (faithful mocks + decisions, version-controlled): <code>specs/design/components.html</code>,
+    <code>tokens.html</code> and the journeys under <code>specs/design/journeys/</code> in the repo.</p>
+
+  <footer>
+    Live design catalogue · real tokens (compiled CSS) + real component partials · unlinked, contributors only.
+    Static design hub &amp; journeys: <code>specs/design/</code> in the repo.
+  </footer>
+
+</div>
+</body>
+</html>

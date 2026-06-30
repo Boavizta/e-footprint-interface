@@ -6,6 +6,8 @@ from model_builder.adapters.views.views_onboarding import load_template_deeplink
 
 urlpatterns = [
     path("", views.home, name="home"),
+    # Live, intentionally-unlinked design catalogue for contributors (tokens + real components).
+    path("design/", views.design_catalogue, name="design-catalogue"),
     # Shareable deep link from the docs' "Load this scenario" links → load it and land on the canvas.
     path("template/<str:template_id>/", load_template_deeplink, name="load-template-deeplink"),
     path("model_builder/", include("model_builder.urls")),

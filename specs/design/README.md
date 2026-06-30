@@ -48,7 +48,9 @@ Colors, type scale, spacing, radii. The values are the **single source of truth 
 
 A catalogue of the primitives that recur across journeys — the object cards, the dynamic form fields, the right-docked side panel, the modals, the disabled-with-tooltip add button — grouped Canvas · Chrome · Side panel & forms · Relationships · Overlays.
 
-**Live** — [`components.html`](components.html). Since a static page can't render the real Django templates, each primitive is a **faithful mock** (reusing the shared toolkit) next to a **code pointer** to its template; the canonical markup stays the template, the canonical styling the toolkit in `build-a-model.html`. This is the single biggest lever against design drift; keep a mock in step when its template changes. (A live in-app catalogue route remains an option if mock-vs-template drift ever bites.)
+**Live** — [`components.html`](components.html). Since a static page can't render the real Django templates, each primitive is a **faithful mock** (reusing the shared toolkit) next to a **code pointer** to its template; the canonical markup stays the template, the canonical styling the toolkit in `build-a-model.html`. This is the single biggest lever against design drift; keep a mock in step when its template changes.
+
+**Live counterpart — the `/design` route.** The interface also serves a live, intentionally-**unlinked** catalogue at `/design` (`e_footprint_interface/views.py::design_catalogue` → `theme/templates/design/catalogue.html`), reachable only by direct navigation and communicated to contributors out of band. It renders the **real tokens** (the app's compiled CSS custom properties) and the **real component partials** with sample context, so it can't drift from what ships — the truthful complement to the static, version-controlled mocks here. Context-heavy primitives (cards, forms, the canvas) link to the live model builder rather than being mocked. Promote a primitive to a sample-data card in the catalogue when it earns its keep.
 
 ## What we deliberately do not version here
 
