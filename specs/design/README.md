@@ -40,15 +40,15 @@ Journeys slot into the four-stage SDD workflow ([`../workflow.md`](../workflow.m
 
 ### 2. Design tokens — `tokens.html` (+ implementation in `theme/static/scss/`)
 
-Colors, type scale, spacing, radii. The values are the **single source of truth in code** — `theme/static/scss/custom.scss` defines `--new-primary #2D4675` (navy), the `--gray-50 … --gray-500` ramp, `--new-light-primary #e8eaf4`, and the orthogonal `--edge-paradigm-accent #7B5DC7`, layered on Bootstrap 5 (compiled to `bs_main.css`; never hand-edit the CSS — edit the SCSS). `tokens.html` will *render* those values and capture the *decisions and rationale* behind them.
+Colors, type scale, spacing, radii. The values are the **single source of truth in code** — `theme/static/scss/custom.scss` defines `--new-primary #2D4675` (navy), the `--gray-50 … --gray-500` ramp, `--new-light-primary #e8eaf4`, the orthogonal `--edge-paradigm-accent #7B5DC7`, and the four-level confidence palette (`--conf-*`), layered on Bootstrap 5 (compiled to `bs_main.css`; never hand-edit the CSS — edit the SCSS).
 
-**Placeholder today.** The journeys reference the palette inline (baked into each journey's `<style>` block as CSS vars taken from the real SCSS). A dedicated `tokens.html` is worth standing up once a token group changes deliberately rather than incidentally.
+**Live** — [`tokens.html`](tokens.html) *renders* those values (swatches, the gray ramp, fluid type specimens, breakpoints, radii) with the rationale. It mirrors the SCSS; refresh a swatch when a token changes there. The journeys also bake the same palette into each `<style>` block as local CSS vars.
 
 ### 3. Component inventory — the recurring UI primitives
 
-A catalogue of the primitives that recur across journeys — the object cards, the dynamic form fields, the right-docked side panel, the modals, the disabled-with-tooltip add button — rendered from the **real templates** so it can't drift from what ships. Beats a static table because it shows what the code actually does.
+A catalogue of the primitives that recur across journeys — the object cards, the dynamic form fields, the right-docked side panel, the modals, the disabled-with-tooltip add button — grouped Canvas · Chrome · Side panel & forms · Relationships · Overlays.
 
-This is the single biggest lever against design drift across the surface. Stand it up once there are enough polished screens to populate it from real usage — not speculatively. Could be a dedicated HTML doc here, or a live in-app catalogue route indexed from [`index.html`](index.html).
+**Live** — [`components.html`](components.html). Since a static page can't render the real Django templates, each primitive is a **faithful mock** (reusing the shared toolkit) next to a **code pointer** to its template; the canonical markup stays the template, the canonical styling the toolkit in `build-a-model.html`. This is the single biggest lever against design drift; keep a mock in step when its template changes. (A live in-app catalogue route remains an option if mock-vs-template drift ever bites.)
 
 ## What we deliberately do not version here
 

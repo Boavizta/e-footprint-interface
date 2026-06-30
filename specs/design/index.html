@@ -61,8 +61,8 @@
   loop, covering both web and edge) is the reference implementation, its <code>&lt;style&gt;</code> block the shared toolkit, and
   <a href="journeys/onboarding.html">onboarding</a>, <a href="journeys/view-results.html">view-results</a>,
   <a href="journeys/audit-a-result.html">audit-a-result</a>, <a href="journeys/compare-models.html">compare-models</a> and
-  <a href="journeys/save-and-load.html">save-and-load</a> are authored against it. <b>tokens</b> and the <b>component inventory</b>
-  are pre-staged and stay placeholders until they're stood up.
+  <a href="journeys/save-and-load.html">save-and-load</a> are authored against it. <b><a href="tokens.html">tokens</a></b> and the
+  <b><a href="components.html">component inventory</a></b> are now stood up too — the design hub is complete.
 </div>
 
 <h2>Journeys</h2>
@@ -103,18 +103,18 @@
 
 <h2>Tokens</h2>
 <div class="grid">
-  <a class="card inert" href="tokens.html">
-    <div class="name">tokens.html <span class="pill soon">Staged</span></div>
-    <div class="desc">Colors, type scale, spacing, radii. The values live in <code>theme/static/scss/custom.scss</code> (<code>--new-primary #2D4675</code>, the gray ramp, <code>--edge-paradigm-accent #7B5DC7</code>) on top of Bootstrap 5 — this doc will render them and capture the decisions. Placeholder until stood up.</div>
+  <a class="card" href="tokens.html">
+    <div class="name">tokens.html</div>
+    <div class="desc">Colour, type scale, spacing and radii, <b>rendered from the real values</b> in <code>theme/static/scss/custom.scss</code> (<code>--new-primary #2D4675</code>, the gray ramp, <code>--edge-paradigm-accent #7B5DC7</code>, the confidence palette) on top of Bootstrap 5 — with the rationale. The SCSS stays the source of truth; this mirrors it.</div>
   </a>
 </div>
 
 <h2>Components</h2>
 <div class="grid">
-  <div class="card inert">
-    <div class="name">component inventory <span class="pill soon">Staged</span></div>
-    <div class="desc">A catalogue of the recurring UI primitives — object cards, the dynamic form fields, the side panel, modals, the disabled-with-tooltip add button — rendered from the real templates so it can't lie. Indexed here once it exists.</div>
-  </div>
+  <a class="card" href="components.html">
+    <div class="name">component inventory</div>
+    <div class="desc">A catalogue of the recurring UI primitives — object cards, the dynamic form fields, the side panel, modals, the disabled-with-tooltip add button — as <b>faithful mocks</b> (the shared toolkit) each with a code pointer. Grouped Canvas · Chrome · Side panel &amp; forms · Relationships · Overlays.</div>
+  </a>
 </div>
 
 <h2>How journeys fit the workflow</h2>
@@ -126,7 +126,7 @@
 <p class="tagline" style="font-size:.9rem;margin-top:.8rem;">Specs and plans are already authored as self-contained HTML in this repo (<a href="../workflow.md">workflow.md</a>) — journeys are the same posture. See the <a href="README.md">README</a> for the sync protocol with design work.</p>
 
 <footer>
-  e-footprint-interface design hub · all six journeys live (build-a-model is the reference) · tokens &amp; component inventory staged.
+  e-footprint-interface design hub · all six journeys live (build-a-model is the reference) · tokens &amp; component inventory live.
 </footer>
 
 </body>
