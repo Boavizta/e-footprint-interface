@@ -1,15 +1,16 @@
 """The contributor design catalogue: GET /design.
 
-A live, intentionally-unlinked page that renders the real tokens (the app's compiled
-CSS custom properties) and a few real component partials with small sample context.
-These tests pin that the route is wired in and that every embedded partial renders
-without a template/context error (a 500 here means a partial's contract changed).
+A live, intentionally-unlinked page. Tokens render from the app's real compiled CSS
+custom properties; components are rendered live from a real sample ModelWeb (built from
+the maintained ecommerce intro template, in memory) through the real canvas and form
+pipeline — so the catalogue can't drift from what ships. A 500 here means the canvas or
+the edit-panel pipeline broke against the sample model.
 """
 import pytest
 
 
 @pytest.mark.django_db
-def test_design_catalogue_renders(client):
+def test_design_catalogue_renders_tokens_and_live_components(client):
     response = client.get("/design/")
     assert response.status_code == 200
     content = response.content
@@ -18,14 +19,13 @@ def test_design_catalogue_renders(client):
     # Live token swatches reference the real CSS custom properties.
     assert b"var(--new-primary)" in content
     assert b"var(--edge-paradigm-accent)" in content
-    # The real component partials rendered with sample context (not just linked).
-    assert b'id="dc-add-enabled"' in content          # add_object_button.html
-    assert b'id="btn-open-panel-result"' in content   # results_bar_button.html
-    assert b"confidence-badge" in content             # confidence_badge.html
-
-
-@pytest.mark.django_db
-def test_design_catalogue_shows_both_results_bar_states(client):
-    """The locked Results bar carries the live validation reason as its tooltip."""
-    content = client.get("/design/").content
+    # The live canvas rendered from the sample model (a real object card is present).
+    assert b'data-canvas-id="usage-journey-container"' in content
+    assert b"model-builder-card" in content
+    # The live edit side panel section rendered (a 200 already proves the form pipeline
+    # built it; this pins the section is wired in).
+    assert b"The edit side panel" in content
+    # Real partials: confidence badge + the Results bar, with the locked validation copy.
+    assert b"confidence-badge" in content
+    assert b'id="btn-open-panel-result"' in content
     assert b"the modeling is incomplete" in content

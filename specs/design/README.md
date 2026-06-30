@@ -38,19 +38,13 @@ Journeys slot into the four-stage SDD workflow ([`../workflow.md`](../workflow.m
 - `journeys/compare-models.html` — the second model slot and the comparison dashboard (KPI strip, decomposition, paired & cumulative charts, diff table), reached via the ⇄ Compare tab; non-destructive, dismiss in place.
 - `journeys/save-and-load.html` — export / open a single model or the two-model workspace (`.e-f.json`, routed by content, UI config included), and the recovery page when a session model fails to deserialize.
 
-### 2. Design tokens — `tokens.html` (+ implementation in `theme/static/scss/`)
+### 2 & 3. Tokens and components — the live `/design` route
 
-Colors, type scale, spacing, radii. The values are the **single source of truth in code** — `theme/static/scss/custom.scss` defines `--new-primary #2D4675` (navy), the `--gray-50 … --gray-500` ramp, `--new-light-primary #e8eaf4`, the orthogonal `--edge-paradigm-accent #7B5DC7`, and the four-level confidence palette (`--conf-*`), layered on Bootstrap 5 (compiled to `bs_main.css`; never hand-edit the CSS — edit the SCSS).
+Tokens (colour, type scale, spacing, radii) and the component inventory are **not static pages**; they live in the app's live, intentionally-**unlinked** catalogue at **`/design`** (`e_footprint_interface/views.py::design_catalogue` → `theme/templates/design/catalogue.html`). Production: `https://e-footprint.boavizta.org/design`; reachable by direct navigation only, communicated to contributors out of band — easy for non-dev contributors, no local setup.
 
-**Live** — [`tokens.html`](tokens.html) *renders* those values (swatches, the gray ramp, fluid type specimens, breakpoints, radii) with the rationale. It mirrors the SCSS; refresh a swatch when a token changes there. The journeys also bake the same palette into each `<style>` block as local CSS vars.
+Why live, not static files: the page loads the app's own compiled CSS, so the **tokens are the real values** (`--new-primary #2D4675`, the `--gray-*` ramp, `--new-light-primary`, the orthogonal `--edge-paradigm-accent #7B5DC7`, the four-level `--conf-*` palette — all from `theme/static/scss/custom.scss`, the source of truth; never hand-edit `bs_main.css`). And it renders the **components from a real sample `ModelWeb`** (built from the maintained `ecommerce` intro template, in memory) through the real canvas and form pipeline — the live three-column canvas (cards, gated add buttons, relationships, inline counts) and a real edit side panel (fields, source/confidence, calculated attributes). So it **can't drift from what ships**, and there's nothing to hand-sync.
 
-### 3. Component inventory — the recurring UI primitives
-
-A catalogue of the primitives that recur across journeys — the object cards, the dynamic form fields, the right-docked side panel, the modals, the disabled-with-tooltip add button — grouped Canvas · Chrome · Side panel & forms · Relationships · Overlays.
-
-**Live** — [`components.html`](components.html). Since a static page can't render the real Django templates, each primitive is a **faithful mock** (reusing the shared toolkit) next to a **code pointer** to its template; the canonical markup stays the template, the canonical styling the toolkit in `build-a-model.html`. This is the single biggest lever against design drift; keep a mock in step when its template changes.
-
-**Live counterpart — the `/design` route.** The interface also serves a live, intentionally-**unlinked** catalogue at `/design` (`e_footprint_interface/views.py::design_catalogue` → `theme/templates/design/catalogue.html`), reachable only by direct navigation and communicated to contributors out of band. It renders the **real tokens** (the app's compiled CSS custom properties) and the **real component partials** with sample context, so it can't drift from what ships — the truthful complement to the static, version-controlled mocks here. Context-heavy primitives (cards, forms, the canvas) link to the live model builder rather than being mocked. Promote a primitive to a sample-data card in the catalogue when it earns its keep.
+The narrative **journeys** stay as static, version-controlled HTML under `journeys/` — they're flows and decisions, not live-renderable. There is no `tokens.html` / `components.html` anymore (folded into the live route).
 
 ## What we deliberately do not version here
 
@@ -65,7 +59,7 @@ The handoff fails when design output is mood-board-shaped and engineering has to
 
 | Design output | Lands as |
 |---|---|
-| Token change | Diff against current values in `tokens.html` + the SCSS implementation. |
+| Token change | Edit the SCSS (`theme/static/scss/custom.scss`, the source of truth) + recompile; the live `/design` catalogue reflects it automatically. |
 | New journey or journey revision | Screen-by-screen + state list → `journeys/<name>.html`. |
 | New or revised component | Variants × states matrix + prose → the component inventory, rendered from the real template. |
 
@@ -75,8 +69,8 @@ Anything that doesn't fit one of those buckets is exploration — keep it in the
 
 1. Author journeys in the build order in [`index.html`](index.html), starting from `build-a-model` (done — it constrains everything else).
 2. Each new journey copies `build-a-model.html`'s `<style>` block, reuses its class vocabulary, and only adds a class for a genuinely new UI element.
-3. Stand up `tokens.html` the first time a token group changes on purpose; audit the touched surfaces against it.
-4. Grow the component inventory from what the authored journeys actually use, not speculatively.
+3. Tokens &amp; components are the live `/design` route — no static page to stand up; extend the catalogue (e.g. promote a context-heavy primitive to a sample-data card) when it earns its keep.
+4. Grow the catalogue from what the app actually ships, not speculatively.
 
 **Trap to avoid.** Don't build a 40-component design system before there are polished screens. The journey set + a couple of token decisions is enough to start; the component inventory grows from what the journeys need.
 

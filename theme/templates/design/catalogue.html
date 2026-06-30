@@ -53,6 +53,10 @@
   .dc-out { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: .3rem; }
   .dc-out a { display: inline-flex; align-items: center; gap: .35rem; border: 1px solid #D1D5DB; border-radius: 8px;
               padding: .4rem .7rem; font-size: .85rem; background: #fff; }
+  /* live canvas + edit-panel wrappers */
+  .dc-canvas { overflow-x: auto; border: 1px solid #E5E7EB; border-radius: 12px; background: #fff; padding: .5rem; }
+  .dc-panelwrap { max-width: 32rem; border: 1px solid #D1D5DB; border-radius: 12px; background: #fff;
+                  padding: .7rem .8rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
   footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid #E5E7EB; color: #6B7280; font-size: .8rem; }
 </style>
 </head>
@@ -107,66 +111,104 @@
     </div>
   </div>
 
+  <p class="dc-note" style="margin-top:.5rem">Edge accent rationale, from the SCSS: <em>"Orthogonal to the teal/blue brand palette and to the red/amber/green confidence palette, so the edge marker reads as 'alternative category' rather than brand chrome or a status … Designer review pending."</em></p>
+  <p class="dc-note">Confidence maps to <code>--conf-high</code> / <code>--conf-medium</code> / <code>--conf-low</code> / <code>--conf-none</code> (background + foreground pairs in <code>custom.scss</code>); the source-link colour is <code>--source-accent</code>.</p>
+
   <h3 class="dc-sub">Typography — fluid micro-headings</h3>
   <p class="dc-kick">The real <code>.h6</code>–<code>.h8</code> classes (Inter; <code>clamp()</code> sizes). Resize the window to see them flex.</p>
   <div class="dc-spec"><span class="h6" style="flex:1">The footprint of a digital service</span><span class="det">.h6 · weight 450</span></div>
   <div class="dc-spec"><span class="h7" style="flex:1">The footprint of a digital service</span><span class="det">.h7 · weight 300</span></div>
   <div class="dc-spec"><span class="h8" style="flex:1">The footprint of a digital service</span><span class="det">.h8 · weight 200</span></div>
+  <p class="dc-kick" style="margin-top:.7rem"><b>Inter</b>, self-hosted as a variable font (weights 100–900) with a system-sans fallback stack. Headings <code>.h1</code>–<code>.h5</code> are Bootstrap's scale recoloured to ink; the weights actually in use:</p>
+  <div class="dc-row" style="gap:1.4rem;align-items:baseline">
+    <span style="font-weight:200;font-size:1.2rem">Aa <span style="font-size:.56rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace">200</span></span>
+    <span style="font-weight:300;font-size:1.2rem">Aa <span style="font-size:.56rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace">300</span></span>
+    <span style="font-weight:450;font-size:1.2rem">Aa <span style="font-size:.56rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace">450</span></span>
+    <span style="font-weight:600;font-size:1.2rem">Aa <span style="font-size:.56rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace">600</span></span>
+    <span style="font-weight:700;font-size:1.2rem">Aa <span style="font-size:.56rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace">700</span></span>
+  </div>
 
-  <!-- ============ COMPONENTS ============ -->
-  <h2 class="dc-sec">Components <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#9CA3AF;font-size:.8rem">— real partials, sample data</span></h2>
-  <p class="dc-kick">Each card embeds the <b>real template partial</b> with small sample context. Markup and styling are exactly what ships
-    (so they can't drift); interactivity (tooltips, menus) is inert here since the app scripts aren't loaded.</p>
-  <div class="dc-gallery">
+  <!-- ============ SPACING & LAYOUT ============ -->
+  <h2 class="dc-sec">Spacing &amp; layout</h2>
+  <h3 class="dc-sub">Breakpoints</h3>
+  <p class="dc-kick">Bootstrap's standard breakpoints; the app is desktop-first (the tab strip &amp; toolbar collapse below <code>lg</code>).</p>
+  <table>
+    <tr><th>Token</th><th>Min width</th></tr>
+    <tr><td><code>sm</code></td><td>576px</td></tr>
+    <tr><td><code>md</code></td><td>768px</td></tr>
+    <tr><td><code>lg</code></td><td>992px</td></tr>
+    <tr><td><code>xl</code></td><td>1200px</td></tr>
+    <tr><td><code>xxl</code></td><td>1400px</td></tr>
+  </table>
+  <h3 class="dc-sub">Named sizes &amp; z-index</h3>
+  <table>
+    <tr><th>Token</th><th>Value</th><th>Role</th></tr>
+    <tr><td><code>--full-height</code></td><td>100vh → 100dvh</td><td>full-viewport height (dvh where supported)</td></tr>
+    <tr><td><code>--open-result-btn</code></td><td>50px</td><td>bottom Results bar height</td></tr>
+    <tr><td><code>--loading-bar-height</code></td><td>2px</td><td>top progress bar</td></tr>
+    <tr><td><code>$zindex-levels</code></td><td>n1 … 5</td><td>shared stacking scale (panel / modal / drawer)</td></tr>
+  </table>
+  <p class="dc-note">Spacing otherwise follows Bootstrap's scale; percentage width/height utilities are generated for 0–100 (step 5, plus 33 &amp; 66).</p>
 
-    <div class="dc-comp">
-      <div class="ch"><b>Add button</b><span class="pt">components/add_object_button.html</span></div>
-      <div class="cb">
-        {% include "model_builder/components/add_object_button.html" with btn_id="dc-add-enabled" label="Add usage journey" hx_url="#" disabled=False class_name="UsageJourney" class_description="x" class_label="Usage journey" %}
-        {% include "model_builder/components/add_object_button.html" with btn_id="dc-add-disabled" label="Add usage pattern" disabled=True disabled_reason="Add a usage journey in the Usage journeys section first." %}
-      </div>
-      <div class="cd">Enabled and the <b>disabled-with-tooltip</b> state (the app's defining rule). The <b>?</b> opens the help drawer for that object type.</div>
+  <!-- ============ RADII ============ -->
+  <h2 class="dc-sec">Radii</h2>
+  <p class="dc-kick">No formal radius scale yet — radii are chosen per component (Bootstrap defaults plus a few ad-hoc values). The recurring ones (a tokenise candidate):</p>
+  <div class="dc-row" style="gap:1.1rem;align-items:flex-end">
+    <span style="text-align:center;font-size:.62rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace"><span style="display:block;width:3.6rem;height:2.4rem;background:var(--new-light-primary);border:1px solid var(--new-primary);border-radius:4px;margin-bottom:.25rem"></span>4px</span>
+    <span style="text-align:center;font-size:.62rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace"><span style="display:block;width:3.6rem;height:2.4rem;background:var(--new-light-primary);border:1px solid var(--new-primary);border-radius:6px;margin-bottom:.25rem"></span>6px</span>
+    <span style="text-align:center;font-size:.62rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace"><span style="display:block;width:3.6rem;height:2.4rem;background:var(--new-light-primary);border:1px solid var(--new-primary);border-radius:8px;margin-bottom:.25rem"></span>8px</span>
+    <span style="text-align:center;font-size:.62rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace"><span style="display:block;width:3.6rem;height:2.4rem;background:var(--new-light-primary);border:1px solid var(--new-primary);border-radius:15px;margin-bottom:.25rem"></span>15px</span>
+    <span style="text-align:center;font-size:.62rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace"><span style="display:block;width:3.6rem;height:2.4rem;background:var(--new-light-primary);border:1px solid var(--new-primary);border-radius:999px;margin-bottom:.25rem"></span>pill</span>
+  </div>
+
+  <!-- ============ COMPONENTS (live from a real sample model) ============ -->
+  <h2 class="dc-sec">Components <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#9CA3AF;font-size:.8rem">— live, from a real sample model</span></h2>
+  <p class="dc-kick">Rendered from a real <code>ModelWeb</code> (the maintained <em>ecommerce</em> template, built in memory) through the
+    real canvas and form pipeline — so these are <b>exactly</b> what ships, not mocks. Interactions (opening panels, drag, tooltips,
+    menus) are inert here since the app's scripts aren't loaded; click through in the <a href="/model_builder/">model builder</a> for those.</p>
+
+  <h3 class="dc-sub">The canvas — object cards, add buttons, relationships, edge groups</h3>
+  <p class="dc-kick">The real three-column canvas: object cards (<code>basic_card</code> / <code>journey_card</code> / <code>server_card</code>), the
+    add buttons with real creation-constraint gating, nested steps &amp; jobs with their inline <code>× n</code> counts, and the relationship
+    structure — all live.</p>
+  <div class="dc-canvas">
+    <div class="d-flex flex-row" id="model-canva-0" data-model-canvas="0">
+      {% include 'model_builder/components/model_canvas_content.html' with slot_suffix="" is_active_canvas=True %}
     </div>
+  </div>
 
+  <h3 class="dc-sub">The edit side panel — {{ edit_panel_object_name }}</h3>
+  <p class="dc-kick">The real edit panel for a sample object: the dynamic form fields, the <b>source / confidence</b> metadata, the
+    relationship widgets, and the read-only <b>Calculated attributes</b> with their derivations — built by the real
+    <code>FormContextBuilder</code>.</p>
+  <div class="dc-panelwrap">{{ edit_panel_html }}</div>
+
+  <h3 class="dc-sub">Specific states</h3>
+  <p class="dc-kick">A couple of states a complete model doesn't surface on its own.</p>
+  <div class="dc-gallery">
     <div class="dc-comp">
       <div class="ch"><b>Results bar</b><span class="pt">components/results_bar_button.html</span></div>
       <div class="cb">
-        <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=results_enabled %}</div>
+        <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=model_web %}</div>
         <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=results_locked %}</div>
       </div>
-      <div class="cd">Enabled vs <b>locked</b> (dimmed, with the live validation reason as its tooltip) — gating on the model being computable.</div>
+      <div class="cd">Enabled (the sample model computes) vs <b>locked</b> (dimmed, the live validation reason as its tooltip).</div>
     </div>
-
     <div class="dc-comp">
-      <div class="ch"><b>Confidence badge</b><span class="pt">dynamic_form_fields/confidence_badge.html</span></div>
+      <div class="ch"><b>Add button — disabled</b><span class="pt">components/add_object_button.html</span></div>
       <div class="cb">
-        <div class="dc-row" style="gap:.5rem">
-          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_high" conf_name_prefix="cmp_high" conf_current="high" conf_omit_menu=True %}
-          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_med" conf_name_prefix="cmp_med" conf_current="medium" conf_omit_menu=True %}
-          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_low" conf_name_prefix="cmp_low" conf_current="low" conf_omit_menu=True %}
-          {% include "model_builder/side_panels/dynamic_form_fields/confidence_badge.html" with conf_dom_id="cmp_none" conf_name_prefix="cmp_none" conf_current="none" conf_omit_menu=True %}
-        </div>
+        {% include "model_builder/components/add_object_button.html" with btn_id="dc-add-disabled" label="Add usage pattern" disabled=True disabled_reason="Add a usage journey in the Usage journeys section first." %}
       </div>
-      <div class="cd">The provenance badge on every input — <b>High · Medium · Low · Not set</b>. Audited in the <em>audit-a-result</em> journey.</div>
+      <div class="cd">The <b>disabled-with-tooltip</b> state — the app's defining rule (the canvas above shows the enabled ones).</div>
     </div>
-
   </div>
 
-  <!-- ============ IN CONTEXT ============ -->
-  <h2 class="dc-sec">Seen live, in context</h2>
-  <p class="dc-kick">The context-heavy primitives — object cards, the dynamic form fields, the side panel, modals, the canvas and the
-    relationship widgets — are best seen in their real setting rather than mocked here. They render with real model data in the
-    builder. (Promoting any of them to a sample-data card above is straightforward when it earns its keep.)</p>
-  <div class="dc-out">
-    <a href="/model_builder/">↗ Open the model builder (live components in context)</a>
-    <a href="/">↗ Home</a>
-  </div>
-  <p class="dc-note">For the catalogue's static counterpart (faithful mocks + decisions, version-controlled): <code>specs/design/components.html</code>,
-    <code>tokens.html</code> and the journeys under <code>specs/design/journeys/</code> in the repo.</p>
+  <p class="dc-note" style="margin-top:1.4rem">Version-controlled narrative docs (journeys + design decisions) live under <code>specs/design/journeys/</code> in the repo.
+    <a href="/model_builder/">↗ Open the model builder</a> · <a href="/">↗ Home</a></p>
 
   <footer>
-    Live design catalogue · real tokens (compiled CSS) + real component partials · unlinked, contributors only.
-    Static design hub &amp; journeys: <code>specs/design/</code> in the repo.
+    Live design catalogue · real tokens (compiled CSS) + a real canvas &amp; edit panel from a sample model · unlinked, contributors only.
+    Narrative journeys: <code>specs/design/journeys/</code> in the repo.
   </footer>
 
 </div>
