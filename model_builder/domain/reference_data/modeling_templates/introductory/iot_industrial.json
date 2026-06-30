@@ -68,9 +68,9 @@
             },
             "usage_journey": "Analyst-reviews-sensor-data",
             "devices": [
-                "Analyst-laptop"
+                "Default-laptop"
             ],
-            "network": "Office-network",
+            "network": "Default-wifi-network",
             "country": "France"
         }
     },
@@ -101,9 +101,9 @@
         }
     },
     "Device": {
-        "Analyst-laptop": {
-            "name": "Analyst laptop",
-            "id": "Analyst-laptop",
+        "Default-laptop": {
+            "name": "Default laptop",
+            "id": "Default-laptop",
             "carbon_footprint_fabrication": {
                 "value": 156.0,
                 "unit": "kilogram",
@@ -131,16 +131,6 @@
         }
     },
     "Network": {
-        "Office-network": {
-            "name": "Office network",
-            "id": "Office-network",
-            "bandwidth_energy_intensity": {
-                "value": 0.1,
-                "unit": "kilowatt_hour / gigabyte",
-                "label": "bandwith energy intensity",
-                "source": "hypothesis"
-            }
-        },
         "Default-wifi-network": {
             "name": "Default wifi network",
             "id": "Default-wifi-network",

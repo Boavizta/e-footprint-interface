@@ -127,9 +127,13 @@ def build_system() -> System:
     edge_usage_journey = EdgeUsageJourney.from_defaults(
         "Sensor working week", edge_functions=[edge_function])
 
+    laptop = Device.laptop()
+    network = Network.wifi_network()
+    france = Countries.FRANCE()
+
     analyst_usage_pattern = UsagePattern(
-        "Daily analyst sessions", analyst_journey, [Device.laptop("Analyst laptop")],
-        Network.from_defaults("Office network"), Countries.FRANCE(),
+        "Daily analyst sessions", analyst_journey, [laptop],
+        network, france,
         ExplainableHourlyQuantitiesFromFormInputs({
             "start_date": "2025-01-01",
             "modeling_duration_value": 3,
@@ -143,8 +147,8 @@ def build_system() -> System:
     edge_usage_pattern = EdgeUsagePattern(
         "Factory sensors starting up",
         edge_usage_journey=edge_usage_journey,
-        network=Network.wifi_network(),
-        country=Countries.FRANCE(),
+        network=network,
+        country=france,
         hourly_edge_usage_journey_starts=ExplainableHourlyQuantitiesFromFormInputs({
             "start_date": "2025-01-01",
             "modeling_duration_value": 1,
