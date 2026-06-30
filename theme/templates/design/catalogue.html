@@ -57,13 +57,13 @@
   .dc-canvas { overflow-x: auto; border: 1px solid #E5E7EB; border-radius: 12px; background: #fff; padding: .5rem; }
   .dc-panelwrap { max-width: 32rem; border: 1px solid #D1D5DB; border-radius: 12px; background: #fff;
                   padding: .7rem .8rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
-  /* breakpoint ruler — bar length ∝ min width (xxl = 100%) */
-  .dc-bps { display: flex; flex-direction: column; gap: .45rem; max-width: 54rem; margin: .4rem 0 .3rem; }
-  .dc-bprow { display: flex; align-items: center; gap: .6rem; }
-  .dc-bptok { flex: 0 0 2.4rem; text-align: right; font-size: .68rem; font-weight: 700; color: #111928; font-family: ui-monospace, Menlo, monospace; }
-  .dc-bptrack { flex: 1; display: flex; align-items: center; background: #F3F4F6; border-radius: 6px; height: 1.6rem; }
-  .dc-bpbar { height: 1.6rem; background: #e8eaf4; border-right: 3px solid #2D4675; border-radius: 6px 0 0 6px;
-              display: flex; align-items: center; justify-content: flex-end; min-width: 3.2rem; }
+  /* breakpoint ruler — bars drawn at ACTUAL pixel width; the container scrolls left-right */
+  .dc-bps { overflow-x: auto; padding-bottom: .5rem; margin: .4rem 0 .3rem; border: 1px solid #E5E7EB; border-radius: 10px; padding: .6rem; background: #fff; }
+  .dc-bprow { display: flex; align-items: center; gap: .6rem; width: max-content; margin: .4rem 0; }
+  .dc-bptok { flex: 0 0 2.4rem; text-align: right; font-size: .68rem; font-weight: 700; color: #111928;
+              font-family: ui-monospace, Menlo, monospace; position: sticky; left: 0; background: #fff; z-index: 1; }
+  .dc-bpbar { flex: 0 0 auto; height: 1.6rem; background: #e8eaf4; border-right: 3px solid #2D4675; border-radius: 6px 0 0 6px;
+              display: flex; align-items: center; justify-content: flex-end; min-width: 3.5rem; }
   .dc-bppx { font-size: .62rem; color: #2D4675; font-family: ui-monospace, Menlo, monospace; padding: 0 .5rem; white-space: nowrap; }
   footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid #E5E7EB; color: #6B7280; font-size: .8rem; }
 </style>
@@ -139,13 +139,13 @@
   <!-- ============ SPACING & LAYOUT ============ -->
   <h2 class="dc-sec">Spacing &amp; layout</h2>
   <h3 class="dc-sub">Breakpoints</h3>
-  <p class="dc-kick">Bootstrap's standard breakpoints, drawn to scale (bar length ∝ min width). The app is desktop-first — the tab strip &amp; toolbar collapse below <code>lg</code>.</p>
+  <p class="dc-kick">Bootstrap's standard breakpoints, drawn at their <b>actual pixel width</b> — scroll the strip left/right to feel each one's real size against your screen. The app is desktop-first; the tab strip &amp; toolbar collapse below <code>lg</code>.</p>
   <div class="dc-bps">
-    <div class="dc-bprow"><span class="dc-bptok">sm</span><span class="dc-bptrack"><span class="dc-bpbar" style="width:41.1%"><span class="dc-bppx">576px</span></span></span></div>
-    <div class="dc-bprow"><span class="dc-bptok">md</span><span class="dc-bptrack"><span class="dc-bpbar" style="width:54.9%"><span class="dc-bppx">768px</span></span></span></div>
-    <div class="dc-bprow"><span class="dc-bptok">lg</span><span class="dc-bptrack"><span class="dc-bpbar" style="width:70.9%"><span class="dc-bppx">992px</span></span></span></div>
-    <div class="dc-bprow"><span class="dc-bptok">xl</span><span class="dc-bptrack"><span class="dc-bpbar" style="width:85.7%"><span class="dc-bppx">1200px</span></span></span></div>
-    <div class="dc-bprow"><span class="dc-bptok">xxl</span><span class="dc-bptrack"><span class="dc-bpbar" style="width:100%"><span class="dc-bppx">1400px</span></span></span></div>
+    <div class="dc-bprow"><span class="dc-bptok">sm</span><span class="dc-bpbar" style="width:576px"><span class="dc-bppx">576px</span></span></div>
+    <div class="dc-bprow"><span class="dc-bptok">md</span><span class="dc-bpbar" style="width:768px"><span class="dc-bppx">768px</span></span></div>
+    <div class="dc-bprow"><span class="dc-bptok">lg</span><span class="dc-bpbar" style="width:992px"><span class="dc-bppx">992px</span></span></div>
+    <div class="dc-bprow"><span class="dc-bptok">xl</span><span class="dc-bpbar" style="width:1200px"><span class="dc-bppx">1200px</span></span></div>
+    <div class="dc-bprow"><span class="dc-bptok">xxl</span><span class="dc-bpbar" style="width:1400px"><span class="dc-bppx">1400px</span></span></div>
   </div>
   <h3 class="dc-sub">Named sizes &amp; z-index</h3>
   <table>
