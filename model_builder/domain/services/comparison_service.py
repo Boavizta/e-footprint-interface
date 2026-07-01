@@ -322,6 +322,8 @@ class ComparisonService:
         return {
             "labels": [str(year) for year in years],
             **_axis_unit_fields(max(stack_heights, default=0.0)),
+            "modelAName": comparison.system_a.name,
+            "modelBName": comparison.system_b.name,
             "datasets": [
                 _bar_dataset(f"{comparison.system_a.name} usage", usage_a, MODEL_A_COLOR, stack="A"),
                 _bar_dataset(f"{comparison.system_a.name} fabrication", fabrication_a, MODEL_A_COLOR_LIGHT, stack="A"),

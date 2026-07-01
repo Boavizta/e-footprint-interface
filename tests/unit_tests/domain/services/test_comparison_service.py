@@ -201,6 +201,10 @@ class TestPairedChart:
         assert datasets[2]["backgroundColor"] == MODEL_B_COLOR        # B usage
         assert datasets[3]["backgroundColor"] == MODEL_B_COLOR_LIGHT  # B fabrication
 
+    def test_payload_carries_both_model_names_for_the_grouped_html_legend(self, view):
+        assert view.paired_chart["modelAName"] == "Streaming app"
+        assert view.paired_chart["modelBName"] == "Streaming app — edge caching"
+
     def test_per_year_stacked_total_reconstructs_each_model_total(self, view):
         datasets = view.paired_chart["datasets"]
         a_total = sum((datasets[0]["data"][i] or 0) + (datasets[1]["data"][i] or 0)
