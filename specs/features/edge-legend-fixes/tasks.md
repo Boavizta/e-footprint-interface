@@ -59,27 +59,6 @@
 
 ---
 
-## Task 3 — Design-hub journeys: view-results and compare-models
-
-**Goal:** Document the corrected legend behaviour in the design hub so future contributors have a visual reference for both the results and comparison flows.
-
-**Files touched:**
-- `specs/design/journeys/view-results.html` — new journey documenting the results panel: the bar chart, the edge-aware legend, the line chart, the Sankey. Follow `journey-authoring.md` conventions and copy `build-a-model.html`'s style block.
-- `specs/design/journeys/compare-models.html` — new journey documenting the comparison dashboard: the KPI strip, the paired bar chart with its grouped per-system legend, the cumulative overlay, and the decomposition bars.
-- `specs/design/index.html` — update the `view-results` and `compare-models` cards from "To author" (`.pill.todo`) to "Live" (`.pill.web` or similar), and link to the new files.
-
-**Tests added/changed:**
-- None (documentation only).
-
-**Acceptance:**
-- Both journey files open in a browser with no network requests (self-contained HTML).
-- The design-hub index links to both new files and they load correctly.
-- The corrected legend behaviours are visibly documented (screenshots or inline mockups) in each journey.
-
-**Depends on:** Tasks 1 and 2 (authors against the final implemented behaviour).
-
----
-
 ## Ordering rationale
 
-Tasks 1 and 2 are independent behavioural changes on separate pages with separate test files — they can be reviewed and landed in either order (or in parallel PRs). Task 3 is documentation that reflects the shipped behaviour, so it naturally follows both. The three-task shape avoids splitting tightly-coupled units: the `isEdge` flag and the legend filter that reads it share no meaningful pause point, so they stay in Task 1; the backend name fields and the JS that consumes them share no meaningful pause point, so they stay in Task 2.
+Tasks 1 and 2 are independent behavioural changes on separate pages with separate test files — they can be reviewed and landed in either order (or in parallel PRs). Full journey docs for view-results and compare-models are out of scope for this fix; the legend behaviour is self-evident in the UI and covered by the spec and plan.
