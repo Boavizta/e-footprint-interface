@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edge Legend Fixes — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  h3 { margin-top: 1.4rem; color: #333; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  .badge { display: inline-block; padding: .15rem .5rem; border-radius: 4px; font-size: .8rem;
+           font-weight: 600; margin-right: .3rem; }
+  .fix-a { background: #e8f4fd; color: #1a6fa8; }
+  .fix-b { background: #fef3e2; color: #a86a1a; }
+
+  /* — mockup shared — */
+  .legend-demo { display: flex; flex-direction: column; gap: .7rem; }
+  .legend-row { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; }
+  .section-lbl { font-size: .72rem; font-weight: 700; text-transform: uppercase;
+                 letter-spacing: .05em; color: #888; min-width: 6.5rem; }
+  .capsule { display: inline-flex; align-items: center; gap: .25rem; padding: .18rem .55rem;
+             border-radius: 999px; border: 2px solid; font-size: .78rem; }
+  .c-server-e { border-color: #c47a45; background: #c47a45; color:#fff; }
+  .c-server-f { border-color: #a0522d; background: #a0522d; color:#fff; }
+  .c-edge-e   { border-color: #5CB6B1; background: #5CB6B1; color:#fff; }
+  .c-edge-f   { border-color: #6595C8; background: #6595C8; color:#fff; }
+  .c-network  { border-color: #9B8EA5; background: #9B8EA5; color:#fff; }
+  .toggle-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .9rem; }
+  .sw { width: 2.4rem; height: 1.2rem; background: #ccc; border-radius: 999px; position: relative;
+        cursor: pointer; transition: background .2s; flex-shrink:0; }
+  .sw.on { background: #5CB6B1; }
+  .sw::after { content:''; position:absolute; left:.15rem; top:.15rem; width:.9rem; height:.9rem;
+               background:#fff; border-radius:50%; transition:transform .2s; }
+  .sw.on::after { transform: translateX(1.2rem); }
+
+  /* — comparison legend mockup — */
+  .comp-box { border: 1px solid #ddd; border-radius: 6px; padding: .6rem 1rem; background:#fff; margin:.5rem 0; }
+  .comp-bad  { display: flex; flex-wrap: wrap; gap: .35rem; justify-content: center; }
+  .comp-good { display: flex; flex-direction: column; gap: .4rem; align-items: flex-start; }
+  .sys-row   { display: flex; gap: .5rem; align-items: center; flex-wrap: nowrap; }
+  .sys-lbl   { font-size: .75rem; font-weight: 700; color: #555; min-width: 5.5rem; }
+  .dot       { width: .68rem; height: .68rem; border-radius: 50%; flex-shrink: 0; }
+  .leg-item  { display: inline-flex; align-items: center; gap: .28rem; font-size: .78rem; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>Edge Legend Fixes</h1>
+<p class="status">Status: Spec — under review · 2026-06-30</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <p>Two independent visual issues in the results charts, both affecting any user who reads impact output:</p>
+  <table>
+    <tr><th>Issue</th><th>Page</th><th>Problem</th></tr>
+    <tr>
+      <td><span class="badge fix-a">A</span> Edge items always in legend</td>
+      <td>Results — single model</td>
+      <td>The bar chart legend always shows <em>Edge devices — energy</em> and <em>Edge devices — fabrication</em>
+          capsules, even when the edge-modeling toggle is off. These categories have no data and no bars when
+          edge is inactive, so the legend entries are misleading noise.</td>
+    </tr>
+    <tr>
+      <td><span class="badge fix-b">B</span> Comparison legend wrapping</td>
+      <td>Comparison view — two systems</td>
+      <td>The paired bar comparison chart uses the default Chart.js legend, which wraps items
+          across multiple lines without grouping. In practice, colors for System 1 and System 2
+          are interleaved across lines, making it hard to identify which color belongs to which system.</td>
+    </tr>
+  </table>
+  <p>Both issues are encountered by any user who reaches the results view. Issue A is the more frequent
+     path (single-model results is the default view); issue B is encountered on every comparison run.
+     Severity is cosmetic but directly undermines trust in chart readability.</p>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <ul>
+    <li><strong>A1.</strong> When the edge-modeling toggle is <em>off</em>, no edge-device entries appear in the single-model results bar chart legend.</li>
+    <li><strong>A2.</strong> The legend correctly reflects the toggle state when the results chart is rendered (the toggle is not accessible while viewing results, so no live update is required).</li>
+    <li><strong>A3.</strong> All non-edge legend entries are unaffected by the toggle state.</li>
+    <li><strong>B1.</strong> In the comparison paired bar chart, legend items are left-aligned and visually grouped by system, so the reader can immediately match a color to System 1 or System 2.</li>
+    <li><strong>B2.</strong> The comparison legend layout is stable regardless of how many hardware types are active (no mid-list wrap).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
+  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
+  <code>plan.html</code>, not here.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Single-model results bar chart: hide edge-device legend items when edge modeling is inactive; show them when active. State is read at chart render time.</li>
+      <li>Comparison paired bar chart: replace the default wrapping legend with a grouped, left-aligned layout — one row per system.</li>
+      <li>Update the <code>view-results</code> and <code>compare-models</code> design-hub journeys (<code>specs/design/journeys/</code>) to document the corrected behaviour.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Line (cumulative) chart legend — no edge-toggle interaction needed there today.</li>
+      <li>Comparison cumulative overlay and decomposition charts — only the paired bar chart's legend is addressed.</li>
+      <li>Hiding edge-device <em>datasets</em> (bars, tooltips) — only the legend items are hidden; if datasets carry zero values when edge is off, nothing renders anyway.</li>
+      <li>Any change to the edge-modeling toggle behaviour itself.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+
+  <h3><span class="badge fix-a">A</span> Edge legend visibility — single-model results</h3>
+  <p>The edge-device capsules disappear from both the Fabrication and Usage legend sections when
+     edge modeling is off, and reappear immediately when it is switched on.</p>
+  <div class="mockup">
+    <p style="margin:0 0 .7rem;font-size:.85rem;color:#555;">Toggle to see the legend react:</p>
+    <div class="toggle-row">
+      <span style="font-size:.85rem;">Edge modeling</span>
+      <div class="sw" id="sw" onclick="flip()"></div>
+      <span id="swLbl" style="font-size:.85rem;color:#888;">off</span>
+    </div>
+    <div class="legend-demo">
+      <div class="legend-row">
+        <span class="section-lbl">Fabrication</span>
+        <span class="capsule c-server-f">Servers</span>
+        <span class="capsule c-edge-f" id="ef">Edge devices</span>
+        <span class="capsule c-network">Network</span>
+      </div>
+      <div class="legend-row">
+        <span class="section-lbl">Usage</span>
+        <span class="capsule c-server-e">Servers</span>
+        <span class="capsule c-edge-e" id="ee">Edge devices</span>
+        <span class="capsule c-network">Network</span>
+      </div>
+    </div>
+    <script>
+      var on = false;
+      function flip() {
+        on = !on;
+        document.getElementById('sw').className = on ? 'sw on' : 'sw';
+        document.getElementById('swLbl').textContent = on ? 'on' : 'off';
+        ['ef','ee'].forEach(function(id){
+          document.getElementById(id).style.display = on ? '' : 'none';
+        });
+      }
+      // init: edge off
+      document.getElementById('ef').style.display = 'none';
+      document.getElementById('ee').style.display = 'none';
+    </script>
+  </div>
+
+  <h3><span class="badge fix-b">B</span> Comparison legend — grouped by system</h3>
+  <p>Items are grouped into one row per system, left-aligned, with a system label on the left.
+     No wrapping.</p>
+  <div class="mockup">
+    <p style="font-size:.85rem;color:#555;margin:0 0 .5rem;"><strong>Before</strong> — wraps, interleaves systems:</p>
+    <div class="comp-box">
+      <div class="comp-bad">
+        <span class="leg-item"><span class="dot" style="background:#4E79A7"></span>Servers energy — Sys 1</span>
+        <span class="leg-item"><span class="dot" style="background:#F28E2B"></span>Servers energy — Sys 2</span>
+        <span class="leg-item"><span class="dot" style="background:#76B7B2"></span>Network energy — Sys 1</span>
+        <span class="leg-item"><span class="dot" style="background:#E15759"></span>Network energy — Sys 2</span>
+        <span class="leg-item"><span class="dot" style="background:#59A14F"></span>Servers fab — Sys 1</span>
+        <span class="leg-item"><span class="dot" style="background:#EDC948"></span>Servers fab — Sys 2</span>
+      </div>
+    </div>
+    <p style="font-size:.85rem;color:#555;margin:.8rem 0 .5rem;"><strong>After</strong> — one row per system, left-aligned:</p>
+    <div class="comp-box">
+      <div class="comp-good">
+        <div class="sys-row">
+          <span class="sys-lbl">System 1</span>
+          <span class="leg-item"><span class="dot" style="background:#4E79A7"></span>Servers energy</span>
+          <span class="leg-item"><span class="dot" style="background:#76B7B2"></span>Network energy</span>
+          <span class="leg-item"><span class="dot" style="background:#59A14F"></span>Servers fab</span>
+        </div>
+        <div class="sys-row">
+          <span class="sys-lbl">System 2</span>
+          <span class="leg-item"><span class="dot" style="background:#F28E2B"></span>Servers energy</span>
+          <span class="leg-item"><span class="dot" style="background:#E15759"></span>Network energy</span>
+          <span class="leg-item"><span class="dot" style="background:#EDC948"></span>Servers fab</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li>Constitution §1.4 — vanilla JS only; no new npm dependency, no SPA framework.</li>
+    <li>Edge-toggle state is a CSS class on <code>&lt;body&gt;</code>; chart-side code reads it from the DOM rather than maintaining a separate copy.</li>
+    <li>Legend rebuilds must not regress chart performance (lightweight DOM patch, no full chart re-creation).</li>
+    <li>Jest test suite must remain green; new behaviour should be covered by new tests.</li>
+    <li>Design-hub journeys are HTML documents following the conventions in <code>specs/design/journey-authoring.md</code>.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ul>
+    <li><strong>B — system labels.</strong> ✅ Resolved: row labels use the real system names as entered by the user.</li>
+    <li><strong>A — live update trigger.</strong> ✅ Resolved: no live update needed. The toggle is not accessible while viewing results; the legend reads toggle state once at render time.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <code>plan.html</code> for approach, affected files, and implementation steps.</li>
+    <li>Re-read <code>specs/architecture.md</code> and <code>specs/conventions.md</code> for
+        code-style and architectural constraints.</li>
+    <li>The relevant design-hub pages are
+        <code>specs/design/journeys/view-results.html</code> and
+        <code>specs/design/journeys/compare-models.html</code> (to be authored as part of this feature).</li>
+  </ol>
+</section>
+
+</body>
+</html>

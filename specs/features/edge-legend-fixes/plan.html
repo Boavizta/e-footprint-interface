@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edge Legend Fixes — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  h3 { margin-top: 1.3rem; color: #333; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  pre { background: #f4f4f4; padding: .7rem 1rem; border-radius: 5px; overflow-x: auto; font-size: .85em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .badge { display: inline-block; padding: .1rem .45rem; border-radius: 4px; font-size: .8rem;
+           font-weight: 600; margin-right: .25rem; }
+  .fix-a { background: #e8f4fd; color: #1a6fa8; }
+  .fix-b { background: #fef3e2; color: #a86a1a; }
+</style>
+</head>
+<body>
+
+<h1>Edge Legend Fixes — Implementation plan</h1>
+<p class="status">Status: Plan — under review · 2026-06-30 · Spec: <a href="spec.html">spec.html</a></p>
+
+<section>
+  <h2>1. Approach</h2>
+
+  <h3><span class="badge fix-a">A</span> Edge items in single-model bar chart</h3>
+  <p>
+    The <code>splitCapsuleLegendPlugin</code> in <code>legend.js</code> rebuilds the legend from
+    <code>chart.legend.legendItems</code> on every update. The items are derived from the chart's
+    datasets, which are built once from <code>HARDWARE_TYPE_CONFIG</code> in <code>config.js</code>.
+    The edge toggle state lives on <code>document.body</code> as the CSS class
+    <code>edge-modeling-on</code> / <code>edge-modeling-off</code>.
+  </p>
+  <p>
+    The fix has two parts: (1) mark edge hardware types in <code>HARDWARE_TYPE_CONFIG</code> with
+    <code>isEdge: true</code> so the flag travels through <code>createDatasetConfig</code> onto the
+    Chart.js dataset object, and (2) in the plugin's rebuild pass, skip any legend item whose
+    dataset carries <code>isEdge: true</code> when <code>body.classList</code> does not contain
+    <code>edge-modeling-on</code>. No chart re-creation is needed — the legend container is
+    cleared and rebuilt on every <code>_legendNeedsRebuild</code> pass anyway.
+  </p>
+
+  <h3><span class="badge fix-b">B</span> Comparison paired bar chart legend</h3>
+  <p>
+    The paired chart payload from <code>ComparisonService</code> already carries per-dataset
+    <code>stack</code> values (<code>"A"</code> or <code>"B"</code>), and dataset labels of the
+    form <code>"{system_name} usage"</code> / <code>"{system_name} fabrication"</code>. However,
+    there is no top-level field for the raw system names, so a clean row label requires either
+    string surgery on a dataset label or a new payload field.
+  </p>
+  <p>
+    We add <code>modelAName</code> and <code>modelBName</code> string fields to the
+    <code>_paired_chart_payload</code> dict in <code>comparison_service.py</code>. On the JS side,
+    we replace the Chart.js built-in legend (<code>legend: { display: true }</code>) with a custom
+    HTML legend rendered into a <code>&lt;div&gt;</code> below the canvas after the chart is
+    created. The custom legend groups datasets by <code>stack</code>, renders one row per system,
+    and uses <code>payload.modelAName</code> / <code>payload.modelBName</code> as row labels.
+    The same treatment is applied to the cumulative overlay chart (<code>renderCumulativeLegend</code>), using a horizontal line swatch to match the line chart visual.
+  </p>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+  <table>
+    <thead><tr><th>File</th><th>Change type</th><th>What changes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>theme/static/scripts/result_charts/config.js</code></td>
+        <td>modified</td>
+        <td>Add <code>isEdge: true</code> to <code>Edge_devices_energy</code> and
+            <code>Edge_devices_fabrication</code> entries in <code>HARDWARE_TYPE_CONFIG</code>.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/result_charts/legend.js</code></td>
+        <td>modified</td>
+        <td>In <code>splitCapsuleLegendPlugin.afterUpdate()</code>, before splitting items into
+            usage/fabrication sections, filter out items where
+            <code>chart.data.datasets[item.datasetIndex].isEdge === true</code> when
+            <code>!document.body.classList.contains('edge-modeling-on')</code>.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/domain/services/comparison_service.py</code></td>
+        <td>modified</td>
+        <td>Add <code>modelAName</code> and <code>modelBName</code> keys to the
+            <code>_paired_chart_payload()</code> return dict.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/result_charts/comparison_charts.js</code></td>
+        <td>modified</td>
+        <td>In <code>buildPairedChartConfig()</code>, set <code>legend: { display: false }</code>.
+            Add <code>renderPairedLegend(payload, canvasId)</code> (one row per system, color swatch + phase label) and <code>renderCumulativeLegend(payload, canvasId)</code> (one row per dataset, line swatch + model name). Both inserted after their respective canvases. <code>destroyPairedLegend()</code> plus inline destroy for the cumulative legend are called from <code>destroyComparisonCharts()</code>.</td>
+      </tr>
+      <tr>
+        <td><code>specs/design/journeys/view-results.html</code></td>
+        <td>new</td>
+        <td>Design-hub journey documenting the results panel, including the corrected edge-aware
+            bar chart legend behaviour.</td>
+      </tr>
+      <tr>
+        <td><code>specs/design/journeys/compare-models.html</code></td>
+        <td>new</td>
+        <td>Design-hub journey documenting the comparison dashboard, including the grouped
+            per-system legend layout.</td>
+      </tr>
+      <tr>
+        <td><code>specs/design/index.html</code></td>
+        <td>modified</td>
+        <td>Update <em>view-results</em> and <em>compare-models</em> cards from "To author" to
+            "Live".</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Implementation notes</h2>
+
+  <h3><span class="badge fix-a">A</span> Edge flag propagation</h3>
+  <p>
+    <code>createDatasetConfig</code> in <code>chart.js</code> spreads <code>HARDWARE_TYPE_CONFIG[hardwareType]</code>
+    directly onto the Chart.js dataset object — so adding <code>isEdge: true</code> to the config
+    entry is enough; the property will be present on <code>chart.data.datasets[i]</code> without
+    any change to <code>chart.js</code>.
+  </p>
+  <p>
+    In <code>splitCapsuleLegendPlugin.afterUpdate()</code>, the filter runs before the
+    usage/fabrication split:
+  </p>
+  <pre>const edgeOff = !document.body.classList.contains('edge-modeling-on');
+const visibleItems = legend.legendItems.filter(item =>
+    !edgeOff || !chart.data.datasets[item.datasetIndex]?.isEdge
+);</pre>
+  <p>Then pass <code>visibleItems</code> to <code>filterItemsByCategory</code> instead of
+     <code>legend.legendItems</code>.</p>
+  <p>
+    <strong>Edge case:</strong> if the body has neither class (e.g. on first load before the
+    toggle JS runs), treat edge as visible (fail-open). The condition above handles this:
+    <code>!body.classList.contains('edge-modeling-on')</code> is true in that state, so edge items
+    are hidden — which is the correct default since the toggle defaults to off when no preference
+    is stored. Verify this matches <code>edge_modeling_toggle.js</code> behaviour before shipping.
+  </p>
+
+  <h3><span class="badge fix-b">B</span> Custom paired legend</h3>
+  <p>
+    <code>renderPairedLegend(payload, canvasId)</code> is a plain DOM function (no Chart.js
+    dependency) that:
+  </p>
+  <ol>
+    <li>Finds or creates a <code>&lt;div id="{canvasId}-legend"&gt;</code> after the canvas.</li>
+    <li>Groups <code>payload.datasets</code> by <code>stack</code> (<code>"A"</code> / <code>"B"</code>).</li>
+    <li>For each group, renders one row: a system-name label (<code>payload.modelAName</code> or
+        <code>payload.modelBName</code>) followed by color-dot + dataset-label items.</li>
+  </ol>
+  <p>
+    The row label element reuses the same font/color tokens already established in
+    <code>SHARED_FONT</code> and <code>TICK_COLOR</code> to stay visually consistent. No
+    interaction (no "only" button) — the comparison legend is display-only.
+  </p>
+  <p>
+    <code>destroyPairedLegend()</code> removes the <code>&lt;div&gt;</code> by id if it exists.
+    It is called from <code>destroyComparisonCharts()</code> so cleanup stays symmetric.
+  </p>
+</section>
+
+<section>
+  <h2>4. Cross-cutting concerns</h2>
+  <ul>
+    <li>
+      <strong>Tests — Fix A:</strong> Add Jest cases to
+      <code>js_tests/</code> (new file or extend an existing legend test file) covering:
+      (a) edge items absent from legend items when body lacks <code>edge-modeling-on</code>;
+      (b) edge items present when body has <code>edge-modeling-on</code>;
+      (c) non-edge items unaffected in both states.
+    </li>
+    <li>
+      <strong>Tests — Fix B:</strong> Extend <code>js_tests/comparison_charts.test.js</code>
+      to assert that <code>buildPairedChartConfig</code> sets <code>legend.display: false</code>,
+      and add a unit test for <code>renderPairedLegend</code> asserting row grouping and label
+      content. Add a Python unit test in <code>tests/unit_tests/</code> asserting
+      <code>modelAName</code> and <code>modelBName</code> are present in the paired payload.
+    </li>
+    <li>
+      <strong>Migrations:</strong> No Django model change. No session schema change (chart payload
+      is computed on the fly from the session system data).
+    </li>
+    <li>
+      <strong>Docs:</strong> <code>specs/architecture.md</code> mentions
+      <code>ComparisonService</code> — add a one-line note that the paired payload now includes
+      system name fields. <code>specs/conventions.md</code> may need a note on the
+      <code>isEdge</code> pattern if it becomes a general precedent.
+    </li>
+    <li>
+      <strong>Build:</strong> JS changes are in the <code>result_charts</code> bundle; rebuild
+      with <code>npm run build:result-charts:dev</code> (or the prod equivalent) before testing.
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. Risks</h2>
+  <ul>
+    <li>
+      <strong>Edge-off default state on first load.</strong> If <code>body</code> has neither
+      class before the toggle JS runs, edge items will be hidden by the fail-open condition.
+      Verify timing: the toggle script runs on <code>DOMContentLoaded</code> and the chart is
+      drawn after <code>triggerResultRendering</code> (an HTMX event), so the body class should
+      be set before any chart renders. Confirm in an E2E smoke test.
+    </li>
+    <li>
+      <strong>Payload backward compatibility.</strong> Adding <code>modelAName</code> /
+      <code>modelBName</code> to the paired payload is additive (JSON; the JS reads these new
+      fields). Old cached payloads (stored as data-attributes on the dashboard element) will lack
+      the fields — <code>renderPairedLegend</code> should fall back gracefully (e.g. "System A" /
+      "System B") when the fields are absent.
+    </li>
+    <li>
+      <strong>Legend container ID collision.</strong> <code>renderPairedLegend</code> shares the
+      <code>{canvasId}-legend</code> naming pattern with the single-model legend plugin. Since the
+      two are on different pages/tabs this is not a runtime collision, but the convention should be
+      noted so future work doesn't accidentally reuse the same id on one page.
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Alternatives considered</h2>
+  <ul>
+    <li>
+      <strong>A — CSS hide via body class.</strong> Hide edge capsules with a CSS rule targeting
+      <code>body.edge-modeling-off [data-is-edge]</code>. Rejected: the custom legend is built
+      dynamically with inline styles; a data-attribute approach would work but mixes display logic
+      across CSS and JS. The plugin approach keeps all legend logic in JS.
+    </li>
+    <li>
+      <strong>A — Re-create the chart on toggle.</strong> Trigger a full chart redraw when the
+      edge toggle changes. Rejected: over-engineered (the toggle is inaccessible while viewing
+      results, per spec), and expensive.
+    </li>
+    <li>
+      <strong>B — Extract system name from dataset label string.</strong> Strip " usage" /
+      " fabrication" suffix from the first stack-A dataset label. Rejected: brittle — depends on
+      label format staying stable; the backend field is the authoritative source.
+    </li>
+    <li>
+      <strong>B — Keep Chart.js built-in legend, tune wrapping.</strong> Set
+      <code>legend.maxWidth</code> or style the legend box to wrap at system boundaries.
+      Rejected: Chart.js doesn't support semantic grouping in its built-in legend; achieving it
+      would require overriding the label-generation callback, which is harder to test and
+      less readable than a simple DOM render.
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Constitutional notes</h2>
+  <p>
+    All changes are vanilla JS (frontend) or pure Python (service layer). No new npm dependency,
+    no framework, no Django model change. Consistent with constitution §1.4 (HTMX-first, minimize
+    JS) and §1.3 (library is domain truth — <code>ComparisonService</code> wraps library output,
+    does not re-implement it). No constitutional deviation.
+  </p>
+</section>
+
+<section>
+  <h2>8. Open questions</h2>
+  <ul>
+    <li>None — all spec open questions are resolved. Ready for task breakdown.</li>
+  </ul>
+</section>
+
+</body>
+</html>
