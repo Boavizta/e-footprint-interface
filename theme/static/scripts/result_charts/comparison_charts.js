@@ -85,9 +85,10 @@ function buildPairedChartConfig(payload) {
                     },
                 },
             },
-            // One legend driving both models' series.
+            // The built-in legend is replaced by a custom HTML legend rendered via renderPairedLegend,
+            // which groups series into one row per system with the real model name as the row label.
             plugins: {
-                legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } },
+                legend: { display: false },
                 tooltip: FORMATTED_VALUE_TOOLTIP,
             },
         },
@@ -131,8 +132,10 @@ function buildCumulativeChartConfig(payload) {
                     },
                 },
             },
+            // The built-in legend is replaced by a custom HTML legend rendered via renderCumulativeLegend,
+            // matching the paired chart's per-system row style.
             plugins: {
-                legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } },
+                legend: { display: false },
                 tooltip: FORMATTED_VALUE_TOOLTIP,
             },
         },
@@ -211,6 +214,114 @@ function buildDecompositionChartConfig(payload) {
     };
 }
 
+/**
+ * Render a grouped HTML legend for the paired bar chart below its canvas. Produces one row per
+ * model (stack "A" / "B"), each row labelled with the real system name and showing one color swatch
+ * per series (usage / fabrication). Falls back to "System A" / "System B" when name fields are absent.
+ * @param {Object} payload - The paired chart payload (includes modelAName, modelBName, datasets).
+ * @param {string} canvasId - The id of the canvas the paired chart is drawn on.
+ */
+function renderPairedLegend(payload, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const legendId = `${canvasId}-legend`;
+    let container = document.getElementById(legendId);
+    if (!container) {
+        container = document.createElement("div");
+        container.id = legendId;
+        canvas.parentNode.insertBefore(container, canvas.nextSibling);
+    }
+    container.innerHTML = "";
+    container.style.cssText = "padding: 6px 0 2px; font-size: 12px; font-family: 'Inter', system-ui, sans-serif;";
+
+    const systemNames = { A: payload.modelAName || "System A", B: payload.modelBName || "System B" };
+
+    // Collect datasets per stack, preserving insertion order (usage then fabrication).
+    const groups = {};
+    for (const dataset of payload.datasets) {
+        const stack = dataset.stack;
+        if (!groups[stack]) groups[stack] = [];
+        groups[stack].push(dataset);
+    }
+
+    for (const [stack, datasets] of Object.entries(groups)) {
+        const row = document.createElement("div");
+        row.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: nowrap;";
+
+        const nameLabel = document.createElement("span");
+        nameLabel.textContent = `${systemNames[stack]}:`;
+        nameLabel.style.cssText = "font-weight: 600; white-space: nowrap; color: #374151;";
+        row.appendChild(nameLabel);
+
+        for (const dataset of datasets) {
+            const item = document.createElement("span");
+            item.style.cssText = "display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;";
+
+            const swatch = document.createElement("span");
+            swatch.style.cssText = `display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: ${dataset.backgroundColor}; flex-shrink: 0;`;
+
+            const phase = document.createElement("span");
+            // The dataset label is "<model name> usage" or "<model name> fabrication"; take the last word.
+            phase.textContent = dataset.label.split(" ").pop();
+            phase.style.color = "#6b7280";
+
+            item.appendChild(swatch);
+            item.appendChild(phase);
+            row.appendChild(item);
+        }
+
+        container.appendChild(row);
+    }
+}
+
+/**
+ * Remove the HTML legend injected by renderPairedLegend for the given canvas.
+ * @param {string} canvasId - The id of the paired chart canvas.
+ */
+function destroyPairedLegend(canvasId) {
+    const el = document.getElementById(`${canvasId}-legend`);
+    if (el) el.remove();
+}
+
+/**
+ * Render a grouped HTML legend for the cumulative overlay chart below its canvas. One row per
+ * dataset (model A line, model B line), each with a color swatch and the model name label.
+ * @param {Object} payload - The cumulative chart payload (datasets carry label + borderColor).
+ * @param {string} canvasId - The id of the canvas the cumulative chart is drawn on.
+ */
+function renderCumulativeLegend(payload, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const legendId = `${canvasId}-legend`;
+    let container = document.getElementById(legendId);
+    if (!container) {
+        container = document.createElement("div");
+        container.id = legendId;
+        canvas.parentNode.insertBefore(container, canvas.nextSibling);
+    }
+    container.innerHTML = "";
+    container.style.cssText = "padding: 6px 0 2px; font-size: 12px; font-family: 'Inter', system-ui, sans-serif;";
+
+    for (const dataset of payload.datasets) {
+        const row = document.createElement("div");
+        row.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;";
+
+        const swatch = document.createElement("span");
+        // A short horizontal bar matches the line chart visual better than a square swatch.
+        swatch.style.cssText = `display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: ${dataset.borderColor}; flex-shrink: 0;`;
+
+        const label = document.createElement("span");
+        label.textContent = dataset.label;
+        label.style.cssText = "font-weight: 600; color: #374151; white-space: nowrap;";
+
+        row.appendChild(swatch);
+        row.appendChild(label);
+        container.appendChild(row);
+    }
+}
+
 const COMPARISON_CHART_KEYS = ["comparisonPairedChart", "comparisonCumulativeChart", "comparisonDecompositionChart"];
 
 function destroyComparisonChart(canvasId) {
@@ -236,6 +347,10 @@ function renderChart(canvasId, config) {
  */
 function destroyComparisonCharts() {
     COMPARISON_CHART_KEYS.forEach(destroyComparisonChart);
+    ["comparisonPairedChart", "comparisonCumulativeChart"].forEach((id) => {
+        const el = document.getElementById(`${id}-legend`);
+        if (el) el.remove();
+    });
 }
 
 /**
@@ -252,8 +367,14 @@ function drawComparisonCharts() {
     const cumulative = JSON.parse(dashboard.dataset.cumulativeChart || "null");
     const decomposition = JSON.parse(dashboard.dataset.decompositionChart || "null");
 
-    if (paired) renderChart("comparisonPairedChart", buildPairedChartConfig(paired));
-    if (cumulative) renderChart("comparisonCumulativeChart", buildCumulativeChartConfig(cumulative));
+    if (paired) {
+        renderChart("comparisonPairedChart", buildPairedChartConfig(paired));
+        renderPairedLegend(paired, "comparisonPairedChart");
+    }
+    if (cumulative) {
+        renderChart("comparisonCumulativeChart", buildCumulativeChartConfig(cumulative));
+        renderCumulativeLegend(cumulative, "comparisonCumulativeChart");
+    }
     if (decomposition && decomposition.labels.length) {
         renderChart("comparisonDecompositionChart", buildDecompositionChartConfig(decomposition));
     }
@@ -265,6 +386,9 @@ module.exports = {
     buildPairedChartConfig,
     buildCumulativeChartConfig,
     buildDecompositionChartConfig,
+    renderPairedLegend,
+    destroyPairedLegend,
+    renderCumulativeLegend,
     drawComparisonCharts,
     destroyComparisonCharts,
 };

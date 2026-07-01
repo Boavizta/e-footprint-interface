@@ -8,6 +8,9 @@ const {
     buildPairedChartConfig,
     buildCumulativeChartConfig,
     buildDecompositionChartConfig,
+    renderPairedLegend,
+    destroyPairedLegend,
+    renderCumulativeLegend,
     destroyComparisonCharts,
 } = require("../theme/static/scripts/result_charts/comparison_charts.js");
 
@@ -59,14 +62,15 @@ describe("buildPairedChartConfig", () => {
         expect(config.data.datasets[2].backgroundColor).toBe("#e09f3e");
     });
 
-    test("uses a single shared stacked y-axis and one legend (magnitude honesty)", () => {
+    test("uses a single shared stacked y-axis; built-in legend is off (replaced by renderPairedLegend)", () => {
         const config = buildPairedChartConfig(pairedPayload());
         expect(config.options.scales.y.stacked).toBe(true);
         expect(config.options.scales.y.beginAtZero).toBe(true);
         expect(config.options.scales.x.stacked).toBe(true);
         // Exactly one y scale; no per-model secondary axis that would break comparability.
         expect(Object.keys(config.options.scales)).toEqual(["x", "y"]);
-        expect(config.options.plugins.legend.display).toBe(true);
+        // The built-in legend is disabled; the grouped HTML legend is rendered by renderPairedLegend.
+        expect(config.options.plugins.legend.display).toBe(false);
     });
 
     test("passes blank (null) buckets through unchanged so non-covered years stay empty", () => {
@@ -91,13 +95,13 @@ describe("buildPairedChartConfig", () => {
 });
 
 describe("buildCumulativeChartConfig", () => {
-    test("overlays two curves on one shared y-axis with one legend", () => {
+    test("overlays two curves on one shared y-axis; built-in legend is off (replaced by renderCumulativeLegend)", () => {
         const config = buildCumulativeChartConfig(cumulativePayload());
         expect(config.type).toBe("line");
         expect(config.data.datasets).toHaveLength(2);
         expect(Object.keys(config.options.scales)).toEqual(["x", "y"]);
         expect(config.options.scales.y.beginAtZero).toBe(true);
-        expect(config.options.plugins.legend.display).toBe(true);
+        expect(config.options.plugins.legend.display).toBe(false);
     });
 
     test("shades the band between the curves (second fills to the first)", () => {
@@ -145,6 +149,109 @@ describe("buildDecompositionChartConfig", () => {
         expect(config.plugins.map((p) => p.id)).toContain("decompositionValueLabels");
         // The display strings the plugin prints ride along on the dataset, untouched by the builder.
         expect(config.data.datasets[0].valueLabels).toEqual(["−660 kg", "+90 kg"]);
+    });
+});
+
+describe("renderPairedLegend", () => {
+    function pairedPayloadWithNames() {
+        return {
+            ...pairedPayload(),
+            modelAName: "Streaming app",
+            modelBName: "Streaming app — edge caching",
+        };
+    }
+
+    function setupCanvas(id) {
+        const canvas = document.createElement("canvas");
+        canvas.id = id;
+        document.body.appendChild(canvas);
+        return canvas;
+    }
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("renders two rows, one per system stack", () => {
+        setupCanvas("testPairedChart");
+        renderPairedLegend(pairedPayloadWithNames(), "testPairedChart");
+        const container = document.getElementById("testPairedChart-legend");
+        expect(container).not.toBeNull();
+        expect(container.children).toHaveLength(2);
+    });
+
+    test("each row is labelled with the real system name", () => {
+        setupCanvas("testPairedChart");
+        renderPairedLegend(pairedPayloadWithNames(), "testPairedChart");
+        const rows = Array.from(document.getElementById("testPairedChart-legend").children);
+        expect(rows[0].textContent).toContain("Streaming app");
+        expect(rows[1].textContent).toContain("Streaming app — edge caching");
+    });
+
+    test("each row contains one color swatch per dataset in that stack (usage + fabrication)", () => {
+        setupCanvas("testPairedChart");
+        renderPairedLegend(pairedPayloadWithNames(), "testPairedChart");
+        const rows = Array.from(document.getElementById("testPairedChart-legend").children);
+        // Each row: name label + 2 items (usage, fabrication) = 3 children.
+        expect(rows[0].children).toHaveLength(3);
+        expect(rows[1].children).toHaveLength(3);
+    });
+
+    test("falls back to 'System A' / 'System B' when name fields are absent", () => {
+        setupCanvas("testPairedChart");
+        renderPairedLegend(pairedPayload(), "testPairedChart"); // no modelAName/modelBName
+        const rows = Array.from(document.getElementById("testPairedChart-legend").children);
+        expect(rows[0].textContent).toContain("System A");
+        expect(rows[1].textContent).toContain("System B");
+    });
+
+    test("is a no-op when the canvas does not exist", () => {
+        expect(() => renderPairedLegend(pairedPayloadWithNames(), "nonexistent")).not.toThrow();
+    });
+
+    test("destroyPairedLegend removes the legend element", () => {
+        setupCanvas("testPairedChart");
+        renderPairedLegend(pairedPayloadWithNames(), "testPairedChart");
+        expect(document.getElementById("testPairedChart-legend")).not.toBeNull();
+        destroyPairedLegend("testPairedChart");
+        expect(document.getElementById("testPairedChart-legend")).toBeNull();
+    });
+
+    test("destroyPairedLegend is a no-op when no legend exists", () => {
+        expect(() => destroyPairedLegend("nonexistent")).not.toThrow();
+    });
+});
+
+describe("renderCumulativeLegend", () => {
+    function setupCanvas(id) {
+        const canvas = document.createElement("canvas");
+        canvas.id = id;
+        document.body.appendChild(canvas);
+        return canvas;
+    }
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("renders one row per dataset (one per model)", () => {
+        setupCanvas("testCumulativeChart");
+        renderCumulativeLegend(cumulativePayload(), "testCumulativeChart");
+        const container = document.getElementById("testCumulativeChart-legend");
+        expect(container).not.toBeNull();
+        expect(container.children).toHaveLength(2);
+    });
+
+    test("each row contains the dataset label (model name)", () => {
+        setupCanvas("testCumulativeChart");
+        renderCumulativeLegend(cumulativePayload(), "testCumulativeChart");
+        const rows = Array.from(document.getElementById("testCumulativeChart-legend").children);
+        expect(rows[0].textContent).toContain("A");
+        expect(rows[1].textContent).toContain("B");
+    });
+
+    test("is a no-op when the canvas does not exist", () => {
+        expect(() => renderCumulativeLegend(cumulativePayload(), "nonexistent")).not.toThrow();
     });
 });
 
