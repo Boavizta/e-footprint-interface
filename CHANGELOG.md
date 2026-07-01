@@ -6,11 +6,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [V1.9.1]
 
-### Fixed
-- CI: replaced the stale `python-version: 3.10.12` pin in `.github/workflows/ci.yml` with a matrix over
-  3.12 and 3.13, matching the `python = "^3.12"` constraint declared in `pyproject.toml`. The workflow
-  now actually tests the Python versions the interface supports.
-
 ### Changed
 - Comparison view performance: opening the ⇄ Compare view now keeps the model builder in place behind
   it instead of replacing it, so returning to a model is instant — no page reload and no model
@@ -21,6 +16,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   warning. Returning to the same model resumes the panel exactly as you left it. Leaving to the *other*
   model still warns about unsaved edits — now anchored on the model you were editing — and continuing
   switches while cancelling keeps you on it.
+
+### Fixed
+- CI: replaced the stale `python-version: 3.10.12` pin in `.github/workflows/ci.yml` with a matrix over
+  3.12 and 3.13, matching the `python = "^3.12"` constraint declared in `pyproject.toml`. The workflow
+  now actually tests the Python versions the interface supports.
 
 ## [V1.9.0]
 
