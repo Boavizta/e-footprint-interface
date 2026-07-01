@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Comparison paired bar chart: the built-in legend (which interleaved usage and fabrication items across lines) is replaced by a custom HTML legend. It shows one row per system, each labelled with the real model name, left-aligned and never wrapping.
+- Single-model results bar chart: edge-device legend capsules are now hidden when the edge-modeling toggle is off. The state is read at render time, so no live update is needed while viewing results.
+
 ## [V1.9.1]
 
 ### Changed

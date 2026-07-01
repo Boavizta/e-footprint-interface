@@ -32,6 +32,8 @@
 
 ## Task 2 — Grouped comparison legend (Fix B)
 
+**Status:** Done.
+
 **Goal:** The comparison paired bar chart legend is replaced with a custom HTML legend that groups items into one row per system, using the real system names, left-aligned.
 
 **Files touched:**
