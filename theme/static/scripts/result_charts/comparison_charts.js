@@ -132,8 +132,10 @@ function buildCumulativeChartConfig(payload) {
                     },
                 },
             },
+            // The built-in legend is replaced by a custom HTML legend rendered via renderCumulativeLegend,
+            // matching the paired chart's per-system row style.
             plugins: {
-                legend: { display: true, position: "bottom", labels: { font: SHARED_FONT } },
+                legend: { display: false },
                 tooltip: FORMATTED_VALUE_TOOLTIP,
             },
         },
@@ -282,6 +284,44 @@ function destroyPairedLegend(canvasId) {
     if (el) el.remove();
 }
 
+/**
+ * Render a grouped HTML legend for the cumulative overlay chart below its canvas. One row per
+ * dataset (model A line, model B line), each with a color swatch and the model name label.
+ * @param {Object} payload - The cumulative chart payload (datasets carry label + borderColor).
+ * @param {string} canvasId - The id of the canvas the cumulative chart is drawn on.
+ */
+function renderCumulativeLegend(payload, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const legendId = `${canvasId}-legend`;
+    let container = document.getElementById(legendId);
+    if (!container) {
+        container = document.createElement("div");
+        container.id = legendId;
+        canvas.parentNode.insertBefore(container, canvas.nextSibling);
+    }
+    container.innerHTML = "";
+    container.style.cssText = "padding: 6px 0 2px; font-size: 12px; font-family: 'Inter', system-ui, sans-serif;";
+
+    for (const dataset of payload.datasets) {
+        const row = document.createElement("div");
+        row.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;";
+
+        const swatch = document.createElement("span");
+        // A short horizontal bar matches the line chart visual better than a square swatch.
+        swatch.style.cssText = `display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: ${dataset.borderColor}; flex-shrink: 0;`;
+
+        const label = document.createElement("span");
+        label.textContent = dataset.label;
+        label.style.cssText = "font-weight: 600; color: #374151; white-space: nowrap;";
+
+        row.appendChild(swatch);
+        row.appendChild(label);
+        container.appendChild(row);
+    }
+}
+
 const COMPARISON_CHART_KEYS = ["comparisonPairedChart", "comparisonCumulativeChart", "comparisonDecompositionChart"];
 
 function destroyComparisonChart(canvasId) {
@@ -307,7 +347,10 @@ function renderChart(canvasId, config) {
  */
 function destroyComparisonCharts() {
     COMPARISON_CHART_KEYS.forEach(destroyComparisonChart);
-    destroyPairedLegend("comparisonPairedChart");
+    ["comparisonPairedChart", "comparisonCumulativeChart"].forEach((id) => {
+        const el = document.getElementById(`${id}-legend`);
+        if (el) el.remove();
+    });
 }
 
 /**
@@ -328,7 +371,10 @@ function drawComparisonCharts() {
         renderChart("comparisonPairedChart", buildPairedChartConfig(paired));
         renderPairedLegend(paired, "comparisonPairedChart");
     }
-    if (cumulative) renderChart("comparisonCumulativeChart", buildCumulativeChartConfig(cumulative));
+    if (cumulative) {
+        renderChart("comparisonCumulativeChart", buildCumulativeChartConfig(cumulative));
+        renderCumulativeLegend(cumulative, "comparisonCumulativeChart");
+    }
     if (decomposition && decomposition.labels.length) {
         renderChart("comparisonDecompositionChart", buildDecompositionChartConfig(decomposition));
     }
@@ -342,6 +388,7 @@ module.exports = {
     buildDecompositionChartConfig,
     renderPairedLegend,
     destroyPairedLegend,
+    renderCumulativeLegend,
     drawComparisonCharts,
     destroyComparisonCharts,
 };

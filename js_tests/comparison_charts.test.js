@@ -10,6 +10,7 @@ const {
     buildDecompositionChartConfig,
     renderPairedLegend,
     destroyPairedLegend,
+    renderCumulativeLegend,
     destroyComparisonCharts,
 } = require("../theme/static/scripts/result_charts/comparison_charts.js");
 
@@ -94,13 +95,13 @@ describe("buildPairedChartConfig", () => {
 });
 
 describe("buildCumulativeChartConfig", () => {
-    test("overlays two curves on one shared y-axis with one legend", () => {
+    test("overlays two curves on one shared y-axis; built-in legend is off (replaced by renderCumulativeLegend)", () => {
         const config = buildCumulativeChartConfig(cumulativePayload());
         expect(config.type).toBe("line");
         expect(config.data.datasets).toHaveLength(2);
         expect(Object.keys(config.options.scales)).toEqual(["x", "y"]);
         expect(config.options.scales.y.beginAtZero).toBe(true);
-        expect(config.options.plugins.legend.display).toBe(true);
+        expect(config.options.plugins.legend.display).toBe(false);
     });
 
     test("shades the band between the curves (second fills to the first)", () => {
@@ -218,6 +219,39 @@ describe("renderPairedLegend", () => {
 
     test("destroyPairedLegend is a no-op when no legend exists", () => {
         expect(() => destroyPairedLegend("nonexistent")).not.toThrow();
+    });
+});
+
+describe("renderCumulativeLegend", () => {
+    function setupCanvas(id) {
+        const canvas = document.createElement("canvas");
+        canvas.id = id;
+        document.body.appendChild(canvas);
+        return canvas;
+    }
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("renders one row per dataset (one per model)", () => {
+        setupCanvas("testCumulativeChart");
+        renderCumulativeLegend(cumulativePayload(), "testCumulativeChart");
+        const container = document.getElementById("testCumulativeChart-legend");
+        expect(container).not.toBeNull();
+        expect(container.children).toHaveLength(2);
+    });
+
+    test("each row contains the dataset label (model name)", () => {
+        setupCanvas("testCumulativeChart");
+        renderCumulativeLegend(cumulativePayload(), "testCumulativeChart");
+        const rows = Array.from(document.getElementById("testCumulativeChart-legend").children);
+        expect(rows[0].textContent).toContain("A");
+        expect(rows[1].textContent).toContain("B");
+    });
+
+    test("is a no-op when the canvas does not exist", () => {
+        expect(() => renderCumulativeLegend(cumulativePayload(), "nonexistent")).not.toThrow();
     });
 });
 
