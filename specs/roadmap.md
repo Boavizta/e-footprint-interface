@@ -10,6 +10,10 @@ Path: `specs/features/recurrent-quantities-weekly-pattern-builder/`.
 
 Composite form field for `ExplainableRecurrentQuantities` with day profiles + week assignment. Spec is locked; needs a plan.
 
+### Timeseries builders — unify `builders/timeseries` with `time_builders` (planned, parked)
+
+The class-based `builders/timeseries` objects (form-input-driven, editable in the interface) currently cover only exponential growth and a constant weekly pattern, while the richer functional helpers in the library's `time_builders` module (linear growth, sinusoidal/daily fluctuation, calendar/frequency, from-list) are not available as editable objects. Unify them: expose the `time_builders` patterns as form-input objects (with a `form_inputs` attribute) so any usage series can be built and edited in the interface. Generalizes the recurrent-quantities weekly-pattern builder above. Origin: EcoScan feedback (`user_research/2026-05-19-ecoscan.md`); the library tutorial already covers timeseries discoverability in the meantime.
+
 ## Mid-term horizon
 
 ### Candidate refactor — converge creation-time linking paths
