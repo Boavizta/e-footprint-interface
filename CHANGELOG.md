@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [V1.9.2]
+
+### Added
+- specs/design folder enumerating all main usage journeys of the interface as html files.
+- Surface Documentation link in navbar, home hero and mobile burger.
+- interface: live /design catalogue route (real tokens + component partials). A contributor-facing, intentionally-unlinked page at /design that renders the design system live from the app itself — the complement to the static, version-controlled hub in specs/design/.
+- Compare view: render form-built timeseries parameter diffs. A form-built timeseries input now arrives from the library diffed at the form-parameter level: the changed parameters come as newline-joined "<label>: <value>" lines in the two value cells.
+
+### Fixed
+- side panel: drop to z-2 so toolbar dropdowns aren't trapped behind it.
+- intro-templates: reuse canonical default device/network/country objects to avoid duplicated objects.
+- Resolve {class:X} tokens in template picker descriptions.
+- model-builder: inline count edit no longer clobbers sibling weight inputs. Editing a usage-journey step weight or job weight inline on the canvas re-framed the change as a whole-parent edit and swapped the entire top-level card back via OOB outerHTML. A sibling count input being edited within the 1-2s round-trip was destroyed and refilled with the stale persisted value, losing the user's input. Now count input edition doesn’t swap the entire top-level card anymore.
+- model-builder: hide empty parentheses when display_unit is blank, in formula explanations.
+
 ## [V1.9.1]
 
 ### Changed
