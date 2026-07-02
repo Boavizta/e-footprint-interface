@@ -39,8 +39,13 @@ model name from stretching the table — header names truncate with a tooltip, b
         <tr>
             <td>{{ row.object_name }}</td>
             <td>{{ row.attribute|field_label }}</td>
-            <td>{{ row.value_a }}</td>
-            <td><strong>{{ row.value_b }}</strong></td>
+            {% comment %}
+            A form-built timeseries diff stacks one "<parameter>: <value>" line per changed form input
+            (e.g. net growth rate: 10 % per year) in each cell, newline-joined by the library — render
+            those breaks. Scalar / count values are single-line, so linebreaksbr is a no-op for them.
+            {% endcomment %}
+            <td>{{ row.value_a|linebreaksbr }}</td>
+            <td><strong>{{ row.value_b|linebreaksbr }}</strong></td>
         </tr>
         {% endfor %}
     </tbody>

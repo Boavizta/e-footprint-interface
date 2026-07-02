@@ -348,3 +348,34 @@ class TestAssumptionsDiff:
         row = view.diff_changed[0]
         assert row.value_a == "—"
         assert row.value_b == "2"
+
+
+class TestAssumptionsDiffTemplate:
+    """The compare template renders the shaped diff. A form-built timeseries diff arrives from the library
+    with its changed parameters stacked as newline-joined "<label>: <value>" lines (the service passes the
+    value cells through verbatim), so the template must turn those newlines into line breaks — while a
+    single-line scalar value must not gain a spurious break."""
+
+    @staticmethod
+    def _render(view):
+        from django.template.loader import render_to_string
+        return render_to_string("model_builder/compare/assumptions_diff.html", {"comparison": view})
+
+    def test_form_input_parameter_lines_render_stacked(self):
+        view = ComparisonService().build_from_comparison(build_comparison(changed=[
+            {"object_class": "UsagePattern", "object_name_a": "Web users", "object_name_b": "Web users",
+             "attribute": "hourly_usage_journey_starts",
+             "value_a": "initial volume: 100 per month\nnet growth rate: 10 % per year",
+             "value_b": "initial volume: 250 per month\nnet growth rate: 20 % per year"}]))
+        html = self._render(view)
+        assert "net growth rate: 10 % per year" in html
+        assert "net growth rate: 20 % per year" in html
+        assert "<br>" in html  # the newline between stacked parameters becomes a line break
+
+    def test_single_line_scalar_value_gains_no_line_break(self):
+        view = ComparisonService().build_from_comparison(build_comparison(changed=[
+            {"object_class": "Server", "object_name_a": "API", "object_name_b": "API",
+             "attribute": "power", "value_a": "300.0 watt", "value_b": "500.0 watt"}]))
+        html = self._render(view)
+        assert "300.0 watt" in html
+        assert "<br>" not in html
