@@ -104,14 +104,19 @@ def test_edge_computer_cpu_component_fixed_inputs_are_excluded_from_source_table
     )
     model_web = ModelWeb(default_system_repository)
     edge_computer = model_web.get_web_object_from_efootprint_id(edge_computer_id)
-    cpu_component_id = edge_computer.cpu_component.efootprint_id
+    cpu_component = edge_computer.cpu_component
+    cpu_component_id = cpu_component.efootprint_id
 
     source_table_rows = {
         (row.modeling_obj_container.efootprint_id, row.attr_name_in_mod_obj_container)
         for row in model_web.web_explainable_quantities_sources
     }
 
-    assert (edge_computer_id, "structure_carbon_footprint_fabrication") in source_table_rows
+    # The CPU component's per-unit fabrication carries a source but is a fixed spec, not a constructor
+    # input, so it is excluded from the editable source table — a non-trivial exclusion (the value is
+    # genuinely sourced, it is filtered out by not being an init/computed attribute, not by lacking a
+    # source).
+    assert cpu_component.modeling_obj.carbon_footprint_fabrication_per_unit.source is not None
     assert (cpu_component_id, "carbon_footprint_fabrication_per_unit") not in source_table_rows
 
 

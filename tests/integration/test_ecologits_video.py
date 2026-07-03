@@ -48,7 +48,7 @@ def _system_data_from_jobs(jobs: list) -> dict:
         hourly_usage_journey_starts=create_hourly_usage())
     system = System("Video system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     try:
-        return system_to_json(system, save_calculated_attributes=True)
+        return system_to_json(system, save_computed_state=True)
     finally:
         system.self_delete()
 
@@ -105,15 +105,15 @@ def test_video_system_round_trips_through_persistence():
     repository = InMemorySystemRepository(initial_data=_build_video_system_data())
     ModelWeb(repository).persist_to_cache()
 
-    # The persisted JSON must carry the Job's per-call calculated attributes, not just its
-    # inputs — otherwise a reload would silently recompute them and an emissions>0 check
-    # could not tell preservation from recomputation.
+    # Under the minimal serialization contract the persisted JSON carries the serialize-flagged
+    # footprint slots (the server's energy and fabrication footprints) plus the calculation graph, so
+    # an exact-version reload attaches them as trusted caches instead of recomputing. The Job's
+    # per-call intermediates are not flagged and recompute lazily on read.
     persisted = repository.get_system_data()
-    (job_data,) = persisted["EcoLogitsVideoGenExternalAPIJob"].values()
-    for calc_attr in ("generation_latency", "request_energy", "request_usage_gwp", "request_embodied_gwp"):
-        assert calc_attr in job_data, f"{calc_attr} not preserved in persisted Job JSON"
-        assert job_data[calc_attr]["value"] is not None
-        assert job_data[calc_attr]["unit"] is not None
+    (server_data,) = persisted["EcoLogitsVideoGenExternalAPIServer"].values()
+    for footprint_attr in ("energy_footprint", "instances_fabrication_footprint"):
+        assert footprint_attr in server_data, f"{footprint_attr} not preserved in persisted server JSON"
+        assert server_data[footprint_attr], f"{footprint_attr} serialized empty"
 
     reloaded = ModelWeb(repository)
     api_web = reloaded.external_apis[0]

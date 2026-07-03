@@ -29,7 +29,7 @@ def multiple_jobs_model_builder(model_builder_page: ModelBuilderPage) -> ModelBu
     uj = UsageJourney("Test UJ", uj_steps=[uj_step1, uj_step2])
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    system_data.update(system_to_json(uj, save_calculated_attributes=False))
+    system_data.update(system_to_json(uj, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 

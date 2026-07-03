@@ -55,7 +55,7 @@ def main() -> None:
 
     for template_id, build_system in BUILDERS.items():
         target = local_templates_by_id[template_id].json_path
-        system_to_json(build_system(), save_calculated_attributes=False, output_filepath=str(target))
+        system_to_json(build_system(), save_computed_state=False, output_filepath=str(target))
         print(f"Wrote {target}")
 
 

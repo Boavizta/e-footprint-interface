@@ -37,7 +37,7 @@ def test_import_system_serializes_orphan_fragment_sources_with_system_to_json(mi
         provider=SourceObject("mistralai"),
         model_name=SourceObject("open-mistral-7b"),
     )
-    external_api_data = system_to_json(external_api, save_calculated_attributes=False)
+    external_api_data = system_to_json(external_api, save_computed_state=False)
     external_api_id = next(iter(external_api_data["EcoLogitsGenAIExternalAPI"]))
 
     # Simulate an older/input payload where calculated EcoLogits sources are not in

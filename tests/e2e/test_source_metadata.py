@@ -32,7 +32,7 @@ def source_metadata_model_builder(minimal_system, model_builder_page: ModelBuild
     server.power.comment = EXISTING_SERVER_POWER_COMMENT
     server.power.confidence = "medium"
 
-    system_data = system_to_json(minimal_system, save_calculated_attributes=False)
+    system_data = system_to_json(minimal_system, save_computed_state=False)
     return load_system_dict_into_browser(model_builder_page, system_data)
 
 

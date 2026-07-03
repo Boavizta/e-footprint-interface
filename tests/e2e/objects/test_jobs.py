@@ -43,7 +43,7 @@ def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage):
     )
 
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
-    system_dict = system_to_json(system, save_calculated_attributes=False)
+    system_dict = system_to_json(system, save_computed_state=False)
 
     # Create orphaned server and service (not connected to system via jobs)
     storage = Storage.from_defaults("Test Storage")
@@ -51,7 +51,7 @@ def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage):
     service = VideoStreaming.from_defaults("Test Service", server=server)
 
     # Add orphaned objects to the system dict (service links server → storage, so one call covers all three)
-    add_only_update(system_dict, system_to_json(service, save_calculated_attributes=False))
+    add_only_update(system_dict, system_to_json(service, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_dict)
 
@@ -81,7 +81,7 @@ def model_with_two_steps_one_job(model_builder_page: ModelBuilderPage):
         hourly_usage_journey_starts=create_hourly_usage()
     )
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
-    system_dict = system_to_json(system, save_calculated_attributes=False)
+    system_dict = system_to_json(system, save_computed_state=False)
     return load_system_dict_into_browser(model_builder_page, system_dict)
 
 

@@ -33,7 +33,7 @@ def system_with_multiple_usage_patterns(minimal_system: System, model_builder_pa
     )
     minimal_system.usage_patterns.append(extra_usage_pattern)
 
-    system_dict = system_to_json(minimal_system, save_calculated_attributes=False)
+    system_dict = system_to_json(minimal_system, save_computed_state=False)
     return load_system_dict_into_browser(model_builder_page, system_dict)
 
 

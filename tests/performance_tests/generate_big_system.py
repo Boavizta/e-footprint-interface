@@ -180,9 +180,9 @@ def generate_big_system(
     system = System("system", usage_patterns=usage_patterns, edge_usage_patterns=edge_usage_patterns)
     logger.info(f"Finished generating system in {round((perf_counter() - start), 3)} seconds")
 
-    timed_system_to_json(system, save_calculated_attributes=False,
+    timed_system_to_json(system, save_computed_state=False,
                          output_filepath=os.path.join(root_dir, "big_system.json"))
-    timed_system_to_json(system, save_calculated_attributes=True,
+    timed_system_to_json(system, save_computed_state=True,
                          output_filepath=os.path.join(root_dir, "big_system_with_calc_attr.json"))
 
     return system

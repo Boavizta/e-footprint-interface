@@ -90,17 +90,12 @@ class ISystemRepository(ABC):
         return data
 
     @abstractmethod
-    def save_data(
-        self,
-        data: Dict[str, Any],
-        data_without_calculated_attributes: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def save_data(self, data: Dict[str, Any]) -> None:
         """Persist the system data.
 
         Args:
-            data: The system data dictionary to save.
-            data_without_calculated_attributes: Optional version without calculated attributes,
-                used for slower persistence layers (e.g., Postgres fallback cache).
+            data: The single canonical system data dictionary to save (inputs plus the serialize-flagged
+                computed slots and calculation graph). Every cache stores this one payload.
         """
         pass
 

@@ -1,14 +1,15 @@
-"""Service for progressively importing system data with size validation.
+"""Service for importing system data with size validation.
 
-This service handles the import of e-footprint system data from JSON,
-computing calculated attributes progressively and checking size limits
-to fail fast if a model exceeds the maximum allowed size.
+This service handles the import of e-footprint system data from JSON: it loads the model, computes it
+(the connected graph plus any orphan objects), serializes it under the minimal contract, and checks
+the resulting payload against the size limit.
 """
 from time import perf_counter
 from typing import Dict, Any
 
 from efootprint.api_utils.json_to_system import json_to_system
-from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.api_utils.system_to_json import (
+    CALCULATION_GRAPH_KEY, calculation_graph_section, system_to_json)
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
@@ -35,13 +36,13 @@ class ProgressiveImportService:
         self.max_payload_size_mb = max_payload_size_mb
 
     def import_system(self, system_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Import system data with progressive size validation.
+        """Import system data, compute it, and return the canonical (with-computed-state) payload.
 
-        This method:
-        1. Parses the JSON into efootprint objects without computing attributes
-        2. Monkey-patches each object to track size after computation
-        3. Triggers computations, failing fast if size limit exceeded
-        4. Returns the fully computed system_data dict
+        Loads without computing (the pull engine defers all computation), then pulls the whole model —
+        the connected graph via the system, plus any orphan objects being imported so their computed
+        sources are attached and hoisted — serializes with the computed state, and checks the final
+        payload against the size budget. The minimal serialization contract keeps that payload small,
+        so one size check on the final payload replaces the former per-object progressive tracking.
 
         Args:
             system_data: The raw system data dictionary (already upgraded).
@@ -50,21 +51,14 @@ class ProgressiveImportService:
             Computed system data.
 
         Raises:
-            PayloadSizeLimitExceeded: If cumulative JSON size exceeds max_payload_size_mb.
+            PayloadSizeLimitExceeded: If the final payload exceeds max_payload_size_mb.
         """
         response_objs, flat_efootprint_objs_dict, upgraded_system_data = json_to_system(
-            system_data, launch_system_computations=False,
-            efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
-
+            system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         upgraded_system_data["efootprint_version"] = efootprint_version
-        size_tracker = {"json_size": 0}
-
-        self._patch_objects_for_progressive_computation(flat_efootprint_objs_dict, size_tracker)
 
         system = next(iter(response_objs["System"].values()))
         system.after_init()
-
-        self._remove_progressive_computation_patch(flat_efootprint_objs_dict)
 
         start = perf_counter()
         final_system_data = self._serialize_system_and_orphans(system, flat_efootprint_objs_dict)
@@ -75,85 +69,38 @@ class ProgressiveImportService:
 
         return final_system_data
 
-    def _patch_objects_for_progressive_computation(
-            self, flat_efootprint_objs_dict: Dict[str, Any], size_tracker: Dict[str, float]) -> None:
-        """Patch all objects to track and validate size after computation.
-
-        Args:
-            flat_efootprint_objs_dict: Dictionary of efootprint objects by ID.
-            size_tracker: Mutable dict tracking cumulative JSON size.
-        """
-        for efootprint_object in flat_efootprint_objs_dict.values():
-            # Use object.__setattr__ to bypass ModelingObject's custom __setattr__ which triggers computations
-            object.__setattr__(
-                efootprint_object, "original_compute_calculated_attributes",
-                efootprint_object.compute_calculated_attributes)
-
-            def compute_and_store_calculated_attributes(obj=efootprint_object):
-                obj.original_compute_calculated_attributes()
-                self._compute_json_and_track_size(obj, size_tracker)
-
-            object.__setattr__(
-                efootprint_object, "compute_calculated_attributes", compute_and_store_calculated_attributes)
-
-    def _compute_json_and_track_size(
-            self, efootprint_object: Any, size_tracker: Dict[str, float]) -> None:
-        """Serialize a computed object for progressive size checks.
-
-        Args:
-            efootprint_object: The efootprint object to serialize.
-            size_tracker: Mutable dict tracking cumulative JSON size.
-
-        Raises:
-            PayloadSizeLimitExceeded: If cumulative size exceeds limit.
-        """
-        class_name = efootprint_object.class_as_simple_str
-        # Remove patched method from instance __dict__ before to_json, so it falls back to class method
-        del efootprint_object.__dict__["compute_calculated_attributes"]
-        del efootprint_object.__dict__["original_compute_calculated_attributes"]
-
-        json_data = efootprint_object.to_json(save_calculated_attributes=True)
-        json_data_size = compute_json_size(json_data).size_mb
-        size_tracker["json_size"] += json_data_size
-
-        logger.debug(
-            f"Computed and serialized calculated attributes for {class_name} (ID: {efootprint_object.id}), "
-            f"increasing JSON size by {round(json_data_size, 2)}. "
-            f"Total size is now {round(size_tracker['json_size'], 1)} MB")
-
-        self._validate_payload_size(size_mb=size_tracker["json_size"])
-
-        object.__setattr__(efootprint_object, "saved_to_json", True)
-
-    def _remove_progressive_computation_patch(self, flat_efootprint_objs_dict: Dict[str, Any]) -> None:
-        """Remove import-only instance attributes before canonical serialization."""
-        for efootprint_object in flat_efootprint_objs_dict.values():
-            efootprint_object.__dict__.pop("compute_calculated_attributes", None)
-            efootprint_object.__dict__.pop("original_compute_calculated_attributes", None)
-            efootprint_object.__dict__.pop("saved_to_json", None)
-
     def _serialize_system_and_orphans(self, system: Any, flat_efootprint_objs_dict: Dict[str, Any]) -> Dict[str, Any]:
         """Serialize the connected system, then preserve objects outside that graph.
 
-        `system_to_json` owns both object serialization and top-level `Sources`
-        construction. Keeping final output assembled from `system_to_json`
-        fragments avoids duplicating source-hoisting rules here.
+        `system_to_json` owns both object serialization and top-level `Sources` construction. Keeping
+        final output assembled from `system_to_json` fragments avoids duplicating source-hoisting rules
+        here. The per-fragment calculation-graph sections are dropped (they are addressed relative to
+        their own fragment) and one graph over every serialized object is rebuilt at the end, so an
+        exact-version reload trusts the stored values.
         """
-        final_system_data = system_to_json(system, save_calculated_attributes=True)
+        final_system_data = system_to_json(system, save_computed_state=True)
+        final_system_data.pop(CALCULATION_GRAPH_KEY, None)
         serialized_object_ids = self._object_ids_in_system_data(final_system_data)
 
         for efootprint_object in flat_efootprint_objs_dict.values():
             if efootprint_object.id in serialized_object_ids:
                 continue
-            orphan_data = system_to_json(efootprint_object, save_calculated_attributes=True)
+            # Orphans are not reached by the system-wide pull, so compute them individually here to
+            # attach their computed sources before serialization hoists them into the Sources block.
+            efootprint_object.after_init()
+            orphan_data = system_to_json(efootprint_object, save_computed_state=True)
+            orphan_data.pop(CALCULATION_GRAPH_KEY, None)
             self._merge_system_json_fragment(final_system_data, orphan_data)
             serialized_object_ids.update(self._object_ids_in_system_data(orphan_data))
 
+        final_system_data[CALCULATION_GRAPH_KEY] = calculation_graph_section(
+            list(flat_efootprint_objs_dict.values()))
         return final_system_data
 
     @staticmethod
     def _object_ids_in_system_data(system_data: Dict[str, Any]) -> set[str]:
-        metadata_keys = {"efootprint_version", "efootprint_interface_version", "Sources", "interface_config"}
+        metadata_keys = {"efootprint_version", "efootprint_interface_version", "Sources", "interface_config",
+                         CALCULATION_GRAPH_KEY}
         return {
             object_id
             for class_key, class_dict in system_data.items()

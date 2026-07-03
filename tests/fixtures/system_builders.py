@@ -73,7 +73,7 @@ def minimal_system():
 @pytest.fixture
 def minimal_system_data(minimal_system) -> dict[str, Any]:
     """System data dict (JSON-serializable) from minimal system."""
-    return system_to_json(minimal_system, save_calculated_attributes=False)
+    return system_to_json(minimal_system, save_computed_state=False)
 
 
 @pytest.fixture
@@ -121,7 +121,7 @@ def build_seeded_journey_fragment() -> dict:
     """
     uj_step = UsageJourneyStep.from_defaults(SEEDED_JOURNEY_STEP_NAME, jobs=[])
     uj = UsageJourney(SEEDED_JOURNEY_NAME, uj_steps=[uj_step])
-    return system_to_json(uj, save_calculated_attributes=False)
+    return system_to_json(uj, save_computed_state=False)
 
 
 @pytest.fixture

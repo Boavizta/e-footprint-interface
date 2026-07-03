@@ -247,7 +247,7 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                     current_value.comment = new_value.comment
 
     if changes_list:
-        ModelingUpdate(changes_list, compute_previous_system_footprints=False)
+        ModelingUpdate(changes_list)
 
     if update_system_data:
         model_web.persist_to_cache()

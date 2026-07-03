@@ -26,7 +26,7 @@ def raise_view_exceptions(monkeypatch):
 
 def _seed_active_slot(client, system) -> None:
     """Persist a built System into the active slot of the client's session (with-calc, recomputed)."""
-    raw = system_to_json(system, save_calculated_attributes=False)
+    raw = system_to_json(system, save_computed_state=False)
     import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     with_calc = import_service.import_system(SessionSystemRepository.upgrade_system_data(raw))
     session = client.session

@@ -83,7 +83,7 @@ def test_scenario_constructor_round_trips_to_committed_json(tpl):
     original_use_name_as_id = ModelingObject._use_name_as_id
     ModelingObject._use_name_as_id = True
     try:
-        freshly_built = system_to_json(build_system(), save_calculated_attributes=False)
+        freshly_built = system_to_json(build_system(), save_computed_state=False)
     finally:
         ModelingObject._use_name_as_id = original_use_name_as_id
 

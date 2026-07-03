@@ -36,8 +36,8 @@ def edge_system_in_browser(model_builder_page: ModelBuilderPage):
     journey2 = EdgeUsageJourney.from_defaults(name="Edge Journey 2", edge_functions=[edge_function2])
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    system_data.update(system_to_json(journey1, save_calculated_attributes=False))
-    add_only_update(system_data, system_to_json(journey2, save_calculated_attributes=False))
+    system_data.update(system_to_json(journey1, save_computed_state=False))
+    add_only_update(system_data, system_to_json(journey2, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 
@@ -60,8 +60,8 @@ def edge_system_with_mirrored_edge_functions(model_builder_page: ModelBuilderPag
     journey2 = EdgeUsageJourney.from_defaults(name="Edge Journey 2", edge_functions=[edge_function])
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    system_data.update(system_to_json(journey1, save_calculated_attributes=False))
-    add_only_update(system_data, system_to_json(journey2, save_calculated_attributes=False))
+    system_data.update(system_to_json(journey1, save_computed_state=False))
+    add_only_update(system_data, system_to_json(journey2, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 

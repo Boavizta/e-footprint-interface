@@ -81,7 +81,7 @@ def test_get_template_system_data_resolves_a_loadable_system(template_id):
     system_data = get_template_system_data(template_id)
     assert "System" in system_data
     # Exercise the resolved JSON through the library loader so a broken path/payload fails here.
-    class_obj_dict, _, _ = json_to_system(system_data, launch_system_computations=False)
+    class_obj_dict, _, _ = json_to_system(system_data)
     assert class_obj_dict["System"]
 
 

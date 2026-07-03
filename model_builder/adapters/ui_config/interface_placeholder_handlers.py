@@ -12,6 +12,7 @@ import inspect
 from typing import Callable
 
 from django.utils.html import escape
+from efootprint.abstract_modeling_classes.reactive_core import computed_slots
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG, FIELD_UI_CONFIG
@@ -52,7 +53,7 @@ def _check_param(class_name: str, attr: str) -> None:
 
 def _check_calc(class_name: str, attr: str) -> None:
     klass = _resolve_class(class_name)
-    if attr not in klass.calculated_attributes:
+    if attr not in computed_slots(klass):
         raise ValueError(f"Unknown calculated attribute {attr!r} for class {class_name!r}")
 
 
