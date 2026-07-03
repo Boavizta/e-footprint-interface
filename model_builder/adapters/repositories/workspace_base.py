@@ -115,11 +115,12 @@ def system_id_of(system_data: Optional[Dict[str, Any]]) -> Optional[str]:
 def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     """Re-id only the System object via the library helper, preserving every object id.
 
-    Deserialize (computing the system) → ``assign_fresh_system_id`` → reserialize *with* calculated
-    attributes, so the stored blob is a true with-calc payload: the slot's recorded size stays the
-    real with-calc weight (the shared budget would otherwise under-count) and re-opening it needn't
-    recompute from scratch. Routing through the library keeps it the source of truth for id semantics
-    and regenerates any reference to the system id from the live object graph.
+    Deserialize (no compute on load) → compute the system → ``assign_fresh_system_id`` → reserialize
+    with the computed state, so the stored blob is a true with-computed-state payload: the slot's
+    recorded size stays the real weight (the shared budget would otherwise under-count) and re-opening
+    it attaches the values as trusted caches instead of recomputing. Routing through the library keeps
+    it the source of truth for id semantics and regenerates any reference to the system id from the
+    live object graph.
 
     The interface-only metadata (``interface_config`` / ``efootprint_interface_version``) isn't part
     of the efootprint object graph, so ``system_to_json`` drops it — carry it across explicitly so a
@@ -132,10 +133,11 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
     response_objs, _flat, _sd = json_to_system(
-        system_data, launch_system_computations=True, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+        system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     system = next(iter(response_objs["System"].values()))
+    system.after_init()
     assign_fresh_system_id(system)
-    reserialized = system_to_json(system, save_calculated_attributes=True)
+    reserialized = system_to_json(system, save_computed_state=True)
     for metadata_key in ("interface_config", "efootprint_interface_version"):
         if metadata_key in system_data:
             reserialized[metadata_key] = system_data[metadata_key]

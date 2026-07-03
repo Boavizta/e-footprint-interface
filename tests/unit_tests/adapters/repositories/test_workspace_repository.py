@@ -196,7 +196,7 @@ class TestDistinctSystemIdInvariant:
         def object_ids(data):
             ids = set()
             for cls, objs in data.items():
-                if isinstance(objs, dict) and cls not in ("System", "Sources"):
+                if isinstance(objs, dict) and cls not in ("System", "Sources", "calculation_graph", "interface_config"):
                     ids |= set(objs.keys())
             return ids
 
@@ -219,32 +219,33 @@ class TestDistinctSystemIdInvariant:
     def test_reminted_slot_keeps_calculated_attributes(self, minimal_system):
         """A collision re-id must not silently drop calculated attributes from the stored blob.
 
-        The re-id round-trips through the library; if it reserialized without calc, the slot's stored
-        payload (and so its recorded weight against the shared budget) would shrink to the without-calc
-        size. Feed ``add_slot`` a real with-calc document that collides with slot 0's id and assert the
-        stored payload is genuinely with-calc — heavier than the without-calc serialization of the same
-        system, and as heavy as a fresh with-calc serialization.
+        The re-id round-trips through the library; if it reserialized without the computed state, the
+        slot's stored payload (and so its recorded weight against the shared budget) would shrink to the
+        inputs-only size. Feed ``add_slot`` a real with-computed-state document that collides with slot
+        0's id and assert the stored payload still carries the computed state: the calculation graph and
+        the System's serialize-flagged total footprint, neither of which the inputs-only twin has.
         """
-        from efootprint.api_utils.system_to_json import system_to_json
-        from e_footprint_interface.json_payload_utils import compute_json_size
+        from efootprint.api_utils.system_to_json import system_to_json, CALCULATION_GRAPH_KEY
         from model_builder.adapters.repositories import InMemoryWorkspaceRepository
 
-        with_calc = system_to_json(minimal_system, save_calculated_attributes=True)
-        without_calc = system_to_json(minimal_system, save_calculated_attributes=False)
-        with_calc_bytes = compute_json_size(with_calc).size_bytes
-        without_calc_bytes = compute_json_size(without_calc).size_bytes
-        assert with_calc_bytes > without_calc_bytes  # the fixture has calc attributes worth preserving
+        with_calc = system_to_json(minimal_system, save_computed_state=True)
+        without_calc = system_to_json(minimal_system, save_computed_state=False)
+        # Precondition: the computed state is genuinely present in one and absent in the other.
+        assert CALCULATION_GRAPH_KEY in with_calc and CALCULATION_GRAPH_KEY not in without_calc
 
-        # Slot 0 holds the without-calc twin, so the with-calc add collides on system id and is re-minted.
+        # Slot 0 holds the inputs-only twin, so the with-computed-state add collides on system id and is
+        # re-minted.
         ws = InMemoryWorkspaceRepository(initial_data=without_calc)
         slot1 = ws.add_slot(with_calc)
 
         stored = ws.repository_for(slot1).get_system_data()
         assert _system_id_from(stored) != _system_id_from(without_calc)  # re-minted
-        # The stored payload is genuinely with-calc, not the without-calc twin; the slot's recorded
-        # weight against the shared budget is therefore the real with-calc size (set by save_data).
-        assert compute_json_size(stored).size_bytes > without_calc_bytes
-        assert compute_json_size(stored).size_bytes == with_calc_bytes
+        # The stored payload is genuinely with-computed-state: the re-id preserved the calculation graph
+        # and the System's serialize-flagged total footprint (an id-format-independent check, unlike a
+        # byte-size comparison, which the fresh id length would perturb).
+        assert CALCULATION_GRAPH_KEY in stored
+        (stored_system,) = stored["System"].values()
+        assert "total_footprint" in stored_system
 
 
 # --------------------------------------------------------------------------- #

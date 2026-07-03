@@ -57,7 +57,7 @@ def _system_data_with_recurrent_server_need(minimal_system_data: dict) -> dict:
             Quantity(np.array([1] * 168, dtype=np.float32), u.occurrence)),
         jobs=[rsn_job],
     )
-    fragment = system_to_json(server_need, save_calculated_attributes=False)
+    fragment = system_to_json(server_need, save_computed_state=False)
     system_data = deepcopy(minimal_system_data)
     for class_key, objs in fragment.items():
         if isinstance(objs, dict):

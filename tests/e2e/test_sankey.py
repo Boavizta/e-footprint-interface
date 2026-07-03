@@ -44,7 +44,7 @@ def sankey_system(model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
         "Test UP", usage_journey=uj, devices=[device], network=network, country=country,
         hourly_usage_journey_starts=create_hourly_usage())
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
-    system_dict = system_to_json(system, save_calculated_attributes=False)
+    system_dict = system_to_json(system, save_computed_state=False)
     return load_system_dict_into_browser(model_builder_page, system_dict)
 
 

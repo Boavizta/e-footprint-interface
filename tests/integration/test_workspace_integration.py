@@ -17,7 +17,7 @@ from model_builder.domain.services.template_catalog_service import INTRO_TEMPLAT
 def _object_ids(system_data: dict) -> set:
     ids = set()
     for cls, objs in system_data.items():
-        if isinstance(objs, dict) and cls not in ("System", "Sources"):
+        if isinstance(objs, dict) and cls not in ("System", "Sources", "calculation_graph", "interface_config"):
             ids |= set(objs.keys())
     return ids
 

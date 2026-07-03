@@ -197,5 +197,5 @@ def raise_view_exceptions(monkeypatch):
 def test_results_endpoint_smoke(client, builder, hit):
     system = builder()
     SessionSystemRepository(client.session).save_data(
-        system_to_json(system, save_calculated_attributes=False))
+        system_to_json(system, save_computed_state=False))
     assert hit(client).status_code == 200

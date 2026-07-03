@@ -72,26 +72,18 @@ class InMemorySystemRepository(ISystemRepository):
     def interface_config(self, value: dict) -> None:
         self._interface_config = value
 
-    def save_data(
-        self,
-        data: Dict[str, Any],
-        data_without_calculated_attributes: Optional[Dict[str, Any]] = None
-    ) -> None:
-        """Store the system data in memory.
+    def save_data(self, data: Dict[str, Any]) -> None:
+        """Store the single canonical system data payload in memory.
 
         Args:
             data: The system data dictionary to save.
-            data_without_calculated_attributes: Optional version without calculated attributes.
-                Ignored for the in-memory repository.
 
         Raises:
             PayloadSizeLimitExceeded: If max_payload_size_mb is set and data exceeds the limit.
         """
         if self._interface_config is not None:
-            for payload in (data, data_without_calculated_attributes):
-                if payload is not None:
-                    payload["interface_config"] = deepcopy(self._interface_config)
-                    payload["efootprint_interface_version"] = interface_version
+            data["interface_config"] = deepcopy(self._interface_config)
+            data["efootprint_interface_version"] = interface_version
 
         if self._max_payload_size_mb is not None:
             size_result = compute_json_size(data)

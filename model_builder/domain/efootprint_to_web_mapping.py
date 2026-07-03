@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Type
 
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.all_classes_in_order import CANONICAL_COMPUTATION_ORDER
+from efootprint.all_classes_in_order import CANONICAL_CLASSES
 
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 from model_builder.domain.entities.web_builders.hardware.edge.edge_appliance_component import EdgeApplianceComponentWeb
@@ -100,7 +100,7 @@ def get_corresponding_web_class(efootprint_class: Type[ModelingObject]) -> Type[
 
     # Find corresponding canonical class
     corresponding_canonical_class = None
-    for canonical_class in CANONICAL_COMPUTATION_ORDER:
+    for canonical_class in CANONICAL_CLASSES:
         if issubclass(efootprint_class, canonical_class):
             corresponding_canonical_class = canonical_class
             break

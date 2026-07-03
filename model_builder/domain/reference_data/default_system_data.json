@@ -1,25 +1,11 @@
 {
-    "efootprint_version": "22.3.1",
-    "Sources": {
-        "hypothesis": {
-            "id": "hypothesis",
-            "name": "e-footprint hypothesis",
-            "link": null
-        }
-    },
+    "efootprint_version": "23.0.0",
     "System": {
         "uuid-system-1": {
             "name": "My system",
             "id": "uuid-system-1",
             "usage_patterns": [],
-            "edge_usage_patterns": [],
-            "total_footprint": {
-                "value": null,
-                "label": "no value",
-                "direct_ancestors_with_id": [],
-                "direct_children_with_id": [],
-                "explain_nested_tuples": []
-            }
+            "edge_usage_patterns": []
         }
     }
 }

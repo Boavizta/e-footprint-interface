@@ -162,7 +162,7 @@ def minimal_complete_model_builder(minimal_system, model_builder_page) -> ModelB
     Creates: storage -> server -> job -> uj_step -> uj -> usage_pattern -> system
     This is useful when you need a valid system but don't care about specific objects.
     """
-    minimal_system_dict = system_to_json(minimal_system, save_calculated_attributes=False)
+    minimal_system_dict = system_to_json(minimal_system, save_computed_state=False)
     return load_system_dict_into_browser(model_builder_page, minimal_system_dict)
 
 

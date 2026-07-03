@@ -21,8 +21,8 @@ def edge_group_system_in_browser(model_builder_page: ModelBuilderPage):
     group = EdgeDeviceGroup("Rack A")
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    add_only_update(system_data, system_to_json(device, save_calculated_attributes=False))
-    add_only_update(system_data, system_to_json(group, save_calculated_attributes=False))
+    add_only_update(system_data, system_to_json(device, save_computed_state=False))
+    add_only_update(system_data, system_to_json(group, save_computed_state=False))
     load_system_dict_into_browser(model_builder_page, system_data)
 
     return {
@@ -41,7 +41,7 @@ def group_edit_system_in_browser(model_builder_page: ModelBuilderPage):
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
     for obj in (device, building, floor, annex):
-        add_only_update(system_data, system_to_json(obj, save_calculated_attributes=False))
+        add_only_update(system_data, system_to_json(obj, save_computed_state=False))
     load_system_dict_into_browser(model_builder_page, system_data)
 
     return {
@@ -61,7 +61,7 @@ def grouped_device_system_in_browser(model_builder_page: ModelBuilderPage):
     )
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    add_only_update(system_data, system_to_json(rack, save_calculated_attributes=False))
+    add_only_update(system_data, system_to_json(rack, save_computed_state=False))
     load_system_dict_into_browser(model_builder_page, system_data)
 
     return {
@@ -82,7 +82,7 @@ def nested_group_with_device_in_browser(model_builder_page: ModelBuilderPage):
     )
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    add_only_update(system_data, system_to_json(outer, save_calculated_attributes=False))
+    add_only_update(system_data, system_to_json(outer, save_computed_state=False))
     load_system_dict_into_browser(model_builder_page, system_data)
 
     return {

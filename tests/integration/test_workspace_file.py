@@ -36,7 +36,7 @@ def _seed_active_slot(client, system, interface_config: dict = None) -> None:
     An optional ``interface_config`` (UI-only state, e.g. Sankey settings) is attached to the slot so
     tests can assert it survives an export/import round-trip.
     """
-    raw = system_to_json(system, save_calculated_attributes=False)
+    raw = system_to_json(system, save_computed_state=False)
     import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     with_calc = import_service.import_system(SessionSystemRepository.upgrade_system_data(raw))
     session = client.session
@@ -51,7 +51,7 @@ def _object_ids(system_data: dict) -> set:
     return {
         object_id
         for cls, objs in system_data.items()
-        if isinstance(objs, dict) and cls not in ("System", "Sources")
+        if isinstance(objs, dict) and cls not in ("System", "Sources", "calculation_graph", "interface_config")
         for object_id in objs
     }
 

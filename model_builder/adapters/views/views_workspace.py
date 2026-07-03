@@ -152,7 +152,7 @@ def _system_data_for_add(request, workspace):
 
     active_model = ModelWeb(workspace.active_repository())
     duplicated = duplicate_system(active_model.system.modeling_obj)
-    system_data = system_to_json(duplicated, save_calculated_attributes=False)
+    system_data = system_to_json(duplicated, save_computed_state=False)
     system_block = system_data["System"][duplicated.id]
     system_block["name"] = f"Copy of {active_model.system.name}"
     return system_data

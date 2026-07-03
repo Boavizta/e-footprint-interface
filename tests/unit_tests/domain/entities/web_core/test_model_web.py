@@ -196,7 +196,7 @@ class TestGetEfootprintObjectsFromEfootprintType:
             network=Network.from_defaults("Network"), country=Countries.FRANCE(),
             hourly_usage_journey_starts=create_hourly_usage())
         system = System("System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
-        repository = InMemorySystemRepository(initial_data=system_to_json(system, save_calculated_attributes=False))
+        repository = InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False))
         return ModelWeb(repository)
 
     def test_existing_country_shadows_same_named_catalog_default(self):

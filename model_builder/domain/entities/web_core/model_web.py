@@ -5,8 +5,10 @@ from efootprint.abstract_modeling_classes.explainable_object_base_class import E
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
+from efootprint.abstract_modeling_classes.reactive_core import computed_slots
 from efootprint.abstract_modeling_classes.source_objects import Sources
 from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.system_to_json import CALCULATION_GRAPH_KEY, calculation_graph_section
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
@@ -38,6 +40,20 @@ DEFAULT_SOURCES_CLASS_MAPPING = {
 }
 
 
+def _materialized_explainable_attributes(efootprint_object, target_class):
+    """Map attr name -> ``target_class`` instance for the object: inputs (in ``__dict__``) plus the
+    materialized values of its computed slots (peeked, never pulled). Computed values live in the
+    reactive slots now, not the instance dict, so scanning ``__dict__`` alone would miss a computed
+    value that carries a source (e.g. an edge device's fabrication footprint) — which the source table
+    must show and persistence must hoist into the shared ``Sources`` block."""
+    attributes = dict(get_instance_attributes(efootprint_object, target_class))
+    for attr_name, descriptor in computed_slots(efootprint_object.efootprint_class).items():
+        peeked = descriptor.peek(efootprint_object)
+        if isinstance(peeked, target_class):
+            attributes[attr_name] = peeked
+    return attributes
+
+
 class ModelWeb:
     def __init__(self, repository: ISystemRepository, system_data: dict = None):
         """Initialize ModelWeb with a system repository.
@@ -58,8 +74,7 @@ class ModelWeb:
             interface_upgraded_system_data = self.repository.upgrade_system_data(raw_system_data)
             start = perf_counter()
             self.response_objs, self.flat_efootprint_objs_dict, self.system_data = json_to_system(
-                interface_upgraded_system_data, launch_system_computations=True,
-                efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+                interface_upgraded_system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
             self.creation_constraints = self._build_creation_constraints()
@@ -81,10 +96,13 @@ class ModelWeb:
             )
         raise AttributeError(f"’ModelWeb’ object has no attribute ‘{name}’")
 
-    def to_json(self, save_calculated_attributes=True):
+    def to_json(self, save_computed_state=True):
         """
         Serializes the current system data to JSON format.
-        :param save_calculated_attributes: If True, calculated attributes will be included in the serialization.
+        :param save_computed_state: If True, the serialize-flagged computed slots (footprint totals,
+            per-source footprints, impact-repartition matrix, breakdown summaries) and the calculation
+            graph are persisted so an exact-version reload attaches them as trusted caches and computes
+            nothing. If False, only inputs are written and everything recomputes on read.
         :return: JSON representation of the system data.
         """
         sources_by_id = {}
@@ -94,33 +112,42 @@ class ModelWeb:
             if obj_type not in modeling_blocks:
                 modeling_blocks[obj_type] = {}
             modeling_blocks[obj_type][efootprint_obj.id] = efootprint_obj.to_json(
-                save_calculated_attributes=save_calculated_attributes)
-            for attr_val in efootprint_obj.__dict__.values():
-                if isinstance(attr_val, ExplainableObject) and attr_val.source is not None:
+                save_computed_state=save_computed_state)
+            for attr_val in _materialized_explainable_attributes(efootprint_obj, ExplainableObject).values():
+                if attr_val.source is not None:
                     sources_by_id.setdefault(attr_val.source.id, attr_val.source)
-                elif isinstance(attr_val, ExplainableObjectDict):
-                    for elt in attr_val.values():
-                        if isinstance(elt, ExplainableObject) and elt.source is not None:
-                            sources_by_id.setdefault(elt.source.id, elt.source)
+            for attr_dict in get_instance_attributes(efootprint_obj, ExplainableObjectDict).values():
+                for elt in attr_dict.values():
+                    if isinstance(elt, ExplainableObject) and elt.source is not None:
+                        sources_by_id.setdefault(elt.source.id, elt.source)
 
         output_json = {"efootprint_version": efootprint_version}
         if sources_by_id:
             output_json["Sources"] = {sid: src.to_json() for sid, src in sorted(sources_by_id.items())}
         output_json.update(modeling_blocks)
 
+        if save_computed_state:
+            # The values-free calculation graph makes an exact-version reload attach the stored slot
+            # values as trusted caches (json_to_system only trusts a file that carries it), so the
+            # session reopens without recomputing.
+            output_json[CALCULATION_GRAPH_KEY] = calculation_graph_section(
+                list(self.flat_efootprint_objs_dict.values()))
+
         return output_json
 
     def persist_to_cache(self):
-        """Serialize current system state and persist it to the repository."""
+        """Serialize current system state and persist it to the repository.
+
+        The minimal serialization contract makes one canonical payload cheap enough to store as-is in
+        every cache: it carries only inputs, the serialize-flagged computed slots and the calculation
+        graph, so there is a single stored copy (no separate without-computed-state variant) and an
+        exact-version reload attaches the stored values as trusted caches without recomputing.
+        """
         start = perf_counter()
-        data_with_calculated_attributes = self.to_json(save_calculated_attributes=True)
-        data_without_calculated_attributes = self.to_json(save_calculated_attributes=False)
+        data = self.to_json(save_computed_state=True)
         elapsed_ms = (perf_counter() - start) * 1000
         logger.info(f"Serialized system data in {round(elapsed_ms, 1)} ms.")
-        self.repository.save_data(
-            data_with_calculated_attributes,
-            data_without_calculated_attributes=data_without_calculated_attributes
-        )
+        self.repository.save_data(data)
 
     def _build_creation_constraints(self) -> dict:
         """Snapshot of per-class creation gates plus __results__.
@@ -241,7 +268,13 @@ class ModelWeb:
         for efootprint_object in self.flat_efootprint_objs_dict.values():
             init_param_names = get_init_signature_params(efootprint_object.efootprint_class).keys()
             calculated_attribute_names = getattr(efootprint_object, "calculated_attributes", [])
-            explainable_quantities = get_instance_attributes(efootprint_object, ExplainableQuantity)
+            # Inputs live in __dict__; computed values live in reactive slots and are pulled here (this
+            # is the source-table export, whose intent is to materialize every sourced value).
+            explainable_quantities = dict(get_instance_attributes(efootprint_object, ExplainableQuantity))
+            for attr_name in calculated_attribute_names:
+                value = getattr(efootprint_object, attr_name)
+                if isinstance(value, ExplainableQuantity):
+                    explainable_quantities[attr_name] = value
             web_explainable_quantities_sources += [
                 ExplainableQuantityWeb(explainable_object, self)
                 for attr_name, explainable_object in explainable_quantities.items()
@@ -257,7 +290,7 @@ class ModelWeb:
         """Distinct Source instances referenced across the model, plus USER_DATA and HYPOTHESIS sentinels."""
         sources_by_id = {}
         for efootprint_obj in self.flat_efootprint_objs_dict.values():
-            for attr_val in get_instance_attributes(efootprint_obj, ExplainableObject).values():
+            for attr_val in _materialized_explainable_attributes(efootprint_obj, ExplainableObject).values():
                 if attr_val.source is not None:
                     sources_by_id.setdefault(attr_val.source.id, attr_val.source)
             for attr_dict in get_instance_attributes(efootprint_obj, ExplainableObjectDict).values():

@@ -184,7 +184,7 @@ def system_with_uj_no_steps(model_builder_page: ModelBuilderPage):
     uj = UsageJourney("Test E2E UJ", uj_steps=[])
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    system_data.update(system_to_json(uj, save_calculated_attributes=False))
+    system_data.update(system_to_json(uj, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 
@@ -196,7 +196,7 @@ def system_with_uj_and_step(model_builder_page: ModelBuilderPage):
     uj = UsageJourney("Seeded UJ", uj_steps=[uj_step])
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    system_data.update(system_to_json(uj, save_calculated_attributes=False))
+    system_data.update(system_to_json(uj, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 
@@ -212,7 +212,7 @@ def system_with_custom_storage_unit(model_builder_page: ModelBuilderPage):
     server.storage.data_storage_duration = SourceValue(5 * u.month)
 
     system_data = deepcopy(EMPTY_SYSTEM_DICT)
-    system_data.update(system_to_json(server, save_calculated_attributes=False))
+    system_data.update(system_to_json(server, save_computed_state=False))
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 

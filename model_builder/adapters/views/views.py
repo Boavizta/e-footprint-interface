@@ -252,7 +252,7 @@ def _single_model_document(repository, model_web=None) -> dict:
     """
     if model_web is None:
         model_web = ModelWeb(repository)
-    document = model_web.to_json(save_calculated_attributes=False)
+    document = model_web.to_json(save_computed_state=False)
     if repository.interface_config:
         document["interface_config"] = repository.interface_config
         document["efootprint_interface_version"] = interface_version
