@@ -44,8 +44,8 @@ def _materialized_explainable_attributes(efootprint_object, target_class):
     """Map attr name -> ``target_class`` instance for the object: inputs (in ``__dict__``) plus the
     materialized values of its computed slots (peeked, never pulled). Computed values live in the
     reactive slots now, not the instance dict, so scanning ``__dict__`` alone would miss a computed
-    value that carries a source (e.g. an edge device's fabrication footprint) — which the source table
-    must show and persistence must hoist into the shared ``Sources`` block."""
+    value that carries a source (e.g. an edge device's fabrication footprint) that persistence must
+    hoist into the shared ``Sources`` block, otherwise the serialized slot referencing it would dangle."""
     attributes = dict(get_instance_attributes(efootprint_object, target_class))
     for attr_name, descriptor in computed_slots(efootprint_object.efootprint_class).items():
         peeked = descriptor.peek(efootprint_object)
@@ -287,10 +287,14 @@ class ModelWeb:
 
     @property
     def available_sources(self):
-        """Distinct Source instances referenced across the model, plus USER_DATA and HYPOTHESIS sentinels."""
+        """Distinct Source instances referenced by the model's *inputs*, plus the USER_DATA and HYPOTHESIS
+        sentinels — the sources a user can reuse when setting an input's source. Scans only inputs (values
+        held in ``__dict__``), never computed slots: computed values carry auto-generated provenance
+        (EcoLogits functions, Boavizta API calls) that is never a meaningful input source, and reading
+        inputs alone keeps this free of any slot pull, so it triggers no computation."""
         sources_by_id = {}
         for efootprint_obj in self.flat_efootprint_objs_dict.values():
-            for attr_val in _materialized_explainable_attributes(efootprint_obj, ExplainableObject).values():
+            for attr_val in get_instance_attributes(efootprint_obj, ExplainableObject).values():
                 if attr_val.source is not None:
                     sources_by_id.setdefault(attr_val.source.id, attr_val.source)
             for attr_dict in get_instance_attributes(efootprint_obj, ExplainableObjectDict).values():

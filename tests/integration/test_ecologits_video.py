@@ -121,6 +121,26 @@ def test_video_system_round_trips_through_persistence():
     assert sum(reloaded.system_emissions["values"]["ExternalAPIs_energy"]) > 0
 
 
+def test_source_picker_excludes_computed_value_provenance():
+    # ModelWeb.available_sources feeds the edit-panel source-reuse dropdown, so it must offer only sources a
+    # user can attach to an input. Computed values carry auto-generated provenance (EcoLogits functions,
+    # Boavizta API calls) that is never a meaningful input source; the picker must exclude it even once the
+    # computed values are materialized — it is scoped to inputs, not to whatever happens to be cached.
+    repository = InMemorySystemRepository(initial_data=_build_video_system_data())
+    model_web = ModelWeb(repository)
+
+    def _is_computed_provenance(name: str) -> bool:
+        return name.startswith("Ecologits") or name.startswith("Boavizta API")
+
+    # The source table pulls every computed value, so its provenance sources materialize here — proof the
+    # picker has something it could leak if it scanned computed slots.
+    table_source_names = [eq.source.name for eq in model_web.web_explainable_quantities_sources if eq.source]
+    assert any(_is_computed_provenance(name) for name in table_source_names)
+
+    picker_source_names = [source.name for source in model_web.available_sources]
+    assert not any(_is_computed_provenance(name) for name in picker_source_names)
+
+
 def test_job_form_resolution_datalist_is_keyed_by_real_api_with_correct_resolutions():
     # Real-object guard for the cross-object dotted-`depends_on` generator path: the resolution
     # datalist must key on each real API object's id and carry exactly that model's resolutions,
