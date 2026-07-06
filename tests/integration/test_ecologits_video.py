@@ -7,6 +7,9 @@ standard results pipeline with non-zero footprints — no special casing.
 
 Assertions on EcoLogits outputs are structural (presence, non-negative) per the feature spec.
 """
+from unittest.mock import patch
+
+from efootprint.abstract_modeling_classes.reactive_core import ReactiveSlot, computed_slots
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
@@ -119,6 +122,33 @@ def test_video_system_round_trips_through_persistence():
     api_web = reloaded.external_apis[0]
     assert api_web.efootprint_class.__name__ == "EcoLogitsVideoGenExternalAPI"
     assert sum(reloaded.system_emissions["values"]["ExternalAPIs_energy"]) > 0
+
+
+def test_exact_version_reload_attaches_trusted_caches_without_computing():
+    # Persist a fully-built system, then reload it. An exact efootprint-version reload must attach the
+    # stored footprint slots as trusted caches and compute nothing — a guarantee the round-trip test's
+    # sum(...energy) > 0 check cannot make, since that passes whether the values were reloaded or
+    # recomputed on read.
+    repository = InMemorySystemRepository(initial_data=_build_video_system_data())
+    ModelWeb(repository).persist_to_cache()
+
+    computed_slot_names = []
+    original_compute = ReactiveSlot._compute
+
+    def _counting_compute(self):
+        computed_slot_names.append(self.name)
+        return original_compute(self)
+
+    with patch.object(ReactiveSlot, "_compute", _counting_compute):
+        reloaded = ModelWeb(repository)
+
+    assert computed_slot_names == [], f"reload recomputed slots instead of attaching stored caches: {computed_slot_names}"
+
+    # The stored footprint is present as a trusted cache: peek returns it without a pull (a lazy-recompute
+    # reload would leave the slot void until first read).
+    system_obj = list(reloaded.response_objs["System"].values())[0]
+    total_footprint_slot = computed_slots(system_obj.efootprint_class)["total_footprint"]
+    assert total_footprint_slot.peek(system_obj) is not None
 
 
 def test_source_picker_excludes_computed_value_provenance():
