@@ -25,6 +25,22 @@ through the generic `efootprint_id_of_parent_to_link_to` + `parent_link_count` p
 per-parent counts at creation, which the single-parent count field doesn't. Candidate: fold edge
 creation onto the generic path (extended to multi-parent) so dict-relationship creation has one code path.
 
+### Candidate cleanup — delegate `ModelWeb.to_json` source-hoisting to the library
+
+`ModelWeb.to_json` re-implements the top-level `Sources` hoisting (scanning inputs plus peeked computed
+single-value slots), which the library's `system_to_json` already owns — and the library additionally
+hoists sources from computed *dict* slots, which the interface copy does not. No serialize-flagged
+computed dict carries a source today, so nothing dangles; but the divergence is latent risk. When
+`to_json` is next touched, delegate its source-hoisting to `system_to_json` (or mirror its computed-dict
+branch) so serialization stays single-sourced in the library. Low priority.
+
+### Audit drill-down first-read recompute — loading affordance (descoped)
+
+Drill-down reads pull lazily. An exact-version session is fully cached, so drill-down has no delay; only a
+legacy inputs-only session pays a one-time first-read recompute (which then self-heals once persisted).
+No loading state was added. Revisit only if that legacy first-read delay becomes a real UX complaint —
+then a brief HTMX loading affordance on the drill-down/calculus-graph fetch is enough.
+
 ## Far horizon (no commitment)
 
 - Persistent per-user model libraries (multi-model save/load per user).
