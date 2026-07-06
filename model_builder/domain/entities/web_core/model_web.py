@@ -8,7 +8,8 @@ from efootprint.abstract_modeling_classes.modeling_object import get_instance_at
 from efootprint.abstract_modeling_classes.reactive_core import computed_slots
 from efootprint.abstract_modeling_classes.source_objects import Sources
 from efootprint.api_utils.json_to_system import json_to_system
-from efootprint.api_utils.system_to_json import CALCULATION_GRAPH_KEY, calculation_graph_section
+from efootprint.api_utils.system_to_json import (
+    CALCULATION_GRAPH_KEY, calculation_graph_section, collect_referenced_source_ids)
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
@@ -43,9 +44,11 @@ DEFAULT_SOURCES_CLASS_MAPPING = {
 def _materialized_explainable_attributes(efootprint_object, target_class):
     """Map attr name -> ``target_class`` instance for the object: inputs (in ``__dict__``) plus the
     materialized values of its computed slots (peeked, never pulled). Computed values live in the
-    reactive slots now, not the instance dict, so scanning ``__dict__`` alone would miss a computed
-    value that carries a source (e.g. an edge device's fabrication footprint) that persistence must
-    hoist into the shared ``Sources`` block, otherwise the serialized slot referencing it would dangle."""
+    reactive slots now, not the instance dict, so scanning ``__dict__`` alone would miss the source of
+    a *serialized* computed slot that carries one — a candidate the ``Sources`` block must be able to
+    resolve so the serialized slot referencing it does not dangle. The block is then filtered to the
+    sources a serialized value actually references, so a bare (non-serialized) computed slot's pure
+    provenance is dropped rather than persisted as an orphan."""
     attributes = dict(get_instance_attributes(efootprint_object, target_class))
     for attr_name, descriptor in computed_slots(efootprint_object.efootprint_class).items():
         peeked = descriptor.peek(efootprint_object)
@@ -123,7 +126,15 @@ class ModelWeb:
 
         output_json = {"efootprint_version": efootprint_version}
         if sources_by_id:
-            output_json["Sources"] = {sid: src.to_json() for sid, src in sorted(sources_by_id.items())}
+            # The collected sources are candidates; keep only those a serialized value references, so
+            # pure computed-attribute provenance (re-attached on recompute) is not persisted as an
+            # orphan. Mirrors the library authority in system_to_json.
+            referenced_source_ids = collect_referenced_source_ids(modeling_blocks)
+            sources_block = {
+                sid: src.to_json() for sid, src in sorted(sources_by_id.items())
+                if sid in referenced_source_ids}
+            if sources_block:
+                output_json["Sources"] = sources_block
         output_json.update(modeling_blocks)
 
         if save_computed_state:
