@@ -169,6 +169,87 @@ class TestAvailableSources:
         assert custom_source.id in [s.id for s in minimal_model_web.available_sources]
 
 
+class TestToJsonHoldsOnlyReferencedSources:
+    """ModelWeb.to_json persists only sources a serialized value references, so pure
+    computed-attribute provenance (EcoLogits / Boavizta getters attach a source to a *computed*
+    value) never reaches the saved Sources block or the row-editor dropdown built from it."""
+
+    @staticmethod
+    def _simple_model_web():
+        from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.constants.countries import Countries
+        from efootprint.core.hardware.device import Device
+        from efootprint.core.hardware.network import Network
+        from efootprint.core.hardware.server import Server
+        from efootprint.core.hardware.storage import Storage
+        from efootprint.core.system import System
+        from efootprint.core.usage.job import Job
+        from efootprint.core.usage.usage_journey import UsageJourney
+        from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+        from efootprint.core.usage.usage_pattern import UsagePattern
+        from model_builder.adapters.repositories import InMemorySystemRepository
+        from tests.fixtures.system_builders import create_hourly_usage
+
+        storage = Storage.from_defaults("Storage")
+        server = Server.from_defaults("Server", storage=storage)
+        job = Job.from_defaults("Job", server=server)
+        uj = UsageJourney("Journey", uj_steps=[UsageJourneyStep.from_defaults("Step", jobs=[job])])
+        usage_pattern = UsagePattern(
+            "UP", usage_journey=uj, devices=[Device.from_defaults("Device")],
+            network=Network.from_defaults("Network"), country=Countries.FRANCE(),
+            hourly_usage_journey_starts=create_hourly_usage())
+        system = System("System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
+        # Inputs-only so the loaded ModelWeb recomputes its whole cone on first read below.
+        return ModelWeb(InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False)))
+
+    def test_source_on_a_computed_slot_is_not_persisted_or_offered(self):
+        from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
+        from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
+        from efootprint.abstract_modeling_classes.reactive_core import computed_slots, serialized_slots
+        from efootprint.abstract_modeling_classes.source_objects import Sources
+        from model_builder.adapters.views.source_table_row_editor_context import _available_sources_from_json
+
+        model_web = self._simple_model_web()
+        raw_system = next(iter(model_web.response_objs["System"].values()))
+        _ = raw_system.total_footprint  # local compute, materializes the computed slots
+
+        # A named source on an *input* is referenced by a serialized value → it must be kept.
+        input_source = Source("named input provenance", "https://example.com/input")
+        # A source on a *bare* (non-serialized) computed slot is referenced by nothing serialized → it
+        # must be dropped (stand-in for the EcoLogits / Boavizta computed-attribute provenance).
+        computed_source = Source("synthetic computed provenance", "https://example.com/computed")
+        input_tagged = computed_tagged = False
+        for obj in model_web.flat_efootprint_objs_dict.values():
+            if not input_tagged:
+                for attr_val in get_instance_attributes(obj, ExplainableObject).values():
+                    attr_val.source = input_source
+                    input_tagged = True
+                    break
+            if not computed_tagged:
+                serialized = set(serialized_slots(obj.efootprint_class))
+                for attr_name, descriptor in computed_slots(obj.efootprint_class).items():
+                    if attr_name in serialized:
+                        continue
+                    peeked = descriptor.peek(obj)
+                    if isinstance(peeked, ExplainableObject):
+                        peeked.source = computed_source
+                        computed_tagged = True
+                        break
+            if input_tagged and computed_tagged:
+                break
+        assert input_tagged and computed_tagged, "Could not tag both an input and a bare computed slot"
+
+        sources_block = model_web.to_json(save_computed_state=True).get("Sources", {})
+        block_names = {payload["name"] for payload in sources_block.values()}
+        assert input_source.name in block_names
+        assert computed_source.name not in block_names
+
+        dropdown_names = {source.name for source in _available_sources_from_json(sources_block)}
+        assert input_source.name in dropdown_names
+        assert computed_source.name not in dropdown_names
+        assert Sources.USER_DATA.name in dropdown_names and Sources.HYPOTHESIS.name in dropdown_names
+
+
 class TestGetEfootprintObjectsFromEfootprintType:
     """Tests for ModelWeb.get_efootprint_objects_from_efootprint_type catalog/system deduplication."""
 

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Adopt efootprint 23.0.0's pull-based computation contract. The session now stores a single canonical model copy (inputs plus the serialize-flagged computed slots and calculation graph) instead of two variants; loading recomputes nothing when the stored efootprint version matches, so page load is faster. Sankey diagrams render from the stored impact-repartition matrix and edit requests recompute only the affected footprint cone. Old sessions reload as inputs-only and recompute lazily on first read.
+- `ModelWeb.to_json` now mirrors the library and persists only sources a serialized value references. Pure computed-attribute provenance (EcoLogits / Boavizta API sources), re-attached whenever a value recomputes, is no longer written into the saved `Sources` block — so the source-table row-editor dropdown, which reads that block, offers input sources only instead of leaking auto-generated computed provenance. Regenerated the `ai_chatbot` and `iot_industrial` intro templates accordingly.
 
 ## [V1.9.4]
 
