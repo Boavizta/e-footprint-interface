@@ -320,7 +320,7 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The edit panel opens with the <b>impact header</b>: the object's footprint, its <b>share of the system total</b> (with a proportion bar), the <b>Usage / Fabrication split</b>, and <b>⌕ Audit</b>. The form follows below unchanged; the <em>Calculated attributes</em> accordion remains for the full list — but the headline no longer hides in it.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The edit panel opens with the <b>impact header</b>: the object's footprint, its <b>share of the system total</b> (with a proportion bar), the <b>Usage / Fabrication split</b>, and <b>⌕ Audit</b>. The form follows below unchanged. The <em>Calculated attributes</em> accordion is a <b>stopgap</b>: it retires into the audit view's Object page when <a href="audit-a-result-target.html">audit-mode</a> ships — the header is the panel's only lasting computed content.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>An object's impact is its first-class information</h3></div>
@@ -334,7 +334,7 @@
       <div class="state"><span class="k">Phase split</span><span class="v"><b>Usage</b> / <b>Fabrication</b> sub-figures, matching the results legend vocabulary.</span></div>
       <div class="state"><span class="k">Impact sources too</span><span class="v">For hardware (servers, devices, network…) the attributed footprint <b>is</b> its own footprint — same header, no special case for the user.</span></div>
       <div class="state"><span class="k">Not computable yet?</span><span class="v">While the model can't compute (no usage pattern…), the header shows a dimmed <em>"No impact yet — complete your model"</em> with the live validation reason — the app's disabled-not-errored rule.</span></div>
-      <div class="state deferred"><span class="k">⌕ Audit</span><span class="v">Opens the audit surface on this footprint — lands with <a href="audit-a-result-target.html">audit-mode</a>; until then the header links the calculated-attributes section.</span></div>
+      <div class="state deferred"><span class="k">⌕ Audit</span><span class="v">Opens the audit view on this object's page — lands with <a href="audit-a-result-target.html">audit-mode</a>; until then the header links the calculated-attributes accordion (a stopgap that retires into that page).</span></div>
     </div>
   </div>
 </div>
@@ -441,7 +441,7 @@
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>Every object shows its attributed footprint — one number reused by badge, impact header, chart series and audit.</b></td><td>Consistency builds trust: the same value everywhere, from one source (the library's persisted attributed footprints). Inventing a different "card metric" would create two truths.</td></tr>
-  <tr><td><b>The edit panel leads with the impact header; the calculated-attributes accordion remains below.</b></td><td>Impact is the object's headline, not an advanced detail — today it's invisible until a user finds the accordion. The full attribute list stays for depth; the header is the triage read.</td></tr>
+  <tr><td><b>The edit panel leads with the impact header; the calculated-attributes accordion is demoted to a stopgap and retires with audit-mode.</b></td><td>The panel is an editor — its read-only job ends at the headline (footprint, share, audit entry), and it renders only persisted values so opening it computes nothing. The full attribute list moves to the audit view's Object page (<a href="audit-a-result-target.html">audit-a-result — target</a>); the accordion survives only until that page exists, so the list is never unreachable.</td></tr>
   <tr><td><b>Badges are display-only reads of persisted values; rendering never computes.</b></td><td>The canvas renders on every request — it must stay computation-free (the app's binding constraints are store weight and round-trips). Serialized attributed footprints make display a lookup.</td></tr>
   <tr><td><b>Total badge synchronous; attributed badges synchronous-if-cheap, else async with a pending chip — measurement decides.</b></td><td>The total is already recomputed on every save (engine guarantee) so it's free to show. Attribution's per-edit cost is real but bounded to the dirty cone; the library feature measures it, and the UI is designed to be correct under either policy rather than betting the edit latency on it.</td></tr>
   <tr><td><b>Precise updates only — affected badges change, others are untouched.</b></td><td>Wholesale refresh would flicker the whole canvas on every save and destroy the "ripple as signal" read. The engine's exact invalidation makes precision free.</td></tr>
@@ -461,7 +461,7 @@
       <dd>Cards: <code>object_cards/*</code> + <code>components/button_card_header.html</code> (name-only today; the ✎ pencil
         and card chrome live here). Panel: <code>views_edition.py open_edit_object_panel</code> →
         <code>side_panels/edit/edit_panel__generic.html</code> (impact header slots above the form;
-        <code>calculated_attributes_section.html</code> remains below). Results bar: <code>components/results_bar_button.html</code>
+        <code>calculated_attributes_section.html</code> stays as a stopgap and retires with audit-mode's Object page). Results bar: <code>components/results_bar_button.html</code>
         (total badge rides this region). OOB machinery for precise patches: <code>oob_regions.py</code> /
         <code>htmx_presenter.py</code> — the badge updates are new OOB regions keyed by object id.</dd>
       <dt>Update flow (target)</dt>

@@ -245,33 +245,29 @@
   footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
   footer a { color: var(--accent); }
 
-  /* ---- audit-a-result-target only: PROSPECTIVE banner, the audit surface, value card, map ---- */
+  /* ---- audit-a-result-target only: PROSPECTIVE banner, the audit view, pages, value card, lenses ---- */
   .role.prospect { background: var(--danger-bg); color: var(--danger); }
   .prospect-banner { background: var(--danger-bg); border: 1px solid #f7cfca; border-left: 4px solid var(--danger);
         border-radius: 8px; padding: .7rem .9rem; font-size: .9rem; color: var(--muted); margin: 1rem 0 1.4rem; }
   .prospect-banner b.h { color: var(--danger); text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; }
   .prospect-banner b { color: var(--ink); }
-  /* the audit surface (in-place overlay, like the Results panel) */
+  /* the audit view (in-place overlay, like the Results panel) */
   .rpanel { position: absolute; inset: 0; background: #fff; display: flex; flex-direction: column; }
   .rphead { display: flex; align-items: center; gap: .5rem; padding: .4rem .55rem; border-bottom: 1px solid var(--line); }
   .rphead .rt { font-size: .8rem; font-weight: 700; color: var(--ink); }
   .rphead .chev { margin-left: auto; color: var(--muted); }
-  .subtabs { display: flex; gap: .3rem; }
-  .subtab { font-size: .62rem; padding: .16rem .5rem; border-radius: 7px; color: var(--faint); background: var(--g100); }
-  .subtab.on { background: var(--lp); color: var(--primary); font-weight: 600; }
   .rpbody { padding: .5rem; overflow: auto; display: grid; gap: .5rem; align-content: start; }
-  /* breadcrumb trail of visited values */
-  .crumbtrail { display: flex; align-items: center; flex-wrap: wrap; gap: .2rem; font-size: .56rem; color: var(--faint);
+  /* breadcrumb = LOCATION (System › object › value [· lens]); ‹ › = history */
+  .crumbtrail { display: flex; align-items: center; flex-wrap: wrap; gap: .2rem; font-size: .58rem; color: var(--faint);
         padding: .3rem .55rem; border-bottom: 1px solid var(--line); background: var(--g50); }
   .crumbtrail .backfwd { color: var(--primary); font-weight: 700; margin-right: .3rem; }
   .crumbtrail .cnode { color: var(--primary); } .crumbtrail .cnode.here { color: var(--ink); font-weight: 600; }
   .crumbtrail .sep { color: var(--g350); }
-  /* the value card (micro view) */
+  /* the value card (Value zoom) */
   .vcard { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .55rem; }
   .vcard .vt { font-size: .7rem; font-weight: 700; color: var(--ink); }
   .vcard .vo { font-size: .56rem; color: var(--faint); }
   .vcard .vval { font-size: .82rem; font-weight: 700; color: var(--primary); margin: .2rem 0; }
-  .vcard .vval .openobj { font-size: .56rem; font-weight: 600; color: var(--primary); margin-left: .5rem; }
   .docstring { background: var(--newlight); border: 1px solid #cfe6ea; border-radius: 7px; padding: .35rem .5rem;
         font-size: .6rem; color: var(--muted); font-style: italic; margin: .25rem 0; line-height: 1.5; }
   /* formula anatomy (kept from today's expander) */
@@ -287,11 +283,34 @@
   .conf.high { background: #e4f5ec; color: #087443; border-color: #bfe6d0; }
   .conf.low { background: #fdecea; color: #b42318; border-color: #f7cfca; }
   .srcchip { font-size: .5rem; color: var(--muted); border: 1px solid var(--g200); border-radius: 999px; padding: .04rem .4rem; background: #fff; }
-  /* audit affordance on a calculated-attribute row */
-  .audbtn { display: inline-flex; align-items: center; gap: .2rem; font-size: .58rem; font-weight: 600; color: var(--primary);
-        border: 1px solid var(--g300); border-radius: 6px; padding: .08rem .35rem; background: #fff; }
   .lazyfill { display: inline-flex; align-items: center; gap: .3rem; font-size: .54rem; color: var(--faint);
         background: var(--g100); border-radius: 999px; padding: .04rem .45rem; }
+  /* pages (System / Object): impact echo + rows */
+  .oimp { background: var(--newlight); border: 1px solid #cfe6ea; border-radius: 8px; padding: .4rem .55rem; }
+  .oimp .iv { font-size: .84rem; font-weight: 700; color: var(--primary); }
+  .oimp .ish { font-size: .54rem; color: var(--muted); }
+  .orows { background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .orows .oh { padding: .3rem .5rem; font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); border-bottom: 1px solid var(--line); }
+  .orow { display: flex; align-items: center; gap: .4rem; padding: .28rem .5rem; font-size: .62rem; }
+  .orow + .orow { border-top: 1px dashed var(--g200); }
+  .orow .on { flex: 1 1 auto; color: var(--ink); }
+  .orow .ov { color: var(--primary); font-weight: 600; white-space: nowrap; }
+  .orow .go { color: var(--g350); }
+  /* lens chips (Objects / Calculated attributes toggle on the Influence view) */
+  .lenschips { display: flex; gap: .25rem; }
+  .lenschip { font-size: .54rem; padding: .07rem .42rem; border-radius: 999px; border: 1px solid var(--g300); color: var(--faint); background: #fff; }
+  .lenschip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+  /* contribution rows (Contribution lens) */
+  .contrib { display: grid; gap: .2rem; padding: .3rem .5rem; }
+  .contrib + .contrib { border-top: 1px dashed var(--g200); }
+  .contrib .cl1 { display: flex; align-items: center; gap: .4rem; font-size: .62rem; }
+  .contrib .cl1 .on { flex: 1 1 auto; color: var(--ink); font-weight: 600; }
+  .contrib .cl1 .ov { color: var(--primary); font-weight: 700; white-space: nowrap; }
+  .contrib .cbar { height: .3rem; border-radius: 99px; background: var(--g200); position: relative; overflow: hidden; }
+  .contrib .cbar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary); border-radius: 99px; display: block; }
+  .contrib .cwhy { font-size: .54rem; color: var(--muted); }
+  /* standalone entry in the results bar */
+  .auditentry { font-weight: 600; font-size: .74rem; color: var(--ink); border-left: 1px solid var(--line); padding-left: .55rem; }
 </style>
 </head>
 <body>
@@ -302,91 +321,184 @@
 <div class="prospect-banner"><b class="h">⚠ Prospective journey — target-state design, not the deployed app.</b><br>
   This is the <b>rebuilt audit mode</b> — normative design for the future <b>audit-mode</b> feature (spec to come in
   <code>specs/features/audit-mode/</code>, after <a href="analyse-results.html">analyse-results</a> and
-  <a href="impact-on-canvas.html">impact-on-canvas</a>). The faithful description of today's audit surfaces remains
+  <a href="impact-on-canvas.html">impact-on-canvas</a>; its <b>Contribution lens</b> is a second increment,
+  <code>audit-attribution</code>). The faithful description of today's audit surfaces remains
   <a href="audit-a-result.html">audit-a-result</a>. At ship time this journey <b>replaces audit-a-result's derivation phases
-  (B–C)</b> — its provenance phase (A · source &amp; confidence, the Sources tab) carries over unchanged — and the
-  <b>pyvis calculus-graph dump retires</b>. Decisions ratified in the 2026-07-03 design discussion.</div>
+  (B–C)</b> — its provenance phase (A · source &amp; confidence, the Sources tab) carries over unchanged — the
+  <b>pyvis calculus-graph dump retires</b>, and the <b>edit panel's Calculated attributes accordion retires</b> into this
+  view's Object page (the panel keeps only the <a href="impact-on-canvas.html">impact header</a>). Decisions ratified in the
+  2026-07-03 discussion; revised 2026-07-07 (dedicated view; panel keeps footprints only; global map dropped for anchored
+  lenses; calculus vs attribution split into two lenses of one surface).</div>
 
 <p class="lede">Every number e-footprint produces can already be traced — the engine records the full derivation of every value.
-  But today that trail is <b>scattered</b> (a formula expander buried in the edit panel, a raw graph dumped in a new tab) and
-  navigating it means bouncing between side panels. <b>audit-a-result — target</b> makes auditing a <b>place</b>: enter from any
-  number on screen, understand <b>one value</b> completely (its meaning, its formula, its cited inputs), <b>walk</b> the
-  derivation with a history you can retrace, and zoom out to the <b>map</b> of how objects feed each other. Success is a
-  reviewer's question answered in seconds: <em>"where does this number come from, and how sure are we?"</em> — at any depth.</p>
+  But today that trail is <b>scattered</b>: a formula expander buried in an edit-panel accordion, a raw graph dumped in a new tab,
+  and no place that <em>is</em> the audit. <b>audit-a-result — target</b> makes auditing the <b>third workspace mode</b> — you
+  <b>build</b> on the canvas, <b>read</b> in Results, <b>trace</b> in Audit. One surface: <b>pages</b> (the System's and each
+  object's) list what there is to audit, the <b>Value</b> view explains one number, and <b>two graph lenses</b> answer the two
+  big questions — <b>Influence</b> (<em>what shapes this footprint?</em> — the calculus, upstream) and <b>Contribution</b>
+  (<em>which footprints land on this object, and why?</em> — the attribution, downstream). Success is a reviewer's question
+  answered in seconds, at any depth.</p>
 <p class="note">Prospective — grounded in <a href="audit-a-result.html">audit-a-result</a> (today's surfaces) and the library's
   explainability machinery: every calculated value carries its ancestry and formula, every calculated attribute has a
-  <b>docstring</b>, the model file persists the <b>values-free calculation graph</b>, and valueless intermediates
-  <b>compute lazily on read</b>. Entry seams from charts are designed in <a href="analyse-results.html">analyse-results</a>;
-  from object cards and the impact header in <a href="impact-on-canvas.html">impact-on-canvas</a>. Code-level pointers in
-  <a href="#pointers">Implementation pointers</a>.</p>
+  <b>docstring</b>, the model file persists the <b>values-free calculation graph</b>, valueless intermediates
+  <b>compute lazily on read</b>, and attribution atoms record how source footprints distribute. Entry seams from charts are
+  designed in <a href="analyse-results.html">analyse-results</a>; from the impact header in
+  <a href="impact-on-canvas.html">impact-on-canvas</a>; the Sankey stays the <em>system-level</em> rendering of the attribution
+  truth this view drills per object. Code-level pointers in <a href="#pointers">Implementation pointers</a>.</p>
 
-<!-- ============ PHASE A — WAYS IN ============ -->
+<!-- ============ PHASE A — THE PLACE AND ITS DOORS ============ -->
 <div class="phase">
-  <span class="tag">A · Ways in</span><span class="conn">any number on screen leads here</span><span class="rule"></span>
+  <span class="tag">A · The place</span><span class="conn">audit is the third workspace mode — its own entry, landing on the System page</span><span class="rule"></span>
 </div>
 
-<!-- screen 1 — entry points -->
+<!-- screen 1 — the standalone entry -->
 <div class="screen">
   <div class="mock-col">
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
-      <div class="stage" style="min-height:300px">
-        <div class="canvas dim" style="min-height:300px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
-        <div class="panel" style="width:66%">
-          <div class="phead"><b>Edit Web server</b><span class="x">×</span></div>
-          <div class="accsec"><div class="h">Calculated attributes <span>▾</span></div>
-            <div class="b">
-              <div class="field"><label>Energy footprint</label>
-                <div style="display:flex;align-items:center;gap:.3rem"><span class="inp" style="flex:1">0.63 t CO₂-eq</span><span class="audbtn">⌕ Audit</span></div></div>
-              <div class="field"><label>Instances fabrication footprint</label>
-                <div style="display:flex;align-items:center;gap:.3rem"><span class="inp" style="flex:1">1.2 t CO₂-eq</span><span class="audbtn">⌕ Audit</span></div></div>
-              <div class="field"><label>Hour by hour compute need</label>
-                <div style="display:flex;align-items:center;gap:.3rem"><span class="inp" style="flex:1">timeseries</span><span class="audbtn">⌕ Audit</span></div></div>
-            </div>
-          </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:210px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◔</span> Viewers <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Streaming <span class="pencil">✎</span></div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server <span class="pencil">✎</span></div></div>
         </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="auditentry">⌕ Audit</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The edit panel's <b>Calculated attributes</b> rows each carry one affordance: <b>⌕ Audit</b>. It opens the audit surface focused on that value. The same affordance appears wherever a computed number shows — chart tooltips, the Sources tab's calculated rows, the impact header. One verb, everywhere.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The bottom bar carries <b>two destinations</b>: <b>Results</b> (read the footprint) and <b>⌕ Audit</b> (trace it). Both gate on the model being computable, with the same live-reason tooltip when it isn't. Opening Audit from here lands on the <b>System page</b> — the index of auditable numbers; opening it from a number lands on that number.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">1</span><h3>Any number on screen is a door</h3></div>
-    <p>Audit stops being a hidden corner of the edit panel: every surface that displays a computed value offers the same
-       <b>⌕ Audit</b> entry, and they all land in one place — the audit surface, focused on that exact value. Under the hood
-       every entry is just an address, <em>(object, attribute)</em>, so any current or future surface can deep-link into the
-       audit mode for free.</p>
+    <div class="step"><span class="n">1</span><h3>Audit is a destination, not a corridor</h3></div>
+    <p>Build on the canvas, read in Results, <b>trace in Audit</b> — three modes of one workspace. The standalone entry makes the
+       flagship capability visible before a user ever wonders about a specific number; the contextual <b>⌕ Audit</b> entries on
+       values remain the fast path in. Every entry resolves to an <b>address</b> — an object, optionally an attribute — so the
+       view opens at the right place.</p>
     <div class="states">
-      <div class="state"><span class="k">From the edit panel</span><span class="v">Each <b>Calculated attributes</b> row → <b>⌕ Audit</b>. (The inline ∑ formula expander retires — its content moves into the audit surface, one click away.)</span></div>
-      <div class="state"><span class="k">From Sources</span><span class="v">Calculated rows' <em>(see graph)</em> becomes <b>⌕ Audit</b> — same destination, focused on that value.</span></div>
-      <div class="state"><span class="k">From charts</span><span class="v">The series tooltip's <em>"Attributed … footprint ↗"</em> link (seam designed in <a href="analyse-results.html">analyse-results</a> Phase D).</span></div>
-      <div class="state"><span class="k">Addressable</span><span class="v">An audit view = <b>(object, attribute)</b> — every entry point is a deep link; back/forward just replay addresses.</span></div>
-      <div class="state deferred"><span class="k">From the impact header</span><span class="v">The side panel's impact header and card badges (⌕ on hover) — land with <a href="impact-on-canvas.html">impact-on-canvas</a>.</span></div>
+      <div class="state"><span class="k">Standalone entry</span><span class="v"><b>⌕ Audit</b> beside <b>Results</b> in the bottom bar — same computability gate, same live validation reason while locked. Lands on the <b>System page</b>.</span></div>
+      <div class="state"><span class="k">Focused entries</span><span class="v">The impact header's <b>⌕ Audit</b> (<a href="impact-on-canvas.html">impact-on-canvas</a>) → that object's <b>page</b>. A chart tooltip (<a href="analyse-results.html">analyse-results</a>) or a Sources calculated row → that <b>Value</b>.</span></div>
+      <div class="state"><span class="k">Panel vs Audit</span><span class="v">A symmetric pair: the <b>edit panel changes</b> an object, the <b>audit view explains</b> it. <b>⌕ Audit</b> crosses one way, <b>Open object ↗</b> crosses back; only one of the two is open at a time.</span></div>
+      <div class="state"><span class="k">In place</span><span class="v">The audit view slides over the canvas like Results — closing it returns to the model untouched. No new tab, no page change.</span></div>
       <div class="state deferred"><span class="k">From the Sankey</span><span class="v">Clicking a Sankey node — needs object ids in the Sankey payload; same address scheme once added.</span></div>
     </div>
   </div>
 </div>
 
-<!-- ============ PHASE B — ONE VALUE, FULLY EXPLAINED ============ -->
-<div class="phase">
-  <span class="tag">B · One value</span><span class="conn">meaning · value · formula · cited inputs — the micro view</span><span class="rule"></span>
+<!-- screen 2 — the System page (landing) -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:300px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode here">System</span></div>
+          <div class="rpbody">
+            <div class="oimp">
+              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="iv">3.5 t CO₂-eq</span><span class="ish">· Total footprint over the modeling period</span><span class="ish" style="margin-left:auto;color:var(--primary);font-weight:600">Value ›</span></div>
+            </div>
+            <div class="orows">
+              <div class="oh">Impact source footprints — the numbers to defend</div>
+              <div class="orow"><span class="on">Web server <span style="color:var(--faint)">(Server)</span></span><span class="ov">Usage 0.63 t · Fab 1.2 t</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">SSD storage <span style="color:var(--faint)">(Storage)</span></span><span class="ov">Usage 0.31 t · Fab 0.4 t</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Viewers' devices <span style="color:var(--faint)">(Devices)</span></span><span class="ov">Usage 0.42 t · Fab 0.38 t</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Network</span><span class="ov">Usage 0.16 t</span><span class="go">›</span></div>
+            </div>
+            <div class="orows">
+              <div class="oh">Attributed footprints — where the total lands</div>
+              <div class="orow"><span class="on">Usage patterns · journeys · steps · jobs…</span><span class="ov" style="color:var(--faint);font-weight:400">pick any object's badge or chart series</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>System page</b> — the audit view's landing: the total footprint on top, then <b>every impact source's footprint pair</b> — the numbers a reviewer asks you to defend, one click from their explanation. No graph here: an index of numbers is a better front door than a diagram of everything.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>Land on the System page — the index of auditable numbers</h3></div>
+    <p>The System is just an object, so the landing is its page: the total footprint and the per-source pairs it sums. This
+       replaces the whole-model dependency map of an earlier draft — the canvas already shows the model's structure, and a
+       global graph is anchored to nothing; the audit question always starts from a <em>number</em>. The graph views live one
+       level down, anchored (Phases D–E).</p>
+    <div class="states">
+      <div class="state"><span class="k">Table of contents</span><span class="v"><b>Total footprint</b> + each impact source's <b>Usage / Fabrication</b> pair — all read from the model file, zero compute.</span></div>
+      <div class="state"><span class="k">One click in</span><span class="v">Any row → that footprint's <b>Value</b> view (Phase C), where the <b>Influence lens</b> is one more click (Phase D).</span></div>
+      <div class="state"><span class="k">No global map</span><span class="v">Rejected: the canvas already renders structure; an unanchored graph repeats the pyvis failure one altitude up. Influence views are anchored per footprint instead.</span></div>
+      <div class="state"><span class="k">Attributed side</span><span class="v">Non-source objects are audited from their badges, chart series or impact headers — their pages and the <b>Contribution lens</b> (Phase E) explain where their numbers come from.</span></div>
+    </div>
+  </div>
 </div>
 
-<!-- screen 2 — the value card -->
+<!-- ============ PHASE B — THE OBJECT PAGE ============ -->
+<div class="phase">
+  <span class="tag">B · The object</span><span class="conn">all of one object's calculated attributes — the accordion's new home</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — object page -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:320px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode here">Web server</span></div>
+          <div class="rpbody">
+            <div class="oimp">
+              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="iv">1.83 t CO₂-eq</span><span class="ish">· 23% of system total · Usage <b>0.63 t</b> · Fabrication <b>1.2 t</b></span><span class="ish" style="margin-left:auto;color:var(--primary);font-weight:600">Open object ↗</span></div>
+            </div>
+            <div class="orows">
+              <div class="oh">Calculated attributes — Web server (Server)</div>
+              <div class="orow"><span class="on">Energy footprint</span><span class="ov">0.63 t CO₂-eq</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Instances fabrication footprint</span><span class="ov">1.2 t CO₂-eq</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Nb of instances</span><span class="ov">2.0</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Hour by hour compute need</span><span class="ov">timeseries</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Hour by hour electricity consumption</span><span class="lazyfill">computing…</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Available compute per instance</span><span class="ov">14.2 cpu_core</span><span class="go">›</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Object page</b>: the object's impact echo on top (same numbers as its impact header and badge, plus <b>Open object ↗</b> to go edit), then <b>every calculated attribute</b> with its value — the edit panel's accordion, relocated to the surface built for it. Values not stored in the file fill in as the engine computes them (grey chip). Any row → its <b>Value</b> view.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>The object page — the full list lives here now</h3></div>
+    <p>The edit panel's <em>Calculated attributes</em> accordion <b>retires</b>; this page is its new home. The move follows the
+       architecture: the panel shows only what the model file already knows (the persisted footprints in its impact header),
+       while this page may <b>compute on demand</b> — it's an analytical surface, opened deliberately, and the cost is one
+       object's cone. The panel gets simpler and faster; the attribute list gets a home where drilling deeper is natural rather
+       than a dead end.</p>
+    <div class="states">
+      <div class="state"><span class="k">Relocated, not lost</span><span class="v">Everything the accordion listed is here — value, unit, and one click to the full explanation (which the accordion never offered without crowding the form).</span></div>
+      <div class="state"><span class="k">Impact echo</span><span class="v">The same footprint / share / phase split as the impact header and badge — one number, every surface.</span></div>
+      <div class="state"><span class="k">Lazy fill</span><span class="v">Footprints read from the file; intermediates compute on page open (one object's cone, grey <em>computing…</em> chips resolve in place).</span></div>
+      <div class="state"><span class="k">To the editor</span><span class="v"><b>Open object ↗</b> closes Audit and opens the edit panel — understand here, change there.</span></div>
+      <div class="state variant"><span class="k">EcoLogits objects</span><span class="v">External-API objects list their EcoLogits-computed attributes identically; their Value views show computation code instead of a formula.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — THE VALUE ============ -->
+<div class="phase">
+  <span class="tag">C · The value</span><span class="conn">meaning · value · formula · cited inputs — and the walk through them</span><span class="rule"></span>
+</div>
+
+<!-- screen 4 — the value card -->
 <div class="screen">
   <div class="mock-col">
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="stage" style="min-height:360px">
         <div class="rpanel">
-          <div class="rphead"><span class="rt">Audit</span><span class="subtabs"><span class="subtab on">Value</span><span class="subtab">Map</span></span><span class="chev">×</span></div>
-          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">Total footprint</span><span class="sep">›</span><span class="cnode here">Web server — Energy footprint</span></div>
+          <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode here">Energy footprint</span><span style="margin-left:auto" class="cnode">◉ Influence</span></div>
           <div class="rpbody">
             <div class="vcard">
               <div class="vt">Energy footprint <span class="vo">· Web server (Server)</span></div>
               <div class="docstring">Emissions from the electricity consumed by the server during the usage phase: hourly power
                 drawn by compute and RAM needs, converted through the carbon intensity of the electricity mix at the server's
                 location.</div>
-              <div class="vval">0.63 t CO₂-eq <span class="vo">over the modeling period</span> <span class="openobj">Open object ↗</span></div>
+              <div class="vval">0.63 t CO₂-eq <span class="vo">over the modeling period</span></div>
               <svg viewBox="0 0 320 34" role="img" aria-label="Daily emissions sparkline">
                 <line x1="10" y1="28" x2="312" y2="28" stroke="#D1D5DB"/>
                 <path d="M12 26 C 60 24, 90 20, 140 18 S 250 10, 310 8 L310 28 L12 28 Z" fill="#2D4675" opacity=".12"/>
@@ -406,11 +518,11 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The audit surface opens <b>in place</b> over the canvas (like Results). The <b>Value</b> view answers everything about one number: its <b>docstring</b> (what this attribute means — straight from the engine's documentation), its <b>value</b> with a daily chart for timeseries, the <b>Formula</b>, each <b>Input variable</b> (calculated ones link deeper; raw inputs carry their <b>source &amp; confidence</b>), and what it <b>feeds into</b>.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Value</b> view answers everything about one number: its <b>docstring</b> (what this attribute means, straight from the engine's documentation), its <b>value</b> with a daily chart for timeseries, the <b>Formula</b>, each <b>Input variable</b> (calculated ones link deeper; raw inputs carry their <b>source &amp; confidence</b>), and what it <b>feeds into</b>. For a footprint, <b>◉ Influence</b> opens its lens (Phase D).</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">2</span><h3>One value, completely explained</h3></div>
-    <p>The micro view keeps the anatomy today's formula expander already proved — input variables, symbolic formula, direct
+    <div class="step"><span class="n">4</span><h3>One value, completely explained</h3></div>
+    <p>The Value view keeps the anatomy today's formula expander already proved — input variables, symbolic formula, direct
        children — and completes it with the two things it lacked: the attribute's <b>meaning</b> (the docstring the library
        maintains as doc-as-code for every calculated attribute) and <b>provenance chips</b> on the raw inputs, so the trail's
        last step is visible without leaving the card.</p>
@@ -419,32 +531,27 @@
       <div class="state"><span class="k">Kept anatomy</span><span class="v">Formula (symbols tooltipped) · Input variables · <b>Feeds into</b> (direct children) — today's expander content, relocated and linked.</span></div>
       <div class="state"><span class="k">Timeseries</span><span class="v">Hourly values chart <b>daily-aggregated</b> (consistent with Results); the scalar shown is the period total.</span></div>
       <div class="state"><span class="k">Trail's end</span><span class="v">Raw inputs show <b>source + confidence</b> chips inline — provenance semantics unchanged from <a href="audit-a-result.html">audit-a-result</a> Phase A.</span></div>
-      <div class="state"><span class="k">To the object</span><span class="v"><b>Open object ↗</b> jumps to the owning object's edit panel when the question becomes "so let me change it".</span></div>
+      <div class="state"><span class="k">The lens hook</span><span class="v">The value's nature picks its lens: a source footprint offers <b>◉ Influence</b>; an attributed footprint offers <b>◎ Contribution</b> (Phase E).</span></div>
       <div class="state variant"><span class="k">EcoLogits values</span><span class="v">Values computed by EcoLogits show its computation code instead of a symbolic formula — same card, different formula block (as today).</span></div>
     </div>
   </div>
 </div>
 
-<!-- ============ PHASE C — WALK THE TRAIL ============ -->
-<div class="phase">
-  <span class="tag">C · Walk the trail</span><span class="conn">navigate the derivation in place, with history</span><span class="rule"></span>
-</div>
-
-<!-- screen 3 — navigation -->
+<!-- screen 5 — walk the trail -->
 <div class="screen">
   <div class="mock-col">
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="stage" style="min-height:330px">
         <div class="rpanel">
-          <div class="rphead"><span class="rt">Audit</span><span class="subtabs"><span class="subtab on">Value</span><span class="subtab">Map</span></span><span class="chev">×</span></div>
-          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">Total footprint</span><span class="sep">›</span><span class="cnode">Web server — Energy footprint</span><span class="sep">›</span><span class="cnode here">Web server — Hour by hour electricity consumption</span></div>
+          <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode here">Hour by hour electricity consumption</span></div>
           <div class="rpbody">
             <div class="vcard">
               <div class="vt">Hour by hour electricity consumption <span class="vo">· Web server (Server)</span> <span class="lazyfill">computed on demand · 0.2 s</span></div>
               <div class="docstring">Electricity drawn by the server each hour: idle power plus the power implied by the hourly
                 compute and memory needs of the jobs it runs, scaled by the number of active instances.</div>
-              <div class="vval">14.6 MWh <span class="vo">over the modeling period</span> <span class="openobj">Open object ↗</span></div>
+              <div class="vval">14.6 MWh <span class="vo">over the modeling period</span></div>
               <div class="formula" style="margin-top:.4rem">
                 <div class="fh">Formula</div>
                 <div class="eq">consumption = <span class="syms">a</span> + (<span class="syms">b</span> × <span class="syms">c</span>)</div>
@@ -460,16 +567,18 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Clicking input variable <b>a</b> on the previous screen navigated the surface <b>in place</b>: the breadcrumb grew, <b>‹</b> retraces. This value wasn't stored in the model file — the engine <b>computed it on demand</b> (the small grey chip), invisibly fast. A <b>Low</b>-confidence input surfaces two clicks from the headline total.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking input variable <b>a</b> on the previous screen navigated in place: the breadcrumb now reads <b>System › Web server › Hour by hour electricity consumption</b>; <b>‹</b> retraces. This value wasn't stored in the model file — the engine <b>computed it on demand</b> (grey chip), invisibly fast. A <b>Low</b>-confidence input surfaces two clicks from the headline total.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">3</span><h3>Click through the derivation — never lose the thread</h3></div>
-    <p>Every calculated input variable and every child is a link that navigates the audit surface itself. The breadcrumb is
-       the investigation's memory: where you started, how you got here, one click back to any step. Today the same walk means
-       opening a different object's side panel at every hop and holding the path in your head.</p>
+    <div class="step"><span class="n">5</span><h3>Click through the derivation — never lose the thread</h3></div>
+    <p>Every calculated input variable and every child is a link that navigates the audit view itself. The breadcrumb always
+       shows <b>where you are</b> — System › object › value, at most three nodes — and <b>‹ ›</b> replay <b>where you've
+       been</b>, however deep the walk. Crossing into another object's value simply rewrites the middle node; the history keeps
+       the whole investigation retraceable. Today the same walk means opening a different side panel at every hop and holding
+       the path in your head.</p>
     <div class="states">
-      <div class="state"><span class="k">In-place navigation</span><span class="v">Ancestors (upstream) and children (downstream) swap the value card — the surface, breadcrumb and history persist.</span></div>
-      <div class="state"><span class="k">History</span><span class="v"><b>‹ ›</b> move through visited values; breadcrumb nodes jump directly. Closing the surface returns to the canvas untouched.</span></div>
+      <div class="state"><span class="k">Location ≠ history</span><span class="v">Breadcrumb = current address (System › object › value), never longer. <b>‹ ›</b> = the visited sequence — a deep walk doesn't grow an unbounded trail.</span></div>
+      <div class="state"><span class="k">In-place navigation</span><span class="v">Ancestors (upstream) and children (downstream) swap the value card; crossing objects rewrites the breadcrumb's middle node.</span></div>
       <div class="state"><span class="k">Lazy depth</span><span class="v">Intermediate values aren't stored — the engine <b>pulls them on demand</b>, computing only the requested value's cone. Depth costs nothing until visited.</span></div>
       <div class="state"><span class="k">Weak links surface</span><span class="v">Provenance chips ride along the walk — a <b>Low</b> confidence or missing source deep in the trail is visible the moment it appears.</span></div>
       <div class="state deferred"><span class="k">Hourly zoom</span><span class="v">Expanding a timeseries chart to hourly resolution inside the audit view — later; daily covers the audit read.</span></div>
@@ -477,63 +586,131 @@
   </div>
 </div>
 
-<!-- ============ PHASE D — THE MAP ============ -->
+<!-- ============ PHASE D — THE INFLUENCE LENS ============ -->
 <div class="phase">
-  <span class="tag">D · The map</span><span class="conn">how objects feed each other — the macro view</span><span class="rule"></span>
+  <span class="tag">D · Influence</span><span class="conn">what shapes this footprint — the calculus, upstream, anchored</span><span class="rule"></span>
 </div>
 
-<!-- screen 4 — object-level dependency map -->
+<!-- screen 6 — influence lens -->
 <div class="screen">
   <div class="mock-col">
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="stage" style="min-height:330px">
         <div class="rpanel">
-          <div class="rphead"><span class="rt">Audit</span><span class="subtabs"><span class="subtab">Value</span><span class="subtab on">Map</span></span><span class="chev">×</span></div>
-          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">…</span><span class="sep">›</span><span class="cnode here">Web server — Energy footprint</span><span style="margin-left:auto" class="cnode">Focus on this value's ancestry ⌖</span></div>
+          <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode">Energy footprint</span><span class="sep">·</span><span class="cnode here">◉ Influence</span>
+            <span style="margin-left:auto" class="lenschips"><span class="lenschip on">Objects</span><span class="lenschip">Calculated attributes</span></span></div>
           <div class="rpbody">
-            <svg viewBox="0 0 400 250" role="img" aria-label="Object-level dependency map" font-family="Inter, system-ui, sans-serif">
-              <defs><marker id="marr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9CA3AF"/></marker></defs>
-              <rect x="10" y="20" width="88" height="30" rx="6" fill="#e8eaf4" stroke="#2D4675"/><text x="54" y="39" text-anchor="middle" font-size="9" fill="#2D4675">Video watchers</text>
-              <rect x="10" y="70" width="88" height="30" rx="6" fill="#e8eaf4" stroke="#2D4675"/><text x="54" y="89" text-anchor="middle" font-size="9" fill="#2D4675">France</text>
-              <rect x="128" y="20" width="88" height="30" rx="6" fill="#fff" stroke="#6B7280"/><text x="172" y="39" text-anchor="middle" font-size="9" fill="#4B5563">Streaming journey</text>
-              <rect x="128" y="70" width="88" height="30" rx="6" fill="#fff" stroke="#6B7280"/><text x="172" y="89" text-anchor="middle" font-size="9" fill="#4B5563">Streaming job</text>
-              <rect x="246" y="34" width="120" height="88" rx="7" fill="#fff" stroke="#2D4675" stroke-width="1.5"/>
-              <text x="306" y="50" text-anchor="middle" font-size="9.5" font-weight="600" fill="#111928">Web server</text>
-              <text x="256" y="66" font-size="8" fill="#2D4675">· Hour by hour compute need</text>
-              <text x="256" y="80" font-size="8" fill="#2D4675">· Hour by hour electricity cons.</text>
-              <text x="256" y="94" font-size="8" font-weight="700" fill="#2D4675">· Energy footprint ⌖</text>
-              <text x="256" y="108" font-size="8" fill="#2D4675">· Instances fabrication footprint</text>
-              <rect x="150" y="160" width="100" height="30" rx="6" fill="#ecfdf3" stroke="#15803d"/><text x="200" y="179" text-anchor="middle" font-size="9" fill="#15803d">System · Total</text>
-              <rect x="290" y="160" width="86" height="30" rx="6" fill="#fff" stroke="#6B7280"/><text x="333" y="179" text-anchor="middle" font-size="9" fill="#4B5563">SSD storage</text>
-              <line x1="98" y1="35" x2="126" y2="35" stroke="#9CA3AF" marker-end="url(#marr)"/>
-              <line x1="98" y1="85" x2="126" y2="85" stroke="#9CA3AF" marker-end="url(#marr)"/>
-              <line x1="216" y1="35" x2="244" y2="55" stroke="#9CA3AF" marker-end="url(#marr)"/>
-              <line x1="216" y1="85" x2="244" y2="78" stroke="#9CA3AF" marker-end="url(#marr)"/>
-              <line x1="98" y1="90" x2="248" y2="100" stroke="#9CA3AF" stroke-dasharray="3,3" marker-end="url(#marr)"/>
-              <line x1="296" y1="122" x2="220" y2="158" stroke="#9CA3AF" marker-end="url(#marr)"/>
-              <line x1="333" y1="122" x2="333" y2="158" stroke="#9CA3AF" marker-end="url(#marr)"/>
-              <line x1="330" y1="122" x2="252" y2="162" stroke="#9CA3AF" opacity="0"/>
-              <text x="20" y="230" font-size="8" fill="#6B7280">solid = feeds computations · dashed = carbon intensity read · ⌖ = the audited value</text>
+            <svg viewBox="0 0 400 240" role="img" aria-label="Influence view: objects whose inputs shape this footprint" font-family="Inter, system-ui, sans-serif">
+              <defs><marker id="iarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9CA3AF"/></marker></defs>
+              <rect x="10" y="14" width="120" height="46" rx="6" fill="#e8eaf4" stroke="#2D4675"/>
+              <text x="70" y="30" text-anchor="middle" font-size="9" font-weight="600" fill="#111928">Viewers</text>
+              <text x="70" y="43" text-anchor="middle" font-size="7.5" fill="#4B5563">hourly visits timeseries</text>
+              <text x="70" y="54" text-anchor="middle" font-size="7.5" fill="#4B5563">devices, network</text>
+              <rect x="10" y="72" width="120" height="46" rx="6" fill="#e8eaf4" stroke="#2D4675"/>
+              <text x="70" y="88" text-anchor="middle" font-size="9" font-weight="600" fill="#111928">Streaming journey</text>
+              <text x="70" y="101" text-anchor="middle" font-size="7.5" fill="#4B5563">step durations,</text>
+              <text x="70" y="112" text-anchor="middle" font-size="7.5" fill="#4B5563">jobs per step</text>
+              <rect x="10" y="130" width="120" height="46" rx="6" fill="#e8eaf4" stroke="#2D4675"/>
+              <text x="70" y="146" text-anchor="middle" font-size="9" font-weight="600" fill="#111928">Streaming job</text>
+              <text x="70" y="159" text-anchor="middle" font-size="7.5" fill="#4B5563">compute &amp; RAM per call,</text>
+              <text x="70" y="170" text-anchor="middle" font-size="7.5" fill="#4B5563">data transferred</text>
+              <rect x="10" y="188" width="120" height="40" rx="6" fill="#e8eaf4" stroke="#2D4675"/>
+              <text x="70" y="204" text-anchor="middle" font-size="9" font-weight="600" fill="#111928">France</text>
+              <text x="70" y="217" text-anchor="middle" font-size="7.5" fill="#4B5563">avg carbon intensity</text>
+              <rect x="180" y="88" width="120" height="60" rx="6" fill="#fff" stroke="#2D4675"/>
+              <text x="240" y="106" text-anchor="middle" font-size="9" font-weight="600" fill="#111928">Web server</text>
+              <text x="240" y="119" text-anchor="middle" font-size="7.5" fill="#4B5563">idle power, power/compute,</text>
+              <text x="240" y="130" text-anchor="middle" font-size="7.5" fill="#4B5563">RAM, compute capacity,</text>
+              <text x="240" y="141" text-anchor="middle" font-size="7.5" fill="#4B5563">server utilisation ratio</text>
+              <rect x="330" y="98" width="62" height="40" rx="7" fill="#2D4675"/>
+              <text x="361" y="114" text-anchor="middle" font-size="8" font-weight="600" fill="#fff">Energy</text>
+              <text x="361" y="126" text-anchor="middle" font-size="8" font-weight="600" fill="#fff">footprint</text>
+              <line x1="130" y1="37" x2="178" y2="95" stroke="#9CA3AF" marker-end="url(#iarr)"/>
+              <line x1="130" y1="95" x2="178" y2="108" stroke="#9CA3AF" marker-end="url(#iarr)"/>
+              <line x1="130" y1="153" x2="178" y2="125" stroke="#9CA3AF" marker-end="url(#iarr)"/>
+              <line x1="130" y1="205" x2="328" y2="126" stroke="#9CA3AF" stroke-dasharray="3,3" marker-end="url(#iarr)"/>
+              <line x1="300" y1="118" x2="328" y2="118" stroke="#9CA3AF" marker-end="url(#iarr)"/>
+              <text x="14" y="238" font-size="8" fill="#6B7280">each box lists its participating inputs · click a box → its object page</text>
             </svg>
           </div>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Map</b> view: objects as nodes, an arrow where one object's values feed another's — <b>expanded on click</b> to list the object's calculated attributes (Web server here, the audited value marked ⌖). <b>Focus ⌖</b> dims everything outside the current value's ancestry. Clicking an attribute jumps to its Value view.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Influence lens</b> for <em>Web server · Energy footprint</em>: only the objects <b>whose inputs shape this number</b>, each annotated with the participating inputs, arrows pointing at the audited footprint. The chip toggle switches to <b>Calculated attributes</b> — the same cone at attribute level, each object's lateral detail collapsed. Anchored, never global.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">4</span><h3>Zoom out — the dependency map</h3></div>
-    <p>The macro question — <em>"what depends on what in this model?"</em> — doesn't need seven hundred formula nodes; it needs
-       the <b>object-level</b> picture. The Map draws objects and their feed relationships, expands any object into its
-       calculated attributes on click, and focuses on one value's ancestry when you come from the Value view. It replaces the
-       old raw calculus-graph dump — same underlying graph, rendered at the altitude a human can read.</p>
+    <div class="step"><span class="n">6</span><h3>The Influence lens — what shapes this footprint</h3></div>
+    <p>The macro question, anchored: <em>"which objects' inputs influence this footprint?"</em> For one audited number the
+       answer is small — a handful of objects, each showing <em>which of its inputs</em> participate. This is where
+       non-obvious influences (the country's carbon intensity, a journey's frequency) become visible — the edges the model
+       canvas never draws. One zoom down, the same cone at calculated-attribute level shows <b>how</b> the influence travels.</p>
     <div class="states">
-      <div class="state"><span class="k">Object altitude</span><span class="v">Nodes = model objects; an edge = "values of A feed computations of B". Dozens of nodes, not hundreds.</span></div>
-      <div class="state"><span class="k">Expand on click</span><span class="v">A node unfolds to its calculated attributes; clicking one opens its <b>Value</b> view — Map and Value are two zooms of one surface.</span></div>
-      <div class="state"><span class="k">Focus mode</span><span class="v"><b>⌖</b> dims all nodes outside the current value's ancestry cone — "what could possibly influence this number" at a glance.</span></div>
-      <div class="state"><span class="k">Zero compute</span><span class="v">Rendered from the <b>calculation graph persisted in the model file</b> — no values needed, so the map is instant even before any lazy fill.</span></div>
-      <div class="state"><span class="k">Retirement</span><span class="v">The pyvis calculus-graph page (new-tab iframe) <b>retires</b> — legacy of the pre-product era, superseded by Value + Map.</span></div>
+      <div class="state"><span class="k">Objects altitude</span><span class="v">Nodes = the objects in this footprint's ancestry cone, annotated with their participating <b>inputs</b>; edges = "feeds". Typically 5–15 nodes — read at a glance.</span></div>
+      <div class="state"><span class="k">Attribute altitude</span><span class="v">The chip toggle re-renders the cone as the <b>scoped DAG of calculated attributes</b> across those same objects — the spine of the derivation; each object's lateral side-branches are <b>collapsed by default</b> (expandable). Node detail stays in the Value view.</span></div>
+      <div class="state"><span class="k">Anchored only</span><span class="v">There is no whole-model graph — every Influence view belongs to one audited footprint. (The System total's cone is the whole model; its Influence view is the one case that resembles a global map, reached deliberately.)</span></div>
+      <div class="state"><span class="k">Zero compute</span><span class="v">Both altitudes render from the <b>calculation graph persisted in the model file</b> — structure needs no values; values appear on hover/click via lazy pulls.</span></div>
+      <div class="state"><span class="k">Exits</span><span class="v">Click an object → its page; click an attribute node → its Value view; <b>×</b> on the lens → back to the Value it came from.</span></div>
+      <div class="state"><span class="k">Retirement</span><span class="v">The pyvis calculus-graph page (new-tab iframe) <b>retires</b> — legacy of the pre-product era, superseded by this lens.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE E — THE CONTRIBUTION LENS (increment 2) ============ -->
+<div class="phase alt">
+  <span class="tag">E · Contribution</span><span class="conn">which footprints land here, and why — the attribution, downstream · second increment</span><span class="rule"></span>
+</div>
+
+<!-- screen 7 — contribution lens -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:300px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Streaming job</span><span class="sep">›</span><span class="cnode">Attributed footprint</span><span class="sep">·</span><span class="cnode here">◎ Contribution</span></div>
+          <div class="rpbody">
+            <div class="oimp">
+              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="iv">2.6 t CO₂-eq</span><span class="ish">· attributed to Streaming job · 74% of system total</span></div>
+            </div>
+            <div class="orows">
+              <div class="oh">Where it comes from — contributions by impact source</div>
+              <div class="contrib">
+                <div class="cl1"><span class="on">Web server · Energy footprint</span><span class="ov">1.55 t · 60%</span><span class="go">›</span></div>
+                <div class="cbar"><i style="width:60%"></i></div>
+                <div class="cwhy">this job drives 60% of the server's compute-hours over the period</div>
+              </div>
+              <div class="contrib">
+                <div class="cl1"><span class="on">Web server · Fabrication footprint</span><span class="ov">0.74 t · 28%</span><span class="go">›</span></div>
+                <div class="cbar"><i style="width:28%"></i></div>
+                <div class="cwhy">fabrication follows the same usage share, over the server's lifespan</div>
+              </div>
+              <div class="contrib">
+                <div class="cl1"><span class="on">SSD storage · Energy + Fabrication</span><span class="ov">0.31 t · 12%</span><span class="go">›</span></div>
+                <div class="cbar"><i style="width:12%"></i></div>
+                <div class="cwhy">share of storage need written and held by this job's data</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Contribution lens</b> for <em>Streaming job</em>'s attributed footprint: one row per contributing <b>impact source footprint</b> — amount, share bar, and <b>why</b> (the share's rationale in words). Each row's <b>›</b> jumps into that source footprint's audit — its Value view and Influence lens — closing the loop between the two stories.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n alt">7</span><h3>The Contribution lens — why this object carries this weight</h3></div>
+    <p>The attribution story runs the other way: source footprints <b>distribute</b> down the consumption chain, and an
+       intermediate object's number is the sum of its shares. The Contribution lens makes each share defensible — which source,
+       how much, and <em>why that fraction</em> — and hands off to the calculus story per source. It's the differentiating
+       half of e-footprint's auditability, shipped as its own increment (<code>audit-attribution</code>) on the same surface.</p>
+    <div class="states">
+      <div class="state"><span class="k">Per-source rows</span><span class="v">Amount · share of the object's attributed total · the share's <b>rationale</b> in words (drawn from the attribution's own keys — usage-driven, capacity-driven…).</span></div>
+      <div class="state"><span class="k">Loop to calculus</span><span class="v">Each contribution links to the source footprint's Value view / <b>◉ Influence</b> — attribution explains the split, calculus defends the number being split.</span></div>
+      <div class="state"><span class="k">Lens by nature</span><span class="v">Attributed footprints offer <b>◎ Contribution</b>; source footprints offer <b>◉ Influence</b> — one surface, the audited value picks the lens.</span></div>
+      <div class="state"><span class="k">Sankey kinship</span><span class="v">The Sankey remains the <b>system-level</b> rendering of the same attribution truth; this lens is its per-object drill — same atoms, same totals, by construction.</span></div>
+      <div class="state deferred"><span class="k">Second increment</span><span class="v">Ships as <code>audit-attribution</code>, after the core <code>audit-mode</code> (pages · Value · Influence). Until then, attributed Value views show their calculus ancestry only.</span></div>
     </div>
   </div>
 </div>
@@ -542,41 +719,46 @@
 <h2 class="sec">Decisions taken</h2>
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
-  <tr><td><b>Audit is one navigable in-place surface (Value + Map), not side-panel hopping or a new-tab dump.</b></td><td>An audit is an investigation — it needs memory (breadcrumb, history) and a stable frame. Panel-bouncing loses the thread; the pyvis tab was a demo-era artefact with no navigation, explicitly not product vision.</td></tr>
-  <tr><td><b>The micro view keeps today's formula-expander anatomy and adds the docstring + inline provenance chips.</b></td><td>Input variables · formula · children is proven and already served by the library; what readers lacked was the value's <em>meaning</em> (docstrings exist as doc-as-code on every calculated attribute) and seeing the trail's end (source/confidence) without a detour.</td></tr>
-  <tr><td><b>One audit affordance (⌕ Audit) on every computed value, everywhere; views addressed by (object, attribute).</b></td><td>Discoverability comes from repetition of a single verb, not from one deep menu. Addressability makes every present and future surface (charts, badges, Sankey) a deep link for free.</td></tr>
-  <tr><td><b>The macro view is object-level first, attribute-level on expand.</b></td><td>Hundreds of slot nodes are noise (the failure mode of the current graph); dozens of object nodes are a map. The full detail remains one expand away, and Focus mode narrows to one value's ancestry.</td></tr>
-  <tr><td><b>Drill-down computes lazily; the map renders from the persisted calculation graph.</b></td><td>The engine's pull design makes depth free until visited (only the requested cone computes); the values-free topology is already in the model file, so the map needs zero computation ever. Nothing is precomputed for auditing.</td></tr>
-  <tr><td><b>Provenance semantics are unchanged; the inline ∑ expander retires into the audit surface.</b></td><td>Source/confidence stays metadata on inputs (audit-a-result Phase A carries over verbatim). Keeping a second, reduced derivation surface in the edit panel would drift from the audit view — one home, one click away, instead.</td></tr>
-  <tr><td><b>Timeseries render daily-aggregated in audit; hourly zoom deferred.</b></td><td>Consistency with Results; daily answers the audit read ("when and how much"). Hourly is reachable later without contract changes since intermediates compute on demand.</td></tr>
+  <tr><td><b>Audit is the third workspace mode, with a standalone gated entry beside Results — landing on the System page.</b></td><td>Auditability is the product's strongest asset; a capability reachable only by stumbling onto the right icon stays invisible (today's failure). The landing is an <em>index of auditable numbers</em> (total + per-source pairs), because an audit always starts from a number.</td></tr>
+  <tr><td><b>No whole-model dependency map.</b></td><td>The canvas already renders the model's structure; a global computational graph is anchored to nothing and repeats the pyvis failure one altitude up. The non-obvious edges (carbon intensity, journey frequency…) surface in the anchored Influence lens, where they're readable.</td></tr>
+  <tr><td><b>Two lenses on one surface, picked by the audited value's nature: ◉ Influence (upstream calculus) for source footprints, ◎ Contribution (downstream attribution) for attributed footprints.</b></td><td>The engine computes two different stories — how a footprint arises, and where it goes — with different directions, data and questions; one "Map" muddled them. But entries, navigation and the Value view are identical, so they're lenses of one mode, not two modes. Delivery splits accordingly: <code>audit-mode</code> (core calculus) then <code>audit-attribution</code>.</td></tr>
+  <tr><td><b>The Influence lens is object-altitude first (inputs annotated), scoped-DAG on toggle, lateral branches collapsed.</b></td><td>5–15 annotated objects answer "what shapes this number" at a glance; the attribute-level DAG shows the spine of <em>how</em>, with per-object elaboration one expand away and per-node detail in the Value view. Spine over completeness — completeness is what made the old graph unreadable.</td></tr>
+  <tr><td><b>The edit panel keeps only the impact header; the Calculated attributes accordion retires into the Object page.</b></td><td>The panel is an editor — its read-only job ends at the headline. The surface boundary matches the serialization boundary: the panel renders only persisted values (zero compute on open); the audit view computes on demand, scoped to what's asked.</td></tr>
+  <tr><td><b>One surface, one breadcrumb (System › object › value · lens); ‹ › history is separate from location.</b></td><td>Pages, Value views and lenses are places in one investigation. A location breadcrumb stays ≤ 4 nodes however deep the walk; history covers retracing.</td></tr>
+  <tr><td><b>The Value view keeps today's formula-expander anatomy and adds the docstring + inline provenance chips.</b></td><td>Input variables · formula · children is proven and already served by the library; what readers lacked was the value's <em>meaning</em> (docstrings exist as doc-as-code on every calculated attribute) and seeing the trail's end (source/confidence) without a detour.</td></tr>
+  <tr><td><b>One ⌕ Audit verb on every computed value; entries are addresses landing at the right place; the pyvis dump retires.</b></td><td>Discoverability comes from repetition of a single verb; addressability makes every present and future surface (charts, badges, Sankey) a deep link for free.</td></tr>
 </table>
 
 <!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— prospective: target shape + today's code anchors</span></summary>
   <div class="pbody">
-    <p><b>Status: prospective.</b> Feature spec to come in <code>specs/features/audit-mode/</code>. Today's anchors listed for
-      orientation; nothing of the target exists yet.</p>
+    <p><b>Status: prospective.</b> Two feature increments: <code>specs/features/audit-mode/</code> (pages · Value · Influence)
+      then <code>specs/features/audit-attribution/</code> (Contribution lens). Today's anchors listed for orientation; nothing
+      of the target exists yet.</p>
     <dl>
       <dt>Today's anchors (kept, moved, or retired)</dt>
-      <dd><b>Kept as content source:</b> the formula machinery — <code>get_calculated_attribute_explanation/&lt;id&gt;/&lt;attr&gt;/</code> → <code>ancestors_formula_and_children.html</code>, symbol mapping in <code>web_abstract_modeling_classes/explainable_objects_web.py</code>; hourly chart via <code>get_explainable_hourly_quantity_chart_and_explanation</code>. <b>Moved:</b> that content relocates from the edit panel's <code>calculated_attributes_section.html</code> rows (which keep only value + ⌕ Audit) into the audit surface. <b>Retired:</b> <code>display-calculus-graph/…</code> + <code>efootprint.utils.calculus_graph.build_calculus_graph</code> (pyvis) + the <code>SessionCacheRepository</code> <code>calculus_graph</code> namespace + <code>calculus_graph.html</code> iframe.</dd>
+      <dd><b>Kept as content source:</b> the formula machinery — <code>get_calculated_attribute_explanation/&lt;id&gt;/&lt;attr&gt;/</code> → <code>ancestors_formula_and_children.html</code>, symbol mapping in <code>web_abstract_modeling_classes/explainable_objects_web.py</code>; hourly chart via <code>get_explainable_hourly_quantity_chart_and_explanation</code>. <b>Moved:</b> the edit panel's <code>calculated_attributes_section.html</code> (+ per-type partials and the <code>object_belongs_to_computable_system</code> gating) retires entirely — content relocates to the Object page; the panel keeps only the impact header (<a href="impact-on-canvas.html">impact-on-canvas</a>; the accordion survives as a stopgap until audit-mode ships). <b>Retired:</b> <code>display-calculus-graph/…</code> + <code>efootprint.utils.calculus_graph.build_calculus_graph</code> (pyvis) + the <code>SessionCacheRepository</code> <code>calculus_graph</code> namespace + <code>calculus_graph.html</code> iframe.</dd>
+      <dt>Standalone entry</dt>
+      <dd>Rides the results-bar region (<code>components/results_bar_button.html</code> family) — gates on
+        <code>creation_constraints["__results__"]</code> like Results, same OOB lock/unlock region.</dd>
       <dt>Docstrings</dt>
       <dd>Runtime source: <code>computed_slots(cls)[attr].__doc__</code> (doc-as-code, placeholder-resolved via <code>placeholder_resolver.py</code>, test-enforced). ⚠ The interface's existing <code>efootprint_description_provider.calc_description()</code> still reads the retired <code>update_&lt;attr&gt;.__doc__</code> API — returns <code>None</code> against the pull-based library; re-point it here.</dd>
-      <dt>Library assets the surface reads</dt>
-      <dd>Ancestry/children per value (<code>direct_ancestors_with_id</code> / children, formula tuples on serialized slots); <b>lazy pulls</b> fill valueless intermediates on read (pull-based contract); the <b>values-free calculation graph</b> section of the model JSON (slot-level edges + labels) — group by owning object id for the Map's nodes/edges; provenance (<code>source</code>/<code>confidence</code>/<code>comment</code>) on input values.</dd>
+      <dt>Library assets per surface</dt>
+      <dd><b>System / Object pages:</b> serialized footprint slots + <code>calculated_attributes</code> / <code>computed_slots</code> for the row list (intermediates lazy-pulled on page open). <b>Value view:</b> ancestry/children per value (<code>direct_ancestors_with_id</code> / children, formula tuples on serialized slots); lazy pulls fill valueless intermediates. <b>Influence lens:</b> the ancestry cone of one slot from the persisted <b>values-free calculation graph</b> — object altitude = cone grouped by owning object id (leaf ancestors = the participating inputs); attribute altitude = the cone's slot DAG with per-object collapse (collapse rule is a plan-stage decision). <b>Contribution lens:</b> the attribution atoms behind the object's attributed footprint (per-source rows; share rationale from the atoms' chain semantics) — same data the Sankey folds, filtered to one object.</dd>
       <dt>Target shape (draft)</dt>
-      <dd>Audit surface = in-place overlay like the Results panel (HTMX partials; Value and Map as sub-views); navigation = address stack of <code>(object id, attr)</code> pairs held client-side, each hop one <code>hx-get</code>; Map = server-derived object-graph JSON rendered client-side (renderer TBD at plan stage — keep it dependency-light). Entry points post the address; chart/Sankey payloads must carry object ids (seam noted in <a href="analyse-results.html">analyse-results</a>).</dd>
+      <dd>Audit view = in-place overlay like the Results panel (HTMX partials). Location = <code>(object id?, attr?, lens?)</code>; navigation = client-held history stack of addresses, each hop one <code>hx-get</code>. Lens graphs = server-derived JSON rendered client-side (renderer TBD at plan stage — keep it dependency-light). Entry points post an address; chart/Sankey payloads must carry object ids (seam noted in <a href="analyse-results.html">analyse-results</a>).</dd>
       <dt>Supersession</dt>
-      <dd>At ship: replaces <a href="audit-a-result.html">audit-a-result</a> Phases B–C (derivation + calculus graph); its Phase A (provenance, Sources tab) carries over into the merged faithful journey. Banner off, hub pill off.</dd>
+      <dd>At ship: replaces <a href="audit-a-result.html">audit-a-result</a> Phases B–C (derivation + calculus graph); its Phase A (provenance, Sources tab) carries over into the merged faithful journey. Removes the edit panel's calculated-attributes accordion (see <a href="impact-on-canvas.html">impact-on-canvas</a>, which demotes it in the interim). Banner off, hub pill off.</dd>
     </dl>
   </div>
 </details>
 
 <footer>
-  Journey · audit-a-result — target · <b>prospective</b> — auditing becomes a place, not a scattered feature · normative for the
-  future <code>audit-mode</code> feature. Shares the canonical <code>&lt;style&gt;</code> toolkit from
-  <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
-  Hub: <a href="../index.html">design/index.html</a>.
+  Journey · audit-a-result — target · <b>prospective</b> — auditing becomes a place: build · read · trace · two lenses, one
+  surface · normative for the future <code>audit-mode</code> + <code>audit-attribution</code> features. Shares the canonical
+  <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see
+  <a href="../journey-authoring.md">journey-authoring.md</a>). Hub: <a href="../index.html">design/index.html</a>.
 </footer>
 
 </body>
