@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Public model sharing — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Public model sharing</h1>
+<p class="status">Status: Spec — under review · 2026-07-03</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <p>Today a modeling built at <a href="https://e-footprint.boavizta.org">e-footprint.boavizta.org</a>
+  lives at most 12 hours in an encrypted session cache, then disappears. The only way to persist or
+  transmit one is a JSON file download. There is consequently <strong>no way to reference a modeling
+  publicly</strong>: no stable URL to cite in an article, publish on a corporate transparency page,
+  or hand to a peer reviewer.</p>
+  <p>This feature lets a user publish a modeling as a <strong>long-lived, public, forkable web
+  page</strong> with a stable link, and lets anyone discover published modelings through a public,
+  searchable index.</p>
+  <table>
+    <tr><th>Persona</th><th>Problem solved</th></tr>
+    <tr><td>Company / product team practicing ecodesign</td>
+        <td>Publish a transparent, living account of the footprint of their digital service and the
+        effect of their ecodesign actions, updatable as the service evolves.</td></tr>
+    <tr><td>Green-IT writers and advocates (including the maintainer)</td>
+        <td>Illustrate articles with actual, explorable modelings rather than screenshots.</td></tr>
+    <tr><td>Journalists and researchers</td>
+        <td>Cite a modeling that readers and peers can open, audit down to every hypothesis, and
+        fork — with immutable version permalinks so a citation cannot silently change.</td></tr>
+    <tr><td>Readers / peers (no account)</td>
+        <td>Consult a shared modeling read-only and fork it into their own session to challenge
+        hypotheses, with zero sign-up friction.</td></tr>
+  </table>
+  <p><strong>Why now:</strong> e-footprint's differentiator is explainability — every value carries
+  its derivation. That value is currently locked inside private sessions. Public sharing turns each
+  published modeling into a demonstration of the methodology, compounding the tool's notoriety and
+  the transparency norms it promotes in the green-IT ecosystem.</p>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <p>Each criterion is user-observable and testable.</p>
+  <ul>
+    <li><strong>Publish:</strong> a signed-in user can publish the modeling in their current session
+    with a title, a set of tags chosen from a curated list, an optional link to the article or page
+    that references it, and a public author/organization name. Publishing yields a stable public
+    URL.</li>
+    <li><strong>View without an account:</strong> anyone opening a share link sees the modeling
+    read-only — objects, hypotheses, results and visualizations, with the usual explainability
+    (every value's derivation reachable) — without signing in.</li>
+    <li><strong>Fork without an account:</strong> from a shared modeling, any visitor can load a
+    copy into their own editing session and modify it freely. The fork is theirs; the original is
+    untouched. Forking requires no account (an account is only needed to <em>publish</em>).</li>
+    <li><strong>Update with history:</strong> the owner can publish a new version of their modeling.
+    The canonical link always shows the latest version; every previously published version remains
+    reachable at an immutable permalink, and the page makes it visible which version is displayed
+    and that history exists.</li>
+    <li><strong>Discover:</strong> a public index page lists all published modelings, searchable by
+    title and filterable by tag. Each entry shows title, author name, tags, last-update date, and
+    the article link when present.</li>
+    <li><strong>Thin accounts:</strong> a user can create an account with an email address only, and
+    must prove control of that email before publishing. The account exists solely to own published
+    modelings; it stores no personal data beyond the email (the public author name is chosen by the
+    user and displayed instead of the email, which is never shown publicly).</li>
+    <li><strong>Erasure:</strong> a user can delete any of their published modelings, and can delete
+    their account entirely (which deletes all their published modelings, breaking their share
+    links); both actions take effect immediately and are user-triggered, with no Boavizta-volunteer
+    involvement. The author owns the reference: publishing publicly does not strip them of control
+    over their data. Forks already published by others are independent modelings and are
+    unaffected.</li>
+    <li><strong>Abuse resistance:</strong> publishing is quota-bound (per-account limits on number
+    of published modelings, modeling size, and publish rate) so that a hostile script with a burner
+    email cannot meaningfully grow the database. Exceeding a quota produces a clear, non-destructive
+    error.</li>
+    <li><strong>Moderation:</strong> any visitor can report a published modeling, and an
+    administrator can unpublish one — covering illegal or abusive content without making volunteers
+    a routine editorial bottleneck.</li>
+    <li><strong>No private storage channel:</strong> there is no way to store a modeling server-side
+    beyond the existing ephemeral session other than publishing it publicly (public by
+    construction).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
+  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
+  <code>plan.html</code>, not here.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Thin user accounts: email-only sign-up with email verification; sign-in; account
+      deletion; a user-chosen public author/organization name.</li>
+      <li>Publishing the session's modeling as a public modeling: title, curated tags, optional
+      article backlink, author name.</li>
+      <li><strong>Public by construction:</strong> every long-lived stored modeling is public and
+      listed in the index. No private or unlisted drafts; the ephemeral session and the JSON
+      download remain the only private workspaces.</li>
+      <li>Read-only public view of a shared modeling, with full explainability and results
+      visualizations, accessible without an account.</li>
+      <li>Fork-to-session from any shared modeling (any version), without an account.</li>
+      <li>Versioning: canonical latest URL + immutable per-version permalinks + visible version
+      history.</li>
+      <li>Owner management: publish an update, edit metadata (title, tags, article link), delete a
+      published modeling.</li>
+      <li>Public index: search by title, filter by curated tags, sorted listing with basic
+      metadata.</li>
+      <li>Anti-abuse: per-account quotas (count, size, rate) and verified-email gate on
+      publishing.</li>
+      <li>Moderation: visitor-facing report action; administrator unpublish capability.</li>
+      <li>Legal surfaces: privacy notice, terms of use covering published-content ownership and the
+      reuse implied by forking, consent at account creation.</li>
+      <li>Governance-doc updates shipped with the feature: amend <code>specs/mission.md</code>
+      (public model library replaces the "no persistent per-user libraries" exclusion) and
+      <code>specs/roadmap.md</code>.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Private or unlisted long-lived modelings, in any form.</li>
+      <li>Multi-user collaborative editing of the same modeling (constitution §4; forking is the
+      collaboration model).</li>
+      <li>Social features: comments, likes, follower feeds, user profile pages beyond the author
+      name.</li>
+      <li>Full-text or semantic search inside modeling contents; search covers title and tags
+      only.</li>
+      <li>User-created tags (the tag list is curated; extending it is a maintainer action).</li>
+      <li>Third-party sign-in (OAuth/SSO), password-recovery flows beyond what the chosen auth
+      mechanism needs.</li>
+      <li>Embeddable widgets for articles (readers click through to the public view).</li>
+      <li>DOI minting or formal academic-citation tooling (immutable permalinks are the v1
+      citation mechanism).</li>
+      <li>Email notifications of any kind (e.g. "a modeling you forked was updated").</li>
+      <li>Automatic content-quality review of published modelings (publication is
+      self-service; moderation is reactive).</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <blockquote>The normative design surface is the prospective journey
+  <code>specs/design/journeys/share-a-model.html</code> (linked from the design hub), which walks
+  the full flow — publish · public page · fork · explore · owner management — in app-faithful
+  browser mocks. Iterate on the design there; the sketch below is the original spec-time
+  storyboard, kept as a compact summary.</blockquote>
+  <p>Three new surfaces. Click the tabs to switch screens; the publish dialog is clickable through
+  to its success state.</p>
+  <div class="mockup">
+    <div style="display:flex; gap:.5rem; margin-bottom:1rem;">
+      <button type="button" data-screen="publish" style="padding:.35rem .8rem; cursor:pointer;">1 · Publish dialog</button>
+      <button type="button" data-screen="view" style="padding:.35rem .8rem; cursor:pointer;">2 · Public modeling page</button>
+      <button type="button" data-screen="explore" style="padding:.35rem .8rem; cursor:pointer;">3 · Explore index</button>
+    </div>
+
+    <div id="screen-publish">
+      <p style="color:#666; font-size:.85rem;">Reached from a <em>Share</em> button in the model
+      builder. If not signed in, the email sign-in/verification step precedes this dialog.</p>
+      <div id="publish-form" style="border:1px solid #ccc; border-radius:8px; padding:1rem; max-width:34rem;">
+        <strong>Publish this modeling publicly</strong>
+        <p style="margin:.4rem 0; font-size:.9rem;">
+          <label>Title<br><input type="text" value="Streaming service — 2026 ecodesign baseline" style="width:100%;"></label></p>
+        <p style="margin:.4rem 0; font-size:.9rem;">Tags (curated list):<br>
+          <span style="border:1px solid #888; border-radius:12px; padding:.1rem .6rem; background:#eef;">video streaming</span>
+          <span style="border:1px solid #888; border-radius:12px; padding:.1rem .6rem; background:#eef;">ecodesign case study</span>
+          <span style="border:1px solid #ccc; border-radius:12px; padding:.1rem .6rem; color:#888;">+ add tag</span></p>
+        <p style="margin:.4rem 0; font-size:.9rem;">
+          <label>Article link (optional)<br><input type="url" placeholder="https://blog.example.com/our-ecodesign-journey" style="width:100%;"></label></p>
+        <p style="margin:.4rem 0; font-size:.9rem;">
+          <label>Public author name<br><input type="text" value="ACME Streaming – Sustainability team" style="width:100%;"></label></p>
+        <p style="background:#fff8e1; border:1px solid #e0c96e; border-radius:6px; padding:.5rem .7rem; font-size:.85rem;">
+          ⚠ This modeling will be <strong>public</strong>: listed in the explore index, visible and
+          forkable by anyone. Your email address is never displayed. There are no private saves.</p>
+        <button type="button" id="publish-btn" style="padding:.4rem 1rem; cursor:pointer;">Publish</button>
+      </div>
+      <div id="publish-success" style="display:none; border:1px solid #7bc47f; background:#f0fff0; border-radius:8px; padding:1rem; max-width:34rem;">
+        ✅ Published as <strong>version 1</strong>.<br>
+        Public link: <code>e-footprint.boavizta.org/shared/streaming-service-2026-baseline</code><br>
+        <span style="font-size:.85rem; color:#555;">Publishing an update later keeps this link
+        pointing to the latest version and adds a permalink for each previous version.</span>
+      </div>
+    </div>
+
+    <div id="screen-view" style="display:none;">
+      <p style="color:#666; font-size:.85rem;">What any visitor (no account) sees at a share link.</p>
+      <div style="border:1px solid #ccc; border-radius:8px; padding:1rem;">
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem;">
+          <div>
+            <strong style="font-size:1.1rem;">Streaming service — 2026 ecodesign baseline</strong><br>
+            <span style="font-size:.85rem; color:#555;">by ACME Streaming – Sustainability team ·
+            updated 2026-07-03 ·
+            <span style="border:1px solid #888; border-radius:12px; padding:0 .5rem;">video streaming</span>
+            <span style="border:1px solid #888; border-radius:12px; padding:0 .5rem;">ecodesign case study</span></span><br>
+            <span style="font-size:.85rem;">📄 Referenced by:
+            <a href="#">blog.example.com/our-ecodesign-journey</a></span>
+          </div>
+          <div style="text-align:right;">
+            <select style="padding:.2rem;">
+              <option>Version 3 (latest) — 2026-07-03</option>
+              <option>Version 2 — 2026-05-12</option>
+              <option>Version 1 — 2026-03-02</option>
+            </select><br>
+            <button type="button" style="margin-top:.4rem; padding:.35rem .9rem; cursor:pointer;">⑂ Fork into my session</button>
+            <a href="#" style="display:block; font-size:.75rem; color:#888; margin-top:.3rem;">Report this modeling</a>
+          </div>
+        </div>
+        <div style="margin-top:.8rem; border:1px dashed #bbb; border-radius:6px; padding:1.2rem; text-align:center; color:#888;">
+          Read-only modeling view — same results page as the builder (Sankey, hourly emissions,
+          sources, every value's derivation on click) with all editing actions absent.
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-explore" style="display:none;">
+      <p style="color:#666; font-size:.85rem;">Public index, linked from the site navigation.</p>
+      <div style="border:1px solid #ccc; border-radius:8px; padding:1rem;">
+        <input type="search" placeholder="Search modelings by title…" style="width:60%; padding:.3rem;">
+        <span style="font-size:.85rem; margin-left:.6rem;">
+          <span style="border:1px solid #888; border-radius:12px; padding:.1rem .6rem; background:#eef;">all</span>
+          <span style="border:1px solid #ccc; border-radius:12px; padding:.1rem .6rem;">video streaming</span>
+          <span style="border:1px solid #ccc; border-radius:12px; padding:.1rem .6rem;">AI service</span>
+          <span style="border:1px solid #ccc; border-radius:12px; padding:.1rem .6rem;">edge fleet</span></span>
+        <div style="margin-top:.8rem; display:grid; gap:.6rem;">
+          <div style="border:1px solid #ddd; border-radius:6px; padding:.6rem .8rem;">
+            <strong>Streaming service — 2026 ecodesign baseline</strong>
+            <span style="font-size:.8rem; color:#555;">— ACME Streaming · updated 2026-07-03 · 📄 article</span></div>
+          <div style="border:1px solid #ddd; border-radius:6px; padding:.6rem .8rem;">
+            <strong>Footprint of a national news website</strong>
+            <span style="font-size:.8rem; color:#555;">— J. Doe, Le Journal · updated 2026-06-18 · 📄 article</span></div>
+          <div style="border:1px solid #ddd; border-radius:6px; padding:.6rem .8rem;">
+            <strong>LLM chatbot vs. classic search — impact comparison</strong>
+            <span style="font-size:.8rem; color:#555;">— GreenIT Lab · updated 2026-06-02</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var mockup = document.currentScript.parentElement;
+        mockup.querySelectorAll('button[data-screen]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            ['publish', 'view', 'explore'].forEach(function (s) {
+              mockup.querySelector('#screen-' + s).style.display =
+                (s === btn.dataset.screen) ? '' : 'none';
+            });
+          });
+        });
+        mockup.querySelector('#publish-btn').addEventListener('click', function () {
+          mockup.querySelector('#publish-form').style.display = 'none';
+          mockup.querySelector('#publish-success').style.display = '';
+        });
+      })();
+    </script>
+  </div>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Data minimization is the pitch.</strong> Boavizta is a French non-profit that has
+    never handled personal data. The only personal data stored is the account email (plus the
+    user-chosen, deliberately public author name). This must remain literally true — it is the core
+    of the case to be made to the Boavizta board. GDPR obligations follow: consent at sign-up, a
+    privacy notice, self-service erasure, and a data-processing register entry for Boavizta.</li>
+    <li><strong>Board approval gates production.</strong> The feature must be deployable and
+    demonstrable on pre-production (<code>dev.e-footprint.boavizta.org</code>) while the Boavizta
+    board decision is pending; production activation is a deliberate, separate step.</li>
+    <li><strong>Public content needs terms.</strong> Publishing implies anyone may view and fork.
+    The terms of use must state the license/reuse regime of published modelings explicitly at
+    publish time. A draft license regime lives in <code>content-license.md</code> in this feature
+    folder; it requires Boavizta board validation alongside the personal-data pitch.</li>
+    <li><strong>Longevity across schema evolution.</strong> Published modelings (including old
+    version snapshots) are long-lived while the <code>efootprint</code> schema evolves; they must
+    remain viewable and forkable after library upgrades, leveraging the existing upgrade path that
+    session/JSON round-trips already rely on.</li>
+    <li><strong>Bounded storage.</strong> Long-lived storage on Boavizta's hosting (Clever Cloud)
+    is a new standing cost; quotas must keep it bounded and predictable. Quota values are a plan
+    decision, referenced symbolically here.</li>
+    <li><strong>Read traffic must be cheap.</strong> A share link may sit in a widely-read article;
+    anonymous read-only views must not inherit the per-request model-rebuild cost of the editing
+    session, and must not degrade builder performance for active sessions.</li>
+    <li><strong>Constitution:</strong> Clean Architecture layering and HTMX-first apply to all new
+    surfaces; multi-user collaborative editing stays rejected (§4). No constitution amendment is
+    required, but <code>mission.md</code> and <code>roadmap.md</code> must be amended deliberately
+    alongside this feature (mission currently excludes persistent per-user model libraries).</li>
+    <li><strong>Accessibility of trust signals:</strong> the public view must make it unmistakable
+    which version is shown, when it was published, and by whom (author name), so citations are
+    auditable.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ul>
+    <li><strong>Auth mechanism:</strong> passwordless magic-link vs. email + password. Outbound
+    email is a new operational dependency for Boavizta hosting <em>either way</em> (email
+    verification gates publishing), so the choice is purely about sign-in UX and whether a
+    credential hash is stored at all. Leaning passwordless (nothing to store, nothing to reset);
+    settle in <code>plan.html</code>.</li>
+    <li><strong>Author name placement:</strong> one display name per account vs. free-text per
+    modeling (a consultant publishing for several clients would want per-modeling).</li>
+    <li><strong>Initial curated tag list:</strong> which tags ship at launch, and what the process
+    is for extending the list.</li>
+    <li><strong>Moderation policy:</strong> who among Boavizta volunteers holds the unpublish
+    capability, and what response commitment (if any) is stated publicly.</li>
+    <li><strong>Content license:</strong> drafted in <code>content-license.md</code> (this folder)
+    — CC BY 4.0 proposed. Remaining open point: Boavizta board validation, alongside the
+    personal-data pitch.</li>
+    <li><strong>Fork provenance:</strong> when a fork is later published, should it visibly link
+    back to the modeling (and version) it was forked from? Cheap to capture at fork time,
+    impossible to reconstruct later.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <code>plan.html</code> (when written) for ordered steps and test gates.</li>
+    <li>Re-read <code>specs/architecture.md</code> (session/persistence and render layers) and
+    <code>specs/conventions.md</code> for code-style and architectural constraints.</li>
+    <li>Context: decisions locked at spec time — public-by-construction (no private/unlisted
+    saves), all published modelings listed in the index, latest-at-canonical-URL with immutable
+    version permalinks, accounts are email-only and exist solely to own published modelings,
+    account deletion cascades to the account's published modelings (author keeps agency over
+    their data; already-published forks by others are unaffected), published content carries the
+    license drafted in <code>content-license.md</code> (CC BY 4.0, pending board validation).</li>
+  </ol>
+</section>
+
+</body>
+</html>
