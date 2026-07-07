@@ -31,6 +31,7 @@
   .pill.web      { background: var(--lp); color: var(--accent); }
   .pill.edge     { background: #f3effb; color: var(--edge); }
   .pill.todo     { background: #fef2f2; color: #dc2626; }
+  .pill.prospect { background: #fef2f2; color: #dc2626; border: 1px dashed #dc2626; }
   .pill.next     { background: var(--accent); color: #fff; }
   .pill.soon     { background: #f3f2ef; color: #8a8a8a; }
   .ord { font-size: .6rem; font-weight: 700; color: var(--faint); border: 1px solid var(--line);
@@ -90,6 +91,30 @@
     <div class="desc">Trace any number to its inputs: <b>provenance</b> (every value's source &amp; confidence, the Sources view) and <b>derivation</b> (the inline formula → the calculus graph → cited inputs). The methodology home — currently distributed across the edit panel and Sources, poised to become first-class.</div>
   </a>
 
+  <a class="card" href="journeys/analyse-results.html">
+    <div class="name">analyse-results <span class="pill prospect">Prospective</span></div>
+    <div class="desc"><b>Target-state, not built.</b> The Results charts rebuilt as stackable, configurable emission chart
+      cards — breakdown angles mirroring the Sankey's "Analyse by", per-period / cumulative modes, per-card commentary
+      forming a saveable analysis report. Normative for <code>specs/features/results-analysis/</code>; supersedes
+      <em>view-results</em> Phases B–C when shipped.</div>
+  </a>
+
+  <a class="card" href="journeys/audit-a-result-target.html">
+    <div class="name">audit-a-result — target <span class="pill prospect">Prospective</span></div>
+    <div class="desc"><b>Target-state, not built.</b> The rebuilt audit mode: one navigable in-place surface — <b>⌕ Audit</b>
+      from any number, a Value view (docstring · formula · cited inputs), breadcrumb navigation through the derivation, and an
+      object-level dependency Map. Retires the pyvis graph dump. Normative for the future <code>audit-mode</code> feature;
+      supersedes <em>audit-a-result</em> Phases B–C when shipped.</div>
+  </a>
+
+  <a class="card" href="journeys/impact-on-canvas.html">
+    <div class="name">impact-on-canvas <span class="pill prospect">Prospective</span></div>
+    <div class="desc"><b>Target-state, not built.</b> Footprint badges on every object card, a live system-total badge on the
+      Results bar, and an edit panel that leads with the object's impact (share of total, phase split, audit entry) — updated
+      precisely after every save. Normative for the future <code>impact-on-canvas</code> feature; folds into
+      <em>build-a-model</em> when shipped.</div>
+  </a>
+
   <a class="card" href="journeys/compare-models.html">
     <div class="name">compare-models</div>
     <div class="desc">The second model slot and the comparison dashboard: KPI strip, decomposition bars, paired &amp; cumulative emissions charts, assumptions diff. Reached via the ⇄ Compare tab — non-destructive, dismiss in place.</div>
@@ -120,7 +145,9 @@
 <p class="tagline" style="font-size:.9rem;margin-top:.8rem;">Specs and plans are already authored as self-contained HTML in this repo (<a href="../workflow.md">workflow.md</a>) — journeys are the same posture. See the <a href="README.md">README</a> for the sync protocol with design work.</p>
 
 <footer>
-  e-footprint-interface design hub · all six journeys live (build-a-model is the reference) · tokens &amp; components: the live <code>/design</code> route.
+  e-footprint-interface design hub · six faithful journeys live (build-a-model is the reference) + three <b>prospective</b>
+  (analyse-results · audit-a-result — target · impact-on-canvas — target-state, banner-marked) · tokens &amp; components:
+  the live <code>/design</code> route.
 </footer>
 
 </body>

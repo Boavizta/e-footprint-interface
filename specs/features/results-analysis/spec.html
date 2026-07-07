@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Results analysis — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Results analysis — configurable emission chart cards</h1>
+<p class="status">Status: Spec — under review · 2026-07-03 · Normative UX:
+<a href="../../design/journeys/analyse-results.html">specs/design/journeys/analyse-results.html</a> (prospective journey)</p>
+
+<blockquote><b>Thin spec by design.</b> This feature is design-heavy, so the UX substance — screens, states,
+decisions — is authored as the prospective <b>analyse-results journey</b> (link above), which is <em>normative</em> for
+this feature. This file binds the feature into the spec-driven workflow at the capability level: problem, success
+criteria, scope, constraints. Same pattern as the pull-based-computation thin spec + rich companion.</blockquote>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <ul>
+    <li><b>Problem.</b> The Results panel's carbon charts are a read-only dead end: two fixed charts, one fixed
+      breakdown (broad object categories), no way to see emissions over time for any other angle — per usage journey,
+      per job, per country — even though the modeling engine attributes impact at exactly that granularity. Nor is
+      there any way to keep an analysis: a user who finds an insight can only screenshot it; nothing of the reading
+      survives in the model file.</li>
+    <li><b>Audience.</b> The primary persona (non-technical product person) reads the default view unchanged and gains
+      "one more chart from another angle" with a single control. Technical and methodology users (engineers,
+      consultants, sustainability teams) compose multi-view, annotated analyses they can hand to stakeholders — the
+      depth-on-demand posture of <code>mission.md</code>.</li>
+    <li><b>Why now.</b> The library's pull-based results contract (and its companion attributed-footprints feature)
+      makes per-object impact series cheap, persisted, and consistent with the Sankey by construction — the data this
+      feature needs is about to exist natively. And the Sankey card stack has proven the interaction pattern
+      (configurable analysis views as stackable cards with persisted settings); this feature generalizes it to the
+      time dimension.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <p>Each criterion is user-observable and testable.</p>
+  <ul>
+    <li><b>Default parity.</b> Opening Results on a computed model with no saved chart config shows the same
+      information as today: per-period (yearly) and cumulative emissions by object category, with the split
+      Fabrication / Usage legend — no configuration required.</li>
+    <li><b>Any angle.</b> On a card, the user can choose any breakdown offered for the classes present in their model
+      (object category, hardware, usage patterns, usage journeys, steps/functions, jobs/component needs, countries),
+      switch between per-period and cumulative modes, change granularity (month/year) and lifecycle phase, and the
+      chart re-renders without a page reload.</li>
+    <li><b>Conservation.</b> Every stacked chart sums to the system total for the same period and phase selection
+      (within display rounding) — including an explicit "Not attributable to …" remainder series when the chosen
+      angle does not cover all flows. Chart values agree with the Sankey and the total footprint for equivalent
+      selections.</li>
+    <li><b>Stack and order.</b> The user can add chart cards, delete them, retitle them, and reorder them; the stack
+      renders in the chosen order.</li>
+    <li><b>Commentary.</b> The user can attach plain-text commentary to any card, edited in place; saving commentary
+      or a title never recomputes the model and never reloads the chart.</li>
+    <li><b>Persistence.</b> Cards — settings, titles, order, commentary — survive closing/reopening the panel, a
+      session reload, and a model export → import round-trip.</li>
+    <li><b>No recompute on view.</b> Opening Results on an already-computed model triggers no model recomputation;
+      chart data is derived from persisted results.</li>
+    <li><b>Gate preserved.</b> The Results entry points still gate on model computability with the live validation
+      reason (behavior unchanged from today).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor instructions, and
+  "mirror pattern X" decisions live in <a href="plan.html">plan.html</a>.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Replace the two fixed CO2 charts with a stack of configurable emission chart cards (one card type;
+        per-period / cumulative modes; breakdown, granularity, phase, small-contributor aggregation settings).</li>
+      <li>Default card stack reproducing today's view for unconfigured models.</li>
+      <li>Add / delete / retitle / reorder cards; per-card plain-text commentary.</li>
+      <li>Persistence of the card stack in the model file's UI configuration (same posture as Sankey cards).</li>
+      <li>Series tooltips carrying object identity, value, and share of period total; object identity present in the
+        chart data (the seam for future click-through to object panels and audit mode).</li>
+      <li>Retirement of the interface-side per-category emissions aggregation in favor of the library's results
+        (single source of modeling truth).</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Impact badges on object cards, side-panel impact header, and the audit-mode rebuild — separate features
+        slicing off later prospective journeys.</li>
+      <li>Day-level granularity in the UI (the data contract already supports it; UI toggle deferred).</li>
+      <li>Report output (print / PDF / share rendering of the stack) and rich-text commentary.</li>
+      <li>Clicking a chart series to navigate anywhere (tooltip only in this iteration).</li>
+      <li>The Sankey section, Sources tab, and xlsx export — unchanged.</li>
+      <li>The companion library feature (serialized daily attributed footprints) — specified and driven from the
+        e-footprint repository; this feature consumes its released contract.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The <b>prospective journey is the normative UX description</b>:
+    <a href="../../design/journeys/analyse-results.html"><code>specs/design/journeys/analyse-results.html</code></a> —
+    screens, states, copy, and the "Decisions taken" table. Summary shape:</p>
+  <div class="mockup">
+    <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif" font-size="11" role="img" aria-label="Card stack overview">
+      <rect x="10" y="10" width="380" height="190" rx="8" fill="#fff" stroke="#888"/>
+      <text x="200" y="30" text-anchor="middle" font-weight="600">Results panel</text>
+      <rect x="25" y="42" width="350" height="62" rx="6" fill="#f9fafb" stroke="#aaa"/>
+      <text x="35" y="58" font-weight="600" font-size="10">Yearly CO2 emissions · ✎ ↑ ↓ ⚙ ✕</text>
+      <text x="35" y="72" font-size="9" fill="#555">by object category · per period (Year)</text>
+      <rect x="35" y="78" width="60" height="18" fill="#2D4675"/><rect x="105" y="74" width="60" height="22" fill="#2D4675"/><rect x="175" y="70" width="60" height="26" fill="#2D4675"/><rect x="245" y="66" width="60" height="30" fill="#2D4675"/>
+      <rect x="25" y="112" width="350" height="56" rx="6" fill="#f9fafb" stroke="#aaa"/>
+      <text x="35" y="128" font-weight="600" font-size="10">Server load — which jobs dominate? · ✎ ↑ ↓ ⚙ ✕</text>
+      <text x="35" y="142" font-size="9" fill="#555">by job · cumulative · Usage only</text>
+      <text x="35" y="158" font-size="9" fill="#666" font-style="italic">"The inference job accounts for two thirds…" (commentary)</text>
+      <rect x="25" y="176" width="350" height="16" rx="6" fill="#fff" stroke="#999" stroke-dasharray="4,3"/>
+      <text x="200" y="188" text-anchor="middle" font-size="9" fill="#2D4675">＋ Add another chart</text>
+      <rect x="420" y="42" width="210" height="126" rx="8" fill="#fafafa" stroke="#888"/>
+      <text x="525" y="62" text-anchor="middle" font-weight="600" font-size="10.5">Per-card settings</text>
+      <text x="432" y="82" font-size="9.5">Break down by · [class groups]</text>
+      <text x="432" y="98" font-size="9.5">Mode · Per period / Cumulative</text>
+      <text x="432" y="114" font-size="9.5">Granularity · Year / Month</text>
+      <text x="432" y="130" font-size="9.5">Lifecycle phase · All / Fab / Usage</text>
+      <text x="432" y="146" font-size="9.5">Aggregation · fold small into "Other"</text>
+      <text x="432" y="162" font-size="9.5">Commentary · plain text</text>
+      <line x1="390" y1="105" x2="418" y2="105" stroke="#555" stroke-dasharray="4,3"/>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><b>Constitution §1.3 — the library is the domain truth.</b> All attribution and aggregation of impact values
+      happens in the efootprint library; the interface renders. No interface-side re-implementation of emissions
+      math survives this feature.</li>
+    <li><b>Constitution §1.4 — HTMX-first, minimize JS.</b> Card management is partial-update driven; client JS is
+      limited to chart rendering.</li>
+    <li><b>Dependency.</b> Requires a released <code>efootprint</code> carrying the pull-based results contract and
+      the companion attributed-footprints feature (serialized daily attributed footprints for non-impact-source
+      objects). Quality gate §2.4 (PyPI pin) applies before merge.</li>
+    <li><b>Performance.</b> Binding constraints are session-store weight and JSON round-trips, not CPU
+      (<code>specs/architecture.md</code>): viewing results must not recompute the model; chart payloads are rolled
+      up server-side to the requested granularity so they stay small on large models.</li>
+    <li><b>Prospective-journey discipline.</b> Until this feature ships, <code>view-results</code> remains the
+      faithful journey; <code>analyse-results</code> carries a prospective banner and supersedes view-results
+      Phases B–C at ship time.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ul>
+    <li><b>Remainder semantics</b> — the journey decides on an explicit "Not attributable to …" series so stacks
+      always sum to the system total. Ratify or amend (alternative: partial stacks with a caption).</li>
+    <li><b>Phase handling on object-level breakdowns</b> — the journey decides phases sum per object by default
+      (category view keeps the split legend). Ratify or amend.</li>
+    <li><b>Default stack composition</b> — two cards (per-period + cumulative, by category). Ratify or amend.</li>
+    <li><b>Card titles</b> — auto-generated from settings with inline rename. Ratify or amend.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read the normative journey:
+      <code>specs/design/journeys/analyse-results.html</code> (prospective — screens, states, decisions).</li>
+    <li>Read <a href="plan.html"><code>plan.html</code></a> for the implementation approach, affected modules and the
+      library dependency.</li>
+    <li>Re-read <code>specs/architecture.md</code> and <code>specs/conventions.md</code> for layering and style
+      constraints; <code>view-results</code> and the Sankey card code are the patterns being generalized.</li>
+  </ol>
+</section>
+
+</body>
+</html>

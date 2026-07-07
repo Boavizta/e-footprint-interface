@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Results analysis — Implementation plan (draft)</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Results analysis — Implementation plan</h1>
+<p class="status">Status: <b>DRAFT</b> — produced by <code>spec-specify</code> because the kickoff conversation was
+design-rich; to be refined during the <code>spec-plan</code> stage · 2026-07-03 · Spec: <a href="spec.html">spec.html</a> ·
+Normative UX: <a href="../../design/journeys/analyse-results.html">analyse-results journey</a> (prospective)</p>
+
+<section>
+  <h2>1. Approach</h2>
+  <p>Mirror the Sankey card architecture end to end — routes, views, templates, <code>interface_config</code>
+  persistence — for a new chart-card family, and move all series math to the library. The interface's
+  <code>EmissionsCalculationService</code> (daily-per-category aggregation feeding <code>window.emissions</code>)
+  retires; chart series are folds over the library's persisted results: <b>impact-source classes</b> fold the
+  serialized hourly footprint pairs (reduced to daily on read), <b>all other classes</b> read the serialized daily
+  attributed-footprint projections delivered by the companion library feature. Chart.js remains the renderer; the
+  existing <code>result_charts</code> bundle (rollups, split-capsule legend, tooltips) is refactored from
+  two-hardcoded-charts to card-config-driven.</p>
+  <p>Data flow per card: HTMX <code>POST chart-diagram/</code> with the card's settings → view builds the series
+  payload via a thin adapter over library accessors (no attribution math interface-side) → template swaps the card's
+  chart region → JS draws. Card CRUD, reorder and commentary are sibling endpoints persisting
+  <code>interface_config["result_charts"]</code> via <code>persist_to_cache()</code>, exactly like
+  <code>sankey_views.py</code> does for <code>["sankey_diagrams"]</code>.</p>
+</section>
+
+<section>
+  <h2>2. Dependency — companion library feature (blocks implementation)</h2>
+  <p>Driven from <code>e-footprint/specs/features/</code> (library repo); contract settled in the 2026-07-03
+  discussion:</p>
+  <ul>
+    <li>Per non-impact-source object and phase: hourly <code>attributed_energy_footprint</code> /
+      <code>attributed_fabrication_footprint</code> as ordinary non-serialized <code>@computed_attribute</code>s
+      (lazy intermediates, full ancestry), plus a <b>daily</b> reduction projection slot per phase flagged
+      <code>@lazy_attribute(serialize=True)</code> — computed on first read, persisted, invalidated by the ordinary
+      deletion wave. Requires a uniform-step daily explainable-timeseries type (sibling of
+      <code>ExplainableHourlyQuantities</code>).</li>
+    <li>Impact sources unchanged (serialized hourly pairs); <code>impact_repartition_matrix</code> unchanged (lazy
+      period sums — Sankey only).</li>
+    <li>Remainder invariant: per breakdown class, system total − Σ(attributed daily of that class) = the
+      "Not attributable" series; conservation guaranteed by attribution, asserted in tests.</li>
+    <li>Perf gates to measure there: added JSON weight (daily projections, est. ~1–2&nbsp;MB compressed on the big
+      fixture) and per-edit dirty-cone attribution cost (decides eager-vs-lazy pull policy for badges later; this
+      feature only reads persisted values).</li>
+  </ul>
+  <p>This interface feature starts when that contract is on a released <code>efootprint</code> (quality gate §2.4:
+  PyPI pin before merge; local co-dev via editable install meanwhile).</p>
+</section>
+
+<section>
+  <h2>3. Affected modules</h2>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change type</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>model_builder/adapters/views/chart_card_views.py</code></td><td>new</td>
+        <td>Mirrors <code>sankey_views.py</code>: <code>chart_cards</code>, <code>chart_card_form</code>,
+        <code>chart_diagram</code>, <code>chart_delete_card</code>, <code>chart_move_card</code> (↑↓),
+        <code>chart_card_commentary</code> (config-only save). Breakdown option gating reuses the Sankey's
+        present-classes logic.</td></tr>
+      <tr><td><code>model_builder/domain/services/chart_series_service.py</code></td><td>new</td>
+        <td>Thin adapter: card settings → series payload. Reads library accessors only (daily reductions of source
+        pairs; daily attributed projections; category grouping via <code>System.energy_footprints</code> /
+        <code>fabrication_footprints</code>). Computes remainder series and "Other" aggregation folding. No Django
+        imports (constitution §1.1).</td></tr>
+      <tr><td><code>model_builder/domain/services/emissions_calculation_service.py</code></td><td>removed</td>
+        <td>Retired with <code>ModelWeb.system_emissions</code> and the inline <code>window.emissions</code>
+        payload. Comparison dashboard usage (if any) migrates to the same service — verify
+        <code>comparison_charts.js</code> feeds during spec-plan refinement.</td></tr>
+      <tr><td><code>templates/model_builder/result/chart_section.html</code>, <code>chart_card.html</code>,
+        <code>chart_diagram.html</code></td><td>new</td>
+        <td>Replace <code>result_graph.html</code> inside <code>result_panel.html</code>. Card = header (editable
+        title, ↑↓, ⚙, ✕) + settings form (hx-post, 300ms debounce like Sankey) + chart canvas + commentary block.
+        Data via <code>data-chart</code> attribute (no inline globals).</td></tr>
+      <tr><td><code>theme/static/scripts/result_charts/</code></td><td>modified</td>
+        <td>From two fixed charts to config-driven: one <code>drawChartCard(el)</code> reading
+        <code>data-chart</code>; keep <code>timeseries_utils.js</code> rollups, <code>legend.js</code> split-capsule
+        (category view) + flat capsules (object views), <code>tooltip.js</code>. Per-object palette: shade ramps off
+        the existing category base colors; deterministic by object id.</td></tr>
+      <tr><td><code>interface_config["result_charts"]</code></td><td>new key</td>
+        <td>List of card dicts: <code>{id, title, breakdown, mode, granularity, phase,
+        aggregation_threshold_percent, commentary, order}</code>. Absent key → default two-card stack (parity).
+        Written via <code>persist_to_cache()</code>; travels with export/import like
+        <code>["sankey_diagrams"]</code>.</td></tr>
+      <tr><td>Series payload (view → JS)</td><td>new contract</td>
+        <td><code>{card_id, mode, granularity, display_unit, periods: [...], series: [{efootprint_id, label, color,
+        group?, values: [...], tooltip_html?}], remainder?}</code> — <b>object ids in the payload</b> (audit seam);
+        rollup to requested granularity server-side so payload stays small on big models.</td></tr>
+      <tr><td><code>model_builder/urls.py</code></td><td>modified</td><td>Routes for the six chart-card endpoints.</td></tr>
+      <tr><td><code>specs/design/journeys/analyse-results.html</code></td><td>exists (prospective)</td>
+        <td>At ship: banner off, supersedes <code>view-results</code> Phases B–C, hub card pill removed.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>4. Cross-cutting concerns</h2>
+  <ul>
+    <li><strong>Tests:</strong> unit — <code>chart_series_service</code> (per-breakdown series, conservation incl.
+      remainder, aggregation folding, granularity rollups, phase handling); integration — card CRUD/reorder/
+      commentary round-trip through <code>interface_config</code> incl. export→import; default-stack parity when key
+      absent; Jest — <code>drawChartCard</code> config-driven rendering, legend behaviors; E2E (one critical flow) —
+      open results → add card → change breakdown → commentary → reload → stack intact.</li>
+    <li><strong>Migrations:</strong> no DB change. JSON: new <code>interface_config</code> key with absent-key
+      default (no upgrade function needed); requires the companion library feature's serialization contract
+      (efootprint version bump handles legacy files by lazy recompute — its concern, not ours).</li>
+    <li><strong>Docs:</strong> <code>specs/architecture.md</code> — replace the emissions-service description with
+      the chart-card pipeline + <code>interface_config["result_charts"]</code>; design hub — flip the prospective
+      pill at ship; <code>CHANGELOG.md</code> entry (quality gate §2.6).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. Risks</h2>
+  <ul>
+    <li><b>Series explosion on object breakdowns</b> (e.g. 50 jobs): mitigated by the aggregation slider (default
+      threshold folds the tail into "Other") and phase-summing default; palette must stay legible — cap distinct
+      hues, ramp within groups.</li>
+    <li><b>Payload weight on big models:</b> mitigated by server-side rollup (month/year points only; daily stays
+      server-side until a Day toggle ships).</li>
+    <li><b>Default-view parity regressions:</b> the old and new category series must match numerically; add a
+      pinned-fixture comparison test before retiring the old service.</li>
+    <li><b>Comparison dashboard coupling:</b> <code>comparison_charts.js</code> shares the bundle and may consume
+      <code>window.emissions</code> — audit and migrate or isolate before retirement (spec-plan refinement item).</li>
+    <li><b>Library release timing:</b> feature blocked on the companion contract; keep stages separable so template/JS
+      work can proceed against a local editable install.</li>
+    <li><b>Commentary injection:</b> plain text rendered escaped (Django autoescape); no HTML pass-through.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Alternatives considered</h2>
+  <ul>
+    <li><b>Time-bucketed repartition matrix as the chart data source</b> — rejected: atom-resolution × time is
+      over-resolution for chart consumers (they fold to object × phase × time immediately); would rework a
+      just-ratified contract; per-object attributed slots are smaller, incrementally invalidated, and natively
+      auditable. (2026-07-03 discussion.)</li>
+    <li><b>Monthly (or hourly) attributed projections</b> — monthly rejected in favor of daily: daily is
+      uniform-step (simpler type), matches the existing client daily contract, folds exactly to month/year, and
+      keeps a future Day toggle data-free. Hourly rejected: tens of MB for symmetry no consumer reads; hourly stays
+      a lazy pull.</li>
+    <li><b>Keep <code>EmissionsCalculationService</code> alongside the new path</b> — rejected: two aggregation
+      truths drift; constitution §1.3.</li>
+    <li><b>ECharts for the time charts (align with Sankey)</b> — rejected for this feature: Chart.js is already
+      bundled, tested, and sufficient; a renderer migration is orthogonal scope.</li>
+    <li><b>One mega-configurable chart instead of stackable cards</b> — rejected: same rationale as the Sankey's
+      stacked views; comparing angles side by side beats reconfiguring one artefact, and cards give the report its
+      structure.</li>
+    <li><b>Drag-and-drop reorder</b> — rejected: constitution §1.4; ↑↓ buttons are two HTMX posts.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Constitutional notes</h2>
+  <p>§1.1 respected: the series service lives in <code>domain/</code> with no Django imports. §1.3 actively
+  reinforced: this feature <em>removes</em> an interface-side re-implementation of emissions aggregation. §1.4:
+  HTMX partials for all card management; JS confined to chart drawing. §2.4: merge gated on a released efootprint
+  carrying the companion contract. Nothing in §4 is touched.</p>
+</section>
+
+<section>
+  <h2>8. Open questions (resolve before tasks)</h2>
+  <ul>
+    <li>Ratify the journey's product calls flagged in spec §6 (remainder series, phase handling, default stack,
+      auto-titles).</li>
+    <li>Comparison dashboard: migrate its data feed in this feature or fence it off for a follow-up?</li>
+    <li>Palette mechanics for object-level series (shade ramps vs extended categorical palette) — pick during
+      spec-plan refinement with a rendered sample.</li>
+    <li>Commentary save path: dedicated endpoint (proposed) vs riding the card-form post.</li>
+    <li>Exact default aggregation threshold for object breakdowns (Sankey defaults 1%).</li>
+  </ul>
+</section>
+
+</body>
+</html>

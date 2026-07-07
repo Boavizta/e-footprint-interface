@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — audit-a-result · target (prospective)</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- audit-a-result-target only: PROSPECTIVE banner, the audit surface, value card, map ---- */
+  .role.prospect { background: var(--danger-bg); color: var(--danger); }
+  .prospect-banner { background: var(--danger-bg); border: 1px solid #f7cfca; border-left: 4px solid var(--danger);
+        border-radius: 8px; padding: .7rem .9rem; font-size: .9rem; color: var(--muted); margin: 1rem 0 1.4rem; }
+  .prospect-banner b.h { color: var(--danger); text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; }
+  .prospect-banner b { color: var(--ink); }
+  /* the audit surface (in-place overlay, like the Results panel) */
+  .rpanel { position: absolute; inset: 0; background: #fff; display: flex; flex-direction: column; }
+  .rphead { display: flex; align-items: center; gap: .5rem; padding: .4rem .55rem; border-bottom: 1px solid var(--line); }
+  .rphead .rt { font-size: .8rem; font-weight: 700; color: var(--ink); }
+  .rphead .chev { margin-left: auto; color: var(--muted); }
+  .subtabs { display: flex; gap: .3rem; }
+  .subtab { font-size: .62rem; padding: .16rem .5rem; border-radius: 7px; color: var(--faint); background: var(--g100); }
+  .subtab.on { background: var(--lp); color: var(--primary); font-weight: 600; }
+  .rpbody { padding: .5rem; overflow: auto; display: grid; gap: .5rem; align-content: start; }
+  /* breadcrumb trail of visited values */
+  .crumbtrail { display: flex; align-items: center; flex-wrap: wrap; gap: .2rem; font-size: .56rem; color: var(--faint);
+        padding: .3rem .55rem; border-bottom: 1px solid var(--line); background: var(--g50); }
+  .crumbtrail .backfwd { color: var(--primary); font-weight: 700; margin-right: .3rem; }
+  .crumbtrail .cnode { color: var(--primary); } .crumbtrail .cnode.here { color: var(--ink); font-weight: 600; }
+  .crumbtrail .sep { color: var(--g350); }
+  /* the value card (micro view) */
+  .vcard { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .55rem; }
+  .vcard .vt { font-size: .7rem; font-weight: 700; color: var(--ink); }
+  .vcard .vo { font-size: .56rem; color: var(--faint); }
+  .vcard .vval { font-size: .82rem; font-weight: 700; color: var(--primary); margin: .2rem 0; }
+  .vcard .vval .openobj { font-size: .56rem; font-weight: 600; color: var(--primary); margin-left: .5rem; }
+  .docstring { background: var(--newlight); border: 1px solid #cfe6ea; border-radius: 7px; padding: .35rem .5rem;
+        font-size: .6rem; color: var(--muted); font-style: italic; margin: .25rem 0; line-height: 1.5; }
+  /* formula anatomy (kept from today's expander) */
+  .formula { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .5rem .6rem; }
+  .formula .fh { font-size: .56rem; text-transform: uppercase; letter-spacing: .03em; color: var(--faint); font-weight: 700; margin: .55rem 0 .15rem; }
+  .formula .fh:first-child { margin-top: 0; }
+  .formula .eq { font-family: ui-monospace, Menlo, monospace; font-size: .68rem; color: var(--ink); background: #fff;
+                 border: 1px solid var(--g200); border-radius: 5px; padding: .3rem .4rem; }
+  .formula .var { font-size: .62rem; color: var(--muted); margin: .12rem 0; display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
+  .formula .var b { color: var(--ink); } .formula .var a { font-weight: 600; }
+  .syms { border-bottom: 1px dotted var(--g400); }
+  .conf { font-size: .5rem; border-radius: 999px; padding: .04rem .4rem; border: 1px solid var(--g200); white-space: nowrap; }
+  .conf.high { background: #e4f5ec; color: #087443; border-color: #bfe6d0; }
+  .conf.low { background: #fdecea; color: #b42318; border-color: #f7cfca; }
+  .srcchip { font-size: .5rem; color: var(--muted); border: 1px solid var(--g200); border-radius: 999px; padding: .04rem .4rem; background: #fff; }
+  /* audit affordance on a calculated-attribute row */
+  .audbtn { display: inline-flex; align-items: center; gap: .2rem; font-size: .58rem; font-weight: 600; color: var(--primary);
+        border: 1px solid var(--g300); border-radius: 6px; padding: .08rem .35rem; background: #fff; }
+  .lazyfill { display: inline-flex; align-items: center; gap: .3rem; font-size: .54rem; color: var(--faint);
+        background: var(--g100); border-radius: 999px; padding: .04rem .45rem; }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>audit-a-result — target <span class="role">Methodology</span> <span class="role prospect">Prospective — not built</span></h1>
+
+<div class="prospect-banner"><b class="h">⚠ Prospective journey — target-state design, not the deployed app.</b><br>
+  This is the <b>rebuilt audit mode</b> — normative design for the future <b>audit-mode</b> feature (spec to come in
+  <code>specs/features/audit-mode/</code>, after <a href="analyse-results.html">analyse-results</a> and
+  <a href="impact-on-canvas.html">impact-on-canvas</a>). The faithful description of today's audit surfaces remains
+  <a href="audit-a-result.html">audit-a-result</a>. At ship time this journey <b>replaces audit-a-result's derivation phases
+  (B–C)</b> — its provenance phase (A · source &amp; confidence, the Sources tab) carries over unchanged — and the
+  <b>pyvis calculus-graph dump retires</b>. Decisions ratified in the 2026-07-03 design discussion.</div>
+
+<p class="lede">Every number e-footprint produces can already be traced — the engine records the full derivation of every value.
+  But today that trail is <b>scattered</b> (a formula expander buried in the edit panel, a raw graph dumped in a new tab) and
+  navigating it means bouncing between side panels. <b>audit-a-result — target</b> makes auditing a <b>place</b>: enter from any
+  number on screen, understand <b>one value</b> completely (its meaning, its formula, its cited inputs), <b>walk</b> the
+  derivation with a history you can retrace, and zoom out to the <b>map</b> of how objects feed each other. Success is a
+  reviewer's question answered in seconds: <em>"where does this number come from, and how sure are we?"</em> — at any depth.</p>
+<p class="note">Prospective — grounded in <a href="audit-a-result.html">audit-a-result</a> (today's surfaces) and the library's
+  explainability machinery: every calculated value carries its ancestry and formula, every calculated attribute has a
+  <b>docstring</b>, the model file persists the <b>values-free calculation graph</b>, and valueless intermediates
+  <b>compute lazily on read</b>. Entry seams from charts are designed in <a href="analyse-results.html">analyse-results</a>;
+  from object cards and the impact header in <a href="impact-on-canvas.html">impact-on-canvas</a>. Code-level pointers in
+  <a href="#pointers">Implementation pointers</a>.</p>
+
+<!-- ============ PHASE A — WAYS IN ============ -->
+<div class="phase">
+  <span class="tag">A · Ways in</span><span class="conn">any number on screen leads here</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — entry points -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:300px">
+        <div class="canvas dim" style="min-height:300px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="panel" style="width:66%">
+          <div class="phead"><b>Edit Web server</b><span class="x">×</span></div>
+          <div class="accsec"><div class="h">Calculated attributes <span>▾</span></div>
+            <div class="b">
+              <div class="field"><label>Energy footprint</label>
+                <div style="display:flex;align-items:center;gap:.3rem"><span class="inp" style="flex:1">0.63 t CO₂-eq</span><span class="audbtn">⌕ Audit</span></div></div>
+              <div class="field"><label>Instances fabrication footprint</label>
+                <div style="display:flex;align-items:center;gap:.3rem"><span class="inp" style="flex:1">1.2 t CO₂-eq</span><span class="audbtn">⌕ Audit</span></div></div>
+              <div class="field"><label>Hour by hour compute need</label>
+                <div style="display:flex;align-items:center;gap:.3rem"><span class="inp" style="flex:1">timeseries</span><span class="audbtn">⌕ Audit</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The edit panel's <b>Calculated attributes</b> rows each carry one affordance: <b>⌕ Audit</b>. It opens the audit surface focused on that value. The same affordance appears wherever a computed number shows — chart tooltips, the Sources tab's calculated rows, the impact header. One verb, everywhere.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>Any number on screen is a door</h3></div>
+    <p>Audit stops being a hidden corner of the edit panel: every surface that displays a computed value offers the same
+       <b>⌕ Audit</b> entry, and they all land in one place — the audit surface, focused on that exact value. Under the hood
+       every entry is just an address, <em>(object, attribute)</em>, so any current or future surface can deep-link into the
+       audit mode for free.</p>
+    <div class="states">
+      <div class="state"><span class="k">From the edit panel</span><span class="v">Each <b>Calculated attributes</b> row → <b>⌕ Audit</b>. (The inline ∑ formula expander retires — its content moves into the audit surface, one click away.)</span></div>
+      <div class="state"><span class="k">From Sources</span><span class="v">Calculated rows' <em>(see graph)</em> becomes <b>⌕ Audit</b> — same destination, focused on that value.</span></div>
+      <div class="state"><span class="k">From charts</span><span class="v">The series tooltip's <em>"Attributed … footprint ↗"</em> link (seam designed in <a href="analyse-results.html">analyse-results</a> Phase D).</span></div>
+      <div class="state"><span class="k">Addressable</span><span class="v">An audit view = <b>(object, attribute)</b> — every entry point is a deep link; back/forward just replay addresses.</span></div>
+      <div class="state deferred"><span class="k">From the impact header</span><span class="v">The side panel's impact header and card badges (⌕ on hover) — land with <a href="impact-on-canvas.html">impact-on-canvas</a>.</span></div>
+      <div class="state deferred"><span class="k">From the Sankey</span><span class="v">Clicking a Sankey node — needs object ids in the Sankey payload; same address scheme once added.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — ONE VALUE, FULLY EXPLAINED ============ -->
+<div class="phase">
+  <span class="tag">B · One value</span><span class="conn">meaning · value · formula · cited inputs — the micro view</span><span class="rule"></span>
+</div>
+
+<!-- screen 2 — the value card -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:360px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Audit</span><span class="subtabs"><span class="subtab on">Value</span><span class="subtab">Map</span></span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">Total footprint</span><span class="sep">›</span><span class="cnode here">Web server — Energy footprint</span></div>
+          <div class="rpbody">
+            <div class="vcard">
+              <div class="vt">Energy footprint <span class="vo">· Web server (Server)</span></div>
+              <div class="docstring">Emissions from the electricity consumed by the server during the usage phase: hourly power
+                drawn by compute and RAM needs, converted through the carbon intensity of the electricity mix at the server's
+                location.</div>
+              <div class="vval">0.63 t CO₂-eq <span class="vo">over the modeling period</span> <span class="openobj">Open object ↗</span></div>
+              <svg viewBox="0 0 320 34" role="img" aria-label="Daily emissions sparkline">
+                <line x1="10" y1="28" x2="312" y2="28" stroke="#D1D5DB"/>
+                <path d="M12 26 C 60 24, 90 20, 140 18 S 250 10, 310 8 L310 28 L12 28 Z" fill="#2D4675" opacity=".12"/>
+                <path d="M12 26 C 60 24, 90 20, 140 18 S 250 10, 310 8" fill="none" stroke="#2D4675" stroke-width="1.4"/>
+              </svg>
+              <div class="formula" style="margin-top:.4rem">
+                <div class="fh">Formula</div>
+                <div class="eq">energy_footprint = <span class="syms">a</span> × <span class="syms">b</span></div>
+                <div class="fh">Input variables</div>
+                <div class="var"><b>a</b> = <a href="#">Hour by hour electricity consumption</a> <span class="vo">· Web server · calculated</span></div>
+                <div class="var"><b>b</b> = <a href="#">Average carbon intensity</a> <span class="vo">· France</span> <span class="srcchip">RTE 2023</span> <span class="conf high">High</span></div>
+                <div class="fh">Feeds into</div>
+                <div class="var">→ <a href="#">Total footprint</a> <span class="vo">· System</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The audit surface opens <b>in place</b> over the canvas (like Results). The <b>Value</b> view answers everything about one number: its <b>docstring</b> (what this attribute means — straight from the engine's documentation), its <b>value</b> with a daily chart for timeseries, the <b>Formula</b>, each <b>Input variable</b> (calculated ones link deeper; raw inputs carry their <b>source &amp; confidence</b>), and what it <b>feeds into</b>.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>One value, completely explained</h3></div>
+    <p>The micro view keeps the anatomy today's formula expander already proved — input variables, symbolic formula, direct
+       children — and completes it with the two things it lacked: the attribute's <b>meaning</b> (the docstring the library
+       maintains as doc-as-code for every calculated attribute) and <b>provenance chips</b> on the raw inputs, so the trail's
+       last step is visible without leaving the card.</p>
+    <div class="states">
+      <div class="state"><span class="k">Meaning first</span><span class="v">The calculated attribute's <b>docstring</b> renders above the math — what the number <em>is</em>, before how it's computed.</span></div>
+      <div class="state"><span class="k">Kept anatomy</span><span class="v">Formula (symbols tooltipped) · Input variables · <b>Feeds into</b> (direct children) — today's expander content, relocated and linked.</span></div>
+      <div class="state"><span class="k">Timeseries</span><span class="v">Hourly values chart <b>daily-aggregated</b> (consistent with Results); the scalar shown is the period total.</span></div>
+      <div class="state"><span class="k">Trail's end</span><span class="v">Raw inputs show <b>source + confidence</b> chips inline — provenance semantics unchanged from <a href="audit-a-result.html">audit-a-result</a> Phase A.</span></div>
+      <div class="state"><span class="k">To the object</span><span class="v"><b>Open object ↗</b> jumps to the owning object's edit panel when the question becomes "so let me change it".</span></div>
+      <div class="state variant"><span class="k">EcoLogits values</span><span class="v">Values computed by EcoLogits show its computation code instead of a symbolic formula — same card, different formula block (as today).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — WALK THE TRAIL ============ -->
+<div class="phase">
+  <span class="tag">C · Walk the trail</span><span class="conn">navigate the derivation in place, with history</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — navigation -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:330px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Audit</span><span class="subtabs"><span class="subtab on">Value</span><span class="subtab">Map</span></span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">Total footprint</span><span class="sep">›</span><span class="cnode">Web server — Energy footprint</span><span class="sep">›</span><span class="cnode here">Web server — Hour by hour electricity consumption</span></div>
+          <div class="rpbody">
+            <div class="vcard">
+              <div class="vt">Hour by hour electricity consumption <span class="vo">· Web server (Server)</span> <span class="lazyfill">computed on demand · 0.2 s</span></div>
+              <div class="docstring">Electricity drawn by the server each hour: idle power plus the power implied by the hourly
+                compute and memory needs of the jobs it runs, scaled by the number of active instances.</div>
+              <div class="vval">14.6 MWh <span class="vo">over the modeling period</span> <span class="openobj">Open object ↗</span></div>
+              <div class="formula" style="margin-top:.4rem">
+                <div class="fh">Formula</div>
+                <div class="eq">consumption = <span class="syms">a</span> + (<span class="syms">b</span> × <span class="syms">c</span>)</div>
+                <div class="fh">Input variables</div>
+                <div class="var"><b>a</b> = <a href="#">Idle power</a> <span class="vo">· Web server</span> <span class="srcchip">Boavizta</span> <span class="conf high">High</span></div>
+                <div class="var"><b>b</b> = <a href="#">Hour by hour compute need</a> <span class="vo">· Web server · calculated</span></div>
+                <div class="var"><b>c</b> = <a href="#">Power per unit of compute</a> <span class="vo">· Web server</span> <span class="conf low">Low</span></div>
+                <div class="fh">Feeds into</div>
+                <div class="var">→ <a href="#">Energy footprint</a> <span class="vo">· Web server</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking input variable <b>a</b> on the previous screen navigated the surface <b>in place</b>: the breadcrumb grew, <b>‹</b> retraces. This value wasn't stored in the model file — the engine <b>computed it on demand</b> (the small grey chip), invisibly fast. A <b>Low</b>-confidence input surfaces two clicks from the headline total.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Click through the derivation — never lose the thread</h3></div>
+    <p>Every calculated input variable and every child is a link that navigates the audit surface itself. The breadcrumb is
+       the investigation's memory: where you started, how you got here, one click back to any step. Today the same walk means
+       opening a different object's side panel at every hop and holding the path in your head.</p>
+    <div class="states">
+      <div class="state"><span class="k">In-place navigation</span><span class="v">Ancestors (upstream) and children (downstream) swap the value card — the surface, breadcrumb and history persist.</span></div>
+      <div class="state"><span class="k">History</span><span class="v"><b>‹ ›</b> move through visited values; breadcrumb nodes jump directly. Closing the surface returns to the canvas untouched.</span></div>
+      <div class="state"><span class="k">Lazy depth</span><span class="v">Intermediate values aren't stored — the engine <b>pulls them on demand</b>, computing only the requested value's cone. Depth costs nothing until visited.</span></div>
+      <div class="state"><span class="k">Weak links surface</span><span class="v">Provenance chips ride along the walk — a <b>Low</b> confidence or missing source deep in the trail is visible the moment it appears.</span></div>
+      <div class="state deferred"><span class="k">Hourly zoom</span><span class="v">Expanding a timeseries chart to hourly resolution inside the audit view — later; daily covers the audit read.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE D — THE MAP ============ -->
+<div class="phase">
+  <span class="tag">D · The map</span><span class="conn">how objects feed each other — the macro view</span><span class="rule"></span>
+</div>
+
+<!-- screen 4 — object-level dependency map -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:330px">
+        <div class="rpanel">
+          <div class="rphead"><span class="rt">Audit</span><span class="subtabs"><span class="subtab">Value</span><span class="subtab on">Map</span></span><span class="chev">×</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">…</span><span class="sep">›</span><span class="cnode here">Web server — Energy footprint</span><span style="margin-left:auto" class="cnode">Focus on this value's ancestry ⌖</span></div>
+          <div class="rpbody">
+            <svg viewBox="0 0 400 250" role="img" aria-label="Object-level dependency map" font-family="Inter, system-ui, sans-serif">
+              <defs><marker id="marr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9CA3AF"/></marker></defs>
+              <rect x="10" y="20" width="88" height="30" rx="6" fill="#e8eaf4" stroke="#2D4675"/><text x="54" y="39" text-anchor="middle" font-size="9" fill="#2D4675">Video watchers</text>
+              <rect x="10" y="70" width="88" height="30" rx="6" fill="#e8eaf4" stroke="#2D4675"/><text x="54" y="89" text-anchor="middle" font-size="9" fill="#2D4675">France</text>
+              <rect x="128" y="20" width="88" height="30" rx="6" fill="#fff" stroke="#6B7280"/><text x="172" y="39" text-anchor="middle" font-size="9" fill="#4B5563">Streaming journey</text>
+              <rect x="128" y="70" width="88" height="30" rx="6" fill="#fff" stroke="#6B7280"/><text x="172" y="89" text-anchor="middle" font-size="9" fill="#4B5563">Streaming job</text>
+              <rect x="246" y="34" width="120" height="88" rx="7" fill="#fff" stroke="#2D4675" stroke-width="1.5"/>
+              <text x="306" y="50" text-anchor="middle" font-size="9.5" font-weight="600" fill="#111928">Web server</text>
+              <text x="256" y="66" font-size="8" fill="#2D4675">· Hour by hour compute need</text>
+              <text x="256" y="80" font-size="8" fill="#2D4675">· Hour by hour electricity cons.</text>
+              <text x="256" y="94" font-size="8" font-weight="700" fill="#2D4675">· Energy footprint ⌖</text>
+              <text x="256" y="108" font-size="8" fill="#2D4675">· Instances fabrication footprint</text>
+              <rect x="150" y="160" width="100" height="30" rx="6" fill="#ecfdf3" stroke="#15803d"/><text x="200" y="179" text-anchor="middle" font-size="9" fill="#15803d">System · Total</text>
+              <rect x="290" y="160" width="86" height="30" rx="6" fill="#fff" stroke="#6B7280"/><text x="333" y="179" text-anchor="middle" font-size="9" fill="#4B5563">SSD storage</text>
+              <line x1="98" y1="35" x2="126" y2="35" stroke="#9CA3AF" marker-end="url(#marr)"/>
+              <line x1="98" y1="85" x2="126" y2="85" stroke="#9CA3AF" marker-end="url(#marr)"/>
+              <line x1="216" y1="35" x2="244" y2="55" stroke="#9CA3AF" marker-end="url(#marr)"/>
+              <line x1="216" y1="85" x2="244" y2="78" stroke="#9CA3AF" marker-end="url(#marr)"/>
+              <line x1="98" y1="90" x2="248" y2="100" stroke="#9CA3AF" stroke-dasharray="3,3" marker-end="url(#marr)"/>
+              <line x1="296" y1="122" x2="220" y2="158" stroke="#9CA3AF" marker-end="url(#marr)"/>
+              <line x1="333" y1="122" x2="333" y2="158" stroke="#9CA3AF" marker-end="url(#marr)"/>
+              <line x1="330" y1="122" x2="252" y2="162" stroke="#9CA3AF" opacity="0"/>
+              <text x="20" y="230" font-size="8" fill="#6B7280">solid = feeds computations · dashed = carbon intensity read · ⌖ = the audited value</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Map</b> view: objects as nodes, an arrow where one object's values feed another's — <b>expanded on click</b> to list the object's calculated attributes (Web server here, the audited value marked ⌖). <b>Focus ⌖</b> dims everything outside the current value's ancestry. Clicking an attribute jumps to its Value view.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>Zoom out — the dependency map</h3></div>
+    <p>The macro question — <em>"what depends on what in this model?"</em> — doesn't need seven hundred formula nodes; it needs
+       the <b>object-level</b> picture. The Map draws objects and their feed relationships, expands any object into its
+       calculated attributes on click, and focuses on one value's ancestry when you come from the Value view. It replaces the
+       old raw calculus-graph dump — same underlying graph, rendered at the altitude a human can read.</p>
+    <div class="states">
+      <div class="state"><span class="k">Object altitude</span><span class="v">Nodes = model objects; an edge = "values of A feed computations of B". Dozens of nodes, not hundreds.</span></div>
+      <div class="state"><span class="k">Expand on click</span><span class="v">A node unfolds to its calculated attributes; clicking one opens its <b>Value</b> view — Map and Value are two zooms of one surface.</span></div>
+      <div class="state"><span class="k">Focus mode</span><span class="v"><b>⌖</b> dims all nodes outside the current value's ancestry cone — "what could possibly influence this number" at a glance.</span></div>
+      <div class="state"><span class="k">Zero compute</span><span class="v">Rendered from the <b>calculation graph persisted in the model file</b> — no values needed, so the map is instant even before any lazy fill.</span></div>
+      <div class="state"><span class="k">Retirement</span><span class="v">The pyvis calculus-graph page (new-tab iframe) <b>retires</b> — legacy of the pre-product era, superseded by Value + Map.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>Audit is one navigable in-place surface (Value + Map), not side-panel hopping or a new-tab dump.</b></td><td>An audit is an investigation — it needs memory (breadcrumb, history) and a stable frame. Panel-bouncing loses the thread; the pyvis tab was a demo-era artefact with no navigation, explicitly not product vision.</td></tr>
+  <tr><td><b>The micro view keeps today's formula-expander anatomy and adds the docstring + inline provenance chips.</b></td><td>Input variables · formula · children is proven and already served by the library; what readers lacked was the value's <em>meaning</em> (docstrings exist as doc-as-code on every calculated attribute) and seeing the trail's end (source/confidence) without a detour.</td></tr>
+  <tr><td><b>One audit affordance (⌕ Audit) on every computed value, everywhere; views addressed by (object, attribute).</b></td><td>Discoverability comes from repetition of a single verb, not from one deep menu. Addressability makes every present and future surface (charts, badges, Sankey) a deep link for free.</td></tr>
+  <tr><td><b>The macro view is object-level first, attribute-level on expand.</b></td><td>Hundreds of slot nodes are noise (the failure mode of the current graph); dozens of object nodes are a map. The full detail remains one expand away, and Focus mode narrows to one value's ancestry.</td></tr>
+  <tr><td><b>Drill-down computes lazily; the map renders from the persisted calculation graph.</b></td><td>The engine's pull design makes depth free until visited (only the requested cone computes); the values-free topology is already in the model file, so the map needs zero computation ever. Nothing is precomputed for auditing.</td></tr>
+  <tr><td><b>Provenance semantics are unchanged; the inline ∑ expander retires into the audit surface.</b></td><td>Source/confidence stays metadata on inputs (audit-a-result Phase A carries over verbatim). Keeping a second, reduced derivation surface in the edit panel would drift from the audit view — one home, one click away, instead.</td></tr>
+  <tr><td><b>Timeseries render daily-aggregated in audit; hourly zoom deferred.</b></td><td>Consistency with Results; daily answers the audit read ("when and how much"). Hourly is reachable later without contract changes since intermediates compute on demand.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— prospective: target shape + today's code anchors</span></summary>
+  <div class="pbody">
+    <p><b>Status: prospective.</b> Feature spec to come in <code>specs/features/audit-mode/</code>. Today's anchors listed for
+      orientation; nothing of the target exists yet.</p>
+    <dl>
+      <dt>Today's anchors (kept, moved, or retired)</dt>
+      <dd><b>Kept as content source:</b> the formula machinery — <code>get_calculated_attribute_explanation/&lt;id&gt;/&lt;attr&gt;/</code> → <code>ancestors_formula_and_children.html</code>, symbol mapping in <code>web_abstract_modeling_classes/explainable_objects_web.py</code>; hourly chart via <code>get_explainable_hourly_quantity_chart_and_explanation</code>. <b>Moved:</b> that content relocates from the edit panel's <code>calculated_attributes_section.html</code> rows (which keep only value + ⌕ Audit) into the audit surface. <b>Retired:</b> <code>display-calculus-graph/…</code> + <code>efootprint.utils.calculus_graph.build_calculus_graph</code> (pyvis) + the <code>SessionCacheRepository</code> <code>calculus_graph</code> namespace + <code>calculus_graph.html</code> iframe.</dd>
+      <dt>Docstrings</dt>
+      <dd>Runtime source: <code>computed_slots(cls)[attr].__doc__</code> (doc-as-code, placeholder-resolved via <code>placeholder_resolver.py</code>, test-enforced). ⚠ The interface's existing <code>efootprint_description_provider.calc_description()</code> still reads the retired <code>update_&lt;attr&gt;.__doc__</code> API — returns <code>None</code> against the pull-based library; re-point it here.</dd>
+      <dt>Library assets the surface reads</dt>
+      <dd>Ancestry/children per value (<code>direct_ancestors_with_id</code> / children, formula tuples on serialized slots); <b>lazy pulls</b> fill valueless intermediates on read (pull-based contract); the <b>values-free calculation graph</b> section of the model JSON (slot-level edges + labels) — group by owning object id for the Map's nodes/edges; provenance (<code>source</code>/<code>confidence</code>/<code>comment</code>) on input values.</dd>
+      <dt>Target shape (draft)</dt>
+      <dd>Audit surface = in-place overlay like the Results panel (HTMX partials; Value and Map as sub-views); navigation = address stack of <code>(object id, attr)</code> pairs held client-side, each hop one <code>hx-get</code>; Map = server-derived object-graph JSON rendered client-side (renderer TBD at plan stage — keep it dependency-light). Entry points post the address; chart/Sankey payloads must carry object ids (seam noted in <a href="analyse-results.html">analyse-results</a>).</dd>
+      <dt>Supersession</dt>
+      <dd>At ship: replaces <a href="audit-a-result.html">audit-a-result</a> Phases B–C (derivation + calculus graph); its Phase A (provenance, Sources tab) carries over into the merged faithful journey. Banner off, hub pill off.</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · audit-a-result — target · <b>prospective</b> — auditing becomes a place, not a scattered feature · normative for the
+  future <code>audit-mode</code> feature. Shares the canonical <code>&lt;style&gt;</code> toolkit from
+  <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — impact-on-canvas (prospective)</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- impact-on-canvas only: PROSPECTIVE banner, footprint badges, impact header ---- */
+  .role.prospect { background: var(--danger-bg); color: var(--danger); }
+  .prospect-banner { background: var(--danger-bg); border: 1px solid #f7cfca; border-left: 4px solid var(--danger);
+        border-radius: 8px; padding: .7rem .9rem; font-size: .9rem; color: var(--muted); margin: 1rem 0 1.4rem; }
+  .prospect-banner b.h { color: var(--danger); text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; }
+  .prospect-banner b { color: var(--ink); }
+  /* footprint badge on an object card */
+  .fpbadge { margin-left: auto; flex: 0 0 auto; font-size: .54rem; font-weight: 700; color: var(--primary);
+        background: var(--lp); border-radius: 999px; padding: .05rem .38rem; white-space: nowrap; }
+  .fpbadge.pending { color: var(--faint); background: var(--g100); }
+  .ocard .fpbadge + .pencil { margin-left: .15rem; }
+  /* system total badge in the results bar */
+  .totbadge { font-size: .62rem; font-weight: 700; color: var(--primary); background: var(--lp);
+        border-radius: 999px; padding: .1rem .5rem; white-space: nowrap; }
+  /* impact header at the top of the edit panel */
+  .imphead { background: var(--newlight); border: 1px solid #cfe6ea; border-radius: 8px; padding: .45rem .55rem; margin-bottom: .5rem; }
+  .imphead .iv { font-size: .92rem; font-weight: 700; color: var(--primary); }
+  .imphead .ish { font-size: .56rem; color: var(--muted); }
+  .imphead .irow { display: flex; align-items: center; gap: .5rem; margin-top: .2rem; flex-wrap: wrap; }
+  .imphead .isplit { font-size: .54rem; color: var(--muted); }
+  .imphead .isplit b { color: var(--ink); }
+  .imphead .audbtn { display: inline-flex; align-items: center; gap: .2rem; font-size: .58rem; font-weight: 600;
+        color: var(--primary); border: 1px solid var(--g300); border-radius: 6px; padding: .08rem .35rem; background: #fff; margin-left: auto; }
+  .sharebar { height: .32rem; border-radius: 99px; background: var(--g200); position: relative; overflow: hidden; margin-top: .25rem; }
+  .sharebar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary); border-radius: 99px; display: block; }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>impact-on-canvas <span class="role">Web + edge</span> <span class="role prospect">Prospective — not built</span></h1>
+
+<div class="prospect-banner"><b class="h">⚠ Prospective journey — target-state design, not the deployed app.</b><br>
+  Normative design for the future <b>impact-on-canvas</b> feature (spec to come in <code>specs/features/impact-on-canvas/</code>).
+  Today, no impact number appears anywhere in the building view — object cards show a name, and calculated values hide in an edit-panel
+  accordion (<a href="build-a-model.html">build-a-model</a> / <a href="audit-a-result.html">audit-a-result</a> stay the faithful
+  descriptions). At ship time this journey folds into <a href="build-a-model.html">build-a-model</a> (cards, panel) and the banner
+  comes off. Decisions ratified in the 2026-07-03 design discussion.</div>
+
+<p class="lede">Today the model and its footprint live in <b>separate rooms</b>: you build on the canvas, then open Results to learn
+  what it weighs. <b>impact-on-canvas</b> puts the weight where the work is: every object card carries its <b>footprint badge</b>, a
+  <b>system total</b> rides the Results bar, and the edit panel <b>leads with the object's impact</b> — updated after every edit, so
+  modeling gets the feedback loop of a live instrument. Success is a modeler who can say, mid-edit, <em>"that change moved this
+  object from 0.4 to 1.1 tonnes and the system by 8%"</em> — without leaving the canvas.</p>
+<p class="note">Prospective — depends on the library's serialized <b>attributed footprints</b> (every object, not just hardware; the
+  companion library feature) so badge values are read, not recomputed. The badge's deeper story — charts per object, full derivation —
+  belongs to <a href="analyse-results.html">analyse-results</a> and <a href="audit-a-result-target.html">audit-a-result — target</a>;
+  this journey is the canvas seam. Code-level pointers in <a href="#pointers">Implementation pointers</a>.</p>
+
+<!-- ============ PHASE A — THE PANEL LEADS WITH IMPACT ============ -->
+<div class="phase">
+  <span class="tag">A · The panel leads with impact</span><span class="conn">click an object — its footprint is the first thing you read</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — impact header -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage" style="min-height:320px">
+        <div class="canvas dim" style="min-height:320px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="panel" style="width:66%">
+          <div class="phead"><b>Edit Web server</b><span class="trash">🗑</span><span class="x">×</span></div>
+          <div class="imphead">
+            <div class="irow"><span class="iv">1.83 t CO₂-eq</span><span class="ish">· 23% of system total</span><span class="audbtn">⌕ Audit</span></div>
+            <div class="sharebar"><i style="width:23%"></i></div>
+            <div class="irow"><span class="isplit">Usage <b>0.63 t</b></span><span class="isplit">Fabrication <b>1.2 t</b></span><span class="ish" style="margin-left:auto">over the modeling period</span></div>
+          </div>
+          <div class="field qty"><label>RAM</label><div class="row"><span class="inp">128</span><select class="dd unit"><option>GB</option></select></div></div>
+          <div class="field qty"><label>Lifespan</label><div class="row"><span class="inp">6</span><select class="dd unit"><option>year</option></select></div></div>
+          <div class="accsec"><div class="h">Calculated attributes <span>▸</span></div></div>
+          <button class="savebtn">Save</button>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The edit panel opens with the <b>impact header</b>: the object's footprint, its <b>share of the system total</b> (with a proportion bar), the <b>Usage / Fabrication split</b>, and <b>⌕ Audit</b>. The form follows below unchanged; the <em>Calculated attributes</em> accordion remains for the full list — but the headline no longer hides in it.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>An object's impact is its first-class information</h3></div>
+    <p>Clicking an object answers "how big is this thing?" before offering the knobs. The impact header reads the object's
+       <b>attributed footprint</b> — the same value its badge, its chart series and its audit view show — so every surface tells
+       one consistent story. For a modeler deciding <em>where to spend effort</em>, the share-of-total is the triage signal the
+       panel never gave.</p>
+    <div class="states">
+      <div class="state"><span class="k">One number, shared</span><span class="v">Header = the object's <b>attributed footprint</b> over the modeling period — identical source as badges and chart series (the library's persisted results).</span></div>
+      <div class="state"><span class="k">Share of total</span><span class="v">Percentage + proportion bar against the system total footprint.</span></div>
+      <div class="state"><span class="k">Phase split</span><span class="v"><b>Usage</b> / <b>Fabrication</b> sub-figures, matching the results legend vocabulary.</span></div>
+      <div class="state"><span class="k">Impact sources too</span><span class="v">For hardware (servers, devices, network…) the attributed footprint <b>is</b> its own footprint — same header, no special case for the user.</span></div>
+      <div class="state"><span class="k">Not computable yet?</span><span class="v">While the model can't compute (no usage pattern…), the header shows a dimmed <em>"No impact yet — complete your model"</em> with the live validation reason — the app's disabled-not-errored rule.</span></div>
+      <div class="state deferred"><span class="k">⌕ Audit</span><span class="v">Opens the audit surface on this footprint — lands with <a href="audit-a-result-target.html">audit-mode</a>; until then the header links the calculated-attributes section.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — BADGES ON THE CANVAS ============ -->
+<div class="phase">
+  <span class="tag">B · Badges on the canvas</span><span class="conn">every card wears its weight · the total rides the Results bar</span><span class="rule"></span>
+</div>
+
+<!-- screen 2 — badges -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare">⇄ Compare</span></div>
+        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
+      </div>
+      <div class="stage">
+        <div class="canvas" style="min-height:250px">
+          <div class="col"><h5><b>Usage patterns</b></h5>
+            <div class="ocard"><span class="ic">◔</span> Viewers <span class="fpbadge">3.1 t</span></div>
+            <div class="ocard"><span class="ic">◔</span> Admins <span class="fpbadge">0.4 t</span></div>
+          </div>
+          <div class="col"><h5><b>Usage journeys</b></h5>
+            <div class="ocard"><span class="ic">⤳</span> Streaming <span class="fpbadge">2.9 t</span></div>
+            <div class="ocard nested"><span class="ic">▹</span> Watch video <span class="fpbadge">2.6 t</span></div>
+          </div>
+          <div class="col"><h5><b>Infrastructure</b></h5>
+            <div class="ocard"><span class="ic">▤</span> Web server <span class="fpbadge">1.8 t</span></div>
+            <div class="ocard"><span class="ic">▦</span> SSD storage <span class="fpbadge">0.7 t</span></div>
+          </div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="totbadge">Total 3.5 t CO₂-eq</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Every object card wears a <b>footprint badge</b> — its attributed CO₂-eq over the modeling period, compact unit. The Results bar carries the <b>system total badge</b>, always visible. Hovering a badge tooltips the share of total and the Usage / Fabrication split; clicking the card opens the panel on the impact header (Phase A).</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>The canvas becomes a heat map of the model</h3></div>
+    <p>Badges turn the canvas from a wiring diagram into a triage view: the eye finds the heavy objects without opening
+       anything. Values come straight from the persisted attributed footprints — displaying them costs no computation, on any
+       model size.</p>
+    <div class="states">
+      <div class="state"><span class="k">Badge value</span><span class="v">The object's attributed footprint, period total, compact display unit. Absolute number — the share lives in the tooltip (two numbers on a card is noise).</span></div>
+      <div class="state"><span class="k">Total badge</span><span class="v">System total on the Results bar, always in view — the model's headline without opening Results.</span></div>
+      <div class="state"><span class="k">Zero-compute display</span><span class="v">Badges are read from the saved model (serialized attributed footprints) — rendering the canvas never triggers computation.</span></div>
+      <div class="state"><span class="k">Incomplete model</span><span class="v">No badges while the model can't compute — cards stay clean, the Results bar stays locked with its live reason (disabled-not-errored).</span></div>
+      <div class="state variant"><span class="k">Edge paradigm</span><span class="v">Edge devices, functions and recurrent needs carry the same badge — attribution covers both paradigms uniformly.</span></div>
+      <div class="state deferred"><span class="k">Badge toggle</span><span class="v">A toolbar switch to hide badges (presentation / screenshot mode) — add if badge noise proves real.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — LIVE AFTER EVERY EDIT ============ -->
+<div class="phase">
+  <span class="tag">C · Live after every edit</span><span class="conn">save → the touched badges move, the rest don't</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — real-time update -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="stage">
+        <div class="canvas" style="min-height:250px">
+          <div class="col"><h5><b>Usage patterns</b></h5>
+            <div class="ocard"><span class="ic">◔</span> Viewers <span class="fpbadge pending">…</span></div>
+            <div class="ocard"><span class="ic">◔</span> Admins <span class="fpbadge">0.4 t</span></div>
+          </div>
+          <div class="col"><h5><b>Usage journeys</b></h5>
+            <div class="ocard"><span class="ic">⤳</span> Streaming <span class="fpbadge pending">…</span></div>
+            <div class="ocard nested"><span class="ic">▹</span> Watch video <span class="fpbadge pending">…</span></div>
+          </div>
+          <div class="col"><h5><b>Infrastructure</b></h5>
+            <div class="ocard fresh"><span class="ic">▤</span> Web server <span class="fpbadge">2.4 t</span></div>
+            <div class="ocard"><span class="ic">▦</span> SSD storage <span class="fpbadge">0.7 t</span></div>
+          </div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="totbadge">Total 4.1 t CO₂-eq</span><span class="chev">︿</span></div>
+        <div class="toast-mock">Web server updated</div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The user saved a RAM increase on Web server. In the save's response: the edited card (green ring) shows its new badge <b>2.4 t</b> and the <b>total badge moved to 4.1 t</b>. Badges whose attribution is still settling show a brief <b>…</b> pending chip, replaced a beat later — untouched objects (Admins, SSD storage) never flicker.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>Feedback with every save — precise, not wholesale</h3></div>
+    <p>The instrument only works if it responds. After a save, the system total and the edited object's badge update in the
+       save's own response; badges of other affected objects follow within a beat. Crucially the update is <b>precise</b>: the
+       engine knows exactly which objects' attributions an edit invalidates, so only those badges change — a stable canvas
+       signals "this edit was local", a wide ripple signals "this touched everything".</p>
+    <div class="states">
+      <div class="state"><span class="k">Total: synchronous</span><span class="v">The system total is recomputed as part of every save (the engine's standing guarantee) — the total badge is always current in the save response.</span></div>
+      <div class="state"><span class="k">Badges: one beat</span><span class="v">Affected badges refresh <b>in the save response if the recompute proves cheap, else asynchronously right after</b> with a <b>…</b> pending chip — the library feature's measurement decides the default; the design accommodates both.</span></div>
+      <div class="state"><span class="k">Precision</span><span class="v">Only the dirty objects' badges change (the engine's invalidation is exact). No global shimmer, no full-canvas reload.</span></div>
+      <div class="state"><span class="k">Ripple as signal</span><span class="v">Which badges move is itself information — the visible blast radius of an edit.</span></div>
+      <div class="state deferred"><span class="k">Delta flash</span><span class="v">A transient +/− delta next to a changed badge ("2.4 t ▲ +0.6") — nice-to-have, add after the base loop proves calm.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>Every object shows its attributed footprint — one number reused by badge, impact header, chart series and audit.</b></td><td>Consistency builds trust: the same value everywhere, from one source (the library's persisted attributed footprints). Inventing a different "card metric" would create two truths.</td></tr>
+  <tr><td><b>The edit panel leads with the impact header; the calculated-attributes accordion remains below.</b></td><td>Impact is the object's headline, not an advanced detail — today it's invisible until a user finds the accordion. The full attribute list stays for depth; the header is the triage read.</td></tr>
+  <tr><td><b>Badges are display-only reads of persisted values; rendering never computes.</b></td><td>The canvas renders on every request — it must stay computation-free (the app's binding constraints are store weight and round-trips). Serialized attributed footprints make display a lookup.</td></tr>
+  <tr><td><b>Total badge synchronous; attributed badges synchronous-if-cheap, else async with a pending chip — measurement decides.</b></td><td>The total is already recomputed on every save (engine guarantee) so it's free to show. Attribution's per-edit cost is real but bounded to the dirty cone; the library feature measures it, and the UI is designed to be correct under either policy rather than betting the edit latency on it.</td></tr>
+  <tr><td><b>Precise updates only — affected badges change, others are untouched.</b></td><td>Wholesale refresh would flicker the whole canvas on every save and destroy the "ripple as signal" read. The engine's exact invalidation makes precision free.</td></tr>
+  <tr><td><b>Badge shows the absolute value; share and phase split live in the tooltip / impact header.</b></td><td>One number per card keeps the canvas legible; percent-vs-absolute toggles and split badges were rejected as card-level noise.</td></tr>
+  <tr><td><b>No badges while the model isn't computable.</b></td><td>Zeros or stale numbers on an incomplete model would be lies; absence + the locked Results bar (with its live reason) already communicates the state — disabled-not-errored, applied to numbers.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— prospective: target shape + today's code anchors</span></summary>
+  <div class="pbody">
+    <p><b>Status: prospective.</b> Feature spec to come in <code>specs/features/impact-on-canvas/</code>. Depends on the
+      companion library feature (serialized daily attributed footprints — badge = period sum of those series; for impact
+      sources, of their own serialized footprint pairs).</p>
+    <dl>
+      <dt>Today's anchors</dt>
+      <dd>Cards: <code>object_cards/*</code> + <code>components/button_card_header.html</code> (name-only today; the ✎ pencil
+        and card chrome live here). Panel: <code>views_edition.py open_edit_object_panel</code> →
+        <code>side_panels/edit/edit_panel__generic.html</code> (impact header slots above the form;
+        <code>calculated_attributes_section.html</code> remains below). Results bar: <code>components/results_bar_button.html</code>
+        (total badge rides this region). OOB machinery for precise patches: <code>oob_regions.py</code> /
+        <code>htmx_presenter.py</code> — the badge updates are new OOB regions keyed by object id.</dd>
+      <dt>Update flow (target)</dt>
+      <dd>Save → <code>ModelingUpdate</code> eagerly recomputes the system total (existing contract) → response carries OOB
+        swaps: edited card badge + total badge + pending chips on dirty badges. Then either (a) the same response already
+        contains all refreshed badges (eager pull of dirty attributed slots — if the library's per-edit measurement says
+        cheap), or (b) a follow-up <code>hx-get</code> fetches the refreshed badges once the lazy fill lands. The dirty set
+        comes from the engine's invalidation — expose "which object ids' attributed footprints were invalidated" on the update
+        result.</dd>
+      <dt>Consistency & gating</dt>
+      <dd>Badge visibility gates on the same computability signal as the Results buttons
+        (<code>creation_constraints["__results__"]</code>). Display unit: compact form of the system-wide display unit —
+        shared helper with the results charts.</dd>
+      <dt>Supersession</dt>
+      <dd>At ship: folds into <a href="build-a-model.html">build-a-model</a> (card anatomy, panel anatomy) — this journey then
+        retires into it rather than living on separately; banner and hub pill come off at that point.</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · impact-on-canvas · <b>prospective</b> — the model wears its weight while you build it · normative for the future
+  <code>impact-on-canvas</code> feature. Shares the canonical <code>&lt;style&gt;</code> toolkit from
+  <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>
