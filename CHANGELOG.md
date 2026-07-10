@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Comparison cumulative overlay chart: its built-in legend is replaced by the same left-aligned HTML treatment, with one row per model.
 - Single-model results bar chart: edge-device legend capsules are now hidden when the edge-modeling toggle is off. The state is read at render time, so no live update is needed while viewing results.
 
+### Added
+- intro-templates: new "GenAI marketing video" introductory template — a marketing team producing a short social video with two GenAI video providers (Google Veo + ByteDance Seedance), prompt-writing LLM calls, local editing, and CDN publishing.
+
+### Changed
+- intro-templates: retire the video-generation step from the "AI chatbot" template so video generation is showcased once, in the dedicated GenAI video template. AI chatbot reverts to a pure chat / LLM-routing journey.
+
 ## [V1.9.3]
 
 ### Fixed

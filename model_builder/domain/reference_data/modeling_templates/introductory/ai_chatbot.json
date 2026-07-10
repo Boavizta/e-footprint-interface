@@ -21,20 +21,10 @@
             "name": "Ecologits compute_llm_impacts_dag function",
             "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/impacts/llm.py"
         },
-        "Ecologits-compute_video_impacts_dag-function": {
-            "id": "Ecologits-compute_video_impacts_dag-function",
-            "name": "Ecologits compute_video_impacts_dag function",
-            "link": "https://github.com/mlco2/ecologits/tree/main/ecologits/impacts/video.py"
-        },
         "Ecologits-llm_impacts-function": {
             "id": "Ecologits-llm_impacts-function",
             "name": "Ecologits llm_impacts function",
             "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/tracers/utils.py#L60"
-        },
-        "Ecologits-video_impacts-defaults": {
-            "id": "Ecologits-video_impacts-defaults",
-            "name": "Ecologits video_impacts defaults",
-            "link": "https://github.com/mlco2/ecologits/tree/main/ecologits/estimations/video.py"
         },
         "Our-world-in-data-28202429": {
             "id": "Our-world-in-data-28202429",
@@ -110,12 +100,6 @@
                     "source": "hypothesis"
                 },
                 "Ask-a-detailed-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Generate-a-5s-video": {
                     "value": 1.0,
                     "unit": "dimensionless",
                     "label": "Times per journey",
@@ -257,30 +241,6 @@
                     "source": "hypothesis"
                 }
             }
-        },
-        "Generate-a-5s-video": {
-            "name": "Generate a 5s video",
-            "id": "Generate-a-5s-video",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "GenAI-video-generation": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                },
-                "Render-video": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
         }
     },
     "Job": {
@@ -383,41 +343,6 @@
             },
             "compute_needed": {
                 "value": 0.2,
-                "unit": "cpu_core",
-                "label": "cpu cores needed on server Chat web application server during job processing",
-                "source": "hypothesis"
-            },
-            "server": "Chat-web-application-server"
-        },
-        "Render-video": {
-            "name": "Render video",
-            "id": "Render-video",
-            "data_transferred": {
-                "value": 2.0,
-                "unit": "kilobyte",
-                "label": "Sum of all data uploads and downloads by request",
-                "source": "hypothesis"
-            },
-            "data_stored": {
-                "value": 2.0,
-                "unit": "kilobyte_stored",
-                "label": "Data stored by request",
-                "source": "hypothesis"
-            },
-            "request_duration": {
-                "value": 0.5,
-                "unit": "second",
-                "label": "Request duration",
-                "source": "hypothesis"
-            },
-            "ram_needed": {
-                "value": 120.0,
-                "unit": "megabyte_ram",
-                "label": "RAM needed during job processing",
-                "source": "hypothesis"
-            },
-            "compute_needed": {
-                "value": 0.1,
                 "unit": "cpu_core",
                 "label": "cpu cores needed on server Chat web application server during job processing",
                 "source": "hypothesis"
@@ -687,70 +612,6 @@
         "Big-LLM-API-server": {
             "name": "Big LLM API server",
             "id": "Big-LLM-API-server"
-        }
-    },
-    "EcoLogitsVideoGenExternalAPIJob": {
-        "GenAI-video-generation": {
-            "name": "GenAI video generation",
-            "id": "GenAI-video-generation",
-            "data_stored": {
-                "value": 0.0,
-                "unit": "megabyte_stored",
-                "label": "Data stored by request",
-                "source": "hypothesis"
-            },
-            "ram_needed": {
-                "value": 0.0,
-                "unit": "megabyte_ram",
-                "label": "RAM needed during job processing",
-                "source": "hypothesis"
-            },
-            "compute_needed": {
-                "value": 0.0,
-                "unit": "cpu_core",
-                "label": "CPU needed during job processing",
-                "source": "hypothesis"
-            },
-            "external_api": "GenAI-video-API",
-            "resolution": {
-                "value": "720p (1280 x 720)",
-                "label": "Resolution",
-                "source": "hypothesis"
-            },
-            "duration": {
-                "value": 5.0,
-                "unit": "second",
-                "label": "Video duration",
-                "source": "hypothesis"
-            },
-            "with_audio": {
-                "value": true,
-                "label": "Generates audio",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EcoLogitsVideoGenExternalAPI": {
-        "GenAI-video-API": {
-            "name": "GenAI video API",
-            "id": "GenAI-video-API",
-            "server": "GenAI-video-API-server",
-            "provider": {
-                "value": "klingai",
-                "label": "Provider",
-                "source": "hypothesis"
-            },
-            "model_name": {
-                "value": "kling-v3",
-                "label": "Model used",
-                "source": "hypothesis"
-            }
-        }
-    },
-    "EcoLogitsVideoGenExternalAPIServer": {
-        "GenAI-video-API-server": {
-            "name": "GenAI video API server",
-            "id": "GenAI-video-API-server"
         }
     }
 }

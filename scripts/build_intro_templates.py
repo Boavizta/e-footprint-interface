@@ -25,10 +25,11 @@ from efootprint.api_utils.system_to_json import system_to_json  # noqa: E402
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import (  # noqa: E402
     INTRO_TEMPLATES,
 )
-from scripts.intro_template_scenarios import ai_chatbot, iot_industrial  # noqa: E402
+from scripts.intro_template_scenarios import ai_chatbot, genai_video, iot_industrial  # noqa: E402
 
 BUILDERS = {
     "ai_chatbot": ai_chatbot.build_system,
+    "genai_video": genai_video.build_system,
     "iot_industrial": iot_industrial.build_system,
 }
 

@@ -1,0 +1,717 @@
+{
+    "efootprint_version": "22.3.0",
+    "Sources": {
+        "Base-ADEME_V19": {
+            "id": "Base-ADEME_V19",
+            "name": "Base ADEME_V19",
+            "link": "https://data.ademe.fr/datasets/base-carbone(r)"
+        },
+        "Boavizta-API-cloud-instances": {
+            "id": "Boavizta-API-cloud-instances",
+            "name": "Boavizta API cloud instances",
+            "link": "https://api.boavizta.org/v1/cloud/instance?provider=scaleway&instance_type=dev1-s"
+        },
+        "DATA2eAI---STATE-OF-MOBILE": {
+            "id": "DATA2eAI---STATE-OF-MOBILE",
+            "name": "DATA.AI - STATE OF MOBILE",
+            "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
+        },
+        "Ecologits-compute_llm_impacts_dag-function": {
+            "id": "Ecologits-compute_llm_impacts_dag-function",
+            "name": "Ecologits compute_llm_impacts_dag function",
+            "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/impacts/llm.py"
+        },
+        "Ecologits-compute_video_impacts_dag-function": {
+            "id": "Ecologits-compute_video_impacts_dag-function",
+            "name": "Ecologits compute_video_impacts_dag function",
+            "link": "https://github.com/mlco2/ecologits/tree/main/ecologits/impacts/video.py"
+        },
+        "Ecologits-llm_impacts-function": {
+            "id": "Ecologits-llm_impacts-function",
+            "name": "Ecologits llm_impacts function",
+            "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/tracers/utils.py#L60"
+        },
+        "Ecologits-video_impacts-defaults": {
+            "id": "Ecologits-video_impacts-defaults",
+            "name": "Ecologits video_impacts defaults",
+            "link": "https://github.com/mlco2/ecologits/tree/main/ecologits/estimations/video.py"
+        },
+        "Our-world-in-data-28202429": {
+            "id": "Our-world-in-data-28202429",
+            "name": "Our world in data (2024)",
+            "link": "https://ourworldindata.org/grapher/carbon-intensity-electricity"
+        },
+        "Traficom-study": {
+            "id": "Traficom-study",
+            "name": "Traficom study",
+            "link": "https://www.traficom.fi/en/news/first-study-energy-consumption-communications-networks"
+        },
+        "hypothesis": {
+            "id": "hypothesis",
+            "name": "e-footprint hypothesis",
+            "link": null
+        },
+        "user_data": {
+            "id": "user_data",
+            "name": "user data",
+            "link": null
+        }
+    },
+    "System": {
+        "GenAI-for-Marketing-video-on-social": {
+            "name": "GenAI for Marketing video on social",
+            "id": "GenAI-for-Marketing-video-on-social",
+            "usage_patterns": [
+                "Video-production-users"
+            ],
+            "edge_usage_patterns": []
+        }
+    },
+    "UsagePattern": {
+        "Video-production-users": {
+            "name": "Video production users",
+            "id": "Video-production-users",
+            "hourly_usage_journey_starts": {
+                "form_inputs": {
+                    "start_date": "2026-01-01",
+                    "modeling_duration_value": 1,
+                    "modeling_duration_unit": "year",
+                    "initial_volume": 52,
+                    "initial_volume_timespan": "year",
+                    "net_growth_rate_in_percentage": 0,
+                    "net_growth_rate_timespan": "year"
+                },
+                "label": "Hourly nb of usage journey starts",
+                "source": "user_data",
+                "comment": "52 journeys per year = one short social video produced and posted per week."
+            },
+            "usage_journey": "Create-a-social-video",
+            "devices": [
+                "Default-laptop"
+            ],
+            "network": "Default-wifi-network",
+            "country": "France"
+        }
+    },
+    "UsageJourney": {
+        "Create-a-social-video": {
+            "name": "Create a social video",
+            "id": "Create-a-social-video",
+            "uj_steps": {
+                "Create-a-prompt-for-video-gen": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Explore-and-iterate": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Generate-the-final-video": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Edit-and-mix-the-final-clips-on-computer": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Publish-to-the-social-network": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                }
+            }
+        }
+    },
+    "Device": {
+        "Default-laptop": {
+            "name": "Default laptop",
+            "id": "Default-laptop",
+            "carbon_footprint_fabrication": {
+                "value": 156.0,
+                "unit": "kilogram",
+                "label": "Carbon footprint fabrication",
+                "source": "Base-ADEME_V19"
+            },
+            "power": {
+                "value": 50.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 7.0,
+                "unit": "hour / day",
+                "label": "Fraction of usage time",
+                "source": "DATA2eAI---STATE-OF-MOBILE"
+            }
+        }
+    },
+    "Network": {
+        "Default-wifi-network": {
+            "name": "Default wifi network",
+            "id": "Default-wifi-network",
+            "bandwidth_energy_intensity": {
+                "value": 0.05,
+                "unit": "kilowatt_hour / gigabyte",
+                "label": "bandwith energy intensity",
+                "source": "Traficom-study"
+            }
+        }
+    },
+    "Country": {
+        "France": {
+            "name": "France",
+            "id": "France",
+            "short_name": "FRA",
+            "average_carbon_intensity": {
+                "value": 44.0,
+                "unit": "gram / kilowatt_hour",
+                "label": "Average carbon intensity",
+                "source": "Our-world-in-data-28202429",
+                "confidence": "high"
+            },
+            "timezone": {
+                "zone": "Europe/Paris",
+                "label": "Timezone",
+                "source": "user_data"
+            }
+        }
+    },
+    "UsageJourneyStep": {
+        "Create-a-prompt-for-video-gen": {
+            "name": "Create a prompt for video gen",
+            "id": "Create-a-prompt-for-video-gen",
+            "user_time_spent": {
+                "value": 5.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Prompt-writing-iteration": {
+                    "value": 3.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Explore-and-iterate": {
+            "name": "Explore and iterate",
+            "id": "Explore-and-iterate",
+            "user_time_spent": {
+                "value": 9.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Draft-clip-attempt-28Seedance29": {
+                    "value": 3.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Draft-clip-attempt-28Veo29": {
+                    "value": 3.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Generate-the-final-video": {
+            "name": "Generate the final video",
+            "id": "Generate-the-final-video",
+            "user_time_spent": {
+                "value": 3.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Final-clip-28Veo2c-8s29": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Final-clip-28Seedance2c-8s29": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Edit-and-mix-the-final-clips-on-computer": {
+            "name": "Edit and mix the final clips on computer",
+            "id": "Edit-and-mix-the-final-clips-on-computer",
+            "user_time_spent": {
+                "value": 15.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {}
+        },
+        "Publish-to-the-social-network": {
+            "name": "Publish to the social network",
+            "id": "Publish-to-the-social-network",
+            "user_time_spent": {
+                "value": 2.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Upload-final-video-to-social-network-CDN": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        }
+    },
+    "EcoLogitsGenAIExternalAPIJob": {
+        "Prompt-writing-iteration": {
+            "name": "Prompt writing iteration",
+            "id": "Prompt-writing-iteration",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Text-Generation-LLM-API",
+            "output_token_count": {
+                "value": 400.0,
+                "unit": "dimensionless",
+                "label": "Output token count for gpt-4.1-mini",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EcoLogitsGenAIExternalAPI": {
+        "Text-Generation-LLM-API": {
+            "name": "Text Generation LLM API",
+            "id": "Text-Generation-LLM-API",
+            "server": "Text-Generation-LLM-API-server",
+            "provider": {
+                "value": "openai",
+                "label": "Provider",
+                "source": "hypothesis"
+            },
+            "model_name": {
+                "value": "gpt-4.1-mini",
+                "label": "Model used",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EcoLogitsGenAIExternalAPIServer": {
+        "Text-Generation-LLM-API-server": {
+            "name": "Text Generation LLM API server",
+            "id": "Text-Generation-LLM-API-server"
+        }
+    },
+    "EcoLogitsVideoGenExternalAPIJob": {
+        "Draft-clip-attempt-28Seedance29": {
+            "name": "Draft clip attempt (Seedance)",
+            "id": "Draft-clip-attempt-28Seedance29",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Seedance-video-generation-API",
+            "resolution": {
+                "value": "720p (1280 x 720)",
+                "label": "Resolution",
+                "source": "hypothesis"
+            },
+            "duration": {
+                "value": 8.0,
+                "unit": "second",
+                "label": "Video duration",
+                "source": "hypothesis"
+            },
+            "with_audio": {
+                "value": false,
+                "label": "Generates audio",
+                "source": "hypothesis"
+            }
+        },
+        "Draft-clip-attempt-28Veo29": {
+            "name": "Draft clip attempt (Veo)",
+            "id": "Draft-clip-attempt-28Veo29",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Google-Veo-video-generation-API",
+            "resolution": {
+                "value": "720p (1280 x 720)",
+                "label": "Resolution",
+                "source": "hypothesis"
+            },
+            "duration": {
+                "value": 8.0,
+                "unit": "second",
+                "label": "Video duration",
+                "source": "hypothesis"
+            },
+            "with_audio": {
+                "value": false,
+                "label": "Generates audio",
+                "source": "hypothesis"
+            }
+        },
+        "Final-clip-28Veo2c-8s29": {
+            "name": "Final clip (Veo, 8s)",
+            "id": "Final-clip-28Veo2c-8s29",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Google-Veo-video-generation-API",
+            "resolution": {
+                "value": "1080p (1920 x 1080)",
+                "label": "Resolution",
+                "source": "hypothesis"
+            },
+            "duration": {
+                "value": 8.0,
+                "unit": "second",
+                "label": "Video duration",
+                "source": "hypothesis"
+            },
+            "with_audio": {
+                "value": false,
+                "label": "Generates audio",
+                "source": "hypothesis"
+            }
+        },
+        "Final-clip-28Seedance2c-8s29": {
+            "name": "Final clip (Seedance, 8s)",
+            "id": "Final-clip-28Seedance2c-8s29",
+            "data_stored": {
+                "value": 0.0,
+                "unit": "megabyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 0.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "CPU needed during job processing",
+                "source": "hypothesis"
+            },
+            "external_api": "Seedance-video-generation-API",
+            "resolution": {
+                "value": "1080p (1920 x 1080)",
+                "label": "Resolution",
+                "source": "hypothesis"
+            },
+            "duration": {
+                "value": 8.0,
+                "unit": "second",
+                "label": "Video duration",
+                "source": "hypothesis"
+            },
+            "with_audio": {
+                "value": false,
+                "label": "Generates audio",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EcoLogitsVideoGenExternalAPI": {
+        "Seedance-video-generation-API": {
+            "name": "Seedance video generation API",
+            "id": "Seedance-video-generation-API",
+            "server": "Seedance-video-generation-API-server",
+            "provider": {
+                "value": "bytedance",
+                "label": "Provider",
+                "source": "hypothesis"
+            },
+            "model_name": {
+                "value": "seedance-1.5-pro",
+                "label": "Model used",
+                "source": "hypothesis"
+            }
+        },
+        "Google-Veo-video-generation-API": {
+            "name": "Google Veo video generation API",
+            "id": "Google-Veo-video-generation-API",
+            "server": "Google-Veo-video-generation-API-server",
+            "provider": {
+                "value": "google",
+                "label": "Provider",
+                "source": "hypothesis"
+            },
+            "model_name": {
+                "value": "veo-3.0",
+                "label": "Model used",
+                "source": "hypothesis"
+            }
+        }
+    },
+    "EcoLogitsVideoGenExternalAPIServer": {
+        "Seedance-video-generation-API-server": {
+            "name": "Seedance video generation API server",
+            "id": "Seedance-video-generation-API-server"
+        },
+        "Google-Veo-video-generation-API-server": {
+            "name": "Google Veo video generation API server",
+            "id": "Google-Veo-video-generation-API-server"
+        }
+    },
+    "Job": {
+        "Upload-final-video-to-social-network-CDN": {
+            "name": "Upload final video to social network CDN",
+            "id": "Upload-final-video-to-social-network-CDN",
+            "data_transferred": {
+                "value": 15.0,
+                "unit": "megabyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 15000.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 2.0,
+                "unit": "second",
+                "label": "Request duration",
+                "source": "hypothesis",
+                "comment": "Only the fraction of the CDN's footprint matching our usage is counted: e-footprint shares the server's impact by occupancy, so this 2s upload claims just a tiny quota of the CDN, not its full footprint."
+            },
+            "ram_needed": {
+                "value": 150.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.1,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server CDN (Content Delivery Network) of social network during job processing",
+                "source": "hypothesis"
+            },
+            "server": "CDN-28Content-Delivery-Network29-of-social-network"
+        }
+    },
+    "BoaviztaCloudServer": {
+        "CDN-28Content-Delivery-Network29-of-social-network": {
+            "name": "CDN (Content Delivery Network) of social network",
+            "id": "CDN-28Content-Delivery-Network29-of-social-network",
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Fraction of usage time",
+                "source": "hypothesis"
+            },
+            "server_type": {
+                "value": "serverless",
+                "label": "Server type",
+                "source": "hypothesis"
+            },
+            "idle_power": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Idle power",
+                "source": "hypothesis"
+            },
+            "power_usage_effectiveness": {
+                "value": 1.2,
+                "unit": "dimensionless",
+                "label": "PUE",
+                "source": "hypothesis"
+            },
+            "average_carbon_intensity": {
+                "value": 100.0,
+                "unit": "gram / kilowatt_hour",
+                "label": "Average carbon intensity of electricity",
+                "source": "hypothesis"
+            },
+            "utilization_rate": {
+                "value": 0.9,
+                "unit": "dimensionless",
+                "label": "Utilization rate",
+                "source": "hypothesis"
+            },
+            "base_ram_consumption": {
+                "value": 0.0,
+                "unit": "gigabyte_ram",
+                "label": "Base RAM consumption",
+                "source": "hypothesis"
+            },
+            "base_compute_consumption": {
+                "value": 0.0,
+                "unit": "cpu_core",
+                "label": "Base cpu core consumption",
+                "source": "hypothesis"
+            },
+            "fixed_nb_of_instances": {
+                "value": null,
+                "label": "User defined number of instances"
+            },
+            "storage": "CDN-video-storage",
+            "provider": {
+                "value": "scaleway",
+                "label": "Cloud provider",
+                "source": "hypothesis"
+            },
+            "instance_type": {
+                "value": "dev1-s",
+                "label": "Instance type",
+                "source": "hypothesis"
+            },
+            "impact_url": "https://api.boavizta.org/v1/cloud/instance"
+        }
+    },
+    "Storage": {
+        "CDN-video-storage": {
+            "name": "CDN video storage",
+            "id": "CDN-video-storage",
+            "power": {
+                "value": 0.0,
+                "unit": "watt",
+                "label": "Power",
+                "source": "hypothesis"
+            },
+            "lifespan": {
+                "value": 6.0,
+                "unit": "year",
+                "label": "Lifespan",
+                "source": "hypothesis"
+            },
+            "fraction_of_usage_time": {
+                "value": 1.0,
+                "unit": "dimensionless",
+                "label": "Fraction of usage time",
+                "source": "hypothesis"
+            },
+            "carbon_footprint_fabrication_per_storage_capacity": {
+                "value": 160.0,
+                "unit": "kilogram / terabyte_stored",
+                "label": "Fabrication carbon footprint per storage capacity",
+                "source": "hypothesis"
+            },
+            "storage_capacity": {
+                "value": 1.0,
+                "unit": "terabyte_stored",
+                "label": "Storage capacity",
+                "source": "hypothesis"
+            },
+            "data_replication_factor": {
+                "value": 3.0,
+                "unit": "dimensionless",
+                "label": "Data replication factor",
+                "source": "hypothesis"
+            },
+            "data_storage_duration": {
+                "value": 43830.0,
+                "unit": "hour",
+                "label": "Data storage duration",
+                "source": "hypothesis"
+            },
+            "base_storage_need": {
+                "value": 0.0,
+                "unit": "gigabyte_stored",
+                "label": "Initial storage need",
+                "source": "hypothesis"
+            },
+            "fixed_nb_of_instances": {
+                "value": null,
+                "label": "User defined number of instances"
+            }
+        }
+    }
+}
