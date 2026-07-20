@@ -4,6 +4,10 @@ This document describes the steps to create and deploy a new release.
 
 ## 1. Pre-release: Update Version and Dependencies
 
+### Rename the `## [Unreleased]` section in [CHANGELOG.md](CHANGELOG.md) to the new version
+
+`feature-implement` writes each feature's entry into `## [Unreleased]` as it ships, so by release time the section should already hold everything notable. Rename it to `## [Vx.y.z] - <today's date>` and start a fresh empty `## [Unreleased]` above it. Only author new entries from scratch if something shipped without going through `feature-implement` (e.g. a standalone `task-implement` run whose CHANGELOG entry is missing) — check the merged commits since the last release tag to be sure nothing is missing.
+
 ### Update interface version
 Edit version in [pyproject.toml](pyproject.toml) and in [version.py](efootprint_interface/version.py) to the new version number (e.g., `x.y.z`):
 ```toml
@@ -64,7 +68,6 @@ npm run jest
 All tests must pass before proceeding.
 
 ### Update documentation
-- Update [CHANGELOG.md](CHANGELOG.md) with all changes since last release
 - Update [README.md](README.md) if needed
 
 ## 3. Create Release Commit and PR

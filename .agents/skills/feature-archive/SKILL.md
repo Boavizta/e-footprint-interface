@@ -20,7 +20,7 @@ You are archiving a **shipped** feature — the final stage of the spec-driven w
 
 2. **Delete `specs/features/<feature-name>/`.** Use `git rm -r` for tracked files, **and** remove any untracked `spec.html` / `plan.html` left behind (a tracked-files-only delete leaves those on disk — check with `git status` and `rm` them). Git history preserves everything.
 
-3. **Update `CHANGELOG.md`** if the feature is not already recorded there.
+3. **Confirm `CHANGELOG.md` has an entry** for this feature under `## [Unreleased]`. `feature-implement` writes this once all tasks are done, so it's normally already there — add it now only if the feature was implemented without that skill (e.g. `task-implement` run standalone) and the entry is missing.
 
 4. **Commit** with a `[REMOVE]` prefix, body `<feature-name>: archive shipped feature spec`. Bundle the promotion edits, the deletion, and any CHANGELOG change into this commit (or a small number of related commits if the promotion edits are substantial).
 

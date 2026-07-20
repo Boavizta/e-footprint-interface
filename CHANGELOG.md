@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [V1.10.0]
+## [Unreleased]
 
 ### Changed
 - Adopt efootprint 23.0.0's pull-based computation contract. The session now stores a single canonical model copy (inputs plus the serialize-flagged computed slots and calculation graph) instead of two variants; loading recomputes nothing when the stored efootprint version matches, so page load is faster. Sankey diagrams render from the stored impact-repartition matrix and edit requests recompute only the affected footprint cone. Old sessions reload as inputs-only and recompute lazily on first read.

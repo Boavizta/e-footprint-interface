@@ -18,7 +18,7 @@ These are the project's immutable rules. They must be respected by every code ch
 3. Jest passes (`npm run jest`).
 4. `pyproject.toml` and `poetry.lock` reference `efootprint` from PyPI (not a local editable path) before any commit reaches `main`. Enforced by a pyproject.toml-parsing test.
 5. If Django models change, a migration file is committed.
-6. `CHANGELOG.md` entry added.
+6. `CHANGELOG.md` entry added under `## [Unreleased]`. For a task run standalone via `task-implement`, add it on the spot. For a task run inside a `feature-implement` loop, this is deferred: the supervisor writes one consolidated entry once every task in the feature is done, so individual tasks skip this gate.
 
 ## 3. Agent-facing rules
 
