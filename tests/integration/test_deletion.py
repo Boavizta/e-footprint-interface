@@ -64,6 +64,46 @@ def test_deleting_dict_child_preserves_sibling_weight_metadata(minimal_repositor
     assert sibling_entry["source"] == "hypothesis"
 
 
+def test_delete_uj_step_cascades_to_its_jobs(minimal_repository):
+    """Deleting a UsageJourneyStep deletes the jobs it holds in its `jobs` weighted dict.
+
+    Jobs are dict children, and the cascade in `ModelingObjectWeb.self_delete` only sees them because
+    the library's `mod_obj_attributes` walks structural dict keys. When it didn't, jobs survived their
+    step and kept blocking the deletion of the servers and external APIs they pointed at.
+    """
+    model_web = ModelWeb(minimal_repository)
+    uj_step_id = model_web.usage_journey_steps[0].efootprint_id
+    assert "Job" in minimal_repository.get_system_data()
+
+    delete_object(minimal_repository, uj_step_id)
+
+    sd = minimal_repository.get_system_data()
+    assert "UsageJourneyStep" not in sd
+    assert "Job" not in sd
+
+
+def test_delete_uj_step_keeps_jobs_shared_with_another_step(minimal_repository):
+    """A job held by two steps survives the deletion of one of them."""
+    model_web = ModelWeb(minimal_repository)
+    uj_step_id = model_web.usage_journey_steps[0].efootprint_id
+    uj_id = model_web.usage_journeys[0].efootprint_id
+    job_id = next(iter(minimal_repository.get_system_data()["Job"]))
+
+    second_step_id = create_object(
+        minimal_repository,
+        create_post_data_from_class_default_values("Second step", "UsageJourneyStep", jobs={job_id: 1}),
+        parent_id=uj_id,
+    )
+    assert second_step_id in minimal_repository.get_system_data()["UsageJourneyStep"]
+
+    delete_object(minimal_repository, uj_step_id)
+
+    sd = minimal_repository.get_system_data()
+    assert uj_step_id not in sd["UsageJourneyStep"]
+    assert job_id in sd["Job"]
+    assert job_id in sd["UsageJourneyStep"][second_step_id]["jobs"]
+
+
 def test_delete_ecologits_job_then_service(default_system_repository_with_journey):
     """Deleting an EcoLogits job then its service clears both from system_data."""
     default_system_repository = default_system_repository_with_journey

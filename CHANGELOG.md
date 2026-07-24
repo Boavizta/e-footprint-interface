@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [V1.9.3]
+
+### Fixed
+- model-builder: deleting a usage journey step now deletes its jobs. They used to survive it as orphans, invisible on the canvas yet still counted as references, so deleting the server or external API they pointed at was refused with no way to act on it. Fixed library-side in `mod_obj_attributes`; requires an efootprint release carrying that fix.
+
 ## [V1.9.2]
 
 ### Added
