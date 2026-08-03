@@ -70,7 +70,7 @@ def _upload(client, url, payload: dict, filename: str):
 @pytest.mark.django_db
 def test_workspace_export_is_an_envelope_of_two_single_model_documents(client, minimal_system):
     """Download both models → the envelope: version, active pointer, and two models[] that are
-    each a byte-for-byte single-model document (no calculated attributes)."""
+    each a byte-for-byte complete single-model document."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})  # slot 1 active
 
@@ -80,9 +80,8 @@ def test_workspace_export_is_an_envelope_of_two_single_model_documents(client, m
     assert len(envelope["models"]) == 2
     for model in envelope["models"]:
         assert "System" in model and "efootprint_version" in model
-        # No calculated attributes are stored in the file (recomputed on import).
-        assert all("calculated_attributes" not in obj for objs in model.values()
-                   if isinstance(objs, dict) for obj in objs.values() if isinstance(obj, dict))
+        assert "calculation_graph" in model
+        assert all("total_footprint" in system for system in model["System"].values())
 
 
 @pytest.mark.django_db

@@ -243,7 +243,7 @@ def open_import_json_panel(request):
 
 
 def _single_model_document(repository, model_web=None) -> dict:
-    """The exact single-model export document for one slot (no calculated attributes).
+    """The exact complete single-model export document for one slot.
 
     Shared by ``download_json`` and the workspace export so each ``models[]`` element of the workspace
     file is byte-for-byte a single-model file — the single-model format is
@@ -252,7 +252,7 @@ def _single_model_document(repository, model_web=None) -> dict:
     """
     if model_web is None:
         model_web = ModelWeb(repository)
-    document = model_web.to_json(save_computed_state=False)
+    document = model_web.export_json()
     if repository.interface_config:
         document["interface_config"] = repository.interface_config
         document["efootprint_interface_version"] = interface_version
@@ -262,11 +262,11 @@ def _single_model_document(repository, model_web=None) -> dict:
 def download_json(request):
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.repository_for(_requested_slot(request, workspace))
-    system = ModelWeb(repository).system
-    json_data = json.dumps(_single_model_document(repository), indent=4)
+    model_web = ModelWeb(repository)
+    json_data = json.dumps(_single_model_document(repository, model_web), indent=4)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
     response = HttpResponse(json_data, content_type="application/json")
-    filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC {system.name}"))
+    filename = smart_truncate(sanitize_filename(f"{current_date_time} UTC {model_web.system.name}"))
     response["Content-Disposition"] = f"attachment; filename={filename}.e-f.json"
     return response
 
@@ -275,9 +275,9 @@ def download_workspace(request):
     """Export both models as one additive ``.e-f.json`` comparison file.
 
     Thin envelope around two byte-for-byte single-model documents plus the active-slot pointer; the
-    single-model format is untouched. Each element carries no calculated attributes (recomputed on
-    import). With a single-model session this exports one ``models[]`` element — re-importable into a
-    workspace just the same.
+    single-model format is untouched. Each element carries a complete serialized-state snapshot. With
+    a single-model session this exports one ``models[]`` element — re-importable into a workspace just
+    the same.
     """
     workspace = SessionWorkspaceRepository(request.session)
     slots = workspace.list_slots()

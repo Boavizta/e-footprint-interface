@@ -250,6 +250,32 @@ class TestToJsonHoldsOnlyReferencedSources:
         assert Sources.USER_DATA.name in dropdown_names and Sources.HYPOTHESIS.name in dropdown_names
 
 
+class TestExportSerialization:
+    def test_cache_persistence_stays_lazy_but_export_materializes_every_serialized_slot(self, minimal_model_web):
+        """Ordinary edit persistence peeks, while explicit export computes a complete snapshot."""
+        from efootprint.abstract_modeling_classes.reactive_core import serialized_slots
+
+        raw_system = next(iter(minimal_model_web.response_objs["System"].values()))
+        total_descriptor = serialized_slots(type(raw_system))["total_footprint"]
+        assert total_descriptor.peek(raw_system) is None
+
+        minimal_model_web.persist_to_cache()
+
+        assert total_descriptor.peek(raw_system) is None
+        persisted = minimal_model_web.repository.get_system_data()
+        assert "total_footprint" not in persisted["System"][raw_system.id]
+
+        exported = minimal_model_web.export_json()
+
+        assert "calculation_graph" in exported
+        assert [raw_system.id, "total_footprint", None] in exported["calculation_graph"]["nodes"]
+        assert exported["calculation_graph"]["edges"]
+        for obj in minimal_model_web.flat_efootprint_objs_dict.values():
+            for attr_name, descriptor in serialized_slots(obj.efootprint_class).items():
+                assert descriptor.peek(obj) is not None, f"{obj.name}.{attr_name} was not materialized"
+                assert attr_name in exported[obj.class_as_simple_str][obj.id]
+
+
 class TestGetEfootprintObjectsFromEfootprintType:
     """Tests for ModelWeb.get_efootprint_objects_from_efootprint_type catalog/system deduplication."""
 

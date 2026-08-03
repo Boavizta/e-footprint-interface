@@ -446,11 +446,11 @@
 <h2 class="sec">What's in the file</h2>
 <p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">One extension, <code>.e-f.json</code>, for both shapes —
   the app routes by <b>content, not extension</b>, so a single-model session can still open a workspace file. Models export
-  <b>without calculated attributes</b> (recomputed on load) but <b>with their UI settings</b> (Sankey views, etc.), so an analysis
-  round-trips intact while the file stays small.</p>
+  with a <b>complete serialized result snapshot</b> and their UI settings (Sankey views, etc.), so an analysis round-trips intact
+  regardless of which projections were opened before download.</p>
 <table>
   <tr><th>Shape</th><th>Contains</th><th>Notes</th></tr>
-  <tr><td><b>Single model</b><br><code>{date} UTC {name}.e-f.json</code></td><td>the model (no calculated attributes) + its <code>interface_config</code> (Sankey settings, …) + the interface version</td><td>opens by <b>replacing the active model</b></td></tr>
+  <tr><td><b>Single model</b><br><code>{date} UTC {name}.e-f.json</code></td><td>the model's inputs + complete serialized results and topology + its <code>interface_config</code> (Sankey settings, …) + the interface version</td><td>opens by <b>replacing the active model</b></td></tr>
   <tr><td><b>Workspace</b><br><code>… comparison (A vs B).e-f.json</code></td><td>an envelope: <code>{ active_slot, models: [ &lt;single-model doc&gt;, … ] }</code> — each entry byte-for-byte a single-model document</td><td>opens by <b>restoring both slots</b> and the active one</td></tr>
   <tr><td><b>Recovered (raw)</b><br><code>… recovered-model.e-f.json</code></td><td>the stored session data <b>verbatim</b> — never rebuilt</td><td>served by the recovery page, even on a corrupt model</td></tr>
 </table>
@@ -461,7 +461,7 @@
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>One <code>.e-f.json</code> extension for both single-model and workspace files; route by content, not extension.</b></td><td>A single-model session can still open a workspace file and vice-versa — the user never has to know which kind they have. The workspace file is an additive envelope of byte-for-byte single-model documents, so the single-model format is never re-implemented or allowed to drift.</td></tr>
-  <tr><td><b>Calculated attributes are stripped on export and recomputed on import.</b></td><td>Keeps files small and makes import authoritative — what you see is recomputed from inputs, not trusted from a possibly-stale or hand-edited file. UI-only state (<code>interface_config</code>) rides inside the file but the model never touches it; the session repository owns it.</td></tr>
+  <tr><td><b>Explicit export materializes the complete serialized result set; automatic session saves stay lazy.</b></td><td>A downloaded model is self-contained and independent of which result views the user opened. Edit-time persistence remains fast and passive: it only stores results already in cache. UI-only state (<code>interface_config</code>) rides inside the file but the model never touches it; the session repository owns it.</td></tr>
   <tr><td><b>Loading is POST-only; the recovery download and <code>/recover/</code> are GET.</b></td><td>A bare GET must not mutate the session model. But a read-only escape hatch has to stay reachable even when the model is what crashes the deserializer — so the recovery reads and the raw download are safe GETs that never build the model.</td></tr>
   <tr><td><b>The recovery page is fully decoupled from the model.</b></td><td>It must render precisely when the model is broken, so it reads only the slot index + a cache-existence check and never deserializes. Anything that touched the model could fail the same way the builder just did.</td></tr>
   <tr><td><b>The bug report carries versions and the error type only — no traceback, no model data.</b></td><td>The report opens a public GitHub issue; leaking model contents or a stack trace there would be a privacy and noise problem. The user is asked to attach the file they just downloaded if they choose to.</td></tr>
