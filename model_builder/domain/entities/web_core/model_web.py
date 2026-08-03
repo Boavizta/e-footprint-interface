@@ -9,7 +9,8 @@ from efootprint.abstract_modeling_classes.reactive_core import computed_slots
 from efootprint.abstract_modeling_classes.source_objects import Sources
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import (
-    CALCULATION_GRAPH_KEY, calculation_graph_section, collect_referenced_source_ids)
+    CALCULATION_GRAPH_KEY, calculation_graph_section, collect_referenced_source_ids,
+    materialize_serialized_state)
 from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
@@ -145,6 +146,11 @@ class ModelWeb:
                 list(self.flat_efootprint_objs_dict.values()))
 
         return output_json
+
+    def export_json(self):
+        """Build a complete user-facing snapshot, independent of prior projection reads."""
+        materialize_serialized_state(self.flat_efootprint_objs_dict.values())
+        return self.to_json(save_computed_state=True)
 
     def persist_to_cache(self):
         """Serialize current system state and persist it to the repository.
