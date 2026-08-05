@@ -169,20 +169,23 @@ class SessionSystemRepository(ISystemRepository):
     def interface_config(self, value: dict) -> None:
         self._interface_config = value
 
-    def save_data(self, data: Dict[str, Any]) -> None:
-        """Persist the single canonical system data payload to Redis and Postgres.
+    def save_data(self, data: Dict[str, Any], recovery_data: Optional[Dict[str, Any]] = None) -> None:
+        """Persist canonical data to Redis and compact recovery data to Postgres.
 
         Args:
-            data: The system data dictionary to save (one canonical payload — the minimal contract
-                makes it cheap enough that both caches store the same blob).
+            data: Canonical data for the fast Redis path, including stored computed state.
+            recovery_data: Optional inputs-only data for the slower Postgres fallback. When omitted,
+                ``data`` is used for both backends.
 
         Raises:
             PayloadSizeLimitExceeded: If the summed weight of all slots exceeds MAX_PAYLOAD_SIZE_MB
                 (the shared workspace budget).
         """
         if self._interface_config is not None:
-            data["interface_config"] = self._interface_config
-            data["efootprint_interface_version"] = interface_version
+            for payload in (data, recovery_data):
+                if payload is not None:
+                    payload["interface_config"] = self._interface_config
+                    payload["efootprint_interface_version"] = interface_version
             self._save_interface_config_to_session()
 
         size_result = compute_json_size(data)
@@ -196,13 +199,20 @@ class SessionSystemRepository(ISystemRepository):
             raise PayloadSizeLimitExceeded(workspace_size_mb, self.MAX_PAYLOAD_SIZE_MB)
 
         cache_key = self._cache_key(create_if_missing=True)
+        postgres_payload = recovery_data if recovery_data is not None else data
 
         if cache_key:
             self._cache_backend.set(
                 cache_key,
                 data,
                 redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
+                write_postgres=False,
+            )
+            self._cache_backend.set(
+                cache_key,
+                postgres_payload,
                 postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
+                write_redis=False,
             )
             self._index.set_slot_size(self._slot, size_result.size_bytes)
             self._session.modified = True

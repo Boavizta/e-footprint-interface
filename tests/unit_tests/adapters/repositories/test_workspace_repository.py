@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
+from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
 from model_builder.adapters.repositories.session_workspace_repository import SessionWorkspaceRepository
@@ -167,6 +168,18 @@ class TestSharedBudget:
              patch.object(CacheBackend, "set", autospec=True):
             repo.save_data(_data("sys-0"))
         assert WorkspaceIndex(session).slot_sizes()[0] > 0
+
+    def test_recovery_payload_does_not_count_toward_canonical_budget(self):
+        session = DictSession()
+        repo = SessionSystemRepository(session)
+        canonical_data = _data("sys-0")
+        oversized_recovery_data = _data("sys-0", payload="x" * int(1.1 * 1024 * 1024))
+
+        with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 1.0), \
+             patch.object(CacheBackend, "set", autospec=True):
+            repo.save_data(canonical_data, recovery_data=oversized_recovery_data)
+
+        assert WorkspaceIndex(session).slot_sizes()[0] == compute_json_size(canonical_data).size_bytes
 
 
 # --------------------------------------------------------------------------- #
