@@ -33,13 +33,13 @@ def _make_sankey_mock(mock_cls):
     instance = MagicMock()
     mock_cls.return_value = instance
     instance.build.return_value = None
-    instance.total_system_value = 1_000_000.0 * u.kg  # 1000 t
+    instance.total_system_value = 1_000_000.0  # kg, i.e. 1000 t
     instance.node_labels = ["Test System", "Usage"]
     instance.full_node_labels = ["Test System", "Usage"]
     instance.link_sources = [0]
     instance.link_targets = [1]
-    instance.link_values = [1_000.0 * u.tonne]
-    instance.node_total_values = [1_000_000.0 * u.kg, 1_000_000.0 * u.kg]
+    instance.link_values = [1_000_000.0]
+    instance.node_total_values = [1_000_000.0, 1_000_000.0]
     instance.aggregated_node_members = {}
     instance._node_columns = {0: 1, 1: 2}
     instance._spacer_nodes = set()
@@ -50,9 +50,9 @@ def _make_sankey_mock(mock_cls):
     instance.get_column_information.return_value = []
     instance.get_column_metadata.return_value = []
     instance.get_root_display_unit.return_value = u.tonne
-    instance.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+    instance.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
     instance.get_percentage_of_total.side_effect = (
-        lambda value: value.to(u.tonne).magnitude / instance.total_system_value.to(u.tonne).magnitude * 100
+        lambda value: value / instance.total_system_value * 100
     )
     return instance
 
@@ -456,9 +456,9 @@ class TestBuildSankeyPayload:
         sankey.full_node_labels = sankey.node_labels
         sankey.link_sources = [0]
         sankey.link_targets = [1]
-        sankey.link_values = [1.0 * u.tonne]
-        sankey.node_total_values = [1000.0 * u.kg, 1000.0 * u.kg]
-        sankey.total_system_value = 1000.0 * u.kg
+        sankey.link_values = [1000.0]
+        sankey.node_total_values = [1000.0, 1000.0]
+        sankey.total_system_value = 1000.0
         sankey.aggregated_node_members = {}
         sankey._node_columns = {0: 1, 1: 2}
         sankey._spacer_nodes = set()
@@ -470,9 +470,9 @@ class TestBuildSankeyPayload:
             "rgba(80,120,180,0.8)",
         ]
         sankey.get_root_display_unit.return_value = u.tonne
-        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
         sankey.get_percentage_of_total.side_effect = (
-            lambda value: value.to(u.tonne).magnitude / sankey.total_system_value.to(u.tonne).magnitude * 100
+            lambda value: value / sankey.total_system_value * 100
         )
 
         payload, _ = _build_sankey_payload(sankey)
@@ -490,9 +490,9 @@ class TestBuildSankeyPayload:
         sankey.full_node_labels = ["Root", "", "Leaf"]
         sankey.link_sources = [0, 1]
         sankey.link_targets = [1, 2]
-        sankey.link_values = [1.0 * u.tonne, 1.0 * u.tonne]
-        sankey.node_total_values = [1000.0 * u.kg, 1000.0 * u.kg, 1000.0 * u.kg]
-        sankey.total_system_value = 1000.0 * u.kg
+        sankey.link_values = [1000.0, 1000.0]
+        sankey.node_total_values = [1000.0, 1000.0, 1000.0]
+        sankey.total_system_value = 1000.0
         sankey.aggregated_node_members = {}
         sankey._node_columns = {0: 1, 1: 2, 2: 3}
         sankey._spacer_nodes = {1}
@@ -505,9 +505,9 @@ class TestBuildSankeyPayload:
             "rgba(80,120,180,0.8)",
         ]
         sankey.get_root_display_unit.return_value = u.tonne
-        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
         sankey.get_percentage_of_total.side_effect = (
-            lambda value: value.to(u.tonne).magnitude / sankey.total_system_value.to(u.tonne).magnitude * 100
+            lambda value: value / sankey.total_system_value * 100
         )
 
         payload, _ = _build_sankey_payload(sankey)
@@ -529,9 +529,9 @@ class TestBuildSankeyPayload:
         sankey.full_node_labels = ["EdgeDevices Usage", "Leaf"]
         sankey.link_sources = [0]
         sankey.link_targets = [1]
-        sankey.link_values = [1.0 * u.tonne]
-        sankey.node_total_values = [1000.0 * u.kg, 1000.0 * u.kg]
-        sankey.total_system_value = 1000.0 * u.kg
+        sankey.link_values = [1000.0]
+        sankey.node_total_values = [1000.0, 1000.0]
+        sankey.total_system_value = 1000.0
         sankey.aggregated_node_members = {}
         sankey._node_columns = {0: 1, 1: 2}
         sankey._spacer_nodes = set()
@@ -543,9 +543,9 @@ class TestBuildSankeyPayload:
             "rgba(80,120,180,0.8)",
         ]
         sankey.get_root_display_unit.return_value = u.tonne
-        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value.to(u.tonne).magnitude:g} t"
+        sankey.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
         sankey.get_percentage_of_total.side_effect = (
-            lambda value: value.to(u.tonne).magnitude / sankey.total_system_value.to(u.tonne).magnitude * 100
+            lambda value: value / sankey.total_system_value * 100
         )
 
         payload, _ = _build_sankey_payload(sankey)
