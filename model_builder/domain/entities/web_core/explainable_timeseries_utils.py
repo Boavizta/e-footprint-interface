@@ -3,6 +3,7 @@ from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.utils.display import display_quantity_as_str, best_display_unit, human_readable_unit
 from pint import Quantity
 
@@ -21,12 +22,11 @@ def get_web_explainable_from_attr(model_web, efootprint_id: str, attr_name: str,
     if id_of_key_in_dict is None:
         return web_attr
 
-    selected_explainable = web_attr.efootprint_object[
-        model_web.get_efootprint_object_from_efootprint_id(
-            id_of_key_in_dict,
-            "object_type unnecessary because the key necessarily already belongs to the system",
-        )
-    ]
+    dict_key = next(
+        key for key in web_attr.efootprint_object
+        if id_of_key_in_dict in (getattr(key, "id", str(key)), css_escape(getattr(key, "id", str(key))))
+    )
+    selected_explainable = web_attr.efootprint_object[dict_key]
     web_wrapper = ExplainableQuantityWeb if isinstance(selected_explainable, ExplainableQuantity) else ExplainableObjectWeb
 
     return web_wrapper(selected_explainable, model_web)

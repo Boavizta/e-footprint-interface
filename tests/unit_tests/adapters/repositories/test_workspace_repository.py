@@ -225,9 +225,11 @@ class TestDistinctSystemIdInvariant:
         0's id and assert the stored payload still carries the computed state: the calculation graph and
         the System's serialize-flagged total footprint, neither of which the inputs-only twin has.
         """
-        from efootprint.api_utils.system_to_json import system_to_json, CALCULATION_GRAPH_KEY
+        from efootprint.api_utils.system_to_json import (
+            CALCULATION_GRAPH_KEY, materialize_serialized_state, system_to_json)
         from model_builder.adapters.repositories import InMemoryWorkspaceRepository
 
+        materialize_serialized_state(minimal_system)
         with_calc = system_to_json(minimal_system, save_computed_state=True)
         without_calc = system_to_json(minimal_system, save_computed_state=False)
         # Precondition: the computed state is genuinely present in one and absent in the other.

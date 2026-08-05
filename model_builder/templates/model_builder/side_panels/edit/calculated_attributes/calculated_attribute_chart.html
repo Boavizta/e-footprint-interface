@@ -19,14 +19,16 @@
     </button>
 </div>
 {% if web_ehq.dict_container %}
-    <h6>Usage pattern: <a
+    <h6>Usage pattern:
+        {% if web_ehq.key_in_dict.class_as_simple_str %}<a
                 href="#"
                 hx-get="/model_builder/open-edit-object-panel/{{ web_ehq.key_in_dict.efootprint_id }}/"
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"
                 hx-disabled-elt="button"
-            >{{ web_ehq.key_in_dict.name }}</a></h6>
+            >{{ web_ehq.key_in_dict.name }}</a>{% else %}{{ web_ehq.key_in_dict.name }}{% endif %}
+    </h6>
 {% endif %}
 {{ data_timeseries|json_script:"data_timeseries" }}
 <canvas id="chart-render-calculated-attribute" class="mb-3"

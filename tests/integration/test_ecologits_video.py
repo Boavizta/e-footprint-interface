@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from efootprint.abstract_modeling_classes.reactive_core import ReactiveSlot, computed_slots
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
-from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.api_utils.system_to_json import materialize_serialized_state, system_to_json
 from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
     EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob)
 from efootprint.constants.countries import country_generator, tz
@@ -51,6 +51,7 @@ def _system_data_from_jobs(jobs: list) -> dict:
         hourly_usage_journey_starts=create_hourly_usage())
     system = System("Video system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     try:
+        materialize_serialized_state(system)
         return system_to_json(system, save_computed_state=True)
     finally:
         system.self_delete()

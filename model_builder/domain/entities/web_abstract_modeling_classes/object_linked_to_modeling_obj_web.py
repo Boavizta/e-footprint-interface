@@ -1,6 +1,7 @@
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
-from efootprint.abstract_modeling_classes.modeling_object import css_escape
+from efootprint.abstract_modeling_classes.modeling_object import css_escape, ModelingObject
 from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 
 from utils import camel_to_snake
@@ -50,7 +51,11 @@ class ObjectLinkedToModelingObjWeb:
     @property
     def key_in_dict(self):
         from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_object
-        return wrap_efootprint_object(self.efootprint_object.key_in_dict, self.model_web)
+        key = self.efootprint_object.key_in_dict
+        if isinstance(key, ModelingObject):
+            return wrap_efootprint_object(key, self.model_web)
+        key_id = getattr(key, "id", str(key))
+        return SimpleNamespace(id=key_id, efootprint_id=css_escape(key_id), name=str(key))
 
     @property
     def attr_name_web(self):

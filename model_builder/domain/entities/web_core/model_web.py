@@ -210,10 +210,10 @@ class ModelWeb:
     def _efootprint_object_from_json(json_input: dict, object_type: str, sources_dict: dict | None = None):
         efootprint_class = MODELING_OBJECT_CLASSES_DICT[object_type]
         efootprint_object, expl_obj_dicts_to_create_after_objects_creation = efootprint_class.from_json_dict(
-            json_input, {}, False, False, sources_dict=sources_dict)
+            json_input, {}, attach_stored_computed_values=False, sources_dict=sources_dict)
         assert len(expl_obj_dicts_to_create_after_objects_creation) == 0, \
             f"{object_type} object {efootprint_object.id} has explainable objects to create after objects creation"
-        efootprint_object.after_init()
+        efootprint_object._mark_live()
 
         return efootprint_object
 
@@ -356,12 +356,12 @@ class ModelWeb:
     @property
     def root_edge_device_groups(self):
         """Root-level groups (not sub-groups of any other group)."""
-        return [group for group in self.edge_device_groups if not group.modeling_obj._find_parent_groups()]
+        return [group for group in self.edge_device_groups if not group.modeling_obj.parent_groups]
 
     @property
     def ungrouped_edge_devices(self):
         """Edge devices not referenced by any group."""
-        return [device for device in self.edge_devices if not device.modeling_obj._find_parent_groups()]
+        return [device for device in self.edge_devices if not device.modeling_obj.parent_groups]
 
     @property
     def edge_computers(self):

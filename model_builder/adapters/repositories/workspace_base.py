@@ -128,14 +128,14 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     dict unchanged).
     """
     from efootprint.api_utils.json_to_system import json_to_system
-    from efootprint.api_utils.system_to_json import system_to_json
+    from efootprint.api_utils.system_to_json import materialize_serialized_state, system_to_json
     from efootprint.comparison.duplication import assign_fresh_system_id
     from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 
-    response_objs, _flat, _sd = json_to_system(
+    response_objs, flat_efootprint_objs, _sd = json_to_system(
         system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     system = next(iter(response_objs["System"].values()))
-    system.after_init()
+    materialize_serialized_state(flat_efootprint_objs.values())
     assign_fresh_system_id(system)
     reserialized = system_to_json(system, save_computed_state=True)
     for metadata_key in ("interface_config", "efootprint_interface_version"):
