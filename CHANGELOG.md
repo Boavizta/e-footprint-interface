@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Comparison paired bar chart: the built-in legend (which interleaved usage and fabrication items across lines) is replaced by a custom HTML legend. It shows one row per system, each labelled with the real model name, left-aligned and never wrapping.
+- Comparison cumulative overlay chart: its built-in legend is replaced by the same left-aligned HTML treatment, with one row per model.
 - Single-model results bar chart: edge-device legend capsules are now hidden when the edge-modeling toggle is off. The state is read at render time, so no live update is needed while viewing results.
 
 ## [V1.9.3]
