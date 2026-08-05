@@ -1,30 +1,15 @@
 {
-    "efootprint_version": "22.3.1",
+    "efootprint_version": "23.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
             "name": "Base ADEME_V19",
             "link": "https://data.ademe.fr/datasets/base-carbone(r)"
         },
-        "Boavizta-API-cloud-instances": {
-            "id": "Boavizta-API-cloud-instances",
-            "name": "Boavizta API cloud instances",
-            "link": "https://api.boavizta.org/v1/cloud/instance?provider=scaleway&instance_type=dev1-s"
-        },
         "DATA2eAI---STATE-OF-MOBILE": {
             "id": "DATA2eAI---STATE-OF-MOBILE",
             "name": "DATA.AI - STATE OF MOBILE",
             "link": "https://www.data.ai/en/GB/state-of-mobile-2022"
-        },
-        "Ecologits-compute_llm_impacts_dag-function": {
-            "id": "Ecologits-compute_llm_impacts_dag-function",
-            "name": "Ecologits compute_llm_impacts_dag function",
-            "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/impacts/llm.py"
-        },
-        "Ecologits-llm_impacts-function": {
-            "id": "Ecologits-llm_impacts-function",
-            "name": "Ecologits llm_impacts function",
-            "link": "https://github.com/genai-impact/ecologits/blob/main/ecologits/tracers/utils.py#L60"
         },
         "Our-world-in-data-28202429": {
             "id": "Our-world-in-data-28202429",

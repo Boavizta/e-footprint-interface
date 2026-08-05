@@ -30,6 +30,17 @@ def _source_refs(payload):
             yield from _source_refs(value)
 
 
+def _modeling_object_ids(payload):
+    metadata_keys = {"efootprint_version", "efootprint_interface_version", "Sources", "interface_config",
+                     "calculation_graph"}
+    return {
+        object_id
+        for class_key, class_dict in payload.items()
+        if class_key not in metadata_keys and isinstance(class_dict, dict)
+        for object_id in class_dict
+    }
+
+
 def test_import_system_delegates_source_integrity_to_system_to_json(minimal_system_data):
     system_data = deepcopy(minimal_system_data)
     external_api = EcoLogitsGenAIExternalAPI(
@@ -56,6 +67,7 @@ def test_import_system_delegates_source_integrity_to_system_to_json(minimal_syst
     missing_source_refs = (
         set(_source_refs(imported))
         - set((imported.get("Sources") or {}).keys())
+        - _modeling_object_ids(imported)
         - {"hypothesis", "user_data"}
     )
     assert missing_source_refs == set()

@@ -4,6 +4,7 @@ These tests cover entity-specific behavior (attribute delegation, protection
 against setting wrapped objects, child/list helpers, and web id formatting).
 """
 from typing import List
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -151,6 +152,15 @@ class TestModelingObjectWeb:
         wrapper.set_efootprint_value("threshold", 42)
 
         assert base_model.values["threshold"] == 42
+
+    def test_non_modeling_computed_dict_key_gets_display_identity(self):
+        coordinate = SimpleNamespace(id="pattern/step", __str__=lambda self: "Pattern / Step")
+        linked = SimpleNamespace(key_in_dict=coordinate)
+        wrapper = ObjectLinkedToModelingObjWeb(linked, MagicMock())
+
+        assert wrapper.key_in_dict.id == "pattern/step"
+        assert wrapper.key_in_dict.efootprint_id == "pattern2fstep"
+        assert wrapper.key_in_dict.name == str(coordinate)
 
     # --- get_efootprint_value ---
 

@@ -98,8 +98,8 @@ class TestModelWeb(unittest.TestCase):
             self.assertListEqual(emissions["values"][key], [])
 
     def test_root_edge_device_groups_returns_only_groups_without_parents(self):
-        root_group = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: []))
-        nested_group = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: ["parent"]))
+        root_group = SimpleNamespace(modeling_obj=SimpleNamespace(parent_groups=[]))
+        nested_group = SimpleNamespace(modeling_obj=SimpleNamespace(parent_groups=["parent"]))
         self.model_web.get_web_objects_from_efootprint_type = MagicMock(return_value=[root_group, nested_group])
 
         result = self.model_web.root_edge_device_groups
@@ -108,8 +108,8 @@ class TestModelWeb(unittest.TestCase):
         self.model_web.get_web_objects_from_efootprint_type.assert_called_with("EdgeDeviceGroup")
 
     def test_ungrouped_edge_devices_returns_only_devices_without_parents(self):
-        ungrouped_device = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: []))
-        grouped_device = SimpleNamespace(modeling_obj=SimpleNamespace(_find_parent_groups=lambda: ["group"]))
+        ungrouped_device = SimpleNamespace(modeling_obj=SimpleNamespace(parent_groups=[]))
+        grouped_device = SimpleNamespace(modeling_obj=SimpleNamespace(parent_groups=["group"]))
         self.model_web.get_web_objects_from_efootprint_type = MagicMock(return_value=[ungrouped_device, grouped_device])
 
         result = self.model_web.ungrouped_edge_devices

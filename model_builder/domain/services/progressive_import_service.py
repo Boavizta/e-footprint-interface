@@ -9,7 +9,7 @@ from typing import Dict, Any
 
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import (
-    CALCULATION_GRAPH_KEY, calculation_graph_section, system_to_json)
+    CALCULATION_GRAPH_KEY, calculation_graph_section, materialize_serialized_state, system_to_json)
 from efootprint.logger import logger
 from efootprint import __version__ as efootprint_version
 
@@ -58,7 +58,7 @@ class ProgressiveImportService:
         upgraded_system_data["efootprint_version"] = efootprint_version
 
         system = next(iter(response_objs["System"].values()))
-        system.after_init()
+        materialize_serialized_state(flat_efootprint_objs_dict.values())
 
         start = perf_counter()
         final_system_data = self._serialize_system_and_orphans(system, flat_efootprint_objs_dict)
@@ -85,9 +85,6 @@ class ProgressiveImportService:
         for efootprint_object in flat_efootprint_objs_dict.values():
             if efootprint_object.id in serialized_object_ids:
                 continue
-            # Orphans are not reached by the system-wide pull, so compute them individually here to
-            # attach their computed sources before serialization hoists them into the Sources block.
-            efootprint_object.after_init()
             orphan_data = system_to_json(efootprint_object, save_computed_state=True)
             orphan_data.pop(CALCULATION_GRAPH_KEY, None)
             self._merge_system_json_fragment(final_system_data, orphan_data)

@@ -412,12 +412,8 @@ def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_ke
     if id_of_key_in_dict is None:
         calculated_attribute = web_attr
     else:
-        calculated_attribute = ExplainableObjectWeb(
-            web_attr.efootprint_object[
-                model_web.get_efootprint_object_from_efootprint_id(
-                    id_of_key_in_dict,
-                    "object_type unnecessary because the usage pattern necessarily already belongs to the system")],
-            model_web)
+        calculated_attribute = get_web_explainable_from_attr(
+            model_web, efootprint_id, attr_name, id_of_key_in_dict)
 
     calculus_graph = build_calculus_graph(calculated_attribute)
     calculus_graph.cdn_resources = "remote"

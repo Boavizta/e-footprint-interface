@@ -31,7 +31,7 @@ class EdgeComponentWeb(ModelingObjectWeb):
         from model_builder.domain.oob_region import OobRegion
         side_effects = super().create_side_effects()
         parent_device = self.modeling_obj.modeling_obj_containers[0]
-        if parent_device._find_parent_groups():
+        if parent_device.parent_groups:
             side_effects.oob_regions.append(OobRegion("edge_device_lists"))
             side_effects.replaces_primary_render = True
         return side_effects
