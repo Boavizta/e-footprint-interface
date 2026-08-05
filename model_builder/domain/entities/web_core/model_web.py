@@ -155,16 +155,16 @@ class ModelWeb:
     def persist_to_cache(self):
         """Serialize current system state and persist it to the repository.
 
-        The minimal serialization contract makes one canonical payload cheap enough to store as-is in
-        every cache: it carries only inputs, the serialize-flagged computed slots and the calculation
-        graph, so there is a single stored copy (no separate without-computed-state variant) and an
-        exact-version reload attaches the stored values as trusted caches without recomputing.
+        Redis receives the canonical payload with stored computed state for fast request hydration.
+        Postgres receives an inputs-only recovery payload because database-cache writes scale with
+        payload size; recovery can afford lazy recomputation after a Redis miss.
         """
         start = perf_counter()
         data = self.to_json(save_computed_state=True)
+        recovery_data = self.to_json(save_computed_state=False)
         elapsed_ms = (perf_counter() - start) * 1000
         logger.info(f"Serialized system data in {round(elapsed_ms, 1)} ms.")
-        self.repository.save_data(data)
+        self.repository.save_data(data, recovery_data=recovery_data)
 
     def _build_creation_constraints(self) -> dict:
         """Snapshot of per-class creation gates plus __results__.

@@ -90,12 +90,12 @@ class ISystemRepository(ABC):
         return data
 
     @abstractmethod
-    def save_data(self, data: Dict[str, Any]) -> None:
+    def save_data(self, data: Dict[str, Any], recovery_data: Optional[Dict[str, Any]] = None) -> None:
         """Persist the system data.
 
         Args:
-            data: The single canonical system data dictionary to save (inputs plus the serialize-flagged
-                computed slots and calculation graph). Every cache stores this one payload.
+            data: Canonical system data, including serialize-flagged computed slots and calculation graph.
+            recovery_data: Optional inputs-only representation for slower durable fallback storage.
         """
         pass
 

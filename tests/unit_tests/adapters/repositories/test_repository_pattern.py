@@ -3,7 +3,7 @@
 These tests__old show how to use the InMemorySystemRepository to test ModelWeb
 without requiring Django session infrastructure.
 """
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
@@ -101,6 +101,28 @@ class TestModelWebWithRepository:
         assert saved_data is not None
         assert "efootprint_version" in saved_data
 
+    def test_model_web_supplies_canonical_and_inputs_only_recovery_payloads(self, minimal_system_data):
+        from efootprint.api_utils.system_to_json import CALCULATION_GRAPH_KEY
+
+        repository = InMemorySystemRepository(initial_data=minimal_system_data)
+        model_web = ModelWeb(repository)
+        raw_system = next(iter(model_web.response_objs["System"].values()))
+        _ = raw_system.total_footprint
+        repository.save_data = MagicMock()
+
+        model_web.persist_to_cache()
+
+        canonical_data = repository.save_data.call_args.args[0]
+        recovery_data = repository.save_data.call_args.kwargs["recovery_data"]
+        assert CALCULATION_GRAPH_KEY in canonical_data
+        assert CALCULATION_GRAPH_KEY not in recovery_data
+        assert "total_footprint" in canonical_data["System"][raw_system.id]
+        assert "total_footprint" not in recovery_data["System"][raw_system.id]
+
+        recovered = ModelWeb(InMemorySystemRepository(initial_data=recovery_data))
+        recovered_system = next(iter(recovered.response_objs["System"].values()))
+        assert recovered_system.total_footprint is not None
+
     def test_repository_interface_contract(self):
         """Verify that InMemorySystemRepository implements ISystemRepository correctly."""
         repository = InMemorySystemRepository()
@@ -141,12 +163,24 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         session = FakeSession()
         repository = SessionSystemRepository(session)
         repository.interface_config = {"sankey_diagrams": [{"id": "deadbeef"}]}
+        canonical_data = {"System": {"sys-1": {"name": "Test System"}}, "calculation_graph": {}}
+        recovery_data = {"System": {"sys-1": {"name": "Test System"}}}
 
-        with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.set"):
-            repository.save_data({"System": {"sys-1": {"name": "Test System"}}})
+        with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.set") as cache_set:
+            repository.save_data(canonical_data, recovery_data=recovery_data)
 
         assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == {"sankey_diagrams": [{"id": "deadbeef"}]}
         assert session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY]
+        assert canonical_data["interface_config"] == recovery_data["interface_config"]
+        assert canonical_data["efootprint_interface_version"] == recovery_data["efootprint_interface_version"]
+
+        redis_write, postgres_write = cache_set.call_args_list
+        assert redis_write.args == ("system_data:session-key:0", canonical_data)
+        assert redis_write.kwargs["write_postgres"] is False
+        assert "write_redis" not in redis_write.kwargs
+        assert postgres_write.args == ("system_data:session-key:0", recovery_data)
+        assert postgres_write.kwargs["write_redis"] is False
+        assert "write_postgres" not in postgres_write.kwargs
 
     def test_clear_removes_interface_config_session_keys(self):
         session = FakeSession()

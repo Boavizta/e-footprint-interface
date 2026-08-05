@@ -72,11 +72,12 @@ class InMemorySystemRepository(ISystemRepository):
     def interface_config(self, value: dict) -> None:
         self._interface_config = value
 
-    def save_data(self, data: Dict[str, Any]) -> None:
-        """Store the single canonical system data payload in memory.
+    def save_data(self, data: Dict[str, Any], recovery_data: Optional[Dict[str, Any]] = None) -> None:
+        """Store the canonical system data payload in memory.
 
         Args:
             data: The system data dictionary to save.
+            recovery_data: Ignored; the in-memory repository has no slower fallback backend.
 
         Raises:
             PayloadSizeLimitExceeded: If max_payload_size_mb is set and data exceeds the limit.
