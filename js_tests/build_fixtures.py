@@ -225,6 +225,34 @@ def render_dict_count(field_ctx):
 
 
 # ---------------------------------------------------------------------------
+# dynamic_forms.test.js — select_object.html
+# ---------------------------------------------------------------------------
+
+SELECTION_ATTRIBUTION = (
+    "Research performed by Sasha Luccioni, Boris Gamazaychikov and Nidhal Jegham, within the GenAI Footprint "
+    "Alliance, piloted by Publicis."
+)
+
+SELECT_OBJECT_CASES = {
+    "select_object_with_attribution": {
+        "web_id": "type_object_available",
+        "has_selection_attribution": True,
+        "options": [
+            {"value": "StandardAPI", "label": "Standard API"},
+            {"value": "VideoAPI", "label": "Video API", "attribution": SELECTION_ATTRIBUTION},
+        ],
+    },
+}
+
+
+def render_select_object(field_ctx):
+    return render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/select_object.html",
+        {"field": field_ctx},
+    )
+
+
+# ---------------------------------------------------------------------------
 # tour.test.js — onboarding/tour_steps.html (+ the canvas data-tour-target anchors)
 # ---------------------------------------------------------------------------
 
@@ -264,6 +292,7 @@ GROUPS = [
     (ROW_EDITOR_CASES, render_row_editor),
     (SOURCE_TABLE_ROW_CASES, render_source_table_row),
     (DICT_COUNT_CASES, render_dict_count),
+    (SELECT_OBJECT_CASES, render_select_object),
     (TOUR_CASES, render_tour_steps),
 ]
 

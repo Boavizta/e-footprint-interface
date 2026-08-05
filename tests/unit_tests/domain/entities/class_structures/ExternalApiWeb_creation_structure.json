@@ -14,9 +14,11 @@
                     },
                     {
                         "label": "EcoLogits modeling of generative-AI video API calls (Sora, Veo, Kling, ...).",
-                        "value": "EcoLogitsVideoGenExternalAPI"
+                        "value": "EcoLogitsVideoGenExternalAPI",
+                        "attribution": "Research performed by Sasha Luccioni, Boris Gamazaychikov and Nidhal Jegham, within the GenAI Footprint Alliance, piloted by Publicis and with AXA, Engie, Groupe La Poste/La Banque Postale (founding members) and also supported by FDJ United, Accor, L’Oréal, Orange, Renault Group (partner members)."
                     }
-                ]
+                ],
+                "has_selection_attribution": true
             }
         ]
     },

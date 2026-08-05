@@ -6,6 +6,15 @@
 
 require("../theme/static/scripts/dynamic_forms.js");
 
+const fs = require("fs");
+const path = require("path");
+
+const FIXTURES = path.join(__dirname, "fixtures");
+
+function mount(name) {
+    document.body.innerHTML = fs.readFileSync(path.join(FIXTURES, `${name}.html`), "utf8");
+}
+
 function setupDom(dynamicFormData) {
     document.body.innerHTML = `
         <input id="Cls_provider" name="Cls_provider" value="openai">
@@ -45,4 +54,28 @@ test("changing the parent filter repopulates the child datalist and clears its i
 
     expect(datalistValues("datalist_Cls_model_name")).toEqual(["veo-3"]);
     expect(document.getElementById("Cls_model_name").value).toBe("");
+});
+
+test("selection attribution appears only for the attributed option", () => {
+    mount("select_object_with_attribution");
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        '<script id="dynamic-form-data" type="application/json">{}</script>',
+    );
+    document.dispatchEvent(new Event("initDynamicForm"));
+
+    const select = document.getElementById("type_object_available");
+    const attribution = document.getElementById("type_object_available-attribution");
+    expect(attribution.classList).toContain("d-none");
+    expect(attribution.textContent).toBe("");
+
+    select.value = "VideoAPI";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(attribution.classList).not.toContain("d-none");
+    expect(attribution.textContent).toContain("Research performed by Sasha Luccioni");
+
+    select.value = "StandardAPI";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(attribution.classList).toContain("d-none");
+    expect(attribution.textContent).toBe("");
 });

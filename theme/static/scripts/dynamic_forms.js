@@ -1,5 +1,22 @@
 document.addEventListener("initDynamicForm", function () {
     const dynamicFormData = JSON.parse(document.getElementById('dynamic-form-data').textContent);
+
+    function updateSelectionAttribution(selectElement) {
+        const attributionElement = document.getElementById(`${selectElement.id}-attribution`);
+        if (!attributionElement) return;
+
+        const attribution = selectElement.selectedOptions[0]?.dataset.attribution || "";
+        attributionElement.textContent = attribution;
+        attributionElement.classList.toggle("d-none", !attribution);
+    }
+
+    document.querySelectorAll("select[data-selection-attribution]").forEach(function (selectElement) {
+        updateSelectionAttribution(selectElement);
+        selectElement.addEventListener("change", function () {
+            updateSelectionAttribution(selectElement);
+        });
+    });
+
     /**
      * 1) SWITCH ELEMENT LOGIC
      */

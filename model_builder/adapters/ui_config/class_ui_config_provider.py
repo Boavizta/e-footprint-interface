@@ -27,6 +27,11 @@ class ClassUIConfigProvider:
         return config.get("more_descriptive_label_for_select_inputs", config.get("label", class_name))
 
     @staticmethod
+    def get_selection_attribution(class_name: str) -> Optional[str]:
+        """Get attribution shown when a class is chosen in a type selector."""
+        return CLASS_UI_CONFIG.get(class_name, {}).get("selection_attribution")
+
+    @staticmethod
     def get_config(class_name: str) -> dict:
         """Get full configuration for a class."""
         return CLASS_UI_CONFIG.get(class_name, {})

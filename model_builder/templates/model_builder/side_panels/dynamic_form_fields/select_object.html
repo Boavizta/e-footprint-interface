@@ -2,11 +2,17 @@
     class="form-control p-2"
     id="{{ field.web_id }}"
     name="{{ field.web_id }}"
+    {% if field.has_selection_attribution %}data-selection-attribution{% endif %}
     onclick="tagFormAsModified()"
     required
 >
     {% for option in field.options %}
-        <option value="{{ option.value }}" {% if option.value == field.selected %}selected{% endif %}>
+        <option value="{{ option.value }}"
+                {% if option.attribution %}data-attribution="{{ option.attribution }}"{% endif %}
+                {% if option.value == field.selected %}selected{% endif %}>
             {{ option.label }}</option>
     {% endfor %}
 </select>
+{% if field.has_selection_attribution %}
+    <p id="{{ field.web_id }}-attribution" class="form-text fst-italic mt-2 mb-0 d-none"></p>
+{% endif %}

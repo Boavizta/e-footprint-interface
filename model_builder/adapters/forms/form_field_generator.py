@@ -102,6 +102,27 @@ def build_dict_count_field_from_annotation(
 
 def generate_object_creation_structure(
     efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"):
+    class_options = []
+    for available_class in available_efootprint_classes:
+        class_name = available_class.__name__
+        option = {
+            "label": ClassUIConfigProvider.get_more_descriptive_label(class_name),
+            "value": class_name,
+        }
+        attribution = ClassUIConfigProvider.get_selection_attribution(class_name)
+        if attribution:
+            option["attribution"] = attribution
+        class_options.append(option)
+
+    class_selection_field = {
+        "input_type": "select_object",
+        "web_id": "type_object_available",
+        "label": ClassUIConfigProvider.get_type_object_available_label(efootprint_class_str),
+        "options": class_options,
+    }
+    if any("attribution" in option for option in class_options):
+        class_selection_field["has_selection_attribution"] = True
+
     dynamic_form_dict = {
         "switch_item": "type_object_available",
         "switch_values": [available_class.__name__ for available_class in available_efootprint_classes],
@@ -110,16 +131,7 @@ def generate_object_creation_structure(
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
         "header": f"{ClassUIConfigProvider.get_label(efootprint_class_str)} selection",
-        "fields": [{
-            "input_type": "select_object",
-            "web_id": "type_object_available",
-            "label": ClassUIConfigProvider.get_type_object_available_label(efootprint_class_str),
-            "options": [
-                {"label": ClassUIConfigProvider.get_more_descriptive_label(available_class.__name__),
-                    "value": available_class.__name__}
-                for available_class in available_efootprint_classes]
-        }
-        ]
+        "fields": [class_selection_field],
     }
 
     form_sections = [type_efootprint_classes_available]

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.9.4]
 
 ### Fixed
 - Comparison paired bar chart: the built-in legend (which interleaved usage and fabrication items across lines) is replaced by a custom HTML legend. It shows one row per system, each labelled with the real model name, left-aligned and never wrapping.
@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - intro-templates: new "GenAI marketing video" introductory template — a marketing team producing a short social video with two GenAI video providers (Google Veo + ByteDance Seedance), prompt-writing LLM calls, local editing, and CDN publishing.
+- External API form: show the GenAI Footprint Alliance research attribution when EcoLogits video-generation modeling is selected.
 
 ### Changed
 - intro-templates: retire the video-generation step from the "AI chatbot" template so video generation is showcased once, in the dedicated GenAI video template. AI chatbot reverts to a pure chat / LLM-routing journey.
