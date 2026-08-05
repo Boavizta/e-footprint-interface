@@ -229,6 +229,9 @@ class ModelBuilderPage:
         # The full builder re-rendered with both canvases; wait for the new active slot to settle.
         expect(self.page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", "1")
         self.page.locator("[data-model-canvas='1']").wait_for(state="visible")
+        # The response and visibility can precede HTMX's 20 ms settle phase, during which triggers on
+        # the swapped canvas are not ready yet.
+        self.page.wait_for_timeout(20)
         return self
 
     def switch_to_model(self, slot: int):

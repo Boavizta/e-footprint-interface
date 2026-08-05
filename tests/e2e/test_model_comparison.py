@@ -155,13 +155,13 @@ class TestModelComparisonWorkspace:
         # now differ ONLY by a uj_steps weight.
         model_builder.add_model_by_duplication()
         # The first count input on the active canvas is the step's "Times per journey" weight (a second,
-        # hidden one is the step→job count). hx-trigger="change" needs a real edit, so type and press Enter.
+        # hidden one is the step→job count). Moving focus away reliably emits hx-trigger="change".
         count_input = page.locator("[data-model-canvas='1'] input.count-inline-edit").first
         count_input.wait_for(state="visible")
         with page.expect_response(lambda r: "update-dict-count" in r.url):
             count_input.click()
             count_input.fill("3")
-            count_input.press("Enter")
+            count_input.press("Tab")
 
         model_builder.open_compare()
 

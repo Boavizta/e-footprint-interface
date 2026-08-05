@@ -47,6 +47,9 @@ class TestVideoExternalAPIObjects:
         # Assert the cascade behaviour (datalist repopulates to a different, non-empty set), not the exact
         # model names — those come from the upstream EcoLogits catalog and are pinned in unit tests instead.
         model_options = page.locator("#datalist_EcoLogitsVideoGenExternalAPI_model_name option")
+        # The cascade is wired by HX-Trigger-After-Settle; wait until it has replaced the server-rendered
+        # placeholder before reading the options or changing the provider.
+        expect(model_options.first).to_have_attribute("value", "sora-2-pro")
         openai_models = set(model_options.evaluate_all("els => els.map(e => e.value)"))
         side_panel.select_option("EcoLogitsVideoGenExternalAPI_provider", "google")
         # The change handler repopulates the datalist then clears the stale selection synchronously, so an
