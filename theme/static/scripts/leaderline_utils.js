@@ -42,6 +42,33 @@ let dictLeaderLineOption = {
 
 let allLines = {};
 
+/* Mirror each line <svg>'s style box into its `viewBox` attribute.
+
+   The bundled leader-line draws every path in absolute document coordinates and relies on the
+   svg's viewBox min-x/min-y to translate them back. It never writes the attribute: its
+   `svg.viewBox.baseVal || svg.setAttribute("viewBox", "0 0 0 0")` guard short-circuits because
+   baseVal is truthy in every modern engine, so all updates only mutate the live SVGRect.
+   Blink and WebKit reflect that mutation into rendering; Firefox >= 153 does not, leaving no
+   effective viewBox — the paths then paint untranslated at +(left, top) and fly off-screen.
+   Writing the attribute ourselves restores the translation, and is inert on engines that
+   already reflect (they compute the identical value).
+
+   The svg's own inline style is the source of truth: leader-line sets `style.left/top` to
+   `viewBox.x/y + bodyOffset`, and bodyOffset is zero here because html/body carry no margin,
+   border or padding. */
+function syncLeaderLineViewBoxes() {
+    document.querySelectorAll("svg.leader-line").forEach(svg => {
+        const box = [svg.style.left, svg.style.top, svg.style.width, svg.style.height].map(parseFloat);
+        if (box.some(value => !Number.isFinite(value))) {
+            return;
+        }
+        const viewBox = box.join(" ");
+        if (svg.getAttribute("viewBox") !== viewBox) {
+            svg.setAttribute("viewBox", viewBox);
+        }
+    });
+}
+
 function updateLines() {
     Object.values(allLines).forEach(lineArray => {
         lineArray.forEach(line => {
@@ -52,6 +79,7 @@ function updateLines() {
             }
         });
     });
+    syncLeaderLineViewBoxes();
 }
 
 function removeAllLinesDepartingFromElement(elementId) {
@@ -189,6 +217,8 @@ function rebuildAllLeaderLines() {
     Object.values(previousLines).forEach(lineArray => {
         lineArray.forEach(line => line.remove());
     });
+
+    syncLeaderLineViewBoxes();
 }
 
 function scheduleRebuildAllLeaderLines() {
@@ -248,6 +278,7 @@ if (typeof module !== "undefined" && module.exports) {
         resolveLeaderLineEndpoint,
         resolveLeaderLineTargets,
         updateLines,
+        syncLeaderLineViewBoxes,
         _setAllLinesForTesting: (lines) => { allLines = lines; },
     };
 }

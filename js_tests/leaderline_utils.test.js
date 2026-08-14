@@ -4,6 +4,7 @@ const {
     resolveLeaderLineEndpoint,
     resolveLeaderLineTargets,
     updateLines,
+    syncLeaderLineViewBoxes,
     _setAllLinesForTesting,
 } = require("../theme/static/scripts/leaderline_utils.js");
 
@@ -160,5 +161,53 @@ test("updateLines skips lines whose endpoints were detached by an OOB swap", () 
     expect(staleStartLine.position).not.toHaveBeenCalled();
     expect(staleEndLine.position).not.toHaveBeenCalled();
 
+    _setAllLinesForTesting({});
+});
+
+/* Firefox >= 153 stopped reflecting `svg.viewBox.baseVal` mutations into rendering, and the
+   bundled leader-line only ever mutates baseVal — so the interface writes the attribute itself. */
+function appendLineSvg({left, top, width, height}) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "leader-line");
+    Object.assign(svg.style, {left, top, width, height});
+    document.body.appendChild(svg);
+    return svg;
+}
+
+test("syncLeaderLineViewBoxes mirrors the style box into the viewBox attribute", () => {
+    const svg = appendLineSvg({left: "377.734px", top: "291.531px", width: "193.844px", height: "203.711px"});
+
+    syncLeaderLineViewBoxes();
+
+    expect(svg.getAttribute("viewBox")).toBe("377.734 291.531 193.844 203.711");
+});
+
+test("syncLeaderLineViewBoxes tracks a repositioned line", () => {
+    const svg = appendLineSvg({left: "10px", top: "20px", width: "30px", height: "40px"});
+    syncLeaderLineViewBoxes();
+
+    Object.assign(svg.style, {left: "50px", top: "60px"});
+    syncLeaderLineViewBoxes();
+
+    expect(svg.getAttribute("viewBox")).toBe("50 60 30 40");
+});
+
+test("syncLeaderLineViewBoxes skips svgs without a resolved style box", () => {
+    const svg = appendLineSvg({left: "", top: "", width: "", height: ""});
+
+    expect(() => syncLeaderLineViewBoxes()).not.toThrow();
+    expect(svg.hasAttribute("viewBox")).toBe(false);
+});
+
+test("updateLines syncs viewBoxes after repositioning", () => {
+    document.body.innerHTML = `<div id="from-1"></div><div id="to-1"></div>`;
+    const svg = appendLineSvg({left: "1px", top: "2px", width: "3px", height: "4px"});
+    const from = document.getElementById("from-1");
+    const to = document.getElementById("to-1");
+    _setAllLinesForTesting({"from-1": [{start: from, end: to, position: jest.fn()}]});
+
+    updateLines();
+
+    expect(svg.getAttribute("viewBox")).toBe("1 2 3 4");
     _setAllLinesForTesting({});
 });
