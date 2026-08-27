@@ -163,10 +163,9 @@ def test_source_picker_excludes_computed_value_provenance():
     def _is_computed_provenance(name: str) -> bool:
         return name.startswith("Ecologits") or name.startswith("Boavizta API")
 
-    # The source table pulls every computed value, so its provenance sources materialize here — proof the
-    # picker has something it could leak if it scanned computed slots.
+    # The source table is input-only and must not pull or expose computed provenance either.
     table_source_names = [eq.source.name for eq in model_web.web_explainable_quantities_sources if eq.source]
-    assert any(_is_computed_provenance(name) for name in table_source_names)
+    assert not any(_is_computed_provenance(name) for name in table_source_names)
 
     picker_source_names = [source.name for source in model_web.available_sources]
     assert not any(_is_computed_provenance(name) for name in picker_source_names)

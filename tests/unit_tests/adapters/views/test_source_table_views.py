@@ -13,7 +13,7 @@ def _setup_session(client, system_data: dict) -> None:
 
 def _first_editable_source_row(client):
     model_web = ModelWeb(SessionSystemRepository(client.session))
-    return next(eq for eq in model_web.web_explainable_quantities_sources if not eq.is_calculated)
+    return next(iter(model_web.web_explainable_quantities_sources))
 
 
 @pytest.mark.django_db
@@ -87,7 +87,7 @@ class TestSourceTableViews:
     def test_download_sources_exports_confidence_and_comment_columns(self, client, minimal_system_data):
         _setup_session(client, minimal_system_data)
         model_web = ModelWeb(SessionSystemRepository(client.session))
-        eq = next(row for row in model_web.web_explainable_quantities_sources if not row.is_calculated)
+        eq = next(iter(model_web.web_explainable_quantities_sources))
         eq.efootprint_object.confidence = "high"
         eq.efootprint_object.comment = "exported metadata note"
         model_web.persist_to_cache()

@@ -226,6 +226,27 @@ class TestToJsonHoldsOnlyReferencedSources:
         # Inputs-only so the loaded ModelWeb recomputes its whole cone on first read below.
         return ModelWeb(InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False)))
 
+    def test_source_inventory_does_not_pull_computed_slots(self):
+        from efootprint.abstract_modeling_classes.reactive_core import computed_slots
+
+        model_web = self._simple_model_web()
+
+        def peeked_slots():
+            return {
+                (id(obj), attr_name): descriptor.peek(obj)
+                for obj in model_web.flat_efootprint_objs_dict.values()
+                for attr_name, descriptor in computed_slots(obj.efootprint_class).items()
+            }
+
+        before = peeked_slots()
+        assert any(value is None for value in before.values())
+
+        _ = model_web.web_explainable_quantities_sources
+
+        after = peeked_slots()
+        assert after.keys() == before.keys()
+        assert all(after[key] is value for key, value in before.items())
+
     def test_source_on_a_computed_slot_is_not_persisted_or_offered(self):
         from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
         from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes
