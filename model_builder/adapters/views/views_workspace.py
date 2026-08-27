@@ -14,7 +14,6 @@ Thin HTTP adapters over ``SessionWorkspaceRepository``:
     results): it shapes ``model_a.system.compare_to(model_b.system)`` through the thin
     ``ComparisonService`` adapter (the library is the domain truth).
 """
-import gc
 import json
 
 from django.http import HttpResponse
@@ -164,12 +163,9 @@ def add_model(request):
     """Add a second model (duplicate / blank / import) and make it active."""
     workspace = SessionWorkspaceRepository(request.session)
     import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-    try:
-        raw_system_data = _system_data_for_add(request, workspace)
-        with_calc = import_service.import_system(raw_system_data)
-        new_slot = workspace.add_slot(with_calc)
-    finally:
-        gc.collect()
+    raw_system_data = _system_data_for_add(request, workspace)
+    with_calc = import_service.import_system(raw_system_data)
+    new_slot = workspace.add_slot(with_calc)
 
     workspace.set_active_slot(new_slot)
     model_web = ModelWeb(workspace.repository_for(new_slot))

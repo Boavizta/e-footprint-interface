@@ -42,6 +42,10 @@ model_builder/
 3. Use Case orchestrates domain logic via `ModelWeb` and domain services.
 4. Presenter formats output → HTTP response with HTMX triggers.
 5. View returns response (full page or partial DOM swap).
+6. In production, Gunicorn runs each request with automatic cyclic GC disabled, writes and closes the
+   response, then performs a logged full collection in `post_request` before accepting more work. This
+   keeps collection pauses out of the response-producing stages; autoscaling absorbs the worker's brief
+   post-response unavailability.
 
 ## Core classes
 
