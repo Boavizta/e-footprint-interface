@@ -3,10 +3,10 @@ from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.abstract_modeling_classes.modeling_object import css_escape
 from efootprint.utils.display import display_quantity_as_str, best_display_unit, human_readable_unit
 from pint import Quantity
 
+from model_builder.domain.entities.web_abstract_modeling_classes.dict_key_web_identity import DictKeyWebIdentity
 from model_builder.domain.entities.web_core.model_web_utils import to_rounded_daily_values, reindex_array
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
     ExplainableObjectWeb,
@@ -24,7 +24,7 @@ def get_web_explainable_from_attr(model_web, efootprint_id: str, attr_name: str,
 
     dict_key = next(
         key for key in web_attr.efootprint_object
-        if id_of_key_in_dict in (getattr(key, "id", str(key)), css_escape(getattr(key, "id", str(key))))
+        if DictKeyWebIdentity.from_key(key).matches(id_of_key_in_dict)
     )
     selected_explainable = web_attr.efootprint_object[dict_key]
     web_wrapper = ExplainableQuantityWeb if isinstance(selected_explainable, ExplainableQuantity) else ExplainableObjectWeb

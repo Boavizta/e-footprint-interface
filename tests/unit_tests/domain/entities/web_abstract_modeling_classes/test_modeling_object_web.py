@@ -158,8 +158,8 @@ class TestModelingObjectWeb:
         linked = SimpleNamespace(key_in_dict=coordinate)
         wrapper = ObjectLinkedToModelingObjWeb(linked, MagicMock())
 
-        assert wrapper.key_in_dict.id == "pattern/step"
-        assert wrapper.key_in_dict.efootprint_id == "pattern2fstep"
+        assert wrapper.key_in_dict.efootprint_id == "pattern/step"
+        assert wrapper.key_in_dict.route_id == "pattern2fstep"
         assert wrapper.key_in_dict.name == str(coordinate)
 
     # --- get_efootprint_value ---
@@ -204,7 +204,14 @@ class TestModelingObjectWeb:
         assert wrapper_in_a != wrapper_in_b
         assert hash(wrapper_in_a) != hash(wrapper_in_b)
 
-    # --- web_id ---
+    # --- route_id / web_id ---
+
+    def test_route_id_escapes_raw_id_without_dom_namespace(self):
+        wrapper = ModelingObjectWeb(StubModelingObject("pattern/step", "Thing"), mock_model_web("abc"))
+
+        assert wrapper.efootprint_id == "pattern/step"
+        assert wrapper.route_id == "pattern2fstep"
+        assert wrapper.web_id == "sys-abc-Thing-pattern/step"
 
     def test_web_id_prefixes_root_with_system_id(self):
         wrapper = ModelingObjectWeb(StubModelingObject("id1", "Thing"), mock_model_web("abc"))

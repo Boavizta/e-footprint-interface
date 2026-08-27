@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, get_args, get_origin, Dict, List, Tuple, Optio
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
-from efootprint.abstract_modeling_classes.modeling_object import ModelingObject, get_instance_attributes
+from efootprint.abstract_modeling_classes.modeling_object import css_escape, ModelingObject, get_instance_attributes
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
@@ -135,6 +135,10 @@ class ModelingObjectWeb:
     @property
     def efootprint_id(self):
         return self._modeling_obj.id
+
+    @property
+    def route_id(self):
+        return css_escape(self.efootprint_id)
 
     @property
     def web_id(self):

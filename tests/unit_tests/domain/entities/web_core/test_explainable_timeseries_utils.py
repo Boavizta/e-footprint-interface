@@ -83,3 +83,24 @@ class TestExplainableTimeseriesUtils:
 
         assert resolved.efootprint_object is scalar
         assert resolved.rounded_value == 1
+
+    def test_get_web_explainable_from_attr_resolves_escaped_coordinate_id(self):
+        class Coordinate:
+            id = "pattern/step"
+
+            def __str__(self):
+                return "Pattern / Step"
+
+        coordinate = Coordinate()
+        scalar = ExplainableQuantity(1 * u.dimensionless, label="scalar")
+        dict_wrapper = SimpleNamespace(efootprint_object={coordinate: scalar})
+        model_web = DummyModelWeb(DummyWebObj("hourly_values", dict_wrapper))
+
+        resolved = get_web_explainable_from_attr(
+            model_web,
+            efootprint_id="obj1",
+            attr_name="hourly_values",
+            id_of_key_in_dict="pattern2fstep",
+        )
+
+        assert resolved.efootprint_object is scalar

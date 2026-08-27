@@ -175,7 +175,7 @@ The `interface_config` is included in JSON exports (download) and restored on im
 
 Import recomputation payloads must be assembled from `efootprint.api_utils.system_to_json.system_to_json()` fragments (the connected `System` plus any orphaned objects) rather than hand-serializing objects in the interface. Import and workspace re-id are explicit complete-snapshot boundaries: they call `materialize_serialized_state()` before passive serialization; hydration itself never calls construction-time `after_init()` hooks. This keeps object serialization and top-level `Sources` hoisting owned by e-footprint and prevents dangling source references after calculated attributes are recomputed.
 
-Computed-dict keys may be stable coordinate values rather than `ModelingObject`s. `ObjectLinkedToModelingObjWeb.key_in_dict` exposes those as display identities with a URL-safe escaped id, and calculated-attribute endpoints resolve that token against the owning dict. Coordinate keys render as text; only true modeling-object keys link to an edit panel.
+Computed-dict keys may be stable coordinate values rather than `ModelingObject`s. `ObjectLinkedToModelingObjWeb.key_in_dict` exposes those as immutable display identities with a raw `efootprint_id` and URL-safe `route_id`; modeling-object wrappers expose the same route contract. This is deliberately separate from `web_id`, which is a system-prefixed DOM identity. Calculated-attribute endpoints resolve either the raw or route token against the owning dict. Coordinate keys render as text; only true modeling-object keys link to an edit panel.
 
 ### Workspace / multi-slot session
 

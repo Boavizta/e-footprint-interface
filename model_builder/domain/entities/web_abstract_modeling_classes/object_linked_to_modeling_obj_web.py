@@ -1,9 +1,9 @@
-from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.modeling_object import css_escape, ModelingObject
 from efootprint.abstract_modeling_classes.object_linked_to_modeling_obj import ObjectLinkedToModelingObj
 
+from model_builder.domain.entities.web_abstract_modeling_classes.dict_key_web_identity import DictKeyWebIdentity
 from utils import camel_to_snake
 
 if TYPE_CHECKING:
@@ -54,8 +54,9 @@ class ObjectLinkedToModelingObjWeb:
         key = self.efootprint_object.key_in_dict
         if isinstance(key, ModelingObject):
             return wrap_efootprint_object(key, self.model_web)
-        key_id = getattr(key, "id", str(key))
-        return SimpleNamespace(id=key_id, efootprint_id=css_escape(key_id), name=str(key))
+        # JobOccurrenceCoordinate is a stable computed-dict key, not a ModelingObject, so expose only the
+        # display and URL identity that templates need instead of passing it through the modeling-object wrapper.
+        return DictKeyWebIdentity.from_key(key)
 
     @property
     def attr_name_web(self):
