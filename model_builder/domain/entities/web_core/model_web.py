@@ -1,5 +1,7 @@
+import gc
 from copy import deepcopy
-from time import perf_counter
+from os import getpid
+from time import perf_counter, process_time
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -42,6 +44,31 @@ DEFAULT_SOURCES_CLASS_MAPPING = {
 }
 
 
+def _gc_stats_snapshot():
+    """Return compact cumulative GC counters for each generation."""
+    return tuple(
+        (stats["collections"], stats["collected"], stats["uncollectable"])
+        for stats in gc.get_stats()
+    )
+
+
+def _log_runtime_stage(label, wall_started_at, cpu_started_at, gc_before):
+    """Log enough process-local detail to explain an unstable wall-clock duration."""
+    wall_ms = 1000 * (perf_counter() - wall_started_at)
+    cpu_ms = 1000 * (process_time() - cpu_started_at)
+    gc_after = _gc_stats_snapshot()
+    gc_deltas = ", ".join(
+        f"g{generation}="
+        f"{after[0] - before[0]}/{after[1] - before[1]}/{after[2] - before[2]}"
+        for generation, (before, after) in enumerate(zip(gc_before, gc_after))
+    )
+    logger.info(
+        f"{label} in {wall_ms:.1f} ms "
+        f"(CPU {cpu_ms:.1f} ms, pid={getpid()}, "
+        f"GC collections/collected/uncollectable: {gc_deltas})."
+    )
+
+
 def _materialized_explainable_attributes(efootprint_object, target_class):
     """Map attr name -> ``target_class`` instance for the object: inputs (in ``__dict__``) plus the
     materialized values of its computed slots (peeked, never pulled). Computed values live in the
@@ -76,11 +103,13 @@ class ModelWeb:
         if raw_system_data is not None:
             self.initial_system_data_efootprint_version = raw_system_data.get("efootprint_version")
             interface_upgraded_system_data = self.repository.upgrade_system_data(raw_system_data)
-            start = perf_counter()
+            gc_before = _gc_stats_snapshot()
+            wall_started_at = perf_counter()
+            cpu_started_at = process_time()
             self.response_objs, self.flat_efootprint_objs_dict, self.system_data = json_to_system(
                 interface_upgraded_system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
-            logger.info(f"ModelWeb object created in {1000 * (perf_counter() - start):.1f} ms.")
+            _log_runtime_stage("ModelWeb object created", wall_started_at, cpu_started_at, gc_before)
             self.creation_constraints = self._build_creation_constraints()
             self._last_emitted_has_edge_objects = self.has_edge_objects
             if self.system_data_source == "postgres":
@@ -159,11 +188,12 @@ class ModelWeb:
         Postgres receives an inputs-only recovery payload because database-cache writes scale with
         payload size; recovery can afford lazy recomputation after a Redis miss.
         """
-        start = perf_counter()
+        gc_before = _gc_stats_snapshot()
+        wall_started_at = perf_counter()
+        cpu_started_at = process_time()
         data = self.to_json(save_computed_state=True)
         recovery_data = self.to_json(save_computed_state=False)
-        elapsed_ms = (perf_counter() - start) * 1000
-        logger.info(f"Serialized system data in {round(elapsed_ms, 1)} ms.")
+        _log_runtime_stage("Serialized system data", wall_started_at, cpu_started_at, gc_before)
         self.repository.save_data(data, recovery_data=recovery_data)
 
     def _build_creation_constraints(self) -> dict:

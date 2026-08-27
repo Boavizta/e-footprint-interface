@@ -1,6 +1,6 @@
 import unittest
-from unittest.mock import MagicMock
 from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import ciso8601
 import numpy as np
@@ -10,7 +10,31 @@ from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyE
 from efootprint.constants.units import u
 from pint import Quantity
 
-from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.entities.web_core.model_web import ModelWeb, _log_runtime_stage
+
+
+class TestRuntimeStageLogging:
+    @patch("model_builder.domain.entities.web_core.model_web.getpid", return_value=42)
+    @patch("model_builder.domain.entities.web_core.model_web.process_time", return_value=1.25)
+    @patch("model_builder.domain.entities.web_core.model_web.perf_counter", return_value=2.5)
+    @patch("model_builder.domain.entities.web_core.model_web._gc_stats_snapshot")
+    @patch("model_builder.domain.entities.web_core.model_web.logger.info")
+    def test_logs_wall_cpu_pid_and_per_generation_gc_deltas(
+            self, logger_info, gc_stats_snapshot, _perf_counter, _process_time, _getpid):
+        gc_stats_snapshot.return_value = ((12, 130, 0), (4, 20, 0), (2, 38214, 1))
+
+        _log_runtime_stage(
+            "Serialized system data",
+            wall_started_at=2.0,
+            cpu_started_at=1.0,
+            gc_before=((8, 10, 0), (3, 20, 0), (1, 0, 0)),
+        )
+
+        logger_info.assert_called_once_with(
+            "Serialized system data in 500.0 ms "
+            "(CPU 250.0 ms, pid=42, GC collections/collected/uncollectable: "
+            "g0=4/120/0, g1=1/0/0, g2=1/38214/1)."
+        )
 
 
 class TestModelWeb(unittest.TestCase):
