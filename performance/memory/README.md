@@ -112,8 +112,9 @@ The development trial of commit `501663cb` passed with the default ratio and no 
 two independent four-pattern requests aborted once at 2,681.5 and 2,682.9 MiB working set, returned the 1,017-byte
 recoverable response with HTTP 200 before cleanup, recycled and replaced their workers, and recorded zero OOM and
 OOM-kill deltas. Ordinary 200/204 traffic succeeded after the first replacement, no monitor error or 5xx was present,
-and the user confirmed that the guidance rendered. The exact 85% threshold was 2,676.65 MiB; the smaller observed
-post-crossing reserve was 466.1 MiB by working set and 445.2 MiB by raw cgroup usage.
+and the user confirmed that the guidance rendered. The 85% threshold derived from the reported one-decimal capacity
+was about 2,676.7 MiB. The smaller observed post-crossing reserve was 466.1 MiB by working set and 445.2 MiB by raw
+cgroup usage.
 
 This completes calibration and technically approves the 85% policy for production. Production activation remains a
 separate, explicit operator deployment decision; calibration does not change deployment configuration automatically.

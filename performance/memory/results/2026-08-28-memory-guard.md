@@ -121,11 +121,12 @@ progress, `would_abort`, completion, abort, post-request, and worker-lifecycle r
 ## Development enforcement gate
 
 Commit `501663cbf47be0d116dfb02cfec4a014fa67f805` was deployed to development with
-`COMPUTATION_MEMORY_GUARD_MODE=enforce` and the default 85% ratio. The runtime reported a 3,149 MiB cgroup, so the exact
-threshold was `3,149 × 0.85 = 2,676.65 MiB`, logged to one decimal place as 2,676.7 MiB. Because enforcement checks after
-a completed reactive calculation, the two independent four-pattern requests crossed by 4.85 MiB and 6.25 MiB before
-raising once. Four patterns were sufficient to trigger the guard on this deployment; the five-pattern topology was
-already covered by the production-container Docker matrix.
+`COMPUTATION_MEMORY_GUARD_MODE=enforce` and the default 85% ratio. The runtime reported cgroup capacity to one decimal
+place as 3,149.0 MiB, yielding an approximately 2,676.7 MiB threshold at the same precision. Because enforcement checks
+after a completed reactive calculation, the two independent four-pattern requests crossed that reported threshold by
+about 4.8 MiB and 6.2 MiB before raising once. The exact byte-valued threshold is not recoverable from the rounded log;
+future records should retain it for exact audits. Four patterns were sufficient to trigger the guard on this deployment;
+the five-pattern topology was already covered by the production-container Docker matrix.
 
 | Request | Worker | Abort working set | Raw cgroup / inactive file | Working-set / raw headroom | HTTP response | Post-GC working set | Response to replacement boot | OOM / OOM-kill delta |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|

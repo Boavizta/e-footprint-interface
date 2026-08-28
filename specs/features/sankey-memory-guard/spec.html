@@ -176,9 +176,10 @@
   <ul>
     <li>The enforcement point remains 85% of cgroup working-set capacity with no fixed reserve. On the smallest
         reproduced 2,926 MiB container, enforcement retained at least 423.6 MiB of working-set headroom after crossing,
-        versus a 134.5 MiB largest observed between-sample increase. The development deployment then crossed its exact
-        2,676.65 MiB threshold at 2,681.5 and 2,682.9 MiB working set, leaving at least 466.1 MiB before its 3,149 MiB
-        capacity. The ratio is technically approved for production activation.</li>
+        versus a 134.5 MiB largest observed between-sample increase. The development deployment then crossed its
+        approximately 2,676.7 MiB threshold, derived from the reported one-decimal capacity, at 2,681.5 and 2,682.9 MiB
+        working set, leaving at least 466.1 MiB before its reported 3,149.0 MiB capacity. The ratio is technically
+        approved for production activation.</li>
     <li>Development enforcement on commit <code>501663cb</code> returned both independent aborts as HTTP 200 before
         collection and worker recycling, replacement workers booted, ordinary traffic continued, and OOM/OOM-kill
         deltas remained zero. The user confirmed that the recoverable guidance rendered. Production activation remains
