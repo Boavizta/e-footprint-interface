@@ -86,6 +86,15 @@ def read_inactive_file_bytes(paths: Iterable[Path] = CGROUP_STAT_PATHS) -> int |
     return None
 
 
+def read_cgroup_working_set_bytes() -> int | None:
+    """Return non-reclaimable cgroup usage without collecting process diagnostics."""
+    current = read_cgroup_current_bytes()
+    inactive_file = read_inactive_file_bytes()
+    if current is None or inactive_file is None:
+        return None
+    return max(0, current - inactive_file)
+
+
 def read_process_rss_bytes(process: psutil.Process | None = None) -> int | None:
     try:
         return (process or psutil.Process(os.getpid())).memory_info().rss

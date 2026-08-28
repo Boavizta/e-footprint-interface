@@ -4,11 +4,14 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from django.http import HttpResponse
-from django.test import RequestFactory
+from django.test import Client, RequestFactory, override_settings
+from django.urls import path
 import pytest
 
 from e_footprint_interface import runtime_memory
 from e_footprint_interface import computation_memory_middleware as middleware_module
+from model_builder.adapters.repositories import InMemorySystemRepository
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
 def _snapshot(working_set_mb=100, *, current_mb=120, inactive_mb=20, rss_mb=80, capacity_mb=4096):
@@ -22,7 +25,27 @@ def _snapshot(working_set_mb=100, *, current_mb=120, inactive_mb=20, rss_mb=80, 
 
 
 def _records(log):
-    return [json.loads(call.args[1]) for call in log.info.call_args_list]
+    return [
+        json.loads(call.args[1])
+        for call in log.info.call_args_list
+        if len(call.args) > 1 and call.args[0] == "computation_memory %s"
+    ]
+
+
+def _fail_view(request):
+    raise RuntimeError("boom")
+
+
+urlpatterns = [path("model_builder/fail/", _fail_view)]
+
+
+def _patch_memory(monkeypatch, *, working_set_mb=100):
+    snapshot = _snapshot(working_set_mb)
+    full_reader = MagicMock(return_value=snapshot)
+    lightweight_reader = MagicMock(return_value=snapshot.working_set_bytes)
+    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", full_reader)
+    monkeypatch.setattr(runtime_memory, "read_cgroup_working_set_bytes", lightweight_reader)
+    return full_reader, lightweight_reader
 
 
 def test_middleware_does_no_monitoring_for_unrelated_routes(monkeypatch):
@@ -85,49 +108,71 @@ def test_observe_mode_scopes_callback_before_handler_and_restores_on_error(monke
 
 
 def test_monitor_samples_every_sixteen_callbacks_away_from_limit(monkeypatch):
-    reader = MagicMock(return_value=_snapshot())
-    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", reader)
+    full_reader, lightweight_reader = _patch_memory(monkeypatch)
     monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 4000 * runtime_memory.MIB)
     monitor = middleware_module.ComputationMemoryMonitor(route="model_builder/", method="GET", log=MagicMock())
 
     for _ in range(15):
         monitor(SimpleNamespace(diagnostic_name="footprint"))
-    assert reader.call_count == 1
+    assert full_reader.call_count == 1
+    lightweight_reader.assert_not_called()
 
     monitor(SimpleNamespace(diagnostic_name="footprint"))
-    assert reader.call_count == 2
+    assert full_reader.call_count == 1
+    assert lightweight_reader.call_count == 1
     assert monitor.completed_slots == 16
 
 
-@pytest.mark.parametrize("mode", ["observe", "enforce"])
-def test_monitor_samples_every_callback_near_limit_but_never_raises(monkeypatch, mode):
-    reader = MagicMock(return_value=_snapshot(working_set_mb=3800))
-    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", reader)
+def test_enforce_mode_keeps_lightweight_per_callback_sampling_near_limit_without_raising(monkeypatch):
+    full_reader, lightweight_reader = _patch_memory(monkeypatch, working_set_mb=3800)
     monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
     monitor = middleware_module.ComputationMemoryMonitor(
-        route="model_builder/sankey-diagram/", method="GET", mode=mode, log=MagicMock()
+        route="model_builder/sankey-diagram/", method="GET", mode="enforce", log=MagicMock()
     )
 
     for _ in range(3):
         monitor(SimpleNamespace(diagnostic_name="impact_repartition_rows"))
 
-    assert reader.call_count == 4
+    assert full_reader.call_count == 1
+    assert lightweight_reader.call_count == 3
     assert monitor.completed_slots == 3
 
 
+def test_observe_mode_emits_one_would_abort_then_returns_to_ordinary_cadence(monkeypatch):
+    full_reader = MagicMock(side_effect=[_snapshot(3800), _snapshot(3910)])
+    lightweight_reader = MagicMock(side_effect=[3910 * runtime_memory.MIB, 3900 * runtime_memory.MIB])
+    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", full_reader)
+    monkeypatch.setattr(runtime_memory, "read_cgroup_working_set_bytes", lightweight_reader)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
+    log = MagicMock()
+    monitor = middleware_module.ComputationMemoryMonitor(route="model_builder/results/", method="GET", log=log)
+
+    for _ in range(16):
+        monitor(SimpleNamespace(diagnostic_name="ordinary_slot"))
+
+    assert [record["event"] for record in _records(log)].count("would_abort") == 1
+    assert lightweight_reader.call_count == 2
+    assert full_reader.call_count == 2
+
+
 def test_progress_logs_only_new_high_water_bands_and_large_jump_identity(monkeypatch):
-    reader = MagicMock(
+    full_reader = MagicMock(
         side_effect=[
             _snapshot(100),
-            _snapshot(120),
             _snapshot(230),
             _snapshot(400),
         ]
     )
-    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", reader)
+    lightweight_reader = MagicMock(
+        side_effect=[120 * runtime_memory.MIB, 230 * runtime_memory.MIB, 400 * runtime_memory.MIB]
+    )
+    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", full_reader)
+    monkeypatch.setattr(runtime_memory, "read_cgroup_working_set_bytes", lightweight_reader)
     monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 200 * runtime_memory.MIB)
     log = MagicMock()
-    monitor = middleware_module.ComputationMemoryMonitor(route="model_builder/results/", method="GET", log=log)
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/results/", method="GET", mode="enforce", log=log
+    )
     monitor(SimpleNamespace(diagnostic_name="ordinary_slot"))
     monitor(SimpleNamespace(diagnostic_name="another_slot"))
     monitor(SimpleNamespace(diagnostic_name="impact_repartition_rows"))
@@ -137,10 +182,13 @@ def test_progress_logs_only_new_high_water_bands_and_large_jump_identity(monkeyp
     assert len(progress) == 2
     assert "slot" not in progress[0]
     assert progress[1]["slot"] == "impact_repartition_rows"
+    assert lightweight_reader.call_count == 3
+    assert full_reader.call_count == 3
 
 
 def test_completion_record_is_correlated_privacy_safe_and_reports_overhead(monkeypatch):
-    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", MagicMock(return_value=_snapshot()))
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 4000 * runtime_memory.MIB)
     log = MagicMock()
     monitor = middleware_module.ComputationMemoryMonitor(
         route="model_builder/sankey-diagram/",
@@ -165,3 +213,74 @@ def test_completion_record_is_correlated_privacy_safe_and_reports_overhead(monke
     serialized = json.dumps(completion)
     assert "model_name" not in serialized
     assert "value" not in serialized
+
+
+@pytest.mark.parametrize(
+    ("computed_slot", "status", "expected"),
+    [
+        (None, "complete", True),
+        ("Server.impact_repartition_rows", "complete", False),
+        ("System.impact_repartition_matrix", "abort", False),
+        (None, "abort", None),
+    ],
+)
+def test_sankey_attribution_state_distinguishes_warm_cold_and_unknown(monkeypatch, computed_slot, status, expected):
+    _patch_memory(monkeypatch)
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/sankey-diagram/", method="GET", log=MagicMock(), attribution_request=True
+    )
+
+    if computed_slot is not None:
+        monitor(SimpleNamespace(diagnostic_name=computed_slot))
+    monitor.finish(status)
+
+    assert monitor.attribution_matrix_cached is expected
+
+
+def test_middleware_populates_topology_after_real_model_hydration(monkeypatch, minimal_system_data):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+
+    def hydrate(request):
+        ModelWeb(InMemorySystemRepository(), minimal_system_data)
+        return HttpResponse("ok")
+
+    request = RequestFactory().get("/model_builder/")
+    middleware_module.ComputationMemoryMiddleware(hydrate)(request)
+
+    completion = _records(log)[-1]
+    assert completion["usage_pattern_count"] == 1
+    assert completion["modeled_hours"] == 8760
+
+
+def test_middleware_keeps_topology_unavailable_when_no_model_was_hydrated(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    log = MagicMock()
+    middleware = middleware_module.ComputationMemoryMiddleware(lambda request: HttpResponse("ok"))
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+
+    middleware(RequestFactory().get("/model_builder/"))
+
+    completion = _records(log)[-1]
+    assert completion["usage_pattern_count"] is None
+    assert completion["modeled_hours"] is None
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+    DEBUG_PROPAGATE_EXCEPTIONS=False,
+)
+def test_real_django_middleware_chain_reports_view_exception_as_abort(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+
+    response = Client(raise_request_exception=False).get("/model_builder/fail/")
+
+    assert response.status_code == 500
+    assert [record["event"] for record in _records(log)] == ["start", "abort"]

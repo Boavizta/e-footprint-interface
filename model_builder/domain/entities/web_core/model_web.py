@@ -25,6 +25,7 @@ from model_builder.domain.efootprint_to_web_mapping import wrap_efootprint_objec
 
 
 from model_builder.domain.exceptions import SessionExpiredError
+from model_builder.domain.model_hydration_observer import report_model_hydrated
 from model_builder.domain.reference_data import (
     DEFAULT_NETWORKS, DEFAULT_NETWORKS_SOURCES,
     DEFAULT_DEVICES, DEFAULT_DEVICES_SOURCES,
@@ -120,6 +121,8 @@ class ModelWeb:
             self._last_emitted_has_edge_objects = False
             logger.info(f"Empty system data so e-footprint modeling hasn’t been hydrated.")
         self.constraint_changes = []
+        if raw_system_data is not None:
+            report_model_hydrated(self)
 
     def __getattr__(self, name):
         if name in ("system", "response_objs", "flat_efootprint_objs_dict", "initial_system_data_efootprint_version"):
