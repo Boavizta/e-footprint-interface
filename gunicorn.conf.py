@@ -32,19 +32,23 @@ def _read_first_finite_value(paths):
     return None
 
 
-def _memory_limit_mb():
-    absolute_limit = os.getenv("WORKER_MEMORY_LIMIT_MB")
+def _container_memory_mb():
+    available_bytes = _read_first_finite_value(_CGROUP_LIMIT_PATHS) or psutil.virtual_memory().total
+    return available_bytes / _MIB
+
+
+def _worker_recycle_limit_mb(container_memory_mb):
+    absolute_limit = os.getenv("WORKER_RECYCLE_LIMIT_MB")
     if absolute_limit is not None:
         limit_mb = float(absolute_limit)
         if limit_mb <= 0:
-            raise ValueError("WORKER_MEMORY_LIMIT_MB must be positive")
+            raise ValueError("WORKER_RECYCLE_LIMIT_MB must be positive")
         return limit_mb
 
-    ratio = float(os.getenv("WORKER_MEMORY_LIMIT_RATIO", "0.8"))
+    ratio = float(os.getenv("WORKER_RECYCLE_LIMIT_RATIO", "0.6"))
     if not 0 < ratio < 1:
-        raise ValueError("WORKER_MEMORY_LIMIT_RATIO must be between 0 and 1")
-    available_bytes = _read_first_finite_value(_CGROUP_LIMIT_PATHS) or psutil.virtual_memory().total
-    return available_bytes / _MIB * ratio
+        raise ValueError("WORKER_RECYCLE_LIMIT_RATIO must be between 0 and 1")
+    return container_memory_mb * ratio
 
 
 def _inactive_file_bytes():
@@ -66,7 +70,8 @@ def _memory_usage_mb():
     return psutil.Process(os.getpid()).memory_info().rss / _MIB
 
 
-MEMORY_LIMIT_MB = _memory_limit_mb()
+CONTAINER_MEMORY_MB = _container_memory_mb()
+WORKER_RECYCLE_LIMIT_MB = _worker_recycle_limit_mb(CONTAINER_MEMORY_MB)
 
 
 def pre_request(worker, req):
@@ -76,7 +81,7 @@ def pre_request(worker, req):
 
 
 def post_request(worker, req, environ, resp):
-    """Collect request garbage after its response, then enforce the worker memory limit."""
+    """Collect request garbage after its response, then enforce the worker recycling threshold."""
     try:
         wall_started_at = perf_counter()
         cpu_started_at = process_time()
@@ -89,10 +94,10 @@ def post_request(worker, req, environ, resp):
         )
 
         memory_mb = _memory_usage_mb()
-        if memory_mb > MEMORY_LIMIT_MB:
+        if memory_mb > WORKER_RECYCLE_LIMIT_MB:
             worker.log.warning(
                 f"Recycling worker because memory working set is {memory_mb:.1f} MB, above the "
-                f"{MEMORY_LIMIT_MB:.1f} MB limit (pid={os.getpid()})."
+                f"{WORKER_RECYCLE_LIMIT_MB:.1f} MB recycling threshold (pid={os.getpid()})."
             )
             worker.alive = False
     finally:

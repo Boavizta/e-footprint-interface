@@ -31,26 +31,30 @@ def _configure_runtime(monkeypatch, config, *, gc_was_enabled=True, memory_mb=10
     return gc
 
 
-def test_memory_limit_uses_cgroup_limit_and_default_ratio(monkeypatch, gunicorn_config):
-    monkeypatch.delenv("WORKER_MEMORY_LIMIT_MB", raising=False)
-    monkeypatch.delenv("WORKER_MEMORY_LIMIT_RATIO", raising=False)
+def test_container_memory_uses_cgroup_limit(monkeypatch, gunicorn_config):
     monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=4 * 1024**3))
 
-    assert gunicorn_config._memory_limit_mb() == pytest.approx(3276.8)
+    assert gunicorn_config._container_memory_mb() == 4096
 
 
-def test_memory_limit_environment_overrides_cgroup_default(monkeypatch, gunicorn_config):
-    monkeypatch.setenv("WORKER_MEMORY_LIMIT_MB", "3000")
+def test_worker_recycle_limit_uses_default_ratio(monkeypatch, gunicorn_config):
+    monkeypatch.delenv("WORKER_RECYCLE_LIMIT_MB", raising=False)
+    monkeypatch.delenv("WORKER_RECYCLE_LIMIT_RATIO", raising=False)
 
-    assert gunicorn_config._memory_limit_mb() == 3000
+    assert gunicorn_config._worker_recycle_limit_mb(4096) == pytest.approx(2457.6)
 
 
-def test_memory_limit_ratio_is_configurable(monkeypatch, gunicorn_config):
-    monkeypatch.delenv("WORKER_MEMORY_LIMIT_MB", raising=False)
-    monkeypatch.setenv("WORKER_MEMORY_LIMIT_RATIO", "0.75")
-    monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=4 * 1024**3))
+def test_worker_recycle_limit_environment_overrides_default(monkeypatch, gunicorn_config):
+    monkeypatch.setenv("WORKER_RECYCLE_LIMIT_MB", "2300")
 
-    assert gunicorn_config._memory_limit_mb() == 3072
+    assert gunicorn_config._worker_recycle_limit_mb(4096) == 2300
+
+
+def test_worker_recycle_limit_ratio_is_configurable(monkeypatch, gunicorn_config):
+    monkeypatch.delenv("WORKER_RECYCLE_LIMIT_MB", raising=False)
+    monkeypatch.setenv("WORKER_RECYCLE_LIMIT_RATIO", "0.5")
+
+    assert gunicorn_config._worker_recycle_limit_mb(4096) == 2048
 
 
 def test_memory_usage_excludes_reclaimable_cgroup_file_cache(monkeypatch, gunicorn_config):
@@ -91,7 +95,7 @@ def test_preserves_disabled_gc_and_still_enforces_memory_limit(monkeypatch, guni
         monkeypatch,
         gunicorn_config,
         gc_was_enabled=False,
-        memory_mb=gunicorn_config.MEMORY_LIMIT_MB + 1,
+        memory_mb=gunicorn_config.WORKER_RECYCLE_LIMIT_MB + 1,
     )
 
     gunicorn_config.pre_request(worker, MagicMock())
@@ -100,8 +104,8 @@ def test_preserves_disabled_gc_and_still_enforces_memory_limit(monkeypatch, guni
     gc.enable.assert_not_called()
     assert worker.alive is False
     worker.log.warning.assert_called_once_with(
-        f"Recycling worker because memory working set is {gunicorn_config.MEMORY_LIMIT_MB + 1:.1f} MB, above the "
-        f"{gunicorn_config.MEMORY_LIMIT_MB:.1f} MB limit (pid=36)."
+        f"Recycling worker because memory working set is {gunicorn_config.WORKER_RECYCLE_LIMIT_MB + 1:.1f} MB, "
+        f"above the {gunicorn_config.WORKER_RECYCLE_LIMIT_MB:.1f} MB recycling threshold (pid=36)."
     )
 
 

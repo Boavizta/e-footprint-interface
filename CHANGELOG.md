@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Adapt the interface to efootprint's private hydration lifecycle, reverse `parent_groups` descriptors, stable computed-dict coordinate keys, and explicit serialized-state materialization boundaries. Legacy edge-model imports, calculated-attribute charts, workspace re-id, and complete snapshot persistence now work with library `dev`.
 
 ### Changed
-- Derive Gunicorn's post-request worker recycling threshold from the container memory limit instead of a fixed 1.6 GB value, with ratio and absolute environment overrides; evaluate the working set rather than reclaimable file cache.
+- Detect the container memory capacity independently from Gunicorn's post-request recycling threshold. Recycle above a configurable 60% working set by default, excluding reclaimable file cache and reserving the higher memory range for active calculations.
 - Scope the Sources table and XLSX export to sourced input quantities, avoiding the previous full pull of every scalar calculated attribute when opening or downloading source data.
 - Defer cyclic garbage collection until Gunicorn has sent each response: automatic GC is disabled while a request runs, then a timed full collection executes at the post-request boundary. This prevents large model graphs from causing random hydration or serialization latency spikes while retaining prompt worker cleanup and the existing memory guard.
 - Add process CPU time, worker PID, and per-generation garbage-collection deltas to ModelWeb hydration and serialization timing logs, making production latency spikes diagnosable without enabling a profiler.
