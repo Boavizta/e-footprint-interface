@@ -5,11 +5,11 @@
 The first observation-only deployment exercised three-, four-, and five-pattern cold Sankeys on the development
 production architecture. It established real request, cgroup, OOM, and worker-restart behavior; it did not validate an
 enforcement response. The monitor was then hardened locally to correct cache/topology diagnostics and reduce sampling
-cost. A representative post-fix dev run remains required before enforcement work begins.
+cost, then validated again on the development production architecture before enforcement work.
 
 The hosting platform exposed two different finite cgroup capacities for the same M deployment: 2,926 MiB before a
-redeployment and 3,176 MiB afterward. Every interpretation below uses the capacity reported by that process's cgroup;
-the cause of the platform variability is external to this investigation.
+redeployment and 3,176 MiB afterward; the post-fix deployment reported 2,975 MiB. Every interpretation below uses the
+capacity reported by that process's cgroup; the cause of the platform variability is external to this investigation.
 
 ## First dev deployment
 
@@ -71,5 +71,26 @@ behavior:
 | Hardened observation | 0.176 s | +0.57% |
 
 The observation result passes the 3% local gate. The no-op/observation ordering is within run-to-run noise at these
-durations. The remaining gate is one representative post-fix run on the dev production architecture showing no more
-than 3% monitor overhead and the corrected diagnostic fields; no such result is inferred from this local benchmark.
+durations.
+
+## Representative post-fix dev gate
+
+Commit `d4d612f4` was deployed in observation mode on a 2,975 MiB cgroup. The previously failing edge reference import
+completed with HTTP 302, and the following builder request returned HTTP 200 with populated pattern-count and
+modeled-hours fields. This confirms that topology diagnostics no longer turn a valid `EdgeUsagePattern` import into an
+application failure.
+
+A cold four-pattern, 26,280-hour Sankey completed 4,539 slots in 6,404.1 ms. Its observer callbacks consumed 137.103 ms
+(about 2.14% of elapsed time), including 120.072 ms of memory reads and 3.028 ms of bounded logging, so the deployed
+monitor passes the 3% observation gate. The sampled working-set peak was 2,925.7 MiB.
+
+The single `would_abort` record appeared at 2,529.2 MiB, matching the configured 85% candidate of about 2,528.75 MiB.
+Its sample count was 623; completion reached 690 samples, exactly the expected ordinary-cadence backoff rather than
+continued per-slot sampling. The cold completion reported `attribution_matrix_cached=false`. A subsequent warm Sankey
+completed with zero slots and `attribution_matrix_cached=true`.
+
+Post-request collection ran and the worker recycled above the independent 60% threshold. The worker-exit record kept
+the exited PID and cgroup counters, omitted process RSS, and reported zero OOM/OOM-kill deltas. The cold request
+completed only about 49 MiB below the natural cgroup limit, so four patterns leave little unguarded headroom. That
+borderline completion strengthens the case for recoverable enforcement at the candidate threshold; it does not itself
+validate the future enforcement response.

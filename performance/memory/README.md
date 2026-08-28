@@ -89,9 +89,12 @@ For a hardened observation deployment, verify one representative cold run before
 5. Compare the deployed monitor timing with the matching `off` run. Observation must remain at or below 3% before
    enforcement implementation begins.
 
-The post-fix representative dev run is a deployment gate, not something the local Docker benchmark can substitute for.
-Do not infer one long elementary computation from a gap between bounded high-water records: callbacks may continue
-without emitting another record.
+The post-fix representative dev gate passed on commit `d4d612f4`: a cold four-pattern, 26,280-hour Sankey completed in
+6,404.1 ms with 137.103 ms of callback time (about 2.14%), correct cold/warm cache state, a single threshold crossing,
+ordinary-cadence backoff, and valid worker-exit evidence. Its 2,925.7 MiB peak on a 2,975 MiB cgroup also demonstrates
+how little natural headroom remains without enforcement. See the linked report for the full evidence. Do not infer one
+long elementary computation from a gap between bounded high-water records: callbacks may continue without emitting
+another record.
 
 The runtime setting accepts `off`, `observe`, and the reserved `enforce` value. It defaults to `off`; the current
 monitor is observation-only and never interrupts a request, including if `enforce` is selected prematurely.
