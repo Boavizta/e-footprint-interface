@@ -16,11 +16,15 @@ and worker. USS shows memory private to one process. Cgroup usage and peak are t
 
 ## Reproduce the reference profile
 
-Build the exact production image from the current checkout:
+Build the production Dockerfile from a clean checkout:
 
 ```bash
 docker build -t efootprint-memory-profile:local .
 ```
+
+Docker currently has no repository-level `.dockerignore`, so a build from a working directory also copies
+untracked files. Check that large local artifacts such as `db.sqlite3` are absent from the image before using
+entrypoint/cgroup measurements as a production baseline. Git-ignored does not mean Docker-ignored.
 
 Run each calculation in a fresh 4 GiB container. Mount the model read-only; do not copy large models into this folder:
 

@@ -2,7 +2,8 @@
 
 ## Environment and scope
 
-- Current production `Dockerfile`, freshly built from the measured checkout
+- Current production `Dockerfile`, freshly built from the measured checkout; dynamic runs bypassed the entrypoint and
+  are unaffected by the local SQLite artifact described below
 - Python 3.12.14, efootprint 23.0.0b2, Django 5.2.17, psutil 7.2.2
 - Docker Desktop Linux 6.10.14, arm64, hard cgroup limit 4,096 MiB
 - Smart-building shared-pattern scenario described in
@@ -28,11 +29,11 @@ may have a different allocator/kernel from Docker Desktop arm64.
 | Full stack before first request | ~68 MiB summed PSS; worker 20, Gunicorn master 24, supervisor 19, nginx ~5 |
 | Full stack after one model-builder request | ~238 MiB summed PSS; worker 180, master 35, supervisor 19, nginx ~5 |
 
-The full container reported about 1.28 GiB raw `memory.current` before its first request and 1.42 GiB afterward, but
-about 1.18 GiB was reclaimable
-`inactive_file`, largely produced by entrypoint/static-file activity. Its working set was about 238 MiB and matched the
-sum of process PSS. Raw cgroup usage must therefore be logged, but must not be treated as equivalent to live anonymous
-memory when deciding to recycle a worker.
+The first full-stack run reported about 1.18 GiB of `inactive_file`, but this was a contaminated local-build result:
+Docker had copied an untracked 612 MiB `db.sqlite3` because the repository had no `.dockerignore`. Entrypoint migrations
+modified that image-layer SQLite file, causing overlay copy-up and caching close to two copies. Repeating the entrypoint
+with a fresh 140 KiB SQLite database left about 60–93 MiB of inactive file cache. The large original figure must not be
+treated as representative of a Git-built Clever Cloud image, where the untracked local database is absent.
 
 Static optimization is low leverage for the observed OOM: hydration adds only about 3 MiB above application imports,
 and the warmed full stack uses roughly 6% of the 4 GiB budget before calculations.
@@ -64,17 +65,16 @@ attribution matrix is cheap; the cold upstream hourly calculation graph is the m
 
 ### Full-stack headroom check
 
-The five-pattern cold Sankey was also run inside an already-started production container alongside supervisor,
-Gunicorn and nginx, after the normal entrypoint had populated the file cache. Disabling automatic GC did not increase
-the worker peak: the calculation completed at 2,663 MiB RSS. However, the cgroup's exact peak reached 3,503.5 MiB,
-leaving only 592.5 MiB below the 4,096 MiB hard limit. During the calculation Linux reclaimed about 445 MiB of inactive
-file cache (from roughly 1,190 to 745 MiB).
+The five-pattern cold Sankey was rerun inside an already-started production container alongside supervisor, Gunicorn
+and nginx, with the accidental local database removed before entrypoint execution. Disabling automatic GC did not
+increase the worker peak: the calculation completed at 2,663 MiB RSS. The cgroup's exact peak reached 2,759.7 MiB,
+including about 61 MiB of inactive file cache, leaving 1,336.3 MiB below the 4,096 MiB hard limit.
 
-The original production OOM has therefore not been reproduced. The fresh-process Sankey figure is not the complete
-container requirement, and the surviving margin is small enough for allocator history, architecture differences or a
-heavier actual five-pattern input to matter. The incident worker was long-lived, while these reference calculations
-started from controlled allocator state; production RSS/cgroup milestone telemetry is required to distinguish those
-causes conclusively.
+The original production OOM has therefore not been reproduced, and the corrected clean-container run leaves materially
+more unexplained headroom than the contaminated run suggested. Allocator history, architecture differences, the exact
+five-pattern input, or a lower effective production cgroup limit remain hypotheses. The incident worker was long-lived,
+while these reference calculations started from controlled allocator state; production RSS/cgroup milestone telemetry
+is required to distinguish those causes conclusively.
 
 ## Conclusions for the next implementation
 
