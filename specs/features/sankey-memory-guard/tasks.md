@@ -208,8 +208,9 @@ until Task 4 approves rollout.
   model-builder routes; existing decorated non-Sankey views render the exception's safe generic message unchanged.
 - An interrupted transactional edit follows existing `ModelingUpdate` rollback, does not persist the rejected edit,
   and leaves the restored model usable. Interrupted results and exports preserve the already-valid persisted model.
-- `sankey_diagram()` catches the capacity exception inside its existing generic decorator and replaces only the graph
-  surface with the dedicated template.
+- Once `ModelWeb` hydration has produced a complete system, `sankey_diagram()` catches the capacity exception inside its
+  existing generic decorator and replaces only the graph surface with the dedicated template. A capacity exception
+  during earlier hydration uses the generic out-of-band modal rather than fabricating attribution coverage.
 - The Sankey explanation reports peek-only attribution-source coverage `X%` and cgroup capacity `Y GiB`, labels coverage
   as non-linear, and recommends reducing usage-pattern complexity or timespan, splitting the model, or using a larger
   instance.

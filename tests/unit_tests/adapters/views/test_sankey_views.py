@@ -15,6 +15,7 @@ from efootprint.core.lifecycle_phases import LifeCyclePhases
 
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
+from model_builder.adapters.views import sankey_views
 from model_builder.adapters.views.sankey_views import (
     _build_sankey_payload,
     _expand_skipped_columns,
@@ -360,6 +361,29 @@ class TestSankeyDiagramStructure:
 
         saved_data = SessionSystemRepository(sankey_client.session).get_system_data()
         assert saved_data.get("interface_config", {}).get("sankey_diagrams", []) == []
+
+    def test_memory_limit_during_hydration_uses_generic_modal_without_fabricating_coverage(
+        self, sankey_client, default_post, monkeypatch
+    ):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        exception = ComputationMemoryLimitExceeded(
+            working_set_bytes=3500 * 1024**2,
+            limit_bytes=3400 * 1024**2,
+            capacity_bytes=4 * 1024**3,
+        )
+        monkeypatch.setattr(sankey_views, "ModelWeb", MagicMock(side_effect=exception))
+        cache_coverage = MagicMock()
+        monkeypatch.setattr(sankey_views, "impact_repartition_rows_cache_coverage", cache_coverage)
+
+        response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
+
+        content = response.content.decode()
+        assert response.status_code == 200
+        assert response.headers["HX-Reswap"] == "none"
+        assert ComputationMemoryLimitExceeded.safe_message in content
+        assert 'id="modal-container"' in content
+        assert "data-sankey-memory-limit" not in content
+        cache_coverage.assert_not_called()
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_column_headers_use_same_dynamic_padding_as_chart(self, mock_cls, sankey_client, default_post):

@@ -60,7 +60,9 @@ monitor failures disable telemetry for that request and fail open in both modes.
 completion at or above the computation working-set limit raises a typed recoverable exception and latches the monitor,
 so transactional rollback computations cannot trip it again. Decorated views use the standard exception modal; the
 middleware supplies the same modal only for undecorated routes. Sankey catches the typed exception inside its generic
-decorator and replaces only the graph area with peek-only attribution-cache coverage and container-capacity guidance.
+decorator after `ModelWeb` hydration and replaces only the graph area with peek-only attribution-cache coverage and
+container-capacity guidance. If hydration itself is interrupted before a complete system exists, the outer generic
+decorator returns the standard out-of-band modal instead; the interface never fabricates attribution coverage.
 Gunicorn's normal post-request collection and recycling still happen after either recoverable response. Gunicorn also
 reuses the cgroup reader and compares cumulative `oom`/`oom_kill` counters across worker boot and exit, including exits
 where a killed worker cannot log for itself. Computation and recycling limits are resolved once per process from

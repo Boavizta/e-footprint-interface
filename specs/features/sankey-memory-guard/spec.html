@@ -143,9 +143,11 @@
   instance with more memory. This instance has Y GiB available.</blockquote>
   <p><code>X</code> is the peek-only ratio of cached attribution slots required by this Sankey to the total required
   attribution slots; no value may be computed merely to produce the explanation. <code>Y</code> is the cgroup container
-  capacity, not host RAM. Every non-Sankey operation uses the existing generic recoverable-error modal carrying the
-  capacity exception's safe message. A transactional edit rejected by the guard has already rolled back before that
-  modal is rendered, and its persistence step is not reached.</p>
+  capacity, not host RAM. Graph-space guidance applies once <code>ModelWeb</code> hydration has produced the complete
+  system required by the coverage query. If capacity is reached earlier during hydration, the request uses the existing
+  generic recoverable-error modal rather than fabricating a coverage percentage. Every non-Sankey operation uses that
+  same modal carrying the capacity exception's safe message. A transactional edit rejected by the guard has already
+  rolled back before that modal is rendered, and its persistence step is not reached.</p>
 </section>
 
 <section>

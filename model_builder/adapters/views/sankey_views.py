@@ -317,6 +317,9 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 @time_it
 def sankey_diagram(request):
     card_id = request.POST.get("card_id", "")
+    # Hydration happens before the graph-specific recovery boundary because attribution
+    # coverage is only meaningful once a complete System exists. An earlier capacity
+    # interruption therefore falls through to the outer generic recoverable-error modal.
     repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     system = list(model_web.response_objs["System"].values())[0]
