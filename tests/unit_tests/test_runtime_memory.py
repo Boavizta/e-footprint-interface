@@ -114,6 +114,10 @@ def test_memory_limit_prefers_absolute_override(monkeypatch):
     assert limit == 2300 * runtime_memory.MIB
 
 
+def test_computation_memory_limit_keeps_eighty_five_percent_default():
+    assert runtime_memory.COMPUTATION_MEMORY_LIMIT_BYTES == int(runtime_memory.THRESHOLD_CAPACITY_BYTES * 0.85)
+
+
 def test_memory_limit_uses_ratio_and_validates_it(monkeypatch):
     monkeypatch.delenv("TEST_LIMIT_MB", raising=False)
     monkeypatch.setenv("TEST_LIMIT_RATIO", "0.6")

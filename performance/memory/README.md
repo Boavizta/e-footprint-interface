@@ -67,14 +67,33 @@ and cgroup peak for later threshold calibration. A failed gate means revise the 
 not a reason to enable enforcement. Enforcement remains unavailable until representative development observation has
 been reviewed.
 
-The 2026-08-28 local gate used seven interleaved fresh 4 GiB containers per mode with the introductory industrial-IoT
-fixture expanded to five shared edge usage patterns. Median cold-calculation time was 0.173 s off, 0.168 s no-op
-(-2.9%), and 0.176 s observe (+1.7%), so both gates passed. Observe recorded 352 callbacks and 24 samples per run;
-median total/max callback, memory-read, and logging costs were 1.788 ms, 0.149 ms, 1.674 ms, and 0.320 ms respectively.
-Median sampled working-set peak was 285.5 MiB and the median largest between-sample jump was 20.2 MiB. This is a local
-overhead gate, not the representative production-capacity calibration required before enforcement.
+The first 2026-08-28 local gate used seven interleaved fresh 4 GiB containers per mode with the introductory
+industrial-IoT fixture expanded to five shared edge usage patterns. It passed at +1.7% observation overhead. After the
+first dev deployment exposed avoidable near-limit sampling cost, the hardened monitor was measured with the same
+seven-run method: median cold-calculation time was 0.175 s off, 0.178 s no-op, and 0.176 s observe. Observation overhead
+was +0.57%; the small no-op/observe inversion is measurement noise. The complete dev evidence and both the original
+and hardened local gates are recorded in
+[`results/2026-08-28-dev-observation.md`](results/2026-08-28-dev-observation.md).
 
-The runtime setting accepts `off`, `observe`, and the reserved `enforce` value. It defaults to `off`; this stage's
+For a hardened observation deployment, verify one representative cold run before starting enforcement work:
+
+1. Confirm completion records populate `usage_pattern_count` and `modeled_hours`; failures before hydration must leave
+   both fields explicitly unavailable.
+2. Confirm Sankey cache state begins unknown, becomes cold after an attribution source or matrix computation, and is
+   marked warm only by a successful completion with no attribution computation.
+3. If working set crosses the candidate limit, confirm exactly one `would_abort` record is emitted and sampling then
+   returns to the ordinary 16-slot cadence. The approved candidate is 85% of runtime cgroup capacity unless
+   `COMPUTATION_MEMORY_LIMIT_RATIO` or `COMPUTATION_MEMORY_LIMIT_MB` overrides it.
+4. Confirm worker-exit records retain the exited worker PID and cgroup event deltas but omit process RSS, which would
+   otherwise describe the Gunicorn master executing the hook.
+5. Compare the deployed monitor timing with the matching `off` run. Observation must remain at or below 3% before
+   enforcement implementation begins.
+
+The post-fix representative dev run is a deployment gate, not something the local Docker benchmark can substitute for.
+Do not infer one long elementary computation from a gap between bounded high-water records: callbacks may continue
+without emitting another record.
+
+The runtime setting accepts `off`, `observe`, and the reserved `enforce` value. It defaults to `off`; the current
 monitor is observation-only and never interrupts a request, including if `enforce` is selected prematurely.
 
 The GC flag matches production Gunicorn request handling. Omitting it is useful only as an explicit comparison with

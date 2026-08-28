@@ -283,4 +283,7 @@ def test_real_django_middleware_chain_reports_view_exception_as_abort(monkeypatc
     response = Client(raise_request_exception=False).get("/model_builder/fail/")
 
     assert response.status_code == 500
-    assert [record["event"] for record in _records(log)] == ["start", "abort"]
+    records = _records(log)
+    assert [record["event"] for record in records] == ["start", "abort"]
+    assert records[-1]["usage_pattern_count"] is None
+    assert records[-1]["modeled_hours"] is None

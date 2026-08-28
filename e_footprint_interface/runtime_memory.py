@@ -193,7 +193,7 @@ COMPUTATION_MEMORY_LIMIT_BYTES = resolve_memory_limit_bytes(
     THRESHOLD_CAPACITY_BYTES,
     absolute_name="COMPUTATION_MEMORY_LIMIT_MB",
     ratio_name="COMPUTATION_MEMORY_LIMIT_RATIO",
-    default_ratio=0.8,
+    default_ratio=0.85,
 )
 WORKER_RECYCLE_LIMIT_BYTES = resolve_memory_limit_bytes(
     THRESHOLD_CAPACITY_BYTES,
