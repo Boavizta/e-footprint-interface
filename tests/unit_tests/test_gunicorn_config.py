@@ -73,6 +73,30 @@ def test_worker_lifecycle_reports_oom_counter_deltas(monkeypatch, gunicorn_confi
     serialized = server.log.warning.call_args.args[1]
     assert '"oom": 1' in serialized
     assert '"oom_kill": 1' in serialized
+    assert '"rss_mb"' not in serialized
+    assert '"pid": 36' in serialized
+    gunicorn_config.runtime_memory.read_memory_snapshot.assert_called_with(include_process_rss=False)
+
+
+def test_worker_lifecycle_reports_v1_failcnt_without_claiming_an_oom_kill(monkeypatch, gunicorn_config):
+    server = SimpleNamespace(log=MagicMock())
+    worker = _worker()
+    events = MagicMock(
+        side_effect=(
+            {"oom": None, "oom_kill": None, "failcnt": 4},
+            {"oom": None, "oom_kill": None, "failcnt": 5},
+        )
+    )
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_events", events)
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_snapshot", MagicMock(return_value=_snapshot()))
+
+    gunicorn_config.pre_fork(server, worker)
+    gunicorn_config.child_exit(server, worker)
+
+    serialized = server.log.warning.call_args.args[1]
+    assert '"failcnt": 1' in serialized
+    assert '"oom": null' in serialized
+    assert '"oom_kill": null' in serialized
 
 
 def test_worker_lifecycle_uses_info_when_no_oom_changed(monkeypatch, gunicorn_config):

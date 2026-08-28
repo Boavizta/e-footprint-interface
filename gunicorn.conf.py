@@ -23,16 +23,28 @@ def _memory_usage_mb():
     return bytes_used / runtime_memory.MIB if bytes_used is not None else 0
 
 
-def _event_delta(previous: dict[str, int], current: dict[str, int]) -> dict[str, int]:
-    return {key: max(0, current.get(key, 0) - previous.get(key, 0)) for key in {"oom", "oom_kill"}}
+def _event_delta(previous: dict[str, int | None], current: dict[str, int | None]) -> dict[str, int | None]:
+    delta = {}
+    for key in {"oom", "oom_kill", "failcnt"}:
+        previous_value = previous.get(key)
+        current_value = current.get(key)
+        delta[key] = (
+            max(0, current_value - previous_value)
+            if previous_value is not None and current_value is not None
+            else None
+        )
+    return delta
 
 
-def _worker_record(event, worker, *, events=None, event_delta=None):
-    snapshot = runtime_memory.read_memory_snapshot()
+def _worker_record(event, worker, *, events=None, event_delta=None, include_process_rss=True):
+    snapshot = runtime_memory.read_memory_snapshot(include_process_rss=include_process_rss)
+    memory_metrics = snapshot.as_mebibytes()
+    if not include_process_rss:
+        memory_metrics.pop("rss_mb")
     return {
         "event": event,
         "pid": getattr(worker, "pid", None),
-        **snapshot.as_mebibytes(),
+        **memory_metrics,
         "memory_events": events if events is not None else runtime_memory.read_memory_events(),
         "memory_event_delta": event_delta,
     }
@@ -54,10 +66,16 @@ def child_exit(server, worker):
     events = runtime_memory.read_memory_events()
     previous = getattr(worker, "_efootprint_memory_events_at_boot", {})
     delta = _event_delta(previous, events)
-    log = server.log.warning if delta["oom"] or delta["oom_kill"] else server.log.info
+    memory_pressure_changed = any(value for value in delta.values() if value is not None)
+    log = server.log.warning if memory_pressure_changed else server.log.info
     log(
         "worker_memory %s",
-        json.dumps(_worker_record("worker_exit", worker, events=events, event_delta=delta), sort_keys=True),
+        json.dumps(
+            _worker_record(
+                "worker_exit", worker, events=events, event_delta=delta, include_process_rss=False
+            ),
+            sort_keys=True,
+        ),
     )
 
 

@@ -77,11 +77,20 @@ def read_cgroup_current_bytes(paths: Iterable[Path] = CGROUP_CURRENT_PATHS) -> i
 
 def read_inactive_file_bytes(paths: Iterable[Path] = CGROUP_STAT_PATHS) -> int | None:
     for path in paths:
+        v1_path = path == CGROUP_STAT_PATHS[1] or path.parent.name == "memory"
+        preferred_key = "total_inactive_file" if v1_path else "inactive_file"
+        fallback_key = "inactive_file" if v1_path else "total_inactive_file"
+        fallback_value = None
         try:
-            values = dict(line.split() for line in path.read_text(encoding="utf-8").splitlines())
-            key = "inactive_file" if "inactive_file" in values else "total_inactive_file"
-            return int(values[key])
-        except (KeyError, OSError, ValueError):
+            for line in path.read_text(encoding="utf-8").splitlines():
+                key, raw_value = line.split()
+                if key == preferred_key:
+                    return int(raw_value)
+                if key == fallback_key:
+                    fallback_value = int(raw_value)
+            if fallback_value is not None:
+                return fallback_value
+        except (OSError, ValueError):
             continue
     return None
 
@@ -102,12 +111,14 @@ def read_process_rss_bytes(process: psutil.Process | None = None) -> int | None:
         return None
 
 
-def read_memory_snapshot(process: psutil.Process | None = None) -> MemorySnapshot:
+def read_memory_snapshot(
+    process: psutil.Process | None = None, *, include_process_rss: bool = True
+) -> MemorySnapshot:
     current = read_cgroup_current_bytes()
     inactive_file = read_inactive_file_bytes()
     working_set = max(0, current - inactive_file) if current is not None and inactive_file is not None else None
     return MemorySnapshot(
-        rss_bytes=read_process_rss_bytes(process),
+        rss_bytes=read_process_rss_bytes(process) if include_process_rss else None,
         cgroup_current_bytes=current,
         inactive_file_bytes=inactive_file,
         working_set_bytes=working_set,
@@ -126,14 +137,16 @@ def _read_key_value_file(path: Path) -> dict[str, int] | None:
 def read_memory_events(
     event_paths: Iterable[Path] = CGROUP_EVENT_PATHS,
     v1_failcnt_paths: Iterable[Path] = CGROUP_V1_FAILCNT_PATHS,
-) -> dict[str, int]:
-    """Read cumulative OOM evidence from cgroup v2, with v1 failcnt as the available equivalent."""
+) -> dict[str, int | None]:
+    """Read cumulative memory-pressure evidence without conflating v1 limit hits with OOM kills."""
     for path in event_paths:
         events = _read_key_value_file(path)
         if events is not None:
             return events
     failcnt = _read_first_integer(v1_failcnt_paths)
-    return {"oom": failcnt, "oom_kill": 0} if failcnt is not None else {}
+    if failcnt is not None:
+        return {"oom": None, "oom_kill": None, "failcnt": failcnt}
+    return {"oom": None, "oom_kill": None}
 
 
 def parse_guard_mode(value: str | None = None) -> str:

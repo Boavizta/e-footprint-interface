@@ -39,6 +39,29 @@ def test_snapshot_distinguishes_raw_usage_inactive_file_working_set_and_rss(monk
     }
 
 
+def test_v1_inactive_file_uses_hierarchical_total_when_both_values_exist(tmp_path):
+    memory_dir = tmp_path / "memory"
+    memory_dir.mkdir()
+    stat = _file(memory_dir, "memory.stat", "inactive_file 10\ntotal_inactive_file 110\n")
+
+    assert runtime_memory.read_inactive_file_bytes((stat,)) == 110
+
+
+def test_lightweight_working_set_does_not_read_process_rss(monkeypatch):
+    monkeypatch.setattr(runtime_memory, "read_cgroup_current_bytes", MagicMock(return_value=1400))
+    monkeypatch.setattr(runtime_memory, "read_inactive_file_bytes", MagicMock(return_value=1100))
+    rss_reader = MagicMock()
+    monkeypatch.setattr(runtime_memory, "read_process_rss_bytes", rss_reader)
+
+    assert runtime_memory.read_cgroup_working_set_bytes() == 300
+    rss_reader.assert_not_called()
+
+    snapshot = runtime_memory.read_memory_snapshot(include_process_rss=False)
+    assert snapshot.rss_bytes is None
+    assert snapshot.working_set_bytes == 300
+    rss_reader.assert_not_called()
+
+
 def test_snapshot_leaves_incomplete_cgroup_metrics_unavailable(monkeypatch):
     monkeypatch.setattr(runtime_memory, "read_cgroup_current_bytes", MagicMock(return_value=None))
     monkeypatch.setattr(runtime_memory, "read_inactive_file_bytes", MagicMock(return_value=10))
@@ -57,8 +80,12 @@ def test_memory_events_reads_v2_and_v1_fallback(tmp_path):
     failcnt = _file(tmp_path, "failcnt", "7")
 
     assert runtime_memory.read_memory_events((v2,), (failcnt,))["oom_kill"] == 2
-    assert runtime_memory.read_memory_events((missing,), (failcnt,)) == {"oom": 7, "oom_kill": 0}
-    assert runtime_memory.read_memory_events((missing,), (missing,)) == {}
+    assert runtime_memory.read_memory_events((missing,), (failcnt,)) == {
+        "oom": None,
+        "oom_kill": None,
+        "failcnt": 7,
+    }
+    assert runtime_memory.read_memory_events((missing,), (missing,)) == {"oom": None, "oom_kill": None}
 
 
 @pytest.mark.parametrize("mode", ["off", "observe", "enforce", " OBSERVE "])
