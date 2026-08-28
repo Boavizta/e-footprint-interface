@@ -215,7 +215,7 @@ def main():
     monitor = None
     calculation_elapsed_seconds = 0.0
     calculation_aborted = False
-    calculation_started_at = time.perf_counter()
+    active_calculation_started_at = time.perf_counter()
     model_web = result = sankey = payload = None
 
     def noop_callback(_slot):
@@ -238,14 +238,15 @@ def main():
     try:
         with observer_scope:
             sampler.begin("hydrate")
+            active_calculation_started_at = time.perf_counter()
             model_web = ModelWeb(InMemorySystemRepository(), data)
             sampler.snapshot("hydrate", "after_hydration")
 
             if args.scenario in {"results", "results-then-sankey"}:
                 sampler.begin("results")
-                calculation_started_at = time.perf_counter()
+                active_calculation_started_at = time.perf_counter()
                 result = model_web.system_emissions
-                calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+                calculation_elapsed_seconds += time.perf_counter() - active_calculation_started_at
                 sampler.snapshot("results", "after_results")
 
             if args.scenario == "results-then-sankey":
@@ -255,15 +256,16 @@ def main():
                 gc.collect()
                 sampler.snapshot("between_requests_gc", "after_first_request_gc")
                 sampler.begin("rehydrate")
+                active_calculation_started_at = time.perf_counter()
                 model_web = ModelWeb(InMemorySystemRepository(), deepcopy(data))
                 sampler.snapshot("rehydrate", "after_second_hydration")
 
             if args.scenario in {"cold-sankey", "warm-sankey", "results-then-sankey"}:
                 sampler.begin("cold_sankey")
-                calculation_started_at = time.perf_counter()
+                active_calculation_started_at = time.perf_counter()
                 sankey, payload = build_sankey(model_web)
                 matrix = model_web.system.modeling_obj.impact_repartition_matrix
-                calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+                calculation_elapsed_seconds += time.perf_counter() - active_calculation_started_at
                 sampler.snapshot("cold_sankey", "after_cold_sankey")
                 print(
                     f"MATRIX rows={len(matrix)}; SANKEY nodes={len(payload['nodes'])} links={len(payload['links'])}",
@@ -274,12 +276,12 @@ def main():
                 del sankey, payload
                 sankey = payload = None
                 sampler.begin("warm_sankey")
-                calculation_started_at = time.perf_counter()
+                active_calculation_started_at = time.perf_counter()
                 sankey, payload = build_sankey(model_web)
-                calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+                calculation_elapsed_seconds += time.perf_counter() - active_calculation_started_at
                 sampler.snapshot("warm_sankey", "after_warm_sankey")
     except ComputationMemoryLimitExceeded:
-        calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+        calculation_elapsed_seconds += time.perf_counter() - active_calculation_started_at
         calculation_aborted = True
         sampler.snapshot(sampler.stage, "memory_limit_abort")
 

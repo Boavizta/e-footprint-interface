@@ -96,8 +96,9 @@ how little natural headroom remains without enforcement. See the linked report f
 long elementary computation from a gap between bounded high-water records: callbacks may continue without emitting
 another record.
 
-The runtime setting accepts `off`, `observe`, and the reserved `enforce` value. It defaults to `off`; the current
-monitor is observation-only and never interrupts a request, including if `enforce` is selected prematurely.
+The runtime setting accepts `off`, `observe`, and `enforce`, and defaults to `off`. Enforce mode interrupts a sampled
+reactive calculation at or above the configured working-set limit and returns a recoverable response; keep it disabled
+in deployment configuration until pre-production calibration approves the threshold and headroom.
 
 The GC flag matches production Gunicorn request handling. Omitting it is useful only as an explicit comparison with
 ordinary Python automatic collection.
