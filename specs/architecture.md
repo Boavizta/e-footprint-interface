@@ -44,9 +44,9 @@ model_builder/
 5. View returns response (full page or partial DOM swap).
 6. In production, Gunicorn runs each request with automatic cyclic GC disabled, writes and closes the
    response, then performs a logged full collection in `post_request` before accepting more work. This
-   keeps collection pauses out of the response-producing stages. After collection, cgroup-wide memory
-   usage above 80% of the container limit recycles the worker; `WORKER_MEMORY_LIMIT_RATIO` changes the
-   ratio and `WORKER_MEMORY_LIMIT_MB` provides an absolute override.
+   keeps collection pauses out of the response-producing stages. After collection, a cgroup working set
+   above 80% of the container limit recycles the worker; reclaimable inactive file cache is excluded.
+   `WORKER_MEMORY_LIMIT_RATIO` changes the ratio and `WORKER_MEMORY_LIMIT_MB` provides an absolute override.
 
 ## Core classes
 

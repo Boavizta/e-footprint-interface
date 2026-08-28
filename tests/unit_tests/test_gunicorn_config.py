@@ -53,6 +53,22 @@ def test_memory_limit_ratio_is_configurable(monkeypatch, gunicorn_config):
     assert gunicorn_config._memory_limit_mb() == 3072
 
 
+def test_memory_usage_excludes_reclaimable_cgroup_file_cache(monkeypatch, gunicorn_config):
+    monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=1400 * 1024**2))
+    monkeypatch.setattr(gunicorn_config, "_inactive_file_bytes", MagicMock(return_value=1100 * 1024**2))
+
+    assert gunicorn_config._memory_usage_mb() == 300
+
+
+def test_memory_usage_falls_back_to_worker_rss_without_complete_cgroup_metrics(monkeypatch, gunicorn_config):
+    monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=None))
+    process = MagicMock()
+    process.memory_info.return_value.rss = 250 * 1024**2
+    monkeypatch.setattr(gunicorn_config.psutil, "Process", MagicMock(return_value=process))
+
+    assert gunicorn_config._memory_usage_mb() == 250
+
+
 def test_collects_after_response_logs_cost_and_restores_enabled_gc(monkeypatch, gunicorn_config):
     worker = _worker()
     gc = _configure_runtime(monkeypatch, gunicorn_config)
@@ -84,7 +100,7 @@ def test_preserves_disabled_gc_and_still_enforces_memory_limit(monkeypatch, guni
     gc.enable.assert_not_called()
     assert worker.alive is False
     worker.log.warning.assert_called_once_with(
-        f"Recycling worker because memory usage is {gunicorn_config.MEMORY_LIMIT_MB + 1:.1f} MB, above the "
+        f"Recycling worker because memory working set is {gunicorn_config.MEMORY_LIMIT_MB + 1:.1f} MB, above the "
         f"{gunicorn_config.MEMORY_LIMIT_MB:.1f} MB limit (pid=36)."
     )
 

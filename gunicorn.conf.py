@@ -15,6 +15,7 @@ timeout = 120
 _MIB = 1024 * 1024
 _CGROUP_LIMIT_PATHS = (Path("/sys/fs/cgroup/memory.max"), Path("/sys/fs/cgroup/memory/memory.limit_in_bytes"))
 _CGROUP_USAGE_PATHS = (Path("/sys/fs/cgroup/memory.current"), Path("/sys/fs/cgroup/memory/memory.usage_in_bytes"))
+_CGROUP_STAT_PATHS = (Path("/sys/fs/cgroup/memory.stat"), Path("/sys/fs/cgroup/memory/memory.stat"))
 
 
 def _read_first_finite_value(paths):
@@ -46,9 +47,23 @@ def _memory_limit_mb():
     return available_bytes / _MIB * ratio
 
 
+def _inactive_file_bytes():
+    for path in _CGROUP_STAT_PATHS:
+        try:
+            values = dict(line.split() for line in path.read_text().splitlines())
+            key = "inactive_file" if "inactive_file" in values else "total_inactive_file"
+            return int(values[key])
+        except (KeyError, OSError, ValueError):
+            continue
+    return None
+
+
 def _memory_usage_mb():
     used_bytes = _read_first_finite_value(_CGROUP_USAGE_PATHS)
-    return used_bytes / _MIB if used_bytes is not None else psutil.Process(os.getpid()).memory_info().rss / _MIB
+    inactive_file_bytes = _inactive_file_bytes()
+    if used_bytes is not None and inactive_file_bytes is not None:
+        return max(0, used_bytes - inactive_file_bytes) / _MIB
+    return psutil.Process(os.getpid()).memory_info().rss / _MIB
 
 
 MEMORY_LIMIT_MB = _memory_limit_mb()
@@ -76,7 +91,7 @@ def post_request(worker, req, environ, resp):
         memory_mb = _memory_usage_mb()
         if memory_mb > MEMORY_LIMIT_MB:
             worker.log.warning(
-                f"Recycling worker because memory usage is {memory_mb:.1f} MB, above the "
+                f"Recycling worker because memory working set is {memory_mb:.1f} MB, above the "
                 f"{MEMORY_LIMIT_MB:.1f} MB limit (pid={os.getpid()})."
             )
             worker.alive = False
