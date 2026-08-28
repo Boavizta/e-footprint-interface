@@ -29,9 +29,7 @@ def _event_delta(previous: dict[str, int | None], current: dict[str, int | None]
         previous_value = previous.get(key)
         current_value = current.get(key)
         delta[key] = (
-            max(0, current_value - previous_value)
-            if previous_value is not None and current_value is not None
-            else None
+            max(0, current_value - previous_value) if previous_value is not None and current_value is not None else None
         )
     return delta
 
@@ -71,9 +69,7 @@ def child_exit(server, worker):
     log(
         "worker_memory %s",
         json.dumps(
-            _worker_record(
-                "worker_exit", worker, events=events, event_delta=delta, include_process_rss=False
-            ),
+            _worker_record("worker_exit", worker, events=events, event_delta=delta, include_process_rss=False),
             sort_keys=True,
         ),
     )

@@ -112,9 +112,7 @@ def read_process_rss_bytes(process: psutil.Process | None = None) -> int | None:
         return None
 
 
-def read_memory_snapshot(
-    process: psutil.Process | None = None, *, include_process_rss: bool = True
-) -> MemorySnapshot:
+def read_memory_snapshot(process: psutil.Process | None = None, *, include_process_rss: bool = True) -> MemorySnapshot:
     current = read_cgroup_current_bytes()
     inactive_file = read_inactive_file_bytes()
     working_set = max(0, current - inactive_file) if current is not None and inactive_file is not None else None

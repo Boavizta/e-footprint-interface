@@ -17,7 +17,8 @@ elementary calculation returns and cannot see a native allocation that peaks and
 
 ## Environment and method
 
-- Interface base commit `72395aa9`; production `Dockerfile`; fresh image `efootprint-memory-profile:task4`
+- Production image/base commit `72395aa9`; profiler script mounted from commit
+  `501663cbf47be0d116dfb02cfec4a014fa67f805`; fresh image `efootprint-memory-profile:task4`
 - Python 3.12.14, efootprint 23.0.0b3, psutil 7.2.2
 - Docker Desktop Linux 6.10.14, arm64
 - Scenario C smart-building model expanded to five shared edge usage patterns
