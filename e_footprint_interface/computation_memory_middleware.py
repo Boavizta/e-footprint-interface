@@ -102,11 +102,17 @@ class ComputationMemoryMonitor:
             return None
 
     def model_hydrated(self, model_web) -> None:
-        patterns = [*model_web.usage_patterns, *model_web.edge_usage_patterns]
-        self.usage_pattern_count = len(patterns)
+        usage_patterns = model_web.usage_patterns
+        edge_usage_patterns = model_web.edge_usage_patterns
+        self.usage_pattern_count = len(usage_patterns) + len(edge_usage_patterns)
         pattern_hours = [
-            self._hourly_value_count(pattern.modeling_obj.hourly_usage_journey_starts) for pattern in patterns
+            self._hourly_value_count(pattern.modeling_obj.hourly_usage_journey_starts)
+            for pattern in usage_patterns
         ]
+        pattern_hours.extend(
+            self._hourly_value_count(pattern.modeling_obj.hourly_edge_usage_journey_starts)
+            for pattern in edge_usage_patterns
+        )
         self.modeled_hours = (
             max(pattern_hours, default=0) if all(hours is not None for hours in pattern_hours) else None
         )

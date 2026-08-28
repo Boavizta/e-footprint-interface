@@ -8,10 +8,17 @@ from django.test import Client, RequestFactory, override_settings
 from django.urls import path
 import pytest
 
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.constants.countries import Countries
+from efootprint.core.hardware.network import Network
+from efootprint.core.system import System
+from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
+from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 from e_footprint_interface import runtime_memory
 from e_footprint_interface import computation_memory_middleware as middleware_module
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from tests.fixtures.system_builders import create_hourly_usage
 
 
 def _snapshot(working_set_mb=100, *, current_mb=120, inactive_mb=20, rss_mb=80, capacity_mb=4096):
@@ -253,6 +260,51 @@ def test_middleware_populates_topology_after_real_model_hydration(monkeypatch, m
     completion = _records(log)[-1]
     assert completion["usage_pattern_count"] == 1
     assert completion["modeled_hours"] == 8760
+
+
+def test_middleware_populates_topology_after_real_edge_model_hydration(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+    edge_pattern = EdgeUsagePattern(
+        "Edge pattern",
+        edge_usage_journey=EdgeUsageJourney.from_defaults("Edge journey", edge_functions=[]),
+        network=Network.wifi_network(),
+        country=Countries.FRANCE(),
+        hourly_edge_usage_journey_starts=create_hourly_usage(),
+    )
+    system_data = system_to_json(System("Edge system", usage_patterns=[], edge_usage_patterns=[edge_pattern]))
+
+    def hydrate(request):
+        ModelWeb(InMemorySystemRepository(), system_data)
+        return HttpResponse("ok")
+
+    response = middleware_module.ComputationMemoryMiddleware(hydrate)(RequestFactory().get("/model_builder/"))
+
+    assert response.status_code == 200
+    completion = _records(log)[-1]
+    assert completion["usage_pattern_count"] == 1
+    assert completion["modeled_hours"] == 8760
+
+
+def test_model_hydration_keeps_hours_unavailable_for_invalid_edge_duration(monkeypatch):
+    _patch_memory(monkeypatch)
+    monitor = middleware_module.ComputationMemoryMonitor(route="model_builder/", method="GET", log=MagicMock())
+    invalid_hourly_values = SimpleNamespace(
+        form_inputs={"modeling_duration_value": 1, "modeling_duration_unit": "unsupported"}
+    )
+    model_web = SimpleNamespace(
+        usage_patterns=[],
+        edge_usage_patterns=[
+            SimpleNamespace(modeling_obj=SimpleNamespace(hourly_edge_usage_journey_starts=invalid_hourly_values))
+        ],
+    )
+
+    monitor.model_hydrated(model_web)
+
+    assert monitor.usage_pattern_count == 1
+    assert monitor.modeled_hours is None
 
 
 def test_middleware_keeps_topology_unavailable_when_no_model_was_hydrated(monkeypatch):
