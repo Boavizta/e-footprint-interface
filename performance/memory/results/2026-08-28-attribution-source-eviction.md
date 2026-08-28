@@ -41,7 +41,8 @@ The clean function returns an `ExplainableHourlyQuantities`, but its on-demand r
 attribute and therefore never finalized. `explain()` currently produces an empty expression (`label = = = value`). The
 experiment makes finalization composable across sources, retains the complete nested formula, and clears value parents.
 The resulting usage formula is valid but 337,627 characters long for this model. This fixes missing explanation rather
-than removing detail, but its presentation is an observable behavior decision that should be resolved before shipping.
+than removing detail. Shipping the complete formula is accepted for this optimization; a compact explanation-boundary
+design is parked in `specs/backlog/attributed-footprint-explanability/` and is not a requirement of the active feature.
 
 ## Tests
 

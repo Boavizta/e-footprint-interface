@@ -17,8 +17,10 @@
 </head>
 <body>
 <h1>Attribution memory optimization — Implementation plan</h1>
-<p>Status: Attributed-footprint experiment viable; formula presentation decision pending · 2026-08-28 ·
+<p>Status: Implementation approach approved · 2026-08-28 ·
 Spec: <a href="spec.html">spec.html</a></p>
+<p>Cold-context implementers must also read <a href="implementation-notes.md"><code>implementation-notes.md</code></a>
+for the exact numerical-order and composable-finalization constraints discovered by the experiment.</p>
 
 <h2>1. Approach</h2>
 <p>The common principle is to reduce each impact source to the result required by its caller, then release that
@@ -94,8 +96,9 @@ relative comparisons use the same runtime and model.</p>
 <ul>
   <li><strong>Formula presentation:</strong> the current on-demand result never runs calculated-attribute finalization,
       so <code>explain()</code> renders an empty expression. Progressive finalization preserves the complete formula and
-      releases parents, but exposes a 337,627-character expression for the reference usage result. Decide explicitly
-      whether fixing that pre-existing empty-formula behavior belongs in this optimization or needs compact display.</li>
+      releases parents, exposing a 337,627-character expression for the reference usage result. Shipping that complete
+      formula is accepted; compact ephemeral explanation boundaries are parked in
+      <code>specs/backlog/attributed-footprint-explanability/</code> and do not block this feature.</li>
   <li><strong>Repeated direct reads:</strong> source eviction can trade memory for recomputation on later calls. Keep
       the single-object API; do not introduce an unbounded batch signature to hide that cost.</li>
   <li><strong>Largest-source bound:</strong> source scoping cannot prevent a single source calculation from exceeding

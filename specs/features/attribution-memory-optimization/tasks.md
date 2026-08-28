@@ -1,7 +1,8 @@
 # Attribution memory optimization — Tasks
 
-**Status:** Tasks — Task 2 experiment viable; formula presentation decision pending.
+**Status:** Tasks — implementation approach approved.
 **Spec:** [`spec.html`](spec.html). **Plan:** [`plan.html`](plan.html).
+**Required implementation context:** [`implementation-notes.md`](implementation-notes.md).
 
 ## Task 1 — Bound cold Sankey retention by attribution source
 
@@ -35,10 +36,10 @@ fixtures; no material latency regression; invalidation and serialization semanti
 
 ---
 
-## Task 2 — Bound direct attributed-footprint retention experimentally
+## Task 2 — Implement bounded direct attributed-footprint retention
 
-**Goal:** Keep `attributed_footprint(obj, phase)` and its hourly explainable result unchanged while determining whether
-source-wise formula finalization and transient eviction release prior sources' arrays.
+**Goal:** Keep `attributed_footprint(obj, phase)` and its hourly numerical result unchanged while finalizing its previously
+missing formula and releasing each source's transient attribution arrays before processing the next source.
 
 **Files touched:**
 
@@ -50,21 +51,21 @@ source-wise formula finalization and transient eviction release prior sources' a
 **Tests and evidence:**
 
 - Capture baseline peak RSS for manufacturing, usage, and sequential both-phase reads from fresh processes.
-- Implement a source-wise fold: aggregate the requested object, finalize the existing formula, clear arithmetic
+- Implement a source-wise fold: aggregate the requested object, make formula finalization composable, clear arithmetic
   parents, then evict the source's transient values.
-- Inspect whether nested formula/direct-ancestor references keep evicted structures reachable.
 - Compare hourly magnitude arrays, dates, units, labels, period sums and formulas exactly enough to rule out a public
   explainability regression.
 - Measure repeated calls to quantify the latency exchanged for bounded retention.
 
-**Acceptance:** Ship only if formula/explainability behavior remains intact and peak RSS is materially reduced. If live
-formula references prevent release, revert the experimental attributed-footprint code and record the measured retention
-path and the smallest viable follow-up design; do not silently weaken explanation detail.
+**Acceptance:** Hourly arrays remain byte-identical; the complete derivation replaces the pre-existing empty
+`explain()` output; one-target and repeated-target peaks remain materially bounded; the full library suite passes. The
+large formula is accepted for this feature. Designing compact, deep-divable ephemeral explanation boundaries remains
+out of scope in `specs/backlog/attributed-footprint-explanability/`.
 
 **Experiment result:** Exact float32 values were preserved. Median one-target peaks fell from 1,322.5 to 496.8 MiB for
 manufacturing, 2,074.5 to 614.9 MiB for usage, and 2,819.6 to 752.3 MiB for sequential phases. Five retained usage
-targets fell from 2,344 to 657 MiB, with latency rising from 1.66 to 2.33 seconds. The remaining review decision is that
-the current function's formula is empty, while composable finalization exposes the complete, very large formula.
+targets fell from 2,344 to 657 MiB, with latency rising from 1.66 to 2.33 seconds. Composable finalization exposes the
+complete, very large formula; that behavior is approved for this feature.
 
 **Depends on:** Task 1, whose transient-eviction primitive it reuses.
 
