@@ -1,6 +1,6 @@
 # Attribution memory optimization — Tasks
 
-**Status:** Tasks — approved direction; Task 2 experiment pending.  
+**Status:** Tasks — Task 2 experiment viable; formula presentation decision pending.
 **Spec:** [`spec.html`](spec.html). **Plan:** [`plan.html`](plan.html).
 
 ## Task 1 — Bound cold Sankey retention by attribution source
@@ -60,6 +60,11 @@ source-wise formula finalization and transient eviction release prior sources' a
 **Acceptance:** Ship only if formula/explainability behavior remains intact and peak RSS is materially reduced. If live
 formula references prevent release, revert the experimental attributed-footprint code and record the measured retention
 path and the smallest viable follow-up design; do not silently weaken explanation detail.
+
+**Experiment result:** Exact float32 values were preserved. Median one-target peaks fell from 1,322.5 to 496.8 MiB for
+manufacturing, 2,074.5 to 614.9 MiB for usage, and 2,819.6 to 752.3 MiB for sequential phases. Five retained usage
+targets fell from 2,344 to 657 MiB, with latency rising from 1.66 to 2.33 seconds. The remaining review decision is that
+the current function's formula is empty, while composable finalization exposes the complete, very large formula.
 
 **Depends on:** Task 1, whose transient-eviction primitive it reuses.
 

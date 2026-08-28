@@ -17,7 +17,7 @@
 </head>
 <body>
 <h1>Attribution memory optimization — Implementation plan</h1>
-<p>Status: Approved direction; attributed-footprint experiment pending · 2026-08-28 ·
+<p>Status: Attributed-footprint experiment viable; formula presentation decision pending · 2026-08-28 ·
 Spec: <a href="spec.html">spec.html</a></p>
 
 <h2>1. Approach</h2>
@@ -51,9 +51,12 @@ relative comparisons use the same runtime and model.</p>
     <tr><td>Five-pattern Sankey, baseline</td><td>2,739.5 MiB</td><td>1.546 s</td><td>All source intermediates retained</td></tr>
     <tr><td>Five-pattern Sankey, source eviction</td><td>778.8 MiB</td><td>1.452 s</td><td>72% lower peak; no latency penalty observed</td></tr>
     <tr><td>Five-pattern system total footprint</td><td>896.2 MiB</td><td>0.917 s</td><td>Cold comparison path</td></tr>
-    <tr><td>Attributed footprint, manufacturing, five targets</td><td>1,264.2 MiB</td><td>1.459 s</td><td>First target already reaches 1,263 MiB</td></tr>
-    <tr><td>Attributed footprint, usage, five targets</td><td>2,018.4 MiB</td><td>1.578 s</td><td>First target already reaches 2,006 MiB</td></tr>
-    <tr><td>Attributed footprint, both phases, five targets</td><td>2,701.2 MiB</td><td>2.501 s</td><td>Motivates the second experiment</td></tr>
+    <tr><td>Attributed footprint, manufacturing, one non-zero target</td><td>1,322.5 MiB</td><td>0.896 s</td><td>Clean-dev baseline</td></tr>
+    <tr><td>Attributed footprint, usage, one non-zero target</td><td>2,074.5 MiB</td><td>1.129 s</td><td>Clean-dev baseline</td></tr>
+    <tr><td>Attributed footprint, both phases, one non-zero target</td><td>2,819.6 MiB</td><td>1.383 s</td><td>Clean-dev baseline</td></tr>
+    <tr><td>Source eviction + composable formula finalization, manufacturing</td><td>496.8 MiB</td><td>0.974 s</td><td>62% lower peak</td></tr>
+    <tr><td>Source eviction + composable formula finalization, usage</td><td>614.9 MiB</td><td>1.099 s</td><td>70% lower peak</td></tr>
+    <tr><td>Source eviction + composable formula finalization, both phases</td><td>752.3 MiB</td><td>1.595 s</td><td>73% lower peak</td></tr>
   </tbody>
 </table>
 
@@ -89,8 +92,10 @@ relative comparisons use the same runtime and model.</p>
 
 <h2>5. Risks and alternatives</h2>
 <ul>
-  <li><strong>Formula retention:</strong> clearing <code>left_parent</code>/<code>right_parent</code> preserves a nested
-      formula, but that formula may retain terminal explainable values. Inspect and measure rather than assuming.</li>
+  <li><strong>Formula presentation:</strong> the current on-demand result never runs calculated-attribute finalization,
+      so <code>explain()</code> renders an empty expression. Progressive finalization preserves the complete formula and
+      releases parents, but exposes a 337,627-character expression for the reference usage result. Decide explicitly
+      whether fixing that pre-existing empty-formula behavior belongs in this optimization or needs compact display.</li>
   <li><strong>Repeated direct reads:</strong> source eviction can trade memory for recomputation on later calls. Keep
       the single-object API; do not introduce an unbounded batch signature to hide that cost.</li>
   <li><strong>Largest-source bound:</strong> source scoping cannot prevent a single source calculation from exceeding
@@ -104,5 +109,12 @@ relative comparisons use the same runtime and model.</p>
 dependency adoption and deployment validation. No schema or database migration is required. If the transient computed
 structure pattern ships, document it briefly in the library architecture/contributor guidance so future calculations
 do not accidentally retain attribution-only arrays.</p>
+
+<h2>7. Attributed-footprint experiment outcome</h2>
+<p>Three fresh processes per scenario produced identical float32 hourly bytes, dates, units, labels and period sums
+between clean <code>dev</code> and the optimized function. Source eviction alone is insufficient for repeated targets:
+five retained usage results peaked at 2,423 MiB because their arithmetic parents kept each recomputed generation alive.
+Composable formula finalization held the same five-result run to 657 MiB, versus 2,344 MiB on clean <code>dev</code>,
+with latency increasing from 1.66 to 2.33 seconds. The full library suite passes: 1,507 tests, 9 skips and 67 subtests.</p>
 </body>
 </html>
