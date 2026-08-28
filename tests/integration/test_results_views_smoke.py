@@ -15,6 +15,8 @@ RAISE_EXCEPTIONS=1 is critical: without it, render_exception_modal_if_error
 absorbs view exceptions into a modal returned with status 200, and a status-code
 assertion would silently pass.
 """
+
+from copy import deepcopy
 from datetime import datetime
 
 import numpy as np
@@ -48,6 +50,7 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from e_footprint_interface import computation_memory_middleware, runtime_memory
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.sankey_views import DEFAULT_ACTIVE_COLUMNS
 from tests.fixtures.system_builders import create_hourly_usage
@@ -77,10 +80,10 @@ def _build_basic_web() -> System:
 def _build_basic_edge_no_server() -> System:
     storage = EdgeStorage.from_defaults("Edge Storage", base_storage_need=SourceValue(100 * u.GB_stored))
     computer = EdgeComputer.from_defaults(
-        "Edge Computer", storage=storage, base_compute_consumption=SourceValue(0.1 * u.cpu_core))
+        "Edge Computer", storage=storage, base_compute_consumption=SourceValue(0.1 * u.cpu_core)
+    )
     process = RecurrentEdgeProcess.from_defaults("Edge Process", edge_device=computer)
-    function = EdgeFunction(
-        "Edge Function", recurrent_edge_device_needs=[process], recurrent_server_needs=[])
+    function = EdgeFunction("Edge Function", recurrent_edge_device_needs=[process], recurrent_server_needs=[])
     journey = EdgeUsageJourney.from_defaults("Edge UJ", edge_functions=[function])
     eup = EdgeUsagePattern(
         "Edge UP",
@@ -99,13 +102,15 @@ def _build_edge_with_server_need() -> System:
 
     edge_storage = EdgeStorage.from_defaults("Edge Storage", base_storage_need=SourceValue(100 * u.GB_stored))
     computer = EdgeComputer.from_defaults(
-        "Edge Computer", storage=edge_storage, base_compute_consumption=SourceValue(0.1 * u.cpu_core))
+        "Edge Computer", storage=edge_storage, base_compute_consumption=SourceValue(0.1 * u.cpu_core)
+    )
     process = RecurrentEdgeProcess.from_defaults("Edge Process", edge_device=computer)
     server_need = RecurrentServerNeed(
         "Server Need",
         edge_device=computer,
         recurrent_volume_per_edge_device=SourceRecurrentValues(
-            Quantity(np.array([1] * 168, dtype=np.float32), u.occurrence)),
+            Quantity(np.array([1] * 168, dtype=np.float32), u.occurrence)
+        ),
         jobs=[server_job],
     )
     function = EdgeFunction(
@@ -140,9 +145,9 @@ def _build_edge_device_group() -> System:
         recurrent_need=SourceRecurrentValues(Quantity(np.array([1] * 168, dtype=np.float32), u.cpu_core)),
     )
     device_need = RecurrentEdgeDeviceNeed(
-        "Device Need", edge_device=device, recurrent_edge_component_needs=[ram_need, cpu_need])
-    function = EdgeFunction(
-        "Edge Function", recurrent_edge_device_needs=[device_need], recurrent_server_needs=[])
+        "Device Need", edge_device=device, recurrent_edge_component_needs=[ram_need, cpu_need]
+    )
+    function = EdgeFunction("Edge Function", recurrent_edge_device_needs=[device_need], recurrent_server_needs=[])
     journey = EdgeUsageJourney.from_defaults("Edge UJ", edge_functions=[function])
     eup = EdgeUsagePattern(
         "Edge UP",
@@ -152,8 +157,7 @@ def _build_edge_device_group() -> System:
         hourly_edge_usage_journey_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
     )
 
-    floor = EdgeDeviceGroup(
-        "Floor", sub_group_counts={}, edge_device_counts={device: SourceValue(4 * u.dimensionless)})
+    floor = EdgeDeviceGroup("Floor", sub_group_counts={}, edge_device_counts={device: SourceValue(4 * u.dimensionless)})
     EdgeDeviceGroup(
         "Building",
         sub_group_counts={floor: SourceValue(3 * u.dimensionless)},
@@ -196,6 +200,39 @@ def raise_view_exceptions(monkeypatch):
 @pytest.mark.parametrize("builder", [b for _, b in ARCHETYPES], ids=[name for name, _ in ARCHETYPES])
 def test_results_endpoint_smoke(client, builder, hit):
     system = builder()
-    SessionSystemRepository(client.session).save_data(
-        system_to_json(system, save_computed_state=False))
+    SessionSystemRepository(client.session).save_data(system_to_json(system, save_computed_state=False))
     assert hit(client).status_code == 200
+
+
+@pytest.mark.django_db
+def test_cold_sankey_memory_trip_uses_real_observer_and_peek_coverage_without_persisting(client, monkeypatch):
+    system_data = system_to_json(_build_basic_web(), save_computed_state=False)
+    repository = SessionSystemRepository(client.session)
+    repository.save_data(system_data)
+    persisted_before = deepcopy(repository.get_system_data())
+    start_snapshot = runtime_memory.MemorySnapshot(
+        rss_bytes=100 * runtime_memory.MIB,
+        cgroup_current_bytes=3820 * runtime_memory.MIB,
+        inactive_file_bytes=20 * runtime_memory.MIB,
+        working_set_bytes=3800 * runtime_memory.MIB,
+        capacity_bytes=4096 * runtime_memory.MIB,
+    )
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "enforce")
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
+    monkeypatch.setattr(runtime_memory, "CGROUP_CAPACITY_BYTES", 4096 * runtime_memory.MIB)
+    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", lambda _process: start_snapshot)
+    monkeypatch.setattr(
+        runtime_memory,
+        "read_cgroup_working_set_bytes",
+        lambda: 3900 * runtime_memory.MIB,
+    )
+
+    response = client.post("/model_builder/sankey-diagram/", _DEFAULT_POST)
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert "data-sankey-memory-limit" in content
+    assert "completion coverage only" in content
+    assert "0%" in content
+    assert "modal-container" not in content
+    assert SessionSystemRepository(client.session).get_system_data() == persisted_before

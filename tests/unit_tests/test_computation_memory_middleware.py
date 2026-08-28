@@ -8,8 +8,14 @@ from django.test import Client, RequestFactory, override_settings
 from django.urls import path
 import pytest
 
+from efootprint.abstract_modeling_classes.reactive_core import observe_computations
 from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.countries import Countries
+from efootprint.constants.units import u
+from efootprint.core.hardware.server import Server
+from efootprint.core.hardware.storage import Storage
 from efootprint.core.hardware.network import Network
 from efootprint.core.system import System
 from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
@@ -185,6 +191,35 @@ def test_enforce_mode_raises_at_threshold_and_latches_for_remaining_callbacks(mo
     assert full_reader.call_count == 2
     assert lightweight_reader.call_count == 2
     assert monitor.completed_slots == 16
+
+
+def test_real_monitor_latches_while_modeling_update_rolls_back(monkeypatch):
+    start_snapshot = _snapshot(3800, current_mb=3820, inactive_mb=20)
+    monkeypatch.setattr(runtime_memory, "read_memory_snapshot", MagicMock(return_value=start_snapshot))
+    monkeypatch.setattr(
+        runtime_memory,
+        "read_cgroup_working_set_bytes",
+        MagicMock(return_value=3900 * runtime_memory.MIB),
+    )
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
+    monkeypatch.setattr(runtime_memory, "CGROUP_CAPACITY_BYTES", 4096 * runtime_memory.MIB)
+    log = MagicMock()
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/edit-object/<object_id>/", method="POST", mode="enforce", log=log
+    )
+    boundary = middleware_module._TelemetryBoundary(monitor)
+    server = Server.from_defaults("Guarded server", storage=Storage.from_defaults("Guarded storage"))
+    original_ram = server.ram
+    original_available_ram = server.available_ram_per_instance.value
+
+    with observe_computations(boundary):
+        with pytest.raises(ComputationMemoryLimitExceeded):
+            ModelingUpdate([[server.ram, SourceValue(256 * u.GB_ram)]])
+
+    assert server.ram is original_ram
+    assert server.available_ram_per_instance.value == original_available_ram
+    assert monitor.completed_slots >= 2
+    assert [record["event"] for record in _records(log)].count("abort") == 1
 
 
 def test_enforce_mode_does_not_raise_below_threshold_boundary(monkeypatch):

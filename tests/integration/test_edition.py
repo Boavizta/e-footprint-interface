@@ -134,6 +134,8 @@ def test_memory_interruption_rolls_transactional_edit_back_without_persisting(
                 )
             )
 
+    assert server.modeling_obj.ram.value == original_ram
+    assert server.modeling_obj.available_ram_per_instance.value.magnitude > 0
     restored_model = ModelWeb(repository)
     restored_server = restored_model.get_web_object_from_efootprint_id(server.efootprint_id)
     assert repository.get_system_data() == persisted_before
