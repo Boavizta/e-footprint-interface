@@ -106,10 +106,10 @@ making observation mode cheap enough to leave enabled during calibration.
 - The same M deployment exposed cgroup capacities of 2,926 MiB before redeployment and 3,176 MiB afterward. Treat the
   runtime cgroup value as authoritative and preserve this variability in the report; Clever Cloud investigation is
   external to this task.
-- At 3,176 MiB, the current 80% hypothesis is 2,540.8 MiB and would have interrupted the five-pattern run around 4.2 s.
-  An 85% candidate is 2,699.6 MiB and would have interrupted it around 4.5–4.9 s with about 476 MiB nominal headroom.
-  Three patterns fit below either threshold; four patterns exceed both. Do not select a final ratio in Task 2b—keep the
-  threshold configurable and leave the 80% versus 85% rollout decision to Task 4.
+- At 3,176 MiB, an 80% threshold would be 2,540.8 MiB and would have interrupted the five-pattern run around 4.2 s.
+  The approved initial 85% threshold is 2,699.6 MiB and would have interrupted it around 4.5–4.9 s with about 476 MiB
+  nominal headroom. Three patterns fit below either threshold; four patterns exceed both. Keep the ratio configurable;
+  Task 4 validates 85% under enforcement before production rollout rather than selecting between the two values.
 - Ordinary observed requests spent roughly 2–3% in the monitor; warm-cache Sankeys spent under 1 ms. Near-limit runs
   reached roughly 6% because observation continued per-slot sampling long after the candidate abort point. Memory
   reads, not logging, dominate: logging remained around 1–2 ms per request.
@@ -166,8 +166,8 @@ making observation mode cheap enough to leave enabled during calibration.
   snapshots; configured-threshold warning behavior; and correct worker-exit identity.
 - Repeatable local Docker measurements plus one representative dev run show at most 3% observation overhead before
   Task 3 begins. If the target is missed, the report records the remaining cost and the task stays open.
-- Task 2b must not implement the capacity exception, rollback handling, Sankey error template, or final threshold
-  selection; those remain Tasks 3 and 4.
+- Task 2b must not implement the capacity exception, rollback handling, Sankey error template, or enforcement rollout;
+  those remain Tasks 3 and 4. The approved initial enforcement ratio is 85%.
 
 **Depends on:** Task 2 and the first dev observation run.
 
@@ -200,8 +200,8 @@ until Task 4 approves rollout.
 - `tests/e2e/test_sankey.py`
 
 **Acceptance:**
-- Enforce mode compares cgroup working set with the configured computation threshold, initially hypothesized at 80% of
-  capacity with an absolute override and no fixed reserve.
+- Enforce mode compares cgroup working set with the configured computation threshold, initially set to 85% of capacity
+  with an absolute override and no fixed reserve.
 - The first unsafe sampled completion raises `ComputationMemoryLimitExceeded`, then latches the request monitor into
   observation-only behavior so rollback guard computations cannot raise it again.
 - The middleware provides the existing generic recoverable-error response only as a fallback for undecorated
@@ -252,13 +252,13 @@ decision, and only then enable enforcement in the deployment environment.
   largest between-sample growth, peak RSS and cgroup working set, inactive file, worker restart time, and OOM counters.
 - Observation overhead is accepted at no more than 3% of cold-computation time, or the sampling policy is revised and
   re-measured before rollout.
-- The selected threshold leaves demonstrated headroom for the largest observed elementary/native allocation and for
-  rendering the recoverable response on the smallest supported container; any deviation from the 80% hypothesis is
-  documented with evidence.
+- The approved 85% threshold leaves demonstrated headroom for the largest observed elementary/native allocation and for
+  rendering the recoverable response on the smallest supported container; Task 4 validates that assumption and revises
+  the configurable ratio only if enforcement evidence disproves it.
 - Temporary detailed timing counters are removed after representative production evidence, while bounded operational
   start/progress/completion/abort and worker-lifecycle records remain.
-- The spec's two open calibration questions are resolved, the final threshold rationale is recorded, and enforcement
-  is enabled first in pre-production through `COMPUTATION_MEMORY_GUARD_MODE=enforce`; production activation remains an
+- The spec's remaining calibration questions are resolved, the 85% threshold rationale is recorded, and enforcement is
+  enabled first in pre-production through `COMPUTATION_MEMORY_GUARD_MODE=enforce`; production activation remains an
   explicit deployment decision after that release is observed.
 
 **Depends on:** Task 3 and representative observation data from Task 2b.

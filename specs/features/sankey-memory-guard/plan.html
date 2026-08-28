@@ -148,15 +148,16 @@
     <li><strong>Operating modes:</strong> <code>COMPUTATION_MEMORY_GUARD_MODE=off|observe|enforce</code>, defaulting to
         <code>off</code> in code. Pre-production explicitly selects <code>observe</code>. Enforcement is enabled only
         after the profiling report records architecture-specific evidence and accepted headroom.</li>
-    <li><strong>Initial enforcement hypothesis:</strong> support an absolute override and a ratio default independent of
-        worker recycling. The candidate abort point is 80% of cgroup capacity, with no additional fixed reserve. The
-        configured ratio and cgroup capacity resolve to one numeric threshold when the runtime-memory module initializes;
+    <li><strong>Initial enforcement threshold:</strong> support an absolute override and a ratio default independent of
+        worker recycling. Observation evidence selects an initial abort point of 85% of cgroup capacity, with no
+        additional fixed reserve. The configured ratio and cgroup capacity resolve to one numeric threshold when the
+        runtime-memory module initializes;
         every request in that worker uses the same value. Enforcement compares cgroup working set to this threshold;
         logs retain raw cgroup current, inactive file, and process RSS so reclaimability assumptions remain auditable.
         Observation must confirm that the largest between-sample increase remains comfortably below the proportional
         headroom on the smallest supported container.</li>
     <li><strong>Two-threshold hysteresis:</strong> retain the existing 60% post-request recycling threshold separately
-        from the 80% in-flight abort threshold. A worker retained above 60% would begin its next request too close to the
+        from the 85% in-flight abort threshold. A worker retained above 60% would begin its next request too close to the
         breaker; recycling it after the response restores headroom. Both thresholds are resolved once from the same
         cgroup capacity, but remain independently configurable because they express different policies.</li>
     <li><strong>Single-trip failure:</strong> enforcement raises <code>ComputationMemoryLimitExceeded</code> once, then
@@ -266,6 +267,8 @@
   <ul>
     <li>Initial adaptive sampling uses 16-slot sampling away from the limit, per-slot sampling within 256 MiB, and
         128 MiB high-water logging bands.</li>
+    <li>The initial in-flight enforcement threshold is 85% of cgroup capacity, with no additional fixed reserve and an
+        absolute override available. The separate post-request worker-recycling threshold remains 60%.</li>
     <li>Cgroup OOM and OOM-kill counter monitoring ships in the first implementation because it provides kernel evidence
         when a killed worker cannot emit a completion log.</li>
   </ul>
