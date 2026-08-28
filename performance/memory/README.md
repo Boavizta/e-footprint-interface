@@ -104,9 +104,9 @@ in deployment configuration until pre-production calibration approves the thresh
 
 [`results/2026-08-28-memory-guard.md`](results/2026-08-28-memory-guard.md) records the off/no-op/observe/enforce matrix
 on fresh 4,096 MiB and smallest-observed 2,926 MiB production containers. Seven-run observation medians added 1.7% to
-the five-pattern cold calculation and 1.8% to the result-primed allocator-history sequence. At 2,926 MiB, the 85%
-breaker stopped all six enforcement runs near 2,496 MiB working set, leaving about 430 MiB of working-set headroom
-against a largest measured 28.2 MiB between-sample jump.
+the five-pattern cold calculation, 0.0% to a same-model result-primed Sankey, and 1.8% to the allocator-history sequence.
+At 2,926 MiB, the 85% breaker stopped all nine enforcement runs with at least 423.6 MiB of working-set headroom against
+a largest measured 134.5 MiB between-sample jump.
 
 That evidence approves an enforcement trial in development with the default ratio and no fixed reserve. It does not
 approve production activation. The development trial must confirm the real recoverable response, post-request
@@ -134,7 +134,8 @@ is a topology calibration, not a general memory guarantee.
 | `results` | Hydrate, then compute `system_emissions` |
 | `cold-sankey` | Hydrate, then construct attribution data and Sankey from an empty calculation cache |
 | `warm-sankey` | Construct the same Sankey twice in one hydrated model; the second build reuses the matrix |
-| `results-then-sankey` | Compute results, delete the model, collect, rehydrate, then compute Sankey in the same worker |
+| `results-primed-sankey` | Compute results and then Sankey on the same hydrated model, preserving any shared calculated slots |
+| `results-then-sankey` | Compute results, delete the model, collect, rehydrate, then compute Sankey to preserve allocator history without calculation-cache priming |
 
 Synthetic usage patterns duplicate the first pattern and attach it to the same system. This intentionally stresses the
 shared-topology combinatorics seen in production while keeping the source fixture unchanged.

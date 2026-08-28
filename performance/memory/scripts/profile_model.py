@@ -172,7 +172,14 @@ def main():
     parser.add_argument("--patterns", type=int, default=2)
     parser.add_argument(
         "--scenario",
-        choices=("hydrate", "results", "cold-sankey", "warm-sankey", "results-then-sankey"),
+        choices=(
+            "hydrate",
+            "results",
+            "cold-sankey",
+            "warm-sankey",
+            "results-primed-sankey",
+            "results-then-sankey",
+        ),
         required=True,
     )
     parser.add_argument(
@@ -242,7 +249,7 @@ def main():
             model_web = ModelWeb(InMemorySystemRepository(), data)
             sampler.snapshot("hydrate", "after_hydration")
 
-            if args.scenario in {"results", "results-then-sankey"}:
+            if args.scenario in {"results", "results-primed-sankey", "results-then-sankey"}:
                 sampler.begin("results")
                 active_calculation_started_at = time.perf_counter()
                 result = model_web.system_emissions
@@ -260,7 +267,7 @@ def main():
                 model_web = ModelWeb(InMemorySystemRepository(), deepcopy(data))
                 sampler.snapshot("rehydrate", "after_second_hydration")
 
-            if args.scenario in {"cold-sankey", "warm-sankey", "results-then-sankey"}:
+            if args.scenario in {"cold-sankey", "warm-sankey", "results-primed-sankey", "results-then-sankey"}:
                 sampler.begin("cold_sankey")
                 active_calculation_started_at = time.perf_counter()
                 sankey, payload = build_sankey(model_web)

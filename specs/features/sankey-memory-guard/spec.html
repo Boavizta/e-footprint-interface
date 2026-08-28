@@ -175,8 +175,8 @@
   <h2>6. Calibration decisions</h2>
   <ul>
     <li>The initial enforcement point remains 85% of cgroup working-set capacity with no fixed reserve. On the smallest
-        reproduced 2,926 MiB container, enforcement retained about 430 MiB of working-set headroom after crossing,
-        versus a 28.2 MiB largest observed between-sample increase. This ratio is approved for a development enforcement
+        reproduced 2,926 MiB container, enforcement retained at least 423.6 MiB of working-set headroom after crossing,
+        versus a 134.5 MiB largest observed between-sample increase. This ratio is approved for a development enforcement
         trial, not yet for production.</li>
     <li>Enforcement is limited to development for one observed release. Production activation remains an explicit
         deployment decision after the real recoverable response, worker recovery, and zero OOM-counter delta are
