@@ -51,6 +51,17 @@ backlog live under `performance/memory/`; large profiler captures remain untrack
    above 60% of the container limit recycles the worker; reclaimable inactive file cache is excluded.
    `WORKER_RECYCLE_LIMIT_RATIO` changes the ratio and `WORKER_RECYCLE_LIMIT_MB` provides an absolute override.
 
+`ComputationMemoryMiddleware` wraps every `/model_builder/` request before view execution when
+`COMPUTATION_MEMORY_GUARD_MODE` is `observe` (the default is `off`). It uses the library's scoped reactive observer to
+count every cache-miss completion, samples process RSS and cgroup memory adaptively, and emits correlated JSON records
+at start, bounded high-water progress, completion, or abort. Records use route patterns and numerical topology only;
+model names, serialized data, calculated values, and other user-authored labels are forbidden. The initial monitor is
+diagnostic only: it does not interrupt calculations. Gunicorn reuses the same cgroup reader and compares cumulative
+`oom`/`oom_kill` counters across worker boot and exit, including exits where a killed worker cannot log for itself.
+Computation and recycling limits are resolved once per process from separate ratio/absolute settings; the recycling
+policy remains 60% while the unapproved computation-limit hypothesis is independently configurable through
+`COMPUTATION_MEMORY_LIMIT_RATIO` (80% by default) or `COMPUTATION_MEMORY_LIMIT_MB`.
+
 ## Core classes
 
 ### ModelWeb — the central orchestrator

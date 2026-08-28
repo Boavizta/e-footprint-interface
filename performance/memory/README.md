@@ -34,9 +34,48 @@ SCRIPT=/absolute/path/to/e-footprint-interface/performance/memory/scripts/profil
 
 docker run --rm --memory=4g --entrypoint poetry \
   -v "$MODEL:/fixture.json:ro" -v "$SCRIPT:/tmp/profile_model.py:ro" \
+  -v "$(cd ../e-footprint && pwd):/opt/e-footprint:ro" -e PYTHONPATH=/opt/e-footprint \
   efootprint-memory-profile:local run python /tmp/profile_model.py /fixture.json \
-  --patterns 2 --scenario cold-sankey --disable-gc-during-calculation
+  --patterns 2 --scenario cold-sankey --monitor-mode observe --disable-gc-during-calculation
 ```
+
+Mounting the sibling checkout exercises the observation API being co-developed in `e-footprint`; the production
+dependency declaration remains pinned to PyPI. Use an absolute sibling path if the command is launched elsewhere.
+
+## Observation rollout gate
+
+Before setting `COMPUTATION_MEMORY_GUARD_MODE=observe` in development or pre-production, run a controlled A/B/C profile
+against the same model, image, memory limit, pattern count, scenario, and GC setting:
+
+```bash
+for RUN in 1 2 3 4 5 6 7; do
+  for MODE in off noop observe; do
+    docker run --rm --memory=4g --entrypoint poetry \
+      -v "$MODEL:/fixture.json:ro" -v "$SCRIPT:/tmp/profile_model.py:ro" \
+      -v "$(cd ../e-footprint && pwd):/opt/e-footprint:ro" -e PYTHONPATH=/opt/e-footprint \
+      efootprint-memory-profile:local run python /tmp/profile_model.py /fixture.json \
+      --patterns 5 --scenario cold-sankey --monitor-mode "$MODE" --disable-gc-during-calculation
+  done
+done
+```
+
+Compare the median `calculation_elapsed_seconds` values from the `RESULT` records. The no-op run isolates the library
+callback cost; it should remain within measurement noise of `off`. Observation may be deployed only when its median
+cold-calculation overhead is at most 3%. Also retain `observer_callback_count`, `observer_sample_count`,
+`observer_callback_wall_ms`, `observer_max_callback_ms`, `largest_sample_jump_mb`, peak working set, inactive file,
+and cgroup peak for later threshold calibration. A failed gate means revise the sampling policy and rerun it; it is
+not a reason to enable enforcement. Enforcement remains unavailable until representative development observation has
+been reviewed.
+
+The 2026-08-28 local gate used seven interleaved fresh 4 GiB containers per mode with the introductory industrial-IoT
+fixture expanded to five shared edge usage patterns. Median cold-calculation time was 0.173 s off, 0.168 s no-op
+(-2.9%), and 0.176 s observe (+1.7%), so both gates passed. Observe recorded 352 callbacks and 24 samples per run;
+median total/max callback, memory-read, and logging costs were 1.788 ms, 0.149 ms, 1.674 ms, and 0.320 ms respectively.
+Median sampled working-set peak was 285.5 MiB and the median largest between-sample jump was 20.2 MiB. This is a local
+overhead gate, not the representative production-capacity calibration required before enforcement.
+
+The runtime setting accepts `off`, `observe`, and the reserved `enforce` value. It defaults to `off`; this stage's
+monitor is observation-only and never interrupts a request, including if `enforce` is selected prematurely.
 
 The GC flag matches production Gunicorn request handling. Omitting it is useful only as an explicit comparison with
 ordinary Python automatic collection.

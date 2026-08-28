@@ -5,6 +5,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from e_footprint_interface import runtime_memory
+
 
 @pytest.fixture
 def gunicorn_config():
@@ -16,7 +18,17 @@ def gunicorn_config():
 
 
 def _worker():
-    return SimpleNamespace(log=MagicMock(), alive=True)
+    return SimpleNamespace(log=MagicMock(), alive=True, pid=36)
+
+
+def _snapshot(working_set_mb=100):
+    return runtime_memory.MemorySnapshot(
+        rss_bytes=80 * runtime_memory.MIB,
+        cgroup_current_bytes=(working_set_mb + 20) * runtime_memory.MIB,
+        inactive_file_bytes=20 * runtime_memory.MIB,
+        working_set_bytes=working_set_mb * runtime_memory.MIB,
+        capacity_bytes=4096 * runtime_memory.MIB,
+    )
 
 
 def _configure_runtime(monkeypatch, config, *, gc_was_enabled=True, memory_mb=100):
@@ -28,68 +40,70 @@ def _configure_runtime(monkeypatch, config, *, gc_was_enabled=True, memory_mb=10
     monkeypatch.setattr(config, "process_time", MagicMock(side_effect=(2.0, 2.18)))
     monkeypatch.setattr(config.os, "getpid", MagicMock(return_value=36))
     monkeypatch.setattr(config, "_memory_usage_mb", MagicMock(return_value=memory_mb))
+    monkeypatch.setattr(config.runtime_memory, "read_memory_snapshot", MagicMock(return_value=_snapshot(memory_mb)))
     return gc
 
 
-def test_container_memory_uses_cgroup_limit(monkeypatch, gunicorn_config):
-    monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=4 * 1024**3))
-
-    assert gunicorn_config._container_memory_mb() == 4096
+def test_worker_recycle_limit_keeps_sixty_percent_default():
+    assert runtime_memory.WORKER_RECYCLE_LIMIT_BYTES == int(runtime_memory.THRESHOLD_CAPACITY_BYTES * 0.6)
 
 
-def test_worker_recycle_limit_uses_default_ratio(monkeypatch, gunicorn_config):
-    monkeypatch.delenv("WORKER_RECYCLE_LIMIT_MB", raising=False)
-    monkeypatch.delenv("WORKER_RECYCLE_LIMIT_RATIO", raising=False)
-
-    assert gunicorn_config._worker_recycle_limit_mb(4096) == pytest.approx(2457.6)
-
-
-def test_worker_recycle_limit_environment_overrides_default(monkeypatch, gunicorn_config):
-    monkeypatch.setenv("WORKER_RECYCLE_LIMIT_MB", "2300")
-
-    assert gunicorn_config._worker_recycle_limit_mb(4096) == 2300
-
-
-def test_worker_recycle_limit_ratio_is_configurable(monkeypatch, gunicorn_config):
-    monkeypatch.delenv("WORKER_RECYCLE_LIMIT_MB", raising=False)
-    monkeypatch.setenv("WORKER_RECYCLE_LIMIT_RATIO", "0.5")
-
-    assert gunicorn_config._worker_recycle_limit_mb(4096) == 2048
-
-
-def test_memory_usage_excludes_reclaimable_cgroup_file_cache(monkeypatch, gunicorn_config):
-    monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=1400 * 1024**2))
-    monkeypatch.setattr(gunicorn_config, "_inactive_file_bytes", MagicMock(return_value=1100 * 1024**2))
-
+def test_memory_usage_excludes_reclaimable_file_cache(monkeypatch, gunicorn_config):
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_snapshot", MagicMock(return_value=_snapshot(300)))
     assert gunicorn_config._memory_usage_mb() == 300
 
 
-def test_memory_usage_falls_back_to_worker_rss_without_complete_cgroup_metrics(monkeypatch, gunicorn_config):
-    monkeypatch.setattr(gunicorn_config, "_read_first_finite_value", MagicMock(return_value=None))
-    process = MagicMock()
-    process.memory_info.return_value.rss = 250 * 1024**2
-    monkeypatch.setattr(gunicorn_config.psutil, "Process", MagicMock(return_value=process))
-
+def test_memory_usage_falls_back_to_worker_rss(monkeypatch, gunicorn_config):
+    snapshot = runtime_memory.MemorySnapshot(250 * runtime_memory.MIB, None, None, None, None)
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_snapshot", MagicMock(return_value=snapshot))
     assert gunicorn_config._memory_usage_mb() == 250
 
 
-def test_collects_after_response_logs_cost_and_restores_enabled_gc(monkeypatch, gunicorn_config):
+def test_worker_lifecycle_reports_oom_counter_deltas(monkeypatch, gunicorn_config):
+    server = SimpleNamespace(log=MagicMock())
+    worker = _worker()
+    events = MagicMock(side_effect=({"oom": 4, "oom_kill": 1}, {"oom": 5, "oom_kill": 2}))
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_events", events)
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_snapshot", MagicMock(return_value=_snapshot()))
+
+    gunicorn_config.pre_fork(server, worker)
+    gunicorn_config.child_exit(server, worker)
+
+    server.log.warning.assert_called_once()
+    serialized = server.log.warning.call_args.args[1]
+    assert '"oom": 1' in serialized
+    assert '"oom_kill": 1' in serialized
+
+
+def test_worker_lifecycle_uses_info_when_no_oom_changed(monkeypatch, gunicorn_config):
+    server = SimpleNamespace(log=MagicMock())
+    worker = _worker()
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_events", MagicMock(return_value={"oom": 4}))
+    monkeypatch.setattr(gunicorn_config.runtime_memory, "read_memory_snapshot", MagicMock(return_value=_snapshot()))
+
+    gunicorn_config.pre_fork(server, worker)
+    gunicorn_config.child_exit(server, worker)
+
+    server.log.info.assert_called_once()
+    server.log.warning.assert_not_called()
+
+
+def test_collects_after_response_logs_correlated_cost_and_restores_enabled_gc(monkeypatch, gunicorn_config):
     worker = _worker()
     gc = _configure_runtime(monkeypatch, gunicorn_config)
 
     gunicorn_config.pre_request(worker, MagicMock())
-    gunicorn_config.post_request(worker, MagicMock(), {}, MagicMock())
+    gunicorn_config.post_request(worker, MagicMock(), {"efootprint.memory_request_id": "request-1"}, MagicMock())
 
     gc.disable.assert_called_once_with()
     gc.collect.assert_called_once_with()
     gc.enable.assert_called_once_with()
-    worker.log.info.assert_called_once_with(
-        "Post-request full GC collected 62936 objects in 200.0 ms (CPU 180.0 ms, pid=36)."
-    )
+    assert worker.log.info.call_args.args[0] == "post_request_memory %s"
+    assert '"request_id": "request-1"' in worker.log.info.call_args.args[1]
     assert worker.alive is True
 
 
-def test_preserves_disabled_gc_and_still_enforces_memory_limit(monkeypatch, gunicorn_config):
+def test_preserves_disabled_gc_and_still_enforces_recycling_threshold(monkeypatch, gunicorn_config):
     worker = _worker()
     gc = _configure_runtime(
         monkeypatch,
@@ -103,10 +117,7 @@ def test_preserves_disabled_gc_and_still_enforces_memory_limit(monkeypatch, guni
 
     gc.enable.assert_not_called()
     assert worker.alive is False
-    worker.log.warning.assert_called_once_with(
-        f"Recycling worker because memory working set is {gunicorn_config.WORKER_RECYCLE_LIMIT_MB + 1:.1f} MB, "
-        f"above the {gunicorn_config.WORKER_RECYCLE_LIMIT_MB:.1f} MB recycling threshold (pid=36)."
-    )
+    worker.log.warning.assert_called_once()
 
 
 def test_restores_gc_when_post_request_memory_check_fails(monkeypatch, gunicorn_config):

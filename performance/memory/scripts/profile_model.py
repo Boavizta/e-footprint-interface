@@ -12,6 +12,7 @@ import platform
 import sys
 import threading
 import time
+from contextlib import nullcontext
 from copy import deepcopy
 from pathlib import Path
 
@@ -179,6 +180,12 @@ def main():
         action="store_true",
         help="Match production Gunicorn, which disables automatic cyclic GC while handling a request.",
     )
+    parser.add_argument(
+        "--monitor-mode",
+        choices=("off", "noop", "observe"),
+        default="off",
+        help="Install no observer, a no-op observer, or the observation-only request monitor.",
+    )
     args = parser.parse_args()
 
     sampler = MemorySampler()
@@ -188,6 +195,8 @@ def main():
     sampler.begin("imports")
 
     from efootprint import __version__ as efootprint_version
+    from efootprint.abstract_modeling_classes.reactive_core import observe_computations
+    from e_footprint_interface.computation_memory_middleware import ComputationMemoryMonitor
     from model_builder.adapters.repositories import InMemorySystemRepository
     from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -201,41 +210,71 @@ def main():
 
     if args.disable_gc_during_calculation:
         gc.disable()
-    sampler.begin("hydrate")
-    model_web = ModelWeb(InMemorySystemRepository(), data)
-    sampler.snapshot("hydrate", "after_hydration")
+    noop_callback_count = 0
+    monitor = None
+    calculation_elapsed_seconds = 0.0
 
-    result = sankey = payload = None
-    if args.scenario in {"results", "results-then-sankey"}:
-        sampler.begin("results")
-        result = model_web.system_emissions
-        sampler.snapshot("results", "after_results")
+    def noop_callback(_slot):
+        nonlocal noop_callback_count
+        noop_callback_count += 1
 
-    if args.scenario == "results-then-sankey":
-        sampler.begin("between_requests_gc")
-        del model_web, result
-        result = None
-        gc.collect()
-        sampler.snapshot("between_requests_gc", "after_first_request_gc")
-        sampler.begin("rehydrate")
-        model_web = ModelWeb(InMemorySystemRepository(), deepcopy(data))
-        sampler.snapshot("rehydrate", "after_second_hydration")
-
-    if args.scenario in {"cold-sankey", "warm-sankey", "results-then-sankey"}:
-        sampler.begin("cold_sankey")
-        sankey, payload = build_sankey(model_web)
-        matrix = model_web.system.modeling_obj.impact_repartition_matrix
-        sampler.snapshot("cold_sankey", "after_cold_sankey")
-        print(
-            f"MATRIX rows={len(matrix)}; SANKEY nodes={len(payload['nodes'])} links={len(payload['links'])}",
-            flush=True,
+    observer_scope = nullcontext()
+    if args.monitor_mode == "noop":
+        observer_scope = observe_computations(noop_callback)
+    elif args.monitor_mode == "observe":
+        monitor = ComputationMemoryMonitor(
+            route=f"profile/{args.scenario}",
+            method="PROFILE",
+            usage_pattern_count=args.patterns,
+            attribution_request="sankey" in args.scenario,
         )
+        observer_scope = observe_computations(monitor)
 
-    if args.scenario == "warm-sankey":
-        del sankey, payload
-        sampler.begin("warm_sankey")
-        sankey, payload = build_sankey(model_web)
-        sampler.snapshot("warm_sankey", "after_warm_sankey")
+    with observer_scope:
+        sampler.begin("hydrate")
+        model_web = ModelWeb(InMemorySystemRepository(), data)
+        sampler.snapshot("hydrate", "after_hydration")
+
+        result = sankey = payload = None
+        if args.scenario in {"results", "results-then-sankey"}:
+            sampler.begin("results")
+            calculation_started_at = time.perf_counter()
+            result = model_web.system_emissions
+            calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+            sampler.snapshot("results", "after_results")
+
+        if args.scenario == "results-then-sankey":
+            sampler.begin("between_requests_gc")
+            del model_web, result
+            result = None
+            gc.collect()
+            sampler.snapshot("between_requests_gc", "after_first_request_gc")
+            sampler.begin("rehydrate")
+            model_web = ModelWeb(InMemorySystemRepository(), deepcopy(data))
+            sampler.snapshot("rehydrate", "after_second_hydration")
+
+        if args.scenario in {"cold-sankey", "warm-sankey", "results-then-sankey"}:
+            sampler.begin("cold_sankey")
+            calculation_started_at = time.perf_counter()
+            sankey, payload = build_sankey(model_web)
+            matrix = model_web.system.modeling_obj.impact_repartition_matrix
+            calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+            sampler.snapshot("cold_sankey", "after_cold_sankey")
+            print(
+                f"MATRIX rows={len(matrix)}; SANKEY nodes={len(payload['nodes'])} links={len(payload['links'])}",
+                flush=True,
+            )
+
+        if args.scenario == "warm-sankey":
+            del sankey, payload
+            sampler.begin("warm_sankey")
+            calculation_started_at = time.perf_counter()
+            sankey, payload = build_sankey(model_web)
+            calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+            sampler.snapshot("warm_sankey", "after_warm_sankey")
+
+    if monitor is not None:
+        monitor.finish("complete")
 
     sampler.begin("post_gc")
     del model_web, data, result, sankey, payload
@@ -249,6 +288,17 @@ def main():
     document = {
         "schema_version": 1,
         "scenario": args.scenario,
+        "monitor_mode": args.monitor_mode,
+        "observer_callback_count": monitor.completed_slots if monitor is not None else noop_callback_count,
+        "observer_sample_count": monitor.sample_count if monitor is not None else 0,
+        "observer_callback_wall_ms": round(monitor.callback_wall_ms, 3) if monitor is not None else 0,
+        "observer_max_callback_ms": round(monitor.max_callback_ms, 3) if monitor is not None else 0,
+        "observer_memory_read_ms": round(monitor.memory_read_ms, 3) if monitor is not None else 0,
+        "observer_logging_ms": round(monitor.logging_ms, 3) if monitor is not None else 0,
+        "observer_largest_sample_jump_mb": (
+            round(monitor.largest_sample_jump_bytes / MIB, 1) if monitor is not None else 0
+        ),
+        "calculation_elapsed_seconds": round(calculation_elapsed_seconds, 3),
         "usage_patterns": args.patterns,
         "source_model": args.model.name,
         "runtime": {

@@ -1,10 +1,11 @@
 # Gunicorn configuration file
 import gc
+import json
 import os
-from pathlib import Path
 from time import perf_counter, process_time
 
-import psutil
+from e_footprint_interface import runtime_memory
+
 
 preload_app = True
 log_file = "-"
@@ -12,66 +13,52 @@ bind = "0.0.0.0:8000"
 workers = 1
 timeout = 120
 
-_MIB = 1024 * 1024
-_CGROUP_LIMIT_PATHS = (Path("/sys/fs/cgroup/memory.max"), Path("/sys/fs/cgroup/memory/memory.limit_in_bytes"))
-_CGROUP_USAGE_PATHS = (Path("/sys/fs/cgroup/memory.current"), Path("/sys/fs/cgroup/memory/memory.usage_in_bytes"))
-_CGROUP_STAT_PATHS = (Path("/sys/fs/cgroup/memory.stat"), Path("/sys/fs/cgroup/memory/memory.stat"))
-
-
-def _read_first_finite_value(paths):
-    for path in paths:
-        try:
-            raw_value = path.read_text().strip()
-            if raw_value != "max":
-                value = int(raw_value)
-                # Cgroup v1 represents an unlimited controller with a very large sentinel value.
-                if value < 1 << 60:
-                    return value
-        except (OSError, ValueError):
-            continue
-    return None
-
-
-def _container_memory_mb():
-    available_bytes = _read_first_finite_value(_CGROUP_LIMIT_PATHS) or psutil.virtual_memory().total
-    return available_bytes / _MIB
-
-
-def _worker_recycle_limit_mb(container_memory_mb):
-    absolute_limit = os.getenv("WORKER_RECYCLE_LIMIT_MB")
-    if absolute_limit is not None:
-        limit_mb = float(absolute_limit)
-        if limit_mb <= 0:
-            raise ValueError("WORKER_RECYCLE_LIMIT_MB must be positive")
-        return limit_mb
-
-    ratio = float(os.getenv("WORKER_RECYCLE_LIMIT_RATIO", "0.6"))
-    if not 0 < ratio < 1:
-        raise ValueError("WORKER_RECYCLE_LIMIT_RATIO must be between 0 and 1")
-    return container_memory_mb * ratio
-
-
-def _inactive_file_bytes():
-    for path in _CGROUP_STAT_PATHS:
-        try:
-            values = dict(line.split() for line in path.read_text().splitlines())
-            key = "inactive_file" if "inactive_file" in values else "total_inactive_file"
-            return int(values[key])
-        except (KeyError, OSError, ValueError):
-            continue
-    return None
+CONTAINER_MEMORY_MB = runtime_memory.THRESHOLD_CAPACITY_BYTES / runtime_memory.MIB
+WORKER_RECYCLE_LIMIT_MB = runtime_memory.WORKER_RECYCLE_LIMIT_BYTES / runtime_memory.MIB
 
 
 def _memory_usage_mb():
-    used_bytes = _read_first_finite_value(_CGROUP_USAGE_PATHS)
-    inactive_file_bytes = _inactive_file_bytes()
-    if used_bytes is not None and inactive_file_bytes is not None:
-        return max(0, used_bytes - inactive_file_bytes) / _MIB
-    return psutil.Process(os.getpid()).memory_info().rss / _MIB
+    snapshot = runtime_memory.read_memory_snapshot()
+    bytes_used = snapshot.working_set_bytes if snapshot.working_set_bytes is not None else snapshot.rss_bytes
+    return bytes_used / runtime_memory.MIB if bytes_used is not None else 0
 
 
-CONTAINER_MEMORY_MB = _container_memory_mb()
-WORKER_RECYCLE_LIMIT_MB = _worker_recycle_limit_mb(CONTAINER_MEMORY_MB)
+def _event_delta(previous: dict[str, int], current: dict[str, int]) -> dict[str, int]:
+    return {key: max(0, current.get(key, 0) - previous.get(key, 0)) for key in {"oom", "oom_kill"}}
+
+
+def _worker_record(event, worker, *, events=None, event_delta=None):
+    snapshot = runtime_memory.read_memory_snapshot()
+    return {
+        "event": event,
+        "pid": getattr(worker, "pid", None),
+        **snapshot.as_mebibytes(),
+        "memory_events": events if events is not None else runtime_memory.read_memory_events(),
+        "memory_event_delta": event_delta,
+    }
+
+
+def pre_fork(server, worker):
+    """Capture counters in the master so they survive a worker SIGKILL."""
+    worker._efootprint_memory_events_at_boot = runtime_memory.read_memory_events()
+
+
+def post_fork(server, worker):
+    events = runtime_memory.read_memory_events()
+    worker.log.info(
+        "worker_memory %s", json.dumps(_worker_record("worker_boot", worker, events=events), sort_keys=True)
+    )
+
+
+def child_exit(server, worker):
+    events = runtime_memory.read_memory_events()
+    previous = getattr(worker, "_efootprint_memory_events_at_boot", {})
+    delta = _event_delta(previous, events)
+    log = server.log.warning if delta["oom"] or delta["oom_kill"] else server.log.info
+    log(
+        "worker_memory %s",
+        json.dumps(_worker_record("worker_exit", worker, events=events, event_delta=delta), sort_keys=True),
+    )
 
 
 def pre_request(worker, req):
@@ -88,16 +75,31 @@ def post_request(worker, req, environ, resp):
         collected = gc.collect()
         wall_ms = 1000 * (perf_counter() - wall_started_at)
         cpu_ms = 1000 * (process_time() - cpu_started_at)
+        request_id = environ.get("efootprint.memory_request_id")
         worker.log.info(
-            f"Post-request full GC collected {collected} objects in {wall_ms:.1f} ms "
-            f"(CPU {cpu_ms:.1f} ms, pid={os.getpid()})."
+            "post_request_memory %s",
+            json.dumps(
+                {
+                    "request_id": request_id,
+                    "pid": os.getpid(),
+                    "gc_collected": collected,
+                    "gc_wall_ms": round(wall_ms, 1),
+                    "gc_cpu_ms": round(cpu_ms, 1),
+                    **runtime_memory.read_memory_snapshot().as_mebibytes(),
+                },
+                sort_keys=True,
+            ),
         )
 
         memory_mb = _memory_usage_mb()
         if memory_mb > WORKER_RECYCLE_LIMIT_MB:
             worker.log.warning(
-                f"Recycling worker because memory working set is {memory_mb:.1f} MB, above the "
-                f"{WORKER_RECYCLE_LIMIT_MB:.1f} MB recycling threshold (pid={os.getpid()})."
+                "Recycling worker because memory working set is %.1f MB, above the %.1f MB recycling threshold "
+                "(pid=%s, request_id=%s).",
+                memory_mb,
+                WORKER_RECYCLE_LIMIT_MB,
+                os.getpid(),
+                request_id,
             )
             worker.alive = False
     finally:
