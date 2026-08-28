@@ -22,9 +22,9 @@ Build the production Dockerfile from a clean checkout:
 docker build -t efootprint-memory-profile:local .
 ```
 
-Docker currently has no repository-level `.dockerignore`, so a build from a working directory also copies
-untracked files. Check that large local artifacts such as `db.sqlite3` are absent from the image before using
-entrypoint/cgroup measurements as a production baseline. Git-ignored does not mean Docker-ignored.
+The repository-level `.dockerignore` excludes local databases, environments, dependency directories, caches, secrets,
+and profiler artifacts. Keep it aligned with new local-only outputs: Git-ignored does not automatically mean
+Docker-ignored.
 
 Run each calculation in a fresh 4 GiB container. Mount the model read-only; do not copy large models into this folder:
 

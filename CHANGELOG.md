@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Add a reproducible 4 GiB production-container memory profiling laboratory, a smart-building topology baseline, and an evidence-ranked memory optimization backlog.
+- Add a production-safe Docker build context that excludes local databases, environments, dependency directories, caches, secrets, and profiler artifacts.
 
 ### Fixed
 - Adapt the interface to efootprint's private hydration lifecycle, reverse `parent_groups` descriptors, stable computed-dict coordinate keys, and explicit serialized-state materialization boundaries. Legacy edge-model imports, calculated-attribute charts, workspace re-id, and complete snapshot persistence now work with library `dev`.
