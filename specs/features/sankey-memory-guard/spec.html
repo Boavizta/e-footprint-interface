@@ -174,13 +174,15 @@
 <section>
   <h2>6. Calibration decisions</h2>
   <ul>
-    <li>The initial enforcement point remains 85% of cgroup working-set capacity with no fixed reserve. On the smallest
+    <li>The enforcement point remains 85% of cgroup working-set capacity with no fixed reserve. On the smallest
         reproduced 2,926 MiB container, enforcement retained at least 423.6 MiB of working-set headroom after crossing,
-        versus a 134.5 MiB largest observed between-sample increase. This ratio is approved for a development enforcement
-        trial, not yet for production.</li>
-    <li>Enforcement is limited to development for one observed release. Production activation remains an explicit
-        deployment decision after the real recoverable response, worker recovery, and zero OOM-counter delta are
-        confirmed. A failed gate returns development to observation mode.</li>
+        versus a 134.5 MiB largest observed between-sample increase. The development deployment then crossed its exact
+        2,676.65 MiB threshold at 2,681.5 and 2,682.9 MiB working set, leaving at least 466.1 MiB before its 3,149 MiB
+        capacity. The ratio is technically approved for production activation.</li>
+    <li>Development enforcement on commit <code>501663cb</code> returned both independent aborts as HTTP 200 before
+        collection and worker recycling, replacement workers booted, ordinary traffic continued, and OOM/OOM-kill
+        deltas remained zero. The user confirmed that the recoverable guidance rendered. Production activation remains
+        a separate, explicit operator deployment decision; it is not performed automatically by calibration approval.</li>
   </ul>
 </section>
 

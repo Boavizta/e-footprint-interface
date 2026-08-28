@@ -97,8 +97,8 @@ long elementary computation from a gap between bounded high-water records: callb
 another record.
 
 The runtime setting accepts `off`, `observe`, and `enforce`, and defaults to `off`. Enforce mode interrupts a sampled
-reactive calculation at or above the configured working-set limit and returns a recoverable response; keep it disabled
-in deployment configuration until pre-production calibration approves the threshold and headroom.
+reactive calculation at or above the configured working-set limit and returns a recoverable response. Production
+activation remains an explicit operator deployment decision even after calibration approval.
 
 ## Enforcement calibration and rollout
 
@@ -108,10 +108,15 @@ the five-pattern cold calculation, 0.0% to a same-model result-primed Sankey, an
 At 2,926 MiB, the 85% breaker stopped all nine enforcement runs with at least 423.6 MiB of working-set headroom against
 a largest measured 134.5 MiB between-sample jump.
 
-That evidence approves an enforcement trial in development with the default ratio and no fixed reserve. It does not
-approve production activation. The development trial must confirm the real recoverable response, post-request
-collection, worker recycle/readiness, and zero OOM-counter delta. Keep production activation explicit after one
-observed release, and restore development to `observe` if any gate fails.
+The development trial of commit `501663cb` passed with the default ratio and no fixed reserve. On a 3,149 MiB cgroup,
+two independent four-pattern requests aborted once at 2,681.5 and 2,682.9 MiB working set, returned the 1,017-byte
+recoverable response with HTTP 200 before cleanup, recycled and replaced their workers, and recorded zero OOM and
+OOM-kill deltas. Ordinary 200/204 traffic succeeded after the first replacement, no monitor error or 5xx was present,
+and the user confirmed that the guidance rendered. The exact 85% threshold was 2,676.65 MiB; the smaller observed
+post-crossing reserve was 466.1 MiB by working set and 445.2 MiB by raw cgroup usage.
+
+This completes calibration and technically approves the 85% policy for production. Production activation remains a
+separate, explicit operator deployment decision; calibration does not change deployment configuration automatically.
 
 Representative deployed observation was sufficient to remove fine-grained timing fields from operational request
 records. Controlled profiler monitors (`method=PROFILE`) retain those counters for future laboratory comparisons;

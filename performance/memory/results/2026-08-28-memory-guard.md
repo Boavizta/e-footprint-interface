@@ -2,10 +2,9 @@
 
 ## Decision
 
-The 85% working-set threshold is approved for an enforcement trial in development. It is **not** approved for
-production yet. Development must run the five-pattern cold Sankey with enforcement enabled and confirm the recoverable
-response, post-request collection, worker recycle, replacement-worker readiness, and zero OOM-counter delta. Production
-activation remains an explicit decision after that release has been observed.
+Task 4 acceptance is satisfied. The 85% working-set threshold, with no fixed reserve, passed the development
+enforcement gate and is technically approved for production activation. Activation remains an explicit operator
+deployment decision; this calibration neither changes production configuration nor makes activation automatic.
 
 No fixed reserve is added. On the smallest reproduced 2,926 MiB cgroup, 15% is 438.9 MiB. Across all scenarios, the
 worst breaker crossing reached 2,502.4 MiB sampled working set and 2,535.7 MiB raw cgroup usage. That left at least
@@ -119,19 +118,34 @@ The deployed observation evidence is sufficient to retire fine-grained timing fi
 The local `PROFILE` method retains internal timing accumulation for controlled calibration only. Bounded start,
 progress, `would_abort`, completion, abort, post-request, and worker-lifecycle records remain.
 
-## External development gate
+## Development enforcement gate
 
-After review, deploy this commit to development with `COMPUTATION_MEMORY_GUARD_MODE=enforce`; do not change the 85%
-ratio or add an absolute override. Run the known five-pattern cold Sankey both from a fresh result state and after
-computing results on the same model, then preserve the correlated request and worker records. Approval for production
-requires all of the following:
+Commit `501663cbf47be0d116dfb02cfec4a014fa67f805` was deployed to development with
+`COMPUTATION_MEMORY_GUARD_MODE=enforce` and the default 85% ratio. The runtime reported a 3,149 MiB cgroup, so the exact
+threshold was `3,149 × 0.85 = 2,676.65 MiB`, logged to one decimal place as 2,676.7 MiB. Because enforcement checks after
+a completed reactive calculation, the two independent four-pattern requests crossed by 4.85 MiB and 6.25 MiB before
+raising once. Four patterns were sufficient to trigger the guard on this deployment; the five-pattern topology was
+already covered by the production-container Docker matrix.
 
-1. The request returns the dedicated recoverable Sankey guidance rather than a 5xx or gateway error.
-2. Exactly one abort record is emitted near 85%; no second trip occurs during recovery.
-3. The response is logged before post-request collection and any worker exit.
-4. The exited worker has zero OOM and OOM-kill deltas, and the replacement worker becomes ready within the observed
-   operational window.
-5. An ordinary request succeeds on the replacement worker.
+| Request | Worker | Abort working set | Raw cgroup / inactive file | Working-set / raw headroom | HTTP response | Post-GC working set | Response to replacement boot | OOM / OOM-kill delta |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `47be174d…` | 36 | 2,681.5 MiB | 2,689.1 / 7.6 MiB | 467.5 / 459.9 MiB | 200, 1,017 bytes | 2,641.4 MiB | 0.578 s | 0 / 0 |
+| `e697158b…` | 56 | 2,682.9 MiB | 2,703.8 / 20.9 MiB | 466.1 / 445.2 MiB | 200, 1,017 bytes | 2,395.3 MiB | 0.580 s | 0 / 0 |
 
-If any condition fails, restore development to `observe` and revise the ratio or recovery path before reconsidering
-production. Even after a pass, production activation remains a separate deployment decision after one observed release.
+Each correlated request contains one `abort` record and no second trip during cleanup. In both cases the HTTP 200 was
+logged before full collection, the recycling decision, worker exit, and replacement boot. The smallest demonstrated
+post-crossing reserve was therefore 466.1 MiB by working set and 445.2 MiB by raw cgroup usage. Even against the larger
+134.5 MiB between-sample jump from the local same-model scenario, those reserves are 3.5 and 3.3 times the jump. The
+1,017-byte response also demonstrates that the recoverable response could be rendered inside the remaining reserve.
+
+After the first replacement booted, it handled ordinary user requests returning 200 and 204, completed a three-pattern
+Sankey with HTTP 200, and was then recycled normally for retained memory. The next worker handled more ordinary 200
+traffic before the second four-pattern attempt. The first replacement boot record appeared 0.578 seconds after the
+aborted response; health traffic followed 10.6 seconds after boot and the first ordinary user-facing 200 followed after
+12.1 seconds. The second replacement booted 0.580 seconds after its response; the supplied excerpt ends at that boot, so
+it does not independently show the next request.
+
+Across the excerpt there is no `monitor_error`, HTTP 5xx, gateway error, or positive `oom`/`oom_kill` delta. The user
+separately confirmed that the recoverable Sankey guidance rendered; the access log alone establishes the successful
+HTTP response, not its visual presentation. Together with the production-container matrix, this passes every rollout
+gate. Production activation is approved technically but remains a separate, explicit operator deployment decision.

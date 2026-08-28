@@ -225,6 +225,8 @@ until Task 4 approves rollout.
 
 ## Task 4 — Calibrate and approve enforcement rollout
 
+**Status:** Done.
+
 **Goal:** Use representative pre-production evidence to validate headroom and overhead, record the operational
 decision, and only then enable enforcement in the deployment environment.
 
