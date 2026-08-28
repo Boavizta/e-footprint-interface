@@ -10,6 +10,7 @@ import psutil
 
 MIB = 1024 * 1024
 _CGROUP_UNLIMITED_SENTINEL = 1 << 60
+DEFAULT_COMPUTATION_MEMORY_LIMIT_RATIO = 0.85
 
 CGROUP_CAPACITY_PATHS = (
     Path("/sys/fs/cgroup/memory.max"),
@@ -193,7 +194,7 @@ COMPUTATION_MEMORY_LIMIT_BYTES = resolve_memory_limit_bytes(
     THRESHOLD_CAPACITY_BYTES,
     absolute_name="COMPUTATION_MEMORY_LIMIT_MB",
     ratio_name="COMPUTATION_MEMORY_LIMIT_RATIO",
-    default_ratio=0.85,
+    default_ratio=DEFAULT_COMPUTATION_MEMORY_LIMIT_RATIO,
 )
 WORKER_RECYCLE_LIMIT_BYTES = resolve_memory_limit_bytes(
     THRESHOLD_CAPACITY_BYTES,
