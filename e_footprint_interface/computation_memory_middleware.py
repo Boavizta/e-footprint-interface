@@ -272,6 +272,11 @@ class ComputationMemoryMonitor:
             "method": self.method,
             "mode": self.mode,
             "pid": os.getpid(),
+            "limit_mb": (
+                runtime_memory.COMPUTATION_MEMORY_LIMIT_BYTES / runtime_memory.MIB
+                if runtime_memory.COMPUTATION_MEMORY_LIMIT_BYTES is not None
+                else None
+            ),
             "elapsed_ms": round(1000 * (perf_counter() - self.started_at), 1),
             "cpu_ms": round(1000 * (process_time() - self.cpu_started_at), 1),
             "completed_slots": self.completed_slots,

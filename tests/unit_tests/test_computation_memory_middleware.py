@@ -307,7 +307,8 @@ def test_progress_logs_only_new_high_water_bands_and_large_jump_identity(monkeyp
 
 def test_completion_record_is_correlated_privacy_safe_and_omits_temporary_overhead_counters(monkeypatch):
     _patch_memory(monkeypatch)
-    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 4000 * runtime_memory.MIB)
+    resolved_limit = 4000 * runtime_memory.MIB + 123
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", resolved_limit)
     log = MagicMock()
     monitor = middleware_module.ComputationMemoryMonitor(
         route="model_builder/sankey-diagram/",
@@ -322,6 +323,7 @@ def test_completion_record_is_correlated_privacy_safe_and_omits_temporary_overhe
 
     records = _records(log)
     assert {record["request_id"] for record in records} == {monitor.request_id}
+    assert {record["limit_mb"] for record in records} == {resolved_limit / runtime_memory.MIB}
     completion = records[-1]
     assert completion["attribution_matrix_cached"] is False
     assert completion["usage_pattern_count"] == 5
@@ -336,6 +338,17 @@ def test_completion_record_is_correlated_privacy_safe_and_omits_temporary_overhe
     serialized = json.dumps(completion)
     assert "model_name" not in serialized
     assert "value" not in serialized
+
+
+def test_records_report_an_unavailable_resolved_limit_explicitly(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", None)
+    log = MagicMock()
+    monitor = middleware_module.ComputationMemoryMonitor(route="model_builder/results/", method="GET", log=log)
+
+    monitor.finish("complete")
+
+    assert {record["limit_mb"] for record in _records(log)} == {None}
 
 
 def test_local_profiler_can_still_measure_monitor_overhead(monkeypatch):

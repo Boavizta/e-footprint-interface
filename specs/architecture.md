@@ -55,7 +55,8 @@ backlog live under `performance/memory/`; large profiler captures remain untrack
 `COMPUTATION_MEMORY_GUARD_MODE` is `observe` or `enforce` (the default is `off`). It uses the library's scoped reactive
 observer to count every cache-miss completion, samples process RSS and cgroup memory adaptively, and emits correlated
 JSON records at start, bounded high-water progress, completion, or abort. Records use route patterns and numerical
-topology only; model names, serialized data, calculated values, and other user-authored labels are forbidden. Unexpected
+topology only, and include the process-resolved computation limit as `limit_mb` for exact correlation; model names,
+serialized data, calculated values, and other user-authored labels are forbidden. Unexpected
 monitor failures disable telemetry for that request and fail open in both modes. In `enforce`, the first sampled
 completion at or above the computation working-set limit raises a typed recoverable exception and latches the monitor,
 so transactional rollback computations cannot trip it again. Decorated views use the standard exception modal; the

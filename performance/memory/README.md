@@ -83,7 +83,8 @@ For a hardened observation deployment, verify one representative cold run before
    marked warm only by a successful completion with no attribution computation.
 3. If working set crosses the candidate limit, confirm exactly one `would_abort` record is emitted and sampling then
    returns to the ordinary 16-slot cadence. The approved candidate is 85% of runtime cgroup capacity unless
-   `COMPUTATION_MEMORY_LIMIT_RATIO` or `COMPUTATION_MEMORY_LIMIT_MB` overrides it.
+   `COMPUTATION_MEMORY_LIMIT_RATIO` or `COMPUTATION_MEMORY_LIMIT_MB` overrides it. Use each record's resolved
+   `limit_mb` value for correlation instead of reconstructing the threshold from rounded capacity telemetry.
 4. Confirm worker-exit records retain the exited worker PID and cgroup event deltas but omit process RSS, which would
    otherwise describe the Gunicorn master executing the hook.
 5. Compare the deployed monitor timing with the matching `off` run. Observation must remain at or below 3% before
