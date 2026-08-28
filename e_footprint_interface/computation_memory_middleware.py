@@ -33,6 +33,25 @@ def _safe_route(request) -> str:
     return match.route or "model_builder/<root>"
 
 
+def _emit_monitor_error(
+    *, log, phase: str, route: str, method: str, mode: str, error: Exception, request_id=None
+) -> None:
+    record = {
+        "event": "monitor_error",
+        "phase": phase,
+        "request_id": request_id,
+        "route": route,
+        "method": method,
+        "mode": mode,
+        "pid": os.getpid(),
+        "error_type": type(error).__name__,
+    }
+    try:
+        log.error("computation_memory %s", json.dumps(record, sort_keys=True, separators=(",", ":")))
+    except Exception:
+        pass
+
+
 class ComputationMemoryMonitor:
     """Count every reactive completion and sample memory without changing request behavior."""
 
@@ -234,6 +253,44 @@ class ComputationMemoryMonitor:
         self.logging_ms += 1000 * (perf_counter() - started_at)
 
 
+class _ObservationTelemetryBoundary:
+    """Disable observation after its first internal failure without changing request behavior."""
+
+    def __init__(self, monitor: ComputationMemoryMonitor):
+        self.monitor = monitor
+        self.failed = False
+
+    @property
+    def request_id(self) -> str:
+        return self.monitor.request_id
+
+    def _run(self, phase: str, callback, *args) -> None:
+        if self.failed:
+            return
+        try:
+            callback(*args)
+        except Exception as error:
+            self.failed = True
+            _emit_monitor_error(
+                log=self.monitor.log,
+                phase=phase,
+                route=self.monitor.route,
+                method=self.monitor.method,
+                mode=self.monitor.mode,
+                error=error,
+                request_id=self.monitor.request_id,
+            )
+
+    def model_hydrated(self, model_web) -> None:
+        self._run("model_hydrated", self.monitor.model_hydrated, model_web)
+
+    def __call__(self, slot) -> None:
+        self._run("computation_callback", self.monitor, slot)
+
+    def finish(self, status: str) -> None:
+        self._run("finish", self.monitor.finish, status)
+
+
 class ComputationMemoryMiddleware:
     """Install diagnostics before any model-builder view can hydrate its ``ModelWeb``."""
 
@@ -244,26 +301,59 @@ class ComputationMemoryMiddleware:
         if not request.path_info.startswith("/model_builder/") or runtime_memory.COMPUTATION_MEMORY_GUARD_MODE == "off":
             return self.get_response(request)
 
-        route = _safe_route(request)
-        monitor = ComputationMemoryMonitor(
-            route=route,
-            method=request.method,
-            mode=runtime_memory.COMPUTATION_MEMORY_GUARD_MODE,
-            attribution_request=route.endswith("sankey-diagram/"),
-        )
-        request.META["efootprint.memory_request_id"] = monitor.request_id
-        request._efootprint_memory_monitor = monitor
+        mode = runtime_memory.COMPUTATION_MEMORY_GUARD_MODE
+        route = "model_builder/<monitor-setup>"
         try:
-            with observe_model_hydrations(monitor.model_hydrated), observe_computations(monitor):
+            route = _safe_route(request)
+            monitor = ComputationMemoryMonitor(
+                route=route,
+                method=request.method,
+                mode=mode,
+                attribution_request=route.endswith("sankey-diagram/"),
+            )
+        except Exception as error:
+            if mode != "observe":
+                raise
+            _emit_monitor_error(
+                log=logger,
+                phase="setup",
+                route=route,
+                method=request.method,
+                mode=mode,
+                error=error,
+            )
+            return self.get_response(request)
+
+        # Observation is diagnostic and fails open. Other modes retain the monitor's direct exception path so a
+        # future enforcement exception can propagate through the reactive engine unchanged.
+        telemetry = _ObservationTelemetryBoundary(monitor) if mode == "observe" else monitor
+        request.META["efootprint.memory_request_id"] = monitor.request_id
+        request._efootprint_memory_monitor = telemetry
+        try:
+            with observe_model_hydrations(telemetry.model_hydrated), observe_computations(telemetry):
                 response = self.get_response(request)
         except Exception:
-            monitor.finish("abort")
+            try:
+                telemetry.finish("abort")
+            except Exception as error:
+                _emit_monitor_error(
+                    log=monitor.log,
+                    phase="finish",
+                    route=monitor.route,
+                    method=monitor.method,
+                    mode=monitor.mode,
+                    error=error,
+                    request_id=monitor.request_id,
+                )
             raise
-        monitor.finish("abort" if response.status_code >= 500 else "complete")
+        telemetry.finish("abort" if response.status_code >= 500 else "complete")
         return response
 
     def process_exception(self, request, exception):
         monitor = getattr(request, "_efootprint_memory_monitor", None)
         if monitor is not None:
-            monitor.finish("abort")
+            try:
+                monitor.finish("abort")
+            except Exception:
+                pass
         return None

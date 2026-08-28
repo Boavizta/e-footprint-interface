@@ -18,6 +18,7 @@ from e_footprint_interface import runtime_memory
 from e_footprint_interface import computation_memory_middleware as middleware_module
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.model_hydration_observer import report_model_hydrated
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -39,11 +40,32 @@ def _records(log):
     ]
 
 
+def _monitor_errors(log):
+    return [
+        json.loads(call.args[1])
+        for call in log.error.call_args_list
+        if len(call.args) > 1 and call.args[0] == "computation_memory %s"
+    ]
+
+
 def _fail_view(request):
     raise RuntimeError("boom")
 
 
-urlpatterns = [path("model_builder/fail/", _fail_view)]
+def _ok_view(request):
+    return HttpResponse("ok")
+
+
+def _report_hydrated_view(request):
+    report_model_hydrated(SimpleNamespace())
+    return HttpResponse("hydrated")
+
+
+urlpatterns = [
+    path("model_builder/fail/", _fail_view),
+    path("model_builder/ok/", _ok_view),
+    path("model_builder/report-hydrated/", _report_hydrated_view),
+]
 
 
 def _patch_memory(monkeypatch, *, working_set_mb=100):
@@ -319,6 +341,156 @@ def test_middleware_keeps_topology_unavailable_when_no_model_was_hydrated(monkey
     completion = _records(log)[-1]
     assert completion["usage_pattern_count"] is None
     assert completion["modeled_hours"] is None
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+)
+def test_real_middleware_disables_observation_when_hydration_callback_fails(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    monkeypatch.setattr(
+        middleware_module.ComputationMemoryMonitor,
+        "model_hydrated",
+        MagicMock(side_effect=AttributeError("user-authored-sensitive-value")),
+    )
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+    monkeypatch.setattr(middleware_module.logger, "error", log.error)
+
+    response = Client().get("/model_builder/report-hydrated/")
+
+    assert response.status_code == 200
+    assert response.content == b"hydrated"
+    errors = _monitor_errors(log)
+    assert len(errors) == 1
+    assert errors[0]["phase"] == "model_hydrated"
+    assert errors[0]["error_type"] == "AttributeError"
+    assert "user-authored-sensitive-value" not in json.dumps(errors[0])
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+)
+def test_real_middleware_preserves_response_when_monitor_setup_fails(monkeypatch):
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    monkeypatch.setattr(
+        middleware_module.ComputationMemoryMonitor,
+        "_sample_and_emit",
+        MagicMock(side_effect=RuntimeError("start failed")),
+    )
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "error", log.error)
+
+    response = Client().get("/model_builder/ok/")
+
+    assert response.status_code == 200
+    assert response.content == b"ok"
+    errors = _monitor_errors(log)
+    assert len(errors) == 1
+    assert errors[0]["phase"] == "setup"
+    assert errors[0]["route"] == "model_builder/ok/"
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+)
+def test_real_middleware_disables_observation_after_reactive_callback_failure(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    callback = MagicMock(side_effect=RuntimeError("callback failed"))
+    monkeypatch.setattr(middleware_module.ComputationMemoryMonitor, "__call__", callback)
+
+    @contextmanager
+    def trigger_callbacks(observer):
+        observer(SimpleNamespace(diagnostic_name="slot"))
+        observer(SimpleNamespace(diagnostic_name="slot"))
+        yield
+
+    monkeypatch.setattr(middleware_module, "observe_computations", trigger_callbacks)
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+    monkeypatch.setattr(middleware_module.logger, "error", log.error)
+
+    response = Client().get("/model_builder/ok/")
+
+    assert response.status_code == 200
+    assert response.content == b"ok"
+    callback.assert_called_once()
+    errors = _monitor_errors(log)
+    assert len(errors) == 1
+    assert errors[0]["phase"] == "computation_callback"
+
+
+def test_enforce_mode_keeps_direct_reactive_exception_path(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "enforce")
+    callback = MagicMock(side_effect=RuntimeError("future enforcement exception"))
+    monkeypatch.setattr(middleware_module.ComputationMemoryMonitor, "__call__", callback)
+
+    @contextmanager
+    def trigger_callback(observer):
+        observer(SimpleNamespace(diagnostic_name="slot"))
+        yield
+
+    monkeypatch.setattr(middleware_module, "observe_computations", trigger_callback)
+    middleware = middleware_module.ComputationMemoryMiddleware(lambda request: HttpResponse("ok"))
+
+    with pytest.raises(RuntimeError, match="future enforcement exception"):
+        middleware(RequestFactory().get("/model_builder/"))
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+)
+def test_real_middleware_preserves_response_when_completion_record_fails(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    log = MagicMock()
+
+    def fail_completion_record(_message, payload):
+        if json.loads(payload)["event"] == "complete":
+            raise RuntimeError("logging failed")
+
+    log.info.side_effect = fail_completion_record
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+    monkeypatch.setattr(middleware_module.logger, "error", log.error)
+
+    response = Client().get("/model_builder/ok/")
+
+    assert response.status_code == 200
+    assert response.content == b"ok"
+    errors = _monitor_errors(log)
+    assert len(errors) == 1
+    assert errors[0]["phase"] == "finish"
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+)
+def test_real_middleware_finish_failure_does_not_mask_application_exception(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+    monkeypatch.setattr(
+        middleware_module.ComputationMemoryMonitor,
+        "finish",
+        MagicMock(side_effect=RuntimeError("finish failed")),
+    )
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
+    monkeypatch.setattr(middleware_module.logger, "error", log.error)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        Client().get("/model_builder/fail/")
+
+    errors = _monitor_errors(log)
+    assert len(errors) == 1
+    assert errors[0]["phase"] == "finish"
 
 
 @override_settings(
