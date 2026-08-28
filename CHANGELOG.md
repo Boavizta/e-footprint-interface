@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Adapt the interface to efootprint's private hydration lifecycle, reverse `parent_groups` descriptors, stable computed-dict coordinate keys, and explicit serialized-state materialization boundaries. Legacy edge-model imports, calculated-attribute charts, workspace re-id, and complete snapshot persistence now work with library `dev`.
 
 ### Changed
+- Rename the no-longer-progressive import coordinator to `SystemImportService` and align its documentation with its current canonical materialization and final payload-validation responsibilities.
 - Remove the obsolete `GITHUB_TOKEN` Docker build argument and private-Git URL rewrite now that all Python dependencies are public packages.
 - Detect the container memory capacity independently from Gunicorn's post-request recycling threshold. Recycle above a configurable 60% working set by default, excluding reclaimable file cache and reserving the higher memory range for active calculations.
 - Scope the Sources table and XLSX export to sourced input quantities, avoiding the previous full pull of every scalar calculated attribute when opening or downloading source data.

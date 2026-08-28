@@ -1,7 +1,7 @@
 """Load-and-compute (and freshness) coverage for the introductory templates.
 
 Each committed JSON must load through the interface's real import path
-(``ProgressiveImportService``) and produce a non-empty computed footprint —
+(``SystemImportService``) and produce a non-empty computed footprint —
 the success criterion "complete, working system... results compute without
 error". Fails if a template stops loading or computing after a library schema
 change (re-run ``python -m scripts.build_intro_templates`` to regenerate).
@@ -23,7 +23,7 @@ from efootprint.api_utils.system_to_json import system_to_json
 
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 from model_builder.domain.reference_data.modeling_templates.introductory.registry import HERE
-from model_builder.domain.services import ProgressiveImportService
+from model_builder.domain.services import SystemImportService
 
 # Mirror the production import cap (InMemorySystemRepository(max_payload_size_mb=30.0)).
 MAX_PAYLOAD_SIZE_MB = 30.0
@@ -46,7 +46,7 @@ def _load_raw(tpl):
 
 @_params
 def test_template_imports_and_computes_through_interface_path(tpl):
-    imported = ProgressiveImportService(max_payload_size_mb=MAX_PAYLOAD_SIZE_MB).import_system(_load_raw(tpl))
+    imported = SystemImportService(max_payload_size_mb=MAX_PAYLOAD_SIZE_MB).import_system(_load_raw(tpl))
 
     class_obj_dict, _, _ = json_to_system(imported)
     system = next(iter(class_obj_dict["System"].values()))

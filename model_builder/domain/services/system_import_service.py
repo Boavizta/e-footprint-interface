@@ -18,13 +18,11 @@ from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 
 
-class ProgressiveImportService:
-    """Service for importing system data with progressive size validation.
+class SystemImportService:
+    """Load, materialize, and validate an imported e-footprint system.
 
-    This service imports e-footprint system data from JSON, computing calculated
-    attributes one object at a time and checking the cumulative size after each.
-    This allows failing fast if a model exceeds the maximum allowed size, rather
-    than computing everything first and failing at session save time.
+    The service rebuilds the canonical computed-state payload, including orphan
+    objects and interface metadata, then validates its final serialized size.
     """
 
     def __init__(self, max_payload_size_mb: float):

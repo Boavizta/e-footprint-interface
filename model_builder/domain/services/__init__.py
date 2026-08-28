@@ -7,7 +7,7 @@ from model_builder.domain.services.system_validation_service import SystemValida
 from model_builder.domain.services.emissions_calculation_service import EmissionsCalculationService, EmissionsResult
 from model_builder.domain.services.comparison_service import ComparisonService, ComparisonView
 from model_builder.domain.services.edit_service import EditService, EditResult
-from model_builder.domain.services.progressive_import_service import ProgressiveImportService
+from model_builder.domain.services.system_import_service import SystemImportService
 from model_builder.domain.services.empty_model import is_empty_model
 from model_builder.domain.services.template_catalog_service import (
     CatalogEntry, CatalogGroup, CatalogGuide, SCRATCH_ID, UPLOAD_ID,
@@ -20,7 +20,7 @@ __all__ = [
     "EmissionsCalculationService", "EmissionsResult",
     "ComparisonService", "ComparisonView",
     "EditService", "EditResult",
-    "ProgressiveImportService",
+    "SystemImportService",
     "is_empty_model",
     "CatalogEntry", "CatalogGroup", "CatalogGuide", "SCRATCH_ID", "UPLOAD_ID",
     "build_template_catalog", "get_template_system_data",

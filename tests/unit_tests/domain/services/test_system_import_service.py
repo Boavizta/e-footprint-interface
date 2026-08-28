@@ -6,7 +6,7 @@ from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.domain.services.progressive_import_service import ProgressiveImportService
+from model_builder.domain.services.system_import_service import SystemImportService
 
 
 def _merge_input_fragment(target: dict, fragment: dict) -> None:
@@ -61,7 +61,7 @@ def test_import_system_delegates_source_integrity_to_system_to_json(minimal_syst
     }
     _merge_input_fragment(system_data, external_api_data)
 
-    imported = ProgressiveImportService(max_payload_size_mb=30).import_system(system_data)
+    imported = SystemImportService(max_payload_size_mb=30).import_system(system_data)
 
     assert external_api_id in imported["EcoLogitsGenAIExternalAPI"]
     missing_source_refs = (

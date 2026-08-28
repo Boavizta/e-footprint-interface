@@ -15,7 +15,7 @@ import pytest
 from efootprint.api_utils.system_to_json import system_to_json
 
 from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
-from model_builder.domain.services import ProgressiveImportService
+from model_builder.domain.services import SystemImportService
 from model_builder.adapters.repositories.workspace_base import system_id_of
 
 
@@ -27,7 +27,7 @@ def raise_view_exceptions(monkeypatch):
 def _seed_active_slot(client, system) -> None:
     """Persist a built System into the active slot of the client's session (with-calc, recomputed)."""
     raw = system_to_json(system, save_computed_state=False)
-    import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     with_calc = import_service.import_system(SessionSystemRepository.upgrade_system_data(raw))
     session = client.session
     SessionWorkspaceRepository(session).active_repository().save_data(with_calc)

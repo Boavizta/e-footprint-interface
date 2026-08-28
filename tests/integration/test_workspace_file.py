@@ -20,7 +20,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
-from model_builder.domain.services import ProgressiveImportService
+from model_builder.domain.services import SystemImportService
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from efootprint.api_utils.system_to_json import system_to_json
 
@@ -37,7 +37,7 @@ def _seed_active_slot(client, system, interface_config: dict = None) -> None:
     tests can assert it survives an export/import round-trip.
     """
     raw = system_to_json(system, save_computed_state=False)
-    import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     with_calc = import_service.import_system(SessionSystemRepository.upgrade_system_data(raw))
     session = client.session
     repository = SessionWorkspaceRepository(session).active_repository()
@@ -183,7 +183,7 @@ def test_workspace_import_enforces_combined_budget(client, minimal_system, monke
     envelope = _download(client, "/model_builder/download-workspace/")
 
     # A budget below the summed with-calc weight of both models, but above each one alone.
-    with_calc = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB).import_system(
+    with_calc = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB).import_system(
         SessionSystemRepository.upgrade_system_data(envelope["models"][0]))
     one_model_mb = len(json.dumps(with_calc).encode()) / (1024 * 1024)
     monkeypatch.setattr(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", one_model_mb * 1.5)

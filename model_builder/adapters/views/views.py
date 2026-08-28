@@ -35,7 +35,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 from model_builder.adapters.presenters.template_picker_presenter import build_picker_groups
 from model_builder.adapters.ui_config.tour_steps import build_tour_steps
 from model_builder.domain.services import (
-    ProgressiveImportService, SCRATCH_ID, get_template_system_data, is_empty_model)
+    SystemImportService, SCRATCH_ID, get_template_system_data, is_empty_model)
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
@@ -50,7 +50,7 @@ def load_system_into_session(repository, raw_system_data, workspace=None):
     invariant — see workspace_base).
     """
     system_data = SessionSystemRepository.upgrade_system_data(raw_system_data)
-    import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     system_data = import_service.import_system(system_data)
     if workspace is not None:
         system_data = workspace.distinctify_against_siblings(system_data, repository.slot)
@@ -337,7 +337,7 @@ def upload_json(request):
                     return redirect("model-builder")
 
                 system_data = SessionSystemRepository.upgrade_system_data(data)
-                import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+                import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
                 system_data_with_calculated_attributes = import_service.import_system(system_data)
                 # Replacing the active model: distinctify so importing the same file the sibling slot
                 # already holds doesn't produce two slots with one system id.

@@ -29,7 +29,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 from model_builder.adapters.views.views import load_system_into_session, render_model_builder, build_workspace_slots
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import (
-    ComparisonService, ProgressiveImportService, SCRATCH_ID, get_template_system_data)
+    ComparisonService, SystemImportService, SCRATCH_ID, get_template_system_data)
 
 
 def _rendered_shared_chrome_oob(model_web) -> str:
@@ -109,7 +109,7 @@ def _restore_workspace(workspace, data: dict) -> None:
 
     # Each embedded model carries its own interface_config (Sankey settings etc.); restore it per slot
     # so the round-trip preserves it as the single-model upload does. Slot 0: set it on the
-    # repository before persist. Slot 1+: ProgressiveImportService already carries it into the with-calc
+    # repository before persist. Slot 1+: SystemImportService already carries it into the with-calc
     # dict, which add_slot's save writes through (and with_fresh_system_id preserves it on a re-mint).
     slot_0_repository = workspace.repository_for(0)
     if "interface_config" in models[0]:
@@ -119,7 +119,7 @@ def _restore_workspace(workspace, data: dict) -> None:
         if slot != 0:
             workspace.remove_slot(slot)
     for model in models[1:]:
-        import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+        import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
         workspace.add_slot(import_service.import_system(SessionSystemRepository.upgrade_system_data(model)))
 
     slots = workspace.list_slots()
@@ -162,7 +162,7 @@ def _system_data_for_add(request, workspace):
 def add_model(request):
     """Add a second model (duplicate / blank / import) and make it active."""
     workspace = SessionWorkspaceRepository(request.session)
-    import_service = ProgressiveImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
     raw_system_data = _system_data_for_add(request, workspace)
     with_calc = import_service.import_system(raw_system_data)
     new_slot = workspace.add_slot(with_calc)

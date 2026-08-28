@@ -14,7 +14,7 @@ from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
 from model_builder.domain.services import (
-    ProgressiveImportService, SCRATCH_ID, UPLOAD_ID, build_template_catalog, get_template_system_data)
+    SystemImportService, SCRATCH_ID, UPLOAD_ID, build_template_catalog, get_template_system_data)
 
 
 def _catalog_entries() -> dict:
@@ -92,7 +92,7 @@ def test_every_card_resolves_to_a_loadable_template():
 
 
 def test_machine_learning_template_survives_interface_persistence_round_trip():
-    imported = ProgressiveImportService(max_payload_size_mb=30.0).import_system(
+    imported = SystemImportService(max_payload_size_mb=30.0).import_system(
         get_template_system_data("machine_learning_workflow"))
     repository = InMemorySystemRepository(initial_data=imported)
 

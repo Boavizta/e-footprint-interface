@@ -20,7 +20,7 @@ class TestUploadJsonInterfaceConfigPersistence:
         repository.interface_config = {"sankey_diagrams": [{"id": "deadbeef"}]}
         repository.save_data(minimal_system_data)
 
-        with patch("model_builder.adapters.views.views.ProgressiveImportService.import_system", return_value=minimal_system_data):
+        with patch("model_builder.adapters.views.views.SystemImportService.import_system", return_value=minimal_system_data):
             response = client.post(
                 "/model_builder/upload-json/",
                 {"import-json-input": _json_upload_file(minimal_system_data)},
@@ -41,7 +41,7 @@ class TestUploadJsonInterfaceConfigPersistence:
             "efootprint_interface_version": "1.0.0",
         }
 
-        with patch("model_builder.adapters.views.views.ProgressiveImportService.import_system", return_value=minimal_system_data):
+        with patch("model_builder.adapters.views.views.SystemImportService.import_system", return_value=minimal_system_data):
             response = client.post(
                 "/model_builder/upload-json/",
                 {"import-json-input": _json_upload_file(uploaded_data)},
