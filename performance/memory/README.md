@@ -100,6 +100,23 @@ The runtime setting accepts `off`, `observe`, and `enforce`, and defaults to `of
 reactive calculation at or above the configured working-set limit and returns a recoverable response; keep it disabled
 in deployment configuration until pre-production calibration approves the threshold and headroom.
 
+## Enforcement calibration and rollout
+
+[`results/2026-08-28-memory-guard.md`](results/2026-08-28-memory-guard.md) records the off/no-op/observe/enforce matrix
+on fresh 4,096 MiB and smallest-observed 2,926 MiB production containers. Seven-run observation medians added 1.7% to
+the five-pattern cold calculation and 1.8% to the result-primed allocator-history sequence. At 2,926 MiB, the 85%
+breaker stopped all six enforcement runs near 2,496 MiB working set, leaving about 430 MiB of working-set headroom
+against a largest measured 28.2 MiB between-sample jump.
+
+That evidence approves an enforcement trial in development with the default ratio and no fixed reserve. It does not
+approve production activation. The development trial must confirm the real recoverable response, post-request
+collection, worker recycle/readiness, and zero OOM-counter delta. Keep production activation explicit after one
+observed release, and restore development to `observe` if any gate fails.
+
+Representative deployed observation was sufficient to remove fine-grained timing fields from operational request
+records. Controlled profiler monitors (`method=PROFILE`) retain those counters for future laboratory comparisons;
+normal HTTP records retain only bounded operational milestones and the measurements needed for diagnosis.
+
 The GC flag matches production Gunicorn request handling. Omitting it is useful only as an explicit comparison with
 ordinary Python automatic collection.
 

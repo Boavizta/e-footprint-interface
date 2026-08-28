@@ -305,7 +305,7 @@ def test_progress_logs_only_new_high_water_bands_and_large_jump_identity(monkeyp
     assert full_reader.call_count == 3
 
 
-def test_completion_record_is_correlated_privacy_safe_and_reports_overhead(monkeypatch):
+def test_completion_record_is_correlated_privacy_safe_and_omits_temporary_overhead_counters(monkeypatch):
     _patch_memory(monkeypatch)
     monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 4000 * runtime_memory.MIB)
     log = MagicMock()
@@ -326,12 +326,28 @@ def test_completion_record_is_correlated_privacy_safe_and_reports_overhead(monke
     assert completion["attribution_matrix_cached"] is False
     assert completion["usage_pattern_count"] == 5
     assert completion["modeled_hours"] == 43800
-    assert completion["callback_wall_ms"] >= 0
-    assert completion["memory_read_ms"] >= 0
-    assert completion["logging_ms"] >= 0
+    assert "callback_wall_ms" not in completion
+    assert "max_callback_ms" not in completion
+    assert "memory_read_ms" not in completion
+    assert "logging_ms" not in completion
+    assert monitor.callback_wall_ms == 0
+    assert monitor.memory_read_ms == 0
+    assert monitor.logging_ms == 0
     serialized = json.dumps(completion)
     assert "model_name" not in serialized
     assert "value" not in serialized
+
+
+def test_local_profiler_can_still_measure_monitor_overhead(monkeypatch):
+    _patch_memory(monkeypatch)
+    monitor = middleware_module.ComputationMemoryMonitor(route="profile/cold-sankey", method="PROFILE", log=MagicMock())
+
+    monitor(SimpleNamespace(diagnostic_name="ordinary_slot"))
+    monitor.finish("complete")
+
+    assert monitor.callback_wall_ms > 0
+    assert monitor.memory_read_ms > 0
+    assert monitor.logging_ms > 0
 
 
 @pytest.mark.parametrize(

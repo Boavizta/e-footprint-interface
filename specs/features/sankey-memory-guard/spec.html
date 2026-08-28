@@ -172,12 +172,15 @@
 </section>
 
 <section>
-  <h2>6. Open questions</h2>
+  <h2>6. Calibration decisions</h2>
   <ul>
-    <li>What measured reserve and transition point should enforcement use after observation-mode runs on the production
-        architecture?</li>
-    <li>Should enforcement initially be limited to pre-production for one release before becoming the production
-        default?</li>
+    <li>The initial enforcement point remains 85% of cgroup working-set capacity with no fixed reserve. On the smallest
+        reproduced 2,926 MiB container, enforcement retained about 430 MiB of working-set headroom after crossing,
+        versus a 28.2 MiB largest observed between-sample increase. This ratio is approved for a development enforcement
+        trial, not yet for production.</li>
+    <li>Enforcement is limited to development for one observed release. Production activation remains an explicit
+        deployment decision after the real recoverable response, worker recovery, and zero OOM-counter delta are
+        confirmed. A failed gate returns development to observation mode.</li>
   </ul>
 </section>
 

@@ -77,6 +77,7 @@ class ComputationMemoryMonitor:
         self.modeled_hours = modeled_hours
         self.attribution_request = attribution_request
         self.attribution_matrix_cached = None
+        self._measure_overhead = method == "PROFILE"
         self.started_at = perf_counter()
         self.cpu_started_at = process_time()
         self.completed_slots = 0
@@ -142,19 +143,26 @@ class ComputationMemoryMonitor:
         )
 
     def __call__(self, slot) -> None:
+        if not self._measure_overhead:
+            self._observe_slot(slot)
+            return
+
         callback_started_at = perf_counter()
         try:
-            self.completed_slots += 1
-            if self.attribution_request and slot.diagnostic_name.endswith(
-                (".impact_repartition_rows", ".impact_repartition_matrix")
-            ):
-                self.attribution_matrix_cached = False
-            if self._should_sample():
-                self._sample_progress(slot.diagnostic_name)
+            self._observe_slot(slot)
         finally:
             callback_ms = 1000 * (perf_counter() - callback_started_at)
             self.callback_wall_ms += callback_ms
             self.max_callback_ms = max(self.max_callback_ms, callback_ms)
+
+    def _observe_slot(self, slot) -> None:
+        self.completed_slots += 1
+        if self.attribution_request and slot.diagnostic_name.endswith(
+            (".impact_repartition_rows", ".impact_repartition_matrix")
+        ):
+            self.attribution_matrix_cached = False
+        if self._should_sample():
+            self._sample_progress(slot.diagnostic_name)
 
     def _should_sample(self) -> bool:
         if self._limit_exceeded or (self.mode == "observe" and self._would_abort_emitted):
@@ -170,17 +178,19 @@ class ComputationMemoryMonitor:
             self.peak_working_set_bytes = max(self.peak_working_set_bytes, working_set)
 
     def _read_working_set(self) -> int | None:
-        started_at = perf_counter()
+        started_at = perf_counter() if self._measure_overhead else None
         working_set = runtime_memory.read_cgroup_working_set_bytes()
-        self.memory_read_ms += 1000 * (perf_counter() - started_at)
+        if started_at is not None:
+            self.memory_read_ms += 1000 * (perf_counter() - started_at)
         self.sample_count += 1
         self._track_working_set(working_set)
         return working_set
 
     def _read_snapshot(self, *, count_sample: bool) -> runtime_memory.MemorySnapshot:
-        started_at = perf_counter()
+        started_at = perf_counter() if self._measure_overhead else None
         snapshot = runtime_memory.read_memory_snapshot(self._process)
-        self.memory_read_ms += 1000 * (perf_counter() - started_at)
+        if started_at is not None:
+            self.memory_read_ms += 1000 * (perf_counter() - started_at)
         if count_sample:
             self.sample_count += 1
         self._track_working_set(snapshot.working_set_bytes)
@@ -271,16 +281,13 @@ class ComputationMemoryMonitor:
             "attribution_matrix_cached": self.attribution_matrix_cached,
             "peak_working_set_mb": round(self.peak_working_set_bytes / runtime_memory.MIB, 1),
             "largest_sample_jump_mb": round(self.largest_sample_jump_bytes / runtime_memory.MIB, 1),
-            "callback_wall_ms": round(self.callback_wall_ms, 3),
-            "max_callback_ms": round(self.max_callback_ms, 3),
-            "memory_read_ms": round(self.memory_read_ms, 3),
-            "logging_ms": round(self.logging_ms, 3),
             **snapshot.as_mebibytes(),
             **extras,
         }
-        started_at = perf_counter()
+        started_at = perf_counter() if self._measure_overhead else None
         self.log.info("computation_memory %s", json.dumps(record, sort_keys=True, separators=(",", ":")))
-        self.logging_ms += 1000 * (perf_counter() - started_at)
+        if started_at is not None:
+            self.logging_ms += 1000 * (perf_counter() - started_at)
 
 
 class _TelemetryBoundary:

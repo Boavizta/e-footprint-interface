@@ -4,7 +4,7 @@ Priorities are evidence-driven and should be revised as more topologies are prof
 
 | Priority | Candidate | Expected effect | Evidence / validation needed | Complexity |
 |---|---|---|---|---|
-| P0 | Progressive calculation memory breaker | Abort a cold Sankey before the container OOM-kills its only worker | Validate maximum growth between reactive-slot callbacks and choose cgroup headroom | Medium, cross-repository |
+| P0 | Progressive calculation memory breaker | Abort a cold Sankey before the container OOM-kills its only worker | Implemented and locally calibrated at 85%; development enforcement trial and explicit production approval remain | Medium, cross-repository |
 | P0 | Persist the scalar attribution matrix in recovery storage | Avoid rebuilding the hourly graph after a Redis miss | Matrix is tiny relative to the calculated hourly graph; measure cache/read cost | Medium |
 | P1 | Topology-aware preflight warning | Warn before a model becomes unlikely to produce a Sankey | Calibrate coordinate-hours by calculation family across adversarial topologies | Medium |
 | P1 | Recycle only after high retained cgroup working set | Recover allocator-retained memory without reacting to reclaimable page cache | A local SQLite copy-up demonstrated that raw cgroup usage may be dominated by unrelated file cache | Low; guard already exists |
