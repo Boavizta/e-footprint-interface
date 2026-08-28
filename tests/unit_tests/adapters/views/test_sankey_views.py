@@ -4,6 +4,7 @@ Covers:
 1. sankey_form(): card_id uniqueness, chip list filtering, default pre-selections
 2. sankey_diagram(): response structure, title, column header labels, parameter mapping
 """
+
 import json
 import re
 from unittest.mock import MagicMock, patch
@@ -13,8 +14,11 @@ from efootprint.constants.units import u
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 
 from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 from model_builder.adapters.views.sankey_views import (
-    _build_sankey_payload, _expand_skipped_columns, DEFAULT_ACTIVE_COLUMNS,
+    _build_sankey_payload,
+    _expand_skipped_columns,
+    DEFAULT_ACTIVE_COLUMNS,
 )
 from tests.fixtures.system_builders import create_hourly_usage
 
@@ -22,6 +26,7 @@ from tests.fixtures.system_builders import create_hourly_usage
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
+
 
 def _setup_session(client, system_data: dict) -> None:
     repository = SessionSystemRepository(client.session)
@@ -51,15 +56,14 @@ def _make_sankey_mock(mock_cls):
     instance.get_column_metadata.return_value = []
     instance.get_root_display_unit.return_value = u.tonne
     instance.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
-    instance.get_percentage_of_total.side_effect = (
-        lambda value: value / instance.total_system_value * 100
-    )
+    instance.get_percentage_of_total.side_effect = lambda value: value / instance.total_system_value * 100
     return instance
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def sankey_client(client, minimal_system_data):
@@ -82,6 +86,7 @@ def default_post():
 # ---------------------------------------------------------------------------
 # TestSankeyForm
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 class TestSankeyForm:
@@ -156,15 +161,17 @@ class TestSankeyCards:
         system_data = {
             **minimal_system_data,
             "interface_config": {
-                "sankey_diagrams": [{
-                    "id": "deadbeef",
-                    "lifecycle_phase_filter": "Manufacturing",
-                    "aggregation_threshold_percent": 2.5,
-                    "active_columns": ["phase", "category", "3"],
-                    "excluded_types": ["Device"],
-                    "display_column_headers": False,
-                    "node_label_max_length": 31,
-                }]
+                "sankey_diagrams": [
+                    {
+                        "id": "deadbeef",
+                        "lifecycle_phase_filter": "Manufacturing",
+                        "aggregation_threshold_percent": 2.5,
+                        "active_columns": ["phase", "category", "3"],
+                        "excluded_types": ["Device"],
+                        "display_column_headers": False,
+                        "node_label_max_length": 31,
+                    }
+                ]
             },
         }
         _setup_session(client, system_data)
@@ -183,15 +190,17 @@ class TestSankeyCards:
         session = client.session
         session.pop("system_data", None)
         session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {
-            "sankey_diagrams": [{
-                "id": "deadbeef",
-                "lifecycle_phase_filter": "Usage",
-                "aggregation_threshold_percent": 3.5,
-                "active_columns": ["phase", "category", "7"],
-                "excluded_types": ["Network"],
-                "display_column_headers": True,
-                "node_label_max_length": 22,
-            }]
+            "sankey_diagrams": [
+                {
+                    "id": "deadbeef",
+                    "lifecycle_phase_filter": "Usage",
+                    "aggregation_threshold_percent": 3.5,
+                    "active_columns": ["phase", "category", "7"],
+                    "excluded_types": ["Network"],
+                    "display_column_headers": True,
+                    "node_label_max_length": 22,
+                }
+            ]
         }
         session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
         session.save()
@@ -208,7 +217,8 @@ class TestSankeyCards:
 
         with patch(
             "model_builder.adapters.repositories.session_system_repository.CacheBackend.get_with_source",
-            autospec=True, side_effect=fake_get_with_source,
+            autospec=True,
+            side_effect=fake_get_with_source,
         ):
             response = client.get("/model_builder/sankey-cards/")
         content = response.content.decode()
@@ -244,6 +254,7 @@ class TestSankeyCards:
 # ---------------------------------------------------------------------------
 # TestSankeyDiagram — response structure
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 class TestSankeyDiagramStructure:
@@ -306,28 +317,64 @@ class TestSankeyDiagramStructure:
         assert response.status_code == 200
         repository = SessionSystemRepository(sankey_client.session)
         saved_data = repository.get_system_data()
-        assert saved_data["interface_config"]["sankey_diagrams"] == [{
-            "id": "1",
-            "lifecycle_phase_filter": "",
-            "aggregation_threshold_percent": 1.0,
-            "active_columns": sorted(DEFAULT_ACTIVE_COLUMNS),
-            "excluded_types": [],
-            "display_column_headers": True,
-            "node_label_max_length": 15,
-        }]
+        assert saved_data["interface_config"]["sankey_diagrams"] == [
+            {
+                "id": "1",
+                "lifecycle_phase_filter": "",
+                "aggregation_threshold_percent": 1.0,
+                "active_columns": sorted(DEFAULT_ACTIVE_COLUMNS),
+                "excluded_types": [],
+                "display_column_headers": True,
+                "node_label_max_length": 15,
+            }
+        ]
+
+    @patch("model_builder.adapters.views.sankey_views.impact_repartition_rows_cache_coverage")
+    @patch("model_builder.adapters.views.sankey_views._build_sankey_payload")
+    def test_memory_limit_replaces_only_graph_with_peeked_coverage_and_capacity(
+        self, build_payload, cache_coverage, sankey_client, default_post, monkeypatch
+    ):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        build_payload.side_effect = ComputationMemoryLimitExceeded(
+            working_set_bytes=3500 * 1024**2,
+            limit_bytes=3400 * 1024**2,
+            capacity_bytes=4 * 1024**3,
+        )
+        cache_coverage.return_value = (1, 3)
+
+        response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
+
+        content = response.content.decode()
+        assert response.status_code == 200
+        assert 'id="sankey-diagram-area-1"' in content
+        assert "33%" in content
+        assert "completion coverage only" in content
+        assert "not a linear" in content
+        assert "4.0 GiB" in content
+        assert "usage patterns" in content
+        assert "modeling timespan" in content
+        assert "split the model" in content
+        assert "modal-container" not in content
+        assert "sankey-title-1" not in content
+        cache_coverage.assert_called_once()
+
+        saved_data = SessionSystemRepository(sankey_client.session).get_system_data()
+        assert saved_data.get("interface_config", {}).get("sankey_diagrams", []) == []
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_column_headers_use_same_dynamic_padding_as_chart(self, mock_cls, sankey_client, default_post):
         instance = _make_sankey_mock(mock_cls)
         instance.node_labels = ["System", "Very long rightmost equipment label for alignment"]
         instance.full_node_labels = instance.node_labels
-        instance.get_column_information.return_value = [{
-            "column_index": 1,
-            "column_type": "manual_split",
-            "description": "Lifecycle phase",
-            "class_names": [],
-            "x_left": 0.5,
-        }]
+        instance.get_column_information.return_value = [
+            {
+                "column_index": 1,
+                "column_type": "manual_split",
+                "description": "Lifecycle phase",
+                "class_names": [],
+                "x_left": 0.5,
+            }
+        ]
         instance.get_column_header_x_shift_px.return_value = -10
 
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
@@ -343,6 +390,7 @@ class TestSankeyDiagramStructure:
 # TestSankeyDiagramParameterMapping — patches ImpactRepartitionSankey constructor
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 class TestSankeyDiagramParameterMapping:
 
@@ -355,7 +403,9 @@ class TestSankeyDiagramParameterMapping:
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_lifecycle_filter_manufacturing(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        sankey_client.post("/model_builder/sankey-diagram/", {**default_post, "lifecycle_phase_filter": "Manufacturing"})
+        sankey_client.post(
+            "/model_builder/sankey-diagram/", {**default_post, "lifecycle_phase_filter": "Manufacturing"}
+        )
         assert mock_cls.call_args.kwargs["lifecycle_phase_filter"] == LifeCyclePhases.MANUFACTURING
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
@@ -391,7 +441,9 @@ class TestSankeyDiagramParameterMapping:
         assert mock_cls.call_args.kwargs["skip_object_footprint_split"] is False
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
-    def test_skip_object_true_when_hardware_and_component_breakdown_inactive(self, mock_cls, sankey_client, default_post):
+    def test_skip_object_true_when_hardware_and_component_breakdown_inactive(
+        self, mock_cls, sankey_client, default_post
+    ):
         _make_sankey_mock(mock_cls)
         data = {**default_post, "active_columns": [c for c in default_post["active_columns"] if c not in ["7", "8"]]}
         sankey_client.post("/model_builder/sankey-diagram/", data)
@@ -471,9 +523,7 @@ class TestBuildSankeyPayload:
         ]
         sankey.get_root_display_unit.return_value = u.tonne
         sankey.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
-        sankey.get_percentage_of_total.side_effect = (
-            lambda value: value / sankey.total_system_value * 100
-        )
+        sankey.get_percentage_of_total.side_effect = lambda value: value / sankey.total_system_value * 100
 
         payload, _ = _build_sankey_payload(sankey)
 
@@ -506,21 +556,21 @@ class TestBuildSankeyPayload:
         ]
         sankey.get_root_display_unit.return_value = u.tonne
         sankey.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
-        sankey.get_percentage_of_total.side_effect = (
-            lambda value: value / sankey.total_system_value * 100
-        )
+        sankey.get_percentage_of_total.side_effect = lambda value: value / sankey.total_system_value * 100
 
         payload, _ = _build_sankey_payload(sankey)
 
-        assert payload["links"] == [{
-            "source_key": "node-0",
-            "target_key": "node-2",
-            "source_name_key": "Root⁣0",
-            "target_name_key": "Leaf⁣2",
-            "value": 1.0,
-            "color": "rgba(100,100,100,0.35)",
-            "tooltip_html": "Root → Leaf<br>1 t CO2eq (100.0%)",
-        }]
+        assert payload["links"] == [
+            {
+                "source_key": "node-0",
+                "target_key": "node-2",
+                "source_name_key": "Root⁣0",
+                "target_name_key": "Leaf⁣2",
+                "value": 1.0,
+                "color": "rgba(100,100,100,0.35)",
+                "tooltip_html": "Root → Leaf<br>1 t CO2eq (100.0%)",
+            }
+        ]
 
     def test_category_nodes_use_object_category_ui_labels(self):
         sankey = MagicMock()
@@ -544,9 +594,7 @@ class TestBuildSankeyPayload:
         ]
         sankey.get_root_display_unit.return_value = u.tonne
         sankey.format_value_in_root_unit.side_effect = lambda value: f"{value / 1000:g} t"
-        sankey.get_percentage_of_total.side_effect = (
-            lambda value: value / sankey.total_system_value * 100
-        )
+        sankey.get_percentage_of_total.side_effect = lambda value: value / sankey.total_system_value * 100
 
         payload, _ = _build_sankey_payload(sankey)
 

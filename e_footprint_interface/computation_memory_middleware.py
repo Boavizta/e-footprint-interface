@@ -1,4 +1,4 @@
-"""Observation-only memory diagnostics for model-builder reactive computations."""
+"""Memory diagnostics and recoverable enforcement for model-builder computations."""
 
 import base64
 import json
@@ -13,6 +13,8 @@ import psutil
 import zstandard as zstd
 
 from e_footprint_interface import runtime_memory
+from model_builder.adapters.views.exception_handling import render_exception_modal
+from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 from model_builder.domain.model_hydration_observer import observe_model_hydrations
 
 
@@ -53,7 +55,7 @@ def _emit_monitor_error(
 
 
 class ComputationMemoryMonitor:
-    """Count every reactive completion and sample memory without changing request behavior."""
+    """Observe reactive completions and trip once when enforce mode reaches its limit."""
 
     def __init__(
         self,
@@ -89,6 +91,8 @@ class ComputationMemoryMonitor:
         self._last_working_set_bytes: int | None = None
         self._logged_high_water_band = -1
         self._would_abort_emitted = False
+        self._limit_exceeded = False
+        self._abort_emitted = False
         self._finished = False
         self._sample_and_emit("start")
 
@@ -98,9 +102,11 @@ class ComputationMemoryMonitor:
         if form_inputs is not None:
             days_per_unit = {"day": 1, "month": 30, "year": 365}
             try:
-                return int(float(form_inputs["modeling_duration_value"]) * days_per_unit[
-                    form_inputs["modeling_duration_unit"]
-                ] * 24)
+                return int(
+                    float(form_inputs["modeling_duration_value"])
+                    * days_per_unit[form_inputs["modeling_duration_unit"]]
+                    * 24
+                )
             except (KeyError, TypeError, ValueError):
                 return None
 
@@ -125,8 +131,7 @@ class ComputationMemoryMonitor:
         edge_usage_patterns = model_web.edge_usage_patterns
         self.usage_pattern_count = len(usage_patterns) + len(edge_usage_patterns)
         pattern_hours = [
-            self._hourly_value_count(pattern.modeling_obj.hourly_usage_journey_starts)
-            for pattern in usage_patterns
+            self._hourly_value_count(pattern.modeling_obj.hourly_usage_journey_starts) for pattern in usage_patterns
         ]
         pattern_hours.extend(
             self._hourly_value_count(pattern.modeling_obj.hourly_edge_usage_journey_starts)
@@ -152,7 +157,7 @@ class ComputationMemoryMonitor:
             self.max_callback_ms = max(self.max_callback_ms, callback_ms)
 
     def _should_sample(self) -> bool:
-        if self.mode == "observe" and self._would_abort_emitted:
+        if self._limit_exceeded or (self.mode == "observe" and self._would_abort_emitted):
             return self.completed_slots % SAMPLE_EVERY_SLOTS == 0
         if self._last_working_set_bytes is not None:
             limit = runtime_memory.COMPUTATION_MEMORY_LIMIT_BYTES
@@ -200,14 +205,36 @@ class ComputationMemoryMonitor:
             and working_set is not None
             and working_set >= limit
         )
-        if crossed_band or large_jump or would_abort:
+        must_abort = (
+            self.mode == "enforce"
+            and not self._limit_exceeded
+            and limit is not None
+            and working_set is not None
+            and working_set >= limit
+        )
+        if crossed_band or large_jump or would_abort or must_abort:
             self._logged_high_water_band = max(self._logged_high_water_band, high_water_band)
             extras = {"sample_jump_mb": round(jump / runtime_memory.MIB, 1)}
             if large_jump:
                 extras["slot"] = diagnostic_name
             if would_abort:
                 self._would_abort_emitted = True
-            self._emit("would_abort" if would_abort else "progress", self._read_snapshot(count_sample=False), **extras)
+            if must_abort:
+                # Latch before logging or raising. Rollback computations may re-enter this callback
+                # while the working set is still high and must not trip the request a second time.
+                self._limit_exceeded = True
+                try:
+                    self._emit("abort", self._read_snapshot(count_sample=False), **extras)
+                    self._abort_emitted = True
+                finally:
+                    # A diagnostic snapshot or logger failure must never cancel the safety trip.
+                    raise ComputationMemoryLimitExceeded(
+                        working_set_bytes=working_set,
+                        limit_bytes=limit,
+                        capacity_bytes=runtime_memory.CGROUP_CAPACITY_BYTES,
+                    )
+            event = "would_abort" if would_abort else "progress"
+            self._emit(event, self._read_snapshot(count_sample=False), **extras)
 
     def _sample_and_emit(self, event: str) -> None:
         snapshot = self._read_snapshot(count_sample=True)
@@ -220,9 +247,12 @@ class ComputationMemoryMonitor:
         if self._finished:
             return
         self._finished = True
+        if self._limit_exceeded:
+            status = "abort"
         if status == "complete" and self.attribution_request and self.attribution_matrix_cached is None:
             self.attribution_matrix_cached = True
-        self._sample_and_emit(status)
+        if status != "abort" or not self._abort_emitted:
+            self._sample_and_emit(status)
 
     def _emit(self, event: str, snapshot: runtime_memory.MemorySnapshot, **extras) -> None:
         record = {
@@ -253,8 +283,8 @@ class ComputationMemoryMonitor:
         self.logging_ms += 1000 * (perf_counter() - started_at)
 
 
-class _ObservationTelemetryBoundary:
-    """Disable observation after its first internal failure without changing request behavior."""
+class _TelemetryBoundary:
+    """Fail open on telemetry defects while preserving the intentional capacity exception."""
 
     def __init__(self, monitor: ComputationMemoryMonitor):
         self.monitor = monitor
@@ -269,6 +299,8 @@ class _ObservationTelemetryBoundary:
             return
         try:
             callback(*args)
+        except ComputationMemoryLimitExceeded:
+            raise
         except Exception as error:
             self.failed = True
             _emit_monitor_error(
@@ -312,8 +344,6 @@ class ComputationMemoryMiddleware:
                 attribution_request=route.endswith("sankey-diagram/"),
             )
         except Exception as error:
-            if mode != "observe":
-                raise
             _emit_monitor_error(
                 log=logger,
                 phase="setup",
@@ -324,14 +354,15 @@ class ComputationMemoryMiddleware:
             )
             return self.get_response(request)
 
-        # Observation is diagnostic and fails open. Other modes retain the monitor's direct exception path so a
-        # future enforcement exception can propagate through the reactive engine unchanged.
-        telemetry = _ObservationTelemetryBoundary(monitor) if mode == "observe" else monitor
+        telemetry = _TelemetryBoundary(monitor)
         request.META["efootprint.memory_request_id"] = monitor.request_id
         request._efootprint_memory_monitor = telemetry
         try:
             with observe_model_hydrations(telemetry.model_hydrated), observe_computations(telemetry):
                 response = self.get_response(request)
+        except ComputationMemoryLimitExceeded as error:
+            telemetry.finish("abort")
+            return render_exception_modal(request, error)
         except Exception:
             try:
                 telemetry.finish("abort")
@@ -356,4 +387,6 @@ class ComputationMemoryMiddleware:
                 monitor.finish("abort")
             except Exception:
                 pass
+        if isinstance(exception, ComputationMemoryLimitExceeded):
+            return render_exception_modal(request, exception)
         return None

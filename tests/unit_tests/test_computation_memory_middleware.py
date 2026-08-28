@@ -17,7 +17,10 @@ from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 from e_footprint_interface import runtime_memory
 from e_footprint_interface import computation_memory_middleware as middleware_module
 from model_builder.adapters.repositories import InMemorySystemRepository
+from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.views import views
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 from model_builder.domain.model_hydration_observer import report_model_hydrated
 from tests.fixtures.system_builders import create_hourly_usage
 
@@ -56,6 +59,14 @@ def _ok_view(request):
     return HttpResponse("ok")
 
 
+def _capacity_fail_view(request):
+    raise ComputationMemoryLimitExceeded(
+        working_set_bytes=3500 * runtime_memory.MIB,
+        limit_bytes=3400 * runtime_memory.MIB,
+        capacity_bytes=4096 * runtime_memory.MIB,
+    )
+
+
 def _report_hydrated_view(request):
     report_model_hydrated(SimpleNamespace())
     return HttpResponse("hydrated")
@@ -65,6 +76,8 @@ urlpatterns = [
     path("model_builder/fail/", _fail_view),
     path("model_builder/ok/", _ok_view),
     path("model_builder/report-hydrated/", _report_hydrated_view),
+    path("model_builder/capacity-fail/", _capacity_fail_view),
+    path("model_builder/download-json/", views.download_json),
 ]
 
 
@@ -152,19 +165,60 @@ def test_monitor_samples_every_sixteen_callbacks_away_from_limit(monkeypatch):
     assert monitor.completed_slots == 16
 
 
-def test_enforce_mode_keeps_lightweight_per_callback_sampling_near_limit_without_raising(monkeypatch):
-    full_reader, lightweight_reader = _patch_memory(monkeypatch, working_set_mb=3800)
+def test_enforce_mode_raises_at_threshold_and_latches_for_remaining_callbacks(monkeypatch):
+    full_reader, lightweight_reader = _patch_memory(monkeypatch, working_set_mb=3900)
     monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
+    monkeypatch.setattr(runtime_memory, "CGROUP_CAPACITY_BYTES", 4096 * runtime_memory.MIB)
+    log = MagicMock()
     monitor = middleware_module.ComputationMemoryMonitor(
-        route="model_builder/sankey-diagram/", method="GET", mode="enforce", log=MagicMock()
+        route="model_builder/sankey-diagram/", method="GET", mode="enforce", log=log
     )
 
-    for _ in range(3):
+    with pytest.raises(ComputationMemoryLimitExceeded) as raised:
         monitor(SimpleNamespace(diagnostic_name="impact_repartition_rows"))
+    for _ in range(15):
+        monitor(SimpleNamespace(diagnostic_name="rollback_guard"))
 
-    assert full_reader.call_count == 1
-    assert lightweight_reader.call_count == 3
-    assert monitor.completed_slots == 3
+    assert raised.value.capacity_bytes == 4096 * runtime_memory.MIB
+    assert raised.value.limit_bytes == 3900 * runtime_memory.MIB
+    assert [record["event"] for record in _records(log)].count("abort") == 1
+    assert full_reader.call_count == 2
+    assert lightweight_reader.call_count == 2
+    assert monitor.completed_slots == 16
+
+
+def test_enforce_mode_does_not_raise_below_threshold_boundary(monkeypatch):
+    _patch_memory(monkeypatch, working_set_mb=3899)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/results/", method="GET", mode="enforce", log=MagicMock()
+    )
+
+    monitor(SimpleNamespace(diagnostic_name="ordinary_slot"))
+
+    assert monitor.completed_slots == 1
+    assert monitor._limit_exceeded is False
+
+
+def test_enforce_mode_still_raises_when_abort_diagnostics_fail(monkeypatch):
+    _patch_memory(monkeypatch, working_set_mb=3900)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 3900 * runtime_memory.MIB)
+    log = MagicMock()
+
+    def fail_abort_record(_message, payload):
+        if json.loads(payload)["event"] == "abort":
+            raise RuntimeError("logging failed")
+
+    log.info.side_effect = fail_abort_record
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/results/", method="GET", mode="enforce", log=log
+    )
+
+    with pytest.raises(ComputationMemoryLimitExceeded):
+        monitor(SimpleNamespace(diagnostic_name="ordinary_slot"))
+
+    assert monitor._limit_exceeded is True
+    assert monitor._abort_emitted is False
 
 
 def test_observe_mode_emits_one_would_abort_then_returns_to_ordinary_cadence(monkeypatch):
@@ -197,7 +251,8 @@ def test_progress_logs_only_new_high_water_bands_and_large_jump_identity(monkeyp
     )
     monkeypatch.setattr(runtime_memory, "read_memory_snapshot", full_reader)
     monkeypatch.setattr(runtime_memory, "read_cgroup_working_set_bytes", lightweight_reader)
-    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 200 * runtime_memory.MIB)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_LIMIT_BYTES", 2000 * runtime_memory.MIB)
+    monkeypatch.setattr(middleware_module, "NEAR_LIMIT_WINDOW_BYTES", 2000 * runtime_memory.MIB)
     log = MagicMock()
     monitor = middleware_module.ComputationMemoryMonitor(
         route="model_builder/results/", method="GET", mode="enforce", log=log
@@ -374,8 +429,9 @@ def test_real_middleware_disables_observation_when_hydration_callback_fails(monk
     ROOT_URLCONF=__name__,
     MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
 )
-def test_real_middleware_preserves_response_when_monitor_setup_fails(monkeypatch):
-    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "observe")
+@pytest.mark.parametrize("mode", ["observe", "enforce"])
+def test_real_middleware_preserves_response_when_monitor_setup_fails(monkeypatch, mode):
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", mode)
     monkeypatch.setattr(
         middleware_module.ComputationMemoryMonitor,
         "_sample_and_emit",
@@ -392,6 +448,7 @@ def test_real_middleware_preserves_response_when_monitor_setup_fails(monkeypatch
     assert len(errors) == 1
     assert errors[0]["phase"] == "setup"
     assert errors[0]["route"] == "model_builder/ok/"
+    assert errors[0]["mode"] == mode
 
 
 @override_settings(
@@ -425,22 +482,84 @@ def test_real_middleware_disables_observation_after_reactive_callback_failure(mo
     assert errors[0]["phase"] == "computation_callback"
 
 
-def test_enforce_mode_keeps_direct_reactive_exception_path(monkeypatch):
+def test_enforce_boundary_keeps_typed_capacity_exception_path(monkeypatch):
     _patch_memory(monkeypatch)
+    exception = ComputationMemoryLimitExceeded(working_set_bytes=3900, limit_bytes=3800, capacity_bytes=4096)
+    callback = MagicMock(side_effect=exception)
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/results/", method="GET", mode="enforce", log=MagicMock()
+    )
+    boundary = middleware_module._TelemetryBoundary(monitor)
+
+    with pytest.raises(ComputationMemoryLimitExceeded):
+        boundary._run("computation_callback", callback, SimpleNamespace(diagnostic_name="slot"))
+
+
+def test_enforce_mode_fails_open_after_unexpected_monitor_error(monkeypatch):
+    _patch_memory(monkeypatch)
+    monitor = middleware_module.ComputationMemoryMonitor(
+        route="model_builder/results/", method="GET", mode="enforce", log=MagicMock()
+    )
+    monitor._sample_progress = MagicMock(side_effect=RuntimeError("telemetry failed"))
+    boundary = middleware_module._TelemetryBoundary(monitor)
+
+    for _ in range(32):
+        boundary(SimpleNamespace(diagnostic_name="ordinary_slot"))
+
+    assert boundary.failed is True
+    monitor._sample_progress.assert_called_once()
+
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=["e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware"],
+)
+def test_undecorated_route_uses_generic_memory_limit_modal_fallback(monkeypatch):
+    _patch_memory(monkeypatch)
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
     monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "enforce")
-    callback = MagicMock(side_effect=RuntimeError("future enforcement exception"))
-    monkeypatch.setattr(middleware_module.ComputationMemoryMonitor, "__call__", callback)
+    log = MagicMock()
+    monkeypatch.setattr(middleware_module.logger, "info", log.info)
 
-    @contextmanager
-    def trigger_callback(observer):
-        observer(SimpleNamespace(diagnostic_name="slot"))
-        yield
+    response = Client().get("/model_builder/capacity-fail/")
 
-    monkeypatch.setattr(middleware_module, "observe_computations", trigger_callback)
-    middleware = middleware_module.ComputationMemoryMiddleware(lambda request: HttpResponse("ok"))
+    body = response.content.decode()
+    assert response.status_code == 200
+    assert response.headers["HX-Reswap"] == "none"
+    assert ComputationMemoryLimitExceeded.safe_message in body
+    records = _records(log)
+    assert [record["event"] for record in records] == ["start", "abort"]
+    assert len({record["request_id"] for record in records}) == 1
 
-    with pytest.raises(RuntimeError, match="future enforcement exception"):
-        middleware(RequestFactory().get("/model_builder/"))
+
+@override_settings(
+    ROOT_URLCONF=__name__,
+    MIDDLEWARE=[
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "e_footprint_interface.computation_memory_middleware.ComputationMemoryMiddleware",
+    ],
+)
+@pytest.mark.django_db
+def test_memory_limited_export_preserves_persisted_model(monkeypatch, minimal_system_data):
+    _patch_memory(monkeypatch)
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    monkeypatch.setattr(runtime_memory, "COMPUTATION_MEMORY_GUARD_MODE", "enforce")
+    client = Client()
+    repository = SessionSystemRepository(client.session)
+    repository.save_data(minimal_system_data)
+    persisted_before = repository.get_system_data()
+    exception = ComputationMemoryLimitExceeded(
+        working_set_bytes=3500 * runtime_memory.MIB,
+        limit_bytes=3400 * runtime_memory.MIB,
+        capacity_bytes=4096 * runtime_memory.MIB,
+    )
+    monkeypatch.setattr(views.ModelWeb, "export_json", MagicMock(side_effect=exception))
+
+    response = client.get("/model_builder/download-json/")
+
+    assert response.status_code == 200
+    assert ComputationMemoryLimitExceeded.safe_message in response.content.decode()
+    assert SessionSystemRepository(client.session).get_system_data() == persisted_before
 
 
 @override_settings(

@@ -3,7 +3,9 @@
 Uses a system with Server, Storage, Device, Network, UsagePattern, and Job
 so all chip types are non-empty and meaningful assertions can be made.
 """
+
 import pytest
+from django.template.loader import render_to_string
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.services.video_streaming import VideoStreaming
@@ -38,11 +40,17 @@ def sankey_system(model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
     network = Network.from_defaults("Test Network")
     country = country_generator("Test Country", "TST", SourceValue(100 * u.g / u.kWh), tz("Europe/Paris"))()
     uj_step = UsageJourneyStep.from_defaults(
-        "Test Step", jobs=[VideoStreamingJob.from_defaults("Test Job", service=service)])
+        "Test Step", jobs=[VideoStreamingJob.from_defaults("Test Job", service=service)]
+    )
     uj = UsageJourney("Test Journey", uj_steps=[uj_step])
     usage_pattern = UsagePattern(
-        "Test UP", usage_journey=uj, devices=[device], network=network, country=country,
-        hourly_usage_journey_starts=create_hourly_usage())
+        "Test UP",
+        usage_journey=uj,
+        devices=[device],
+        network=network,
+        country=country,
+        hourly_usage_journey_starts=create_hourly_usage(),
+    )
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     system_dict = system_to_json(system, save_computed_state=False)
     return load_system_dict_into_browser(model_builder_page, system_dict)
@@ -50,6 +58,29 @@ def sankey_system(model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
 
 @pytest.mark.e2e
 class TestSankeySection:
+
+    def test_memory_limit_guidance_replaces_graph_but_keeps_card_controls(self, sankey_system: ModelBuilderPage):
+        sankey_system.open_result_panel()
+        card = SankeyPage(sankey_system).first_card()
+        card.wait_for_diagram_update()
+        response_html = render_to_string(
+            "model_builder/result/sankey_memory_limit.html",
+            {"card_id": card.card_id, "coverage_percent": 33, "capacity_gib": 4.0},
+        )
+        sankey_system.page.route(
+            "**/model_builder/sankey-diagram/",
+            lambda route: route.fulfill(status=200, content_type="text/html", body=response_html),
+        )
+
+        card.set_lifecycle_filter("Manufacturing")
+
+        guidance = card.memory_limit_guidance_locator()
+        guidance.wait_for(state="visible")
+        assert "33%" in guidance.inner_text()
+        assert "completion coverage only" in guidance.inner_text()
+        assert "4.0 GiB" in guidance.inner_text()
+        assert card.settings_visible()
+        assert sankey_system.page.locator("#model-builder-modal").count() == 0
 
     def test_first_diagram_auto_renders_on_result_panel_open(self, sankey_system: ModelBuilderPage):
         """Opening the result panel auto-generates the first Sankey with default settings."""

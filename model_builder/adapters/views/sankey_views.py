@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
 from efootprint.constants.units import u
+from efootprint.core.attribution import impact_repartition_rows_cache_coverage
 from efootprint.core.lifecycle_phases import LifeCyclePhases
 from efootprint.utils.display import human_readable_unit
 from efootprint.utils.impact_repartition.sankey import ImpactRepartitionSankey
@@ -17,6 +18,7 @@ from model_builder.adapters.ui_config.class_ui_config_provider import ClassUICon
 from model_builder.adapters.ui_config.object_category_ui_config_provider import ObjectCategoryUIConfigProvider
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 
 EXCLUDABLE_CLASSES = ["Device", "EdgeDevice", "Network", "ServerBase", "ExternalAPI", "Storage", "EdgeStorage"]
 
@@ -126,12 +128,18 @@ def _estimate_sankey_right_padding(nodes: list[dict]) -> int:
 def _build_column_headers_context(sankey: ImpactRepartitionSankey) -> list[dict]:
     headers = []
     for info in sorted(sankey.get_column_information(), key=lambda x: x["column_index"]):
-        lines = [info["description"]] if info["column_type"] == "manual_split" else [ClassUIConfigProvider.get_label(cn) for cn in info["class_names"]]
-        headers.append({
-            "lines": lines,
-            "x_left": info["x_left"],
-            "x_shift_px": sankey.get_column_header_x_shift_px(),
-        })
+        lines = (
+            [info["description"]]
+            if info["column_type"] == "manual_split"
+            else [ClassUIConfigProvider.get_label(cn) for cn in info["class_names"]]
+        )
+        headers.append(
+            {
+                "lines": lines,
+                "x_left": info["x_left"],
+                "x_shift_px": sankey.get_column_header_x_shift_px(),
+            }
+        )
     return headers
 
 
@@ -193,7 +201,8 @@ def _build_node_tooltip(sankey: ImpactRepartitionSankey, node_idx: int, display_
 
 
 def _build_link_tooltip(
-        sankey: ImpactRepartitionSankey, source_full_label: str, target_full_label: str, value_kg: float) -> str:
+    sankey: ImpactRepartitionSankey, source_full_label: str, target_full_label: str, value_kg: float
+) -> str:
     amount_str = _format_sankey_value(sankey, value_kg)
     pct = _get_sankey_percentage(sankey, value_kg)
     return f"{source_full_label} → {target_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
@@ -227,7 +236,9 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
     kg_to_display_unit = (1 * u.kg).to(display_unit).magnitude
     for node_idx, label in enumerate(sankey.node_labels):
         display_labels_by_idx[node_idx] = _get_display_node_label(sankey, node_idx, label)
-        display_full_labels_by_idx[node_idx] = _get_display_node_label(sankey, node_idx, sankey.full_node_labels[node_idx])
+        display_full_labels_by_idx[node_idx] = _get_display_node_label(
+            sankey, node_idx, sankey.full_node_labels[node_idx]
+        )
 
     nodes_per_column: dict[int, int] = {}
     nodes = []
@@ -239,21 +250,23 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
         display_label = display_labels_by_idx[node_idx]
         display_full_label = display_full_labels_by_idx[node_idx]
         name_key = f"{display_label}{_SANKEY_NAME_DELIMITER}{node_idx}"
-        nodes.append({
-            "key": f"node-{node_idx}",
-            "name_key": name_key,
-            "label": display_label,
-            "full_name": display_full_label,
-            "value": sankey.node_total_values[node_idx] * kg_to_display_unit,
-            "depth": column - min_column,
-            "column": column,
-            "color": node_colors[node_idx],
-            "tooltip_html": _build_node_tooltip(sankey, node_idx, display_full_label),
-            "is_aggregated": node_idx in sankey.aggregated_node_members,
-            "is_category": node_idx in category_nodes,
-            "is_leaf": node_idx in leaf_nodes,
-            "is_breakdown": node_idx in breakdown_nodes,
-        })
+        nodes.append(
+            {
+                "key": f"node-{node_idx}",
+                "name_key": name_key,
+                "label": display_label,
+                "full_name": display_full_label,
+                "value": sankey.node_total_values[node_idx] * kg_to_display_unit,
+                "depth": column - min_column,
+                "column": column,
+                "color": node_colors[node_idx],
+                "tooltip_html": _build_node_tooltip(sankey, node_idx, display_full_label),
+                "is_aggregated": node_idx in sankey.aggregated_node_members,
+                "is_category": node_idx in category_nodes,
+                "is_leaf": node_idx in leaf_nodes,
+                "is_breakdown": node_idx in breakdown_nodes,
+            }
+        )
 
     right_padding_px = _estimate_sankey_right_padding(nodes)
 
@@ -270,16 +283,19 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
 
     links = []
     for (source_idx, target_idx), value in sorted(collapsed_links.items()):
-        links.append({
-            "source_key": f"node-{source_idx}",
-            "target_key": f"node-{target_idx}",
-            "source_name_key": f"{display_labels_by_idx[source_idx]}{_SANKEY_NAME_DELIMITER}{source_idx}",
-            "target_name_key": f"{display_labels_by_idx[target_idx]}{_SANKEY_NAME_DELIMITER}{target_idx}",
-            "value": value * kg_to_display_unit,
-            "color": node_colors[source_idx].replace("0.8)", "0.35)"),
-            "tooltip_html": _build_link_tooltip(
-                sankey, display_full_labels_by_idx[source_idx], display_full_labels_by_idx[target_idx], value),
-        })
+        links.append(
+            {
+                "source_key": f"node-{source_idx}",
+                "target_key": f"node-{target_idx}",
+                "source_name_key": f"{display_labels_by_idx[source_idx]}{_SANKEY_NAME_DELIMITER}{source_idx}",
+                "target_name_key": f"{display_labels_by_idx[target_idx]}{_SANKEY_NAME_DELIMITER}{target_idx}",
+                "value": value * kg_to_display_unit,
+                "color": node_colors[source_idx].replace("0.8)", "0.35)"),
+                "tooltip_html": _build_link_tooltip(
+                    sankey, display_full_labels_by_idx[source_idx], display_full_labels_by_idx[target_idx], value
+                ),
+            }
+        )
 
     node_width, node_gap, chart_top, chart_bottom = 20, 20, 10, 30
     max_nodes_per_col = max(nodes_per_column.values()) if nodes_per_column else 1
@@ -314,7 +330,8 @@ def sankey_diagram(request):
     skip_object_category_footprint_split = "category" not in active_columns
     skip_object_footprint_split = "7" not in active_columns and "8" not in active_columns
     inactive_column_indices = [
-        chip_id for chip_id, _, _ in ANALYSE_BY_CHIPS
+        chip_id
+        for chip_id, _, _ in ANALYSE_BY_CHIPS
         if chip_id not in active_columns and chip_id not in ("phase", "category")
     ]
     skipped_classes = _expand_skipped_columns(inactive_column_indices)
@@ -322,61 +339,83 @@ def sankey_diagram(request):
     display_column_headers = "display_column_headers" in request.POST
     node_label_max_length = int(request.POST.get("node_label_max_length", "15"))
 
-    sankey = ImpactRepartitionSankey(
-        system,
-        aggregation_threshold_percent=aggregation_threshold_percent,
-        node_label_max_length=node_label_max_length,
-        skipped_impact_repartition_classes=skipped_classes or None,
-        skip_phase_footprint_split=skip_phase_footprint_split,
-        skip_object_category_footprint_split=skip_object_category_footprint_split,
-        skip_object_footprint_split=skip_object_footprint_split,
-        excluded_object_types=excluded_object_types or None,
-        lifecycle_phase_filter=lifecycle_phase_filter,
-        display_column_information=False,
-    )
-    sankey_payload, sankey_height = _build_sankey_payload(sankey)
-    sankey_payload_json = json.dumps(sankey_payload)
+    try:
+        sankey = ImpactRepartitionSankey(
+            system,
+            aggregation_threshold_percent=aggregation_threshold_percent,
+            node_label_max_length=node_label_max_length,
+            skipped_impact_repartition_classes=skipped_classes or None,
+            skip_phase_footprint_split=skip_phase_footprint_split,
+            skip_object_category_footprint_split=skip_object_category_footprint_split,
+            skip_object_footprint_split=skip_object_footprint_split,
+            excluded_object_types=excluded_object_types or None,
+            lifecycle_phase_filter=lifecycle_phase_filter,
+            display_column_information=False,
+        )
+        sankey_payload, sankey_height = _build_sankey_payload(sankey)
+        sankey_payload_json = json.dumps(sankey_payload)
 
-    column_headers = _build_column_headers_context(sankey) if display_column_headers else []
+        column_headers = _build_column_headers_context(sankey) if display_column_headers else []
 
-    lifecycle_info = f"{lifecycle_phase_str.lower()} " if lifecycle_phase_filter else ""
-    excluded_info = ""
-    if excluded_object_types:
-        labels = [ClassUIConfigProvider.get_label(cls) for cls in excluded_object_types]
-        excluded_info = f" excluding {', '.join(labels)}"
-    total_co2 = _format_sankey_value(sankey, _get_sankey_total_value(sankey))
-    title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info} (total {total_co2} CO₂eq)"
-    subtitle_map = {None: "All phases", LifeCyclePhases.MANUFACTURING: "Manufacturing only", LifeCyclePhases.USAGE: "Usage only"}
-    subtitle = subtitle_map[lifecycle_phase_filter]
+        lifecycle_info = f"{lifecycle_phase_str.lower()} " if lifecycle_phase_filter else ""
+        excluded_info = ""
+        if excluded_object_types:
+            labels = [ClassUIConfigProvider.get_label(cls) for cls in excluded_object_types]
+            excluded_info = f" excluding {', '.join(labels)}"
+        total_co2 = _format_sankey_value(sankey, _get_sankey_total_value(sankey))
+        title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info} (total {total_co2} CO₂eq)"
+        subtitle_map = {
+            None: "All phases",
+            LifeCyclePhases.MANUFACTURING: "Manufacturing only",
+            LifeCyclePhases.USAGE: "Usage only",
+        }
+        subtitle = subtitle_map[lifecycle_phase_filter]
 
-    card_settings = {
-        "id": card_id,
-        "lifecycle_phase_filter": lifecycle_phase_str,
-        "aggregation_threshold_percent": aggregation_threshold_percent,
-        "active_columns": sorted(active_columns),
-        "excluded_types": excluded_object_types,
-        "display_column_headers": display_column_headers,
-        "node_label_max_length": node_label_max_length,
-    }
-    config = repository.interface_config
-    diagrams = config.setdefault("sankey_diagrams", [])
-    existing_index = next((i for i, diagram in enumerate(diagrams) if diagram["id"] == card_id), None)
-    if existing_index is None:
-        diagrams.append(card_settings)
-    else:
-        diagrams[existing_index] = card_settings
-    model_web.persist_to_cache()
+        card_settings = {
+            "id": card_id,
+            "lifecycle_phase_filter": lifecycle_phase_str,
+            "aggregation_threshold_percent": aggregation_threshold_percent,
+            "active_columns": sorted(active_columns),
+            "excluded_types": excluded_object_types,
+            "display_column_headers": display_column_headers,
+            "node_label_max_length": node_label_max_length,
+        }
+        config = repository.interface_config
+        diagrams = config.setdefault("sankey_diagrams", [])
+        existing_index = next((i for i, diagram in enumerate(diagrams) if diagram["id"] == card_id), None)
+        if existing_index is None:
+            diagrams.append(card_settings)
+        else:
+            diagrams[existing_index] = card_settings
+        model_web.persist_to_cache()
 
-    return render(request, "model_builder/result/sankey_diagram.html", {
-        "card_id": card_id,
-        "sankey_payload_json": sankey_payload_json,
-        "sankey_height": sankey_height,
-        "column_headers": column_headers,
-        "sankey_layout": sankey_payload["layout"],
-        "display_column_headers": display_column_headers,
-        "title": title,
-        "subtitle": subtitle,
-    })
+        return render(
+            request,
+            "model_builder/result/sankey_diagram.html",
+            {
+                "card_id": card_id,
+                "sankey_payload_json": sankey_payload_json,
+                "sankey_height": sankey_height,
+                "column_headers": column_headers,
+                "sankey_layout": sankey_payload["layout"],
+                "display_column_headers": display_column_headers,
+                "title": title,
+                "subtitle": subtitle,
+            },
+        )
+    except ComputationMemoryLimitExceeded as error:
+        cached_slots, total_slots = impact_repartition_rows_cache_coverage(system)
+        coverage_percent = round(100 * cached_slots / total_slots) if total_slots else 0
+        capacity_gib = round(error.capacity_bytes / (1024**3), 1) if error.capacity_bytes is not None else None
+        return render(
+            request,
+            "model_builder/result/sankey_memory_limit.html",
+            {
+                "card_id": card_id,
+                "coverage_percent": coverage_percent,
+                "capacity_gib": capacity_gib,
+            },
+        )
 
 
 def sankey_form(request):
@@ -388,11 +427,15 @@ def sankey_form(request):
     exclude_chips = _build_exclude_chip_list(EXCLUDABLE_CLASSES, present_classes)
     analyse_by_chips = _build_analyse_by_chips(present_classes)
 
-    return render(request, "model_builder/result/sankey_card.html", {
-        "card_id": card_id,
-        "exclude_chips": exclude_chips,
-        "analyse_by_chips": analyse_by_chips,
-    })
+    return render(
+        request,
+        "model_builder/result/sankey_card.html",
+        {
+            "card_id": card_id,
+            "exclude_chips": exclude_chips,
+            "analyse_by_chips": analyse_by_chips,
+        },
+    )
 
 
 def sankey_cards(request):
@@ -418,16 +461,18 @@ def sankey_cards(request):
         for chip in exclude_chips:
             chip["active"] = chip["class_name"] in saved_excluded_types
 
-        cards_html.append(render_to_string(
-            "model_builder/result/sankey_card.html",
-            {
-                "card_id": saved_diagram["id"],
-                "exclude_chips": exclude_chips,
-                "analyse_by_chips": analyse_by_chips,
-                "initial_settings": saved_diagram,
-            },
-            request=request,
-        ))
+        cards_html.append(
+            render_to_string(
+                "model_builder/result/sankey_card.html",
+                {
+                    "card_id": saved_diagram["id"],
+                    "exclude_chips": exclude_chips,
+                    "analyse_by_chips": analyse_by_chips,
+                    "initial_settings": saved_diagram,
+                },
+                request=request,
+            )
+        )
 
     return HttpResponse("".join(cards_html))
 

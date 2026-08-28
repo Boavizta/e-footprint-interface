@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
@@ -6,6 +8,7 @@ from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.application.use_cases import CreateObjectInput, CreateObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
 
 
@@ -38,6 +41,31 @@ def _extract_select_html(response_body: str, select_id: str) -> str:
 @pytest.mark.django_db
 class TestViewsEdition:
 
+    def test_memory_limited_edit_uses_generic_modal_and_preserves_persisted_model(
+        self, client, minimal_system_data, monkeypatch
+    ):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        object_id = model_web.servers[0].efootprint_id
+        saved_before = SessionSystemRepository(client.session).get_system_data()
+        exception = ComputationMemoryLimitExceeded(
+            working_set_bytes=3500 * 1024**2,
+            limit_bytes=3400 * 1024**2,
+            capacity_bytes=4 * 1024**3,
+        )
+        monkeypatch.setattr(
+            "model_builder.adapters.views.views_edition.EditObjectUseCase.execute",
+            MagicMock(side_effect=exception),
+        )
+
+        response = client.post(f"/model_builder/edit-object/{object_id}/", {})
+
+        assert response.status_code == 200
+        assert response.headers["HX-Reswap"] == "none"
+        assert ComputationMemoryLimitExceeded.safe_message in response.content.decode()
+        assert SessionSystemRepository(client.session).get_system_data() == saved_before
+
     def test_open_edit_object_panel_for_edge_device_renders_group_memberships(self, client, default_system_repository):
         _setup_session(client, default_system_repository.get_system_data())
         device_id = _create_object_in_session(
@@ -63,7 +91,9 @@ class TestViewsEdition:
         assert f"/model_builder/update-dict-count/{group_id}/{device_id}/" in body
         assert f"/model_builder/unlink-dict-entry/{group_id}/{device_id}/" in body
 
-    def test_open_edit_object_panel_for_group_excludes_illegal_sub_group_choices(self, client, default_system_repository):
+    def test_open_edit_object_panel_for_group_excludes_illegal_sub_group_choices(
+        self, client, default_system_repository
+    ):
         _setup_session(client, default_system_repository.get_system_data())
         campus_id = _create_object_in_session(
             client,

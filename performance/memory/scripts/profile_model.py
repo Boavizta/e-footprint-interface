@@ -182,9 +182,9 @@ def main():
     )
     parser.add_argument(
         "--monitor-mode",
-        choices=("off", "noop", "observe"),
+        choices=("off", "noop", "observe", "enforce"),
         default="off",
-        help="Install no observer, a no-op observer, or the observation-only request monitor.",
+        help="Install no observer, a no-op observer, observation, or the enforce-mode circuit breaker.",
     )
     args = parser.parse_args()
 
@@ -200,6 +200,7 @@ def main():
     from model_builder.adapters.repositories import InMemorySystemRepository
     from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
     from model_builder.domain.entities.web_core.model_web import ModelWeb
+    from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 
     sampler.snapshot("imports", "after_app_imports")
     sampler.begin("input")
@@ -213,6 +214,9 @@ def main():
     noop_callback_count = 0
     monitor = None
     calculation_elapsed_seconds = 0.0
+    calculation_aborted = False
+    calculation_started_at = time.perf_counter()
+    model_web = result = sankey = payload = None
 
     def noop_callback(_slot):
         nonlocal noop_callback_count
@@ -221,60 +225,66 @@ def main():
     observer_scope = nullcontext()
     if args.monitor_mode == "noop":
         observer_scope = observe_computations(noop_callback)
-    elif args.monitor_mode == "observe":
+    elif args.monitor_mode in {"observe", "enforce"}:
         monitor = ComputationMemoryMonitor(
             route=f"profile/{args.scenario}",
             method="PROFILE",
+            mode=args.monitor_mode,
             usage_pattern_count=args.patterns,
             attribution_request="sankey" in args.scenario,
         )
         observer_scope = observe_computations(monitor)
 
-    with observer_scope:
-        sampler.begin("hydrate")
-        model_web = ModelWeb(InMemorySystemRepository(), data)
-        sampler.snapshot("hydrate", "after_hydration")
+    try:
+        with observer_scope:
+            sampler.begin("hydrate")
+            model_web = ModelWeb(InMemorySystemRepository(), data)
+            sampler.snapshot("hydrate", "after_hydration")
 
-        result = sankey = payload = None
-        if args.scenario in {"results", "results-then-sankey"}:
-            sampler.begin("results")
-            calculation_started_at = time.perf_counter()
-            result = model_web.system_emissions
-            calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
-            sampler.snapshot("results", "after_results")
+            if args.scenario in {"results", "results-then-sankey"}:
+                sampler.begin("results")
+                calculation_started_at = time.perf_counter()
+                result = model_web.system_emissions
+                calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+                sampler.snapshot("results", "after_results")
 
-        if args.scenario == "results-then-sankey":
-            sampler.begin("between_requests_gc")
-            del model_web, result
-            result = None
-            gc.collect()
-            sampler.snapshot("between_requests_gc", "after_first_request_gc")
-            sampler.begin("rehydrate")
-            model_web = ModelWeb(InMemorySystemRepository(), deepcopy(data))
-            sampler.snapshot("rehydrate", "after_second_hydration")
+            if args.scenario == "results-then-sankey":
+                sampler.begin("between_requests_gc")
+                del model_web, result
+                model_web = result = None
+                gc.collect()
+                sampler.snapshot("between_requests_gc", "after_first_request_gc")
+                sampler.begin("rehydrate")
+                model_web = ModelWeb(InMemorySystemRepository(), deepcopy(data))
+                sampler.snapshot("rehydrate", "after_second_hydration")
 
-        if args.scenario in {"cold-sankey", "warm-sankey", "results-then-sankey"}:
-            sampler.begin("cold_sankey")
-            calculation_started_at = time.perf_counter()
-            sankey, payload = build_sankey(model_web)
-            matrix = model_web.system.modeling_obj.impact_repartition_matrix
-            calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
-            sampler.snapshot("cold_sankey", "after_cold_sankey")
-            print(
-                f"MATRIX rows={len(matrix)}; SANKEY nodes={len(payload['nodes'])} links={len(payload['links'])}",
-                flush=True,
-            )
+            if args.scenario in {"cold-sankey", "warm-sankey", "results-then-sankey"}:
+                sampler.begin("cold_sankey")
+                calculation_started_at = time.perf_counter()
+                sankey, payload = build_sankey(model_web)
+                matrix = model_web.system.modeling_obj.impact_repartition_matrix
+                calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+                sampler.snapshot("cold_sankey", "after_cold_sankey")
+                print(
+                    f"MATRIX rows={len(matrix)}; SANKEY nodes={len(payload['nodes'])} links={len(payload['links'])}",
+                    flush=True,
+                )
 
-        if args.scenario == "warm-sankey":
-            del sankey, payload
-            sampler.begin("warm_sankey")
-            calculation_started_at = time.perf_counter()
-            sankey, payload = build_sankey(model_web)
-            calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
-            sampler.snapshot("warm_sankey", "after_warm_sankey")
+            if args.scenario == "warm-sankey":
+                del sankey, payload
+                sankey = payload = None
+                sampler.begin("warm_sankey")
+                calculation_started_at = time.perf_counter()
+                sankey, payload = build_sankey(model_web)
+                calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+                sampler.snapshot("warm_sankey", "after_warm_sankey")
+    except ComputationMemoryLimitExceeded:
+        calculation_elapsed_seconds += time.perf_counter() - calculation_started_at
+        calculation_aborted = True
+        sampler.snapshot(sampler.stage, "memory_limit_abort")
 
     if monitor is not None:
-        monitor.finish("complete")
+        monitor.finish("abort" if calculation_aborted else "complete")
 
     sampler.begin("post_gc")
     del model_web, data, result, sankey, payload
@@ -289,6 +299,7 @@ def main():
         "schema_version": 1,
         "scenario": args.scenario,
         "monitor_mode": args.monitor_mode,
+        "calculation_aborted": calculation_aborted,
         "observer_callback_count": monitor.completed_slots if monitor is not None else noop_callback_count,
         "observer_sample_count": monitor.sample_count if monitor is not None else 0,
         "observer_callback_wall_ms": round(monitor.callback_wall_ms, 3) if monitor is not None else 0,

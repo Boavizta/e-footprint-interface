@@ -1,0 +1,19 @@
+<div id="sankey-diagram-area-{{ card_id }}" class="sankey-diagram-area">
+    <div class="alert alert-warning m-3" role="alert" data-sankey-memory-limit>
+        <h3 class="h5">Impact repartition stopped safely</h3>
+        <p>
+            This model is too large to compute its impact repartition within the available memory.
+            <strong>{{ coverage_percent }}%</strong> of the required attribution data was prepared before the
+            memory safety limit was reached.
+        </p>
+        <p>
+            This percentage is completion coverage only. Attribution steps vary in size, so it is not a linear
+            estimate of elapsed time, remaining work, or remaining memory.
+        </p>
+        <p>
+            Reduce the model complexity—especially the number of usage patterns—or shorten the modeling timespan,
+            then try again. You can also split the model or run the interface on an instance with more memory.
+        </p>
+        {% if capacity_gib is not None %}<p class="mb-0">This instance has {{ capacity_gib }} GiB available.</p>{% endif %}
+    </div>
+</div>

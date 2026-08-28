@@ -1,4 +1,5 @@
 """Page objects for the Sankey impact repartition section."""
+
 from playwright.sync_api import Page, Locator, expect
 
 from tests.e2e.pages.model_builder_page import ModelBuilderPage
@@ -36,6 +37,9 @@ class SankeyCard:
             return True
         except Exception:
             return False
+
+    def memory_limit_guidance_locator(self) -> Locator:
+        return self.diagram_area_locator().locator("[data-sankey-memory-limit]")
 
     def wait_for_diagram_update(self, timeout: int = 10000) -> None:
         """Wait for ECharts to render inside the plot container."""
@@ -130,7 +134,8 @@ class SankeyPage:
             self.page.locator(".btn-add-sankey").click()
         # Wait for the new card to appear in the DOM
         self.page.locator("#sankey-cards-container .sankey-card").nth(count_before).wait_for(
-            state="visible", timeout=10000)
+            state="visible", timeout=10000
+        )
         new_card = self.cards()[-1]
         new_card.wait_for_diagram_update()
         return new_card

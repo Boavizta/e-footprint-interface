@@ -52,15 +52,20 @@ backlog live under `performance/memory/`; large profiler captures remain untrack
    `WORKER_RECYCLE_LIMIT_RATIO` changes the ratio and `WORKER_RECYCLE_LIMIT_MB` provides an absolute override.
 
 `ComputationMemoryMiddleware` wraps every `/model_builder/` request before view execution when
-`COMPUTATION_MEMORY_GUARD_MODE` is `observe` (the default is `off`). It uses the library's scoped reactive observer to
-count every cache-miss completion, samples process RSS and cgroup memory adaptively, and emits correlated JSON records
-at start, bounded high-water progress, completion, or abort. Records use route patterns and numerical topology only;
-model names, serialized data, calculated values, and other user-authored labels are forbidden. The initial monitor is
-diagnostic only: it does not interrupt calculations. Gunicorn reuses the same cgroup reader and compares cumulative
-`oom`/`oom_kill` counters across worker boot and exit, including exits where a killed worker cannot log for itself.
-Computation and recycling limits are resolved once per process from separate ratio/absolute settings; the recycling
-policy remains 60% while the approved initial computation limit is independently configurable through
-`COMPUTATION_MEMORY_LIMIT_RATIO` (85% by default) or `COMPUTATION_MEMORY_LIMIT_MB`.
+`COMPUTATION_MEMORY_GUARD_MODE` is `observe` or `enforce` (the default is `off`). It uses the library's scoped reactive
+observer to count every cache-miss completion, samples process RSS and cgroup memory adaptively, and emits correlated
+JSON records at start, bounded high-water progress, completion, or abort. Records use route patterns and numerical
+topology only; model names, serialized data, calculated values, and other user-authored labels are forbidden. Unexpected
+monitor failures disable telemetry for that request and fail open in both modes. In `enforce`, the first sampled
+completion at or above the computation working-set limit raises a typed recoverable exception and latches the monitor,
+so transactional rollback computations cannot trip it again. Decorated views use the standard exception modal; the
+middleware supplies the same modal only for undecorated routes. Sankey catches the typed exception inside its generic
+decorator and replaces only the graph area with peek-only attribution-cache coverage and container-capacity guidance.
+Gunicorn's normal post-request collection and recycling still happen after either recoverable response. Gunicorn also
+reuses the cgroup reader and compares cumulative `oom`/`oom_kill` counters across worker boot and exit, including exits
+where a killed worker cannot log for itself. Computation and recycling limits are resolved once per process from
+separate ratio/absolute settings; the recycling policy remains 60% while the computation limit is independently
+configurable through `COMPUTATION_MEMORY_LIMIT_RATIO` (85% by default) or `COMPUTATION_MEMORY_LIMIT_MB`.
 
 ## Core classes
 

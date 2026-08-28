@@ -10,13 +10,19 @@ Dropped/changed:
 
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 
+import pytest
+from efootprint.abstract_modeling_classes.reactive_core import observe_computations
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
 from efootprint.constants.units import u
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 from model_builder.domain.reference_data import DEFAULT_COUNTRIES, DEFAULT_DEVICES, DEFAULT_NETWORKS
+from model_builder.adapters.forms.form_data_parser import parse_form_data
+from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
 from tests.fixtures.use_case_helpers import create_object, delete_object, edit_object
 
@@ -85,6 +91,58 @@ def test_edit_server_updates_nested_storage(default_system_repository):
     assert sd["Storage"][storage_id]["carbon_footprint_fabrication_per_storage_capacity"]["value"] == 160.0
 
 
+def test_memory_interruption_rolls_transactional_edit_back_without_persisting(
+    default_system_repository_with_journey,
+):
+    repository = default_system_repository_with_journey
+    server_id = create_object(
+        repository,
+        create_post_data_from_class_default_values(
+            "Guarded server",
+            "Server",
+            server_type="autoscaling",
+            Storage_form_data=create_post_data_from_class_default_values("Guarded storage", "Storage"),
+        ),
+    )
+    model_web = ModelWeb(repository)
+    server = model_web.get_web_object_from_efootprint_id(server_id)
+    original_ram = server.modeling_obj.ram.value
+    _ = server.modeling_obj.available_ram_per_instance
+    persisted_before = deepcopy(repository.get_system_data())
+    tripped = False
+    guard_completions = 0
+
+    def interrupt_first_guard(slot):
+        nonlocal tripped, guard_completions
+        if not slot.guard:
+            return
+        guard_completions += 1
+        if not tripped:
+            tripped = True
+            raise ComputationMemoryLimitExceeded(
+                working_set_bytes=3500 * 1024**2,
+                limit_bytes=3400 * 1024**2,
+                capacity_bytes=4 * 1024**3,
+            )
+
+    with observe_computations(interrupt_first_guard):
+        with pytest.raises(ComputationMemoryLimitExceeded) as raised:
+            EditObjectUseCase(model_web).execute(
+                EditObjectInput(
+                    object_id=server.efootprint_id,
+                    form_data=parse_form_data({"ram": "256", "ram__unit": str(u.GB_ram)}, "Server"),
+                )
+            )
+
+    restored_model = ModelWeb(repository)
+    restored_server = restored_model.get_web_object_from_efootprint_id(server.efootprint_id)
+    assert repository.get_system_data() == persisted_before
+    assert restored_server.modeling_obj.ram.value == original_ram
+    assert restored_server.modeling_obj.available_ram_per_instance.value.magnitude > 0
+    assert guard_completions >= 2
+    assert str(raised.value) == ComputationMemoryLimitExceeded.safe_message
+
+
 def test_edit_usage_journey_reorders_steps(default_system_repository):
     uj_id = create_object(
         default_system_repository,
@@ -116,8 +174,8 @@ def test_edit_usage_journey_reorders_steps(default_system_repository):
     # order, so this is the case that regressed (order silently dropped).
     new_order = [step_2, step_3, step_1]
     edit_object(
-        default_system_repository, uj_id, "UsageJourney",
-        {"uj_steps": json.dumps({step_2: 1, step_3: 1, step_1: 1})})
+        default_system_repository, uj_id, "UsageJourney", {"uj_steps": json.dumps({step_2: 1, step_3: 1, step_1: 1})}
+    )
 
     sd = default_system_repository.get_system_data()
     assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == new_order
@@ -127,8 +185,8 @@ def test_edit_usage_journey_reorders_steps(default_system_repository):
 
     # A count change on top of the existing order still persists both.
     edit_object(
-        default_system_repository, uj_id, "UsageJourney",
-        {"uj_steps": json.dumps({step_2: 1, step_3: 2.5, step_1: 1})})
+        default_system_repository, uj_id, "UsageJourney", {"uj_steps": json.dumps({step_2: 1, step_3: 2.5, step_1: 1})}
+    )
 
     sd = default_system_repository.get_system_data()
     assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == new_order
@@ -157,8 +215,7 @@ def test_edit_usage_journey_remove_step_deletes_orphan(default_system_repository
         parent_id=uj_id,
     )
 
-    edit_object(
-        default_system_repository, uj_id, "UsageJourney", {"uj_steps": json.dumps({step_1: 1, step_3: 1})})
+    edit_object(default_system_repository, uj_id, "UsageJourney", {"uj_steps": json.dumps({step_1: 1, step_3: 1})})
 
     sd = default_system_repository.get_system_data()
     assert list(sd["UsageJourney"][uj_id]["uj_steps"]) == [step_1, step_3]
@@ -216,7 +273,9 @@ def test_edit_ecologits_external_api_provider_and_model(default_system_repositor
     )
 
     sd = default_system_repository.get_system_data()
-    api_class = next(class_name for class_name, objects in sd.items() if isinstance(objects, dict) and api_id in objects)
+    api_class = next(
+        class_name for class_name, objects in sd.items() if isinstance(objects, dict) and api_id in objects
+    )
     assert sd[api_class][api_id]["provider"]["value"] == provider_2
     assert sd[api_class][api_id]["model_name"]["value"] == model_2
 
