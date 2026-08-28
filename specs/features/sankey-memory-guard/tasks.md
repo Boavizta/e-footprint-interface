@@ -87,6 +87,92 @@ preserving application behavior. This creates the deliberate production-observat
 
 ---
 
+## Task 2b — Harden production observation from dev evidence
+
+**Goal:** Correct the diagnostic gaps and remove avoidable sampling cost revealed by the first dev deployment before
+enforcement behavior is built. Preserve the bounded-log design and the per-computation enforcement checkpoint while
+making observation mode cheap enough to leave enabled during calibration.
+
+**Repository:** `e-footprint-interface/`.
+
+**Evidence from the first dev observation:**
+
+| Scenario | Start / peak working set | Slots / elapsed | Monitor cost | Outcome |
+|---|---:|---:|---:|---|
+| Three-pattern cold Sankey | 1,376.5 / 2,157.9 MiB | 3,945 / 3,816 ms | 77.9 ms callback; 68.9 ms reads; 0.9 ms logging | Completed; post-GC 2,086.4 MiB; recycled |
+| Four-pattern cold Sankey | 805.2 / 2,937.8 MiB | 4,539 / 6,409 ms | 413.0 ms callback; 394.6 ms reads; 2.4 ms logging | Completed with 238 MiB headroom; post-GC 2,867.2 MiB; recycled |
+| Five-pattern cold Sankey | 1,271.3 / at least 3,080.3 MiB | Last progress at slot 3,868 / 5,751 ms; killed at 42.1 s | At last progress: 362.2 ms callback; 346.1 ms reads; 2.3 ms logging | 502 and SIGKILL; `oom=1`, `oom_kill=1`, `max=279702`, `sock_throttled=4` |
+
+- The same M deployment exposed cgroup capacities of 2,926 MiB before redeployment and 3,176 MiB afterward. Treat the
+  runtime cgroup value as authoritative and preserve this variability in the report; Clever Cloud investigation is
+  external to this task.
+- At 3,176 MiB, the current 80% hypothesis is 2,540.8 MiB and would have interrupted the five-pattern run around 4.2 s.
+  An 85% candidate is 2,699.6 MiB and would have interrupted it around 4.5–4.9 s with about 476 MiB nominal headroom.
+  Three patterns fit below either threshold; four patterns exceed both. Do not select a final ratio in Task 2b—keep the
+  threshold configurable and leave the 80% versus 85% rollout decision to Task 4.
+- Ordinary observed requests spent roughly 2–3% in the monitor; warm-cache Sankeys spent under 1 ms. Near-limit runs
+  reached roughly 6% because observation continued per-slot sampling long after the candidate abort point. Memory
+  reads, not logging, dominate: logging remained around 1–2 ms per request.
+- The OOM worker was replaced immediately and finished application imports about five seconds later. Most user-visible
+  delay came from approximately 36 seconds of kernel reclaim/thrashing before the kill, not worker boot.
+
+**Current implementation defects to address:**
+
+- `ComputationMemoryMonitor` initializes every Sankey as `attribution_matrix_cached=True` and changes it to `False`
+  only after the matrix slot completes. The OOM run therefore claimed a cache hit in every surviving progress record.
+- Middleware constructs monitors with `usage_pattern_count=None` and `modeled_hours=None` and never updates them after
+  `ModelWeb` hydration, so every production record lacks topology.
+- Every sample calls the full snapshot reader: cgroup current, the complete `memory.stat` parse, and process RSS. In the
+  near-limit phase this produced 1,000+ filesystem reads and hundreds of milliseconds of avoidable work.
+- Observation mode continues sampling every slot after the candidate threshold has already been crossed, even though
+  only one `would_abort` point is needed to predict enforcement behavior.
+- Gunicorn `child_exit` executes in the master, but the lifecycle record combines the dead worker PID with RSS measured
+  from the master process. The cgroup values and OOM deltas are valid; that process-RSS identity is not.
+- Bounded 128 MiB high-water logging intentionally means the last progress record before OOM need not be the last
+  successful callback. Do not infer that the 36-second log gap was one elementary calculation.
+
+**Files touched:**
+- `e_footprint_interface/runtime_memory.py`
+- `e_footprint_interface/computation_memory_middleware.py`
+- `gunicorn.conf.py`
+- `performance/memory/results/2026-08-28-dev-observation.md` (new)
+- `performance/memory/README.md`
+- `CHANGELOG.md`
+
+**Tests added/changed:**
+- `tests/unit_tests/test_runtime_memory.py`
+- `tests/unit_tests/test_computation_memory_middleware.py`
+- `tests/unit_tests/test_gunicorn_config.py`
+
+**Acceptance:**
+- Completed model operations populate usage-pattern count and modeled hours whenever a `ModelWeb` was hydrated; cached
+  requests and failures before hydration retain an explicit unavailable value rather than guessed topology.
+- A Sankey observation starts with attribution-cache state unknown, changes to cold as soon as an attribution source or
+  matrix slot computes, and reports warm only when the request completes without attribution computation. A worker OOM
+  can therefore never leave progress records falsely claiming that the matrix was cached.
+- Worker-exit records do not label the Gunicorn master's RSS as the dead worker's RSS: they either omit process RSS or
+  identify the measuring process separately, while preserving cgroup counters and the exited worker PID.
+- The per-sample enforcement path reads only the values required to compare cgroup working set with the threshold.
+  Process RSS and the complete diagnostic snapshot are read only for emitted records; one `psutil.Process` instance is
+  reused and `inactive_file` is extracted without constructing a dictionary for all of `memory.stat`.
+- Observation mode emits one correlated `would_abort` record on first crossing the candidate threshold, then backs off
+  to the ordinary 16-slot cadence. Enforcement mode retains per-computation sampling inside the configured 256 MiB
+  warning window and will raise immediately in Task 3.
+- High-water, exceptional-jump, completion, post-request, worker lifecycle, and OOM-counter records remain bounded and
+  preserve their existing privacy constraints.
+- The dev evidence is recorded: three-pattern peak, four-pattern borderline completion, five-pattern OOM, capacity
+  variation between 2,926 and 3,176 MiB, monitor timings, worker-restart timings, and cgroup OOM/max counters.
+- Focused tests cover warm, cold, interrupted and pre-hydration metadata; observe-mode backoff; lightweight versus full
+  snapshots; configured-threshold warning behavior; and correct worker-exit identity.
+- Repeatable local Docker measurements plus one representative dev run show at most 3% observation overhead before
+  Task 3 begins. If the target is missed, the report records the remaining cost and the task stays open.
+- Task 2b must not implement the capacity exception, rollback handling, Sankey error template, or final threshold
+  selection; those remain Tasks 3 and 4.
+
+**Depends on:** Task 2 and the first dev observation run.
+
+---
+
 ## Task 3 — Add recoverable enforcement and Sankey guidance
 
 **Goal:** Turn the observed threshold into a single-trip request circuit breaker that preserves model consistency and
@@ -132,7 +218,7 @@ until Task 4 approves rollout.
 - Tests cover threshold boundaries, absolute overrides, single-trip behavior, graph integrity, rollback/non-persistence,
   result preservation, generic fallback, specialized Sankey rendering, and the user-visible E2E flow.
 
-**Depends on:** Task 2.
+**Depends on:** Task 2b.
 
 ---
 
@@ -175,7 +261,7 @@ decision, and only then enable enforcement in the deployment environment.
   is enabled first in pre-production through `COMPUTATION_MEMORY_GUARD_MODE=enforce`; production activation remains an
   explicit deployment decision after that release is observed.
 
-**Depends on:** Task 3 and representative observation data from Task 2.
+**Depends on:** Task 3 and representative observation data from Task 2b.
 
 ---
 
@@ -184,7 +270,9 @@ decision, and only then enable enforcement in the deployment environment.
 Task 1 lands the framework-owned contracts first, independently of Django and container policy. Task 2 is the first
 behavioral pause point: it wires the first consumer and yields useful production diagnostics without rejecting any
 request. The runtime reader, middleware, adaptive sampler, structured logs, and Gunicorn counters stay together because
-splitting them would leave incomplete or uncorrelated evidence. Task 3 adds the second behavioral milestone—safe
-interruption and recovery—and keeps the exception, rollback behavior, middleware fallback, Sankey branch, and template
-together because there is no safe user-visible pause point among them. Task 4 is deliberately separate: enforcement
-must be calibrated from deployed observation rather than approved from synthetic tests alone.
+splitting them would leave incomplete or uncorrelated evidence. Task 2b is a targeted evidence-driven hardening commit:
+the first deployment exposed correctness and overhead problems that should not be carried into enforcement. Task 3
+adds the second behavioral milestone—safe interruption and recovery—and keeps the exception, rollback behavior,
+middleware fallback, Sankey branch, and template together because there is no safe user-visible pause point among
+them. Task 4 is deliberately separate: enforcement must be calibrated from deployed observation rather than approved
+from synthetic tests alone.
