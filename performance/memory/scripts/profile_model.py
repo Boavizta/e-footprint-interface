@@ -174,6 +174,11 @@ def main():
         choices=("hydrate", "results", "cold-sankey", "warm-sankey", "results-then-sankey"),
         required=True,
     )
+    parser.add_argument(
+        "--disable-gc-during-calculation",
+        action="store_true",
+        help="Match production Gunicorn, which disables automatic cyclic GC while handling a request.",
+    )
     args = parser.parse_args()
 
     sampler = MemorySampler()
@@ -194,6 +199,8 @@ def main():
     data = SessionSystemRepository.upgrade_system_data(data)
     sampler.snapshot("input", "after_input_upgrade")
 
+    if args.disable_gc_during_calculation:
+        gc.disable()
     sampler.begin("hydrate")
     model_web = ModelWeb(InMemorySystemRepository(), data)
     sampler.snapshot("hydrate", "after_hydration")
@@ -233,6 +240,7 @@ def main():
     sampler.begin("post_gc")
     del model_web, data, result, sankey, payload
     collected = gc.collect()
+    gc.enable()
     sampler.snapshot("post_gc", "after_delete_and_full_gc")
     sampler.stop()
 
@@ -249,6 +257,7 @@ def main():
             "efootprint": efootprint_version,
             "pid": os.getpid(),
             "cgroup_limit_mb": round(cgroup_limit / MIB, 1) if cgroup_limit else None,
+            "automatic_gc_during_calculation": not args.disable_gc_during_calculation,
         },
         "elapsed_seconds": round(time.perf_counter() - started_at, 3),
         "gc_collected": collected,

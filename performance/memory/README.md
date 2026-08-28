@@ -31,8 +31,11 @@ SCRIPT=/absolute/path/to/e-footprint-interface/performance/memory/scripts/profil
 docker run --rm --memory=4g --entrypoint poetry \
   -v "$MODEL:/fixture.json:ro" -v "$SCRIPT:/tmp/profile_model.py:ro" \
   efootprint-memory-profile:local run python /tmp/profile_model.py /fixture.json \
-  --patterns 2 --scenario cold-sankey
+  --patterns 2 --scenario cold-sankey --disable-gc-during-calculation
 ```
+
+The GC flag matches production Gunicorn request handling. Omitting it is useful only as an explicit comparison with
+ordinary Python automatic collection.
 
 The final `RESULT` line is compact JSON suitable for committing under `results/`. Raw Memray captures, heap dumps, and
 other large artifacts belong under `artifacts/`, which Git ignores.

@@ -12,6 +12,8 @@
 Dynamic scenarios execute the production-installed code directly in a fresh `poetry run python` process. They use the
 real `ModelWeb`, result calculation, `ImpactRepartitionSankey`, and interface Sankey payload builder, but exclude HTTP,
 Gunicorn, nginx, cache writes, and response rendering. Static measurements use the complete production entrypoint.
+Unless explicitly comparing ordinary Python behavior, calculations disable automatic cyclic GC like production
+Gunicorn does while handling a request.
 
 These measurements are a topology calibration, not a universal upper bound. The production host is likely x86_64 and
 may have a different allocator/kernel from Docker Desktop arm64.
@@ -59,6 +61,20 @@ previously retained pages are substantially reused rather than simply added to t
 
 The second Sankey build on the same model takes 38 ms and adds about 0.1 MiB RSS. This confirms that a warm scalar
 attribution matrix is cheap; the cold upstream hourly calculation graph is the memory event.
+
+### Full-stack headroom check
+
+The five-pattern cold Sankey was also run inside an already-started production container alongside supervisor,
+Gunicorn and nginx, after the normal entrypoint had populated the file cache. Disabling automatic GC did not increase
+the worker peak: the calculation completed at 2,663 MiB RSS. However, the cgroup's exact peak reached 3,503.5 MiB,
+leaving only 592.5 MiB below the 4,096 MiB hard limit. During the calculation Linux reclaimed about 445 MiB of inactive
+file cache (from roughly 1,190 to 745 MiB).
+
+The original production OOM has therefore not been reproduced. The fresh-process Sankey figure is not the complete
+container requirement, and the surviving margin is small enough for allocator history, architecture differences or a
+heavier actual five-pattern input to matter. The incident worker was long-lived, while these reference calculations
+started from controlled allocator state; production RSS/cgroup milestone telemetry is required to distinguish those
+causes conclusively.
 
 ## Conclusions for the next implementation
 
