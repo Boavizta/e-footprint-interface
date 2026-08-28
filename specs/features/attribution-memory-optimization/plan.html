@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attribution memory optimization — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 58rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>Attribution memory optimization — Implementation plan</h1>
+<p>Status: Approved direction; attributed-footprint experiment pending · 2026-08-28 ·
+Spec: <a href="spec.html">spec.html</a></p>
+
+<h2>1. Approach</h2>
+<p>The common principle is to reduce each impact source to the result required by its caller, then release that
+source's attribution-only hourly intermediates before moving to the next source. The reactive graph retains dependency
+edges independently of cached values, so releasing an intermediate must drop its value without invalidating a coherent
+descendant or losing the edge that will invalidate that descendant after a future input edit.</p>
+
+<p>For Sankey, each source already exposes <code>impact_repartition_rows</code>: JSON-native rows whose values are period
+sums in kilograms. <code>System.impact_repartition_matrix</code> appends one source's rows and immediately evicts that
+source's explicitly marked transient structures. The final matrix stays cached and serializable. This changes lifetime,
+not calculations: the same source slots execute, and a later edit recomputes the affected source rows plus the transient
+helpers that were deliberately released.</p>
+
+<p>For <code>attributed_footprint(obj, phase)</code>, first test a source-wise fold while keeping the public signature.
+For each source, aggregate only atoms whose chain selects <code>obj</code>, finalize the subtotal's existing formula in
+the same manner as a calculated attribute, clear arithmetic parents, and evict the source's transient structures.
+Measure whether the retained formula or direct-ancestor metadata still strongly references evicted hourly values. Do
+not weaken formula/explainability semantics merely to obtain a benchmark win. If formula references prevent release,
+document the retention path before considering a lightweight address-based formula representation.</p>
+
+<h2>2. Evidence captured before implementation</h2>
+<p>Measurements use the supplied smart-building model expanded to the requested pattern count, fresh macOS processes,
+a 5 ms RSS sampler, and automatic cyclic GC disabled during calculation. Absolute Linux/cgroup values will differ;
+relative comparisons use the same runtime and model.</p>
+<table>
+  <thead><tr><th>Cold path</th><th>Peak RSS</th><th>Latency</th><th>Finding</th></tr></thead>
+  <tbody>
+    <tr><td>Four-pattern Sankey, baseline</td><td>2,239.1 MiB</td><td>1.242 s</td><td>4,538 reactive callbacks</td></tr>
+    <tr><td>Four-pattern Sankey, source eviction</td><td>656.0 MiB</td><td>1.161 s</td><td>Same 4,538 callbacks; 71% lower peak</td></tr>
+    <tr><td>Five-pattern Sankey, baseline</td><td>2,739.5 MiB</td><td>1.546 s</td><td>All source intermediates retained</td></tr>
+    <tr><td>Five-pattern Sankey, source eviction</td><td>778.8 MiB</td><td>1.452 s</td><td>72% lower peak; no latency penalty observed</td></tr>
+    <tr><td>Five-pattern system total footprint</td><td>896.2 MiB</td><td>0.917 s</td><td>Cold comparison path</td></tr>
+    <tr><td>Attributed footprint, manufacturing, five targets</td><td>1,264.2 MiB</td><td>1.459 s</td><td>First target already reaches 1,263 MiB</td></tr>
+    <tr><td>Attributed footprint, usage, five targets</td><td>2,018.4 MiB</td><td>1.578 s</td><td>First target already reaches 2,006 MiB</td></tr>
+    <tr><td>Attributed footprint, both phases, five targets</td><td>2,701.2 MiB</td><td>2.501 s</td><td>Motivates the second experiment</td></tr>
+  </tbody>
+</table>
+
+<h2>3. Affected modules</h2>
+<table>
+  <thead><tr><th>Module</th><th>Planned responsibility</th></tr></thead>
+  <tbody>
+    <tr><td><code>efootprint/.../reactive_core/computed_slots.py</code></td><td>Add an opt-in transient flag and public
+        value eviction that preserves dependency edges; reject contradictory serialized/transient declarations.</td></tr>
+    <tr><td><code>efootprint/core/hardware/{edge,server_base,storage}.py</code></td><td>Mark only attribution-specific
+        helper structures transient: four edge-device, three server and two storage structures.</td></tr>
+    <tr><td><code>efootprint/core/attribution/__init__.py</code></td><td>Centralize contextual-source unwrapping and
+        transient eviction; experimentally implement the source-wise direct-attribution fold.</td></tr>
+    <tr><td><code>efootprint/core/system.py</code></td><td>Evict one source's transient helpers only after its
+        period-sum rows have been retained by the system matrix.</td></tr>
+    <tr><td><code>efootprint tests</code></td><td>Cover eviction/invalidation semantics, exact attribution and Sankey
+        equality, formulas, repeated reads, and recomputation scope.</td></tr>
+    <tr><td><code>e-footprint-interface/performance/memory</code></td><td>Retain reproducible scenarios and result notes;
+        validate the released library inside the deployment-shaped Docker image.</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Correctness and performance gates</h2>
+<ul>
+  <li>Compare complete Sankey matrix rows and rendered node/link payloads before and after optimization.</li>
+  <li>Verify an evicted upstream transient slot is empty, its cached descendant remains readable, and an input edit
+      still invalidates that descendant through the preserved edge.</li>
+  <li>Compare attributed hourly magnitudes, unit, start date, label, sum and displayed formula before/after.</li>
+  <li>Measure each scenario in at least three fresh processes; report medians and individual outliers.</li>
+  <li>Run the complete library suite. The current Sankey experiment passes 1,506 tests, 9 skips and 67 subtests.</li>
+  <li>Run an interface Docker benchmark before changing the deployed dependency.</li>
+</ul>
+
+<h2>5. Risks and alternatives</h2>
+<ul>
+  <li><strong>Formula retention:</strong> clearing <code>left_parent</code>/<code>right_parent</code> preserves a nested
+      formula, but that formula may retain terminal explainable values. Inspect and measure rather than assuming.</li>
+  <li><strong>Repeated direct reads:</strong> source eviction can trade memory for recomputation on later calls. Keep
+      the single-object API; do not introduce an unbounded batch signature to hide that cost.</li>
+  <li><strong>Largest-source bound:</strong> source scoping cannot prevent a single source calculation from exceeding
+      capacity. The reactive memory guard remains the final safety mechanism.</li>
+  <li><strong>Matrix-only attributed totals:</strong> folding scalar rows is simpler and cheaper but cannot replace the
+      documented hourly return contract, so it is not the primary approach.</li>
+</ul>
+
+<h2>6. Architecture and documentation</h2>
+<p>All modeling and cache-lifetime changes belong to e-footprint. The interface owns only profiling evidence,
+dependency adoption and deployment validation. No schema or database migration is required. If the transient computed
+structure pattern ships, document it briefly in the library architecture/contributor guidance so future calculations
+do not accidentally retain attribution-only arrays.</p>
+</body>
+</html>
