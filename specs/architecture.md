@@ -35,6 +35,9 @@ model_builder/
 └── domain/reference_data/     # JSON configs (default data) + modeling_templates/ (see "Modeling templates")
 ```
 
+Repeatable production-container memory experiments, compact reference results, and the evidence-ranked optimization
+backlog live under `performance/memory/`; large profiler captures remain untracked artifacts.
+
 ### Request lifecycle
 
 1. User action → View (adapter).

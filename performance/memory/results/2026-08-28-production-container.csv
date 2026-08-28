@@ -1,0 +1,12 @@
+scenario,usage_patterns,run,peak_process_rss_mb,peak_cgroup_current_mb,peak_cgroup_inactive_file_mb,peak_cgroup_working_set_mb,post_gc_process_rss_mb,post_gc_working_set_mb
+hydrate,2,1,186.2,198.8,40.4,158.4,186.2,158.4
+results,2,1,530.6,541.5,38.7,502.8,456.0,428.2
+cold-sankey,2,1,1224.5,1235.4,37.9,1197.5,1164.8,1137.7
+cold-sankey,2,2,1224.5,1235.9,37.9,1198.0,1123.4,1096.7
+cold-sankey,2,3,1224.5,1235.6,37.9,1197.8,1164.8,1138.0
+cold-sankey,3,1,1707.1,1719.9,37.9,1682.0,1664.0,1638.6
+cold-sankey,4,1,2190.3,2204.3,38.4,2165.9,2148.7,2124.3
+cold-sankey,5,1,2673.8,2688.8,38.7,2650.1,2629.8,2605.8
+cold-sankey,5,2,2673.6,2709.9,59.8,2650.2,2629.5,2606.1
+cold-sankey,5,3,2674.1,2688.1,38.0,2650.0,2640.2,2616.4
+results-then-sankey,5,1,2673.7,2688.2,38.1,2650.1,2640.9,2617.2

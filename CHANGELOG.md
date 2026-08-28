@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Add a reproducible 4 GiB production-container memory profiling laboratory, a smart-building topology baseline, and an evidence-ranked memory optimization backlog.
+
 ### Fixed
 - Adapt the interface to efootprint's private hydration lifecycle, reverse `parent_groups` descriptors, stable computed-dict coordinate keys, and explicit serialized-state materialization boundaries. Legacy edge-model imports, calculated-attribute charts, workspace re-id, and complete snapshot persistence now work with library `dev`.
 
