@@ -15,11 +15,12 @@ function rememberAutosavingRelationshipCount(event) {
 
 function rejectBlankAutosavingRelationshipCount(event) {
     const input = event.target.closest("[data-action='autosave-relationship-count']");
-    if (!input || input.value !== "") {
+    const valueBeforeEdit = input?.dataset.valueBeforeEdit;
+    if (!input || input.value !== "" || valueBeforeEdit === undefined) {
         return;
     }
 
-    input.value = input.dataset.valueBeforeEdit ?? input.defaultValue;
+    input.value = valueBeforeEdit;
     event.preventDefault();
     event.stopImmediatePropagation();
 }

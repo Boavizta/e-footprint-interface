@@ -157,6 +157,13 @@ class TestCanvasInlineCounts:
         model_builder.open_result_panel()
         initial_chart_data = page.evaluate("JSON.stringify(window.charts.barChart.data)")
 
+        # Editing the step weight inline posts and recomputes immediately — no panel round-trip.
+        step_card.set_inline_count("0.5")
+        page.wait_for_function(
+            "data => !!window.charts && !!window.charts.barChart && JSON.stringify(window.charts.barChart.data) !== data", arg=initial_chart_data)
+        step_card.inline_count_should_equal("0.5")
+
+        chart_after_step_edit = page.evaluate("JSON.stringify(window.charts.barChart.data)")
         count_update_requests = []
         page.on(
             "request",
@@ -164,20 +171,13 @@ class TestCanvasInlineCounts:
             if "/update-dict-count/" in request.url
             else None,
         )
-        step_card.clear_inline_count().inline_count_should_equal("1")
+        step_card.clear_inline_count().inline_count_should_equal("0.5")
         page.wait_for_timeout(100)
         expect(page.locator("#model-builder-modal")).not_to_be_visible()
         assert count_update_requests == []
-        assert page.evaluate("JSON.stringify(window.charts.barChart.data)") == initial_chart_data
-
-        # Editing the step weight inline posts and recomputes immediately — no panel round-trip.
-        step_card.set_inline_count("0.5")
-        page.wait_for_function(
-            "data => !!window.charts && !!window.charts.barChart && JSON.stringify(window.charts.barChart.data) !== data", arg=initial_chart_data)
-        step_card.inline_count_should_equal("0.5")
+        assert page.evaluate("JSON.stringify(window.charts.barChart.data)") == chart_after_step_edit
 
         # A 0-count job chip dims (still in the model, visibly contributing nothing) and recomputes.
-        chart_after_step_edit = page.evaluate("JSON.stringify(window.charts.barChart.data)")
         step_card.get_nested_object_card("Job", "Test Job").set_inline_count("0")
         page.wait_for_function(
             "data => !!window.charts && !!window.charts.barChart && JSON.stringify(window.charts.barChart.data) !== data", arg=chart_after_step_edit)

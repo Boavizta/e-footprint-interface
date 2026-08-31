@@ -17,18 +17,23 @@ test("the real autosaving count partial is required", () => {
     expect(input().required).toBe(true);
 });
 
-test("committing a blank restores the value captured on focus and suppresses the change", () => {
+test("committing a blank restores the latest live value and suppresses the change", () => {
     const field = input();
     const requestListener = jest.fn();
     field.addEventListener("change", requestListener);
 
     field.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    field.value = "4.75";
+    field.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
+    field.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    field.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     field.value = "";
     const accepted = field.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
 
-    expect(field.value).toBe("2.5");
+    expect(field.defaultValue).toBe("2.5");
+    expect(field.value).toBe("4.75");
     expect(accepted).toBe(false);
-    expect(requestListener).not.toHaveBeenCalled();
+    expect(requestListener).toHaveBeenCalledTimes(1);
 });
 
 test.each(["0", "3", "1.25"])("valid numeric value %s reaches the change listener", value => {
