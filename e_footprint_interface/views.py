@@ -42,6 +42,7 @@ def design_catalogue(request):
     """
     from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
     from model_builder.adapters.forms.form_context_builder import FormContextBuilder
+    from model_builder.adapters.card_order import ordered_card_lists
 
     model_web = _design_sample_model()
 
@@ -61,6 +62,7 @@ def design_catalogue(request):
     )}}}
     return render(request, "design/catalogue.html", {
         "model_web": model_web,
+        "slot_entry": ordered_card_lists(model_web),
         "class_help_info": build_canvas_class_help_info(),
         "edit_panel_html": mark_safe(edit_panel_html),
         "edit_panel_object_name": sample_obj.name,

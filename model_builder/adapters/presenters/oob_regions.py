@@ -7,19 +7,21 @@ from typing import Callable, Dict, Iterable
 
 from django.template.loader import render_to_string
 
+from model_builder.adapters.card_order import ordered_card_lists
 from model_builder.domain.oob_region import OobRegion
 
 
 def _render_edge_device_lists(model_web, params) -> str:
     del params
     classes = "list-group d-flex flew-column w-75 ms-25"
+    context = {"model_web": model_web, "slot_entry": ordered_card_lists(model_web)}
     groups_html = render_to_string(
         "model_builder/object_cards/partials/root_edge_device_groups_list.html",
-        {"model_web": model_web},
+        context,
     )
     devices_html = render_to_string(
         "model_builder/object_cards/partials/ungrouped_edge_devices_list.html",
-        {"model_web": model_web},
+        context,
     )
     return (
         f"<div id='edge-device-groups-list' class='{classes}' "
@@ -52,7 +54,7 @@ def _render_model_canvas(model_web, params) -> str:
     content = render_to_string(
         "model_builder/components/model_canvas_content.html",
         {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
-         "slot_suffix": "", "is_active_canvas": True})
+         "slot_suffix": "", "is_active_canvas": True, "slot_entry": ordered_card_lists(model_web)})
     return (f"<div id='model-canva-{slot}' class='d-flex flex-row' "
             f"hx-swap-oob='innerHTML:#model-canva-{slot}'>{content}</div>")
 

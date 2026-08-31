@@ -21,7 +21,19 @@ class _FakeWorkspace:
 
 
 def _stub_model_web(name):
-    return type("MW", (), {"system": type("S", (), {"name": name})()})()
+    attributes = {
+        "system": type("S", (), {"name": name})(),
+        "repository": type("R", (), {"interface_config": {}})(),
+        "usage_patterns": [],
+        "edge_usage_patterns": [],
+        "usage_journeys": [],
+        "edge_usage_journeys": [],
+        "external_apis": [],
+        "servers": [],
+        "root_edge_device_groups": [],
+        "ungrouped_edge_devices": [],
+    }
+    return type("MW", (), attributes)()
 
 
 def test_active_slot_reuses_passed_model_web_and_builds_only_the_parked_one(monkeypatch):

@@ -5,6 +5,8 @@ from types import SimpleNamespace
 import pytest
 from django.template.loader import render_to_string
 
+from model_builder.adapters.card_order import ordered_card_lists, stable_rank_merge
+from model_builder.adapters.presenters.oob_regions import _render_edge_device_lists, _render_model_canvas
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views import views
 
@@ -28,7 +30,7 @@ def _web_ids(objects):
     ],
 )
 def test_stable_rank_merge(saved_ids, expected):
-    assert _web_ids(views._stable_rank_merge(_objects("a", "b", "c"), saved_ids)) == expected
+    assert _web_ids(stable_rank_merge(_objects("a", "b", "c"), saved_ids)) == expected
 
 
 def test_ordered_card_lists_combines_web_and_edge_objects_and_orders_all_six_lists():
@@ -52,7 +54,7 @@ def test_ordered_card_lists_combines_web_and_edge_objects_and_orders_all_six_lis
         ungrouped_edge_devices=_objects("device"),
     )
 
-    ordered = views._ordered_card_lists(model_web)
+    ordered = ordered_card_lists(model_web)
 
     assert _web_ids(ordered["ordered_usage_patterns"]) == ["edge-up", "web-up"]
     assert _web_ids(ordered["ordered_usage_journeys"]) == ["edge-uj", "web-uj"]
@@ -66,9 +68,16 @@ def test_ordered_card_lists_uses_natural_order_when_configuration_is_missing():
     model_web = SimpleNamespace(
         repository=SimpleNamespace(interface_config={}),
         usage_patterns=_objects("first", "second"),
+        edge_usage_patterns=[],
+        usage_journeys=[],
+        edge_usage_journeys=[],
+        external_apis=[],
+        servers=[],
+        root_edge_device_groups=[],
+        ungrouped_edge_devices=[],
     )
 
-    assert _web_ids(views._ordered_card_lists(model_web)["ordered_usage_patterns"]) == ["first", "second"]
+    assert _web_ids(ordered_card_lists(model_web)["ordered_usage_patterns"]) == ["first", "second"]
 
 
 class _Workspace:
@@ -90,6 +99,13 @@ def _model_for(repository, natural_order):
         repository=repository,
         system=SimpleNamespace(name=f"model-{repository.slot}"),
         usage_patterns=_objects(*natural_order),
+        edge_usage_patterns=[],
+        usage_journeys=[],
+        edge_usage_journeys=[],
+        external_apis=[],
+        servers=[],
+        root_edge_device_groups=[],
+        ungrouped_edge_devices=[],
     )
 
 
@@ -138,6 +154,51 @@ def test_canvas_template_renders_all_six_explicit_ordered_lists():
 
     for prefix in ("up", "uj", "api", "server", "group", "device"):
         assert content.index(f'id="{prefix}-second"') < content.index(f'id="{prefix}-first"')
+
+
+def _model_web_for_ordered_oob_render():
+    def cards(prefix):
+        return [
+            SimpleNamespace(web_id=f"{prefix}-second", efootprint_id=f"{prefix}-second"),
+            SimpleNamespace(web_id=f"{prefix}-first", efootprint_id=f"{prefix}-first"),
+        ]
+
+    card_order = {
+        "up-list": ["up-first", "up-second"],
+        "uj-list": ["uj-first", "uj-second"],
+        "external-api-list": ["api-first", "api-second"],
+        "server-list": ["server-first", "server-second"],
+        "edge-device-groups-list": ["group-first", "group-second"],
+        "edge-devices-list": ["device-first", "device-second"],
+    }
+    return SimpleNamespace(
+        repository=SimpleNamespace(slot=0, interface_config={"card_order": card_order}),
+        creation_constraints={},
+        usage_patterns=cards("up"),
+        edge_usage_patterns=[],
+        usage_journeys=cards("uj"),
+        edge_usage_journeys=[],
+        external_apis=cards("api"),
+        servers=cards("server"),
+        root_edge_device_groups=cards("group"),
+        ungrouped_edge_devices=cards("device"),
+    )
+
+
+@pytest.mark.django_db
+def test_full_canvas_oob_render_preserves_saved_order_for_all_six_lists():
+    content = _render_model_canvas(_model_web_for_ordered_oob_render(), {})
+
+    for prefix in ("up", "uj", "api", "server", "group", "device"):
+        assert content.index(f'id="{prefix}-first"') < content.index(f'id="{prefix}-second"')
+
+
+@pytest.mark.django_db
+def test_edge_device_lists_oob_render_preserves_saved_order():
+    content = _render_edge_device_lists(_model_web_for_ordered_oob_render(), {})
+
+    for prefix in ("group", "device"):
+        assert content.index(f'id="{prefix}-first"') < content.index(f'id="{prefix}-second"')
 
 
 COMPLETE_CARD_ORDER = {

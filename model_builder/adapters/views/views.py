@@ -21,6 +21,7 @@ from e_footprint_interface import __version__ as interface_version
 
 from model_builder.adapters.repositories import (
     SessionSystemRepository, SessionWorkspaceRepository, SessionCacheRepository)
+from model_builder.adapters.card_order import CARD_ORDER_LIST_IDS, ordered_card_lists
 from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
 from model_builder.adapters.views.source_table_row_editor_context import build_source_table_row_editor_context
@@ -38,61 +39,6 @@ from model_builder.adapters.ui_config.tour_steps import build_tour_steps
 from model_builder.domain.services import (
     SystemImportService, SCRATCH_ID, get_template_system_data, is_empty_model)
 from utils import htmx_render, sanitize_filename, smart_truncate
-
-
-CARD_ORDER_LIST_IDS = (
-    "up-list",
-    "uj-list",
-    "external-api-list",
-    "server-list",
-    "edge-device-groups-list",
-    "edge-devices-list",
-)
-
-
-def _stable_rank_merge(objects, saved_ids):
-    """Return current objects in saved order, followed by unranked objects in natural order."""
-    objects = list(objects)
-    if not isinstance(saved_ids, list):
-        return objects
-
-    objects_by_id = {obj.web_id: obj for obj in objects}
-    ranked_ids = set()
-    ordered = []
-    for web_id in saved_ids:
-        if web_id in objects_by_id and web_id not in ranked_ids:
-            ordered.append(objects_by_id[web_id])
-            ranked_ids.add(web_id)
-    ordered.extend(obj for obj in objects if obj.web_id not in ranked_ids)
-    return ordered
-
-
-def _ordered_card_lists(model_web):
-    """Build the six model-canvas lists from repository-owned interface configuration."""
-    repository = getattr(model_web, "repository", None)
-    interface_config = getattr(repository, "interface_config", {})
-    card_order = interface_config.get("card_order", {}) if isinstance(interface_config, dict) else {}
-    if not isinstance(card_order, dict):
-        card_order = {}
-
-    current_lists = {
-        "ordered_usage_patterns": [
-            *getattr(model_web, "usage_patterns", []),
-            *getattr(model_web, "edge_usage_patterns", []),
-        ],
-        "ordered_usage_journeys": [
-            *getattr(model_web, "usage_journeys", []),
-            *getattr(model_web, "edge_usage_journeys", []),
-        ],
-        "ordered_external_apis": getattr(model_web, "external_apis", []),
-        "ordered_servers": getattr(model_web, "servers", []),
-        "ordered_root_edge_device_groups": getattr(model_web, "root_edge_device_groups", []),
-        "ordered_ungrouped_edge_devices": getattr(model_web, "ungrouped_edge_devices", []),
-    }
-    return {
-        context_name: _stable_rank_merge(objects, card_order.get(list_id, []))
-        for (context_name, objects), list_id in zip(current_lists.items(), CARD_ORDER_LIST_IDS)
-    }
 
 
 def load_system_into_session(repository, raw_system_data, workspace=None):
@@ -153,7 +99,7 @@ def build_workspace_slots(workspace, active_model_web=None):
             # Active canvas keeps the canonical structural ids; parked canvas suffixes them by slot so
             # nothing collides across the two resident canvases (see model_canvas_content.html).
             "suffix": "" if is_active else f"-{slot}",
-            **_ordered_card_lists(model_web),
+            **ordered_card_lists(model_web),
         })
     return slots
 
@@ -183,7 +129,7 @@ def render_model_builder(request, model_web, show_template_picker, workspace=Non
     """
     workspace_slots = build_workspace_slots(workspace, active_model_web=model_web) if workspace is not None else [
         {"slot": getattr(model_web.repository, "slot", 0), "model_web": model_web,
-         "name": model_web.system.name, "is_active": True, "suffix": "", **_ordered_card_lists(model_web)}]
+         "name": model_web.system.name, "is_active": True, "suffix": "", **ordered_card_lists(model_web)}]
     active_slot = next(s["slot"] for s in workspace_slots if s["is_active"])
 
     model_is_empty = is_empty_model(model_web.system_data)
