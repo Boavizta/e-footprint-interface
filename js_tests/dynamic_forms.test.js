@@ -15,14 +15,11 @@ function mount(name) {
 }
 
 function setupDom(dynamicFormData) {
-    document.body.innerHTML = `
-        <select id="Cls_provider" name="Cls_provider">
-            <option value="openai" selected>openai</option>
-            <option value="google">google</option>
-        </select>
-        <select id="Cls_model_name" name="Cls_model_name" data-default-value="sora-2-pro" required></select>
-        <script id="dynamic-form-data" type="application/json"></script>
-    `;
+    mount("conditional_select_catalog");
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        '<script id="dynamic-form-data" type="application/json"></script>',
+    );
     document.getElementById("dynamic-form-data").textContent = JSON.stringify(dynamicFormData);
     document.dispatchEvent(new Event("initDynamicForm"));
 }

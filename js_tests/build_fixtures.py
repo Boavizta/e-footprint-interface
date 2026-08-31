@@ -277,6 +277,38 @@ def render_select_object(field_ctx):
 
 
 # ---------------------------------------------------------------------------
+# dynamic_forms.test.js — select_str_input.html conditional catalog cascade
+# ---------------------------------------------------------------------------
+
+CONDITIONAL_SELECT_CASES = {
+    "conditional_select_catalog": [
+        {
+            "web_id": "Cls_provider",
+            "default": "openai",
+            "selected": "openai",
+            "options": [
+                {"value": "openai", "label": "openai"},
+                {"value": "google", "label": "google"},
+            ],
+        },
+        {
+            "web_id": "Cls_model_name",
+            "default": "sora-2-pro",
+            "selected": "sora-2-pro",
+            "options": [],
+        },
+    ],
+}
+
+
+def render_select_str_input(field_ctx):
+    return render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/select_str_input.html",
+        {"field": field_ctx},
+    )
+
+
+# ---------------------------------------------------------------------------
 # tour.test.js — onboarding/tour_steps.html (+ the canvas data-tour-target anchors)
 # ---------------------------------------------------------------------------
 
@@ -352,6 +384,7 @@ GROUPS = [
     (DICT_COUNT_CASES, render_dict_count),
     (INLINE_COUNT_CASES, render_inline_count),
     (SELECT_OBJECT_CASES, render_select_object),
+    (CONDITIONAL_SELECT_CASES, render_select_str_input),
     (TOUR_CASES, render_tour_steps),
     (SORTABLE_CANVAS_CASES, render_sortable_canvas),
 ]
