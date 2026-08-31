@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.10.1]
 
 ### Fixed
 - Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips, without recomputing or reserializing the model after each drag.
 - Clearing an inline relationship count now restores the latest valid value without sending repeated invalid updates to the backend.
+- 0% Sankey aggregation threshold now persists when Results is closed.
 - Sankey aggregation thresholds, including 0%, now persist when Results is closed immediately after a change.
 
 ### Changed
