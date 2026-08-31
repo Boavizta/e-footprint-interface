@@ -187,6 +187,11 @@ class ModelWeb:
     def persist_to_cache(self):
         """Serialize current system state and persist it to the repository.
 
+        The total footprint is materialized before the repository measures the canonical payload.
+        Computing it also materializes every impact source's aggregate footprint pair, so an edit
+        cannot appear small while invalidated and later make the model exceed the payload limit when
+        results are opened. Other serialized projections, notably the Sankey matrix, remain lazy.
+
         Redis receives the canonical payload with stored computed state for fast request hydration.
         Postgres receives an inputs-only recovery payload because database-cache writes scale with
         payload size; recovery can afford lazy recomputation after a Redis miss.
@@ -194,6 +199,7 @@ class ModelWeb:
         gc_before = _gc_stats_snapshot()
         wall_started_at = perf_counter()
         cpu_started_at = process_time()
+        _ = self.system.total_footprint
         data = self.to_json(save_computed_state=True)
         recovery_data = self.to_json(save_computed_state=False)
         _log_runtime_stage("Serialized system data", wall_started_at, cpu_started_at, gc_before)

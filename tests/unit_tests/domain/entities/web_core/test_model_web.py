@@ -296,19 +296,29 @@ class TestToJsonHoldsOnlyReferencedSources:
 
 
 class TestExportSerialization:
-    def test_cache_persistence_stays_lazy_but_export_materializes_every_serialized_slot(self, minimal_model_web):
-        """Ordinary edit persistence peeks, while explicit export computes a complete snapshot."""
+    def test_cache_persistence_materializes_total_but_export_materializes_every_serialized_slot(
+            self, minimal_model_web):
+        """Persistence prices the aggregate footprint; export computes every serialized projection."""
         from efootprint.abstract_modeling_classes.reactive_core import serialized_slots
 
         raw_system = next(iter(minimal_model_web.response_objs["System"].values()))
         total_descriptor = serialized_slots(type(raw_system))["total_footprint"]
+        matrix_descriptor = serialized_slots(type(raw_system))["impact_repartition_matrix"]
         assert total_descriptor.peek(raw_system) is None
+        assert matrix_descriptor.peek(raw_system) is None
 
         minimal_model_web.persist_to_cache()
 
-        assert total_descriptor.peek(raw_system) is None
+        assert total_descriptor.peek(raw_system) is not None
+        assert matrix_descriptor.peek(raw_system) is None
         persisted = minimal_model_web.repository.get_system_data()
-        assert "total_footprint" not in persisted["System"][raw_system.id]
+        assert "total_footprint" in persisted["System"][raw_system.id]
+        assert "impact_repartition_matrix" not in persisted["System"][raw_system.id]
+        for obj in minimal_model_web.flat_efootprint_objs_dict.values():
+            obj_slots = serialized_slots(obj.efootprint_class)
+            for footprint_name in {"energy_footprint", "instances_fabrication_footprint"} & obj_slots.keys():
+                assert obj_slots[footprint_name].peek(obj) is not None
+                assert footprint_name in persisted[obj.class_as_simple_str][obj.id]
 
         exported = minimal_model_web.export_json()
 
