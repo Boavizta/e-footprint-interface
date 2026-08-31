@@ -1,7 +1,7 @@
 # Attributed-footprint explainability boundaries
 
-**Status:** Parked investigation.  
-**Recorded:** 2026-08-28.  
+**Status:** Parked investigation.
+**Recorded:** 2026-08-28.
 **Related active feature:** `specs/features/attribution-memory-optimization/`.
 
 ## Problem encountered
