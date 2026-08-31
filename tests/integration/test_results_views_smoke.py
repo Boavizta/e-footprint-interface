@@ -22,6 +22,7 @@ from datetime import datetime
 import numpy as np
 import pytest
 from pint import Quantity
+from efootprint.abstract_modeling_classes.reactive_core import observe_computations
 from efootprint.abstract_modeling_classes.source_objects import SourceValue, SourceRecurrentValues
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
@@ -53,6 +54,7 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 from e_footprint_interface import computation_memory_middleware, runtime_memory
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.adapters.views.sankey_views import DEFAULT_ACTIVE_COLUMNS
+from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -202,6 +204,40 @@ def test_results_endpoint_smoke(client, builder, hit):
     system = builder()
     SessionSystemRepository(client.session).save_data(system_to_json(system, save_computed_state=False))
     assert hit(client).status_code == 200
+
+
+@pytest.mark.django_db
+def test_result_chart_persists_newly_computed_footprints_only_once(client, monkeypatch):
+    system = _build_basic_web()
+    repository = SessionSystemRepository(client.session)
+    repository.save_data(system_to_json(system, save_computed_state=False))
+    persist_calls = 0
+    original_persist_to_cache = ModelWeb.persist_to_cache
+
+    def count_persist(model_web):
+        nonlocal persist_calls
+        persist_calls += 1
+        return original_persist_to_cache(model_web)
+
+    monkeypatch.setattr(ModelWeb, "persist_to_cache", count_persist)
+
+    def hit_result_chart():
+        completed_slots = 0
+
+        def count_completion(_slot):
+            nonlocal completed_slots
+            completed_slots += 1
+
+        with observe_computations(count_completion):
+            response = client.get("/model_builder/result-chart/", HTTP_HX_REQUEST="true")
+        assert response.status_code == 200
+        return completed_slots
+
+    assert hit_result_chart() > 0
+    assert persist_calls == 1
+    assert "total_footprint" in repository.get_system_data()["System"][system.id]
+    assert hit_result_chart() == 0
+    assert persist_calls == 1
 
 
 @pytest.mark.django_db

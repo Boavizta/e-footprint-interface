@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from openpyxl import Workbook
 from efootprint import __version__ as efootprint_version
+from efootprint.abstract_modeling_classes.reactive_core import computed_slots
 from efootprint.logger import logger
 from efootprint.utils.calculus_graph import build_calculus_graph
 from efootprint.utils.display import format_quantity_for_display, human_readable_unit
@@ -376,10 +377,15 @@ def upload_json(request):
 @time_it
 def result_chart(request):
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
+    system = model_web.system.modeling_obj
+    total_footprint_slot = computed_slots(type(system))["total_footprint"]
+    total_footprint_was_cached = total_footprint_slot.peek(system) is not None
     model_web.raise_incomplete_modeling_errors()
 
     http_response = htmx_render(
         request, "model_builder/result/result_panel.html", context={"model_web": model_web})
+    if not total_footprint_was_cached and total_footprint_slot.peek(system) is not None:
+        model_web.persist_to_cache()
     http_response["HX-Trigger-After-Settle"] = "triggerResultRendering"
 
     return http_response

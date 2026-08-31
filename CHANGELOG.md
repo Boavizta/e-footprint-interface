@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add a production-safe Docker build context that excludes local databases, environments, dependency directories, caches, secrets, and profiler artifacts.
 
 ### Fixed
+- Persist footprints computed by a cold results-chart request so subsequent results and Sankey requests reuse the warm cache without rewriting an already-cached model.
 - Adapt the interface to efootprint's private hydration lifecycle, reverse `parent_groups` descriptors, stable computed-dict coordinate keys, and explicit serialized-state materialization boundaries. Legacy edge-model imports, calculated-attribute charts, workspace re-id, and complete snapshot persistence now work with library `dev`.
 
 ### Changed
