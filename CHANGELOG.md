@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips, without recomputing or reserializing the model after each drag.
+- Clearing an inline relationship count now restores the latest valid value without sending repeated invalid updates to the backend.
+- Sankey aggregation thresholds, including 0%, now persist when Results is closed immediately after a change.
+
+### Changed
+- Closed-catalog fields such as EcoLogits model names and Boavizta cloud instance types now use native selects instead of editable datalists.
 
 ## [V1.10.0] - 2026-08-31
 
