@@ -53,6 +53,11 @@ class ISystemRepository(ABC):
     def interface_config(self, value: dict) -> None:
         self._interface_config = value
 
+    @abstractmethod
+    def save_interface_config(self) -> None:
+        """Persist interface-only metadata without rebuilding the modeling system."""
+        pass
+
     @staticmethod
     def upgrade_system_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """Upgrade system data to the latest schema version.

@@ -4,6 +4,7 @@ This implementation stores system data in Redis (fast cache) with a Postgres
 fallback cache, keyed by the Django session identifier and the workspace slot.
 """
 import os
+from copy import deepcopy
 from typing import Dict, Any, Optional, Tuple
 
 from django.contrib.sessions.backends.base import SessionBase
@@ -168,6 +169,57 @@ class SessionSystemRepository(ISystemRepository):
     @interface_config.setter
     def interface_config(self, value: dict) -> None:
         self._interface_config = value
+
+    def save_interface_config(self) -> None:
+        """Persist UI metadata while preserving each backend's existing system representation."""
+        if self._interface_config is None:
+            return
+
+        cache_key = self._cache_key(create_if_missing=True)
+        if not cache_key:
+            self._save_interface_config_to_session()
+            return
+
+        redis_alias = self._cache_backend.REDIS_CACHE_ALIAS
+        postgres_alias = self._cache_backend.POSTGRES_CACHE_ALIAS
+        redis_data = self._cache_backend.get_from(cache_key, redis_alias)
+        postgres_data = self._cache_backend.get_from(cache_key, postgres_alias)
+
+        def with_interface_config(data):
+            if data is None:
+                return None
+            return {
+                **data,
+                "interface_config": deepcopy(self._interface_config),
+                "efootprint_interface_version": interface_version,
+            }
+
+        redis_data = with_interface_config(redis_data)
+        postgres_data = with_interface_config(postgres_data)
+
+        if redis_data is not None:
+            size_result = compute_json_size(redis_data)
+            workspace_size_mb = self._index.workspace_size_mb_with(self._slot, size_result.size_bytes)
+            if workspace_size_mb > self.MAX_PAYLOAD_SIZE_MB:
+                raise PayloadSizeLimitExceeded(workspace_size_mb, self.MAX_PAYLOAD_SIZE_MB)
+
+        if redis_data is not None:
+            self._cache_backend.set(
+                cache_key,
+                redis_data,
+                redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
+                write_postgres=False,
+            )
+            self._index.set_slot_size(self._slot, size_result.size_bytes)
+        if postgres_data is not None:
+            self._cache_backend.set(
+                cache_key,
+                postgres_data,
+                postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
+                write_redis=False,
+            )
+
+        self._save_interface_config_to_session()
 
     def save_data(self, data: Dict[str, Any], recovery_data: Optional[Dict[str, Any]] = None) -> None:
         """Persist canonical data to Redis and compact recovery data to Postgres.

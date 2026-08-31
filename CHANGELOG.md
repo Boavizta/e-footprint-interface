@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips.
+- Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips, without recomputing or reserializing the model after each drag.
 
 ## [V1.10.0] - 2026-08-31
 

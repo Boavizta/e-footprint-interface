@@ -5,7 +5,9 @@ without requiring Django session infrastructure.
 """
 from unittest.mock import MagicMock, patch
 
+from e_footprint_interface import __version__ as interface_version
 from model_builder.adapters.repositories import InMemorySystemRepository
+from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -62,6 +64,18 @@ class TestInMemoryRepository:
         saved_data = repository.get_system_data()
         assert saved_data["interface_config"] == {"sankey_diagrams": [{"id": "deadbeef"}]}
         assert "efootprint_interface_version" in saved_data
+
+    def test_save_interface_config_merges_metadata_without_replacing_system_data(self):
+        repository = InMemorySystemRepository(initial_data={"System": {"sys-1": {"name": "Test System"}}})
+        repository.interface_config = {"card_order": {"server-list": ["Server_a"]}}
+
+        repository.save_interface_config()
+
+        assert repository.get_system_data() == {
+            "System": {"sys-1": {"name": "Test System"}},
+            "interface_config": {"card_order": {"server-list": ["Server_a"]}},
+            "efootprint_interface_version": interface_version,
+        }
 
     def test_clear(self):
         """Clear should remove all data."""
@@ -131,6 +145,7 @@ class TestModelWebWithRepository:
         assert isinstance(repository, ISystemRepository)
         assert hasattr(repository, 'get_system_data')
         assert hasattr(repository, 'save_data')
+        assert hasattr(repository, 'save_interface_config')
         assert hasattr(repository, 'has_system_data')
         assert hasattr(repository, 'clear')
 
@@ -181,6 +196,37 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         assert postgres_write.args == ("system_data:session-key:0", recovery_data)
         assert postgres_write.kwargs["write_redis"] is False
         assert "write_postgres" not in postgres_write.kwargs
+
+    def test_save_interface_config_preserves_canonical_and_recovery_representations(self):
+        session = FakeSession()
+        repository = SessionSystemRepository(session)
+        canonical_data = {
+            "System": {"sys-1": {"name": "Test System", "total_footprint": {"value": 42}}},
+            "calculation_graph": {"nodes": ["canonical-only"]},
+        }
+        recovery_data = {"System": {"sys-1": {"name": "Test System"}}}
+        redis_cache = MagicMock()
+        postgres_cache = MagicMock()
+        redis_cache.get.return_value = canonical_data
+        postgres_cache.get.return_value = recovery_data
+
+        def get_cache(alias):
+            return redis_cache if alias == CacheBackend.REDIS_CACHE_ALIAS else postgres_cache
+
+        repository.interface_config = {"card_order": {"server-list": ["Server_a"]}}
+        with patch.object(CacheBackend, "_get_cache", side_effect=get_cache):
+            repository.save_interface_config()
+
+        saved_canonical = redis_cache.set.call_args.args[1]
+        saved_recovery = postgres_cache.set.call_args.args[1]
+        assert saved_canonical["calculation_graph"] == {"nodes": ["canonical-only"]}
+        assert saved_canonical["System"]["sys-1"]["total_footprint"] == {"value": 42}
+        assert "calculation_graph" not in saved_recovery
+        assert "total_footprint" not in saved_recovery["System"]["sys-1"]
+        assert saved_canonical["interface_config"] == saved_recovery["interface_config"] == {
+            "card_order": {"server-list": ["Server_a"]}
+        }
+        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == saved_canonical["interface_config"]
 
     def test_clear_removes_interface_config_session_keys(self):
         session = FakeSession()

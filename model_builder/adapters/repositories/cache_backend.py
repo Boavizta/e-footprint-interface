@@ -62,6 +62,15 @@ class CacheBackend:
 
         return None
 
+    def get_from(self, cache_key: str, cache_alias: str):
+        """Read one cache backend without falling through to the other representation."""
+        cache = self._get_cache(cache_alias)
+        if cache is None:
+            return None
+        return self._time_cache_call(
+            "get", cache_alias, lambda: cache.get(cache_key)
+        )
+
     def get_with_source(self, cache_key: str):
         redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
         postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)

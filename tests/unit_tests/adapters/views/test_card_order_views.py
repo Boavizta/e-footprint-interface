@@ -1,6 +1,7 @@
 import json
 from copy import deepcopy
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 from django.template.loader import render_to_string
@@ -220,11 +221,12 @@ def test_save_card_order_persists_complete_mapping_and_preserves_siblings_and_ot
     parked_repository.interface_config = {"sankey_diagrams": [{"id": "parked"}]}
     parked_repository.save_data(deepcopy(minimal_system_data))
 
-    response = client.post(
-        "/model_builder/save-card-order/",
-        data=json.dumps(COMPLETE_CARD_ORDER),
-        content_type="application/json",
-    )
+    with patch.object(views, "ModelWeb", side_effect=AssertionError("card-order save must not hydrate the model")):
+        response = client.post(
+            "/model_builder/save-card-order/",
+            data=json.dumps(COMPLETE_CARD_ORDER),
+            content_type="application/json",
+        )
 
     assert response.status_code == 204
     active_data = SessionSystemRepository(client.session, slot=0).get_system_data()

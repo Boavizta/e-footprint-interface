@@ -206,9 +206,8 @@ def save_card_order(request):
         return HttpResponse(status=400)
 
     repository = SessionWorkspaceRepository(request.session).active_repository()
-    model_web = ModelWeb(repository)
     repository.interface_config["card_order"] = card_order
-    model_web.persist_to_cache()
+    repository.save_interface_config()
     return HttpResponse(status=204)
 
 

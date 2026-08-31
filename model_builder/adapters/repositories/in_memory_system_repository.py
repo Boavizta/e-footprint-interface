@@ -72,6 +72,11 @@ class InMemorySystemRepository(ISystemRepository):
     def interface_config(self, value: dict) -> None:
         self._interface_config = value
 
+    def save_interface_config(self) -> None:
+        """Merge interface-only metadata into the stored payload without rebuilding a model."""
+        if self._data is not None:
+            self.save_data(deepcopy(self._data))
+
     def save_data(self, data: Dict[str, Any], recovery_data: Optional[Dict[str, Any]] = None) -> None:
         """Store the canonical system data payload in memory.
 
