@@ -6,6 +6,29 @@ function initModelBuilderMain() {
     initTruncatedTextTooltips();
 }
 
+function rememberAutosavingRelationshipCount(event) {
+    const input = event.target.closest("[data-action='autosave-relationship-count']");
+    if (input) {
+        input.dataset.valueBeforeEdit = input.value;
+    }
+}
+
+function rejectBlankAutosavingRelationshipCount(event) {
+    const input = event.target.closest("[data-action='autosave-relationship-count']");
+    if (!input || input.value !== "") {
+        return;
+    }
+
+    input.value = input.dataset.valueBeforeEdit ?? input.defaultValue;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+}
+
+// Capture before HTMX receives the change on the input. Delegation keeps the guard active for
+// relationship controls introduced by partial and out-of-band swaps.
+document.addEventListener("focusin", rememberAutosavingRelationshipCount, true);
+document.addEventListener("change", rejectBlankAutosavingRelationshipCount, true);
+
 function initTruncatedTextTooltips(root = document) {
     if (!window.bootstrap || !bootstrap.Tooltip) {
         return;
@@ -363,5 +386,10 @@ document.body.addEventListener("htmx:confirm", function (evt) {
 });
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = {CARD_ORDER_LIST_IDS, initSortableObjectCards};
+    module.exports = {
+        CARD_ORDER_LIST_IDS,
+        initSortableObjectCards,
+        rejectBlankAutosavingRelationshipCount,
+        rememberAutosavingRelationshipCount,
+    };
 }

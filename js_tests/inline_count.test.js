@@ -1,0 +1,46 @@
+const fs = require("fs");
+const path = require("path");
+
+require("../theme/static/scripts/model_builder_main.js");
+
+const FIXTURE = path.join(__dirname, "fixtures", "inline_count_autosave.html");
+
+beforeEach(() => {
+    document.body.innerHTML = fs.readFileSync(FIXTURE, "utf8");
+});
+
+function input() {
+    return document.querySelector("[data-action='autosave-relationship-count']");
+}
+
+test("the real autosaving count partial is required", () => {
+    expect(input().required).toBe(true);
+});
+
+test("committing a blank restores the value captured on focus and suppresses the change", () => {
+    const field = input();
+    const requestListener = jest.fn();
+    field.addEventListener("change", requestListener);
+
+    field.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    field.value = "";
+    const accepted = field.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
+
+    expect(field.value).toBe("2.5");
+    expect(accepted).toBe(false);
+    expect(requestListener).not.toHaveBeenCalled();
+});
+
+test.each(["0", "3", "1.25"])("valid numeric value %s reaches the change listener", value => {
+    const field = input();
+    const requestListener = jest.fn();
+    field.addEventListener("change", requestListener);
+
+    field.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    field.value = value;
+    const accepted = field.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
+
+    expect(field.value).toBe(value);
+    expect(accepted).toBe(true);
+    expect(requestListener).toHaveBeenCalledTimes(1);
+});

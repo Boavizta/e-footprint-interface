@@ -91,6 +91,14 @@ class ObjectCard:
         expect(self.locator.locator("input[name='count']").first).to_have_value(value)
         return self
 
+    def clear_inline_count(self):
+        """Clear and commit the inline count as a user would when leaving the field."""
+        field = self.locator.locator("input[name='count']").first
+        field.focus()
+        field.fill("")
+        field.press("Tab")
+        return self
+
     def has_link_existing_child_button(self, child_type: str) -> bool:
         """Return whether a 'link existing' button is present for the given child type."""
         return self.locator.locator(

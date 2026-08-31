@@ -145,6 +145,8 @@ class TestDictMutationViews:
     @pytest.mark.parametrize(
         ("raw_count", "message"),
         [
+            (None, "Count must be a number."),
+            ("", "Count must be a number."),
             ("abc", "Count must be a number."),
             ("-1", "Count must be positive."),
         ],
@@ -161,9 +163,10 @@ class TestDictMutationViews:
         )
         client.post(f"/model_builder/link-dict-entry/{device_id}/", {"parent_id": group_id})
 
+        post_data = {} if raw_count is None else {"count": raw_count}
         response = client.post(
             f"/model_builder/update-dict-count/{group_id}/{device_id}/",
-            {"count": raw_count},
+            post_data,
         )
 
         _assert_error_modal_response(response, message)

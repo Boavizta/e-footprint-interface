@@ -225,6 +225,30 @@ def render_dict_count(field_ctx):
 
 
 # ---------------------------------------------------------------------------
+# inline_count.test.js — dict_entry_count_unlink.html
+# ---------------------------------------------------------------------------
+
+INLINE_COUNT_CASES = {
+    "inline_count_autosave": {
+        "entry_count": "2.5",
+        "min_val": 0,
+        "step": "any",
+        "parent_name": "Test Journey",
+        "parent_efootprint_id": "journey-1",
+        "entry_efootprint_id": "step-1",
+        "count_only": True,
+    },
+}
+
+
+def render_inline_count(case_ctx):
+    return render_to_string(
+        "model_builder/object_cards/partials/dict_entry_count_unlink.html",
+        case_ctx,
+    )
+
+
+# ---------------------------------------------------------------------------
 # dynamic_forms.test.js — select_object.html
 # ---------------------------------------------------------------------------
 
@@ -326,6 +350,7 @@ GROUPS = [
     (ROW_EDITOR_CASES, render_row_editor),
     (SOURCE_TABLE_ROW_CASES, render_source_table_row),
     (DICT_COUNT_CASES, render_dict_count),
+    (INLINE_COUNT_CASES, render_inline_count),
     (SELECT_OBJECT_CASES, render_select_object),
     (TOUR_CASES, render_tour_steps),
     (SORTABLE_CANVAS_CASES, render_sortable_canvas),

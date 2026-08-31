@@ -40,6 +40,8 @@ Execute Tasks **1 → 2 → 4 → 3**.
 
 ## Task 2 — Reject blank autosaving relationship counts in the client
 
+**Status:** Done
+
 **Goal:** Keep every autosaving relationship-count control consistent with persisted state by restoring its prior live numeric value and suppressing the HTMX request when a user commits a blank, while retaining backend validation and the existing semantics of zero and unlink.
 
 **Diagnostic:** [`diagnostics/count-no-value-repeated-errors.md`](diagnostics/count-no-value-repeated-errors.md)
