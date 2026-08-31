@@ -4,28 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.10.0] - 2026-08-31
 
 ### Added
-- Add a configurable, cgroup-aware computation memory guard for model-builder requests. Its bounded privacy-safe telemetry can observe computation with at most 3% measured overhead or enforce the calibrated 85% working-set limit; unsafe Sankey builds stop with actionable graph guidance (and a generic recoverable modal before model hydration), preserve persisted model state, then collect memory and recycle the worker without producing an OOM or 5xx response.
-- Add a reproducible 4 GiB production-container memory profiling laboratory, a smart-building topology baseline, and an evidence-ranked memory optimization backlog.
-- Add a production-safe Docker build context that excludes local databases, environments, dependency directories, caches, secrets, and profiler artifacts.
+- A configurable, cgroup-aware computation memory guard prevents expensive requests from exhausting the container. At the default 85% limit, interrupted Sankey builds return recoverable guidance instead of an OOM or 5xx response.
+- Reproducible production-container memory profiling, including representative model scenarios and regression evidence.
+- A production-safe Docker build context that excludes local data, caches, secrets, and profiler artifacts.
 
 ### Fixed
 - Persist footprints computed by a cold results-chart request so subsequent results and Sankey requests reuse the warm cache without rewriting an already-cached model.
-- Adapt the interface to efootprint's private hydration lifecycle, reverse `parent_groups` descriptors, stable computed-dict coordinate keys, and explicit serialized-state materialization boundaries. Legacy edge-model imports, calculated-attribute charts, workspace re-id, and complete snapshot persistence now work with library `dev`.
+- Legacy edge-model imports, calculated-attribute charts, workspace re-identification, and complete snapshot exports now work with e-footprint 23.
+- Model edits now materialize the system total footprint before persistence, so the workspace payload limit accounts for aggregate footprint caches immediately instead of allowing a model that becomes too large to reopen after results are computed.
 
 ### Changed
-- Rename the no-longer-progressive import coordinator to `SystemImportService` and align its documentation with its current canonical materialization and final payload-validation responsibilities.
-- Remove the obsolete `GITHUB_TOKEN` Docker build argument and private-Git URL rewrite now that all Python dependencies are public packages.
-- Detect the container memory capacity independently from Gunicorn's post-request recycling threshold. Recycle above a configurable 60% working set by default, excluding reclaimable file cache and reserving the higher memory range for active calculations.
-- Scope the Sources table and XLSX export to sourced input quantities, avoiding the previous full pull of every scalar calculated attribute when opening or downloading source data.
-- Defer cyclic garbage collection until Gunicorn has sent each response: automatic GC is disabled while a request runs, then a timed full collection executes at the post-request boundary. This prevents large model graphs from causing random hydration or serialization latency spikes while retaining prompt worker cleanup and the existing memory guard.
-- Add process CPU time, worker PID, and per-generation garbage-collection deltas to ModelWeb hydration and serialization timing logs, making production latency spikes diagnosable without enabling a profiler.
-- Consume efootprint's Sankey node and link values as canonical kg floats, converting them only once when producing the ECharts display payload.
-- Explicit model and workspace downloads now materialize every efootprint `serialize=True` slot before serialization, producing complete snapshots independent of which result projections the user visited. Automatic session persistence after edits remains peek-only and lazy.
-- Adopt efootprint 23.0.0's pull-based computation contract. Redis stores the canonical model payload (inputs plus the serialize-flagged computed slots and calculation graph), while Postgres stores a compact inputs-only recovery payload to keep synchronous durable-cache writes fast. Redis loading recomputes nothing when the stored efootprint version matches; a Postgres fallback recomputes lazily on first read. Sankey diagrams render from the stored impact-repartition matrix and edit requests recompute only the affected footprint cone. Old sessions also reload as inputs-only and recompute lazily on first read.
-- `ModelWeb.to_json` now mirrors the library and persists only sources a serialized value references. Pure computed-attribute provenance (EcoLogits / Boavizta API sources), re-attached whenever a value recomputes, is no longer written into the saved `Sources` block — so the source-table row-editor dropdown, which reads that block, offers input sources only instead of leaking auto-generated computed provenance. Regenerated the `ai_chatbot` and `iot_industrial` intro templates accordingly.
+- Upgrade to e-footprint 23.0.0 and its pull-based computation model. Matching Redis snapshots load without recomputation, Postgres keeps a compact inputs-only recovery copy, old sessions recompute lazily, and edits invalidate only affected results.
+- Model JSON now has substantially more headroom: for the same standard large-system fixture, the complete cached export fell from 202.8 MB with the previous format to 12.8 MB with schema v23 (15.8× smaller). In an edge-heavy smart-building scenario, the previous format reached 256 MB while adding the third usage pattern, whereas schema v23 represents 10 usage patterns in 52 MB.
+- Sankey generation and attributed-footprint calculations use about one-third as much additional peak memory in large-model benchmarks; production-shaped attribution scenarios reduced total process peaks by 2.6–3.8×.
+- Together, these gains make models around 5× larger practical on the same computing resources for comparable workloads; exact capacity still depends on model topology and workload.
+- Explicit model and workspace downloads materialize complete snapshots; automatic persistence after edits materializes the total footprint for payload validation while leaving other projections lazy.
+- Results and Sankey requests reuse persisted footprint caches. Sankey payloads consume canonical kg floats and the stored attribution matrix.
+- The Sources table, source picker, and XLSX export now include sourced inputs only; computed EcoLogits and Boavizta provenance is restored on recomputation instead of appearing as editable source data.
+- Cyclic garbage collection runs after responses, avoiding calculation-time pauses. Workers recycle above 60% working-set usage by default, independently from the computation guard and excluding reclaimable file cache.
+- Runtime timing logs now include CPU, worker, and garbage-collection diagnostics.
+- Docker builds no longer require a GitHub token or private dependency rewrite.
 
 ## [V1.9.4]
 
