@@ -77,6 +77,8 @@ complete, very large formula; that behavior is approved for this feature.
 
 ## Task 3 — Adopt and validate the optimized library in the interface
 
+**Status:** Done.
+
 **Goal:** Release/adopt the completed library optimization and verify it under the interface's Docker and memory-guard
 environment before deployment.
 
@@ -94,6 +96,11 @@ environment before deployment.
 
 **Acceptance:** The interface consumes a released/PyPI dependency; Docker results confirm the expected memory reduction;
 the memory guard remains a fallback rather than the normal outcome for the five-pattern reference model.
+
+**Validation result:** The production image installed efootprint 23.0.0 from PyPI. Across three fresh 2,926 MiB
+containers per scenario, results, cold Sankey, and four attributed-footprint scenarios all completed without an abort
+or `would_abort`; the highest working-set peak was 861.7 MiB against the 2,487.1 MiB guard threshold. The focused
+interface results/memory smoke suite passed 57 tests after the normal production `collectstatic` step.
 
 **Depends on:** Tasks 1 and 2 (or Task 2's documented no-ship decision).
 
