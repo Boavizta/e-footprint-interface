@@ -15,6 +15,8 @@ Execute Tasks **1 → 2 → 4 → 3**.
 
 ## Task 1 — Preserve precision in `System.total_footprint`
 
+**Status:** Done
+
 **Goal:** Make the public hourly `total_footprint` conserve the same fabrication and energy streams as the category totals by removing calculation-layer rounding, without changing category membership or device allocation.
 
 **Diagnostic:** [`diagnostics/genai-video-total-footprint-double-count.md`](diagnostics/genai-video-total-footprint-double-count.md)
