@@ -1,5 +1,5 @@
 """Side panel page object for form interactions."""
-from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, expect
+from playwright.sync_api import Page, expect
 
 from tests.e2e.utils import click_and_wait_for_htmx
 
@@ -69,57 +69,24 @@ class SidePanelPage:
     def submit_and_wait_for_close(self):
         """Submit the form, wait for its HTMX request, then wait for the panel to close."""
         hx_url = self.form.get_attribute("hx-post")
-        # A response can arrive before HTMX's 20 ms settle phase has applied final OOB attributes.
-        # Track the exact form XHR: unrelated parallel requests must not release this waiter.
-        # `hx-swap="none"` edits deliberately emit no afterSettle event, so they use request completion below.
-        expects_swap = self.form.get_attribute("hx-swap") != "none"
-        settle_token = None
-        if expects_swap:
-            settle_token = self.page.evaluate(
-                """() => {
-                const form = document.getElementById("sidePanelForm");
-                window.__e2eHtmxSettleSequence = (window.__e2eHtmxSettleSequence || 0) + 1;
-                const token = window.__e2eHtmxSettleSequence;
-                window.__e2eHtmxRequestStates = window.__e2eHtmxRequestStates || {};
-                window.__e2eHtmxRequestStates[token] = {settled: false};
-
-                const onBeforeRequest = (event) => {
-                    if (event.detail.elt !== form) return;
-                    const requestXhr = event.detail.xhr;
-                    document.body.removeEventListener("htmx:beforeRequest", onBeforeRequest);
-
-                    const onAfterSettle = (settleEvent) => {
-                        if (settleEvent.detail.xhr !== requestXhr) return;
-                        document.body.removeEventListener("htmx:afterSettle", onAfterSettle);
-                        window.__e2eHtmxRequestStates[token].settled = true;
-                    };
-                    document.body.addEventListener("htmx:afterSettle", onAfterSettle);
-                };
-                document.body.addEventListener("htmx:beforeRequest", onBeforeRequest);
-                return token;
-            }"""
-            )
+        # The panel form exists before HTMX's settle phase processes newly swapped content.
+        # Clicking during that window performs a native submit instead of an HTMX request.
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
         if hx_url:
-            try:
-                with self.page.expect_response(lambda r: hx_url in r.url, timeout=1000):
-                    self.submit_button.click()
-            except PlaywrightTimeoutError:
-                # Some valid flows close the panel without an easily matchable response in Playwright.
-                pass
+            with self.page.expect_response(lambda response: hx_url in response.url) as response_info:
+                self.submit_button.click()
+            response = response_info.value
+            assert response.ok, f"Side-panel form request failed with HTTP {response.status}: {response.url}"
         else:
             self.submit_button.click()
-        self.form.wait_for(state="hidden", timeout=500)
-        if settle_token is not None:
-            self.page.wait_for_function(
-                """token => {
-                    const state = window.__e2eHtmxRequestStates?.[token];
-                    return state?.settled === true;
-                }""",
-                arg=settle_token,
-                timeout=5000,
-            )
-        else:
-            self.page.wait_for_function("() => document.querySelector('.htmx-request') === null", timeout=5000)
+        self.form.wait_for(state="hidden")
+        # afterRequest closes the panel before HTMX's settle phase applies final OOB attributes.
+        # Waiting on HTMX's own state classes avoids relying on a bubbled event from replaced elements.
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
         return self
 
     def close(self):
