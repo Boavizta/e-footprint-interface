@@ -40,7 +40,6 @@ function hidePanelResult() {
     var resultDiv = document.getElementById("result-block");
 
     panel.style.height = "";
-    resultDiv.innerHTML = "";
     resultDiv.style.height = "";
 
     if (document.getElementById("sidePanel").classList.contains("d-none")) {
@@ -48,13 +47,26 @@ function hidePanelResult() {
     } else {
         resultDiv.classList.remove("result-width");
     }
-    btn.style.display = "block";
-
     var scrollableArea = document.getElementById("model-canva-scrollable-area");
     if (scrollableArea) {
         scrollableArea.classList.remove("overflow-x-hidden");
         scrollableArea.classList.add("overflow-x-auto");
     }
+
+    function emptyResultPanel() {
+        resultDiv.innerHTML = "";
+        resultDiv.style.display = "";
+        btn.style.display = "block";
+    }
+
+    var pendingSankeyRequest = resultDiv.querySelector(".sankey-settings.htmx-request");
+    if (pendingSankeyRequest) {
+        resultDiv.style.display = "none";
+        pendingSankeyRequest.addEventListener("htmx:afterRequest", emptyResultPanel, { once: true });
+        return;
+    }
+
+    emptyResultPanel();
 }
 
 function initHammer() {
