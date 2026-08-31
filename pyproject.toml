@@ -40,7 +40,7 @@ exclude = '''
 [tool.poetry.dependencies]
 python = "^3.12"
 # efootprint = {path = "../e-footprint", develop = true}  # local dev: swap back, do NOT commit
-efootprint = "23.0.0b4"
+efootprint = "23.0.0b5"
 django= "^5.0"
 django-browser-reload = "^1.12.1"
 django-environ = "^0"
