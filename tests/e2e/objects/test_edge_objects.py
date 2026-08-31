@@ -149,7 +149,7 @@ class TestEdgeObjects:
         model_builder.click_add_server()
         side_panel.select_object_type("BoaviztaCloudServer")
         side_panel.fill_field("BoaviztaCloudServer_name", server_name)
-        side_panel.fill_field("BoaviztaCloudServer_instance_type", "ent1-l")
+        side_panel.select_option("BoaviztaCloudServer_instance_type", "ent1-l")
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("BoaviztaCloudServer", server_name)
 

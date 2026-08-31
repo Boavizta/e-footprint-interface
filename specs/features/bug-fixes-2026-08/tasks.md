@@ -67,6 +67,8 @@ Execute Tasks **1 → 2 → 4 → 3**.
 
 ## Task 3 — Replace closed catalog datalists with native selects
 
+**Status:** Done
+
 **Goal:** Render all four conditional closed-catalog fields as native single-choice `<select>` controls, preserving their provider/object-dependent option mappings and submitted values while removing incidental free-text entry and datalist-specific code.
 
 **Diagnostic:** [`diagnostics/replace-datalists-with-selects.md`](diagnostics/replace-datalists-with-selects.md)

@@ -95,9 +95,9 @@
                     "available_sources": []
                 },
                 "default": "claude-opus-4-5",
-                "input_type": "datalist",
+                "input_type": "select_str_input",
                 "selected": "claude-opus-4-5",
-                "options": null
+                "options": []
             }
         ],
         "advanced_fields": []
@@ -183,9 +183,9 @@
                     "available_sources": []
                 },
                 "default": "sora-2-pro",
-                "input_type": "datalist",
+                "input_type": "select_str_input",
                 "selected": "sora-2-pro",
-                "options": null
+                "options": []
             }
         ],
         "advanced_fields": []

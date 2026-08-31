@@ -1,6 +1,5 @@
-// initDynamicForm wires datalist cascades. This exercises the single-hop path that
-// still ships (parent select -> child datalist): changing the parent repopulates the
-// child datalist from the parent's value and clears the child input. (The three-level
+// initDynamicForm wires conditional select cascades. This exercises the single-hop path:
+// changing the parent repopulates the child select and clears an invalid selection. (The three-level
 // chain propagation was removed in the ecologits-video-generation cleanup — no
 // single form ever holds a three-level chain.)
 
@@ -17,20 +16,22 @@ function mount(name) {
 
 function setupDom(dynamicFormData) {
     document.body.innerHTML = `
-        <input id="Cls_provider" name="Cls_provider" value="openai">
-        <input id="Cls_model_name" name="Cls_model_name" list="datalist_Cls_model_name" value="sora-2-pro">
-        <datalist id="datalist_Cls_model_name"></datalist>
+        <select id="Cls_provider" name="Cls_provider">
+            <option value="openai" selected>openai</option>
+            <option value="google">google</option>
+        </select>
+        <select id="Cls_model_name" name="Cls_model_name" data-default-value="sora-2-pro" required></select>
         <script id="dynamic-form-data" type="application/json"></script>
     `;
     document.getElementById("dynamic-form-data").textContent = JSON.stringify(dynamicFormData);
     document.dispatchEvent(new Event("initDynamicForm"));
 }
 
-function datalistValues(id) {
+function optionValues(id) {
     return Array.from(document.getElementById(id).options).map((opt) => opt.value);
 }
 
-test("changing the parent filter repopulates the child datalist and clears its input", () => {
+test("conditional select restores its default and clears it when the parent makes it stale", () => {
     setupDom({
         dynamic_lists: [
             {
@@ -45,15 +46,17 @@ test("changing the parent filter repopulates the child datalist and clears its i
     });
 
     // Initial fill from the starting provider value.
-    expect(datalistValues("datalist_Cls_model_name")).toEqual(["sora-2", "sora-2-pro"]);
+    expect(optionValues("Cls_model_name")).toEqual(["sora-2", "sora-2-pro"]);
+    expect(document.getElementById("Cls_model_name").value).toBe("sora-2-pro");
 
-    // Flip provider; the datalist listener refills from the new value and clears the input.
+    // Flip provider; the select listener replaces the options and clears the invalid selection.
     const provider = document.getElementById("Cls_provider");
     provider.value = "google";
     provider.dispatchEvent(new Event("change", { bubbles: true }));
 
-    expect(datalistValues("datalist_Cls_model_name")).toEqual(["veo-3"]);
+    expect(optionValues("Cls_model_name")).toEqual(["veo-3"]);
     expect(document.getElementById("Cls_model_name").value).toBe("");
+    expect(document.getElementById("Cls_model_name").selectedIndex).toBe(-1);
 });
 
 test("selection attribution appears only for the attributed option", () => {

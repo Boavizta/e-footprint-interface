@@ -75,85 +75,71 @@ document.addEventListener("initDynamicForm", function () {
         });
     }
 
-    /**
-     * Reusable function that populates a target element (either <datalist> or <select>)
-     * depending on 'type' ('datalist' vs 'select').
-     * - listValue: an object keyed by filterKey, yielding an array of items
-     * - filterId: the ID of the filter element (e.g. "type_object_available")
-     * - targetId: the ID of the datalist/select to be populated
-     * - type: either 'datalist' or 'select'
-     */
-    function updateDynamicDatalistOrSelect(type, listValue, filterId, targetId) {
+    /** Populate a select from the options associated with another control's value. */
+    function updateDynamicSelect(listValue, filterId, targetId, restoreDefault = false, clearInvalid = false) {
         const filterElem = document.getElementById(filterId);
         const targetElem = document.getElementById(targetId);
 
         if (!filterElem || !targetElem) return;
 
         const filterKey = filterElem.value;
-        const items = listValue[filterKey] || []; // fallback to empty array
+        const items = (listValue[filterKey] || []).map((item) => {
+            if (typeof item === "object") {
+                return {label: String(item.label), value: String(item.value)};
+            }
+            return {label: String(item), value: String(item)};
+        });
+        const selectedValue = restoreDefault ? targetElem.dataset.defaultValue : targetElem.value;
 
         // Check if options are already present
         const existingOptions = Array.from(targetElem.options).map(opt => opt.value);
-        const newOptions = items.map(item => (type === "datalist" ? item : item.value));
+        const newOptions = items.map(item => item.value);
 
-        if (existingOptions.length === newOptions.length && existingOptions.every((val, idx) => val === newOptions[idx])) {
-            return; // If options are the same, don't update
+        const optionsAreCurrent = existingOptions.length === newOptions.length
+            && existingOptions.every((val, idx) => val === newOptions[idx]);
+        if (optionsAreCurrent) {
+            if (newOptions.includes(selectedValue)) targetElem.value = selectedValue;
+            return;
         }
 
-        // Preserve the selected value if possible
-        const selectedValue = targetElem.value;
-
-        // Clear existing options
         targetElem.innerHTML = "";
+        items.forEach(({ label, value }) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            targetElem.appendChild(option);
+        });
 
-        if (type === "datalist") {
-            // items are simple strings
-            items.forEach((item) => {
-                const option = document.createElement("option");
-                option.value = item;
-                targetElem.appendChild(option);
-            });
-        } else if (type === "select") {
-            // items are objects with {label, value}
-            items.forEach(({ label, value }) => {
-                const option = document.createElement("option");
-                option.value = value;
-                option.textContent = label;
-                targetElem.appendChild(option);
-            });
-
-            // Restore selected value if it still exists
-            if (newOptions.includes(selectedValue)) {
-                targetElem.value = selectedValue;
-            }
-
-            if (items.length === 1 && targetElem.closest('#item-efootprint_classes_available')) {
-                targetElem.closest('#item-efootprint_classes_available').classList.add('d-none');
-            }
-            else {
-                if (targetElem.closest('#item-efootprint_classes_available')) {
-                    targetElem.closest('#item-efootprint_classes_available').classList.remove('d-none');
-                }
-            }
-            targetElem.dispatchEvent(new Event("change", { bubbles: true }));
+        if (newOptions.includes(selectedValue)) {
+            targetElem.value = selectedValue;
+        } else if (clearInvalid) {
+            targetElem.selectedIndex = -1;
         }
+
+        if (items.length === 1 && targetElem.closest('#item-efootprint_classes_available')) {
+            targetElem.closest('#item-efootprint_classes_available').classList.add('d-none');
+        }
+        else {
+            if (targetElem.closest('#item-efootprint_classes_available')) {
+                targetElem.closest('#item-efootprint_classes_available').classList.remove('d-none');
+            }
+        }
+        targetElem.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
 
     /**
-     * Handle DYNAMIC LISTS (for <datalist>)
+     * Handle conditional catalog selects
      */
     if (dynamicFormData.dynamic_lists) {
         dynamicFormData.dynamic_lists.forEach((dynamicList) => {
             const filterId = dynamicList.filter_by;
-            const listId = "datalist_" + dynamicList.input_id;
+            const selectId = dynamicList.input_id;
 
-            // Fill once initially
-            updateDynamicDatalistOrSelect("datalist", dynamicList.list_value, filterId, listId);
+            updateDynamicSelect(dynamicList.list_value, filterId, selectId, true, true);
 
             document.getElementById(filterId)?.addEventListener("change", function () {
-                updateDynamicDatalistOrSelect("datalist", dynamicList.list_value, filterId, listId);
-                document.getElementById(dynamicList.input_id).value = "";
+                updateDynamicSelect(dynamicList.list_value, filterId, selectId, false, true);
             });
         });
     }
@@ -167,11 +153,11 @@ document.addEventListener("initDynamicForm", function () {
             const selectId = dynamicSelect.input_id;
 
             // Fill once initially
-            updateDynamicDatalistOrSelect("select", dynamicSelect.list_value, filterId, selectId);
+            updateDynamicSelect(dynamicSelect.list_value, filterId, selectId);
 
             // Re-fill on change
             document.getElementById(filterId)?.addEventListener("change", function () {
-                updateDynamicDatalistOrSelect("select", dynamicSelect.list_value, filterId, selectId);
+                updateDynamicSelect(dynamicSelect.list_value, filterId, selectId);
             });
         });
     }

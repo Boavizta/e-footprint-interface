@@ -129,7 +129,7 @@ async def run_full_journey(page: Page, run_number: int, user_id: int) -> None:
     await expect(side_panel).to_contain_text("Add new server")
     await side_panel_form.locator("#type_object_available").first.select_option("BoaviztaCloudServer")
     await fill_field("BoaviztaCloudServer_name", server_name)
-    await fill_field("BoaviztaCloudServer_instance_type", "ent1-l")
+    await select_option("BoaviztaCloudServer_instance_type", "ent1-l")
     await submit_and_wait_for_close()
 
     # --- Add service to server ---

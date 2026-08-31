@@ -76,7 +76,14 @@ class TestFullJourney:
         side_panel.should_contain_text("Add new server")
         side_panel.select_object_type("BoaviztaCloudServer")
         side_panel.fill_field("BoaviztaCloudServer_name", server_name)
-        side_panel.fill_field("BoaviztaCloudServer_instance_type", "ent1-l")
+        instance_select = page.locator("#BoaviztaCloudServer_instance_type")
+        scaleway_instances = set(instance_select.locator("option").evaluate_all("els => els.map(e => e.value)"))
+        side_panel.select_option("BoaviztaCloudServer_provider", "aws")
+        expect(instance_select).to_have_value("")
+        aws_instances = set(instance_select.locator("option").evaluate_all("els => els.map(e => e.value)"))
+        assert aws_instances and aws_instances != scaleway_instances
+        side_panel.select_option("BoaviztaCloudServer_provider", "scaleway")
+        side_panel.select_option("BoaviztaCloudServer_instance_type", "ent1-l")
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("BoaviztaCloudServer", server_name)
 
@@ -154,4 +161,3 @@ class TestFullJourney:
 
         # --- Constraint assertion: removing the only UsagePattern must flip Results back to disabled ---
         expect(page.locator("#btn-open-panel-result")).not_to_have_attribute("hx-get", "/model_builder/result-chart/")
-

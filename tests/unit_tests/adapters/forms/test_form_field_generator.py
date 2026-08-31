@@ -196,11 +196,13 @@ def test_generate_dynamic_form_emits_chained_dynamic_lists_for_three_level_casca
     provider_field = _get_field_by_web_id(fields, f"{_SyntheticCascadeClass.__name__}_provider")
     assert provider_field["input_type"] == "select_str_input"
 
-    # model_name and resolution are both in conditional_list_values -> two datalist + two dynamic_lists entries
+    # model_name and resolution are both in conditional_list_values -> two selects + two dynamic_lists entries
     model_name_field = _get_field_by_web_id(fields, f"{_SyntheticCascadeClass.__name__}_model_name")
     resolution_field = _get_field_by_web_id(fields, f"{_SyntheticCascadeClass.__name__}_resolution")
-    assert model_name_field["input_type"] == "datalist"
-    assert resolution_field["input_type"] == "datalist"
+    assert model_name_field["input_type"] == "select_str_input"
+    assert resolution_field["input_type"] == "select_str_input"
+    assert model_name_field["options"] == []
+    assert resolution_field["options"] == []
 
     by_input_id = {entry["input_id"]: entry for entry in dynamic_lists}
     model_name_entry = by_input_id[f"{_SyntheticCascadeClass.__name__}_model_name"]
@@ -249,7 +251,7 @@ class _SyntheticCrossObjectJobWeb(ModelingObjectWeb):
 
 # Guards the generator's cross-object dotted-`depends_on` handling: a `resolution` field keyed on
 # `external_api.model_name` (where `external_api` is skipped in the form and selected via a helper)
-# is emitted as a single-hop datalist filtered by the helper id and re-keyed by available API object
+# is emitted as a single-hop select filtered by the helper id and re-keyed by available API object
 # id, so the existing one-hop cascade applies with no extra JS.
 def test_generate_dynamic_form_rekeys_cross_object_conditional_by_referenced_object_id(
         monkeypatch, minimal_model_web):
@@ -274,9 +276,10 @@ def test_generate_dynamic_form_rekeys_cross_object_conditional_by_referenced_obj
     fields, _, dynamic_lists = generate_dynamic_form(
         _SyntheticCrossObjectJobClass.__name__, default_values, minimal_model_web)
 
-    # external_api is skipped; resolution renders as a datalist.
+    # external_api is skipped; resolution renders as a select.
     resolution_field = _get_field_by_web_id(fields, f"{_SyntheticCrossObjectJobClass.__name__}_resolution")
-    assert resolution_field["input_type"] == "datalist"
+    assert resolution_field["input_type"] == "select_str_input"
+    assert resolution_field["options"] == []
     assert all(
         field["web_id"] != f"{_SyntheticCrossObjectJobClass.__name__}_external_api" for field in fields)
 

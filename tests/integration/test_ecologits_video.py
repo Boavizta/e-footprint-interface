@@ -10,7 +10,7 @@ Assertions on EcoLogits outputs are structural (presence, non-negative) per the 
 from unittest.mock import patch
 
 from efootprint.abstract_modeling_classes.reactive_core import ReactiveSlot, computed_slots
-from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, Sources, SourceValue
 from efootprint.api_utils.system_to_json import materialize_serialized_state, system_to_json
 from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
     EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob)
@@ -24,10 +24,12 @@ from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
+from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_builders.services.external_api_web import ExternalAPIWeb
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.usage.job_web import JobWeb
+from model_builder.domain.object_factory import edit_object_from_parsed_data
 
 from tests.fixtures.system_builders import create_hourly_usage
 
@@ -171,9 +173,9 @@ def test_source_picker_excludes_computed_value_provenance():
     assert not any(_is_computed_provenance(name) for name in picker_source_names)
 
 
-def test_job_form_resolution_datalist_is_keyed_by_real_api_with_correct_resolutions():
+def test_job_form_resolution_select_is_keyed_by_real_api_with_correct_resolutions():
     # Real-object guard for the cross-object dotted-`depends_on` generator path: the resolution
-    # datalist must key on each real API object's id and carry exactly that model's resolutions,
+    # select must key on each real API object's id and carry exactly that model's resolutions,
     # which depends on str(api.model_name) matching the library's conditional_list_values keys.
     # Unit/snapshot tests use pre-matched stubs; only this asserts the real str()-keying contract.
     repository = InMemorySystemRepository(initial_data=_build_two_video_apis_system_data())
@@ -192,3 +194,24 @@ def test_job_form_resolution_datalist_is_keyed_by_real_api_with_correct_resoluti
     assert resolution_entry["list_value"] == {
         id_by_model["sora-2-pro"]: ["720p (1280 x 720)", "1080p (1920 x 1080)"],
         id_by_model["seedance-1.0"]: ["480p (854 x 480)", "720p (1280 x 720)"]}
+
+
+def test_conditional_select_value_metadata_round_trips_through_edit():
+    repository = InMemorySystemRepository(initial_data=_build_video_system_data())
+    api_web = ModelWeb(repository).external_apis[0]
+
+    parsed = parse_form_data({
+        "EcoLogitsVideoGenExternalAPI_model_name": "sora-2-pro",
+        "EcoLogitsVideoGenExternalAPI_model_name__confidence": "high",
+        "EcoLogitsVideoGenExternalAPI_model_name__comment": "catalog selection reviewed",
+        "EcoLogitsVideoGenExternalAPI_model_name__source_id": Sources.HYPOTHESIS.id,
+        "EcoLogitsVideoGenExternalAPI_model_name__source_name": Sources.HYPOTHESIS.name,
+        "EcoLogitsVideoGenExternalAPI_model_name__source_link": Sources.HYPOTHESIS.link or "",
+    }, "EcoLogitsVideoGenExternalAPI")
+    edit_object_from_parsed_data(parsed, api_web)
+
+    model_name = api_web.modeling_obj.model_name
+    assert model_name.value == "sora-2-pro"
+    assert model_name.confidence == "high"
+    assert model_name.comment == "catalog selection reviewed"
+    assert model_name.source is Sources.HYPOTHESIS

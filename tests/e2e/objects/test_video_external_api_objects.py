@@ -1,10 +1,10 @@
 """E2E flow for the EcoLogits video-generation external API.
 
 Adds an EcoLogitsVideoGenExternalAPI through the model-builder UI — driving the
-provider -> model cascade (changing the provider narrows the model list to that
+provider -> model cascade (changing the provider narrows the model select to that
 provider's valid models), the boolean with_audio toggle, and the datacenter advanced
 parameters — then, with a second API on a different model, drives the Job form's
-cross-object resolution cascade (the resolution datalist offers exactly the selected
+cross-object resolution cascade (the resolution select offers exactly the selected
 API's valid resolutions and repopulates on API change), attaches a job, a usage pattern,
 asserts the result chart renders, checks the per-call explainability tree, and finally
 deletes the job without error.
@@ -38,22 +38,22 @@ class TestVideoExternalAPIObjects:
         side_panel.select_object_type("EcoLogitsVideoGenExternalAPI")
         side_panel.fill_field("EcoLogitsVideoGenExternalAPI_name", api_name)
 
-        # Provider renders as a select and model_name as a cascading datalist defaulting to sora-2-pro.
+        # Provider and model_name render as selects, with the model default restored after dynamic hydration.
         expect(page.locator("#EcoLogitsVideoGenExternalAPI_provider")).to_be_visible()
         expect(page.locator("#EcoLogitsVideoGenExternalAPI_model_name")).to_have_value("sora-2-pro")
 
-        # Drive the provider -> model cascade: switching provider repopulates the model datalist
+        # Drive the provider -> model cascade: switching provider repopulates the model select
         # with only that provider's valid models and clears the now-invalid model selection.
-        # Assert the cascade behaviour (datalist repopulates to a different, non-empty set), not the exact
+        # Assert the cascade behaviour (the select gets a different, non-empty set), not the exact
         # model names — those come from the upstream EcoLogits catalog and are pinned in unit tests instead.
-        model_options = page.locator("#datalist_EcoLogitsVideoGenExternalAPI_model_name option")
+        model_options = page.locator("#EcoLogitsVideoGenExternalAPI_model_name option")
         # The cascade is wired by HX-Trigger-After-Settle; wait until it has replaced the server-rendered
         # placeholder before reading the options or changing the provider.
         expect(model_options.first).to_have_attribute("value", "sora-2-pro")
         openai_models = set(model_options.evaluate_all("els => els.map(e => e.value)"))
         side_panel.select_option("EcoLogitsVideoGenExternalAPI_provider", "google")
-        # The change handler repopulates the datalist then clears the stale selection synchronously, so an
-        # empty model_name is a reliable signal that the datalist has already been refreshed.
+        # The change handler repopulates the select then clears the stale selection synchronously, so an
+        # empty model_name is a reliable signal that the select has already been refreshed.
         expect(page.locator("#EcoLogitsVideoGenExternalAPI_model_name")).to_have_value("")
         google_models = set(model_options.evaluate_all("els => els.map(e => e.value)"))
         assert google_models and google_models != openai_models
@@ -62,7 +62,7 @@ class TestVideoExternalAPIObjects:
         side_panel.select_option("EcoLogitsVideoGenExternalAPI_provider", "openai")
         expect(page.locator("#EcoLogitsVideoGenExternalAPI_model_name")).to_have_value("")
         assert set(model_options.evaluate_all("els => els.map(e => e.value)")) == openai_models
-        side_panel.fill_field("EcoLogitsVideoGenExternalAPI_model_name", "sora-2-pro")
+        side_panel.select_option("EcoLogitsVideoGenExternalAPI_model_name", "sora-2-pro")
 
         # Datacenter location, PUE and WUE are now inferred from the EcoLogits provider config,
         # so the form exposes no advanced parameters for this object type.
@@ -78,16 +78,16 @@ class TestVideoExternalAPIObjects:
         side_panel.select_object_type("EcoLogitsVideoGenExternalAPI")
         side_panel.fill_field("EcoLogitsVideoGenExternalAPI_name", second_api_name)
         side_panel.select_option("EcoLogitsVideoGenExternalAPI_provider", "bytedance")
-        side_panel.fill_field("EcoLogitsVideoGenExternalAPI_model_name", "seedance-1.0")
+        side_panel.select_option("EcoLogitsVideoGenExternalAPI_model_name", "seedance-1.0")
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("EcoLogitsVideoGenExternalAPI", second_api_name)
 
-        # Step 3: Create a job; the resolution datalist must offer exactly the chosen API's valid
+        # Step 3: Create a job; the resolution select must offer exactly the chosen API's valid
         # resolutions and repopulate when a different API is selected.
         uj_step_card = model_builder.get_object_card("UsageJourneyStep", uj_step_name)
         uj_step_card.click_add_job_button()
         page.locator("#server_or_external_api").wait_for(state="attached")
-        resolution_options = page.locator("#datalist_EcoLogitsVideoGenExternalAPIJob_resolution option")
+        resolution_options = page.locator("#EcoLogitsVideoGenExternalAPIJob_resolution option")
 
         # Selecting the sora API offers its two resolutions (720p, 1080p) — never the generic placeholder.
         side_panel.select_option("server_or_external_api", api_name)
@@ -96,7 +96,7 @@ class TestVideoExternalAPIObjects:
         assert set(resolution_options.evaluate_all("els => els.map(e => e.value)")) == {
             "720p (1280 x 720)", "1080p (1920 x 1080)"}
 
-        # Switching to the seedance API (different model) repopulates the datalist: 1080p drops, 480p appears.
+        # Switching to the seedance API (different model) repopulates the select: 1080p drops, 480p appears.
         side_panel.select_option("server_or_external_api", second_api_name)
         expect(resolution_options).to_have_count(2)
         assert set(resolution_options.evaluate_all("els => els.map(e => e.value)")) == {
@@ -114,7 +114,7 @@ class TestVideoExternalAPIObjects:
         expect(page.locator("#EcoLogitsVideoGenExternalAPIJob_with_audio")).to_have_value("false")
 
         # Selecting an API clears the resolution (cascade); pick a valid one for the chosen API.
-        side_panel.fill_field("EcoLogitsVideoGenExternalAPIJob_resolution", "1080p (1920 x 1080)")
+        side_panel.select_option("EcoLogitsVideoGenExternalAPIJob_resolution", "1080p (1920 x 1080)")
 
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("EcoLogitsVideoGenExternalAPIJob", job_name)

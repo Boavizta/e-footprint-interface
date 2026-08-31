@@ -459,9 +459,9 @@
                     "available_sources": []
                 },
                 "default": "720p (1280 x 720)",
-                "input_type": "datalist",
+                "input_type": "select_str_input",
                 "selected": "720p (1280 x 720)",
-                "options": null
+                "options": []
             },
             {
                 "web_id": "EcoLogitsVideoGenExternalAPIJob_duration",

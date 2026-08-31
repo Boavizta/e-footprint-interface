@@ -394,9 +394,9 @@
                     "available_sources": []
                 },
                 "default": "ent1-s",
-                "input_type": "datalist",
+                "input_type": "select_str_input",
                 "selected": "ent1-s",
-                "options": null
+                "options": []
             },
             {
                 "web_id": "BoaviztaCloudServer_server_type",
