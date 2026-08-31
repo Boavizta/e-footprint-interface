@@ -1,9 +1,11 @@
 # Reactive computation memory guard — Tasks
 
-**Status:** Tasks — under review.
+**Status:** Tasks — done.
 **Spec:** [`spec.html`](spec.html). **Plan:** [`plan.html`](plan.html).
 
 ## Task 1 — Add library computation-observation primitives
+
+**Status:** Done.
 
 **Goal:** Give interface callers a safe, scoped way to observe every newly completed reactive slot, and expose a
 domain-owned, peek-only attribution coverage query. This is the cross-repository library prerequisite; it does not
@@ -42,6 +44,8 @@ introduce deployment policy or user-facing behavior.
 ---
 
 ## Task 2 — Ship observation-only request and worker diagnostics
+
+**Status:** Done.
 
 **Goal:** Instrument model-builder requests and Gunicorn workers with bounded, correlated memory evidence while
 preserving application behavior. This creates the deliberate production-observation pause point before enforcement.
@@ -88,6 +92,8 @@ preserving application behavior. This creates the deliberate production-observat
 ---
 
 ## Task 2b — Harden production observation from dev evidence
+
+**Status:** Done.
 
 **Goal:** Correct the diagnostic gaps and remove avoidable sampling cost revealed by the first dev deployment before
 enforcement behavior is built. Preserve the bounded-log design and the per-computation enforcement checkpoint while
@@ -174,6 +180,8 @@ making observation mode cheap enough to leave enabled during calibration.
 ---
 
 ## Task 3 — Add recoverable enforcement and Sankey guidance
+
+**Status:** Done.
 
 **Goal:** Turn the observed threshold into a single-trip request circuit breaker that preserves model consistency and
 gives Sankey users an actionable graph-space explanation. The capability lands behind configuration and remains off
