@@ -87,7 +87,12 @@ function initSortableObjectCards() {
     };
 
     CARD_ORDER_LIST_IDS.forEach(listId => {
-        const sortable = new Sortable(document.getElementById(listId), options);
+        const element = document.getElementById(listId);
+        const existingSortable = Sortable.get(element);
+        if (existingSortable) {
+            existingSortable.destroy();
+        }
+        const sortable = new Sortable(element, options);
         sortables.push({listId, sortable});
     });
 }

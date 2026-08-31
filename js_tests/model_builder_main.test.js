@@ -13,11 +13,15 @@ beforeEach(() => {
     document.body.setAttribute("hx-headers", JSON.stringify({"X-CSRFToken": "csrf-token"}));
     global.updateLines = jest.fn();
     global.fetch = jest.fn(() => Promise.resolve({ok: true}));
+    const sortablesByElement = new Map();
     global.Sortable = jest.fn(function (element, options) {
         this.el = element;
         this.options = options;
         this.toArray = jest.fn(() => Array.from(element.children, child => child.id));
+        this.destroy = jest.fn(() => sortablesByElement.delete(element));
+        sortablesByElement.set(element, this);
     });
+    global.Sortable.get = jest.fn(element => sortablesByElement.get(element));
 });
 
 afterEach(() => {
@@ -71,6 +75,21 @@ test("one drag end sends one request, clears grab state, and updates leader line
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(grabbed.classList.contains("grabbing")).toBe(false);
     expect(global.updateLines).toHaveBeenCalledTimes(1);
+});
+
+test("reinitialization destroys old sortables and a later drag sends one request", () => {
+    const {CARD_ORDER_LIST_IDS, initSortableObjectCards} = loadModule();
+    initSortableObjectCards();
+    const oldInstances = global.Sortable.mock.instances.slice();
+
+    initSortableObjectCards();
+    const currentInstances = global.Sortable.mock.instances.slice(CARD_ORDER_LIST_IDS.length);
+    global.fetch.mockClear();
+    currentInstances[0].options.onEnd();
+
+    oldInstances.forEach(instance => expect(instance.destroy).toHaveBeenCalledTimes(1));
+    currentInstances.forEach(instance => expect(instance.destroy).not.toHaveBeenCalled());
+    expect(global.fetch).toHaveBeenCalledTimes(1);
 });
 
 test("a rejected background save keeps the DOM order and is handled", async () => {
