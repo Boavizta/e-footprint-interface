@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips.
+
 ## [V1.10.0] - 2026-08-31
 
 ### Added
