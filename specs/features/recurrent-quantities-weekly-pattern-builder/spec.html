@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly-pattern builder for recurrent quantities — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  fieldset { border: 1px solid #ccc; border-radius: 6px; margin: 1rem 0; padding: .8rem; }
+  legend { font-weight: 600; padding: 0 .35rem; }
+  label { display: inline-block; margin: .25rem .35rem .25rem 0; }
+  input, select, button { font: inherit; padding: .25rem .4rem; }
+  #mock-builder-picker { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  #mock-builder-picker label { font-weight: 600; }
+  #mock-builder-picker select { min-width: 12rem; }
+  #mock-weekly-pattern table input { box-sizing: border-box; width: 100%; }
+  #mock-weekly-pattern table input[type="number"] { min-width: 4rem; }
+  #mock-weekly-pattern small, #mock-constant small { color: #666; display: block; margin-top: .35rem; }
+  #mock-weekly-pattern input[aria-invalid="true"] { border: 2px solid #b42318; }
+  #mock-weekly-pattern [data-range-error-row] td { border-top: 0; color: #b42318; font-size: .9rem; }
+  #mock-weekly-pattern button:disabled { cursor: not-allowed; opacity: .6; }
+  #mock-preview-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(15rem, 2fr);
+                         gap: 1rem; align-items: start; }
+  #mock-preview { border: 1px solid #ccc; border-radius: 6px; padding: .8rem; position: sticky; top: 1rem; }
+  #mock-preview h3 { margin-top: 0; }
+  #mock-preview svg { display: block; width: 100%; height: auto; }
+  #mock-preview [data-preview-status] { color: #666; font-size: .9rem; min-height: 2.8rem; }
+  @media (max-width: 46rem) {
+    #mock-preview-layout { grid-template-columns: 1fr; }
+    #mock-preview { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Weekly-pattern builder for recurrent quantities</h1>
+<p class="status">Status: Spec — under review · 2026-08-31 · Reformatted from the 2026-04-21 legacy spec</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <p><code>ExplainableRecurrentQuantities</code> represents a canonical 168-hour week, but the interface currently
+  lets people author only one value repeated across every hour. This makes ordinary rhythms—weekday office hours,
+  quiet evenings, busier weekends, or scheduled edge workloads—impossible to express without leaving the interface.</p>
+  <ul>
+    <li><strong>Primary audience:</strong> non-technical product and sustainability practitioners who need a
+    form-based way to describe a weekly workload without constructing an array or writing Python.</li>
+    <li><strong>Secondary audience:</strong> technical and industrial users modeling recurrent web or edge demand.</li>
+    <li><strong>Why now:</strong> recurrent workload inputs already exist throughout edge modeling; richer authoring
+    removes a modeling limitation while preserving the simple constant-value path.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <ul>
+    <li>A user can choose between <em>Constant value</em> and <em>Weekly pattern</em> wherever a recurrent quantity is editable.</li>
+    <li>A weekly pattern can contain one to seven day profiles with non-empty, case-sensitive unique names, and every
+    weekday is assigned to exactly one profile.</li>
+    <li>Each profile supports a baseline plus non-overlapping integer-hour ranges within <code>[0, 24]</code>.</li>
+    <li>Saving a valid pattern produces exactly 168 hourly values ordered Monday 00:00 through Sunday 23:00,
+    using the profile baseline outside explicit ranges.</li>
+    <li>Invalid profile counts, names, day coverage, numeric values, hour bounds, overlaps, or forbidden negative
+    values block save and identify the offending profile or range inline.</li>
+    <li>A valid weekly-pattern draft displays a side preview of the generated 168-hour timeseries and refreshes after
+    committed edits without saving the object.</li>
+    <li>An invalid draft does not produce an invented or ambiguous timeseries: the preview keeps its last valid chart
+    and states that errors must be corrected before it can refresh.</li>
+    <li>Switching builders preserves the unsaved inputs of both builders until the panel is saved or closed, while
+    only the selected builder is submitted. Closing a modified panel uses the existing unsaved-changes confirmation
+    and discards both drafts when confirmed.</li>
+    <li>Existing recurrent values reopen with their stored builder selected; new values follow the builder of the
+    attribute default and initialize a first-use weekly pattern from the current constant value.</li>
+    <li>The authored pattern, including unused profiles, survives system JSON download and upload without changing
+    the computed week, unit, source, confidence, or comment.</li>
+    <li>Fields with only one available builder—currently hourly quantities—retain their existing appearance and behavior.</li>
+    <li>The existing hourly usage-journey-starts preview remains available and matches the timeseries that the library
+    generates from the same unsaved form inputs.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. Implementation structure and wire-format choices live in
+  <a href="plan.html"><code>plan.html</code></a>.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>A form-based weekly editor built around reusable day profiles and a total assignment of Monday through Sunday.</li>
+      <li>A field-level, read-only unit shared by every baseline and range value.</li>
+      <li>Profile creation, removal, naming, day assignment, baseline editing, and chronological range editing.</li>
+      <li>A newly added profile starts with baseline <code>0</code> and no ranges.</li>
+      <li>Single-assignment “stealing” semantics: assigning a day to one profile removes it from its previous profile.</li>
+      <li>New ranges start in the first free gap of at least one hour with value <code>0</code>; adding is disabled when
+      the day is fully covered. Valid edits move a range to its chronological position, while invalid edits remain in
+      place with inline feedback.</li>
+      <li>New profiles append in creation order. Removing a profile leaves its days unassigned until the user assigns
+      them elsewhere; unused profiles with no assigned days remain valid authored state.</li>
+      <li>Two first-use profiles: <em>weekday</em> for Monday–Friday and <em>weekend</em> for Saturday–Sunday, both using
+      the current constant value or attribute default as their baseline.</li>
+      <li>A builder selector for polymorphic explainable-timeseries fields, hidden when only one builder is available.</li>
+      <li>Round-trip persistence and compatibility with existing calculated-attribute displays and downstream consumers.</li>
+      <li>Text summaries outside the editor continue to use the existing recurrent-quantity summary.</li>
+      <li>A live draft preview beside the editor on wide layouts, falling below it when horizontal space is constrained.</li>
+      <li>Migration of the existing hourly usage preview to the same authoritative preview behavior, without changing
+      its user-facing projection controls.</li>
+      <li>English labels and desktop-first behavior, consistent with the rest of the application.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>A painted or drag-and-drop 7 × 24 grid.</li>
+      <li>CSV import, sub-hour boundaries, formulas, profile templates, profile copying, and profile reordering.</li>
+      <li>Per-profile units or different units across ranges.</li>
+      <li>Replacing the constant builder with a degenerate weekly pattern.</li>
+      <li>Changing the user experience of single-builder hourly-quantity fields.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The mockup demonstrates builder switching and the default weekly-pattern shape. Values typed into either mode
+  remain present when switching back and forth. Assigning a day to one profile removes it from the other. To inspect
+  range handling, add a range, change its bounds so it overlaps another row, then leave the input.</p>
+  <div class="mockup" id="mock-weekly-builder">
+    <div id="mock-builder-picker">
+      <label for="mock-builder-selector">Describe this weekly quantity as</label>
+      <select id="mock-builder-selector">
+        <option value="constant">Constant value</option>
+        <option value="weekly" selected>Weekly pattern</option>
+      </select>
+    </div>
+
+    <div id="mock-preview-layout">
+      <div id="mock-editor">
+
+      <section id="mock-constant" hidden>
+      <h3>Constant value</h3>
+      <label>Value <input type="number" value="10" step="0.1"></label>
+      <label>Unit <input value="concurrent" readonly></label>
+      <small>This value repeats across all 168 hours.</small>
+      </section>
+
+      <section id="mock-weekly-pattern">
+      <h3>Weekly pattern</h3>
+      <p><strong>Unit:</strong> concurrent</p>
+      <fieldset data-profile="weekday">
+        <legend>Profile 1</legend>
+        <label>Name <input value="weekday"></label>
+        <p><strong>Days</strong><br>
+          <label><input type="checkbox" data-day="Mon" checked> Mon</label>
+          <label><input type="checkbox" data-day="Tue" checked> Tue</label>
+          <label><input type="checkbox" data-day="Wed" checked> Wed</label>
+          <label><input type="checkbox" data-day="Thu" checked> Thu</label>
+          <label><input type="checkbox" data-day="Fri" checked> Fri</label>
+          <label><input type="checkbox" data-day="Sat"> Sat</label>
+          <label><input type="checkbox" data-day="Sun"> Sun</label>
+        </p>
+        <label>Baseline <input type="number" data-profile-baseline min="0" value="10" step="0.1"></label>
+        <table>
+          <thead><tr><th>Start</th><th>End</th><th>Value</th><th></th></tr></thead>
+          <tbody data-range><tr>
+            <td><input type="number" data-range-field="start" min="0" max="23" step="1" value="8"></td>
+            <td><input type="number" data-range-field="end" min="1" max="24" step="1" value="18"></td>
+            <td><input type="number" data-range-field="value" min="0" step="0.1" value="60"></td>
+            <td><button type="button" data-remove-range>Remove</button></td>
+          </tr><tr data-range-error-row hidden><td colspan="4" data-range-error role="alert"></td></tr></tbody>
+        </table>
+        <button type="button" data-add-range>Add range</button>
+      </fieldset>
+      <fieldset data-profile="weekend">
+        <legend>Profile 2</legend>
+        <label>Name <input value="weekend"></label>
+        <p><strong>Days</strong><br>
+          <label><input type="checkbox" data-day="Mon"> Mon</label>
+          <label><input type="checkbox" data-day="Tue"> Tue</label>
+          <label><input type="checkbox" data-day="Wed"> Wed</label>
+          <label><input type="checkbox" data-day="Thu"> Thu</label>
+          <label><input type="checkbox" data-day="Fri"> Fri</label>
+          <label><input type="checkbox" data-day="Sat" checked> Sat</label>
+          <label><input type="checkbox" data-day="Sun" checked> Sun</label>
+        </p>
+        <label>Baseline <input type="number" data-profile-baseline min="0" value="10" step="0.1"></label>
+        <table>
+          <thead><tr><th>Start</th><th>End</th><th>Value</th><th></th></tr></thead>
+        </table>
+        <p><button type="button" data-add-range>Add range</button> <button type="button" disabled>Remove profile</button></p>
+      </fieldset>
+      <button type="button" disabled>Add profile</button>
+      <small>This pattern repeats every week. Each hour uses its profile baseline unless a range overrides it.</small>
+      </section>
+      </div>
+
+      <aside id="mock-preview" aria-live="polite">
+        <h3>Generated weekly timeseries</h3>
+        <svg viewBox="0 0 320 190" role="img" aria-labelledby="mock-chart-title mock-chart-description">
+          <title id="mock-chart-title">Preview of the generated 168-hour weekly timeseries</title>
+          <desc id="mock-chart-description">A line chart divided into Monday through Sunday.</desc>
+          <rect x="34" y="16" width="266" height="132" fill="#fafafa" stroke="#ccc"></rect>
+          <g data-preview-grid></g>
+          <path data-preview-line fill="none" stroke="#0f766e" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+          <text x="4" y="24" data-preview-max font-size="10"></text>
+          <text x="4" y="148" data-preview-min font-size="10"></text>
+          <g data-preview-days></g>
+        </svg>
+        <p data-preview-status>Preview ready. In production, the server generates this draft data without saving it.</p>
+      </aside>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const mockup = document.getElementById("mock-weekly-builder");
+      const selector = mockup.querySelector("#mock-builder-selector");
+      const constantPanel = mockup.querySelector("#mock-constant");
+      const weeklyPanel = mockup.querySelector("#mock-weekly-pattern");
+      const previewLine = mockup.querySelector("[data-preview-line]");
+      const previewStatus = mockup.querySelector("[data-preview-status]");
+      const previewMinimum = mockup.querySelector("[data-preview-min]");
+      const previewMaximum = mockup.querySelector("[data-preview-max]");
+      const previewGrid = mockup.querySelector("[data-preview-grid]");
+      const previewDays = mockup.querySelector("[data-preview-days]");
+      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      let nextRangeId = 1;
+
+      function rangeInputs(range) {
+        return {
+          start: range.querySelector('[data-range-field="start"]'),
+          end: range.querySelector('[data-range-field="end"]'),
+          value: range.querySelector('[data-range-field="value"]')
+        };
+      }
+
+      function readRange(range) {
+        const inputs = rangeInputs(range);
+        return {
+          start: Number(inputs.start.value),
+          end: Number(inputs.end.value),
+          value: Number(inputs.value.value)
+        };
+      }
+
+      function rangeError(range, ranges) {
+        const value = readRange(range);
+        if (!Number.isInteger(value.start) || value.start < 0 || value.start > 23) {
+          return {fields: ["start"], message: "Start must be an integer from 0 to 23."};
+        }
+        if (!Number.isInteger(value.end) || value.end < 1 || value.end > 24) {
+          return {fields: ["end"], message: "End must be an integer from 1 to 24."};
+        }
+        if (value.start >= value.end) {
+          return {fields: ["start", "end"], message: "Start must be earlier than end."};
+        }
+        if (!Number.isFinite(value.value) || value.value < 0) {
+          return {fields: ["value"], message: "Value must be a non-negative number."};
+        }
+        const overlap = ranges.find(function (candidate) {
+          if (candidate === range) return false;
+          const other = readRange(candidate);
+          return Number.isInteger(other.start) && Number.isInteger(other.end)
+            && value.start < other.end && value.end > other.start;
+        });
+        if (overlap) {
+          const other = readRange(overlap);
+          return {
+            fields: ["start", "end"],
+            message: "Overlaps the " + String(other.start).padStart(2, "0") + ":00–"
+              + String(other.end).padStart(2, "0") + ":00 range."
+          };
+        }
+        return null;
+      }
+
+      function showRangeError(range, error) {
+        const inputs = rangeInputs(range);
+        Object.entries(inputs).forEach(function (entry) {
+          entry[1].setAttribute("aria-invalid", String(Boolean(error && error.fields.includes(entry[0]))));
+        });
+        const errorRow = range.querySelector("[data-range-error-row]");
+        errorRow.hidden = !error;
+        range.querySelector("[data-range-error]").textContent = error ? error.message : "";
+      }
+
+      function firstFreeGap(ranges) {
+        const sorted = ranges.map(readRange).sort(function (left, right) { return left.start - right.start; });
+        let cursor = 0;
+        for (const range of sorted) {
+          if (range.start > cursor) return {start: cursor, end: range.start};
+          cursor = Math.max(cursor, range.end);
+        }
+        return cursor < 24 ? {start: cursor, end: 24} : null;
+      }
+
+      function validateProfile(profile, reorderWhenValid) {
+        const table = profile.querySelector("table");
+        const ranges = Array.from(table.querySelectorAll("tbody[data-range]"));
+        const errors = ranges.map(function (range) { return rangeError(range, ranges); });
+        ranges.forEach(function (range, index) { showRangeError(range, errors[index]); });
+
+        if (reorderWhenValid && errors.every(function (error) { return !error; })) {
+          ranges.sort(function (left, right) { return readRange(left).start - readRange(right).start; })
+            .forEach(function (range) { table.appendChild(range); });
+        }
+
+        const addButton = profile.querySelector("[data-add-range]");
+        const gap = errors.some(Boolean) ? null : firstFreeGap(ranges);
+        addButton.disabled = errors.some(Boolean) || !gap;
+        addButton.textContent = !gap && !errors.some(Boolean) ? "Day fully covered" : "Add range";
+      }
+
+      function createRange(start, end) {
+        const range = document.createElement("tbody");
+        range.dataset.range = "range-" + nextRangeId++;
+        range.innerHTML = '<tr>'
+          + '<td><input type="number" data-range-field="start" min="0" max="23" step="1" value="' + start + '"></td>'
+          + '<td><input type="number" data-range-field="end" min="1" max="24" step="1" value="' + end + '"></td>'
+          + '<td><input type="number" data-range-field="value" min="0" step="0.1" value="0"></td>'
+          + '<td><button type="button" data-remove-range>Remove</button></td>'
+          + '</tr><tr data-range-error-row hidden><td colspan="4" data-range-error role="alert"></td></tr>';
+        return range;
+      }
+
+      function allProfilesValid() {
+        return Array.from(weeklyPanel.querySelectorAll("fieldset[data-profile]")).every(function (profile) {
+          const ranges = Array.from(profile.querySelectorAll("tbody[data-range]"));
+          return ranges.every(function (range) { return !rangeError(range, ranges); });
+        }) && days.every(function (day) {
+          return weeklyPanel.querySelectorAll('input[data-day="' + day + '"]:checked').length === 1;
+        });
+      }
+
+      function generatedValues() {
+        if (selector.value === "constant") {
+          return Array(168).fill(Number(constantPanel.querySelector('input[type="number"]').value));
+        }
+        if (!allProfilesValid()) return null;
+        const values = [];
+        days.forEach(function (day) {
+          const owner = Array.from(weeklyPanel.querySelectorAll("fieldset[data-profile]")).find(function (profile) {
+            return profile.querySelector('input[data-day="' + day + '"]').checked;
+          });
+          const baseline = Number(owner.querySelector("[data-profile-baseline]").value);
+          const dayValues = Array(24).fill(baseline);
+          owner.querySelectorAll("tbody[data-range]").forEach(function (range) {
+            const authored = readRange(range);
+            for (let hour = authored.start; hour < authored.end; hour++) dayValues[hour] = authored.value;
+          });
+          values.push(...dayValues);
+        });
+        return values;
+      }
+
+      function drawPreview() {
+        const values = generatedValues();
+        if (!values || values.some(function (value) { return !Number.isFinite(value) || value < 0; })) {
+          previewStatus.textContent = "Fix the highlighted errors to refresh the preview; the last valid chart is retained.";
+          return;
+        }
+
+        const minimum = Math.min(...values);
+        const maximum = Math.max(...values);
+        const span = maximum - minimum || 1;
+        const points = values.map(function (value, index) {
+          const x = 34 + index * 266 / 167;
+          const y = maximum === minimum ? 82 : 148 - (value - minimum) * 132 / span;
+          return (index === 0 ? "M" : "L") + x.toFixed(1) + " " + y.toFixed(1);
+        }).join(" ");
+        previewLine.setAttribute("d", points);
+        previewMinimum.textContent = minimum.toFixed(1);
+        previewMaximum.textContent = maximum.toFixed(1);
+        previewStatus.textContent = selector.value === "constant"
+          ? "168 hours at the selected constant value."
+          : "168-hour draft preview refreshed from the valid profile inputs.";
+      }
+
+      days.forEach(function (day, index) {
+        const boundaryX = 34 + index * 266 / 7;
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", boundaryX);
+        line.setAttribute("x2", boundaryX);
+        line.setAttribute("y1", "16");
+        line.setAttribute("y2", "148");
+        line.setAttribute("stroke", "#ddd");
+        previewGrid.appendChild(line);
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", 34 + (index + .5) * 266 / 7);
+        label.setAttribute("y", "166");
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-size", "10");
+        label.textContent = day;
+        previewDays.appendChild(label);
+      });
+
+      selector.addEventListener("change", function () {
+        const showWeekly = selector.value === "weekly";
+        constantPanel.hidden = showWeekly;
+        weeklyPanel.hidden = !showWeekly;
+        drawPreview();
+      });
+
+      weeklyPanel.addEventListener("change", function (event) {
+        const checkbox = event.target.closest("input[data-day]");
+        if (!checkbox || !checkbox.checked) return;
+        weeklyPanel.querySelectorAll('input[data-day="' + checkbox.dataset.day + '"]').forEach(function (candidate) {
+          if (candidate !== checkbox) candidate.checked = false;
+        });
+        drawPreview();
+      });
+
+      weeklyPanel.addEventListener("click", function (event) {
+        const addButton = event.target.closest("[data-add-range]");
+        if (addButton) {
+          const profile = addButton.closest("fieldset[data-profile]");
+          const table = profile.querySelector("table");
+          const ranges = Array.from(table.querySelectorAll("tbody[data-range]"));
+          const gap = firstFreeGap(ranges);
+          if (!gap) return;
+          table.appendChild(createRange(gap.start, gap.end));
+          validateProfile(profile, true);
+          drawPreview();
+          return;
+        }
+
+        const removeButton = event.target.closest("[data-remove-range]");
+        if (removeButton) {
+          const profile = removeButton.closest("fieldset[data-profile]");
+          removeButton.closest("tbody[data-range]").remove();
+          validateProfile(profile, false);
+          drawPreview();
+        }
+      });
+
+      weeklyPanel.addEventListener("focusout", function (event) {
+        if (!event.target.matches("[data-range-field]")) return;
+        validateProfile(event.target.closest("fieldset[data-profile]"), true);
+        drawPreview();
+      });
+
+      weeklyPanel.addEventListener("change", function (event) {
+        if (event.target.matches("[data-profile-baseline]")) drawPreview();
+      });
+
+      constantPanel.querySelector('input[type="number"]').addEventListener("input", drawPreview);
+
+      weeklyPanel.querySelectorAll("fieldset[data-profile]").forEach(function (profile) {
+        validateProfile(profile, false);
+      });
+      drawPreview();
+    }());
+  </script>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li>The library remains the source of truth for weekly composition and validation; the interface must not own
+    a competing interpretation of the 168-hour result.</li>
+    <li>The canonical week is local time with index 0 = Monday 00:00, matching the existing recurrent-quantity contract.</li>
+    <li>All values use the attribute's existing Pint unit. When the attribute disallows negatives, every baseline
+    and range value must be zero or greater.</li>
+    <li>Range boundaries are integers satisfying <code>0 ≤ start &lt; end ≤ 24</code>; ranges within one profile are disjoint.</li>
+    <li>Interaction follows the interface's HTMX-first, minimal-JavaScript constitution. Local JavaScript is acceptable
+    for lossless builder switching and dynamic profile/range editing.</li>
+    <li>Draft preview values are generated authoritatively on the server through the same library builders used on save;
+    previewing must not persist or mutate the session model. Browser code only coordinates requests and renders the response.</li>
+    <li>Preview requests are bounded, debounced where inputs change continuously, and ensure an older response cannot replace
+    a newer draft. The hourly preview is aggregated before transfer rather than sending its full multi-year hourly array.</li>
+    <li>The library JSON quality gate applies: authored state and its computed result must round-trip.</li>
+    <li>No backward-compatibility shim is required, but existing constant-builder JSON must continue to load in V1.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <p>No unresolved capability-level questions. Implementation naming, registration, form encoding, and error plumbing
+  are captured for review in <a href="plan.html"><code>plan.html</code></a>.</p>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <a href="plan.html"><code>plan.html</code></a> for the draft cross-repository approach and unresolved design choices.</li>
+    <li>Read <code>specs/architecture.md</code>, <code>specs/constitution.md</code>, and <code>specs/conventions.md</code> in
+    <code>e-footprint-interface</code>.</li>
+    <li>Read <code>specs/architecture/index.html</code>, especially the layers/modeling and persistence pages, plus
+    <code>specs/constitution.md</code> in <code>e-footprint</code>.</li>
+  </ol>
+</section>
+
+</body>
+</html>
