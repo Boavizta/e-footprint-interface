@@ -30,14 +30,19 @@ class TestUploadJsonInterfaceConfigPersistence:
         saved_data = SessionSystemRepository(client.session).get_system_data()
         assert saved_data["interface_config"] == {"sankey_diagrams": [{"id": "deadbeef"}]}
 
-    def test_upload_with_interface_config_replaces_existing_sankey_config(self, client, minimal_system_data):
+    def test_upload_with_interface_config_replaces_existing_config_including_card_order(
+        self, client, minimal_system_data
+    ):
         repository = SessionSystemRepository(client.session)
         repository.interface_config = {"sankey_diagrams": [{"id": "deadbeef"}]}
         repository.save_data(minimal_system_data)
 
         uploaded_data = {
             **minimal_system_data,
-            "interface_config": {"sankey_diagrams": [{"id": "cafebabe"}]},
+            "interface_config": {
+                "sankey_diagrams": [{"id": "cafebabe"}],
+                "card_order": {"server-list": ["Server_a", "Server_b"]},
+            },
             "efootprint_interface_version": "1.0.0",
         }
 
@@ -49,4 +54,7 @@ class TestUploadJsonInterfaceConfigPersistence:
 
         assert response.status_code == 302
         saved_data = SessionSystemRepository(client.session).get_system_data()
-        assert saved_data["interface_config"] == {"sankey_diagrams": [{"id": "cafebabe"}]}
+        assert saved_data["interface_config"] == {
+            "sankey_diagrams": [{"id": "cafebabe"}],
+            "card_order": {"server-list": ["Server_a", "Server_b"]},
+        }

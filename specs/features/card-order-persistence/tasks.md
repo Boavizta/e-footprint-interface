@@ -5,7 +5,7 @@
 
 ## Task 1 — Persist and restore the six-list order
 
-**Status:** Pending.
+**Status:** Done.
 
 **Goal:** Establish the complete server-side contract for saving card order and rendering every resident model canvas
 from its own saved order, without changing `ModelWeb` or relying on client-side reordering.

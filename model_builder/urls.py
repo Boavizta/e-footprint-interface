@@ -17,6 +17,7 @@ urlpatterns = [
     path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,
          name="load-template"),
     path("reset-model/", views.reset_model, name="reset-model"),
+    path("save-card-order/", views.save_card_order, name="save-card-order"),
     path("switch-model/", model_builder.adapters.views.views_workspace.switch_model, name="switch-model"),
     path("add-model/", model_builder.adapters.views.views_workspace.add_model, name="add-model"),
     path("open-add-model-import-panel/", model_builder.adapters.views.views_workspace.open_add_model_import_panel,
