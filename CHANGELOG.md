@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Add a configurable, cgroup-aware computation memory guard for model-builder requests. Its bounded privacy-safe telemetry can observe computation with at most 3% measured overhead or enforce the calibrated 85% working-set limit; unsafe Sankey builds stop with actionable graph guidance (and a generic recoverable modal before model hydration), preserve persisted model state, then collect memory and recycle the worker without producing an OOM or 5xx response.
 - Add a reproducible 4 GiB production-container memory profiling laboratory, a smart-building topology baseline, and an evidence-ranked memory optimization backlog.
 - Add a production-safe Docker build context that excludes local databases, environments, dependency directories, caches, secrets, and profiler artifacts.
 
