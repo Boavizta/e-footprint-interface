@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persistent object-card ordering — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  svg { width: 100%; height: auto; margin: 1rem 0; }
+</style>
+</head>
+<body>
+
+<h1>Persistent object-card ordering — Implementation plan</h1>
+<p class="status">Status: Plan — under review · 2026-08-31 · Spec: <a href="spec.html">spec.html</a></p>
+
+<section>
+  <h2>1. Approach</h2>
+  <p>Keep ordering as UI-only metadata in <code>interface_config["card_order"]</code>, next to the existing
+  Sankey configuration. SortableJS will use each card's existing <code>id</code> attribute as its identifier.
+  When a drag ends, the client gathers the complete order of all six designated lists and sends one
+  fire-and-forget POST. The endpoint replaces only <code>card_order</code>, preserving all other interface
+  configuration, and persists through the active model repository's established cache/session path.</p>
+  <p>On every full builder render, the adapter reads each resident workspace slot's own interface configuration,
+  merges saved rank with the current objects, and supplies explicitly ordered lists to the canvas template.
+  Saved IDs not present in the current model are ignored; current objects without a saved rank retain their
+  natural relative order after all ranked objects. <code>ModelWeb</code> remains unchanged. Build the rank map once
+  per list so restoration is <code>O(n + m)</code> for <code>n</code> current cards and <code>m</code> saved IDs.</p>
+
+  <svg viewBox="0 0 760 210" role="img" aria-labelledby="flow-title flow-desc">
+    <title id="flow-title">Card-order persistence flow</title>
+    <desc id="flow-desc">A drag end sends all list orders to the adapter, which stores them in interface config;
+    reload and JSON import feed the stored order back into adapter-side sorting and template rendering.</desc>
+    <defs>
+      <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+        <polygon points="0 0, 9 3.5, 0 7" fill="#555"></polygon>
+      </marker>
+    </defs>
+    <g fill="#f7f7f7" stroke="#777">
+      <rect x="10" y="25" width="140" height="55" rx="8"></rect>
+      <rect x="205" y="25" width="145" height="55" rx="8"></rect>
+      <rect x="405" y="25" width="160" height="55" rx="8"></rect>
+      <rect x="610" y="25" width="140" height="55" rx="8"></rect>
+      <rect x="405" y="130" width="160" height="55" rx="8"></rect>
+      <rect x="610" y="130" width="140" height="55" rx="8"></rect>
+    </g>
+    <g font-family="system-ui, sans-serif" font-size="13" text-anchor="middle" fill="#222">
+      <text x="80" y="49">SortableJS onEnd</text><text x="80" y="67">all six lists</text>
+      <text x="277" y="49">POST adapter</text><text x="277" y="67">active slot</text>
+      <text x="485" y="49">interface_config</text><text x="485" y="67">card_order</text>
+      <text x="680" y="49">JSON export</text><text x="680" y="67">and import</text>
+      <text x="485" y="153">adapter rank merge</text><text x="485" y="171">per workspace slot</text>
+      <text x="680" y="153">template renders</text><text x="680" y="171">ordered cards</text>
+    </g>
+    <g stroke="#555" stroke-width="2" marker-end="url(#arrow)">
+      <line x1="150" y1="52" x2="197" y2="52"></line>
+      <line x1="350" y1="52" x2="397" y2="52"></line>
+      <line x1="565" y1="52" x2="602" y2="52"></line>
+      <path d="M680 80 V108 H485 V122" fill="none"></path>
+      <line x1="565" y1="157" x2="602" y2="157"></line>
+    </g>
+  </svg>
+
+  <details open><summary>Persisted shape</summary>
+    <pre><code>{
+  "interface_config": {
+    "sankey_diagrams": [...],
+    "card_order": {
+      "up-list": ["UsagePattern_abc", "EdgeUsagePattern_xyz"],
+      "uj-list": ["UsageJourney_1", "UsageJourney_2"],
+      "external-api-list": ["ExternalAPI_1"],
+      "server-list": ["Server_1", "Server_2"],
+      "edge-device-groups-list": ["EdgeDeviceGroup_1"],
+      "edge-devices-list": ["EdgeDeviceBase_1"]
+    }
+  }
+}</code></pre>
+  </details>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change type</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>theme/static/scripts/model_builder_main.js</code></td>
+        <td>modified</td>
+        <td>Define the persisted list IDs, initialize <code>external-api-list</code>, set
+        <code>dataIdAttr: "id"</code>, and on drag end collect every list's <code>toArray()</code> result before
+        issuing one background POST. Keep the existing grab cleanup and leader-line update.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/adapters/views/views.py</code></td>
+        <td>modified</td>
+        <td>Add the POST adapter and a small stable-rank merge helper. During builder context construction,
+        prepare explicit ordered card lists from each slot's <code>repository.interface_config</code>. Combined
+        web/edge usage-pattern and journey lists are ranked as the single DOM lists they render into.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/urls.py</code></td>
+        <td>modified</td>
+        <td>Expose a POST-only <code>save-card-order</code> route.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/components/model_canvas_content.html</code></td>
+        <td>modified</td>
+        <td>Render the six top-level lists from explicit adapter-provided context variables instead of reading
+        the corresponding <code>ModelWeb</code> properties directly. Card markup and IDs do not change.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/object_cards/partials/root_edge_device_groups_list.html</code><br>
+        <code>model_builder/templates/model_builder/object_cards/partials/ungrouped_edge_devices_list.html</code></td>
+        <td>modified if retained as partials</td>
+        <td>Iterate the explicitly ordered root-group and ungrouped-device lists supplied by the canvas context.</td>
+      </tr>
+      <tr>
+        <td><code>tests/unit_tests/adapters/views/</code></td>
+        <td>new or modified tests</td>
+        <td>Cover stable rank merging, stale IDs, new IDs, empty/missing configuration, endpoint validation,
+        preservation of Sankey settings, active-slot scoping, and persisted repository data.</td>
+      </tr>
+      <tr>
+        <td><code>js_tests/model_builder_main.test.js</code></td>
+        <td>new</td>
+        <td>Stub SortableJS and verify all six designated lists initialize with the existing ID attribute. Add a
+        regression test that derives the initialized Sortable instances, triggers drag end for each one, and
+        asserts every emitted payload contains the current <code>toArray()</code> value of every initialized list.
+        This test must fail if any sortable list is omitted from persistence. Also retain coverage of the existing
+        on-end visual cleanup.</td>
+      </tr>
+      <tr>
+        <td><code>tests/e2e/</code> and its page object</td>
+        <td>modified</td>
+        <td>Add a focused workflow proving a representative drag survives reload and that an exported model
+        restores its order after upload. Rely on unit coverage for exhaustive list and edge-case permutations.</td>
+      </tr>
+      <tr>
+        <td><code>specs/architecture.md</code></td>
+        <td>modified</td>
+        <td>Extend the persistence section with the <code>card_order</code> convention and adapter-side ordering.
+        This prevents the new persistence/rendering pattern from becoming undocumented.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Cross-cutting concerns</h2>
+  <ul>
+    <li><strong>Tests:</strong> Use Python unit tests for ordering and repository writes, including one full six-list
+    payload assertion against persisted <code>interface_config</code>. In Jest, enumerate the initialized Sortable
+    instances and prove that ending a drag on each produces a payload containing every sortable list and its
+    <code>toArray()</code> order; this is the regression gate that prevents a future sortable list from being left
+    unpersisted. Add one Playwright workflow for the user-visible reload/export/import contract. Run the full
+    pytest and Jest quality gates before shipping.</li>
+    <li><strong>Validation:</strong> Accept one JSON object containing exactly the supported list keys whose values
+    are arrays of string IDs. Malformed requests return 400 without altering existing interface configuration.
+    Duplicate submitted IDs can be normalized to their first occurrence during rank-map construction so they
+    cannot duplicate cards in output.</li>
+    <li><strong>Persistence:</strong> Update <code>repository.interface_config["card_order"]</code> in place, then use
+    the same model persistence route already used by Sankey configuration. Do not overwrite sibling
+    <code>interface_config</code> keys.</li>
+    <li><strong>Schema migration:</strong> None. <code>card_order</code> is optional and additive; old JSON files
+    naturally use model order, while the existing export/import machinery already carries the complete
+    <code>interface_config</code>.</li>
+    <li><strong>Workspace behavior:</strong> The save endpoint targets the active repository. Full rendering must
+    order both resident canvases from their own repository configuration so a later client-side slot switch
+    reveals the right per-model order without re-rendering.</li>
+    <li><strong>Failure behavior:</strong> The browser keeps the reordered DOM even if the background request fails.
+    Suppress an unhandled promise rejection; a later reload may therefore show the last successfully saved order,
+    consistent with the deliberately fire-and-forget design.</li>
+    <li><strong>Docs:</strong> Update <code>specs/architecture.md</code>; no <code>AGENTS.md</code> change is needed
+    because its existing persistence and architecture pointers remain accurate.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Risks</h2>
+  <ul>
+    <li><strong>Resident workspace canvases:</strong> only the active canvas owns canonical list IDs, while parked
+    canvases have suffixed IDs. Mitigation: save the active canvas only, but prepare ordered context per slot on
+    the full render; retain the established reinitialization after slot switches.</li>
+    <li><strong>New and stale object IDs:</strong> naïve sorting with repeated <code>index()</code> is both fragile
+    and <code>O(nm)</code>. Mitigation: build an ID-to-rank map once, filter stale IDs implicitly, and use original
+    position as the stable fallback for unranked objects.</li>
+    <li><strong>Lost sibling configuration:</strong> assigning a new interface-config dict could erase Sankey
+    settings. Mitigation: mutate only <code>card_order</code> and assert preservation in endpoint tests.</li>
+    <li><strong>Rapid consecutive drags:</strong> fire-and-forget requests can complete out of order. SortableJS
+    <code>onEnd</code> normally spaces requests by user interaction, but it is still possible. Preserve the stated
+    simple last-request model for this iteration; if tests or production evidence show reordering races, add
+    client serialization as a follow-up rather than broadening this feature pre-emptively.</li>
+    <li><strong>Import expectations:</strong> imports without <code>interface_config</code> currently preserve the
+    active session's configuration. Keep that established behavior; imported files with <code>card_order</code>
+    replace it as part of their complete interface configuration.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. Alternatives considered</h2>
+  <ul>
+    <li><strong>Store order in the efootprint model or <code>ModelWeb</code>:</strong> rejected because visual card
+    order is interface state, not modeling truth, and would contaminate the domain boundary.</li>
+    <li><strong>Save one list per request:</strong> rejected because partial state complicates persistence and
+    import semantics; the six short arrays are cheap to send together.</li>
+    <li><strong>Save continuously during dragging or add a Save button:</strong> rejected because the DOM already
+    provides immediate session state and drag end is the single meaningful persistence boundary.</li>
+    <li><strong>Reorder cards client-side after every render:</strong> rejected because the Django adapter can
+    provide deterministic render context with no extra startup manipulation or client-side state layer.</li>
+    <li><strong>Clean stale identifiers on every render:</strong> rejected because ignoring them is sufficient and
+    avoids a write during a read-only page load.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Constitutional notes</h2>
+  <p>The plan preserves dependency direction and the library-as-domain-truth rule: only Django adapter,
+  template, repository-owned interface metadata, and minimal JavaScript concerns change. <code>ModelWeb</code> and
+  the e-footprint repository remain untouched. The endpoint is a small HTTP persistence adapter rather than a new
+  client-side data layer, consistent with the HTMX-first/minimal-JavaScript rule. No constitutional amendment is
+  required.</p>
+</section>
+
+<section>
+  <h2>7. Open questions</h2>
+  <p>None.</p>
+</section>
+
+</body>
+</html>

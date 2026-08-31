@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persistent object-card ordering — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  .mockup ol { max-width: 24rem; padding-left: 1.5rem; }
+  .mockup li { border: 1px solid #ccc; border-radius: 6px; margin: .4rem 0; padding: .35rem .5rem; }
+  .mockup button { float: right; margin-left: .35rem; }
+</style>
+</head>
+<body>
+
+<h1>Persistent object-card ordering</h1>
+<p class="status">Status: Spec — under review · 2026-08-31</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <p>People building a model can drag its top-level object cards into an order that helps them understand and
+  present the system. Today that organization exists only in the browser DOM: reloading the page returns the
+  cards to their model-derived order, and exporting then importing the model also loses it.</p>
+  <p>This affects anyone who uses card order as part of an ongoing modeling workflow, especially larger models
+  where a deliberate visual sequence reduces scanning effort. Persisting that preference makes the existing
+  drag-and-drop interaction trustworthy rather than temporary.</p>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <ul>
+    <li>After a user reorders cards in any of the six designated top-level lists, a successful page reload
+    restores the same order.</li>
+    <li>Downloading a model after reordering cards and uploading that file restores the saved order.</li>
+    <li>Usage patterns, usage journeys, external APIs, servers, root edge-device groups, and ungrouped edge
+    devices all participate in the persisted ordering behavior.</li>
+    <li>A newly added object that has no saved position appears after the saved objects in its list.</li>
+    <li>A saved identifier for an object that no longer exists does not prevent the modeling view from loading.</li>
+    <li>Dragging remains immediate: the card moves in the page without waiting for a server-rendered response or
+    requiring a separate Save action.</li>
+    <li>Each model in a two-model workspace restores its own card order.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Remembering the order of cards in the six designated lists in the main modeling view.</li>
+      <li>Saving the complete six-list ordering after a drag finishes.</li>
+      <li>Restoring ordering on a fresh render, including after reload and file import.</li>
+      <li>Including the ordering preference in single-model and workspace JSON round trips.</li>
+      <li>Graceful behavior when saved and current object sets differ.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Moving cards between lists.</li>
+      <li>Ordering nested cards inside journeys, servers, or within edge-device groups.</li>
+      <li>A visible save indicator, retry queue, or offline synchronization for a failed background save.</li>
+      <li>User-account-level ordering shared across models or browser sessions.</li>
+      <li>Automatically pruning identifiers for deleted objects from previously saved order data.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The existing drag interaction is unchanged. This small review mockup uses arrow buttons in place of dragging:
+  move a card, then use “Simulate reload” to see that the visible order is retained.</p>
+  <div class="mockup">
+    <strong>Servers</strong>
+    <ol id="review-card-list">
+      <li>Application server <button type="button" data-direction="down">Move down</button></li>
+      <li>Database server <button type="button" data-direction="down">Move down</button></li>
+      <li>Analytics server <button type="button" data-direction="up">Move up</button></li>
+    </ol>
+    <button type="button" id="review-reload">Simulate reload</button>
+    <p id="review-status" aria-live="polite">No order change yet.</p>
+  </div>
+  <script>
+    (() => {
+      const list = document.getElementById("review-card-list");
+      const status = document.getElementById("review-status");
+      list.addEventListener("click", event => {
+        const button = event.target.closest("button[data-direction]");
+        if (!button) return;
+        const item = button.closest("li");
+        if (button.dataset.direction === "up" && item.previousElementSibling) {
+          list.insertBefore(item, item.previousElementSibling);
+        } else if (button.dataset.direction === "down" && item.nextElementSibling) {
+          list.insertBefore(item.nextElementSibling, item);
+        }
+        status.textContent = "Order changed and remembered in the background.";
+      });
+      document.getElementById("review-reload").addEventListener("click", () => {
+        status.textContent = "Reload complete: the cards remain in this order.";
+      });
+    })();
+  </script>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li>The feature remains session-driven and model-scoped, consistent with <code>specs/mission.md</code>.</li>
+    <li>Ordering is interface-only state and must not enter the efootprint model or <code>ModelWeb</code>; this
+    preserves the Clean Architecture boundary and the library-as-domain-truth rules in the constitution.</li>
+    <li>The existing HTMX-first, minimal-JavaScript architecture remains in place. The background write occurs
+    only when a drag ends.</li>
+    <li>Existing JSON files without saved card ordering remain valid and render in their natural order.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <p>None.</p>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <code>plan.html</code> for the persistence shape, rendering path, affected files, and test gates.</li>
+    <li>Re-read <code>specs/architecture.md</code>, especially “Persistence and interface_config” and the resident
+    two-model canvas design, plus <code>specs/conventions.md</code>.</li>
+  </ol>
+</section>
+
+</body>
+</html>
