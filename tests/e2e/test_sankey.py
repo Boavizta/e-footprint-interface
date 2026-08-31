@@ -185,6 +185,20 @@ class TestSankeySection:
         restored_card.wait_for_diagram_update()
         assert restored_card.aggregation_threshold() == 0
 
+    def test_column_filter_persists_when_results_close_immediately(self, sankey_system: ModelBuilderPage):
+        sankey_system.open_result_panel()
+        card = SankeyPage(sankey_system).first_card()
+        card.wait_for_diagram_update()
+        assert card.analyse_by_chip_is_active("Usage journeys")
+
+        card.toggle_analyse_by_chip_without_wait("Usage journeys")
+        sankey_system.close_result_panel()
+        sankey_system.open_result_panel()
+
+        restored_card = SankeyPage(sankey_system).first_card()
+        restored_card.wait_for_diagram_update()
+        assert not restored_card.analyse_by_chip_is_active("Usage journeys")
+
     def test_analyse_by_chip_toggle_triggers_diagram_update(self, sankey_system: ModelBuilderPage):
         """Toggling an analyse-by chip triggers a live diagram update."""
         sankey_system.open_result_panel()

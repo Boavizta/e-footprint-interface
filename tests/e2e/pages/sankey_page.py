@@ -93,6 +93,11 @@ class SankeyCard:
     def toggle_analyse_by_chip(self, label: str) -> None:
         """Toggle an analyse-by chip by its UI label text."""
         with self.page.expect_response(lambda r: "sankey-diagram" in r.url):
+            self.toggle_analyse_by_chip_without_wait(label)
+
+    def toggle_analyse_by_chip_without_wait(self, label: str) -> None:
+        """Toggle an analyse-by chip without waiting for its response."""
+        with self.page.expect_request(lambda request: "sankey-diagram" in request.url):
             self._container.locator(f'.chip[data-type="analyse"]').filter(has_text=label).click()
 
     def toggle_exclude_chip(self, label: str) -> None:
@@ -102,6 +107,12 @@ class SankeyCard:
 
     def analyse_by_chip_exists(self, label: str) -> bool:
         return self._container.locator(f'.chip[data-type="analyse"]').filter(has_text=label).count() > 0
+
+    def analyse_by_chip_is_active(self, label: str) -> bool:
+        chip_classes = (
+            self._container.locator(f'.chip[data-type="analyse"]').filter(has_text=label).get_attribute("class")
+        )
+        return "active" in chip_classes.split()
 
     def exclude_chip_exists(self, label: str) -> bool:
         return self._container.locator(f'.chip[data-type="exclude"]').filter(has_text=label).count() > 0

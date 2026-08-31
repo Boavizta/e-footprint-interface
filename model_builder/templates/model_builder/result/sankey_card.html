@@ -23,7 +23,7 @@
           hx-target="#sankey-diagram-area-{{ card_id }}"
           hx-swap="outerHTML"
           hx-sync="this:replace"
-          hx-trigger="load, change[event.target.type!='range'] delay:300ms, change[event.target.type=='range'], input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
+          hx-trigger="load, change, input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
         <input type="hidden" name="card_id" value="{{ card_id }}">
 
         <div class="settings-row">

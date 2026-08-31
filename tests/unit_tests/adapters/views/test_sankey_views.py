@@ -149,6 +149,13 @@ class TestSankeyForm:
         r = sankey_client.get("/model_builder/sankey-form/")
         assert 'name="card_id"' in r.content.decode()
 
+    def test_discrete_changes_are_immediate_while_continuous_inputs_are_debounced(self, sankey_client):
+        content = sankey_client.get("/model_builder/sankey-form/").content.decode()
+        assert (
+            'hx-trigger="load, change, input delay:300ms from:find input[type=range], '
+            'input delay:300ms from:find input[type=number]"' in content
+        )
+
 
 @pytest.mark.django_db
 class TestSankeyCards:
