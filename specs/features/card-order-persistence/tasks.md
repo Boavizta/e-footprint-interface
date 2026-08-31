@@ -1,6 +1,6 @@
 # Persistent object-card ordering — Tasks
 
-**Status:** Tasks — under review.
+**Status:** Tasks — complete.
 **Spec:** [`spec.html`](spec.html). **Plan:** [`plan.html`](plan.html).
 
 ## Task 1 — Persist and restore the six-list order
@@ -54,7 +54,7 @@ from its own saved order, without changing `ModelWeb` or relying on client-side 
 
 ## Task 2 — Save every SortableJS list and prove the round trip
 
-**Status:** Pending.
+**Status:** Done.
 
 **Goal:** Connect drag completion to the server contract, guard against any sortable list being omitted from persistence,
 and verify the user-visible reload and JSON export/import outcomes.

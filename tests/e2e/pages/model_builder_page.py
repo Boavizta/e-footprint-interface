@@ -183,6 +183,22 @@ class ModelBuilderPage:
         ).filter(has_text=name)).to_have_count(0)
         return self
 
+    def card_names_in_list(self, list_id: str) -> list[str]:
+        """Return the visible labels of top-level cards in one sortable canvas list."""
+        cards = self.page.locator(f"#{list_id} > .model-builder-card")
+        return [card.locator("button[id^='button-']").first.inner_text().strip() for card in cards.all()]
+
+    def drag_card_to_start(self, list_id: str, card_name: str):
+        """Drag a top-level card before the current first card and wait for its background save."""
+        cards = self.page.locator(f"#{list_id} > .model-builder-card")
+        source = cards.filter(has_text=card_name)
+        target = cards.first
+        target_box = target.bounding_box()
+        assert target_box is not None
+        with self.page.expect_response(lambda response: "save-card-order" in response.url and response.status == 204):
+            source.drag_to(target, target_position={"x": target_box["width"] / 2, "y": 1})
+        return self
+
     # --- Add object buttons ---
 
     def click_add_usage_journey(self):
@@ -350,4 +366,14 @@ class ModelBuilderPage:
         with self.page.expect_response(lambda r: "upload-json" in r.url):
             self.page.locator("button[type='submit']").click()
         self.side_panel.should_be_closed()
+        return self
+
+    def download_active_model(self, file_path: str):
+        """Download the active model JSON to ``file_path``."""
+        download_menu = self.page.locator("#download-menu-toggle")
+        if download_menu.count():
+            download_menu.click()
+        with self.page.expect_download() as download_info:
+            self.page.locator('a[href="download-json/"]').click()
+        download_info.value.save_as(file_path)
         return self

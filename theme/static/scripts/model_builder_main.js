@@ -36,9 +36,42 @@ function isTextTruncated(element) {
     return element.scrollWidth > element.clientWidth;
 }
 
+const CARD_ORDER_LIST_IDS = [
+    "up-list",
+    "uj-list",
+    "external-api-list",
+    "server-list",
+    "edge-device-groups-list",
+    "edge-devices-list",
+];
+
+function csrfTokenFromHtmxHeaders() {
+    try {
+        return JSON.parse(document.body.getAttribute("hx-headers") || "{}")["X-CSRFToken"] || "";
+    } catch (_error) {
+        return "";
+    }
+}
+
+function saveCardOrder(sortables) {
+    const cardOrder = Object.fromEntries(
+        sortables.map(({listId, sortable}) => [listId, sortable.toArray()])
+    );
+    fetch("/model_builder/save-card-order/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfTokenFromHtmxHeaders(),
+        },
+        body: JSON.stringify(cardOrder),
+    }).catch(() => {});
+}
+
 function initSortableObjectCards() {
+    const sortables = [];
     const options = {
         animation: 150,
+        dataIdAttr: "id",
         onStart: () => {
             document.querySelectorAll('.grabbing').forEach(el => {
                 el.classList.remove('grabbing');
@@ -49,14 +82,14 @@ function initSortableObjectCards() {
                 el.classList.remove('grabbing');
             });
             updateLines();
+            saveCardOrder(sortables);
         }
     };
 
-    new Sortable(document.getElementById("up-list"), options);
-    new Sortable(document.getElementById("uj-list"), options);
-    new Sortable(document.getElementById("server-list"), options);
-    new Sortable(document.getElementById("edge-device-groups-list"), options);
-    new Sortable(document.getElementById("edge-devices-list"), options);
+    CARD_ORDER_LIST_IDS.forEach(listId => {
+        const sortable = new Sortable(document.getElementById(listId), options);
+        sortables.push({listId, sortable});
+    });
 }
 
 let timer = null;
@@ -323,3 +356,7 @@ document.body.addEventListener("htmx:confirm", function (evt) {
         evt.detail.issueRequest(true);
     }
 });
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {CARD_ORDER_LIST_IDS, initSortableObjectCards};
+}

@@ -284,6 +284,40 @@ TOUR_CASES = {
 
 
 # ---------------------------------------------------------------------------
+# model_builder_main.test.js — model_canvas_content.html sortable containers
+# ---------------------------------------------------------------------------
+
+def render_sortable_canvas(_case_ctx):
+    def cards(prefix):
+        return [
+            SimpleNamespace(web_id=f"{prefix}-first", efootprint_id=f"{prefix}-first"),
+            SimpleNamespace(web_id=f"{prefix}-second", efootprint_id=f"{prefix}-second"),
+        ]
+
+    slot_entry = {
+        "ordered_usage_patterns": cards("up"),
+        "ordered_usage_journeys": cards("uj"),
+        "ordered_external_apis": cards("api"),
+        "ordered_servers": cards("server"),
+        "ordered_root_edge_device_groups": cards("group"),
+        "ordered_ungrouped_edge_devices": cards("device"),
+    }
+    return render_to_string(
+        "model_builder/components/model_canvas_content.html",
+        {
+            "slot_entry": slot_entry,
+            "model_web": SimpleNamespace(creation_constraints={}),
+            "slot_suffix": "",
+            "is_active_canvas": True,
+            "class_help_info": {},
+        },
+    )
+
+
+SORTABLE_CANVAS_CASES = {"sortable_canvas_six_lists": {}}
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -294,6 +328,7 @@ GROUPS = [
     (DICT_COUNT_CASES, render_dict_count),
     (SELECT_OBJECT_CASES, render_select_object),
     (TOUR_CASES, render_tour_steps),
+    (SORTABLE_CANVAS_CASES, render_sortable_canvas),
 ]
 
 
