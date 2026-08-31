@@ -44,7 +44,30 @@ The resulting usage formula is valid but 337,627 characters long for this model.
 than removing detail. Shipping the complete formula is accepted for this optimization; a compact explanation-boundary
 design is parked in `specs/backlog/attributed-footprint-explanability/` and is not a requirement of the active feature.
 
+## Implementation verification — 2026-08-31
+
+The accepted implementation was remeasured against a fresh `git archive` of clean library commit `d76b858d`. Each cell
+used three new interface-Poetry Python processes, the same external fixture expanded through
+`performance.memory.scripts.profile_model.add_usage_patterns`, `ModelWeb` hydration, automatic GC disabled during the
+calculation, and a 5 ms `psutil` RSS sampler. The target was explicitly unwrapped with
+`system.edge_usage_patterns[0]._value`; every returned period sum was asserted non-zero. The five-target case retained
+all five unwrapped pattern results.
+
+| Scenario | Baseline RSS runs | Implemented RSS runs | Reduction by median | Baseline latency runs | Implemented latency runs |
+|---|---:|---:|---:|---:|---:|
+| Manufacturing | 1,333.3 / 1,333.7 / 1,333.7 MiB | 504.7 / 502.2 / 510.9 MiB | 62.2% | 0.874 / 0.881 / 0.884 s | 0.852 / 0.826 / 0.838 s |
+| Usage | 2,087.1 / 2,089.1 / 2,088.0 MiB | 604.3 / 620.2 / 631.3 MiB | 70.3% | 0.987 / 1.001 / 0.994 s | 0.922 / 0.920 / 0.938 s |
+| Manufacturing then usage | 2,835.9 / 2,836.2 / 2,836.4 MiB | 745.3 / 758.7 / 743.4 MiB | 73.7% | 1.361 / 1.358 / 1.392 s | 1.313 / 1.299 / 1.301 s |
+| Five retained usage targets | 2,350.7 / 2,350.1 / 2,351.1 MiB | 632.0 / 645.3 / 649.2 MiB | 72.6% | 1.599 / 1.612 / 1.609 s | 2.253 / 2.241 / 2.254 s |
+
+All implemented and baseline processes produced the same 43,800-element float32 arrays, UTC start date, kilogram unit,
+phase label and period sums. The manufacturing bytes had SHA-256
+`e56f63dc92657bfd0e77c712045aa5d7a09667d852bee6e95dce4c810c14f532` and sum `23,763.796875 kg`; usage had
+SHA-256 `7b555316d772ee895a9f6af24968273db788824ae62d863b7da6b878bba9e80e` and sum `14,705.853515625 kg`.
+The implemented explanation lengths were 255,769 characters for manufacturing and 337,627 for usage.
+
 ## Tests
 
-- Focused ExplainableObject and attribution tests: 59 passed, 2 subtests passed.
-- Full suite: 1,507 passed, 9 skipped, 67 subtests passed in 37.22 seconds.
+- Focused ExplainableObject, attribution, and recomputation tests: 65 passed, 9 subtests passed.
+- Full library suite: 1,520 passed, 2 skipped in 42.10 seconds.
+- Library documentation: `mkdocs build --strict` passed.

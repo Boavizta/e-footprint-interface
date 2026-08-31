@@ -6,6 +6,8 @@
 
 ## Task 1 — Bound cold Sankey retention by attribution source
 
+**Status:** Done.
+
 **Goal:** Reduce each source to cached period-sum rows and release its attribution-only hourly structures before
 processing the next source, without changing calculations or reactive invalidation.
 
@@ -37,6 +39,8 @@ fixtures; no material latency regression; invalidation and serialization semanti
 ---
 
 ## Task 2 — Implement bounded direct attributed-footprint retention
+
+**Status:** Done.
 
 **Goal:** Keep `attributed_footprint(obj, phase)` and its hourly numerical result unchanged while finalizing its previously
 missing formula and releasing each source's transient attribution arrays before processing the next source.
