@@ -23,7 +23,7 @@
           hx-target="#sankey-diagram-area-{{ card_id }}"
           hx-swap="outerHTML"
           hx-sync="this:replace"
-          hx-trigger="load, change delay:300ms, input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
+          hx-trigger="load, change[event.target.type!='range'] delay:300ms, change[event.target.type=='range'], input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
         <input type="hidden" name="card_id" value="{{ card_id }}">
 
         <div class="settings-row">
@@ -49,12 +49,19 @@
                     </span>
                 </label>
                 <div class="d-flex align-items-center gap-2">
-                    {% with threshold=initial_settings.aggregation_threshold_percent|default:"1" %}
+                    {% if initial_settings %}
+                    {% with threshold=initial_settings.aggregation_threshold_percent %}
                     <input type="range" name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="{{ threshold }}"
                            style="width: 90px;"
                            oninput="this.nextElementSibling.textContent = this.value + '%'">
                     <span style="font-size: 13px; color: #555; min-width: 28px;">{{ threshold }}%</span>
                     {% endwith %}
+                    {% else %}
+                    <input type="range" name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="1"
+                           style="width: 90px;"
+                           oninput="this.nextElementSibling.textContent = this.value + '%'">
+                    <span style="font-size: 13px; color: #555; min-width: 28px;">1%</span>
+                    {% endif %}
                 </div>
             </div>
 

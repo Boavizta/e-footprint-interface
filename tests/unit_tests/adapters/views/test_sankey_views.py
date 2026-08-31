@@ -186,6 +186,27 @@ class TestSankeyCards:
         assert 'name="node_label_max_length" value="31"' in content
         assert 'name="excluded_types" value="Device"' in content
 
+    def test_restores_saved_zero_aggregation_threshold(self, client, minimal_system_data):
+        system_data = {
+            **minimal_system_data,
+            "interface_config": {
+                "sankey_diagrams": [
+                    {
+                        "id": "deadbeef",
+                        "aggregation_threshold_percent": 0.0,
+                        "active_columns": ["phase", "category", "3"],
+                    }
+                ]
+            },
+        }
+        _setup_session(client, system_data)
+
+        response = client.get("/model_builder/sankey-cards/")
+        content = response.content.decode()
+
+        assert 'name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="0.0"' in content
+        assert ">0.0%</span>" in content
+
     def test_restores_saved_cards_from_session_interface_config_fallback(self, client, minimal_system_data):
         _setup_session(client, minimal_system_data)
         session = client.session

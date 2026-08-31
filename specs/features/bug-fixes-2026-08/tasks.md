@@ -94,6 +94,8 @@ Execute Tasks **1 → 2 → 4 → 3**.
 
 ## Task 4 — Preserve Sankey threshold zero and immediate-close changes
 
+**Status:** Done
+
 **Goal:** Keep the existing repository-owned Sankey settings persistence while ensuring a saved `0%` threshold renders as zero and a released threshold value is submitted before an immediate Results close detaches the form.
 
 **Diagnostic:** [`diagnostics/sankey-aggregation-threshold-persistence.md`](diagnostics/sankey-aggregation-threshold-persistence.md)

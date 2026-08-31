@@ -172,6 +172,19 @@ class TestSankeySection:
         sankey_system.open_result_panel()
         assert not SankeyPage(sankey_system).onboarding_banner_visible()
 
+    def test_zero_threshold_persists_when_results_close_immediately(self, sankey_system: ModelBuilderPage):
+        sankey_system.open_result_panel()
+        card = SankeyPage(sankey_system).first_card()
+        card.wait_for_diagram_update()
+
+        card.set_aggregation_threshold_without_wait(0)
+        sankey_system.close_result_panel()
+        sankey_system.open_result_panel()
+
+        restored_card = SankeyPage(sankey_system).first_card()
+        restored_card.wait_for_diagram_update()
+        assert restored_card.aggregation_threshold() == 0
+
     def test_analyse_by_chip_toggle_triggers_diagram_update(self, sankey_system: ModelBuilderPage):
         """Toggling an analyse-by chip triggers a live diagram update."""
         sankey_system.open_result_panel()

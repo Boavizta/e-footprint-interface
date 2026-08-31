@@ -53,8 +53,17 @@ class SankeyCard:
     def set_aggregation_threshold(self, value: float) -> None:
         """Set the aggregation threshold slider (0–10)."""
         with self.page.expect_response(lambda r: "sankey-diagram" in r.url):
-            self._container.locator('[name="aggregation_threshold_percent"]').fill(str(value))
-            self._container.locator('[name="aggregation_threshold_percent"]').dispatch_event("change")
+            self.set_aggregation_threshold_without_wait(value)
+
+    def set_aggregation_threshold_without_wait(self, value: float) -> None:
+        """Release the aggregation threshold slider without waiting for its response."""
+        threshold = self._container.locator('[name="aggregation_threshold_percent"]')
+        with self.page.expect_request(lambda request: "sankey-diagram" in request.url):
+            threshold.fill(str(value))
+            threshold.dispatch_event("change")
+
+    def aggregation_threshold(self) -> float:
+        return float(self._container.locator('[name="aggregation_threshold_percent"]').input_value())
 
     def toggle_phase_split(self, enabled: bool) -> None:
         checkbox = self._container.locator('[name="phase_split"]')
