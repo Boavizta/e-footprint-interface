@@ -6,12 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Recurrent-quantity fields can now switch losslessly between constant values and weekly patterns. The weekly editor supports named profiles, weekday assignment, baselines, and hourly ranges with inline validation, and preserves the full authored pattern through save, reopen, download, and upload.
+- Weekly patterns now have a live 168-hour side preview generated from the unsaved draft by the library-backed server path. Invalid drafts surface on the relevant controls while retaining the last valid chart, and rapid edits cannot let stale responses overwrite newer ones.
+
 ### Fixed
 - Clearing an inline relationship count now restores the latest valid value without sending repeated invalid updates to the backend.
 - 0% Sankey aggregation threshold now persists when Results is closed.
 - Sankey aggregation thresholds, including 0%, now persist when Results is closed immediately after a change.
 
 ### Changed
+- Hourly usage previews now share the same non-persisting server preview path as weekly patterns. Hourly, monthly, and yearly views derive from one exact server-prepared series and switch in the browser without another request, keeping aggregation consistent and previews stable across panel updates.
 - Closed-catalog fields such as EcoLogits model names and Boavizta cloud instance types now use native selects instead of editable datalists.
 
 ## [V1.10.1]
