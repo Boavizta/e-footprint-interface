@@ -4,16 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [V1.10.1]
+## [Unreleased]
 
 ### Fixed
-- Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips, without recomputing or reserializing the model after each drag.
 - Clearing an inline relationship count now restores the latest valid value without sending repeated invalid updates to the backend.
 - 0% Sankey aggregation threshold now persists when Results is closed.
 - Sankey aggregation thresholds, including 0%, now persist when Results is closed immediately after a change.
 
 ### Changed
 - Closed-catalog fields such as EcoLogits model names and Boavizta cloud instance types now use native selects instead of editable datalists.
+
+## [V1.10.1]
+
+### Fixed
+- Model-builder object-card drag-and-drop order now persists for all six sortable lists across page reloads, both model workspaces, and JSON export/import round trips, without recomputing or reserializing the model after each drag.
 
 ## [V1.10.0] - 2026-08-31
 

@@ -322,6 +322,7 @@ The form generator injects this as `field["subfields"]` so templates can render 
 ## Rendering in the web context
 
 - **Session-driven state.** The current system model is stored in Django session as `system_data` (JSON). Each request reconstructs the domain system via `ModelWeb(repository)`.
+- **Sankey settings close safely.** Settings autosave into repository-owned `interface_config`; when Results closes with a Sankey request in flight, `hidePanelResult()` hides the panel and waits for `htmx:afterRequest` before detaching its contents so the final released control value is persisted.
 - **HTMX partials.** Most UI actions trigger small HTTP requests that replace DOM snippets using templates under `model_builder/templates/model_builder/`.
 - **Metadata-only edits.** Parsed source metadata submissions (`_metadata_only`) are persisted through the normal
   edit use case, but the output sets `refresh_cards=False` so `HtmxPresenter` skips object-card OOB swaps;
