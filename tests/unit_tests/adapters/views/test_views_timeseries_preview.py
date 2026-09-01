@@ -8,7 +8,10 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from django.test import RequestFactory
-from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWeeklyPattern
+from efootprint.builders.timeseries import (
+    ExplainableHourlyQuantitiesFromFormInputs,
+    ExplainableRecurrentQuantitiesFromWeeklyPattern,
+)
 
 from model_builder.adapters.views.views_timeseries_preview import timeseries_preview
 
@@ -47,6 +50,18 @@ def preview_request(form_inputs, **overrides):
     return request
 
 
+def hourly_inputs(duration_value=2, duration_unit="year"):
+    return {
+        "start_date": "2025-01-01",
+        "modeling_duration_value": duration_value,
+        "modeling_duration_unit": duration_unit,
+        "initial_volume": 3000,
+        "initial_volume_timespan": "month",
+        "net_growth_rate_in_percentage": 12,
+        "net_growth_rate_timespan": "year",
+    }
+
+
 def response_attribute(response, attribute):
     body = response.content.decode()
     match = re.search(rf'{attribute}="([^"]*)"', body)
@@ -78,6 +93,64 @@ def test_preview_does_not_mutate_request_session():
 
     assert response.status_code == 200
     assert request.session == before
+
+
+def test_hourly_preview_returns_bounded_monthly_and_yearly_library_aggregates():
+    inputs = hourly_inputs()
+    response = timeseries_preview(
+        preview_request(
+            inputs,
+            object_type="UsagePattern",
+            field_name="hourly_usage_journey_starts",
+            builder="growth",
+        )
+    )
+
+    assert response.status_code == 200
+    assert response_attribute(response, "data-success") == "true"
+    configs = json.loads(response_attribute(response, "data-chart-configs"))
+    builder = ExplainableHourlyQuantitiesFromFormInputs(inputs)
+    expected_total = float(builder.value.sum().magnitude)
+    assert set(configs) == {"month", "year"}
+    assert len(configs["month"]["data"]["datasets"][0]["data"]) == 24
+    assert len(configs["year"]["data"]["datasets"][0]["data"]) == 2
+    assert sum(configs["month"]["data"]["datasets"][0]["data"]) == pytest.approx(expected_total, rel=1e-5)
+    assert sum(configs["year"]["data"]["datasets"][0]["data"]) == pytest.approx(expected_total, rel=1e-5)
+    assert "data-chart-config=" not in response.content.decode()
+
+
+def test_hourly_preview_reports_invalid_builder_inputs_without_a_chart():
+    inputs = hourly_inputs()
+    inputs["start_date"] = "not-a-date"
+
+    response = timeseries_preview(
+        preview_request(
+            inputs,
+            object_type="UsagePattern",
+            field_name="hourly_usage_journey_starts",
+            builder="growth",
+        )
+    )
+
+    assert response.status_code == 200
+    assert response_attribute(response, "data-success") == "false"
+    assert "data-chart-configs" not in response.content.decode()
+
+
+def test_hourly_preview_rejects_duration_beyond_the_form_limit_before_projection():
+    response = timeseries_preview(
+        preview_request(
+            hourly_inputs(duration_value=11),
+            object_type="UsagePattern",
+            field_name="hourly_usage_journey_starts",
+            builder="growth",
+        )
+    )
+
+    errors = json.loads(response_attribute(response, "data-errors"))
+    assert errors[0]["path"] == "modeling_duration_value"
+    assert errors[0]["code"] == "invalid_duration"
+    assert "data-chart-configs" not in response.content.decode()
 
 
 def test_registry_allowlist_rejects_unknown_builder():

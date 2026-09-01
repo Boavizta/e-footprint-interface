@@ -1,30 +1,11 @@
 const {
     cumulativeSumFromArray,
-    generateTimeIndexLabels,
-    sumDailyValuesByDisplayGranularity
+    generateTimeIndexLabels
 } = require('../theme/static/scripts/timeseries_utils.js');
 const { DateTime, Duration } = require("luxon");
 global.luxon = { DateTime, Duration };
 const {join} = require("node:path");
 const {readFileSync} = require("node:fs");
-const exp = require("node:constants");
-const {computeUsageJourneyVolume} = require("../theme/static/scripts/usage_pattern_timeseries");
-
-test('Monthly displayed data has right length', () => {
-    let testDailyUsageJourneyVolume = computeUsageJourneyVolume(
-        '2021-01-01', 1, "year", 10, "month", 1000, "month")
-    let aggregatedData = sumDailyValuesByDisplayGranularity(
-        Object.keys(testDailyUsageJourneyVolume), Object.values(testDailyUsageJourneyVolume), "month");
-    expect(Object.keys(aggregatedData).length).toBe(12);
-})
-
-test('Yearly displayed data has right length', () => {
-    let dailyUsageJourneyVolume = computeUsageJourneyVolume(
-        '2021-01-01', 2, "year", 10, "month", 1000, "month")
-    let aggregatedData = sumDailyValuesByDisplayGranularity(
-        Object.keys(dailyUsageJourneyVolume), Object.values(dailyUsageJourneyVolume), "year");
-    expect(Object.keys(aggregatedData).length).toBe(2);
-})
 
 test(
     'Check generateTimeIndexLabels return an Array with the right number of elements and check' +

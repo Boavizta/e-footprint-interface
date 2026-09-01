@@ -158,6 +158,8 @@ then use them to show the generated canonical week beside the weekly editor.
 
 ## Task 4 — Migrate the hourly usage preview onto the shared server path
 
+**Status:** Done.
+
 **Repository:** `e-footprint-interface`.
 
 **Goal:** Reuse the preview protocol for hourly usage-journey starts, move projection and aggregation back to the server-side

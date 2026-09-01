@@ -109,6 +109,17 @@ def prepare_hourly_quantity_data(ehq: ExplainableHourlyQuantities) -> Tuple[Dict
     return data_dict, extra_context
 
 
+def prepare_hourly_quantity_period_data(ehq: ExplainableHourlyQuantities) -> dict[str, dict[str, float]]:
+    """Aggregate an hourly timeseries into compact calendar-month and calendar-year series."""
+    daily_data, _ = prepare_hourly_quantity_data(ehq)
+    period_data = {"month": {}, "year": {}}
+    for date, value in daily_data.items():
+        for granularity, key_length in (("month", 7), ("year", 4)):
+            key = date[:key_length]
+            period_data[granularity][key] = period_data[granularity].get(key, 0) + value
+    return period_data
+
+
 def weekly_hour_labels() -> list[str]:
     """Return labels for the canonical Monday-first 168-hour week."""
     day_labels = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")

@@ -1,4 +1,8 @@
-<div class="mb-3" id="{{ field.web_id }}">
+<div class="mb-3" id="{{ field.web_id }}" data-timeseries-preview data-hourly-timeseries-preview
+     data-field-web-id="{{ field.web_id }}" data-field-name="{{ field.attr_name }}"
+     data-preview-url="{% url 'timeseries-preview' %}" data-preview-id="{{ field.web_id }}__preview"
+     data-latest-request-sequence="0" data-timeseries-preview-canvas-id="timeSeriesChart"
+     data-timeseries-preview-container-id="chartTimeseries" data-timeseries-preview-granularity-id="display_granularity">
     <div class="accordion accordion-panel" id="{{ field.web_id }}__usage_projection">
         <div class="accordion-item">
             <h2 class="accordion-header">
@@ -22,7 +26,7 @@
                                id="{{ field.web_id }}__start_date"
                                value="{{ field.default.start_date }}"
                                data-default-value="{{ field.default.start_date }}"
-                               _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+                               data-hourly-preview-input
                                required
                         >
                     </div>
@@ -40,26 +44,20 @@
                                    required
                                    data-default-value="{{ field.default.modeling_duration_value }}"
                                    data-associated-unit-id="{{ field.web_id }}__modeling_duration_unit"
-                                   _="on input if my value is not empty applyMaxLimitOnModelingDurationValue()
-
-                                    then openOrCloseTimeseriesChartAndTriggerUpdate()
-                                    "
+                                   data-hourly-preview-input
                             >
                             <select class="input-group-text"
                                     name="{{ field.web_id }}__modeling_duration_unit"
                                     id="{{ field.web_id }}__modeling_duration_unit"
-                                    _="
-                                    on change
-                                        applyMaxLimitOnModelingDurationValue()
-                                        then openOrCloseTimeseriesChartAndTriggerUpdate()
-                                    "
+                                    data-hourly-preview-input
                                     data-default-value="{{ field.default.modeling_duration_unit }}"
                             >
                                 <option value="month" {% if field.default.modeling_duration_unit == "month" %}selected{% endif %}>Months</option>
                                 <option value="year" {% if field.default.modeling_duration_unit == "year" %}selected{% endif %}>Years</option>
                             </select>
                         </div>
-                        <div class="hidden text-danger fs-xl" id="modeling_duration_value_error_message"></div>
+                        <div class="d-none text-danger fs-xl" id="modeling_duration_value_error_message"
+                             data-modeling-duration-error></div>
                     </div>
 
                     <!-- Initial Volume -->
@@ -83,13 +81,13 @@
                                    required
                                    data-default-value="{{ field.default.initial_volume }}"
                                    data-associated-unit-id="{{ field.web_id }}__initial_volume_timespan"
-                                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate() then tagFormAsModified()"
+                                   data-hourly-preview-input
                             >
                             <select class="input-group-text"
                                     name="{{ field.web_id }}__initial_volume_timespan"
                                     id="{{ field.web_id }}__initial_volume_timespan"
                                     data-default-value="{{ field.default.initial_volume_timespan }}"
-                                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
+                                    data-hourly-preview-input
                             >
                                 <option value="day" {% if field.default.initial_volume_timespan == "day" %}selected{% endif %}>Daily</option>
                                 <option value="month" {% if field.default.initial_volume_timespan == "month" %}selected{% endif %}>Monthly</option>
@@ -112,13 +110,13 @@
                                    required
                                    data-default-value="{{ field.default.net_growth_rate_in_percentage }}"
                                    data-associated-unit-id="{{ field.web_id }}__net_growth_rate_timespan"
-                                   _="on input openOrCloseTimeseriesChartAndTriggerUpdate()"
+                                   data-hourly-preview-input
                             >
                             <select class="input-group-text"
                                     name="{{ field.web_id }}__net_growth_rate_timespan"
                                     id="{{ field.web_id }}__net_growth_rate_timespan"
                                     data-default-value="{{ field.default.net_growth_rate_timespan }}"
-                                    _="on change openOrCloseTimeseriesChartAndTriggerUpdate()"
+                                    data-hourly-preview-input
                             >
                                 <option value="month" {% if field.default.net_growth_rate_timespan == "month" %}selected{% endif %}>Monthly</option>
                                 <option value="year" {% if field.default.net_growth_rate_timespan == "year" %}selected{% endif %}>Yearly</option>
@@ -129,6 +127,7 @@
             </div>
         </div>
     </div>
+    <div class="d-none" data-timeseries-preview-responses></div>
 </div>
 
 <script>
@@ -136,8 +135,6 @@
         enableTime: false,
         dateFormat: "Y-m-d"
     });
-    openOrCloseTimeseriesChartAndTriggerUpdate();
-
     (function attachAccordionSaveGuard() {
         function ensureAccordionOpenBeforeSave() {
             const accordionPanel = document.getElementById('{{ field.web_id }}__usage_projection_panel');

@@ -4,4 +4,5 @@
      data-success="{% if success %}true{% else %}false{% endif %}"
      data-status="{{ status }}"
      data-errors="{{ errors_json }}"
+     {% if chart_configs_json %}data-chart-configs="{{ chart_configs_json }}"{% endif %}
      {% if chart_config_json %}data-chart-config="{{ chart_config_json }}"{% endif %}></div>

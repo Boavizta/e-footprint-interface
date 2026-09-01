@@ -57,7 +57,25 @@ class TestTimeseriesChartDisplay:
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").click()
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("25")
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan").select_option("year")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        preview_responses = []
+        page.on(
+            "response",
+            lambda response: preview_responses.append(response.url) if "timeseries-preview" in response.url else None,
+        )
+        with page.expect_response(lambda response: "timeseries-preview" in response.url):
+            page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        expect(page.locator("#timeSeriesChart")).to_be_visible()
+        monthly_labels = page.locator("#timeSeriesChart").evaluate(
+            "canvas => canvas._timeseriesPreviewChart.data.labels"
+        )
+
+        request_count = len(preview_responses)
+        page.locator("#display_granularity").select_option("year")
+        yearly_labels = page.locator("#timeSeriesChart").evaluate(
+            "canvas => canvas._timeseriesPreviewChart.data.labels"
+        )
+        assert len(yearly_labels) < len(monthly_labels)
+        assert len(preview_responses) == request_count
 
         # Submit first UP
         model_builder.side_panel.submit_and_wait_for_close()

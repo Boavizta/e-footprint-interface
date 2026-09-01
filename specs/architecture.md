@@ -197,6 +197,9 @@ field, allow-listed registry builder, normalized form inputs, and preview revisi
 from the constructor signature, creates only a temporary library builder, and returns a bounded server-prepared chart
 payload. It never hydrates a `ModelWeb`, repository, or mutation use case. Chart preparation accepts raw library
 timeseries, while saved-object callers add their web wrapper, formula, and ancestor context separately.
+Hourly growth drafts use the same adapter and construct `ExplainableHourlyQuantitiesFromFormInputs` server-side. The
+response contains only calendar-month and calendar-year aggregates; the browser keeps those bounded series and switches
+granularity locally without projecting or aggregating the hourly values again.
 For relationship-dependent component needs, the preview accepts only the closed server-owned family of edge-component
 unit dimensions; binding the chosen unit to the selected component instance remains an authoritative save-time guard.
 `timeseries_preview.js` owns Chart.js create/update/destroy and newest-response selection across HTMX swaps. The weekly

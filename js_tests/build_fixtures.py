@@ -419,6 +419,36 @@ def render_weekly_pattern(field_ctx):
     )
 
 
+HOURLY_PREVIEW_CASES = {
+    "hourly_preview_default": {
+        "web_id": "UsagePattern_hourly_usage_journey_starts",
+        "attr_name": "hourly_usage_journey_starts",
+        "default": {
+            "start_date": "2025-01-01",
+            "modeling_duration_value": "2",
+            "modeling_duration_unit": "year",
+            "initial_volume": "1000",
+            "initial_volume_timespan": "month",
+            "net_growth_rate_in_percentage": "10",
+            "net_growth_rate_timespan": "year",
+        },
+        "subfields_ui_config": {"initial_volume": {"label": "Initial volume", "tooltip": None}},
+    }
+}
+
+
+def render_hourly_preview(field_ctx):
+    return (
+        '<div id="sidePanelContent"><form id="sidePanelForm">'
+        + render_to_string(
+            "model_builder/side_panels/dynamic_form_fields/hourly_quantities_from_growth.html",
+            {"field": field_ctx},
+        )
+        + "</form></div>"
+        + render_to_string("model_builder/side_panels/timeseries_chart.html")
+    )
+
+
 TIMESERIES_PREVIEW_CASES = {
     "timeseries_preview_success": {
         "preview_id": "RecurrentEdgeProcess_recurrent_compute_needed__preview",
@@ -443,6 +473,29 @@ TIMESERIES_PREVIEW_CASES = {
             [{"path": "profiles[0].baseline", "code": "invalid_number", "message": "Invalid baseline."}]
         ),
         "chart_config_json": "",
+        "chart_configs_json": "",
+    },
+    "timeseries_preview_hourly_success": {
+        "preview_id": "UsagePattern_hourly_usage_journey_starts__preview",
+        "request_sequence": "2",
+        "success": True,
+        "status": "Preview ready.",
+        "errors_json": "[]",
+        "chart_config_json": "",
+        "chart_configs_json": json.dumps(
+            {
+                "month": {
+                    "type": "bar",
+                    "data": {"labels": ["2025-01", "2025-02"], "datasets": [{"data": [10, 20]}]},
+                    "options": {"responsive": True},
+                },
+                "year": {
+                    "type": "bar",
+                    "data": {"labels": ["2025", "2026"], "datasets": [{"data": [30, 40]}]},
+                    "options": {"responsive": True},
+                },
+            }
+        ),
     },
 }
 
@@ -466,6 +519,7 @@ GROUPS = [
     (TOUR_CASES, render_tour_steps),
     (SORTABLE_CANVAS_CASES, render_sortable_canvas),
     (WEEKLY_PATTERN_CASES, render_weekly_pattern),
+    (HOURLY_PREVIEW_CASES, render_hourly_preview),
     (TIMESERIES_PREVIEW_CASES, render_timeseries_preview),
 ]
 

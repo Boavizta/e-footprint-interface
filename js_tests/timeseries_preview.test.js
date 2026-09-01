@@ -12,6 +12,12 @@ const SUCCESS_FIXTURE = fs.readFileSync(
 const ERROR_FIXTURE = fs.readFileSync(
     path.join(__dirname, "fixtures", "timeseries_preview_error.html"), "utf8"
 );
+const HOURLY_EDITOR_FIXTURE = fs.readFileSync(
+    path.join(__dirname, "fixtures", "hourly_preview_default.html"), "utf8"
+);
+const HOURLY_SUCCESS_FIXTURE = fs.readFileSync(
+    path.join(__dirname, "fixtures", "timeseries_preview_hourly_success.html"), "utf8"
+);
 
 function responseFrom(html) {
     const wrapper = document.createElement("div");
@@ -107,4 +113,23 @@ test("template places preview beside the editor only on wide Bootstrap breakpoin
     expect(document.querySelector("[data-timeseries-preview-column]").classList).toContain("col-xl-4");
     expect(document.querySelector("[data-timeseries-editor-column]").classList).toContain("col-12");
     expect(document.querySelector("[data-timeseries-preview-column]").classList).toContain("col-12");
+});
+
+test("hourly granularity switches between server-prepared series without another request", () => {
+    document.body.innerHTML = HOURLY_EDITOR_FIXTURE;
+    const region = document.querySelector("[data-hourly-timeseries-preview]");
+    region.dataset.latestRequestSequence = "2";
+
+    expect(selectResponse(responseFrom(HOURLY_SUCCESS_FIXTURE))).toBe(true);
+    expect(window.Chart).toHaveBeenCalledTimes(1);
+    const chart = document.getElementById("timeSeriesChart")._timeseriesPreviewChart;
+    expect(window.chart).toBe(chart);
+    expect(chart.data.labels).toEqual(["2025-01", "2025-02"]);
+
+    document.getElementById("display_granularity").value = "year";
+    window.createOrUpdateTimeSeriesChart();
+
+    expect(window.Chart).toHaveBeenCalledTimes(1);
+    expect(chart.update).toHaveBeenCalledTimes(1);
+    expect(chart.data.labels).toEqual(["2025", "2026"]);
 });

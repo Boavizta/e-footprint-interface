@@ -1,201 +1,198 @@
-let timeSeriesChartJSOptions = {
-    locale: "en-EN",
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-        x: {
-            type: 'time',
-            time: {
-                tooltipFormat: 'yyyy',
-                unit: 'year'
+(function () {
+    "use strict";
+
+    const PREVIEW_DEBOUNCE_MS = 300;
+    const previewTimers = new WeakMap();
+    const activeRequests = new WeakMap();
+    const initializedRoots = new Set();
+
+    function durationMaximum(unit) {
+        return unit === "month" ? 120 : 10;
+    }
+
+    function controls(root) {
+        return {
+            startDate: root.querySelector('[id$="start_date"]'),
+            duration: root.querySelector('[id$="modeling_duration_value"]'),
+            durationUnit: root.querySelector('[id$="modeling_duration_unit"]'),
+            initialVolume: root.querySelector('[id$="initial_volume"]'),
+            initialVolumeTimespan: root.querySelector('[id$="initial_volume_timespan"]'),
+            growthRate: root.querySelector('[id$="net_growth_rate_in_percentage"]'),
+            growthTimespan: root.querySelector('[id$="net_growth_rate_timespan"]'),
+        };
+    }
+
+    function validateDuration(root) {
+        const fields = controls(root);
+        const maximum = durationMaximum(fields.durationUnit.value);
+        const value = Number.parseInt(fields.duration.value, 10);
+        const error = root.querySelector("[data-modeling-duration-error]");
+        fields.duration.max = String(maximum);
+        if (!Number.isFinite(value) || value <= 0) {
+            fields.duration.value = fields.durationUnit.value === "month" ? "12" : "1";
+            error.textContent = "Modeling duration value must be greater than 0 and can't be empty";
+            error.classList.remove("d-none");
+        } else if (value > maximum) {
+            fields.duration.value = String(maximum);
+            error.textContent = `Modeling duration value must be less than or equal to ${maximum}`;
+            error.classList.remove("d-none");
+        } else {
+            error.textContent = "";
+            error.classList.add("d-none");
+        }
+    }
+
+    function validForPreview(root) {
+        const fields = controls(root);
+        return Boolean(fields.startDate.value)
+            && Number(fields.duration.value) > 0
+            && Number(fields.initialVolume.value) > 0
+            && fields.growthRate.value !== "";
+    }
+
+    function formInputs(root) {
+        const fields = controls(root);
+        return {
+            start_date: fields.startDate.value,
+            modeling_duration_value: fields.duration.value,
+            modeling_duration_unit: fields.durationUnit.value,
+            initial_volume: fields.initialVolume.value,
+            initial_volume_timespan: fields.initialVolumeTimespan.value,
+            net_growth_rate_in_percentage: fields.growthRate.value,
+            net_growth_rate_timespan: fields.growthTimespan.value,
+        };
+    }
+
+    function setVisible(root, visible) {
+        root.dispatchEvent(new CustomEvent("timeseries-preview:visibility", {
+            bubbles: true,
+            detail: {visible: visible},
+        }));
+    }
+
+    function abortRequest(root) {
+        const request = activeRequests.get(root);
+        if (!request) return;
+        activeRequests.delete(root);
+        request.source.dispatchEvent(new Event("htmx:abort"));
+        request.source.remove();
+    }
+
+    function sendPreview(root, sequence) {
+        const sink = root.querySelector("[data-timeseries-preview-responses]");
+        if (!sink || Number(root.dataset.latestRequestSequence) !== sequence || !window.htmx?.ajax) return;
+        const source = document.createElement("span");
+        source.hidden = true;
+        document.body.appendChild(source);
+        const activeRequest = {source: source, sequence: sequence};
+        activeRequests.set(root, activeRequest);
+        const fieldWebId = root.dataset.fieldWebId || "";
+        const separator = fieldWebId.indexOf("_");
+        const request = window.htmx.ajax("POST", root.dataset.previewUrl, {
+            source: source,
+            target: sink,
+            swap: "innerHTML",
+            values: {
+                object_type: separator < 0 ? "" : fieldWebId.slice(0, separator),
+                field_name: root.dataset.fieldName,
+                builder: "growth",
+                form_inputs: JSON.stringify(formInputs(root)),
+                preview_id: root.dataset.previewId,
+                request_sequence: String(sequence),
             },
-            title: { display: false },
-            grid: { display: false }
-        },
-        y: {
-            display: true,
-            title: {
-                display: true,
-                text: 'Number of usage journeys',
-            },
-            beginAtZero: true
+        });
+        const finish = function () {
+            if (activeRequests.get(root) === activeRequest) activeRequests.delete(root);
+            source.remove();
+        };
+        if (request && typeof request.then === "function") Promise.resolve(request).then(finish, finish);
+        else finish();
+    }
+
+    function schedulePreview(root, delay) {
+        const previousTimer = previewTimers.get(root);
+        if (previousTimer) window.clearTimeout(previousTimer);
+        abortRequest(root);
+        const sequence = Number(root.dataset.latestRequestSequence || 0) + 1;
+        root.dataset.latestRequestSequence = String(sequence);
+        if (!validForPreview(root) || window.innerWidth < 1200) {
+            setVisible(root, false);
+            return;
         }
-    },
-    plugins: {
-        tooltip: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-                label: function(context) {
-                    let label = context.dataset.label || '';
-                    let value = context.parsed.y;
-                    if (value !== null && value !== undefined) {
-                        value = value.toFixed(1);
-                    }
-                    return `${label}: ${value}`;
-                }
-            }
-        },
-        legend: { display: false },
-        responsive: true,
-        maintainAspectRatio: false,
-        zoom: {
-            zoom: {
-                drag: {enabled: true,},
-                pinch: {enabled: true},
-                mode: 'x',
-            }
-        }
-    }
-};
-
-function openOrCloseTimeseriesChartAndTriggerUpdate() {
-    if( window.innerWidth < 1200){return}
-    let element = document.getElementById("chartTimeseries");
-    let sidePanel = document.getElementById("sidePanelContent");
-    let startDate = sidePanel.querySelector('[id$="start_date"]').value;
-    let modelingDurationValue = sidePanel.querySelector('[id$="modeling_duration_value"]').value;
-    let initialUsageJourneyVolume = sidePanel.querySelector('[id$="initial_volume"]').value;
-    let netGrowthRateInPercentage = sidePanel.querySelector('[id$="net_growth_rate_in_percentage"]').value;
-    if(
-        startDate !==""
-        && (modelingDurationValue !== "" && modelingDurationValue > 0)
-        && (initialUsageJourneyVolume !== "" && initialUsageJourneyVolume > 0)
-        && (netGrowthRateInPercentage !== "")
-    ){
-        if(element.classList.contains("d-none")){
-            element.classList.remove("d-none");
-            element.classList.add("d-block");
-        }
-        createOrUpdateTimeSeriesChart();
-    }else{
-        if(element.classList.contains("d-block")) {
-            element.classList.remove("d-block");
-            element.classList.add("d-none");
-            if (window.chart) {
-                window.chart.destroy();
-                window.chart = null;
-            }
-        }
-    }
-}
-
-function closeTimeseriesChart() {
-    if(window.chart){
-        let element = document.getElementById("chartTimeseries");
-        element.classList.remove("d-block");
-        element.classList.add("d-none");
-        window.chart.destroy();
-        window.chart = null;
-    }
-}
-
-function getModelingDurationMaxValue(inputUnit) {
-    return inputUnit === "month" ? 120 : 10;
-}
-
-function applyMaxLimitOnModelingDurationValue() {
-    let sidePanel = document.getElementById("sidePanelContent");
-    let inputValue = sidePanel.querySelector('[id$="modeling_duration_value"]');
-    let inputUnit = sidePanel.querySelector('[id$="modeling_duration_unit"]').value;
-    let currentValue = parseInt(inputValue.value);
-    let maxValue = getModelingDurationMaxValue(inputUnit);
-    inputValue.max = maxValue;
-    let errorElement = document.getElementById('modeling_duration_value_error_message');
-    if(currentValue <= 0 || isNaN(currentValue) || !currentValue){
-        errorElement.innerHTML = "Modeling duration value must be greater than 0 and can't be empty";
-        errorElement.style.display = "block";
-        if (inputUnit === 'month'){inputValue.value= 12}else{inputValue.value= 1}
-    }else if (currentValue > maxValue) {
-        errorElement.innerHTML = `Modeling duration value must be less than or equal to ${maxValue}`;
-        errorElement.style.display = "block";
-        inputValue.value = maxValue;
-    }else{
-        errorElement.innerHTML ='';
-        errorElement.style.display = "none";
-    }
-}
-
-function createOrUpdateTimeSeriesChart(){
-    let sidePanel = document.getElementById("sidePanelContent");
-    let startDate = luxon.DateTime.fromISO(sidePanel.querySelector('[id$="start_date"]').value);
-    let modelingDurationValue = parseInt(sidePanel.querySelector('[id$="modeling_duration_value"]').value);
-    let modelingDurationUnit = sidePanel.querySelector('[id$="modeling_duration_unit"]').value;
-    let initialUsageJourneyVolume = parseInt(sidePanel.querySelector('[id$="initial_volume"]').value);
-    let initialUsageJourneyVolumeTimespan = sidePanel.querySelector('[id$="initial_volume_timespan"]').value;
-    let netGrowthRateInPercentage = parseInt(sidePanel.querySelector('[id$="net_growth_rate_in_percentage"]').value);
-    let netGrowthRateTimespan = sidePanel.querySelector('[id$="net_growth_rate_timespan"]').value;
-
-    let dailyUsageJourneyVolume = computeUsageJourneyVolume(
-        startDate, modelingDurationValue, modelingDurationUnit, netGrowthRateInPercentage, netGrowthRateTimespan,
-        initialUsageJourneyVolume, initialUsageJourneyVolumeTimespan);
-
-    let displayGranularity = document.getElementById('display_granularity').value;
-    let usageJourneyVolume = sumDailyValuesByDisplayGranularity(
-        Object.keys(dailyUsageJourneyVolume), Object.values(dailyUsageJourneyVolume), displayGranularity);
-
-    if (window.chart) {
-        window.chart.destroy();
-        window.chart = null;
+        setVisible(root, true);
+        const timer = window.setTimeout(function () {
+            previewTimers.delete(root);
+            sendPreview(root, sequence);
+        }, delay);
+        previewTimers.set(root, timer);
     }
 
-    timeSeriesChartJSOptions.scales.x.time.unit = displayGranularity === "month" ? "month" : "year";
-    timeSeriesChartJSOptions.scales.x.time.tooltipFormat = displayGranularity === "month" ? "MMM yyyy" : "yyyy";
+    function initialize(root) {
+        if (!root || root.dataset.hourlyTimeseriesPreviewInitialized === "true") return;
+        root.dataset.hourlyTimeseriesPreviewInitialized = "true";
+        initializedRoots.add(root);
+        validateDuration(root);
+        schedulePreview(root, 0);
+    }
 
-    const ctx = document.getElementById("timeSeriesChart").getContext('2d');
-    window.chart = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: Object.keys(usageJourneyVolume),
-            datasets: [{
-                label: 'Nb of usage journeys',
-                borderColor: '#017E7E',
-                backgroundColor: '#017E7E',
-                data: Object.values(usageJourneyVolume),
-                fill: false,
-                tension: 0.5
-            }]
-        },
-        options: timeSeriesChartJSOptions
+    function initializeAll(container) {
+        if (!container?.querySelectorAll) return;
+        if (container.matches?.("[data-hourly-timeseries-preview]")) initialize(container);
+        container.querySelectorAll("[data-hourly-timeseries-preview]").forEach(initialize);
+    }
+
+    document.addEventListener("input", function (event) {
+        const root = event.target.closest?.("[data-hourly-timeseries-preview]");
+        if (!root || !event.target.matches("[data-hourly-preview-input]")) return;
+        if (typeof window.tagFormAsModified === "function") window.tagFormAsModified();
+        if (event.target.matches('[id$="modeling_duration_value"]')) validateDuration(root);
+        schedulePreview(root, PREVIEW_DEBOUNCE_MS);
     });
-}
 
-function computeUsageJourneyVolume(
-    startDate, modelingDurationValue, modelingDurationUnit, netGrowthRateInPercentage, netGrowthRateTimespan,
-    initialUsageJourneyVolume, initialUsageJourneyVolumeTimespan) {
-    let dailyUsageJourneyVolume = {};
+    document.addEventListener("change", function (event) {
+        const root = event.target.closest?.("[data-hourly-timeseries-preview]");
+        if (!root || !event.target.matches("[data-hourly-preview-input]")) return;
+        if (typeof window.tagFormAsModified === "function") window.tagFormAsModified();
+        if (event.target.matches('[id$="modeling_duration_unit"]')) validateDuration(root);
+        schedulePreview(root, 0);
+    });
 
-    let luxonStartDate = luxon.DateTime.fromISO(startDate);
-    let luxonModelingDuration = luxon.Duration.fromObject({ [modelingDurationUnit]: modelingDurationValue });
-    let luxonNetGrowthRateTimespan = luxon.Duration.fromObject({ [netGrowthRateTimespan]: 1 });
-    let luxonInitialUsageJourneyVolumeTimespan = luxon.Duration.fromObject({ [initialUsageJourneyVolumeTimespan]: 1 });
+    document.addEventListener("htmx:afterSettle", function (event) {
+        initializeAll(event.detail?.target || event.target);
+    });
 
-    let modelingDurationInDays = luxonModelingDuration.shiftTo('days')['days'];
-    let growthRateTimespanInDays = luxonNetGrowthRateTimespan.shiftTo('days')['days'];
-    let initialUsageJourneyVolumeTimespanInDays = luxonInitialUsageJourneyVolumeTimespan.shiftTo('days')['days'];
+    document.addEventListener("htmx:beforeCleanupElement", function (event) {
+        const container = event.detail?.elt || event.target;
+        if (!container?.querySelectorAll) return;
+        const roots = [];
+        if (container.matches?.("[data-hourly-timeseries-preview]")) roots.push(container);
+        roots.push(...container.querySelectorAll("[data-hourly-timeseries-preview]"));
+        roots.forEach(function (root) {
+            const timer = previewTimers.get(root);
+            if (timer) window.clearTimeout(timer);
+            abortRequest(root);
+            initializedRoots.delete(root);
+        });
+    });
 
-    let dailyGrowthRate = (1 + netGrowthRateInPercentage/100) ** (1/growthRateTimespanInDays);
-    let exponentialGrowthSumOverInitialUsageJourneyVolumeTimespan;
-    if (dailyGrowthRate === 1) {
-        exponentialGrowthSumOverInitialUsageJourneyVolumeTimespan = initialUsageJourneyVolumeTimespanInDays;
+    document.addEventListener("timeseries-preview:close-hourly", function () {
+        initializedRoots.forEach(function (root) {
+            const timer = previewTimers.get(root);
+            if (timer) window.clearTimeout(timer);
+            abortRequest(root);
+        });
+        initializedRoots.clear();
+    });
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () { initializeAll(document); }, {once: true});
     } else {
-        exponentialGrowthSumOverInitialUsageJourneyVolumeTimespan =
-        (dailyGrowthRate ** initialUsageJourneyVolumeTimespanInDays - 1) / (dailyGrowthRate - 1);
+        initializeAll(document);
     }
-    let firstDailyUsageJourneyVolume = initialUsageJourneyVolume / exponentialGrowthSumOverInitialUsageJourneyVolumeTimespan;
 
-    let dateLooper = luxonStartDate;
-    let dailyUsageJourneyVolumeLooper = firstDailyUsageJourneyVolume;
-    for(let day_nb = 0; day_nb < modelingDurationInDays; day_nb++){
-        dailyUsageJourneyVolume[dateLooper.toISO()] = dailyUsageJourneyVolumeLooper;
-        dailyUsageJourneyVolumeLooper *= dailyGrowthRate;
-        dateLooper = luxonStartDate.plus({ ["day"]: (day_nb+1)});
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports = {
+            durationMaximum, formInputs, initializeAll, schedulePreview, validateDuration, validForPreview,
+        };
     }
-    return dailyUsageJourneyVolume;
-}
-
-if (typeof module !== "undefined" && module.exports) {
-    module.exports = {
-        computeUsageJourneyVolume
-    };
-}
+}());

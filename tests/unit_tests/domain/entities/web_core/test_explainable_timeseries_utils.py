@@ -13,6 +13,7 @@ from efootprint.constants.units import u
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     get_web_explainable_from_attr,
     prepare_hourly_quantity_data,
+    prepare_hourly_quantity_period_data,
     prepare_recurrent_quantity_data,
     prepare_timeseries_chart_context,
     weekly_hour_labels,
@@ -44,6 +45,18 @@ class TestExplainableTimeseriesUtils:
 
         # 6 hours padded with zeros before the 4 values → total sum 10 for the day
         assert data == {"2025-01-01": 10.0}
+
+    def test_prepare_hourly_quantity_period_data_uses_calendar_boundaries(self):
+        start = datetime(2024, 12, 31, tzinfo=pytz.utc)
+        values = np.ones(48, dtype=np.float32) * u.occurrence
+        ehq = ExplainableHourlyQuantities(values, start_date=start, label="ehq")
+
+        data = prepare_hourly_quantity_period_data(ehq)
+
+        assert data == {
+            "month": {"2024-12": 24.0, "2025-01": 24.0},
+            "year": {"2024": 24.0, "2025": 24.0},
+        }
 
     def test_prepare_recurrent_quantity_data(self):
         """Returns hour-indexed dict of recurrent magnitudes."""

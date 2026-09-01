@@ -1,10 +1,12 @@
 """Stateless draft previews for editable timeseries builders."""
 
 import json
+import math
 
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.builders.timeseries import WeeklyPatternValidationError
 from efootprint.constants.units import u
@@ -15,6 +17,7 @@ from efootprint.utils.tools import get_init_signature_params
 from model_builder.adapters.forms.timeseries_builder_registry import editable_builders_for
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
+    prepare_hourly_quantity_period_data,
     prepare_recurrent_quantity_data,
     weekly_hour_labels,
 )
@@ -27,6 +30,7 @@ EDGE_COMPONENT_NEED_UNIT_FAMILY = (
     u.bit_stored,
     u.concurrent,
 )
+HOURLY_DURATION_LIMITS = {"month": 120, "year": 10}
 
 
 def _error(path: str, code: str, message: str) -> dict[str, str]:
@@ -86,7 +90,46 @@ def _negative_value_errors(form_inputs: dict) -> list[dict[str, str]]:
     return errors
 
 
-def _preview_context(preview_id: str, request_sequence: str, errors=None, chart_config=None) -> dict:
+def _hourly_input_errors(form_inputs: dict) -> list[dict[str, str]]:
+    errors = []
+    duration_unit = form_inputs.get("modeling_duration_unit")
+    duration_limit = HOURLY_DURATION_LIMITS.get(duration_unit)
+    try:
+        duration = float(form_inputs.get("modeling_duration_value"))
+    except (TypeError, ValueError):
+        duration = math.nan
+    if duration_limit is None:
+        errors.append(_error("modeling_duration_unit", "invalid_unit", "Duration unit must be month or year."))
+    elif not math.isfinite(duration) or duration <= 0 or duration > duration_limit:
+        errors.append(
+            _error(
+                "modeling_duration_value",
+                "invalid_duration",
+                f"Duration must be greater than 0 and at most {duration_limit} {duration_unit}s.",
+            )
+        )
+
+    allowed_timespans = {
+        "initial_volume_timespan": {"day", "month", "year"},
+        "net_growth_rate_timespan": {"month", "year"},
+    }
+    for field_name, allowed_values in allowed_timespans.items():
+        if form_inputs.get(field_name) not in allowed_values:
+            errors.append(_error(field_name, "invalid_timespan", f"Invalid {field_name.replace('_', ' ')}."))
+
+    for field_name in ("initial_volume", "net_growth_rate_in_percentage"):
+        try:
+            value = float(form_inputs.get(field_name))
+        except (TypeError, ValueError):
+            value = math.nan
+        if not math.isfinite(value) or value < 0:
+            errors.append(_error(field_name, "invalid_number", "Value must be a finite number that is zero or greater."))
+    return errors
+
+
+def _preview_context(
+    preview_id: str, request_sequence: str, errors=None, chart_config=None, chart_configs=None
+) -> dict:
     errors = errors or []
     return {
         "preview_id": preview_id,
@@ -99,6 +142,7 @@ def _preview_context(preview_id: str, request_sequence: str, errors=None, chart_
         ),
         "errors_json": json.dumps(errors),
         "chart_config_json": json.dumps(chart_config) if chart_config is not None else "",
+        "chart_configs_json": json.dumps(chart_configs) if chart_configs is not None else "",
     }
 
 
@@ -131,8 +175,8 @@ def timeseries_preview(request):
     modeling_class, definition = _resolve_builder(object_type, field_name, builder_identifier)
     if modeling_class is None or definition is None:
         return HttpResponseBadRequest("Unknown field or timeseries builder.")
-    if not issubclass(definition.builder_class, ExplainableRecurrentQuantities):
-        return HttpResponseBadRequest("This timeseries builder is not supported by the preview yet.")
+    if not issubclass(definition.builder_class, (ExplainableHourlyQuantities, ExplainableRecurrentQuantities)):
+        return HttpResponseBadRequest("This timeseries builder is not supported by the preview.")
 
     try:
         form_inputs = json.loads(request.POST.get("form_inputs", ""))
@@ -140,6 +184,12 @@ def timeseries_preview(request):
         return HttpResponseBadRequest("Form inputs must be valid JSON.")
     if not isinstance(form_inputs, dict):
         return HttpResponseBadRequest("Form inputs must be a JSON object.")
+
+    if issubclass(definition.builder_class, ExplainableHourlyQuantities):
+        errors = _hourly_input_errors(form_inputs)
+        if errors:
+            context = _preview_context(preview_id, request_sequence, errors=errors)
+            return render(request, "model_builder/side_panels/timeseries_preview.html", context)
 
     try:
         builder = definition.builder_class(form_inputs=form_inputs, label="Draft preview")
@@ -171,6 +221,61 @@ def timeseries_preview(request):
         )
     if errors:
         context = _preview_context(preview_id, request_sequence, errors=errors)
+        return render(request, "model_builder/side_panels/timeseries_preview.html", context)
+
+    if isinstance(builder, ExplainableHourlyQuantities):
+        period_data = prepare_hourly_quantity_period_data(builder)
+        chart_configs = {
+            granularity: {
+                "type": "bar",
+                "data": {
+                    "labels": list(values),
+                    "datasets": [
+                        {
+                            "label": "Nb of usage journeys",
+                            "borderColor": "#017E7E",
+                            "backgroundColor": "#017E7E",
+                            "data": list(values.values()),
+                            "fill": False,
+                        }
+                    ],
+                },
+                "options": {
+                    "locale": "en-EN",
+                    "responsive": True,
+                    "maintainAspectRatio": False,
+                    "animation": False,
+                    "scales": {
+                        "x": {
+                            "type": "time",
+                            "time": {
+                                "unit": granularity,
+                                "tooltipFormat": "MMM yyyy" if granularity == "month" else "yyyy",
+                            },
+                            "title": {"display": False},
+                            "grid": {"display": False},
+                        },
+                        "y": {
+                            "display": True,
+                            "title": {"display": True, "text": "Number of usage journeys"},
+                            "beginAtZero": True,
+                        },
+                    },
+                    "plugins": {
+                        "legend": {"display": False},
+                        "zoom": {
+                            "zoom": {
+                                "drag": {"enabled": True},
+                                "pinch": {"enabled": True},
+                                "mode": "x",
+                            }
+                        },
+                    },
+                },
+            }
+            for granularity, values in period_data.items()
+        }
+        context = _preview_context(preview_id, request_sequence, chart_configs=chart_configs)
         return render(request, "model_builder/side_panels/timeseries_preview.html", context)
 
     labels = weekly_hour_labels()
