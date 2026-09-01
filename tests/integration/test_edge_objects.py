@@ -1,5 +1,8 @@
 """Integration tests for edge object creation, linking, and lifecycle."""
 
+import json
+from copy import deepcopy
+
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
@@ -7,7 +10,7 @@ from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWee
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
-from tests.fixtures.use_case_helpers import create_object, delete_object
+from tests.fixtures.use_case_helpers import create_object, delete_object, edit_object
 
 
 def _system_data(repository) -> dict:
@@ -207,6 +210,41 @@ def test_recurrent_edge_device_need_with_component_needs(default_system_reposito
     ]
     assert len(cpu_need.recurrent_need.value.magnitude) == 168
     assert cpu_need.recurrent_need.value.magnitude[8] == 5
+
+    edited_authored_state = deepcopy(cpu_need.recurrent_need.form_inputs)
+    edited_authored_state["profiles"][2].update(
+        {"name": "unused audit profile", "baseline": 7, "ranges": [{"start": 2, "end": 3, "value": 9}]}
+    )
+    edit_object(
+        default_system_repository,
+        cpu_need_id,
+        "RecurrentEdgeComponentNeed",
+        {"recurrent_need__weekly_pattern": json.dumps(edited_authored_state)},
+    )
+
+    reopened = ModelWeb(default_system_repository)
+    cpu_need = reopened.get_efootprint_object_from_efootprint_id(cpu_need_id, "RecurrentEdgeComponentNeed")
+    assert cpu_need.recurrent_need.form_inputs["profiles"][2] == edited_authored_state["profiles"][2]
+    assert cpu_need.recurrent_need.value.magnitude[8] == 5
+
+    same_output_weekly_pattern = {
+        "unit": "GB_ram",
+        "profiles": [
+            {"name": "all week", "days": list(range(7)), "baseline": 4, "ranges": []},
+            {"name": "unused", "days": [], "baseline": 0, "ranges": []},
+        ],
+    }
+    edit_object(
+        default_system_repository,
+        ram_need_id,
+        "RecurrentEdgeComponentNeed",
+        {"recurrent_need__weekly_pattern": json.dumps(same_output_weekly_pattern)},
+    )
+
+    reopened = ModelWeb(default_system_repository)
+    ram_need = reopened.get_efootprint_object_from_efootprint_id(ram_need_id, "RecurrentEdgeComponentNeed")
+    assert isinstance(ram_need.recurrent_need, ExplainableRecurrentQuantitiesFromWeeklyPattern)
+    assert ram_need.recurrent_need.form_inputs == same_output_weekly_pattern
 
 
 def test_failed_creation_leaves_system_unchanged(default_system_repository):

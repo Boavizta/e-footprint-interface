@@ -1,9 +1,10 @@
+import json
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
-from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -46,22 +47,32 @@ class TestViewsEdition:
         self, client, minimal_system_data, monkeypatch
     ):
         _setup_session(client, minimal_system_data)
-        model_web = _model_web(client)
-        object_id = model_web.servers[0].efootprint_id
+        object_id = "recurrent-process"
         saved_before = SessionSystemRepository(client.session).get_system_data()
-        validation_error = WeeklyPatternValidationError(
-            [{"path": "profiles", "code": "missing_day_assignment", "message": "Monday is unassigned."}]
+        model_web = MagicMock()
+        model_web.get_web_object_from_efootprint_id.return_value = SimpleNamespace(
+            class_as_simple_str="RecurrentEdgeProcess"
         )
-        monkeypatch.setattr(
-            "model_builder.adapters.views.views_edition.EditObjectUseCase.execute",
-            MagicMock(side_effect=validation_error),
-        )
+        monkeypatch.setattr("model_builder.adapters.views.views_edition.ModelWeb", MagicMock(return_value=model_web))
+        execute = MagicMock()
+        monkeypatch.setattr("model_builder.adapters.views.views_edition.EditObjectUseCase.execute", execute)
+        invalid_pattern = {
+            "unit": "cpu_core",
+            "profiles": [{"name": "incomplete", "days": [0], "baseline": 1, "ranges": []}],
+        }
 
-        response = client.post(f"/model_builder/edit-object/{object_id}/", {"Server_name": "Test Server"})
+        response = client.post(
+            f"/model_builder/edit-object/{object_id}/",
+            {
+                "RecurrentEdgeProcess_name": "Invalid process",
+                "RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": json.dumps(invalid_pattern),
+            },
+        )
 
         assert response.status_code == 422
         assert response.headers["HX-Reswap"] == "none"
-        assert response.json() == {"errors": validation_error.errors}
+        assert response.json()["errors"][0]["code"] == "missing_day_assignment"
+        execute.assert_not_called()
         assert SessionSystemRepository(client.session).get_system_data() == saved_before
 
     def test_memory_limited_edit_uses_generic_modal_and_preserves_persisted_model(

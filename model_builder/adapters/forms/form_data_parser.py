@@ -234,6 +234,27 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         elif attr_key.endswith("__builder_selector"):
             # Builder selectors are UI-only and normally have no name; tolerate a submitted one without leaking it.
             continue
+        elif attr_key.endswith("__constant_value"):
+            base_attr = attr_key[: -len("__constant_value")]
+            if base_attr not in new_efootprint_obj_class.attributes_that_can_have_negative_values():
+                try:
+                    constant_value = float(value)
+                except (TypeError, ValueError):
+                    pass
+                else:
+                    if constant_value < 0:
+                        raise WeeklyPatternValidationError(
+                            [
+                                {
+                                    "path": "constant_value",
+                                    "code": "negative_value_not_allowed",
+                                    "message": "Constant value must be zero or greater for this field.",
+                                }
+                            ]
+                        )
+            parsed_value = parsed.setdefault(base_attr, {})
+            parsed_value.setdefault("form_inputs", {})["constant_value"] = value
+            parsed_value.setdefault("label", "no label")
         elif attr_key.endswith("__weekly_pattern"):
             base_attr = attr_key[: -len("__weekly_pattern")]
             form_inputs = _parse_weekly_pattern_input(
@@ -243,9 +264,9 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             parsed.setdefault(base_attr, {}).update({"form_inputs": form_inputs, "label": "no label"})
         elif "__" in attr_key:
             base_attr, field_name = attr_key.split("__", 1)
-            if base_attr not in parsed:
-                parsed[base_attr] = {"form_inputs": {}, "label": "no label"}
-            parsed[base_attr]["form_inputs"][field_name] = value
+            parsed_value = parsed.setdefault(base_attr, {})
+            parsed_value.setdefault("form_inputs", {})[field_name] = value
+            parsed_value.setdefault("label", "no label")
         elif key.endswith("_form_data") and isinstance(value, str):
             parsed_key, parsed_form = _parse_inline_form_data(key, value)
             parsed[parsed_key] = parsed_form

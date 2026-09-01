@@ -2,7 +2,8 @@
     {% if field.show_builder_selector %}
         <div class="mb-3">
             <label class="form-label" for="{{ field.web_id }}__builder_selector">Describe this weekly quantity as</label>
-            <select class="form-select" id="{{ field.web_id }}__builder_selector" data-builder-selector>
+            <select class="form-select" id="{{ field.web_id }}__builder_selector" data-builder-selector
+                    aria-describedby="{{ field.web_id }}__weekly_error">
                 {% for builder in field.builders %}
                     <option value="{{ builder.identifier }}"
                             {% if builder.identifier == field.selected_builder %}selected{% endif %}>{{ builder.label }}</option>

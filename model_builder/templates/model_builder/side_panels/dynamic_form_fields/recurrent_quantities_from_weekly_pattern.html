@@ -5,68 +5,111 @@
     <input type="hidden" name="{{ field.web_id }}__weekly_pattern" data-weekly-pattern-payload>
 
     <p class="small text-muted mb-3">Unit: <strong data-weekly-unit>{{ builder.default.unit }}</strong></p>
-    <div class="alert alert-danger py-2 d-none" role="alert" data-weekly-error></div>
+    <div class="alert alert-danger py-2 d-none" id="{{ field.web_id }}__weekly_error"
+         role="alert" aria-live="polite" data-weekly-error></div>
 
     <div data-weekly-profiles>
         {% for profile in builder.default.profiles %}
             <fieldset class="border rounded p-3 mb-3" data-weekly-profile>
                 <legend class="float-none w-auto fs-5 px-1" data-profile-legend>Profile {{ forloop.counter }}</legend>
                 <div class="mb-3">
-                    <label class="form-label" for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name">Name</label>
+                    <label class="form-label" for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name"
+                           data-profile-name-label>Name</label>
                     <input class="form-control" type="text"
                            id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name"
-                           value="{{ profile.name }}" required data-profile-name>
-                    <div class="invalid-feedback" data-profile-name-error></div>
+                           value="{{ profile.name }}" required data-profile-name
+                           aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name_error">
+                    <div class="invalid-feedback" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name_error"
+                         data-profile-name-error></div>
                 </div>
 
                 <div class="mb-3">
-                    <span class="form-label d-block">Days</span>
-                    <div class="d-flex flex-wrap gap-3">
-                        <label><input class="form-check-input me-1" type="checkbox" value="0" data-profile-day
-                                      {% if 0 in profile.days %}checked{% endif %}>Mon</label>
-                        <label><input class="form-check-input me-1" type="checkbox" value="1" data-profile-day
-                                      {% if 1 in profile.days %}checked{% endif %}>Tue</label>
-                        <label><input class="form-check-input me-1" type="checkbox" value="2" data-profile-day
-                                      {% if 2 in profile.days %}checked{% endif %}>Wed</label>
-                        <label><input class="form-check-input me-1" type="checkbox" value="3" data-profile-day
-                                      {% if 3 in profile.days %}checked{% endif %}>Thu</label>
-                        <label><input class="form-check-input me-1" type="checkbox" value="4" data-profile-day
-                                      {% if 4 in profile.days %}checked{% endif %}>Fri</label>
-                        <label><input class="form-check-input me-1" type="checkbox" value="5" data-profile-day
-                                      {% if 5 in profile.days %}checked{% endif %}>Sat</label>
-                        <label><input class="form-check-input me-1" type="checkbox" value="6" data-profile-day
-                                      {% if 6 in profile.days %}checked{% endif %}>Sun</label>
+                    <span class="form-label d-block" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_days_label"
+                          data-profile-days-label>Days</span>
+                    <div class="d-flex flex-wrap gap-3" role="group"
+                         aria-labelledby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_days_label"
+                         aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_days_error"
+                         data-profile-days-group>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_0" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_0"
+                                   type="checkbox" value="0" data-profile-day
+                                   {% if 0 in profile.days %}checked{% endif %}>Mon
+                        </label>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_1" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_1"
+                                   type="checkbox" value="1" data-profile-day
+                                   {% if 1 in profile.days %}checked{% endif %}>Tue
+                        </label>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_2" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_2"
+                                   type="checkbox" value="2" data-profile-day
+                                   {% if 2 in profile.days %}checked{% endif %}>Wed
+                        </label>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_3" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_3"
+                                   type="checkbox" value="3" data-profile-day
+                                   {% if 3 in profile.days %}checked{% endif %}>Thu
+                        </label>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_4" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_4"
+                                   type="checkbox" value="4" data-profile-day
+                                   {% if 4 in profile.days %}checked{% endif %}>Fri
+                        </label>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_5" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_5"
+                                   type="checkbox" value="5" data-profile-day
+                                   {% if 5 in profile.days %}checked{% endif %}>Sat
+                        </label>
+                        <label for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_6" data-profile-day-label>
+                            <input class="form-check-input me-1" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_day_6"
+                                   type="checkbox" value="6" data-profile-day
+                                   {% if 6 in profile.days %}checked{% endif %}>Sun
+                        </label>
                     </div>
+                    <div class="text-danger small d-none" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_days_error"
+                         role="alert" data-profile-days-error></div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline">Baseline</label>
+                    <label class="form-label" for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline"
+                           data-profile-baseline-label>Baseline</label>
                     <div class="input-group">
                         <input class="form-control" type="number"
                                id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline"
                                value="{{ profile.baseline }}" step="0.1" required data-profile-baseline
+                               aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline_error"
                                {% if not field.can_be_negative %}min="0"{% endif %}>
                         <span class="input-group-text">{{ builder.default.unit }}</span>
-                        <div class="invalid-feedback" data-profile-baseline-error></div>
+                        <div class="invalid-feedback" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline_error"
+                             data-profile-baseline-error></div>
                     </div>
                 </div>
 
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
-                        <thead><tr><th>Start</th><th>End</th><th>Value</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+                        <thead><tr><th scope="col">Start</th><th scope="col">End</th><th scope="col">Value</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
                         <tbody data-profile-ranges>
                             {% for range in profile.ranges %}
                                 <tr data-weekly-range>
                                     <td><input class="form-control form-control-sm" type="number" min="0" max="23" step="1"
-                                               value="{{ range.start }}" required data-range-start></td>
+                                               value="{{ range.start }}" required data-range-start
+                                               aria-label="Range start hour"
+                                               aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error">
+                                        <div class="text-danger small d-none"
+                                             id="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"
+                                             role="alert" data-range-error></div></td>
                                     <td><input class="form-control form-control-sm" type="number" min="1" max="24" step="1"
-                                               value="{{ range.end }}" required data-range-end></td>
+                                               value="{{ range.end }}" required data-range-end aria-label="Range end hour"
+                                               aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"></td>
                                     <td><input class="form-control form-control-sm" type="number" step="0.1"
                                                value="{{ range.value }}" required data-range-value
+                                               aria-label="Range value"
+                                               aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"
                                                {% if not field.can_be_negative %}min="0"{% endif %}></td>
                                     <td><button class="btn btn-sm btn-outline-danger" type="button"
-                                                data-action="remove-weekly-range">Remove</button></td>
-                                    <td class="d-none" colspan="4" data-range-error></td>
+                                                data-action="remove-weekly-range"
+                                                aria-label="Remove range from profile {{ forloop.parentloop.counter }}">Remove</button></td>
                                 </tr>
                             {% endfor %}
                         </tbody>

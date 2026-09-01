@@ -7,6 +7,7 @@ and object reference resolution.
 Note: This module expects pre-parsed data (clean attribute names without prefixes).
 Use adapters/forms/form_data_parser.py to parse HTTP form data before calling these functions.
 """
+
 from copy import copy, deepcopy
 from typing import Any, Dict, List, get_origin, get_args, TYPE_CHECKING
 
@@ -85,9 +86,7 @@ def _apply_metadata(
 
     if "confidence" in parsed_value:
         raw_confidence = parsed_value["confidence"]
-        explainable_object.confidence = (
-            raw_confidence if raw_confidence in ("low", "medium", "high") else None
-        )
+        explainable_object.confidence = raw_confidence if raw_confidence in ("low", "medium", "high") else None
 
     if "comment" in parsed_value:
         explainable_object.comment = parsed_value["comment"] or None
@@ -136,11 +135,14 @@ def create_efootprint_obj_from_parsed_data(
                 model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
                 for obj_id in value
             ]
-        elif (annotation_origin is not None and isinstance(annotation_origin, type)
-              and issubclass(annotation_origin, ExplainableObjectDict)) or (
-                isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)):
+        elif (
+            annotation_origin is not None
+            and isinstance(annotation_origin, type)
+            and issubclass(annotation_origin, ExplainableObjectDict)
+        ) or (isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)):
             obj_creation_kwargs[attr_name] = ExplainableObjectDict(
-                _build_explainable_object_dict_entries(value, model_web, attr_name))
+                _build_explainable_object_dict_entries(value, model_web, attr_name)
+            )
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
             obj_to_add = model_web.get_efootprint_object_from_efootprint_id(value, mod_obj_attribute_object_type_str)
@@ -153,8 +155,9 @@ def create_efootprint_obj_from_parsed_data(
     return new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
 
 
-def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb",
-                                 update_system_data=False):
+def edit_object_from_parsed_data(
+    parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb", update_system_data=False
+):
     """Edit an efootprint object from parsed attribute data.
 
     Args:
@@ -192,16 +195,22 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                 continue
             logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
             list_attribute_object_type_str = get_args(annotation)[0].__name__
-            changes_list.append([
-                current_value,
-                [model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
-                 for obj_id in value]])
+            changes_list.append(
+                [
+                    current_value,
+                    [
+                        model_web.get_efootprint_object_from_efootprint_id(obj_id, list_attribute_object_type_str)
+                        for obj_id in value
+                    ],
+                ]
+            )
             continue
 
         is_explainable_object_dict = (
-            (annotation_origin is not None and isinstance(annotation_origin, type)
-             and issubclass(annotation_origin, ExplainableObjectDict))
-            or (isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict)))
+            annotation_origin is not None
+            and isinstance(annotation_origin, type)
+            and issubclass(annotation_origin, ExplainableObjectDict)
+        ) or (isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict))
         if is_explainable_object_dict:
             new_entries = _build_explainable_object_dict_entries(value, model_web, attr_name)
             # Dict equality (!=) ignores key order, so a pure reorder would be missed. Compare the
@@ -219,7 +228,8 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                 logger.debug(f"{attr_name} has changed in {obj_to_edit.efootprint_id}")
                 mod_obj_attribute_object_type_str = annotation.__name__
                 obj_to_add = model_web.get_efootprint_object_from_efootprint_id(
-                    new_mod_obj_id, mod_obj_attribute_object_type_str)
+                    new_mod_obj_id, mod_obj_attribute_object_type_str
+                )
                 changes_list.append([current_value, obj_to_add])
             continue
 
@@ -229,7 +239,12 @@ def edit_object_from_parsed_data(parsed_data: Dict[str, Any], obj_to_edit: "Mode
                 continue
             new_value = ExplainableObject.from_json_dict(value)
             new_value.set_label(current_value.label)
-            value_changed = new_value != current_value
+            authored_state_changed = type(new_value) is not type(current_value) or (
+                hasattr(new_value, "form_inputs")
+                and hasattr(current_value, "form_inputs")
+                and new_value.form_inputs != current_value.form_inputs
+            )
+            value_changed = authored_state_changed or new_value != current_value
             _apply_metadata(new_value, value, available_sources, pending_sources)
             if value_changed:
                 changes_list.append([current_value, new_value])

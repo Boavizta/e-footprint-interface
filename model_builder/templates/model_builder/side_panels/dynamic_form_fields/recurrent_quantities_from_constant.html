@@ -8,9 +8,10 @@
                step="0.1"
                {% if not field.can_be_negative %}min="0"{% endif %}
                placeholder="Input a constant value"
-               aria-describedby="basic-addon3 basic-addon4"
                required
                data-default-value="{{ builder.default.constant_value }}"
+               data-error-path="constant_value"
+               aria-describedby="{{ field.web_id }}__constant_value_help {{ field.web_id }}__constant_value_error"
                {% if field.metadata.source %}
                oninput="onInputValueChange('{{ field.web_id }}');tagFormAsModified();"
                {% endif %}
@@ -24,7 +25,9 @@
         >
     </div>
 
-    <small class="form-text text-muted">
+    <div class="invalid-feedback d-none" id="{{ field.web_id }}__constant_value_error" data-constant-value-error></div>
+
+    <small class="form-text text-muted" id="{{ field.web_id }}__constant_value_help">
         This constant value will be repeated over the entire canonical week (168 hours).
     </small>
 </div>

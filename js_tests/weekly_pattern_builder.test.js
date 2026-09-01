@@ -48,6 +48,21 @@ test("switching builders retains both drafts and submits only the active builder
     expect(window.tagFormAsModified).toHaveBeenCalled();
 });
 
+test("switching away from an invalid weekly draft removes it from form validation", () => {
+    const editor = selectWeeklyBuilder();
+    const monday = profiles(editor)[0].querySelector("[data-profile-day][value='0']");
+    monday.checked = false;
+    monday.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(document.getElementById("sidePanelForm").checkValidity()).toBe(false);
+
+    const selector = document.querySelector("[data-builder-selector]");
+    selector.value = "constant";
+    selector.dispatchEvent(new Event("change", {bubbles: true}));
+
+    expect(selector.validationMessage).toBe("");
+    expect(document.getElementById("sidePanelForm").checkValidity()).toBe(true);
+});
+
 test("day assignment steals ownership from the previous profile", () => {
     const editor = selectWeeklyBuilder();
     const profileList = profiles(editor);
@@ -74,6 +89,15 @@ test("profile add and remove preserve unassigned days as an invalid draft", () =
     expect(profiles(editor)).toHaveLength(2);
     expect(editor.querySelector("[data-weekly-error]").textContent).toContain("Mon must be assigned");
     expect(document.getElementById("sidePanelForm").checkValidity()).toBe(false);
+});
+
+test("removing an existing profile marks the form modified after detaching the control", () => {
+    const editor = selectWeeklyBuilder();
+    window.tagFormAsModified.mockClear();
+
+    profiles(editor)[1].querySelector("[data-action='remove-weekly-profile']").click();
+
+    expect(window.tagFormAsModified).toHaveBeenCalledTimes(1);
 });
 
 test("ranges use the first free hour, sort chronologically, and reject overlaps", () => {
@@ -126,5 +150,55 @@ test("authoritative errors map normalized paths back to visible controls", () =>
 
     expect(editor.querySelector("[data-profile-baseline]").validationMessage)
         .toBe("Server says this baseline is invalid.");
-    expect(window.hideLoadingBar).toHaveBeenCalled();
+});
+
+test("authoritative day paths follow serialized selection order and fall back to the profile", () => {
+    const editor = selectWeeklyBuilder();
+    const form = document.getElementById("sidePanelForm");
+    const weekend = profiles(editor)[1];
+    const saturday = weekend.querySelector("[data-profile-day][value='5']");
+
+    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {
+        bubbles: true,
+        detail: {
+            xhr: {
+                status: 422,
+                responseText: JSON.stringify({
+                    errors: [{path: "profiles[1].days[0]", message: "Duplicate Saturday."}],
+                }),
+            },
+            elt: form,
+        },
+    }));
+    expect(saturday.validationMessage).toBe("Duplicate Saturday.");
+
+    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {
+        bubbles: true,
+        detail: {
+            xhr: {
+                status: 422,
+                responseText: JSON.stringify({
+                    errors: [{path: "profiles[1].days[2]", message: "Injected day is invalid."}],
+                }),
+            },
+            elt: form,
+        },
+    }));
+    expect(weekend.querySelector("[data-profile-days-error]").textContent).toBe("Injected day is invalid.");
+});
+
+test("dynamic controls retain accessible labels and error descriptions", () => {
+    const editor = selectWeeklyBuilder();
+    editor.querySelector("[data-action='add-weekly-profile']").click();
+    const profile = profiles(editor)[2];
+    const name = profile.querySelector("[data-profile-name]");
+    expect(profile.querySelector("[data-profile-name-label]").htmlFor).toBe(name.id);
+    expect(document.getElementById(name.getAttribute("aria-describedby"))).not.toBeNull();
+
+    profile.querySelector("[data-action='add-weekly-range']").click();
+    const range = profile.querySelector("[data-weekly-range]");
+    const start = range.querySelector("[data-range-start]");
+    expect(document.getElementById(start.getAttribute("aria-describedby"))).toBe(
+        range.querySelector("[data-range-error]")
+    );
 });

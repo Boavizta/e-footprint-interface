@@ -1,7 +1,7 @@
+import json
 from unittest.mock import MagicMock
 
 import pytest
-from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.repositories import SessionSystemRepository
 
@@ -13,20 +13,24 @@ def test_weekly_validation_error_returns_structured_response_without_mutating_se
     repository = SessionSystemRepository(client.session)
     repository.save_data(minimal_system_data)
     saved_before = repository.get_system_data()
-    validation_error = WeeklyPatternValidationError(
-        [{"path": "profiles[0].ranges[0].start", "code": "invalid_start_hour", "message": "Invalid start."}]
-    )
-    monkeypatch.setattr(
-        "model_builder.adapters.views.views_addition.CreateObjectUseCase.execute",
-        MagicMock(side_effect=validation_error),
-    )
+    execute = MagicMock()
+    monkeypatch.setattr("model_builder.adapters.views.views_addition.CreateObjectUseCase.execute", execute)
+    invalid_pattern = {
+        "unit": "cpu_core",
+        "profiles": [{"name": "incomplete", "days": [0], "baseline": 1, "ranges": []}],
+    }
 
     response = client.post(
-        "/model_builder/add-object/Server/",
-        {"type_object_available": "Server", "Server_name": "Invalid server"},
+        "/model_builder/add-object/RecurrentEdgeProcess/",
+        {
+            "type_object_available": "RecurrentEdgeProcess",
+            "RecurrentEdgeProcess_name": "Invalid process",
+            "RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": json.dumps(invalid_pattern),
+        },
     )
 
     assert response.status_code == 422
     assert response.headers["HX-Reswap"] == "none"
-    assert response.json() == {"errors": validation_error.errors}
+    assert response.json()["errors"][0]["code"] == "missing_day_assignment"
+    execute.assert_not_called()
     assert SessionSystemRepository(client.session).get_system_data() == saved_before

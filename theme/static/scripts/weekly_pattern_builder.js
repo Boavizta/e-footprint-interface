@@ -29,6 +29,7 @@
         root.querySelectorAll("[data-builder-panel]").forEach(function (panel) {
             setPanelActive(panel, panel.dataset.builderPanel === selected);
         });
+        if (selector && selected !== "weekly_pattern") setControlError(selector, "");
         root.querySelectorAll("[data-weekly-pattern-editor]").forEach(function (editor) {
             if (editor.closest("[data-builder-panel]").hidden) {
                 clearEditorErrors(editor);
@@ -71,10 +72,12 @@
         editor.querySelectorAll("input, select").forEach(function (control) {
             setControlError(control, "");
         });
-        editor.querySelectorAll("[data-profile-name-error], [data-profile-baseline-error], [data-range-error]")
+        editor.querySelectorAll(
+            "[data-profile-name-error], [data-profile-days-error], [data-profile-baseline-error], [data-range-error]"
+        )
             .forEach(function (element) {
                 element.textContent = "";
-                if (element.matches("[data-range-error]")) element.classList.add("d-none");
+                if (element.matches("[data-profile-days-error], [data-range-error]")) element.classList.add("d-none");
             });
         const general = editor.querySelector("[data-weekly-error]");
         general.textContent = "";
@@ -162,22 +165,60 @@
     }
 
     function reindexEditor(editor) {
+        const fieldId = editor.dataset.fieldWebId;
         profileElements(editor).forEach(function (profile, profileIndex) {
             profile.querySelector("[data-profile-legend]").textContent = `Profile ${profileIndex + 1}`;
             const name = profile.querySelector("[data-profile-name]");
             const baseline = profile.querySelector("[data-profile-baseline]");
+            const nameId = `${fieldId}__profile_${profileIndex}_name`;
+            const nameErrorId = `${nameId}_error`;
+            name.id = nameId;
+            name.setAttribute("aria-describedby", nameErrorId);
+            profile.querySelector("[data-profile-name-label]").htmlFor = nameId;
+            profile.querySelector("[data-profile-name-error]").id = nameErrorId;
             name.dataset.errorPath = `profiles[${profileIndex}].name`;
-            baseline.dataset.errorPath = `profiles[${profileIndex}].baseline`;
+
+            const daysLabelId = `${fieldId}__profile_${profileIndex}_days_label`;
+            const daysErrorId = `${fieldId}__profile_${profileIndex}_days_error`;
+            profile.querySelector("[data-profile-days-label]").id = daysLabelId;
+            const daysGroup = profile.querySelector("[data-profile-days-group]");
+            daysGroup.setAttribute("aria-labelledby", daysLabelId);
+            daysGroup.setAttribute("aria-describedby", daysErrorId);
+            profile.querySelector("[data-profile-days-error]").id = daysErrorId;
+            let selectedDayIndex = 0;
+            const dayLabels = profile.querySelectorAll("[data-profile-day-label]");
             profile.querySelectorAll("[data-profile-day]").forEach(function (day, dayIndex) {
-                day.dataset.errorPath = `profiles[${profileIndex}].days[${dayIndex}]`;
+                const dayId = `${fieldId}__profile_${profileIndex}_day_${dayIndex}`;
+                day.id = dayId;
+                dayLabels[dayIndex].htmlFor = dayId;
+                delete day.dataset.errorPath;
+                if (day.checked) {
+                    day.dataset.errorPath = `profiles[${profileIndex}].days[${selectedDayIndex}]`;
+                    selectedDayIndex += 1;
+                }
             });
+
+            const baselineId = `${fieldId}__profile_${profileIndex}_baseline`;
+            const baselineErrorId = `${baselineId}_error`;
+            baseline.id = baselineId;
+            baseline.setAttribute("aria-describedby", baselineErrorId);
+            profile.querySelector("[data-profile-baseline-label]").htmlFor = baselineId;
+            profile.querySelector("[data-profile-baseline-error]").id = baselineErrorId;
+            baseline.dataset.errorPath = `profiles[${profileIndex}].baseline`;
             rangeElements(profile).forEach(function (range, rangeIndex) {
-                range.querySelector("[data-range-start]").dataset.errorPath =
-                    `profiles[${profileIndex}].ranges[${rangeIndex}].start`;
-                range.querySelector("[data-range-end]").dataset.errorPath =
-                    `profiles[${profileIndex}].ranges[${rangeIndex}].end`;
-                range.querySelector("[data-range-value]").dataset.errorPath =
-                    `profiles[${profileIndex}].ranges[${rangeIndex}].value`;
+                const rangePrefix = `${fieldId}__profile_${profileIndex}_range_${rangeIndex}`;
+                const errorId = `${rangePrefix}_error`;
+                const error = range.querySelector("[data-range-error]");
+                error.id = errorId;
+                ["start", "end", "value"].forEach(function (part) {
+                    const control = range.querySelector(`[data-range-${part}]`);
+                    control.id = `${rangePrefix}_${part}`;
+                    control.dataset.errorPath = `profiles[${profileIndex}].ranges[${rangeIndex}].${part}`;
+                    control.setAttribute("aria-describedby", errorId);
+                });
+                range.querySelector("[data-action='remove-weekly-range']").setAttribute(
+                    "aria-label", `Remove range from profile ${profileIndex + 1}`
+                );
             });
         });
     }
@@ -275,14 +316,14 @@
         row.dataset.weeklyRange = "";
         row.innerHTML = `
             <td><input class="form-control form-control-sm" type="number" min="0" max="23" step="1"
-                       value="${start}" required data-range-start></td>
+                       value="${start}" required aria-label="Range start hour" data-range-start>
+                <div class="text-danger small d-none" role="alert" data-range-error></div></td>
             <td><input class="form-control form-control-sm" type="number" min="1" max="24" step="1"
-                       value="${start + 1}" required data-range-end></td>
+                       value="${start + 1}" required aria-label="Range end hour" data-range-end></td>
             <td><input class="form-control form-control-sm" type="number" step="0.1" value="0" required
-                       data-range-value${minValue}></td>
+                       aria-label="Range value" data-range-value${minValue}></td>
             <td><button class="btn btn-sm btn-outline-danger" type="button"
-                        data-action="remove-weekly-range">Remove</button></td>
-            <td class="d-none" colspan="4" data-range-error></td>`;
+                        data-action="remove-weekly-range">Remove</button></td>`;
         return row;
     }
 
@@ -293,21 +334,23 @@
         profile.dataset.weeklyProfile = "";
         profile.innerHTML = `
             <legend class="float-none w-auto fs-5 px-1" data-profile-legend></legend>
-            <div class="mb-3"><label class="form-label">Name</label>
+            <div class="mb-3"><label class="form-label" data-profile-name-label>Name</label>
                 <input class="form-control" type="text" value="profile" required data-profile-name>
                 <div class="invalid-feedback" data-profile-name-error></div></div>
-            <div class="mb-3"><span class="form-label d-block">Days</span><div class="d-flex flex-wrap gap-3">
+            <div class="mb-3"><span class="form-label d-block" data-profile-days-label>Days</span>
+                <div class="d-flex flex-wrap gap-3" role="group" data-profile-days-group>
                 ${DAY_LABELS.map(function (day, index) {
-                    return `<label><input class="form-check-input me-1" type="checkbox" value="${index}"
+                    return `<label data-profile-day-label><input class="form-check-input me-1" type="checkbox" value="${index}"
                                          data-profile-day>${day}</label>`;
                 }).join("")}
-            </div></div>
-            <div class="mb-3"><label class="form-label">Baseline</label><div class="input-group">
+                </div><div class="text-danger small d-none" role="alert" data-profile-days-error></div></div>
+            <div class="mb-3"><label class="form-label" data-profile-baseline-label>Baseline</label><div class="input-group">
                 <input class="form-control" type="number" value="0" step="0.1" required data-profile-baseline${minValue}>
                 <span class="input-group-text">${editor.querySelector("[data-weekly-unit]").textContent.trim()}</span>
                 <div class="invalid-feedback" data-profile-baseline-error></div></div></div>
             <div class="table-responsive"><table class="table table-sm align-middle">
-                <thead><tr><th>Start</th><th>End</th><th>Value</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+                <thead><tr><th scope="col">Start</th><th scope="col">End</th><th scope="col">Value</th>
+                    <th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
                 <tbody data-profile-ranges></tbody></table></div>
             <div class="d-flex justify-content-between gap-2">
                 <button class="btn btn-sm btn-outline-primary" type="button" data-action="add-weekly-range">Add range</button>
@@ -384,6 +427,13 @@
     document.addEventListener("input", function (event) {
         const editor = event.target.closest("[data-weekly-pattern-editor]");
         if (editor) validateAndSync(editor);
+        const constant = event.target.closest("[data-error-path='constant_value']");
+        if (constant) {
+            setControlError(constant, "");
+            const error = constant.closest("[data-builder-panel]").querySelector("[data-constant-value-error]");
+            error.textContent = "";
+            error.classList.add("d-none");
+        }
         if (event.target.closest("[data-timeseries-builder]")) markModified(event.target);
     });
 
@@ -392,6 +442,7 @@
         if (!action || !action.includes("weekly")) return;
         const editor = event.target.closest("[data-weekly-pattern-editor]");
         if (!editor) return;
+        const builderRoot = editor.closest("[data-timeseries-builder]");
 
         if (action === "add-weekly-profile") {
             const profile = createProfile(editor);
@@ -412,7 +463,7 @@
             event.target.closest("[data-weekly-range]").remove();
         }
         validateAndSync(editor);
-        markModified(event.target);
+        markModified(builderRoot);
     });
 
     document.addEventListener("htmx:afterSettle", function (event) {
@@ -423,8 +474,8 @@
         const xhr = event.detail?.xhr;
         const form = event.target.closest?.("form") || event.detail?.elt?.closest?.("form");
         if (!xhr || xhr.status !== 422 || !form) return;
-        const editor = form.querySelector("[data-builder-panel]:not([hidden]) [data-weekly-pattern-editor]");
-        if (!editor) return;
+        const activePanels = Array.from(form.querySelectorAll("[data-builder-panel]:not([hidden])"));
+        if (!activePanels.length) return;
 
         let errors;
         try {
@@ -432,14 +483,30 @@
         } catch (error) {
             return;
         }
-        event.stopImmediatePropagation();
-        clearEditorErrors(editor);
-        const generalMessages = [];
+        const editors = activePanels.map(function (panel) {
+            return panel.querySelector("[data-weekly-pattern-editor]");
+        }).filter(Boolean);
+        editors.forEach(clearEditorErrors);
+        activePanels.forEach(function (panel) {
+            panel.querySelectorAll("[data-constant-value-error]").forEach(function (error) {
+                error.textContent = "";
+                error.classList.add("d-none");
+            });
+        });
+        const generalMessages = new Map(editors.map(function (editor) { return [editor, []]; }));
         errors.forEach(function (error) {
-            const control = Array.from(editor.querySelectorAll("[data-error-path]"))
+            const control = activePanels.flatMap(function (panel) {
+                return Array.from(panel.querySelectorAll("[data-error-path]"));
+            })
                 .find(function (candidate) { return candidate.dataset.errorPath === error.path; });
             if (control) {
                 setControlError(control, error.message);
+                if (control.matches("[data-error-path='constant_value']")) {
+                    const constantError = control.closest("[data-builder-panel]").querySelector("[data-constant-value-error]");
+                    constantError.textContent = error.message;
+                    constantError.classList.remove("d-none");
+                    return;
+                }
                 const profile = control.closest("[data-weekly-profile]");
                 if (control.matches("[data-profile-name]")) {
                     profile.querySelector("[data-profile-name-error]").textContent = error.message;
@@ -450,15 +517,26 @@
                     rangeError.textContent = error.message;
                     rangeError.classList.remove("d-none");
                 }
-            } else {
-                generalMessages.push(error.message);
+            } else if (editors.length) {
+                const profileMatch = error.path.match(/^profiles\[(\d+)](?:\.days(?:\[\d+])?)?/);
+                const editor = editors[0];
+                const profile = profileMatch ? profileElements(editor)[Number(profileMatch[1])] : null;
+                if (profile && error.path.includes(".days")) {
+                    const daysError = profile.querySelector("[data-profile-days-error]");
+                    daysError.textContent = error.message;
+                    daysError.classList.remove("d-none");
+                    profile.querySelectorAll("[data-profile-day]").forEach(function (day) {
+                        day.setAttribute("aria-invalid", "true");
+                    });
+                } else {
+                    generalMessages.get(editor).push(error.message);
+                }
             }
         });
-        showGeneralError(editor, generalMessages);
-        const firstInvalid = editor.querySelector(":invalid");
+        generalMessages.forEach(function (messages, editor) { showGeneralError(editor, messages); });
+        const firstInvalid = form.querySelector("[data-builder-panel]:not([hidden]) :invalid");
         if (firstInvalid) firstInvalid.focus();
-        if (typeof window.hideLoadingBar === "function") window.hideLoadingBar();
-    }, true);
+    });
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", function () { initializeAll(document); }, {once: true});
