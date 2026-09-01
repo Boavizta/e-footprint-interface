@@ -15,6 +15,11 @@ from model_builder.domain.entities.web_abstract_modeling_classes.explainable_obj
     ExplainableQuantityWeb,
 )
 
+TimeseriesDataPreparer = (
+    Callable[[ExplainableHourlyQuantities], Tuple[Dict, Dict]]
+    | Callable[[ExplainableRecurrentQuantities], Tuple[Dict, Dict]]
+)
+
 
 def get_web_explainable_from_attr(
     model_web, efootprint_id: str, attr_name: str, id_of_key_in_dict: Optional[str] = None
@@ -38,7 +43,11 @@ def get_web_explainable_from_attr(
 
 
 def prepare_timeseries_chart_context(
-    model_web, efootprint_id: str, attr_name: str, data_preparer_func: Callable, id_of_key_in_dict: Optional[str] = None
+    model_web,
+    efootprint_id: str,
+    attr_name: str,
+    data_preparer_func: TimeseriesDataPreparer,
+    id_of_key_in_dict: Optional[str] = None,
 ) -> Tuple[Dict, ExplainableObjectWeb]:
     """
     Common logic for preparing timeseries chart context.
@@ -47,7 +56,7 @@ def prepare_timeseries_chart_context(
         model_web: ModelWeb instance
         efootprint_id: ID of the object containing the attribute
         attr_name: Name of the timeseries attribute
-        data_preparer_func: Function to prepare data_dict from web explainable object
+        data_preparer_func: Function that converts a raw library timeseries into chart data and extra context
         id_of_key_in_dict: Optional key for dict-based attributes
 
     Returns:
