@@ -119,6 +119,42 @@ def test_hourly_preview_returns_bounded_monthly_and_yearly_library_aggregates():
     assert "data-chart-config=" not in response.content.decode()
 
 
+def test_hourly_preview_aggregates_raw_counts_exactly_across_calendar_boundaries_and_display_prefixes():
+    inputs = hourly_inputs(duration_value=1, duration_unit="month")
+    inputs.update(
+        {
+            "start_date": "2024-12-31",
+            "initial_volume": 1_000_000_000,
+            "initial_volume_timespan": "day",
+            "net_growth_rate_in_percentage": 0,
+        }
+    )
+
+    response = timeseries_preview(
+        preview_request(
+            inputs,
+            object_type="UsagePattern",
+            field_name="hourly_usage_journey_starts",
+            builder="growth",
+        )
+    )
+
+    configs = json.loads(response_attribute(response, "data-chart-configs"))
+    builder = ExplainableHourlyQuantitiesFromFormInputs(inputs)
+    daily_counts = builder.value.magnitude.reshape(-1, 24).sum(axis=1, dtype=np.float64)
+    monthly_config = configs["month"]["data"]
+    yearly_config = configs["year"]["data"]
+    monthly = dict(zip(monthly_config["labels"], monthly_config["datasets"][0]["data"]))
+    yearly = dict(zip(yearly_config["labels"], yearly_config["datasets"][0]["data"]))
+
+    assert list(monthly) == ["2024-12", "2025-01"]
+    assert monthly["2024-12"] == daily_counts[0]
+    assert monthly["2025-01"] == pytest.approx(sum(daily_counts[1:]), rel=0, abs=1e-6)
+    assert yearly == {"2024": monthly["2024-12"], "2025": monthly["2025-01"]}
+    assert sum(monthly.values()) == pytest.approx(sum(daily_counts), rel=0, abs=1e-6)
+    assert sum(monthly.values()) > 1_000_000_000
+
+
 def test_hourly_preview_reports_invalid_builder_inputs_without_a_chart():
     inputs = hourly_inputs()
     inputs["start_date"] = "not-a-date"

@@ -110,13 +110,30 @@ def prepare_hourly_quantity_data(ehq: ExplainableHourlyQuantities) -> Tuple[Dict
 
 
 def prepare_hourly_quantity_period_data(ehq: ExplainableHourlyQuantities) -> dict[str, dict[str, float]]:
-    """Aggregate an hourly timeseries into compact calendar-month and calendar-year series."""
-    daily_data, _ = prepare_hourly_quantity_data(ehq)
+    """Aggregate raw hourly magnitudes into compact calendar-month and calendar-year series."""
+    if ehq.start_date.hour == 0:
+        hourly_values = ehq.value
+        start_date_starting_at_midnight = ehq.start_date
+    else:
+        start_date_starting_at_midnight = ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        hourly_values = reindex_array(ehq, start_date_starting_at_midnight, len(ehq.value) + ehq.start_date.hour)
+
+    hours = len(hourly_values)
+    day_idx = np.arange(hours) // 24
+    n_days = math.ceil(hours / 24)
+    daily_sum = np.bincount(day_idx, weights=hourly_values.magnitude, minlength=n_days)
+    if ehq.plot_aggregation_strategy == "mean":
+        daily_values = daily_sum / np.bincount(day_idx, minlength=n_days)
+    else:
+        daily_values = daily_sum
+
+    start = np.datetime64(start_date_starting_at_midnight, "D")
+    dates = (start + np.arange(n_days)).astype(str).tolist()
     period_data = {"month": {}, "year": {}}
-    for date, value in daily_data.items():
+    for date, value in zip(dates, daily_values):
         for granularity, key_length in (("month", 7), ("year", 4)):
             key = date[:key_length]
-            period_data[granularity][key] = period_data[granularity].get(key, 0) + value
+            period_data[granularity][key] = period_data[granularity].get(key, 0) + float(value)
     return period_data
 
 

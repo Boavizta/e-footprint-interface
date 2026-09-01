@@ -48,14 +48,26 @@ class TestExplainableTimeseriesUtils:
 
     def test_prepare_hourly_quantity_period_data_uses_calendar_boundaries(self):
         start = datetime(2024, 12, 31, tzinfo=pytz.utc)
-        values = np.ones(48, dtype=np.float32) * u.occurrence
+        values = np.concatenate((np.full(24, 2, dtype=np.float32), np.full(24, 3, dtype=np.float32))) * u.occurrence
         ehq = ExplainableHourlyQuantities(values, start_date=start, label="ehq")
 
         data = prepare_hourly_quantity_period_data(ehq)
 
         assert data == {
-            "month": {"2024-12": 24.0, "2025-01": 24.0},
-            "year": {"2024": 24.0, "2025": 24.0},
+            "month": {"2024-12": 48.0, "2025-01": 72.0},
+            "year": {"2024": 48.0, "2025": 72.0},
+        }
+
+    def test_prepare_hourly_quantity_period_data_keeps_raw_magnitudes_above_display_prefix_threshold(self):
+        start = datetime(2025, 1, 1, tzinfo=pytz.utc)
+        values = np.full(48, 1_000_000, dtype=np.float32) * u.occurrence
+        ehq = ExplainableHourlyQuantities(values, start_date=start, label="ehq")
+
+        data = prepare_hourly_quantity_period_data(ehq)
+
+        assert data == {
+            "month": {"2025-01": 48_000_000.0},
+            "year": {"2025": 48_000_000.0},
         }
 
     def test_prepare_recurrent_quantity_data(self):
