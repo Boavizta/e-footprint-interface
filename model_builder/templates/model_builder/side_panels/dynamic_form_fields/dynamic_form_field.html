@@ -1,4 +1,5 @@
-<div id="field-group-{{ field.web_id }}" class="mb-3{% if field.hide_field %} d-none{% endif %}">
+<div id="field-group-{{ field.web_id }}"
+     class="mb-3{% if field.input_type == 'explainable_timeseries_builder' %} timeseries-field-group{% endif %}{% if field.hide_field %} d-none{% endif %}">
     {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
     {% if field.metadata.source %}
         <div class="input-row d-flex align-items-center gap-2">

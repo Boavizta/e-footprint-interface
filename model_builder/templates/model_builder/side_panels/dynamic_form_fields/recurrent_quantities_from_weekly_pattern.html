@@ -4,10 +4,10 @@
      data-can-be-negative="{% if field.can_be_negative %}true{% else %}false{% endif %}">
     <input type="hidden" name="{{ field.web_id }}__weekly_pattern" data-weekly-pattern-payload>
 
-    <div class="weekly-pattern-intro mb-3">
+    <div class="weekly-pattern-summary mb-2">
         <div>
-            <p class="fw-semibold mb-0">Weekly schedule</p>
-            <p class="small text-muted mb-0">Assign each day to a profile, then add ranges only where demand changes.</p>
+            <p class="weekly-pattern-summary__title mb-0">Weekly schedule</p>
+            <p class="weekly-pattern-summary__hint mb-0">Repeats every week</p>
         </div>
         <span class="weekly-pattern-unit" data-weekly-unit>{{ builder.default.unit }}</span>
     </div>
@@ -20,11 +20,12 @@
                 <legend class="weekly-profile-card__legend float-none w-auto" data-profile-legend>Profile {{ forloop.counter }}</legend>
                 <button class="btn btn-sm btn-link text-danger weekly-profile-card__remove" type="button"
                         data-action="remove-weekly-profile"
+                        aria-label="Remove profile {{ forloop.counter }}"
                         {% if builder.default.profiles|length == 1 %}disabled{% endif %}>Remove</button>
-                <div class="mb-3">
+                <div class="weekly-profile-field">
                     <label class="form-label" for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name"
                            data-profile-name-label>Name</label>
-                    <input class="form-control" type="text"
+                    <input class="form-control form-control-sm" type="text"
                            id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name"
                            value="{{ profile.name }}" required data-profile-name
                            aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_name_error">
@@ -32,7 +33,7 @@
                          data-profile-name-error></div>
                 </div>
 
-                <div class="mb-3">
+                <div class="weekly-profile-field">
                     <span class="form-label d-block" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_days_label"
                           data-profile-days-label>Days</span>
                     <div class="weekly-day-picker" role="group"
@@ -79,10 +80,10 @@
                          role="alert" data-profile-days-error></div>
                 </div>
 
-                <div class="mb-3">
+                <div class="weekly-profile-field">
                     <label class="form-label" for="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline"
                            data-profile-baseline-label>Baseline</label>
-                    <div class="input-group">
+                    <div class="input-group input-group-sm">
                         <input class="form-control" type="number"
                                id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline"
                                value="{{ profile.baseline }}" step="0.1" required data-profile-baseline
@@ -135,5 +136,4 @@
 
     <button class="btn weekly-add-profile w-100" type="button" data-action="add-weekly-profile"
             {% if builder.default.profiles|length >= 7 %}disabled{% endif %}>+ Add another profile</button>
-    <p class="form-text text-center">This schedule repeats every week.</p>
 </div>

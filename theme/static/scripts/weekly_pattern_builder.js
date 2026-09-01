@@ -199,6 +199,9 @@
         const fieldId = editor.dataset.fieldWebId;
         profileElements(editor).forEach(function (profile, profileIndex) {
             profile.querySelector("[data-profile-legend]").textContent = `Profile ${profileIndex + 1}`;
+            profile.querySelector("[data-action='remove-weekly-profile']").setAttribute(
+                "aria-label", `Remove profile ${profileIndex + 1}`
+            );
             const name = profile.querySelector("[data-profile-name]");
             const baseline = profile.querySelector("[data-profile-baseline]");
             const nameId = `${fieldId}__profile_${profileIndex}_name`;
@@ -405,10 +408,10 @@
             <legend class="weekly-profile-card__legend float-none w-auto" data-profile-legend></legend>
             <button class="btn btn-sm btn-link text-danger weekly-profile-card__remove" type="button"
                     data-action="remove-weekly-profile">Remove</button>
-            <div class="mb-3"><label class="form-label" data-profile-name-label>Name</label>
-                <input class="form-control" type="text" value="profile" required data-profile-name>
+            <div class="weekly-profile-field"><label class="form-label" data-profile-name-label>Name</label>
+                <input class="form-control form-control-sm" type="text" value="profile" required data-profile-name>
                 <div class="invalid-feedback" data-profile-name-error></div></div>
-            <div class="mb-3"><span class="form-label d-block" data-profile-days-label>Days</span>
+            <div class="weekly-profile-field"><span class="form-label d-block" data-profile-days-label>Days</span>
                 <div class="weekly-day-picker" role="group" data-profile-days-group>
                 ${DAY_LABELS.map(function (day, index) {
                     return `<label class="weekly-day-option" data-profile-day-label>
@@ -416,7 +419,7 @@
                             </label>`;
                 }).join("")}
                 </div><div class="text-danger small d-none" role="alert" data-profile-days-error></div></div>
-            <div class="mb-3"><label class="form-label" data-profile-baseline-label>Baseline</label><div class="input-group">
+            <div class="weekly-profile-field"><label class="form-label" data-profile-baseline-label>Baseline</label><div class="input-group input-group-sm">
                 <input class="form-control" type="number" value="0" step="0.1" required data-profile-baseline${minValue}>
                 <span class="input-group-text" data-weekly-unit>${editor.querySelector("[data-weekly-unit]").textContent.trim()}</span>
                 <div class="invalid-feedback" data-profile-baseline-error></div></div></div>

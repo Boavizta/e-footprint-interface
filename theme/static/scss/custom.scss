@@ -750,21 +750,53 @@ input:disabled{
     position: relative;
 }
 
-.weekly-builder-mode .form-label {
-    color: var(--gray-500);
-    font-size: 0.875rem;
-    font-weight: 600;
+.timeseries-field-group {
+    margin-bottom: 1.25rem !important;
+    padding: 0 0 1rem 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+    border-left: 2px solid var(--gray-300);
 }
 
-.weekly-pattern-intro {
+.timeseries-field-group > .row > .col-auto > .form-label {
+    margin-bottom: 0.375rem;
+    color: var(--dark-blue);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.weekly-builder-mode .form-label {
+    margin-bottom: 0.2rem;
+    color: var(--gray-400);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.weekly-builder-mode .form-select {
+    min-height: 2.25rem;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
+.weekly-pattern-summary {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 0.875rem 1rem;
-    border: 1px solid var(--gray-200);
-    border-radius: 0.75rem;
-    background: var(--gray-50);
+    gap: 0.75rem;
+    padding: 0.25rem 0 0.5rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.weekly-pattern-summary__title {
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.weekly-pattern-summary__hint {
+    color: var(--gray-400);
+    font-size: 0.6875rem;
 }
 
 .weekly-pattern-unit,
@@ -772,30 +804,29 @@ input:disabled{
     display: inline-flex;
     align-items: center;
     flex: 0 0 auto;
-    min-height: 1.75rem;
-    padding: 0.25rem 0.625rem;
+    min-height: 1.5rem;
+    padding: 0.2rem 0.5rem;
     border-radius: 999px;
     background: rgba(45, 70, 117, 0.09);
     color: var(--new-primary);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
 }
 
 .weekly-profile-card {
     position: relative;
-    margin: 0 0 1rem;
-    padding: 1rem;
+    margin: 0 0 0.75rem;
+    padding: 0.75rem;
     border: 1px solid var(--gray-200);
-    border-radius: 0.875rem;
+    border-radius: 0.625rem;
     background: #fff;
-    box-shadow: 0 0.125rem 0.5rem rgba(31, 41, 55, 0.045);
 }
 
 .weekly-profile-card__legend {
-    margin: 0 0 0.875rem;
+    margin: 0 0 0.625rem;
     padding: 0 4rem 0 0;
     color: var(--new-primary);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -803,17 +834,33 @@ input:disabled{
 
 .weekly-profile-card__remove {
     position: absolute;
-    top: 0.55rem;
-    right: 0.625rem;
+    top: -1.45rem;
+    right: 0.4rem;
     padding-inline: 0.375rem;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     text-decoration: none;
+}
+
+.weekly-profile-field {
+    margin-bottom: 0.625rem;
+}
+
+.weekly-profile-card .form-label {
+    margin-bottom: 0.2rem;
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.weekly-profile-card .form-control,
+.weekly-profile-card .input-group-text {
+    font-size: 0.8125rem;
 }
 
 .weekly-day-picker {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.375rem;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.2rem;
 }
 
 .weekly-day-option {
@@ -836,12 +883,12 @@ input:disabled{
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.25rem;
+    min-height: 1.75rem;
     border: 1px solid var(--gray-200);
     border-radius: 999px;
     background: var(--gray-50);
     color: var(--gray-500);
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
 }
 
@@ -868,14 +915,14 @@ input:disabled{
 .weekly-ranges-table {
     width: 100%;
     table-layout: fixed;
-    margin-bottom: 0.625rem;
+    margin-bottom: 0.375rem;
 }
 
 .weekly-ranges-table th {
-    padding-block: 0.375rem;
+    padding-block: 0.25rem;
     border-bottom-color: var(--gray-200);
     color: var(--gray-400);
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -895,7 +942,7 @@ input:disabled{
 }
 
 .weekly-ranges-table td {
-    padding: 0.375rem 0.25rem;
+    padding: 0.25rem 0.15rem;
     border-bottom: 0;
 }
 
@@ -905,14 +952,16 @@ input:disabled{
 
 .weekly-add-range {
     border-radius: 999px;
+    font-size: 0.75rem;
 }
 
 .weekly-add-profile {
-    padding: 0.75rem;
+    padding: 0.5rem;
     border: 1px dashed var(--new-primary);
-    border-radius: 0.75rem;
+    border-radius: 0.625rem;
     background: rgba(45, 70, 117, 0.04);
     color: var(--new-primary);
+    font-size: 0.8125rem;
     font-weight: 600;
 }
 
