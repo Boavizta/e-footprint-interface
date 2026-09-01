@@ -7,7 +7,7 @@
         hx-disabled-elt="button"
         hx-swap="innerHTML"
         hx-target="#system-name"
-        hx-on::after-request="closeAndEmptySidePanel()"
+        hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
 >
     <div class="mb-3">
         <label for="name" class="form-label">Choose a new name for your system</label>

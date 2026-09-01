@@ -6,7 +6,7 @@
         hx-target="#edge-device-groups-list"
         hx-swap="beforeend"
         hx-disabled-elt="button"
-        hx-on::after-request="closeAndEmptySidePanel()"
+        hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
     >
         {% if parent_group_membership_field %}
             {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" with field=parent_group_membership_field %}

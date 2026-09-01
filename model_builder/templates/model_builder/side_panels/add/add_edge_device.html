@@ -7,7 +7,7 @@
         hx-target="#edge-devices-list"
         hx-swap="beforeend"
         hx-disabled-elt="button"
-        hx-on::after-request="closeAndEmptySidePanel()"
+        hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
         hx-vals="js:{
             {{ storage_type }}_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
         }">

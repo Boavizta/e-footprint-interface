@@ -6,7 +6,7 @@
             hx-post="/model_builder/edit-object/{{ object_to_edit.efootprint_id }}/"
             hx-swap="none"
             hx-disabled-elt="button"
-            hx-on::after-request="closeAndEmptySidePanel()"
+            hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
             id="sidePanelForm"
           >
         {% block edit_form_content %}

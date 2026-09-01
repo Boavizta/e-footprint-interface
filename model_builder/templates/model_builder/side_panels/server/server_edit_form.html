@@ -6,7 +6,7 @@
           hx-post="/model_builder/edit-object/{{ object_to_edit.efootprint_id }}/"
           hx-swap="none"
           hx-disabled-elt="button"
-          hx-on::after-request="closeAndEmptySidePanel()"
+          hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
           hx-vals="js:{
                         {{ object_to_edit.storage.class_as_simple_str }}_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))
                     }"

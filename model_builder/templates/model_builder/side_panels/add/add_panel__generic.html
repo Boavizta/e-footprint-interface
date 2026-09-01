@@ -19,7 +19,7 @@
               hx-swap="{{ htmx_config.hx_swap }}"
             {% endif %}
             hx-disabled-elt="button"
-            hx-on::after-request="closeAndEmptySidePanel()"
+            hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
     >
         {% if parent_link_count_field %}
             <div class="dict-membership-row mb-3">
