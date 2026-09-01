@@ -108,11 +108,14 @@ test("HTMX response-sink swaps select the response and clear the carrier", () =>
     expect(sink.children).toHaveLength(0);
 });
 
-test("template places preview beside the editor only on wide Bootstrap breakpoints", () => {
-    expect(document.querySelector("[data-timeseries-editor-column]").classList).toContain("col-xl-8");
-    expect(document.querySelector("[data-timeseries-preview-column]").classList).toContain("col-xl-4");
-    expect(document.querySelector("[data-timeseries-editor-column]").classList).toContain("col-12");
-    expect(document.querySelector("[data-timeseries-preview-column]").classList).toContain("col-12");
+test("template gives the weekly preview its own external surface", () => {
+    const editor = document.querySelector("[data-timeseries-editor-column]");
+    const preview = document.querySelector("[data-timeseries-preview-column]");
+
+    expect(preview.classList).toContain("weekly-pattern-preview-shell");
+    expect(preview.querySelector("[data-timeseries-preview]").classList).toContain("weekly-pattern-preview");
+    expect(editor.className).not.toContain("col-");
+    expect(preview.className).not.toContain("col-");
 });
 
 test("hourly granularity switches between server-prepared series without another request", () => {

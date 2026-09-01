@@ -16,14 +16,50 @@
         });
     }
 
-    function activateSelectedBuilder(root) {
+    function selectedBuilder(root) {
+        return root.querySelector("[data-builder-selector]")?.value
+            || root.querySelector("[data-builder-panel]")?.dataset.builderPanel;
+    }
+
+    function previewScope(root) {
+        return root.closest("form") || document;
+    }
+
+    function activatePreview(root) {
+        previewScope(root).querySelectorAll("[data-timeseries-builder]").forEach(function (candidate) {
+            const preview = candidate.querySelector("[data-timeseries-preview-column]");
+            if (!preview) return;
+            const active = candidate === root && selectedBuilder(candidate) === "weekly_pattern";
+            preview.hidden = !active;
+            candidate.classList.toggle("weekly-preview-active", active);
+        });
+    }
+
+    function activateSelectedBuilder(root, preferPreview) {
         const selector = root.querySelector("[data-builder-selector]");
-        const selected = selector ? selector.value : root.querySelector("[data-builder-panel]")?.dataset.builderPanel;
+        const selected = selectedBuilder(root);
         root.querySelectorAll("[data-builder-panel]").forEach(function (panel) {
             setPanelActive(panel, panel.dataset.builderPanel === selected);
         });
+
         const previewColumn = root.querySelector("[data-timeseries-preview-column]");
-        if (previewColumn) previewColumn.hidden = selected !== "weekly_pattern";
+        const scope = previewScope(root);
+        const activeRoot = scope.querySelector("[data-timeseries-builder].weekly-preview-active");
+        if (selected === "weekly_pattern" && (preferPreview || !activeRoot || selectedBuilder(activeRoot) !== "weekly_pattern")) {
+            activatePreview(root);
+        } else if (previewColumn && activeRoot !== root) {
+            previewColumn.hidden = true;
+            root.classList.remove("weekly-preview-active");
+        } else if (selected !== "weekly_pattern") {
+            if (previewColumn) previewColumn.hidden = true;
+            root.classList.remove("weekly-preview-active");
+            if (activeRoot === root) {
+                const fallback = Array.from(scope.querySelectorAll("[data-timeseries-builder]")).find(function (candidate) {
+                    return candidate !== root && selectedBuilder(candidate) === "weekly_pattern";
+                });
+                if (fallback) activatePreview(fallback);
+            }
+        }
         if (selector && selected !== "weekly_pattern") setControlError(selector, "");
         root.querySelectorAll("[data-weekly-pattern-editor]").forEach(function (editor) {
             if (editor.closest("[data-builder-panel]").hidden) {
@@ -242,6 +278,7 @@
         const root = editor?.closest("[data-timeseries-builder]");
         const region = root?.querySelector("[data-timeseries-preview]");
         if (!root || !region) return;
+        activatePreview(root);
         if (editor.closest("[data-builder-panel]")?.hidden || !validateAndSync(editor)) {
             region.dispatchEvent(new CustomEvent("timeseries-preview:cancel", {bubbles: true}));
             setPreviewStatus(root, "Fix the highlighted errors to refresh the preview; the last valid chart is retained.");
@@ -354,7 +391,7 @@
                        value="${start + 1}" required aria-label="Range end hour" data-range-end></td>
             <td><input class="form-control form-control-sm" type="number" step="0.1" value="0" required
                        aria-label="Range value" data-range-value${minValue}></td>
-            <td><button class="btn btn-sm btn-outline-danger" type="button"
+            <td><button class="btn btn-sm btn-link text-danger p-1" type="button"
                         data-action="remove-weekly-range">Remove</button></td>`;
         return row;
     }
@@ -362,32 +399,33 @@
     function createProfile(editor) {
         const profile = document.createElement("fieldset");
         const minValue = editor.dataset.canBeNegative === "true" ? "" : ' min="0"';
-        profile.className = "border rounded p-3 mb-3";
+        profile.className = "weekly-profile-card";
         profile.dataset.weeklyProfile = "";
         profile.innerHTML = `
-            <legend class="float-none w-auto fs-5 px-1" data-profile-legend></legend>
+            <legend class="weekly-profile-card__legend float-none w-auto" data-profile-legend></legend>
+            <button class="btn btn-sm btn-link text-danger weekly-profile-card__remove" type="button"
+                    data-action="remove-weekly-profile">Remove</button>
             <div class="mb-3"><label class="form-label" data-profile-name-label>Name</label>
                 <input class="form-control" type="text" value="profile" required data-profile-name>
                 <div class="invalid-feedback" data-profile-name-error></div></div>
             <div class="mb-3"><span class="form-label d-block" data-profile-days-label>Days</span>
-                <div class="d-flex flex-wrap gap-3" role="group" data-profile-days-group>
+                <div class="weekly-day-picker" role="group" data-profile-days-group>
                 ${DAY_LABELS.map(function (day, index) {
-                    return `<label data-profile-day-label><input class="form-check-input me-1" type="checkbox" value="${index}"
-                                         data-profile-day>${day}</label>`;
+                    return `<label class="weekly-day-option" data-profile-day-label>
+                                <input type="checkbox" value="${index}" data-profile-day><span>${day}</span>
+                            </label>`;
                 }).join("")}
                 </div><div class="text-danger small d-none" role="alert" data-profile-days-error></div></div>
             <div class="mb-3"><label class="form-label" data-profile-baseline-label>Baseline</label><div class="input-group">
                 <input class="form-control" type="number" value="0" step="0.1" required data-profile-baseline${minValue}>
                 <span class="input-group-text" data-weekly-unit>${editor.querySelector("[data-weekly-unit]").textContent.trim()}</span>
                 <div class="invalid-feedback" data-profile-baseline-error></div></div></div>
-            <div class="table-responsive"><table class="table table-sm align-middle">
-                <thead><tr><th scope="col">Start</th><th scope="col">End</th><th scope="col">Value</th>
+            <div class="table-responsive"><table class="table table-sm align-middle weekly-ranges-table">
+                <thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Value</th>
                     <th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
                 <tbody data-profile-ranges></tbody></table></div>
-            <div class="d-flex justify-content-between gap-2">
-                <button class="btn btn-sm btn-outline-primary" type="button" data-action="add-weekly-range">Add range</button>
-                <button class="btn btn-sm btn-outline-danger" type="button" data-action="remove-weekly-profile">Remove profile</button>
-            </div>`;
+            <div><button class="btn btn-sm btn-outline-primary weekly-add-range" type="button"
+                         data-action="add-weekly-range">+ Add time range</button></div>`;
         return profile;
     }
 
@@ -407,7 +445,8 @@
         root.dataset.timeseriesBuilderInitialized = "true";
         activateSelectedBuilder(root);
         const activeEditor = root.querySelector("[data-builder-panel='weekly_pattern']:not([hidden]) [data-weekly-pattern-editor]");
-        if (activeEditor) schedulePreview(activeEditor, 0);
+        const preview = root.querySelector("[data-timeseries-preview-column]");
+        if (activeEditor && preview && !preview.hidden) schedulePreview(activeEditor, 0);
     }
 
     function initializeAll(container) {
@@ -451,7 +490,7 @@
         const selector = event.target.closest("[data-builder-selector]");
         if (selector) {
             const root = selector.closest("[data-timeseries-builder]");
-            activateSelectedBuilder(root);
+            activateSelectedBuilder(root, true);
             const activeEditor = root.querySelector(
                 "[data-builder-panel='weekly_pattern']:not([hidden]) [data-weekly-pattern-editor]"
             );
@@ -495,6 +534,11 @@
             error.classList.add("d-none");
         }
         if (event.target.closest("[data-timeseries-builder]")) markModified(event.target);
+    });
+
+    document.addEventListener("focusin", function (event) {
+        const editor = event.target.closest("[data-weekly-pattern-editor]");
+        if (editor) activatePreview(editor.closest("[data-timeseries-builder]"));
     });
 
     document.addEventListener("click", function (event) {
@@ -651,6 +695,7 @@
 
     if (typeof module !== "undefined" && module.exports) {
         module.exports = {
+            activatePreview,
             activateSelectedBuilder,
             firstFreeHour,
             initializeAll,

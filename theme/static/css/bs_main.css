@@ -21005,6 +21005,229 @@ input:disabled {
   padding: 2rem;
 }
 
+/* Weekly-pattern editor: the chart occupies the canvas beside the side panel,
+   while the form stays compact enough to scan as a weekly schedule. */
+.weekly-timeseries-builder {
+  position: relative;
+}
+
+.weekly-builder-mode .form-label {
+  color: var(--gray-500);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.weekly-pattern-intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.75rem;
+  background: var(--gray-50);
+}
+
+.weekly-pattern-unit,
+.weekly-pattern-preview__badge {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: rgba(45, 70, 117, 0.09);
+  color: var(--new-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.weekly-profile-card {
+  position: relative;
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.875rem;
+  background: #fff;
+  box-shadow: 0 0.125rem 0.5rem rgba(31, 41, 55, 0.045);
+}
+
+.weekly-profile-card__legend {
+  margin: 0 0 0.875rem;
+  padding: 0 4rem 0 0;
+  color: var(--new-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.weekly-profile-card__remove {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.625rem;
+  padding-inline: 0.375rem;
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.weekly-day-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.375rem;
+}
+
+.weekly-day-option {
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+}
+
+.weekly-day-option input {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.weekly-day-option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  background: var(--gray-50);
+  color: var(--gray-500);
+  font-size: 0.8125rem;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.weekly-day-option:hover span {
+  border-color: var(--gray-400);
+}
+
+.weekly-day-option input:checked + span {
+  border-color: var(--new-primary);
+  background: rgba(45, 70, 117, 0.09);
+  color: var(--new-primary);
+  font-weight: 700;
+}
+
+.weekly-day-option input:focus-visible + span {
+  outline: 0.2rem solid rgba(13, 110, 253, 0.25);
+  outline-offset: 1px;
+}
+
+.weekly-day-option input[aria-invalid=true] + span {
+  border-color: var(--bs-danger);
+}
+
+.weekly-ranges-table {
+  width: 100%;
+  table-layout: fixed;
+  margin-bottom: 0.625rem;
+}
+
+.weekly-ranges-table th {
+  padding-block: 0.375rem;
+  border-bottom-color: var(--gray-200);
+  color: var(--gray-400);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.weekly-ranges-table th:nth-child(1),
+.weekly-ranges-table th:nth-child(2) {
+  width: 20%;
+}
+
+.weekly-ranges-table th:nth-child(3) {
+  width: 31%;
+}
+
+.weekly-ranges-table th:nth-child(4) {
+  width: 29%;
+}
+
+.weekly-ranges-table td {
+  padding: 0.375rem 0.25rem;
+  border-bottom: 0;
+}
+
+.weekly-ranges-table .form-control {
+  min-width: 0;
+}
+
+.weekly-add-range {
+  border-radius: 999px;
+}
+
+.weekly-add-profile {
+  padding: 0.75rem;
+  border: 1px dashed var(--new-primary);
+  border-radius: 0.75rem;
+  background: rgba(45, 70, 117, 0.04);
+  color: var(--new-primary);
+  font-weight: 600;
+}
+
+.weekly-add-profile:hover,
+.weekly-add-profile:focus-visible {
+  border-color: var(--new-primary);
+  background: rgba(45, 70, 117, 0.1);
+  color: var(--new-primary);
+}
+
+.weekly-pattern-preview-shell {
+  z-index: 2;
+}
+
+.weekly-pattern-preview {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.9375rem;
+  background: #fff;
+  box-shadow: 0 1rem 3rem rgba(31, 41, 55, 0.1);
+}
+
+.weekly-pattern-preview__eyebrow {
+  color: var(--new-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.weekly-pattern-preview__title {
+  color: var(--gray-500);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.weekly-pattern-preview__chart {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.weekly-pattern-preview__status {
+  margin-top: 0.875rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-200);
+  color: var(--gray-400);
+  font-size: 0.8125rem;
+}
+
 #chart-render-calculated-attribute {
   height: 400px !important;
   width: 100%;
@@ -21274,6 +21497,38 @@ input:disabled {
   }
   .result-width {
     width: 67vw;
+  }
+}
+@media (min-width: 992px) {
+  .weekly-pattern-preview-shell {
+    position: fixed;
+    top: max(15vh, 9.5rem);
+    right: 33vw;
+    width: 50vw;
+    height: min(70vh, 100vh - 13.5rem);
+    padding-right: 1.5rem;
+  }
+}
+@media (min-width: 576px) and (max-width: 991.98px) {
+  .weekly-pattern-preview-shell {
+    position: fixed;
+    top: max(10vh, 9.5rem);
+    right: 50vw;
+    width: 50vw;
+    height: min(80vh, 100vh - 13.5rem);
+    padding: 1rem;
+  }
+}
+@media (max-width: 575.98px) {
+  .weekly-pattern-preview-shell {
+    position: static;
+    width: 100%;
+    height: 22rem;
+    margin-bottom: 1rem;
+  }
+  .weekly-pattern-preview {
+    padding: 1rem;
+    box-shadow: none;
   }
 }
 .width-0 {

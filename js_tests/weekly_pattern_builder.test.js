@@ -204,6 +204,28 @@ test("switching builders retains both drafts and submits only the active builder
     expect(window.tagFormAsModified).toHaveBeenCalled();
 });
 
+test("only the most recently used weekly field exposes its external preview", () => {
+    const form = document.getElementById("sidePanelForm");
+    const firstRoot = form.querySelector("[data-timeseries-builder]");
+    const secondRoot = firstRoot.cloneNode(true);
+    secondRoot.removeAttribute("data-timeseries-builder-initialized");
+    secondRoot.classList.remove("weekly-preview-active");
+    form.appendChild(secondRoot);
+    initializeAll(secondRoot);
+
+    const firstSelector = firstRoot.querySelector("[data-builder-selector]");
+    firstSelector.value = "weekly_pattern";
+    firstSelector.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(firstRoot.querySelector("[data-timeseries-preview-column]").hidden).toBe(false);
+    expect(secondRoot.querySelector("[data-timeseries-preview-column]").hidden).toBe(true);
+
+    const secondSelector = secondRoot.querySelector("[data-builder-selector]");
+    secondSelector.value = "weekly_pattern";
+    secondSelector.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(firstRoot.querySelector("[data-timeseries-preview-column]").hidden).toBe(true);
+    expect(secondRoot.querySelector("[data-timeseries-preview-column]").hidden).toBe(false);
+});
+
 test("reactivating a selected builder restores its named payload after transient disabling", () => {
     const editor = selectWeeklyBuilder();
     const payload = editor.querySelector("[data-weekly-pattern-payload]");

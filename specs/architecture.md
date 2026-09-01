@@ -207,6 +207,11 @@ Chart.js create/update/destroy. Editors supply only form-specific validity, payl
 mapping; preview requests originate outside the save form so their lifecycle events cannot disable its controls or trigger
 its successful-save close handler.
 
+On tablet and desktop, a weekly preview remains a descendant of its field for lifecycle ownership but is positioned as a
+fixed surface immediately left of the side panel, matching the hourly-preview workspace layout; on phones it returns to
+the form flow. A side-panel form exposes at most one weekly preview: selecting or editing a weekly field activates its
+surface and hides sibling previews, so forms with several recurrent quantities never stack charts over the canvas.
+
 ## Persistence and `interface_config`
 
 The repository layer manages two concerns:
