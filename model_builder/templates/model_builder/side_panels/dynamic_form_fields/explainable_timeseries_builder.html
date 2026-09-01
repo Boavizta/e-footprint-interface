@@ -1,0 +1,20 @@
+<div id="{{ field.web_id }}__builder" data-timeseries-builder data-field-web-id="{{ field.web_id }}">
+    {% if field.show_builder_selector %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ field.web_id }}__builder_selector">Describe this weekly quantity as</label>
+            <select class="form-select" id="{{ field.web_id }}__builder_selector" data-builder-selector>
+                {% for builder in field.builders %}
+                    <option value="{{ builder.identifier }}"
+                            {% if builder.identifier == field.selected_builder %}selected{% endif %}>{{ builder.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+
+    {% for builder in field.builders %}
+        <section data-builder-panel="{{ builder.identifier }}"
+                 {% if builder.identifier != field.selected_builder %}hidden{% endif %}>
+            {% include "model_builder/side_panels/dynamic_form_fields/"|add:builder.template_name %}
+        </section>
+    {% endfor %}
+</div>

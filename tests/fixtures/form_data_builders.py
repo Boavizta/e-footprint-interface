@@ -49,6 +49,10 @@ def create_post_data_from_class_default_values(
     for attr_name, default_value in class_to_use_for_defaults.default_values.items():
         if attr_name in overrides or attr_name in web_class.attributes_to_skip_in_forms:
             continue
+        if "weekly_pattern" in form_inputs_overrides.get(attr_name, {}):
+            # A composite timeseries submits exactly one builder. Do not retain the constant
+            # builder's keys when a test explicitly selects a weekly payload.
+            continue
         form_inputs = {}
         if attr_name in form_inputs_overrides:
             # Case of form_inputs

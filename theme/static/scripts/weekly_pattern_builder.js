@@ -1,0 +1,472 @@
+(function () {
+    "use strict";
+
+    const FLOAT32_MAX = 3.4028234663852886e38;
+    const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    function controlsIn(panel) {
+        return panel.querySelectorAll("input, select, textarea, button");
+    }
+
+    function setPanelActive(panel, active) {
+        panel.hidden = !active;
+        controlsIn(panel).forEach(function (control) {
+            if (!active) {
+                if (!Object.prototype.hasOwnProperty.call(control.dataset, "builderWasDisabled")) {
+                    control.dataset.builderWasDisabled = String(control.disabled);
+                }
+                control.disabled = true;
+            } else if (Object.prototype.hasOwnProperty.call(control.dataset, "builderWasDisabled")) {
+                control.disabled = control.dataset.builderWasDisabled === "true";
+                delete control.dataset.builderWasDisabled;
+            }
+        });
+    }
+
+    function activateSelectedBuilder(root) {
+        const selector = root.querySelector("[data-builder-selector]");
+        const selected = selector ? selector.value : root.querySelector("[data-builder-panel]")?.dataset.builderPanel;
+        root.querySelectorAll("[data-builder-panel]").forEach(function (panel) {
+            setPanelActive(panel, panel.dataset.builderPanel === selected);
+        });
+        root.querySelectorAll("[data-weekly-pattern-editor]").forEach(function (editor) {
+            if (editor.closest("[data-builder-panel]").hidden) {
+                clearEditorErrors(editor);
+                editor.querySelector("[data-weekly-pattern-payload]").value = JSON.stringify(serializeEditor(editor));
+            } else {
+                validateAndSync(editor);
+            }
+        });
+    }
+
+    function numericValue(input) {
+        if (!input || input.value.trim() === "") return null;
+        const value = Number(input.value);
+        return Number.isFinite(value) && Math.abs(value) <= FLOAT32_MAX ? value : null;
+    }
+
+    function profileElements(editor) {
+        return Array.from(editor.querySelectorAll("[data-weekly-profile]"));
+    }
+
+    function rangeElements(profile) {
+        return Array.from(profile.querySelectorAll("[data-weekly-range]"));
+    }
+
+    function readRange(range) {
+        return {
+            start: numericValue(range.querySelector("[data-range-start]")),
+            end: numericValue(range.querySelector("[data-range-end]")),
+            value: numericValue(range.querySelector("[data-range-value]")),
+        };
+    }
+
+    function setControlError(control, message) {
+        control.setCustomValidity(message || "");
+        control.classList.toggle("is-invalid", Boolean(message));
+        control.setAttribute("aria-invalid", String(Boolean(message)));
+    }
+
+    function clearEditorErrors(editor) {
+        editor.querySelectorAll("input, select").forEach(function (control) {
+            setControlError(control, "");
+        });
+        editor.querySelectorAll("[data-profile-name-error], [data-profile-baseline-error], [data-range-error]")
+            .forEach(function (element) {
+                element.textContent = "";
+                if (element.matches("[data-range-error]")) element.classList.add("d-none");
+            });
+        const general = editor.querySelector("[data-weekly-error]");
+        general.textContent = "";
+        general.classList.add("d-none");
+    }
+
+    function showGeneralError(editor, messages) {
+        const uniqueMessages = Array.from(new Set(messages.filter(Boolean)));
+        const general = editor.querySelector("[data-weekly-error]");
+        general.textContent = uniqueMessages.join(" ");
+        general.classList.toggle("d-none", uniqueMessages.length === 0);
+        const validityAnchor = editor.closest("[data-timeseries-builder]")?.querySelector("[data-builder-selector]")
+            || editor.querySelector("[data-profile-name]");
+        if (validityAnchor) setControlError(validityAnchor, uniqueMessages.join(" "));
+    }
+
+    function validateRange(editor, range, otherRanges) {
+        const authored = readRange(range);
+        const startInput = range.querySelector("[data-range-start]");
+        const endInput = range.querySelector("[data-range-end]");
+        const valueInput = range.querySelector("[data-range-value]");
+        let message = "";
+        let controls = [];
+
+        if (!Number.isInteger(authored.start) || authored.start < 0 || authored.start > 23) {
+            message = "Start must be an integer from 0 to 23.";
+            controls = [startInput];
+        } else if (!Number.isInteger(authored.end) || authored.end < 1 || authored.end > 24) {
+            message = "End must be an integer from 1 to 24.";
+            controls = [endInput];
+        } else if (authored.start >= authored.end) {
+            message = "Start must be earlier than end.";
+            controls = [startInput, endInput];
+        } else if (authored.value === null) {
+            message = "Value must be a finite number representable as float32.";
+            controls = [valueInput];
+        } else if (editor.dataset.canBeNegative !== "true" && authored.value < 0) {
+            message = "Value must be zero or greater for this field.";
+            controls = [valueInput];
+        } else {
+            const overlap = otherRanges.find(function (candidate) {
+                if (candidate === range) return false;
+                const other = readRange(candidate);
+                return Number.isInteger(other.start) && Number.isInteger(other.end)
+                    && authored.start < other.end && authored.end > other.start;
+            });
+            if (overlap) {
+                const other = readRange(overlap);
+                message = `Overlaps the ${String(other.start).padStart(2, "0")}:00–${String(other.end).padStart(2, "0")}:00 range.`;
+                controls = [startInput, endInput];
+            }
+        }
+
+        controls.forEach(function (control) { setControlError(control, message); });
+        const errorElement = range.querySelector("[data-range-error]");
+        errorElement.textContent = message;
+        errorElement.classList.toggle("d-none", !message);
+        return !message;
+    }
+
+    function firstFreeHour(profile) {
+        const ranges = rangeElements(profile).map(readRange);
+        if (ranges.some(function (range) {
+            return !Number.isInteger(range.start) || !Number.isInteger(range.end)
+                || range.start < 0 || range.end > 24 || range.start >= range.end;
+        })) return null;
+
+        ranges.sort(function (left, right) { return left.start - right.start; });
+        let cursor = 0;
+        for (const range of ranges) {
+            if (range.start - cursor >= 1) return cursor;
+            cursor = Math.max(cursor, range.end);
+        }
+        return 24 - cursor >= 1 ? cursor : null;
+    }
+
+    function updateButtons(editor) {
+        const profiles = profileElements(editor);
+        profiles.forEach(function (profile) {
+            profile.querySelector("[data-action='remove-weekly-profile']").disabled = profiles.length === 1;
+            const addRange = profile.querySelector("[data-action='add-weekly-range']");
+            addRange.disabled = firstFreeHour(profile) === null;
+        });
+        editor.querySelector("[data-action='add-weekly-profile']").disabled = profiles.length >= 7;
+    }
+
+    function reindexEditor(editor) {
+        profileElements(editor).forEach(function (profile, profileIndex) {
+            profile.querySelector("[data-profile-legend]").textContent = `Profile ${profileIndex + 1}`;
+            const name = profile.querySelector("[data-profile-name]");
+            const baseline = profile.querySelector("[data-profile-baseline]");
+            name.dataset.errorPath = `profiles[${profileIndex}].name`;
+            baseline.dataset.errorPath = `profiles[${profileIndex}].baseline`;
+            profile.querySelectorAll("[data-profile-day]").forEach(function (day, dayIndex) {
+                day.dataset.errorPath = `profiles[${profileIndex}].days[${dayIndex}]`;
+            });
+            rangeElements(profile).forEach(function (range, rangeIndex) {
+                range.querySelector("[data-range-start]").dataset.errorPath =
+                    `profiles[${profileIndex}].ranges[${rangeIndex}].start`;
+                range.querySelector("[data-range-end]").dataset.errorPath =
+                    `profiles[${profileIndex}].ranges[${rangeIndex}].end`;
+                range.querySelector("[data-range-value]").dataset.errorPath =
+                    `profiles[${profileIndex}].ranges[${rangeIndex}].value`;
+            });
+        });
+    }
+
+    function serializeEditor(editor) {
+        return {
+            unit: editor.querySelector("[data-weekly-unit]").textContent.trim(),
+            profiles: profileElements(editor).map(function (profile) {
+                return {
+                    name: profile.querySelector("[data-profile-name]").value,
+                    days: Array.from(profile.querySelectorAll("[data-profile-day]:checked"))
+                        .map(function (checkbox) { return Number(checkbox.value); }),
+                    baseline: numericValue(profile.querySelector("[data-profile-baseline]")),
+                    ranges: rangeElements(profile).map(readRange),
+                };
+            }),
+        };
+    }
+
+    function validateAndSync(editor) {
+        if (!editor) return false;
+        clearEditorErrors(editor);
+        reindexEditor(editor);
+        const profiles = profileElements(editor);
+        const names = new Map();
+        const generalErrors = [];
+        let valid = profiles.length >= 1 && profiles.length <= 7;
+
+        profiles.forEach(function (profile) {
+            const nameInput = profile.querySelector("[data-profile-name]");
+            const name = nameInput.value;
+            let nameError = "";
+            if (!name.trim()) {
+                nameError = "Profile name is required.";
+            } else if (names.has(name)) {
+                nameError = `Profile name '${name}' must be unique.`;
+                setControlError(names.get(name), nameError);
+            }
+            if (nameError) {
+                setControlError(nameInput, nameError);
+                profile.querySelector("[data-profile-name-error]").textContent = nameError;
+                valid = false;
+            } else {
+                names.set(name, nameInput);
+            }
+
+            const baselineInput = profile.querySelector("[data-profile-baseline]");
+            const baseline = numericValue(baselineInput);
+            let baselineError = "";
+            if (baseline === null) baselineError = "Baseline must be a finite number representable as float32.";
+            else if (editor.dataset.canBeNegative !== "true" && baseline < 0) {
+                baselineError = "Baseline must be zero or greater for this field.";
+            }
+            if (baselineError) {
+                setControlError(baselineInput, baselineError);
+                profile.querySelector("[data-profile-baseline-error]").textContent = baselineError;
+                valid = false;
+            }
+
+            const ranges = rangeElements(profile);
+            ranges.forEach(function (range) {
+                if (!validateRange(editor, range, ranges)) valid = false;
+            });
+        });
+
+        DAY_LABELS.forEach(function (day, dayIndex) {
+            const owners = editor.querySelectorAll(`[data-profile-day][value='${dayIndex}']:checked`).length;
+            if (owners !== 1) {
+                generalErrors.push(`${day} must be assigned to exactly one profile.`);
+                valid = false;
+            }
+        });
+        if (profiles.length < 1 || profiles.length > 7) {
+            generalErrors.push("A weekly pattern must contain between 1 and 7 profiles.");
+        }
+        showGeneralError(editor, generalErrors);
+
+        editor.querySelector("[data-weekly-pattern-payload]").value = JSON.stringify(serializeEditor(editor));
+        updateButtons(editor);
+        return valid;
+    }
+
+    function sortRangesIfValid(editor, profile) {
+        if (!validateAndSync(editor)) return;
+        const container = profile.querySelector("[data-profile-ranges]");
+        rangeElements(profile)
+            .sort(function (left, right) { return readRange(left).start - readRange(right).start; })
+            .forEach(function (range) { container.appendChild(range); });
+        validateAndSync(editor);
+    }
+
+    function createRange(editor, start) {
+        const row = document.createElement("tr");
+        const minValue = editor.dataset.canBeNegative === "true" ? "" : ' min="0"';
+        row.dataset.weeklyRange = "";
+        row.innerHTML = `
+            <td><input class="form-control form-control-sm" type="number" min="0" max="23" step="1"
+                       value="${start}" required data-range-start></td>
+            <td><input class="form-control form-control-sm" type="number" min="1" max="24" step="1"
+                       value="${start + 1}" required data-range-end></td>
+            <td><input class="form-control form-control-sm" type="number" step="0.1" value="0" required
+                       data-range-value${minValue}></td>
+            <td><button class="btn btn-sm btn-outline-danger" type="button"
+                        data-action="remove-weekly-range">Remove</button></td>
+            <td class="d-none" colspan="4" data-range-error></td>`;
+        return row;
+    }
+
+    function createProfile(editor) {
+        const profile = document.createElement("fieldset");
+        const minValue = editor.dataset.canBeNegative === "true" ? "" : ' min="0"';
+        profile.className = "border rounded p-3 mb-3";
+        profile.dataset.weeklyProfile = "";
+        profile.innerHTML = `
+            <legend class="float-none w-auto fs-5 px-1" data-profile-legend></legend>
+            <div class="mb-3"><label class="form-label">Name</label>
+                <input class="form-control" type="text" value="profile" required data-profile-name>
+                <div class="invalid-feedback" data-profile-name-error></div></div>
+            <div class="mb-3"><span class="form-label d-block">Days</span><div class="d-flex flex-wrap gap-3">
+                ${DAY_LABELS.map(function (day, index) {
+                    return `<label><input class="form-check-input me-1" type="checkbox" value="${index}"
+                                         data-profile-day>${day}</label>`;
+                }).join("")}
+            </div></div>
+            <div class="mb-3"><label class="form-label">Baseline</label><div class="input-group">
+                <input class="form-control" type="number" value="0" step="0.1" required data-profile-baseline${minValue}>
+                <span class="input-group-text">${editor.querySelector("[data-weekly-unit]").textContent.trim()}</span>
+                <div class="invalid-feedback" data-profile-baseline-error></div></div></div>
+            <div class="table-responsive"><table class="table table-sm align-middle">
+                <thead><tr><th>Start</th><th>End</th><th>Value</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+                <tbody data-profile-ranges></tbody></table></div>
+            <div class="d-flex justify-content-between gap-2">
+                <button class="btn btn-sm btn-outline-primary" type="button" data-action="add-weekly-range">Add range</button>
+                <button class="btn btn-sm btn-outline-danger" type="button" data-action="remove-weekly-profile">Remove profile</button>
+            </div>`;
+        return profile;
+    }
+
+    function markModified(element) {
+        const root = element.closest("[data-timeseries-builder]");
+        if (!root) return;
+        if (typeof window.tagFormAsModified === "function") window.tagFormAsModified();
+        const fieldId = root.dataset.fieldWebId;
+        const metadataAnchor = fieldId ? document.getElementById(fieldId) : null;
+        if (metadataAnchor) {
+            metadataAnchor.dispatchEvent(new CustomEvent("source-metadata:value-changed", {bubbles: true}));
+        }
+    }
+
+    function initialize(root) {
+        if (root.dataset.timeseriesBuilderInitialized === "true") return;
+        root.dataset.timeseriesBuilderInitialized = "true";
+        activateSelectedBuilder(root);
+    }
+
+    function initializeAll(container) {
+        const scope = container?.querySelectorAll ? container : document;
+        if (scope.matches?.("[data-timeseries-builder]")) initialize(scope);
+        scope.querySelectorAll("[data-timeseries-builder]").forEach(initialize);
+    }
+
+    function syncUnitsFromConstantInputs(form) {
+        if (!form) return;
+        form.querySelectorAll("[data-timeseries-builder]").forEach(function (root) {
+            const fieldId = root.dataset.fieldWebId;
+            const constantUnit = document.getElementById(`${fieldId}__constant_unit`);
+            if (!constantUnit) return;
+            root.querySelectorAll("[data-weekly-unit]").forEach(function (unit) {
+                unit.textContent = constantUnit.value;
+            });
+            root.querySelectorAll("[data-weekly-pattern-editor]").forEach(function (editor) {
+                if (!editor.closest("[data-builder-panel]").hidden) validateAndSync(editor);
+                else editor.querySelector("[data-weekly-pattern-payload]").value = JSON.stringify(serializeEditor(editor));
+            });
+        });
+    }
+
+    document.addEventListener("change", function (event) {
+        syncUnitsFromConstantInputs(event.target.closest("form"));
+        const selector = event.target.closest("[data-builder-selector]");
+        if (selector) {
+            activateSelectedBuilder(selector.closest("[data-timeseries-builder]"));
+            markModified(selector);
+            return;
+        }
+
+        const editor = event.target.closest("[data-weekly-pattern-editor]");
+        if (!editor) return;
+        const day = event.target.closest("[data-profile-day]");
+        if (day && day.checked) {
+            editor.querySelectorAll(`[data-profile-day][value='${day.value}']`).forEach(function (candidate) {
+                if (candidate !== day) candidate.checked = false;
+            });
+        }
+        const profile = event.target.closest("[data-weekly-profile]");
+        if (profile && event.target.matches("[data-range-start], [data-range-end]")) {
+            sortRangesIfValid(editor, profile);
+        } else {
+            validateAndSync(editor);
+        }
+        markModified(event.target);
+    });
+
+    document.addEventListener("input", function (event) {
+        const editor = event.target.closest("[data-weekly-pattern-editor]");
+        if (editor) validateAndSync(editor);
+        if (event.target.closest("[data-timeseries-builder]")) markModified(event.target);
+    });
+
+    document.addEventListener("click", function (event) {
+        const action = event.target.closest("[data-action]")?.dataset.action;
+        if (!action || !action.includes("weekly")) return;
+        const editor = event.target.closest("[data-weekly-pattern-editor]");
+        if (!editor) return;
+
+        if (action === "add-weekly-profile") {
+            const profile = createProfile(editor);
+            const existingNames = new Set(profileElements(editor).map(function (item) {
+                return item.querySelector("[data-profile-name]").value;
+            }));
+            let suffix = profileElements(editor).length + 1;
+            while (existingNames.has(`profile ${suffix}`)) suffix += 1;
+            profile.querySelector("[data-profile-name]").value = `profile ${suffix}`;
+            editor.querySelector("[data-weekly-profiles]").appendChild(profile);
+        } else if (action === "remove-weekly-profile") {
+            event.target.closest("[data-weekly-profile]").remove();
+        } else if (action === "add-weekly-range") {
+            const profile = event.target.closest("[data-weekly-profile]");
+            const start = firstFreeHour(profile);
+            if (start !== null) profile.querySelector("[data-profile-ranges]").appendChild(createRange(editor, start));
+        } else if (action === "remove-weekly-range") {
+            event.target.closest("[data-weekly-range]").remove();
+        }
+        validateAndSync(editor);
+        markModified(event.target);
+    });
+
+    document.addEventListener("htmx:afterSettle", function (event) {
+        initializeAll(event.detail?.target || event.target);
+    });
+
+    document.addEventListener("htmx:afterRequest", function (event) {
+        const xhr = event.detail?.xhr;
+        const form = event.target.closest?.("form") || event.detail?.elt?.closest?.("form");
+        if (!xhr || xhr.status !== 422 || !form) return;
+        const editor = form.querySelector("[data-builder-panel]:not([hidden]) [data-weekly-pattern-editor]");
+        if (!editor) return;
+
+        let errors;
+        try {
+            errors = JSON.parse(xhr.responseText).errors;
+        } catch (error) {
+            return;
+        }
+        event.stopImmediatePropagation();
+        clearEditorErrors(editor);
+        const generalMessages = [];
+        errors.forEach(function (error) {
+            const control = Array.from(editor.querySelectorAll("[data-error-path]"))
+                .find(function (candidate) { return candidate.dataset.errorPath === error.path; });
+            if (control) {
+                setControlError(control, error.message);
+                const profile = control.closest("[data-weekly-profile]");
+                if (control.matches("[data-profile-name]")) {
+                    profile.querySelector("[data-profile-name-error]").textContent = error.message;
+                } else if (control.matches("[data-profile-baseline]")) {
+                    profile.querySelector("[data-profile-baseline-error]").textContent = error.message;
+                } else if (control.closest("[data-weekly-range]")) {
+                    const rangeError = control.closest("[data-weekly-range]").querySelector("[data-range-error]");
+                    rangeError.textContent = error.message;
+                    rangeError.classList.remove("d-none");
+                }
+            } else {
+                generalMessages.push(error.message);
+            }
+        });
+        showGeneralError(editor, generalMessages);
+        const firstInvalid = editor.querySelector(":invalid");
+        if (firstInvalid) firstInvalid.focus();
+        if (typeof window.hideLoadingBar === "function") window.hideLoadingBar();
+    }, true);
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () { initializeAll(document); }, {once: true});
+    } else {
+        initializeAll(document);
+    }
+
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports = {activateSelectedBuilder, firstFreeHour, serializeEditor, validateAndSync, initializeAll};
+    }
+}());

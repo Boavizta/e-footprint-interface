@@ -1,6 +1,8 @@
 import json
 
+from django.http import JsonResponse
 from django.shortcuts import render
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
@@ -22,7 +24,8 @@ def open_create_object_panel(request, object_type):
 
     form_builder = FormContextBuilder(model_web)
     context_data = form_builder.build_creation_context(
-        efootprint_class_web, object_type, efootprint_id_of_parent_to_link_to)
+        efootprint_class_web, object_type, efootprint_id_of_parent_to_link_to
+    )
 
     if efootprint_id_of_parent_to_link_to:
         context_data["efootprint_id_of_parent_to_link_to"] = efootprint_id_of_parent_to_link_to
@@ -35,7 +38,8 @@ def open_create_object_panel(request, object_type):
     context_data["htmx_config"] = htmx_config
 
     http_response = render(
-        request, f"model_builder/side_panels/add/{efootprint_class_web.add_template}", context=context_data)
+        request, f"model_builder/side_panels/add/{efootprint_class_web.add_template}", context=context_data
+    )
 
     http_response["HX-Trigger-After-Settle"] = "initDynamicForm"
 
@@ -48,18 +52,23 @@ def add_object(request, object_type):
     repository = SessionWorkspaceRepository(request.session).active_repository()
 
     # 1. Parse form data (adapter responsibility - before use case)
-    parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
+    try:
+        parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
 
-    # 2. Map request to use case input (with parsed data)
-    input_data = CreateObjectInput(
-        object_type=object_type,
-        form_data=parsed_form_data,
-        parent_id=request.POST.get("efootprint_id_of_parent_to_link_to")
-    )
+        # 2. Map request to use case input (with parsed data)
+        input_data = CreateObjectInput(
+            object_type=object_type,
+            form_data=parsed_form_data,
+            parent_id=request.POST.get("efootprint_id_of_parent_to_link_to"),
+        )
 
-    # 3. Execute use case
-    use_case = CreateObjectUseCase(repository)
-    output = use_case.execute(input_data)
+        # 3. Execute use case
+        use_case = CreateObjectUseCase(repository)
+        output = use_case.execute(input_data)
+    except WeeklyPatternValidationError as error:
+        response = JsonResponse({"errors": error.errors}, status=422)
+        response["HX-Reswap"] = "none"
+        return response
 
     # 4. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))

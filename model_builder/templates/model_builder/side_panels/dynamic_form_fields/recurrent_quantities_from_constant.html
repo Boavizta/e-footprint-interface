@@ -4,12 +4,13 @@
                class="form-control input_with_add_on"
                name="{{ field.web_id }}__constant_value"
                id="{{ field.web_id }}"
-               value="{{ field.default.constant_value }}"
+               value="{{ builder.default.constant_value }}"
                step="0.1"
+               {% if not field.can_be_negative %}min="0"{% endif %}
                placeholder="Input a constant value"
                aria-describedby="basic-addon3 basic-addon4"
                required
-               data-default-value="{{ field.default.constant_value }}"
+               data-default-value="{{ builder.default.constant_value }}"
                {% if field.metadata.source %}
                oninput="onInputValueChange('{{ field.web_id }}');tagFormAsModified();"
                {% endif %}
@@ -18,7 +19,7 @@
             class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
             name="{{ field.web_id }}__constant_unit"
             id="{{ field.web_id }}__constant_unit"
-            value="{{ field.default.constant_unit }}"
+            value="{{ builder.default.constant_unit }}"
             readonly
         >
     </div>

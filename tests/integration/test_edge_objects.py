@@ -1,7 +1,9 @@
 """Integration tests for edge object creation, linking, and lifecycle."""
+
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
+from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWeeklyPattern
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
@@ -29,13 +31,15 @@ def test_recurrent_edge_process_is_linked_through_hierarchy(default_system_repos
     edge_function_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test Edge Function", "EdgeFunction", recurrent_edge_device_needs="", recurrent_server_needs=""),
+            "Test Edge Function", "EdgeFunction", recurrent_edge_device_needs="", recurrent_server_needs=""
+        ),
         parent_id=edge_usage_journey_id,
     )
     edge_device_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test Edge Computer", "EdgeComputer",
+            "Test Edge Computer",
+            "EdgeComputer",
             EdgeStorage_form_data=create_post_data_from_class_default_values("Test Edge Storage", "EdgeStorage"),
         ),
     )
@@ -142,28 +146,49 @@ def test_recurrent_edge_device_need_with_component_needs(default_system_reposito
     edge_function_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test Edge Function", "EdgeFunction", recurrent_edge_device_needs="", recurrent_server_needs=""),
+            "Test Edge Function", "EdgeFunction", recurrent_edge_device_needs="", recurrent_server_needs=""
+        ),
         parent_id=edge_usage_journey_id,
     )
     redn_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test REDN", "RecurrentEdgeDeviceNeed",
-            edge_device=edge_device_id, recurrent_edge_component_needs=""),
+            "Test REDN", "RecurrentEdgeDeviceNeed", edge_device=edge_device_id, recurrent_edge_component_needs=""
+        ),
         parent_id=edge_function_id,
     )
     cpu_need_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "CPU Need", "RecurrentEdgeComponentNeed", edge_component=cpu_id,
-            **{"recurrent_need__constant_value": "2.0", "recurrent_need__constant_unit": "cpu_core"}),
+            "CPU Need",
+            "RecurrentEdgeComponentNeed",
+            edge_component=cpu_id,
+            **{
+                "recurrent_need__weekly_pattern": {
+                    "unit": "cpu_core",
+                    "profiles": [
+                        {
+                            "name": "weekday",
+                            "days": [0, 1, 2, 3, 4],
+                            "baseline": 2,
+                            "ranges": [{"start": 8, "end": 18, "value": 5}],
+                        },
+                        {"name": "weekend", "days": [5, 6], "baseline": 1, "ranges": []},
+                        {"name": "unused", "days": [], "baseline": 0, "ranges": []},
+                    ],
+                }
+            },
+        ),
         parent_id=redn_id,
     )
     ram_need_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "RAM Need", "RecurrentEdgeComponentNeed", edge_component=ram_id,
-            **{"recurrent_need__constant_value": "4.0", "recurrent_need__constant_unit": "GB_ram"}),
+            "RAM Need",
+            "RecurrentEdgeComponentNeed",
+            edge_component=ram_id,
+            **{"recurrent_need__constant_value": "4.0", "recurrent_need__constant_unit": "GB_ram"},
+        ),
         parent_id=redn_id,
     )
 
@@ -172,26 +197,41 @@ def test_recurrent_edge_device_need_with_component_needs(default_system_reposito
     component_needs = sd["RecurrentEdgeDeviceNeed"][redn_id]["recurrent_edge_component_needs"]
     assert set(component_needs) == {cpu_need_id, ram_need_id}
 
+    reopened = ModelWeb(default_system_repository)
+    cpu_need = reopened.get_efootprint_object_from_efootprint_id(cpu_need_id, "RecurrentEdgeComponentNeed")
+    assert isinstance(cpu_need.recurrent_need, ExplainableRecurrentQuantitiesFromWeeklyPattern)
+    assert [profile["name"] for profile in cpu_need.recurrent_need.form_inputs["profiles"]] == [
+        "weekday",
+        "weekend",
+        "unused",
+    ]
+    assert len(cpu_need.recurrent_need.value.magnitude) == 168
+    assert cpu_need.recurrent_need.value.magnitude[8] == 5
+
 
 def test_failed_creation_leaves_system_unchanged(default_system_repository):
     """Creating a RecurrentEdgeProcess fails when EdgeComputer.lifespan < EdgeUsageJourney.usage_span."""
     edge_usage_journey_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Long Journey", "EdgeUsageJourney", edge_functions="",
+            "Long Journey",
+            "EdgeUsageJourney",
+            edge_functions="",
             usage_span=SourceValue(10 * u.yr),  # longer than EdgeComputer default lifespan (6yr)
         ),
     )
     edge_function_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test Edge Function", "EdgeFunction", recurrent_edge_device_needs="", recurrent_server_needs=""),
+            "Test Edge Function", "EdgeFunction", recurrent_edge_device_needs="", recurrent_server_needs=""
+        ),
         parent_id=edge_usage_journey_id,
     )
     edge_computer_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Short-Lived Computer", "EdgeComputer",
+            "Short-Lived Computer",
+            "EdgeComputer",
             EdgeStorage_form_data=create_post_data_from_class_default_values("Test Edge Storage", "EdgeStorage"),
         ),
     )
@@ -202,7 +242,8 @@ def test_failed_creation_leaves_system_unchanged(default_system_repository):
         create_object(
             default_system_repository,
             create_post_data_from_class_default_values(
-                "Faulty Process", "RecurrentEdgeProcess", edge_device=edge_computer_id),
+                "Faulty Process", "RecurrentEdgeProcess", edge_device=edge_computer_id
+            ),
             parent_id=edge_function_id,
         )
 

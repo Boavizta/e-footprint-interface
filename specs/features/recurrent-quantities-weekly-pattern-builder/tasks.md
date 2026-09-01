@@ -44,6 +44,8 @@ Task 2.
 
 ## Task 2 — Ship the composite weekly-pattern editor and save flow
 
+**Status:** Done.
+
 **Repository:** `e-footprint-interface`.
 
 **Goal:** Register editable timeseries builders explicitly and let recurrent fields switch between the existing constant

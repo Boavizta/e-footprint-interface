@@ -1,5 +1,9 @@
 """Unit tests for form data parser."""
+
+import json
+
 import pytest
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from tests.utils import assert_dicts_equal
@@ -18,7 +22,7 @@ class TestParseFormData:
         result = parse_form_data(form_data, "Server")
 
         assert result["name"] == "My Server"
-        assert result["compute"] == {"value": "4", "label": "no label"} # Not treated as quantity without unit field
+        assert result["compute"] == {"value": "4", "label": "no label"}  # Not treated as quantity without unit field
 
     def test_parses_unprefixed_fields(self):
         """Should handle unprefixed keys (from internal calls)."""
@@ -110,13 +114,15 @@ class TestParseFormData:
     def test_parse_inline_form_data(self):
         value = '{"type_object_available":"Storage","Storage_name":"Storage 3","Storage_storage_capacity":"1","Storage_storage_capacity__unit":"TB","Storage_data_replication_factor":"3", "Storage_data_replication_factor__unit":"dimensionless"}'
         from model_builder.adapters.forms.form_data_parser import _parse_inline_form_data
+
         parsed_key, parsed_form = _parse_inline_form_data("Storage_form_data", value)
 
         expected = {
             "name": "Storage 3",
             "type_object_available": "Storage",
             "storage_capacity": {"value": 1.0, "unit": "TB", "label": "no label"},
-            "data_replication_factor": {"value": 3.0, "unit": "dimensionless", "label": "no label"}}
+            "data_replication_factor": {"value": 3.0, "unit": "dimensionless", "label": "no label"},
+        }
 
         assert parsed_key == "_parsed_Storage"
 
@@ -156,7 +162,7 @@ class TestParseFormData:
             ('{"group-1": "abc"}', "must be a number"),
             ('{"group-1": -1}', "must be positive"),
             ('["group-1"]', "must be a JSON object"),
-            ('{bad json}', "must be valid JSON"),
+            ("{bad json}", "must be valid JSON"),
         ],
     )
     def test_rejects_invalid_explainable_object_dict_widget_payload(self, payload, message):
@@ -309,3 +315,62 @@ class TestParentLinkCount:
     def test_rejects_invalid_values(self, raw_value, message):
         with pytest.raises(ValueError, match=message):
             parse_form_data({"parent_link_count": raw_value}, "UsageJourneyStep")
+
+
+class TestWeeklyPatternParsing:
+
+    def test_decodes_normalized_payload_and_keeps_metadata_outside_form_inputs(self):
+        weekly_pattern = {
+            "unit": "cpu_core",
+            "profiles": [
+                {
+                    "name": "all week",
+                    "days": list(range(7)),
+                    "baseline": 2,
+                    "ranges": [{"start": 8, "end": 18, "value": 4.5}],
+                }
+            ],
+        }
+        form_data = {
+            "RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": json.dumps(weekly_pattern),
+            "RecurrentEdgeProcess_recurrent_compute_needed__builder_selector": "weekly_pattern",
+            "RecurrentEdgeProcess_recurrent_compute_needed__confidence": "high",
+            "RecurrentEdgeProcess_recurrent_compute_needed__comment": "weekday peak",
+        }
+
+        result = parse_form_data(form_data, "RecurrentEdgeProcess")
+
+        parsed = result["recurrent_compute_needed"]
+        assert parsed["form_inputs"] == weekly_pattern
+        assert parsed["confidence"] == "high"
+        assert parsed["comment"] == "weekday peak"
+        assert "builder_selector" not in parsed["form_inputs"]
+
+    def test_rejects_negative_values_for_an_attribute_that_disallows_them(self):
+        weekly_pattern = {
+            "unit": "cpu_core",
+            "profiles": [{"name": "all week", "days": list(range(7)), "baseline": -1, "ranges": []}],
+        }
+
+        with pytest.raises(WeeklyPatternValidationError) as error:
+            parse_form_data(
+                {"RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": json.dumps(weekly_pattern)},
+                "RecurrentEdgeProcess",
+            )
+
+        assert error.value.errors == [
+            {
+                "path": "profiles[0].baseline",
+                "code": "negative_value_not_allowed",
+                "message": "Baseline must be zero or greater for this field.",
+            }
+        ]
+
+    def test_rejects_malformed_weekly_json_with_structured_error(self):
+        with pytest.raises(WeeklyPatternValidationError) as error:
+            parse_form_data(
+                {"RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": "{bad"},
+                "RecurrentEdgeProcess",
+            )
+
+        assert error.value.errors[0]["code"] == "invalid_json"

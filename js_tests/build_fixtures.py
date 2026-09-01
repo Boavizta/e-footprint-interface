@@ -10,6 +10,7 @@ To add a fixture, append an entry to the relevant manifest below — keep them
 flat, duplication is fine. Naming convention: `<domain>_<shape>` so both the
 fixture file and the test reference are self-describing.
 """
+
 import json
 import os
 import sys
@@ -56,18 +57,14 @@ SOURCE_METADATA_CASES = {
     "field_empty": metadata_field(),
     "field_high_no_source": metadata_field(confidence="high"),
     "field_src_listed": metadata_field(available_sources=[SRC1]),
-    "field_src_selected_with_comment": metadata_field(
-        source=SRC1, comment="vetted note", available_sources=[SRC1]),
+    "field_src_selected_with_comment": metadata_field(source=SRC1, comment="vetted note", available_sources=[SRC1]),
     "field_unlisted_source": metadata_field(
         source={"id": "abc123", "name": "Internal", "link": ""},
         available_sources=[SRC1],
     ),
-    "field_hypothesis_with_comment": metadata_field(
-        source=HYPOTHESIS, comment="keep me", available_sources=SENTINELS),
-    "field_src_with_sentinels": metadata_field(
-        source=SRC1, available_sources=[SRC1, *SENTINELS]),
-    "field_high_hypothesis": metadata_field(
-        confidence="high", source=HYPOTHESIS, available_sources=SENTINELS),
+    "field_hypothesis_with_comment": metadata_field(source=HYPOTHESIS, comment="keep me", available_sources=SENTINELS),
+    "field_src_with_sentinels": metadata_field(source=SRC1, available_sources=[SRC1, *SENTINELS]),
+    "field_high_hypothesis": metadata_field(confidence="high", source=HYPOTHESIS, available_sources=SENTINELS),
     "two_empty_fields": [metadata_field(web_id="FieldA"), metadata_field(web_id="FieldB")],
 }
 
@@ -75,25 +72,22 @@ SOURCE_METADATA_CASES = {
 def render_metadata_field(field_ctx):
     web_id = field_ctx["web_id"]
     metadata = field_ctx["metadata"]
-    return (
-        render_to_string(
-            "model_builder/side_panels/dynamic_form_fields/confidence_badge.html",
-            {
-                "conf_dom_id": web_id,
-                "conf_name_prefix": web_id,
-                "conf_current": metadata["confidence"],
-            },
-        )
-        + render_to_string(
-            "model_builder/side_panels/dynamic_form_fields/source.html",
-            {
-                "source_dom_id": web_id,
-                "source_name_prefix": web_id,
-                "source_meta_source": metadata["source"],
-                "source_meta_comment": metadata["comment"],
-                "source_meta_available": metadata["available_sources"],
-            },
-        )
+    return render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/confidence_badge.html",
+        {
+            "conf_dom_id": web_id,
+            "conf_name_prefix": web_id,
+            "conf_current": metadata["confidence"],
+        },
+    ) + render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/source.html",
+        {
+            "source_dom_id": web_id,
+            "source_name_prefix": web_id,
+            "source_meta_source": metadata["source"],
+            "source_meta_comment": metadata["comment"],
+            "source_meta_available": metadata["available_sources"],
+        },
     )
 
 
@@ -118,8 +112,7 @@ ROW_EDITOR_CASES = {
     # priorId is in the available list (a known source) — init keeps the select on it.
     "row_editor_listed_src1": row_editor(prior_source=SRC1),
     # priorId isn't in the available list — init flips the select to __custom__ + prefills name/link.
-    "row_editor_unlisted_custom": row_editor(
-        prior_source={"id": "abc123", "name": "Internal", "link": ""}),
+    "row_editor_unlisted_custom": row_editor(prior_source={"id": "abc123", "name": "Internal", "link": ""}),
 }
 
 
@@ -137,8 +130,7 @@ def render_row_editor(case_ctx):
             "eq": eq,
             "field_name_prefix": "Server_compute",
             "available_sources": [
-                SimpleNamespace(id=s["id"], name=s["name"], link=s["link"])
-                for s in case_ctx["available_sources"]
+                SimpleNamespace(id=s["id"], name=s["name"], link=s["link"]) for s in case_ctx["available_sources"]
             ],
             "edit_object_url": "/edit/obj1/",
         },
@@ -182,6 +174,7 @@ def render_source_table_row(case_ctx):
 # ---------------------------------------------------------------------------
 # dict_count.test.js — dict_count.html
 # ---------------------------------------------------------------------------
+
 
 def dict_count_field(web_id, options, selected=None, count_label=None, ordered=False):
     selected = selected or {}
@@ -317,8 +310,15 @@ def render_select_str_input(field_ctx):
 # attribute rename fails the test) and wrap it in stand-in anchors mirroring the column ids.
 _TOUR_TARGET_STANDIN = "".join(
     f'<div data-tour-target="{target}"></div>'
-    for target in ("usage-journeys", "infrastructure", "edge-modeling", "usage-patterns", "results",
-                   "comparison", "help-menu")
+    for target in (
+        "usage-journeys",
+        "infrastructure",
+        "edge-modeling",
+        "usage-patterns",
+        "results",
+        "comparison",
+        "help-menu",
+    )
 )
 
 
@@ -327,8 +327,7 @@ def render_tour_steps(case_ctx):
 
     steps_html = render_to_string(
         "model_builder/onboarding/tour_steps.html",
-        {"tour_steps": build_tour_steps(is_blank=case_ctx["is_blank"]),
-         "model_is_empty": case_ctx["is_blank"]},
+        {"tour_steps": build_tour_steps(is_blank=case_ctx["is_blank"]), "model_is_empty": case_ctx["is_blank"]},
     )
     return _TOUR_TARGET_STANDIN + steps_html
 
@@ -342,6 +341,7 @@ TOUR_CASES = {
 # ---------------------------------------------------------------------------
 # model_builder_main.test.js — model_canvas_content.html sortable containers
 # ---------------------------------------------------------------------------
+
 
 def render_sortable_canvas(_case_ctx):
     def cards(prefix):
@@ -374,6 +374,51 @@ SORTABLE_CANVAS_CASES = {"sortable_canvas_six_lists": {}}
 
 
 # ---------------------------------------------------------------------------
+# weekly_pattern_builder.test.js — composite builder + weekly editor templates
+# ---------------------------------------------------------------------------
+
+WEEKLY_PATTERN_CASES = {
+    "weekly_pattern_default": {
+        "web_id": "RecurrentEdgeProcess_recurrent_compute_needed",
+        "selected_builder": "constant",
+        "show_builder_selector": True,
+        "can_be_negative": False,
+        "builders": [
+            {
+                "identifier": "constant",
+                "label": "Constant value",
+                "template_name": "recurrent_quantities_from_constant.html",
+                "default": {"constant_value": "3", "constant_unit": "cpu_core"},
+            },
+            {
+                "identifier": "weekly_pattern",
+                "label": "Weekly pattern",
+                "template_name": "recurrent_quantities_from_weekly_pattern.html",
+                "default": {
+                    "unit": "cpu_core",
+                    "profiles": [
+                        {"name": "weekday", "days": [0, 1, 2, 3, 4], "baseline": "3", "ranges": []},
+                        {"name": "weekend", "days": [5, 6], "baseline": "3", "ranges": []},
+                    ],
+                },
+            },
+        ],
+    },
+}
+
+
+def render_weekly_pattern(field_ctx):
+    return (
+        '<form id="sidePanelForm">'
+        + render_to_string(
+            "model_builder/side_panels/dynamic_form_fields/explainable_timeseries_builder.html",
+            {"field": field_ctx},
+        )
+        + '<button type="submit">Save</button></form>'
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -387,6 +432,7 @@ GROUPS = [
     (CONDITIONAL_SELECT_CASES, render_select_str_input),
     (TOUR_CASES, render_tour_steps),
     (SORTABLE_CANVAS_CASES, render_sortable_canvas),
+    (WEEKLY_PATTERN_CASES, render_weekly_pattern),
 ]
 
 

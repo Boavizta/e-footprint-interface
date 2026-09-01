@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.constants.units import u
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import SessionSystemRepository
@@ -40,6 +41,28 @@ def _extract_select_html(response_body: str, select_id: str) -> str:
 
 @pytest.mark.django_db
 class TestViewsEdition:
+
+    def test_weekly_validation_error_returns_structured_response_without_mutating_session(
+        self, client, minimal_system_data, monkeypatch
+    ):
+        _setup_session(client, minimal_system_data)
+        model_web = _model_web(client)
+        object_id = model_web.servers[0].efootprint_id
+        saved_before = SessionSystemRepository(client.session).get_system_data()
+        validation_error = WeeklyPatternValidationError(
+            [{"path": "profiles", "code": "missing_day_assignment", "message": "Monday is unassigned."}]
+        )
+        monkeypatch.setattr(
+            "model_builder.adapters.views.views_edition.EditObjectUseCase.execute",
+            MagicMock(side_effect=validation_error),
+        )
+
+        response = client.post(f"/model_builder/edit-object/{object_id}/", {"Server_name": "Test Server"})
+
+        assert response.status_code == 422
+        assert response.headers["HX-Reswap"] == "none"
+        assert response.json() == {"errors": validation_error.errors}
+        assert SessionSystemRepository(client.session).get_system_data() == saved_before
 
     def test_memory_limited_edit_uses_generic_modal_and_preserves_persisted_model(
         self, client, minimal_system_data, monkeypatch

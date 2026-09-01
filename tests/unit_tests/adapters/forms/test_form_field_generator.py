@@ -7,9 +7,13 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.source_objects import SourceObject
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
 from efootprint.constants.units import u
+from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWeeklyPattern
 
 from model_builder.adapters.forms.form_field_generator import (
-    build_dict_count_field_from_annotation, generate_dynamic_form, generate_select_multiple_field)
+    build_dict_count_field_from_annotation,
+    generate_dynamic_form,
+    generate_select_multiple_field,
+)
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
@@ -32,7 +36,8 @@ def test_select_multiple_field_is_hidden_when_nothing_to_pick_and_nothing_select
     model_web.get_efootprint_objects_from_efootprint_type.return_value = []
 
     field = generate_select_multiple_field(
-        "recurrent_server_needs", "EdgeFunction", [], "RecurrentServerNeed", model_web)
+        "recurrent_server_needs", "EdgeFunction", [], "RecurrentServerNeed", model_web
+    )
 
     assert field["selected"] == []
     assert field["unselected"] == []
@@ -45,7 +50,8 @@ def test_select_multiple_field_is_shown_when_options_are_available():
     model_web.get_efootprint_objects_from_efootprint_type.return_value = [option]
 
     field = generate_select_multiple_field(
-        "recurrent_server_needs", "EdgeFunction", [], "RecurrentServerNeed", model_web)
+        "recurrent_server_needs", "EdgeFunction", [], "RecurrentServerNeed", model_web
+    )
 
     assert field["unselected"] == [{"value": "opt1", "label": "Option 1"}]
     assert field["hide_field"] is False
@@ -55,8 +61,7 @@ def test_dict_count_field_is_hidden_when_no_options_and_nothing_selected():
     model_web = MagicMock()
     model_web.get_web_objects_from_efootprint_type.return_value = []
 
-    field = build_dict_count_field_from_annotation(
-        "uj_steps", "UsageJourney", "UsageJourneyStep", {}, model_web)
+    field = build_dict_count_field_from_annotation("uj_steps", "UsageJourney", "UsageJourneyStep", {}, model_web)
 
     assert field["options"] == []
     assert field["hide_field"] is True
@@ -84,6 +89,67 @@ def test_generate_dynamic_form_keeps_integer_step_for_integral_values(minimal_mo
 
     assert power_field["default"] == "250"
     assert power_field["step"] == "1"
+
+
+def test_generate_dynamic_form_registers_both_recurrent_builders_with_constant_defaults(minimal_model_web):
+    recurrent_class = MODELING_OBJECT_CLASSES_DICT["RecurrentEdgeProcess"]
+    recurrent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["RecurrentEdgeProcess"]
+    defaults = {"name": "Process", **recurrent_class.default_values, **recurrent_web_class.default_values}
+
+    fields, _, _ = generate_dynamic_form("RecurrentEdgeProcess", defaults, minimal_model_web)
+
+    field = _get_field_by_web_id(fields, "RecurrentEdgeProcess_recurrent_compute_needed")
+    assert field["input_type"] == "explainable_timeseries_builder"
+    assert field["selected_builder"] == "constant"
+    assert [builder["identifier"] for builder in field["builders"]] == ["constant", "weekly_pattern"]
+    weekly = field["builders"][1]["default"]
+    assert weekly == {
+        "unit": "cpu_core",
+        "profiles": [
+            {"name": "weekday", "days": [0, 1, 2, 3, 4], "baseline": "1.0", "ranges": []},
+            {"name": "weekend", "days": [5, 6], "baseline": "1.0", "ranges": []},
+        ],
+    }
+    assert field["can_be_negative"] is False
+
+
+def test_generate_dynamic_form_selects_and_preserves_a_stored_weekly_builder(minimal_model_web):
+    recurrent_class = MODELING_OBJECT_CLASSES_DICT["RecurrentEdgeProcess"]
+    recurrent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["RecurrentEdgeProcess"]
+    defaults = {"name": "Process", **recurrent_class.default_values, **recurrent_web_class.default_values}
+    authored = {
+        "unit": "cpu_core",
+        "profiles": [
+            {
+                "name": "office",
+                "days": [0, 1, 2, 3, 4, 5, 6],
+                "baseline": 2,
+                "ranges": [
+                    {"start": 8, "end": 18, "value": 5},
+                ],
+            },
+            {"name": "unused", "days": [], "baseline": 0, "ranges": []},
+        ],
+    }
+    defaults["recurrent_compute_needed"] = ExplainableRecurrentQuantitiesFromWeeklyPattern(authored)
+
+    fields, _, _ = generate_dynamic_form("RecurrentEdgeProcess", defaults, minimal_model_web)
+
+    field = _get_field_by_web_id(fields, "RecurrentEdgeProcess_recurrent_compute_needed")
+    assert field["selected_builder"] == "weekly_pattern"
+    assert field["builders"][1]["default"]["profiles"][1]["name"] == "unused"
+    assert field["builders"][1]["default"]["profiles"][0]["ranges"][0] == {"start": "8", "end": "18", "value": "5"}
+
+
+def test_generate_dynamic_form_keeps_single_builder_hourly_field_appearance(minimal_model_web):
+    usage_pattern = minimal_model_web.usage_patterns[0].modeling_obj
+
+    fields, _, _ = generate_dynamic_form("UsagePattern", usage_pattern.__dict__, minimal_model_web)
+
+    field = _get_field_by_web_id(fields, "UsagePattern_hourly_usage_journey_starts")
+    assert field["input_type"] == "hourly_quantities_from_growth"
+    assert "builders" not in field
+    assert "selected_builder" not in field
 
 
 def test_generate_dynamic_form_builds_weighted_dict_fields_with_count_wording(minimal_model_web):
@@ -162,7 +228,8 @@ def _register_synthetic_class(monkeypatch, cls):
 
 @pytest.mark.parametrize("default_value", [True, False])
 def test_generate_dynamic_form_emits_bool_input_type_for_boolean_source_object(
-        monkeypatch, minimal_model_web, default_value):
+    monkeypatch, minimal_model_web, default_value
+):
     _register_synthetic_class(monkeypatch, _SyntheticBoolClass)
     default_values = {"name": "test", "flag": SourceObject(default_value)}
 
@@ -189,8 +256,7 @@ def test_generate_dynamic_form_emits_chained_dynamic_lists_for_three_level_casca
         "resolution": SourceObject("1080p"),
     }
 
-    fields, _, dynamic_lists = generate_dynamic_form(
-        _SyntheticCascadeClass.__name__, default_values, minimal_model_web)
+    fields, _, dynamic_lists = generate_dynamic_form(_SyntheticCascadeClass.__name__, default_values, minimal_model_web)
 
     # provider is in list_values -> select_str_input, no dynamic_lists entry
     provider_field = _get_field_by_web_id(fields, f"{_SyntheticCascadeClass.__name__}_provider")
@@ -227,6 +293,7 @@ class _SyntheticReferencedAPIClass(ModelingObject):
 
 class _SyntheticCrossObjectJobClass(ModelingObject):
     """A Job-like class whose `resolution` depends on a sub-attribute of a referenced object."""
+
     default_values = {"resolution": SourceObject("720p")}
     list_values = {}
     conditional_list_values = {
@@ -253,35 +320,40 @@ class _SyntheticCrossObjectJobWeb(ModelingObjectWeb):
 # `external_api.model_name` (where `external_api` is skipped in the form and selected via a helper)
 # is emitted as a single-hop select filtered by the helper id and re-keyed by available API object
 # id, so the existing one-hop cascade applies with no extra JS.
-def test_generate_dynamic_form_rekeys_cross_object_conditional_by_referenced_object_id(
-        monkeypatch, minimal_model_web):
+def test_generate_dynamic_form_rekeys_cross_object_conditional_by_referenced_object_id(monkeypatch, minimal_model_web):
     monkeypatch.setitem(
-        MODELING_OBJECT_CLASSES_DICT, _SyntheticReferencedAPIClass.__name__, _SyntheticReferencedAPIClass)
+        MODELING_OBJECT_CLASSES_DICT, _SyntheticReferencedAPIClass.__name__, _SyntheticReferencedAPIClass
+    )
     monkeypatch.setitem(
-        ALL_EFOOTPRINT_CLASSES_DICT, _SyntheticReferencedAPIClass.__name__, _SyntheticReferencedAPIClass)
+        ALL_EFOOTPRINT_CLASSES_DICT, _SyntheticReferencedAPIClass.__name__, _SyntheticReferencedAPIClass
+    )
     monkeypatch.setitem(
-        MODELING_OBJECT_CLASSES_DICT, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobClass)
+        MODELING_OBJECT_CLASSES_DICT, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobClass
+    )
     monkeypatch.setitem(
-        ALL_EFOOTPRINT_CLASSES_DICT, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobClass)
+        ALL_EFOOTPRINT_CLASSES_DICT, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobClass
+    )
     monkeypatch.setitem(
-        EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING, _SyntheticCrossObjectJobClass.__name__,
-        _SyntheticCrossObjectJobWeb)
+        EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobWeb
+    )
 
     api_objects = [_StubReferencedAPI("api_1", "model-a"), _StubReferencedAPI("api_2", "model-b")]
     monkeypatch.setattr(
-        minimal_model_web, "get_efootprint_objects_from_efootprint_type",
-        lambda obj_type: api_objects if obj_type == _SyntheticReferencedAPIClass.__name__ else [])
+        minimal_model_web,
+        "get_efootprint_objects_from_efootprint_type",
+        lambda obj_type: api_objects if obj_type == _SyntheticReferencedAPIClass.__name__ else [],
+    )
 
     default_values = {"name": "test", "resolution": SourceObject("720p")}
     fields, _, dynamic_lists = generate_dynamic_form(
-        _SyntheticCrossObjectJobClass.__name__, default_values, minimal_model_web)
+        _SyntheticCrossObjectJobClass.__name__, default_values, minimal_model_web
+    )
 
     # external_api is skipped; resolution renders as a select.
     resolution_field = _get_field_by_web_id(fields, f"{_SyntheticCrossObjectJobClass.__name__}_resolution")
     assert resolution_field["input_type"] == "select_str_input"
     assert resolution_field["options"] == []
-    assert all(
-        field["web_id"] != f"{_SyntheticCrossObjectJobClass.__name__}_external_api" for field in fields)
+    assert all(field["web_id"] != f"{_SyntheticCrossObjectJobClass.__name__}_external_api" for field in fields)
 
     assert len(dynamic_lists) == 1
     entry = dynamic_lists[0]

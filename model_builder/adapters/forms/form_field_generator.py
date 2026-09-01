@@ -13,15 +13,13 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.constants.units import u
 from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
-from efootprint.builders.timeseries.explainable_hourly_quantities_from_form_inputs import ExplainableHourlyQuantitiesFromFormInputs
-from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import ExplainableRecurrentQuantitiesFromConstant
-
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
+from model_builder.adapters.forms.timeseries_builder_registry import build_timeseries_form_config
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -72,8 +70,13 @@ def compatible_step_for_magnitude(magnitude, default_step: float = 0.1) -> str:
 
 
 def build_dict_count_field_from_annotation(
-    attr_name: str, class_name: str, type_arg_str: str,
-    default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None) -> dict:
+    attr_name: str,
+    class_name: str,
+    type_arg_str: str,
+    default_values: dict,
+    model_web: "ModelWeb",
+    obj_to_edit: "ModelingObjectWeb" = None,
+) -> dict:
     """Build a dict_count field payload for an `ExplainableObjectDict[X]` attribute."""
     available_web_objects = model_web.get_web_objects_from_efootprint_type(type_arg_str)
     if obj_to_edit is not None:
@@ -101,7 +104,8 @@ def build_dict_count_field_from_annotation(
 
 
 def generate_object_creation_structure(
-    efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"):
+    efootprint_class_str: str, available_efootprint_classes: list, model_web: "ModelWeb"
+):
     class_options = []
     for available_class in available_efootprint_classes:
         class_name = available_class.__name__
@@ -126,7 +130,8 @@ def generate_object_creation_structure(
     dynamic_form_dict = {
         "switch_item": "type_object_available",
         "switch_values": [available_class.__name__ for available_class in available_efootprint_classes],
-        "dynamic_lists": []}
+        "dynamic_lists": [],
+    }
 
     type_efootprint_classes_available = {
         "category": "efootprint_classes_available",
@@ -142,22 +147,26 @@ def generate_object_creation_structure(
         available_efootprint_class_label = ClassUIConfigProvider.get_label(available_efootprint_class_str)
         default_values["name"] = (
             f"{available_efootprint_class_label} "
-            f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}")
+            f"{len(model_web.get_web_objects_from_efootprint_type(available_efootprint_class_str)) + 1}"
+        )
         corresponding_web_class = get_corresponding_web_class(efootprint_class)
         for default_web_attr in corresponding_web_class.default_values:
             default_values[default_web_attr] = copy(corresponding_web_class.default_values[default_web_attr])
 
         class_fields, class_fields_advanced, dynamic_lists = generate_dynamic_form(
-            available_efootprint_class_str, default_values, model_web)
+            available_efootprint_class_str, default_values, model_web
+        )
 
         dynamic_form_dict["dynamic_lists"] += dynamic_lists
 
-        form_sections.append({
-            "category": available_efootprint_class_str,
-            "header": f"{available_efootprint_class_label} creation",
-            "fields": class_fields,
-            "advanced_fields": class_fields_advanced,
-        })
+        form_sections.append(
+            {
+                "category": available_efootprint_class_str,
+                "header": f"{available_efootprint_class_label} creation",
+                "fields": class_fields,
+                "advanced_fields": class_fields_advanced,
+            }
+        )
 
     return form_sections, dynamic_form_dict
 
@@ -202,8 +211,8 @@ def generate_select_multiple_field(
 
 
 def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb",
-    obj_to_edit: "ModelingObjectWeb" = None):
+    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None
+):
     structure_fields = []
     structure_fields_advanced = []
     dynamic_lists = []
@@ -222,7 +231,8 @@ def generate_dynamic_form(
         annotation = init_sig_params[attr_name].annotation
         if annotation is empty_annotation:
             logger.warning(
-                f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default.")
+                f"Attribute {attr_name} in {efootprint_class_str} has no annotation so it has been set up to str by default."
+            )
             annotation = str
         annotation = resolve_optional_annotation(annotation)
         field_config = FieldUIConfigProvider.get_config(attr_name, efootprint_class_str)
@@ -236,29 +246,29 @@ def generate_dynamic_form(
         if not is_list_attr:
             # The list branch overwrites tooltip via generate_select_multiple_field,
             # so only the non-list branches need to pay for the lookup here.
-            structure_field["tooltip"] = EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(
-                efootprint_class_str, attr_name)
+            structure_field["tooltip"] = EFOOTPRINT_DESCRIPTION_PROVIDER.field_tooltip(efootprint_class_str, attr_name)
         if is_list_attr:
             list_attribute_object_type_str = get_args(annotation)[0].__name__
             selected_objects = default_values.get(attr_name, [])
             structure_field.update(
                 generate_select_multiple_field(
-                    attr_name, efootprint_class_str, selected_objects, list_attribute_object_type_str, model_web)
+                    attr_name, efootprint_class_str, selected_objects, list_attribute_object_type_str, model_web
+                )
             )
-        elif (annotation_origin is not None
-              and isinstance(annotation_origin, type)
-              and issubclass(annotation_origin, ExplainableObjectDict)):
+        elif (
+            annotation_origin is not None
+            and isinstance(annotation_origin, type)
+            and issubclass(annotation_origin, ExplainableObjectDict)
+        ):
             type_arg = get_args(annotation)[0]
             type_arg_str = type_arg if isinstance(type_arg, str) else type_arg.__name__
             structure_field.update(
                 build_dict_count_field_from_annotation(
-                    attr_name, efootprint_class_str, type_arg_str, default_values, model_web, obj_to_edit)
+                    attr_name, efootprint_class_str, type_arg_str, default_values, model_web, obj_to_edit
+                )
             )
         elif issubclass(annotation, str):
-            structure_field.update({
-                "input_type": "str",
-                "default": _stringify_form_value(default_values[attr_name])
-            })
+            structure_field.update({"input_type": "str", "default": _stringify_form_value(default_values[attr_name])})
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
             selection_options = model_web.get_efootprint_objects_from_efootprint_type(mod_obj_attribute_object_type_str)
@@ -270,23 +280,29 @@ def generate_dynamic_form(
                 else:
                     raise ValueError(
                         f"No default value for {attr_name} in {efootprint_class_str}. This attribute should maybe "
-                        f"be ignored through the attributes_to_skip_in_forms class attribute ?")
-            structure_field.update({
-                "input_type": "select_object",
-                "selected": selected.id,
-                "options": [
-                    {"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options]
-            })
+                        f"be ignored through the attributes_to_skip_in_forms class attribute ?"
+                    )
+            structure_field.update(
+                {
+                    "input_type": "select_object",
+                    "selected": selected.id,
+                    "options": [{"label": attr_value.name, "value": attr_value.id} for attr_value in selection_options],
+                }
+            )
         else:
             default = default_values[attr_name]
             metadata = {
                 "confidence": default.confidence,
                 "comment": default.comment,
-                "source": {
-                    "id": default.source.id,
-                    "name": default.source.name,
-                    "link": default.source.link,
-                } if default.source else None,
+                "source": (
+                    {
+                        "id": default.source.id,
+                        "name": default.source.name,
+                        "link": default.source.link,
+                    }
+                    if default.source
+                    else None
+                ),
                 "available_sources": available_sources,
             }
             structure_field.update({"metadata": metadata})
@@ -294,54 +310,65 @@ def generate_dynamic_form(
                 default_value_decimal = Decimal(str(default.magnitude))
                 default_value = _format_decimal_for_number_input(default_value_decimal)
                 step = _get_compatible_step(default_value_decimal, field_config.get("step", 0.1))
-                structure_field.update({
-                    "input_type": "explainable_quantity",
-                    "unit": "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}",
-                    "default": default_value,
-                    "can_be_negative": attr_name in attributes_that_can_have_negative_values,
-                    "step": step
-                })
+                structure_field.update(
+                    {
+                        "input_type": "explainable_quantity",
+                        "unit": (
+                            "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}"
+                        ),
+                        "default": default_value,
+                        "can_be_negative": attr_name in attributes_that_can_have_negative_values,
+                        "step": step,
+                    }
+                )
             elif issubclass(annotation, ExplainableHourlyQuantities):
-                # Check if this is a form-editable timeseries or a read-only one
-                if isinstance(default, ExplainableHourlyQuantitiesFromFormInputs):
-                    # Editable: extract form inputs
-                    structure_field.update({
-                        "input_type": "hourly_quantities_from_growth",
-                        "default": _stringify_form_value(default.form_inputs),
-                        "subfields_ui_config": corresponding_web_class.hourly_quantities_from_growth_ui_config,
-                    })
+                form_config = build_timeseries_form_config(annotation, default)
+                if form_config:
+                    only_builder = form_config["builders"][0]
+                    structure_field.update(
+                        {
+                            "input_type": only_builder["template_name"].removesuffix(".html"),
+                            "default": _stringify_form_value(only_builder["default"]),
+                        }
+                    )
+                    structure_field["subfields_ui_config"] = (
+                        corresponding_web_class.hourly_quantities_from_growth_ui_config
+                    )
                 else:
-                    # Read-only: base efootprint class
                     structure_field.update({"input_type": "timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableRecurrentQuantities):
-                # Check if this is a form-editable timeseries or a read-only one
-                if isinstance(default, ExplainableRecurrentQuantitiesFromConstant):
-                    # Editable: extract constant value
-                    structure_field.update({
-                        "input_type": "recurrent_quantities_from_constant",
-                        "default": _stringify_form_value(default.form_inputs)
-                    })
+                form_config = build_timeseries_form_config(annotation, default)
+                if form_config:
+                    rendered_config = _stringify_form_value(form_config)
+                    for rendered_builder, builder in zip(rendered_config["builders"], form_config["builders"]):
+                        if rendered_builder["identifier"] == "weekly_pattern":
+                            for rendered_profile, profile in zip(
+                                rendered_builder["default"]["profiles"], builder["default"]["profiles"]
+                            ):
+                                rendered_profile["days"] = list(profile["days"])
+                    structure_field.update(rendered_config)
+                    structure_field["can_be_negative"] = attr_name in attributes_that_can_have_negative_values
                 else:
-                    # Read-only: base efootprint class
                     structure_field.update({"input_type": "recurrent_timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableObject):
                 structure_field.update({"default": _stringify_form_value(default.value)})
                 if isinstance(default.value, bool):
                     structure_field.update({"input_type": "bool"})
                 elif attr_name in list_values.keys():
-                    structure_field.update({
-                        "input_type": "select_str_input",
-                        "selected": default_values[attr_name].value,
-                        "options": [
-                            {"label": str(attr_value), "value": str(attr_value)}
-                            for attr_value in list_values[attr_name]]
-                    })
+                    structure_field.update(
+                        {
+                            "input_type": "select_str_input",
+                            "selected": default_values[attr_name].value,
+                            "options": [
+                                {"label": str(attr_value), "value": str(attr_value)}
+                                for attr_value in list_values[attr_name]
+                            ],
+                        }
+                    )
                 elif attr_name in conditional_list_values.keys():
-                    structure_field.update({
-                        "input_type": "select_str_input",
-                        "selected": default_values[attr_name].value,
-                        "options": []
-                    })
+                    structure_field.update(
+                        {"input_type": "select_str_input", "selected": default_values[attr_name].value, "options": []}
+                    )
                     depends_on = conditional_list_values[attr_name]["depends_on"]
                     conditional_values = conditional_list_values[attr_name]["conditional_list_values"]
                     values_by_conditional_value = {
@@ -355,9 +382,11 @@ def generate_dynamic_form(
                         # object's id — reusing the single-hop conditional-select cascade with no extra JS.
                         first_segment, *remaining_path = depends_on.split(".")
                         filter_by = corresponding_web_class.conditional_list_filter_overrides.get(
-                            first_segment, f"{efootprint_class_str}_{first_segment}")
+                            first_segment, f"{efootprint_class_str}_{first_segment}"
+                        )
                         referenced_type = resolve_optional_annotation(
-                            init_sig_params[first_segment].annotation).__name__
+                            init_sig_params[first_segment].annotation
+                        ).__name__
                         list_value = {}
                         for referenced_obj in model_web.get_efootprint_objects_from_efootprint_type(referenced_type):
                             resolved = referenced_obj
@@ -371,11 +400,13 @@ def generate_dynamic_form(
                     else:
                         filter_by = f"{efootprint_class_str}_{depends_on}"
                         list_value = values_by_conditional_value
-                    dynamic_lists.append({
-                        "input_id": f"{efootprint_class_str}_{attr_name}",
-                        "filter_by": filter_by,
-                        "list_value": list_value,
-                    })
+                    dynamic_lists.append(
+                        {
+                            "input_id": f"{efootprint_class_str}_{attr_name}",
+                            "filter_by": filter_by,
+                            "list_value": list_value,
+                        }
+                    )
                 else:
                     structure_field.update({"input_type": "str"})
 
@@ -385,14 +416,15 @@ def generate_dynamic_form(
             structure_fields.append(structure_field)
 
     # Reorder fields so timeseries fields appear last (preserving order within each group)
-    timeseries_input_types = ["hourly_quantities_from_growth", "recurrent_quantities_from_constant",
-                               "timeseries_input", "recurrent_timeseries_input"]
+    timeseries_input_types = ["explainable_timeseries_builder", "timeseries_input", "recurrent_timeseries_input"]
 
     non_timeseries_fields = [f for f in structure_fields if f["input_type"] not in timeseries_input_types]
     timeseries_fields = [f for f in structure_fields if f["input_type"] in timeseries_input_types]
     structure_fields = non_timeseries_fields + timeseries_fields
 
-    non_timeseries_fields_advanced = [f for f in structure_fields_advanced if f["input_type"] not in timeseries_input_types]
+    non_timeseries_fields_advanced = [
+        f for f in structure_fields_advanced if f["input_type"] not in timeseries_input_types
+    ]
     timeseries_fields_advanced = [f for f in structure_fields_advanced if f["input_type"] in timeseries_input_types]
     structure_fields_advanced = non_timeseries_fields_advanced + timeseries_fields_advanced
 

@@ -178,6 +178,20 @@ Timeseries generation is handled by `ExplainableObject` subclasses registered to
 - **Storage:** stores the constant value (for editing) AND computed recurring_values array.
 - **Lazy evaluation:** generates 168-element array when `.value` accessed; caches result.
 
+### Editable timeseries builder registry and weekly patterns
+
+`adapters/forms/timeseries_builder_registry.py` explicitly maps each explainable-timeseries base type to the ordered
+library builders that the interface can edit, together with interface-only identifiers, labels, templates, and draft
+initializers. Single-builder hourly fields keep their existing direct rendering. Recurrent fields render the registered
+constant and weekly-pattern builders together, select the stored/default concrete builder, and disable the inactive
+sub-form so only one canonical payload submits while both unsaved drafts remain in the DOM.
+
+`ExplainableRecurrentQuantitiesFromWeeklyPattern` remains library-owned. The interface editor serializes its visible
+profiles into one normalized hidden JSON field; the form parser validates and decodes that payload, adds the owning
+modeling attribute's negative-value policy, and leaves source/confidence/comment at the shared field boundary. Expected
+validation failures return normalized path/code/message JSON without invoking a mutation use case, allowing the
+delegated editor to attach authoritative errors to the corresponding visible controls.
+
 ## Persistence and `interface_config`
 
 The repository layer manages two concerns:
