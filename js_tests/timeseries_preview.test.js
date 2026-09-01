@@ -44,6 +44,8 @@ test("newest valid response creates and then updates one chart instance", () => 
     expect(window.Chart).toHaveBeenCalledTimes(1);
     const chart = region.querySelector("canvas")._timeseriesPreviewChart;
     expect(chart.data.labels).toEqual(["Mon 00:00", "Mon 01:00"]);
+    expect(region.querySelector("[data-timeseries-preview-status]").textContent).toBe("");
+    expect(region.querySelector("[data-timeseries-preview-status]").hidden).toBe(true);
 
     region.dataset.latestRequestSequence = "2";
     expect(selectResponse(responseFrom(SUCCESS_FIXTURE))).toBe(true);
@@ -74,6 +76,7 @@ test("invalid newest response retains the last valid chart and publishes structu
     expect(region.querySelector("canvas")._timeseriesPreviewChart).toBe(chart);
     expect(chart.destroy).not.toHaveBeenCalled();
     expect(region.querySelector("[data-timeseries-preview-status]").textContent).toContain("last valid chart");
+    expect(region.querySelector("[data-timeseries-preview-status]").hidden).toBe(false);
     expect(listener.mock.calls[0][0].detail.errors[0].path).toBe("profiles[0].baseline");
 });
 

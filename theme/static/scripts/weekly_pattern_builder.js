@@ -274,7 +274,9 @@
 
     function setPreviewStatus(root, message) {
         const status = root.querySelector("[data-timeseries-preview-status]");
-        if (status) status.textContent = message;
+        if (!status) return;
+        status.textContent = message || "";
+        status.hidden = !message;
     }
 
     function schedulePreview(editor, delay) {

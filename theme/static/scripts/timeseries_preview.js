@@ -35,7 +35,9 @@
 
     function setPreviewStatus(region, message) {
         const status = region?.querySelector("[data-timeseries-preview-status]");
-        if (status && message) status.textContent = message;
+        if (!status) return;
+        status.textContent = message || "";
+        status.hidden = !message;
     }
 
     function beginRequestRevision(region) {
@@ -200,8 +202,7 @@
 
         const success = response.dataset.success === "true";
         const errors = parseJson(response.dataset.errors || "[]", []);
-        const status = region.querySelector("[data-timeseries-preview-status]");
-        if (status) status.textContent = response.dataset.status || "";
+        setPreviewStatus(region, response.dataset.status || "");
         if (success) {
             const config = parseJson(response.dataset.chartConfig || "", null);
             const configs = parseJson(response.dataset.chartConfigs || "", null);

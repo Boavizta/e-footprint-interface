@@ -93,7 +93,8 @@ def test_weekly_pattern_save_reopen_and_download_upload_round_trip(recurrent_pro
     time_range.locator("[data-range-end]").fill("18")
     time_range.locator("[data-range-start]").fill("8")
     time_range.locator("[data-range-value]").fill("5")
-    expect(preview_status).to_have_text("Preview ready.")
+    expect(preview_status).to_have_text("")
+    expect(preview_status).to_be_hidden()
     preview_values = preview.locator("canvas").evaluate(
         "element => element._timeseriesPreviewChart.data.datasets[0].data"
     )

@@ -77,6 +77,7 @@ def test_weekly_preview_matches_temporary_library_builder_and_echoes_identity():
     assert response_attribute(response, "data-preview-id") == "compute-preview"
     assert response_attribute(response, "data-request-sequence") == "4"
     assert response_attribute(response, "data-success") == "true"
+    assert response_attribute(response, "data-status") == ""
     config = json.loads(response_attribute(response, "data-chart-config"))
     expected = ExplainableRecurrentQuantitiesFromWeeklyPattern(inputs).display_quantity.magnitude
     assert config["data"]["labels"][0] == "Mon 00:00"

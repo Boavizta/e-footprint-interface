@@ -162,6 +162,7 @@ test("client-invalid drafts suppress requests and retain the preview chart area"
 
     expect(window.htmx.ajax).toHaveBeenCalledTimes(callsBeforeInvalidEdit);
     expect(document.querySelector("[data-timeseries-preview-status]").textContent).toContain("last valid chart");
+    expect(document.querySelector("[data-timeseries-preview-status]").hidden).toBe(false);
     expect(document.querySelector("[data-timeseries-preview-canvas]")).not.toBeNull();
     jest.useRealTimers();
 });

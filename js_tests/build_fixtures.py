@@ -454,7 +454,7 @@ TIMESERIES_PREVIEW_CASES = {
         "preview_id": "RecurrentEdgeProcess_recurrent_compute_needed__preview",
         "request_sequence": "2",
         "success": True,
-        "status": "Preview ready.",
+        "status": "",
         "errors_json": "[]",
         "chart_config_json": json.dumps(
             {
@@ -479,7 +479,7 @@ TIMESERIES_PREVIEW_CASES = {
         "preview_id": "UsagePattern_hourly_usage_journey_starts__preview",
         "request_sequence": "2",
         "success": True,
-        "status": "Preview ready.",
+        "status": "",
         "errors_json": "[]",
         "chart_config_json": "",
         "chart_configs_json": json.dumps(

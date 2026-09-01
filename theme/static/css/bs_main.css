@@ -21022,13 +21022,6 @@ input:disabled {
   border-left: 2px solid var(--gray-300);
 }
 
-.timeseries-field-group > .row > .col-auto > .form-label {
-  margin-bottom: 0.375rem;
-  color: var(--dark-blue);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
 .weekly-builder-mode .form-label {
   margin-bottom: 0.2rem;
   color: var(--gray-400);

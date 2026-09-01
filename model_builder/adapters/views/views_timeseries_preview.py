@@ -136,7 +136,7 @@ def _preview_context(
         "request_sequence": request_sequence,
         "success": not errors,
         "status": (
-            "Preview ready."
+            ""
             if not errors
             else "Fix the highlighted errors to refresh the preview; the last valid chart is retained."
         ),
