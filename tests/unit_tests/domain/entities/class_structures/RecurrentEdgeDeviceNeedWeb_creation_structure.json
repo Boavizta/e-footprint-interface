@@ -246,7 +246,7 @@
                         }
                     }
                 ],
-                "can_be_negative": false
+                "can_be_negative": true
             }
         ],
         "advanced_fields": []

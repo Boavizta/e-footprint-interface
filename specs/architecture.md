@@ -187,10 +187,11 @@ constant and weekly-pattern builders together, select the stored/default concret
 sub-form so only one canonical payload submits while both unsaved drafts remain in the DOM.
 
 `ExplainableRecurrentQuantitiesFromWeeklyPattern` remains library-owned. The interface editor serializes its visible
-profiles into one normalized hidden JSON field; the form parser validates and decodes that payload, adds the owning
-modeling attribute's negative-value policy, and leaves source/confidence/comment at the shared field boundary. Expected
-validation failures return normalized path/code/message JSON without invoking a mutation use case, allowing the
-delegated editor to attach authoritative errors to the corresponding visible controls.
+profiles into one normalized hidden JSON field; the form parser validates and decodes that payload, mirroring the
+owning modeling attribute's negative-value policy so it can return path-specific editor errors. Ordinary constant
+inputs rely on the library model's input validation instead. Source/confidence/comment stay at the shared field
+boundary. Expected weekly-pattern validation failures return normalized path/code/message JSON without invoking a
+mutation use case, allowing the delegated editor to attach authoritative errors to the corresponding visible controls.
 
 Weekly drafts use the stateless `timeseries-preview` adapter. The request identifies a modeling class, constructor
 field, allow-listed registry builder, normalized form inputs, and preview revision; the adapter resolves field policy

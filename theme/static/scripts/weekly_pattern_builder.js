@@ -531,13 +531,6 @@
                 schedulePreview(editor, PREVIEW_DEBOUNCE_MS);
             }
         }
-        const constant = event.target.closest("[data-error-path='constant_value']");
-        if (constant) {
-            setControlError(constant, "");
-            const error = constant.closest("[data-builder-panel]").querySelector("[data-constant-value-error]");
-            error.textContent = "";
-            error.classList.add("d-none");
-        }
         if (event.target.closest("[data-timeseries-builder]")) markModified(event.target);
     });
 
@@ -641,12 +634,6 @@
             return panel.querySelector("[data-weekly-pattern-editor]");
         }).filter(Boolean);
         editors.forEach(clearEditorErrors);
-        activePanels.forEach(function (panel) {
-            panel.querySelectorAll("[data-constant-value-error]").forEach(function (error) {
-                error.textContent = "";
-                error.classList.add("d-none");
-            });
-        });
         const generalMessages = new Map(editors.map(function (editor) { return [editor, []]; }));
         errors.forEach(function (error) {
             const control = activePanels.flatMap(function (panel) {
@@ -655,12 +642,6 @@
                 .find(function (candidate) { return candidate.dataset.errorPath === error.path; });
             if (control) {
                 setControlError(control, error.message);
-                if (control.matches("[data-error-path='constant_value']")) {
-                    const constantError = control.closest("[data-builder-panel]").querySelector("[data-constant-value-error]");
-                    constantError.textContent = error.message;
-                    constantError.classList.remove("d-none");
-                    return;
-                }
                 const profile = control.closest("[data-weekly-profile]");
                 if (control.matches("[data-profile-name]")) {
                     profile.querySelector("[data-profile-name-error]").textContent = error.message;

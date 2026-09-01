@@ -10,8 +10,7 @@
                placeholder="Input a constant value"
                required
                data-default-value="{{ builder.default.constant_value }}"
-               data-error-path="constant_value"
-               aria-describedby="{{ field.web_id }}__constant_value_help {{ field.web_id }}__constant_value_error"
+               aria-describedby="{{ field.web_id }}__constant_value_help"
                {% if field.metadata.source %}
                oninput="onInputValueChange('{{ field.web_id }}');tagFormAsModified();"
                {% endif %}
@@ -24,8 +23,6 @@
             readonly
         >
     </div>
-
-    <div class="invalid-feedback d-none" id="{{ field.web_id }}__constant_value_error" data-constant-value-error></div>
 
     <small class="form-text text-muted" id="{{ field.web_id }}__constant_value_help">
         This constant value will be repeated over the entire canonical week (168 hours).

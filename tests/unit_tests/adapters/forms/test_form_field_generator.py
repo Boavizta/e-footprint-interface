@@ -141,6 +141,17 @@ def test_generate_dynamic_form_selects_and_preserves_a_stored_weekly_builder(min
     assert field["builders"][1]["default"]["profiles"][0]["ranges"][0] == {"start": "8", "end": "18", "value": "5"}
 
 
+def test_generate_dynamic_form_allows_negative_recurrent_storage(minimal_model_web):
+    recurrent_class = MODELING_OBJECT_CLASSES_DICT["RecurrentEdgeProcess"]
+    recurrent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["RecurrentEdgeProcess"]
+    defaults = {"name": "Process", **recurrent_class.default_values, **recurrent_web_class.default_values}
+
+    fields, _, _ = generate_dynamic_form("RecurrentEdgeProcess", defaults, minimal_model_web)
+
+    field = _get_field_by_web_id(fields, "RecurrentEdgeProcess_recurrent_storage_needed")
+    assert field["can_be_negative"] is True
+
+
 def test_generate_dynamic_form_keeps_single_builder_hourly_field_appearance(minimal_model_web):
     usage_pattern = minimal_model_web.usage_patterns[0].modeling_obj
 

@@ -366,23 +366,19 @@ class TestWeeklyPatternParsing:
             }
         ]
 
-    def test_rejects_negative_constant_for_an_attribute_that_disallows_it(self):
-        with pytest.raises(WeeklyPatternValidationError) as error:
-            parse_form_data(
-                {
-                    "RecurrentEdgeProcess_recurrent_compute_needed__constant_value": "-1",
-                    "RecurrentEdgeProcess_recurrent_compute_needed__constant_unit": "cpu_core",
-                },
-                "RecurrentEdgeProcess",
-            )
-
-        assert error.value.errors == [
+    def test_leaves_negative_constant_validation_to_the_model(self):
+        result = parse_form_data(
             {
-                "path": "constant_value",
-                "code": "negative_value_not_allowed",
-                "message": "Constant value must be zero or greater for this field.",
-            }
-        ]
+                "RecurrentEdgeProcess_recurrent_compute_needed__constant_value": "-1",
+                "RecurrentEdgeProcess_recurrent_compute_needed__constant_unit": "cpu_core",
+            },
+            "RecurrentEdgeProcess",
+        )
+
+        assert result["recurrent_compute_needed"] == {
+            "form_inputs": {"constant_value": "-1", "constant_unit": "cpu_core"},
+            "label": "no label",
+        }
 
     def test_rejects_malformed_weekly_json_with_structured_error(self):
         with pytest.raises(WeeklyPatternValidationError) as error:
