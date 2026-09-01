@@ -5,6 +5,8 @@
 
 ## Task 1 — Add the library weekly-pattern builder
 
+**Status:** Done.
+
 **Repository:** `e-footprint`.
 
 **Goal:** Add the library-owned `ExplainableRecurrentQuantitiesFromWeeklyPattern` with intrinsic validation, canonical
