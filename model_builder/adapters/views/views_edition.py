@@ -1,8 +1,7 @@
 import json
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import render
-from efootprint.builders.timeseries import WeeklyPatternValidationError
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
@@ -57,19 +56,14 @@ def edit_object(request, object_id, trigger_result_display=False):
     object_type = obj_to_edit.class_as_simple_str
 
     # 2. Parse form data (adapter responsibility - before use case)
-    try:
-        parsed_form_data = parse_form_data(request.POST, object_type)
+    parsed_form_data = parse_form_data(request.POST, object_type)
 
-        # 3. Map request to use case input (with parsed data)
-        input_data = EditObjectInput(object_id=object_id, form_data=parsed_form_data)
+    # 3. Map request to use case input (with parsed data)
+    input_data = EditObjectInput(object_id=object_id, form_data=parsed_form_data)
 
-        # 4. Execute use case
-        use_case = EditObjectUseCase(model_web)
-        output = use_case.execute(input_data)
-    except WeeklyPatternValidationError as error:
-        response = JsonResponse({"errors": error.errors}, status=422)
-        response["HX-Reswap"] = "none"
-        return response
+    # 4. Execute use case
+    use_case = EditObjectUseCase(model_web)
+    output = use_case.execute(input_data)
 
     # 5. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))
