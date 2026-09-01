@@ -107,6 +107,8 @@ weekly side preview.
 
 ## Task 3 — Add the server-authoritative weekly side preview
 
+**Status:** Done.
+
 **Repository:** `e-footprint-interface`.
 
 **Goal:** Add the non-persisting preview protocol, reusable raw-timeseries chart preparation, and generic Chart.js lifecycle,

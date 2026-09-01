@@ -1,0 +1,186 @@
+"""Stateless draft previews for editable timeseries builders."""
+
+import json
+
+from django.http import HttpResponseBadRequest
+from django.shortcuts import render
+from django.views.decorators.http import require_POST
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
+from efootprint.builders.timeseries import WeeklyPatternValidationError
+from efootprint.utils.display import human_readable_unit
+from efootprint.utils.tools import get_init_signature_params
+
+from model_builder.adapters.forms.timeseries_builder_registry import editable_builders_for
+from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
+    prepare_recurrent_quantity_data,
+    weekly_hour_labels,
+)
+from model_builder.domain.type_annotation_utils import resolve_optional_annotation
+
+
+def _error(path: str, code: str, message: str) -> dict[str, str]:
+    return {"path": path, "code": code, "message": message}
+
+
+def _resolve_builder(object_type: str, field_name: str, identifier: str):
+    modeling_class = MODELING_OBJECT_CLASSES_DICT.get(object_type)
+    if modeling_class is None:
+        return None, None
+
+    signature = get_init_signature_params(modeling_class)
+    if field_name not in signature:
+        return None, None
+    annotation = resolve_optional_annotation(signature[field_name].annotation)
+    definition = next(
+        (candidate for candidate in editable_builders_for(annotation) if candidate.identifier == identifier),
+        None,
+    )
+    return modeling_class, definition
+
+
+def _negative_value_errors(form_inputs: dict) -> list[dict[str, str]]:
+    def is_negative(value) -> bool:
+        try:
+            return float(value) < 0
+        except (TypeError, ValueError):
+            return False
+
+    errors = []
+    if is_negative(form_inputs.get("constant_value", 0)):
+        errors.append(
+            _error(
+                "constant_value",
+                "negative_value_not_allowed",
+                "Value must be zero or greater for this field.",
+            )
+        )
+    for profile_index, profile in enumerate(form_inputs.get("profiles", [])):
+        if is_negative(profile.get("baseline", 0)):
+            errors.append(
+                _error(
+                    f"profiles[{profile_index}].baseline",
+                    "negative_value_not_allowed",
+                    "Baseline must be zero or greater for this field.",
+                )
+            )
+        for range_index, time_range in enumerate(profile.get("ranges", [])):
+            if is_negative(time_range.get("value", 0)):
+                errors.append(
+                    _error(
+                        f"profiles[{profile_index}].ranges[{range_index}].value",
+                        "negative_value_not_allowed",
+                        "Value must be zero or greater for this field.",
+                    )
+                )
+    return errors
+
+
+def _preview_context(preview_id: str, request_sequence: str, errors=None, chart_config=None) -> dict:
+    errors = errors or []
+    return {
+        "preview_id": preview_id,
+        "request_sequence": request_sequence,
+        "success": not errors,
+        "status": (
+            "Preview ready."
+            if not errors
+            else "Fix the highlighted errors to refresh the preview; the last valid chart is retained."
+        ),
+        "errors_json": json.dumps(errors),
+        "chart_config_json": json.dumps(chart_config) if chart_config is not None else "",
+    }
+
+
+@require_POST
+def timeseries_preview(request):
+    """Render a draft chart response without hydrating or persisting a model."""
+    object_type = request.POST.get("object_type", "")
+    field_name = request.POST.get("field_name", "")
+    builder_identifier = request.POST.get("builder", "")
+    preview_id = request.POST.get("preview_id", "")
+    request_sequence = request.POST.get("request_sequence", "")
+    if not all((object_type, field_name, builder_identifier, preview_id, request_sequence)):
+        return HttpResponseBadRequest("Missing preview request identity.")
+    try:
+        if int(request_sequence) < 1:
+            raise ValueError
+    except ValueError:
+        return HttpResponseBadRequest("Preview request sequence must be a positive integer.")
+
+    modeling_class, definition = _resolve_builder(object_type, field_name, builder_identifier)
+    if modeling_class is None or definition is None:
+        return HttpResponseBadRequest("Unknown field or timeseries builder.")
+    if not issubclass(definition.builder_class, ExplainableRecurrentQuantities):
+        return HttpResponseBadRequest("This timeseries builder is not supported by the preview yet.")
+
+    try:
+        form_inputs = json.loads(request.POST.get("form_inputs", ""))
+    except (json.JSONDecodeError, TypeError):
+        return HttpResponseBadRequest("Form inputs must be valid JSON.")
+    if not isinstance(form_inputs, dict):
+        return HttpResponseBadRequest("Form inputs must be a JSON object.")
+
+    try:
+        builder = definition.builder_class(form_inputs=form_inputs, label="Draft preview")
+    except WeeklyPatternValidationError as validation_error:
+        context = _preview_context(preview_id, request_sequence, errors=validation_error.errors)
+        return render(request, "model_builder/side_panels/timeseries_preview.html", context)
+    except (KeyError, TypeError, ValueError) as validation_error:
+        errors = [_error("form_inputs", "invalid_inputs", str(validation_error))]
+        context = _preview_context(preview_id, request_sequence, errors=errors)
+        return render(request, "model_builder/side_panels/timeseries_preview.html", context)
+
+    errors = []
+    if field_name not in modeling_class.attributes_that_can_have_negative_values():
+        errors.extend(_negative_value_errors(form_inputs))
+
+    expected_value = modeling_class.default_values.get(field_name)
+    if expected_value is not None and not builder.value.is_compatible_with(expected_value.value.units):
+        errors.append(
+            _error(
+                "unit",
+                "incompatible_unit",
+                ("Unit must be compatible with " f"{human_readable_unit(expected_value.value.units)}."),
+            )
+        )
+    if errors:
+        context = _preview_context(preview_id, request_sequence, errors=errors)
+        return render(request, "model_builder/side_panels/timeseries_preview.html", context)
+
+    labels = weekly_hour_labels()
+    data, extra = prepare_recurrent_quantity_data(builder, labels)
+    if len(data) != 168:
+        errors = [_error("form_inputs", "invalid_week_length", "A recurrent preview must contain exactly 168 hours.")]
+        context = _preview_context(preview_id, request_sequence, errors=errors)
+        return render(request, "model_builder/side_panels/timeseries_preview.html", context)
+
+    chart_config = {
+        "type": "line",
+        "data": {
+            "labels": list(data),
+            "datasets": [
+                {
+                    "label": f"Generated week ({extra['display_unit']})" if extra["display_unit"] else "Generated week",
+                    "data": list(data.values()),
+                    "borderColor": "#0f766e",
+                    "backgroundColor": "rgba(15, 118, 110, 0.12)",
+                    "borderWidth": 2,
+                    "pointRadius": 0,
+                    "stepped": True,
+                }
+            ],
+        },
+        "options": {
+            "responsive": True,
+            "maintainAspectRatio": False,
+            "animation": False,
+            "plugins": {"legend": {"display": False}},
+            "scales": {
+                "x": {"ticks": {"maxTicksLimit": 7, "maxRotation": 0}},
+                "y": {"title": {"display": bool(extra["display_unit"]), "text": extra["display_unit"]}},
+            },
+        },
+    }
+    context = _preview_context(preview_id, request_sequence, chart_config=chart_config)
+    return render(request, "model_builder/side_panels/timeseries_preview.html", context)

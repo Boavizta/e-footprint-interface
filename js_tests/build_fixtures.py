@@ -380,6 +380,7 @@ SORTABLE_CANVAS_CASES = {"sortable_canvas_six_lists": {}}
 WEEKLY_PATTERN_CASES = {
     "weekly_pattern_default": {
         "web_id": "RecurrentEdgeProcess_recurrent_compute_needed",
+        "attr_name": "recurrent_compute_needed",
         "selected_builder": "constant",
         "show_builder_selector": True,
         "can_be_negative": False,
@@ -418,6 +419,38 @@ def render_weekly_pattern(field_ctx):
     )
 
 
+TIMESERIES_PREVIEW_CASES = {
+    "timeseries_preview_success": {
+        "preview_id": "RecurrentEdgeProcess_recurrent_compute_needed__preview",
+        "request_sequence": "2",
+        "success": True,
+        "status": "Preview ready.",
+        "errors_json": "[]",
+        "chart_config_json": json.dumps(
+            {
+                "type": "line",
+                "data": {"labels": ["Mon 00:00", "Mon 01:00"], "datasets": [{"data": [1, 2]}]},
+                "options": {"responsive": True},
+            }
+        ),
+    },
+    "timeseries_preview_error": {
+        "preview_id": "RecurrentEdgeProcess_recurrent_compute_needed__preview",
+        "request_sequence": "3",
+        "success": False,
+        "status": "Fix the highlighted errors to refresh the preview; the last valid chart is retained.",
+        "errors_json": json.dumps(
+            [{"path": "profiles[0].baseline", "code": "invalid_number", "message": "Invalid baseline."}]
+        ),
+        "chart_config_json": "",
+    },
+}
+
+
+def render_timeseries_preview(case_ctx):
+    return render_to_string("model_builder/side_panels/timeseries_preview.html", case_ctx)
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -433,6 +466,7 @@ GROUPS = [
     (TOUR_CASES, render_tour_steps),
     (SORTABLE_CANVAS_CASES, render_sortable_canvas),
     (WEEKLY_PATTERN_CASES, render_weekly_pattern),
+    (TIMESERIES_PREVIEW_CASES, render_timeseries_preview),
 ]
 
 

@@ -2,7 +2,9 @@ import math
 from typing import Tuple, Dict, Optional, Callable
 
 import numpy as np
+from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.utils.display import display_quantity_as_str, best_display_unit, human_readable_unit
 from pint import Quantity
 
@@ -14,7 +16,9 @@ from model_builder.domain.entities.web_abstract_modeling_classes.explainable_obj
 )
 
 
-def get_web_explainable_from_attr(model_web, efootprint_id: str, attr_name: str, id_of_key_in_dict: Optional[str] = None):
+def get_web_explainable_from_attr(
+    model_web, efootprint_id: str, attr_name: str, id_of_key_in_dict: Optional[str] = None
+):
     """Resolve a calculated attribute or one of its dict entries to the concrete web explainable wrapper."""
     edited_web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
     web_attr = getattr(edited_web_obj, attr_name)
@@ -23,21 +27,18 @@ def get_web_explainable_from_attr(model_web, efootprint_id: str, attr_name: str,
         return web_attr
 
     dict_key = next(
-        key for key in web_attr.efootprint_object
-        if DictKeyWebIdentity.from_key(key).matches(id_of_key_in_dict)
+        key for key in web_attr.efootprint_object if DictKeyWebIdentity.from_key(key).matches(id_of_key_in_dict)
     )
     selected_explainable = web_attr.efootprint_object[dict_key]
-    web_wrapper = ExplainableQuantityWeb if isinstance(selected_explainable, ExplainableQuantity) else ExplainableObjectWeb
+    web_wrapper = (
+        ExplainableQuantityWeb if isinstance(selected_explainable, ExplainableQuantity) else ExplainableObjectWeb
+    )
 
     return web_wrapper(selected_explainable, model_web)
 
 
 def prepare_timeseries_chart_context(
-    model_web,
-    efootprint_id: str,
-    attr_name: str,
-    data_preparer_func: Callable,
-    id_of_key_in_dict: Optional[str] = None
+    model_web, efootprint_id: str, attr_name: str, data_preparer_func: Callable, id_of_key_in_dict: Optional[str] = None
 ) -> Tuple[Dict, ExplainableObjectWeb]:
     """
     Common logic for preparing timeseries chart context.
@@ -54,39 +55,40 @@ def prepare_timeseries_chart_context(
     """
     web_explainable = get_web_explainable_from_attr(model_web, efootprint_id, attr_name, id_of_key_in_dict)
 
-    data_dict, extra_context = data_preparer_func(web_explainable)
+    data_dict, extra_context = data_preparer_func(web_explainable.efootprint_object)
 
     literal_formula, ancestors_mapped_to_symbols_list = (
-        web_explainable.compute_literal_formula_and_ancestors_mapped_to_symbols_list())
+        web_explainable.compute_literal_formula_and_ancestors_mapped_to_symbols_list()
+    )
 
     context = {
         "web_explainable": web_explainable,
         "data_timeseries": data_dict,
         "literal_formula": literal_formula,
         "ancestors_mapped_to_symbols_list": ancestors_mapped_to_symbols_list,
-        **extra_context
+        **extra_context,
     }
 
     return context, web_explainable
 
 
-def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, Dict]:
-    """Prepare data for hourly quantity charts."""
-    aggregation_strategy = web_ehq.efootprint_object.plot_aggregation_strategy
+def prepare_hourly_quantity_data(ehq: ExplainableHourlyQuantities) -> Tuple[Dict, Dict]:
+    """Prepare chart data directly from a library hourly timeseries."""
+    aggregation_strategy = ehq.plot_aggregation_strategy
     if aggregation_strategy == "sum":
-        display_unit = best_display_unit(24 * web_ehq.value)
+        display_unit = best_display_unit(24 * ehq.value)
     else:
-        display_unit = best_display_unit(web_ehq.value)
-    display_value = web_ehq.value.to(display_unit)
-    if web_ehq.start_date.hour == 0:
+        display_unit = best_display_unit(ehq.value)
+    display_value = ehq.value.to(display_unit)
+    if ehq.start_date.hour == 0:
         reindexed_values = display_value
-        start_date_starting_at_midnight = web_ehq.start_date
+        start_date_starting_at_midnight = ehq.start_date
     else:
-        start_date_starting_at_midnight = web_ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        start_date_starting_at_midnight = ehq.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         reindexed_values = reindex_array(
-            web_ehq.efootprint_object.copy().to(display_unit),
+            ehq.copy().to(display_unit),
             start_date_starting_at_midnight,
-            len(web_ehq.value) + web_ehq.start_date.hour,
+            len(ehq.value) + ehq.start_date.hour,
         )
 
     n_days = math.ceil(len(reindexed_values) / 24)
@@ -98,16 +100,29 @@ def prepare_hourly_quantity_data(web_ehq: ExplainableObjectWeb) -> Tuple[Dict, D
     if aggregation_strategy == "mean":
         aggregation_value = display_quantity_as_str(Quantity(np.mean(daily_data), display_unit))
     elif aggregation_strategy == "sum":
-        aggregation_value = display_quantity_as_str(web_ehq.sum().display_quantity)
-    extra_context = {"aggregation_strategy": aggregation_strategy, "aggregation_value": aggregation_value,
-                     "display_unit": human_readable_unit(display_unit)}
+        aggregation_value = display_quantity_as_str(ehq.sum().display_quantity)
+    extra_context = {
+        "aggregation_strategy": aggregation_strategy,
+        "aggregation_value": aggregation_value,
+        "display_unit": human_readable_unit(display_unit),
+    }
     return data_dict, extra_context
 
 
-def prepare_recurrent_quantity_data(web_erq: ExplainableObjectWeb) -> Tuple[Dict, Dict]:
-    """Prepare data for recurrent quantity charts (168-hour canonical week)."""
-    recurrent_values = web_erq.display_quantity
-    hours = list(range(len(recurrent_values)))
-    data_dict = {str(hour): float(str(val)) for hour, val in zip(hours, recurrent_values.magnitude)}
+def weekly_hour_labels() -> list[str]:
+    """Return labels for the canonical Monday-first 168-hour week."""
+    day_labels = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    return [f"{day} {hour:02d}:00" for day in day_labels for hour in range(24)]
 
-    return data_dict, {"display_unit": human_readable_unit(web_erq.display_quantity.units)}
+
+def prepare_recurrent_quantity_data(
+    erq: ExplainableRecurrentQuantities, labels: list[str] | None = None
+) -> Tuple[Dict, Dict]:
+    """Prepare chart data directly from a library recurrent timeseries."""
+    recurrent_values = erq.display_quantity
+    chart_labels = labels if labels is not None else [str(hour) for hour in range(len(recurrent_values))]
+    if len(chart_labels) != len(recurrent_values):
+        raise ValueError("The number of chart labels must match the recurrent timeseries length.")
+    data_dict = {label: float(str(val)) for label, val in zip(chart_labels, recurrent_values.magnitude)}
+
+    return data_dict, {"display_unit": human_readable_unit(recurrent_values.units)}

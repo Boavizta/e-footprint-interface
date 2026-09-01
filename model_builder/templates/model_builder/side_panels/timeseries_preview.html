@@ -1,0 +1,7 @@
+<div data-timeseries-preview-response
+     data-preview-id="{{ preview_id }}"
+     data-request-sequence="{{ request_sequence }}"
+     data-success="{% if success %}true{% else %}false{% endif %}"
+     data-status="{{ status }}"
+     data-errors="{{ errors_json }}"
+     {% if chart_config_json %}data-chart-config="{{ chart_config_json }}"{% endif %}></div>

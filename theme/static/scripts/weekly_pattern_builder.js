@@ -3,6 +3,8 @@
 
     const FLOAT32_MAX = 3.4028234663852886e38;
     const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const PREVIEW_DEBOUNCE_MS = 300;
+    const previewTimers = new WeakMap();
 
     function controlsIn(panel) {
         return panel.querySelectorAll("input, select, textarea, button");
@@ -29,6 +31,8 @@
         root.querySelectorAll("[data-builder-panel]").forEach(function (panel) {
             setPanelActive(panel, panel.dataset.builderPanel === selected);
         });
+        const previewColumn = root.querySelector("[data-timeseries-preview-column]");
+        if (previewColumn) previewColumn.hidden = selected !== "weekly_pattern";
         if (selector && selected !== "weekly_pattern") setControlError(selector, "");
         root.querySelectorAll("[data-weekly-pattern-editor]").forEach(function (editor) {
             if (editor.closest("[data-builder-panel]").hidden) {
@@ -238,6 +242,80 @@
         };
     }
 
+    function setPreviewStatus(root, message) {
+        const status = root.querySelector("[data-timeseries-preview-status]");
+        if (status) status.textContent = message;
+    }
+
+    function beginPreviewRevision(root) {
+        const region = root.querySelector("[data-timeseries-preview]");
+        if (!region) return 0;
+        const sequence = Number(region.dataset.latestRequestSequence || 0) + 1;
+        region.dataset.latestRequestSequence = String(sequence);
+        return sequence;
+    }
+
+    function sendPreview(editor, sequence) {
+        const root = editor.closest("[data-timeseries-builder]");
+        const region = root?.querySelector("[data-timeseries-preview]");
+        const sink = root?.querySelector("[data-timeseries-preview-responses]");
+        if (!root || !region || !sink || Number(region.dataset.latestRequestSequence) !== sequence) return;
+        if (!window.htmx?.ajax) return;
+
+        const fieldWebId = root.dataset.fieldWebId || "";
+        const separator = fieldWebId.indexOf("_");
+        const objectType = separator < 0 ? "" : fieldWebId.slice(0, separator);
+        const fieldName = root.dataset.fieldName || (separator < 0 ? "" : fieldWebId.slice(separator + 1));
+        setPreviewStatus(root, "Refreshing preview…");
+        const requestSource = document.createElement("span");
+        requestSource.hidden = true;
+        requestSource.dataset.timeseriesPreviewRequest = "";
+        document.body.appendChild(requestSource);
+        const request = window.htmx.ajax("POST", root.dataset.previewUrl, {
+            source: requestSource,
+            target: sink,
+            swap: "innerHTML",
+            values: {
+                object_type: objectType,
+                field_name: fieldName,
+                builder: "weekly_pattern",
+                form_inputs: editor.querySelector("[data-weekly-pattern-payload]").value,
+                preview_id: root.dataset.previewId,
+                request_sequence: String(sequence),
+            },
+        });
+        if (request && typeof request.finally === "function") {
+            request.finally(function () { requestSource.remove(); });
+        } else {
+            requestSource.remove();
+        }
+    }
+
+    function schedulePreview(editor, delay) {
+        const root = editor?.closest("[data-timeseries-builder]");
+        if (!root) return;
+        const previousTimer = previewTimers.get(root);
+        if (previousTimer) window.clearTimeout(previousTimer);
+        const sequence = beginPreviewRevision(root);
+        if (editor.closest("[data-builder-panel]")?.hidden || !validateAndSync(editor)) {
+            setPreviewStatus(root, "Fix the highlighted errors to refresh the preview; the last valid chart is retained.");
+            return;
+        }
+        if (delay > 0) setPreviewStatus(root, "Waiting for the current edit to finish…");
+        const timer = window.setTimeout(function () {
+            previewTimers.delete(root);
+            sendPreview(editor, sequence);
+        }, delay);
+        previewTimers.set(root, timer);
+    }
+
+    function cancelPreview(root) {
+        const timer = previewTimers.get(root);
+        if (timer) window.clearTimeout(timer);
+        previewTimers.delete(root);
+        beginPreviewRevision(root);
+    }
+
     function validateAndSync(editor) {
         if (!editor) return false;
         clearEditorErrors(editor);
@@ -374,6 +452,8 @@
         if (root.dataset.timeseriesBuilderInitialized === "true") return;
         root.dataset.timeseriesBuilderInitialized = "true";
         activateSelectedBuilder(root);
+        const activeEditor = root.querySelector("[data-builder-panel='weekly_pattern']:not([hidden]) [data-weekly-pattern-editor]");
+        if (activeEditor) schedulePreview(activeEditor, 0);
     }
 
     function initializeAll(container) {
@@ -402,7 +482,13 @@
         syncUnitsFromConstantInputs(event.target.closest("form"));
         const selector = event.target.closest("[data-builder-selector]");
         if (selector) {
-            activateSelectedBuilder(selector.closest("[data-timeseries-builder]"));
+            const root = selector.closest("[data-timeseries-builder]");
+            activateSelectedBuilder(root);
+            const activeEditor = root.querySelector(
+                "[data-builder-panel='weekly_pattern']:not([hidden]) [data-weekly-pattern-editor]"
+            );
+            if (activeEditor) schedulePreview(activeEditor, 0);
+            else cancelPreview(root);
             markModified(selector);
             return;
         }
@@ -421,12 +507,18 @@
         } else {
             validateAndSync(editor);
         }
+        schedulePreview(editor, 0);
         markModified(event.target);
     });
 
     document.addEventListener("input", function (event) {
         const editor = event.target.closest("[data-weekly-pattern-editor]");
-        if (editor) validateAndSync(editor);
+        if (editor) {
+            validateAndSync(editor);
+            if (!event.target.matches("[data-range-start], [data-range-end]")) {
+                schedulePreview(editor, PREVIEW_DEBOUNCE_MS);
+            }
+        }
         const constant = event.target.closest("[data-error-path='constant_value']");
         if (constant) {
             setControlError(constant, "");
@@ -463,11 +555,63 @@
             event.target.closest("[data-weekly-range]").remove();
         }
         validateAndSync(editor);
+        schedulePreview(editor, 0);
         markModified(builderRoot);
+    });
+
+    document.addEventListener("timeseries-preview:response", function (event) {
+        const root = event.target.closest?.("[data-timeseries-builder]");
+        if (!root || event.detail?.success) return;
+        const editor = root.querySelector(
+            "[data-builder-panel='weekly_pattern']:not([hidden]) [data-weekly-pattern-editor]"
+        );
+        if (!editor) return;
+        clearEditorErrors(editor);
+        reindexEditor(editor);
+        const generalMessages = [];
+        (event.detail.errors || []).forEach(function (error) {
+            const control = Array.from(editor.querySelectorAll("[data-error-path]")).find(function (candidate) {
+                return candidate.dataset.errorPath === error.path;
+            });
+            if (control) {
+                setControlError(control, error.message);
+                const profile = control.closest("[data-weekly-profile]");
+                if (control.matches("[data-profile-name]")) {
+                    profile.querySelector("[data-profile-name-error]").textContent = error.message;
+                } else if (control.matches("[data-profile-baseline]")) {
+                    profile.querySelector("[data-profile-baseline-error]").textContent = error.message;
+                } else if (control.closest("[data-weekly-range]")) {
+                    const rangeError = control.closest("[data-weekly-range]").querySelector("[data-range-error]");
+                    rangeError.textContent = error.message;
+                    rangeError.classList.remove("d-none");
+                }
+                return;
+            }
+            const profileMatch = error.path.match(/^profiles\[(\d+)](?:\.days(?:\[\d+])?)?/);
+            const profile = profileMatch ? profileElements(editor)[Number(profileMatch[1])] : null;
+            if (profile && error.path.includes(".days")) {
+                const daysError = profile.querySelector("[data-profile-days-error]");
+                daysError.textContent = error.message;
+                daysError.classList.remove("d-none");
+                profile.querySelectorAll("[data-profile-day]").forEach(function (day) {
+                    day.setAttribute("aria-invalid", "true");
+                });
+            } else {
+                generalMessages.push(error.message);
+            }
+        });
+        showGeneralError(editor, generalMessages);
     });
 
     document.addEventListener("htmx:afterSettle", function (event) {
         initializeAll(event.detail?.target || event.target);
+    });
+
+    document.addEventListener("htmx:beforeCleanupElement", function (event) {
+        const container = event.detail?.elt || event.target;
+        if (!container?.querySelectorAll) return;
+        if (container.matches?.("[data-timeseries-builder]")) cancelPreview(container);
+        container.querySelectorAll("[data-timeseries-builder]").forEach(cancelPreview);
     });
 
     document.addEventListener("htmx:afterRequest", function (event) {
@@ -545,6 +689,13 @@
     }
 
     if (typeof module !== "undefined" && module.exports) {
-        module.exports = {activateSelectedBuilder, firstFreeHour, serializeEditor, validateAndSync, initializeAll};
+        module.exports = {
+            activateSelectedBuilder,
+            firstFreeHour,
+            initializeAll,
+            schedulePreview,
+            serializeEditor,
+            validateAndSync,
+        };
     }
 }());

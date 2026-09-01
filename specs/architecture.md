@@ -192,6 +192,15 @@ modeling attribute's negative-value policy, and leaves source/confidence/comment
 validation failures return normalized path/code/message JSON without invoking a mutation use case, allowing the
 delegated editor to attach authoritative errors to the corresponding visible controls.
 
+Weekly drafts use the stateless `timeseries-preview` adapter. The request identifies a modeling class, constructor
+field, allow-listed registry builder, normalized form inputs, and preview revision; the adapter resolves field policy
+from the constructor signature, creates only a temporary library builder, and returns a bounded server-prepared chart
+payload. It never hydrates a `ModelWeb`, repository, or mutation use case. Chart preparation accepts raw library
+timeseries, while saved-object callers add their web wrapper, formula, and ancestor context separately.
+`timeseries_preview.js` owns Chart.js create/update/destroy and newest-response selection across HTMX swaps. The weekly
+editor owns only form-specific request timing and error-to-control mapping; preview requests originate outside the save
+form so their lifecycle events cannot disable its controls or trigger its successful-save close handler.
+
 ## Persistence and `interface_config`
 
 The repository layer manages two concerns:

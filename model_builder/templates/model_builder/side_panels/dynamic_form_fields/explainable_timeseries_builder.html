@@ -1,21 +1,42 @@
-<div id="{{ field.web_id }}__builder" data-timeseries-builder data-field-web-id="{{ field.web_id }}">
-    {% if field.show_builder_selector %}
-        <div class="mb-3">
-            <label class="form-label" for="{{ field.web_id }}__builder_selector">Describe this weekly quantity as</label>
-            <select class="form-select" id="{{ field.web_id }}__builder_selector" data-builder-selector
-                    aria-describedby="{{ field.web_id }}__weekly_error">
-                {% for builder in field.builders %}
-                    <option value="{{ builder.identifier }}"
-                            {% if builder.identifier == field.selected_builder %}selected{% endif %}>{{ builder.label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    {% endif %}
+<div id="{{ field.web_id }}__builder" data-timeseries-builder data-field-web-id="{{ field.web_id }}"
+     data-field-name="{{ field.attr_name }}" data-preview-url="{% url 'timeseries-preview' %}"
+     data-preview-id="{{ field.web_id }}__preview">
+    <div class="row g-3 align-items-start">
+        <div class="col-12 col-xl-8" data-timeseries-editor-column>
+            {% if field.show_builder_selector %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.web_id }}__builder_selector">Describe this weekly quantity as</label>
+                    <select class="form-select" id="{{ field.web_id }}__builder_selector" data-builder-selector
+                            aria-describedby="{{ field.web_id }}__weekly_error">
+                        {% for builder in field.builders %}
+                            <option value="{{ builder.identifier }}"
+                                    {% if builder.identifier == field.selected_builder %}selected{% endif %}>{{ builder.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
 
-    {% for builder in field.builders %}
-        <section data-builder-panel="{{ builder.identifier }}"
-                 {% if builder.identifier != field.selected_builder %}hidden{% endif %}>
-            {% include "model_builder/side_panels/dynamic_form_fields/"|add:builder.template_name %}
-        </section>
-    {% endfor %}
+            {% for builder in field.builders %}
+                <section data-builder-panel="{{ builder.identifier }}"
+                         {% if builder.identifier != field.selected_builder %}hidden{% endif %}>
+                    {% include "model_builder/side_panels/dynamic_form_fields/"|add:builder.template_name %}
+                </section>
+            {% endfor %}
+        </div>
+        <div class="col-12 col-xl-4" data-timeseries-preview-column>
+            <aside class="border rounded p-3" aria-live="polite" data-timeseries-preview
+                   data-preview-id="{{ field.web_id }}__preview" data-latest-request-sequence="0">
+                <h3 class="h6">Generated weekly timeseries</h3>
+                <div class="position-relative" style="height: 16rem;">
+                    <canvas aria-label="Preview of the generated 168-hour weekly timeseries" role="img"
+                            data-timeseries-preview-canvas></canvas>
+                </div>
+                <p class="small text-muted mb-0 mt-2" data-timeseries-preview-status>
+                    Preparing preview…
+                </p>
+            </aside>
+            <div class="d-none" id="{{ field.web_id }}__preview_responses"
+                 data-timeseries-preview-responses></div>
+        </div>
+    </div>
 </div>

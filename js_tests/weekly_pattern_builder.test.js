@@ -21,9 +21,99 @@ function profiles(editor) {
 
 beforeEach(() => {
     document.body.innerHTML = FIXTURE;
+    delete window.htmx;
     window.tagFormAsModified.mockClear();
     window.hideLoadingBar.mockClear();
     initializeAll(document);
+});
+
+test("valid continuous edits debounce preview requests and keep only the latest revision", () => {
+    jest.useFakeTimers();
+    window.htmx = {ajax: jest.fn()};
+    const editor = selectWeeklyBuilder();
+    jest.runOnlyPendingTimers();
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
+
+    const baseline = editor.querySelector("[data-profile-baseline]");
+    baseline.value = "4";
+    baseline.dispatchEvent(new Event("input", {bubbles: true}));
+    baseline.value = "6";
+    baseline.dispatchEvent(new Event("input", {bubbles: true}));
+    jest.advanceTimersByTime(299);
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(1);
+
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(2);
+    const requestConfig = window.htmx.ajax.mock.calls[1][2];
+    const values = requestConfig.values;
+    expect(JSON.parse(values.form_inputs).profiles[0].baseline).toBe(6);
+    expect(requestConfig.source.closest("form")).toBeNull();
+    expect(values.request_sequence).toBe(
+        document.querySelector("[data-timeseries-preview]").dataset.latestRequestSequence
+    );
+    jest.useRealTimers();
+});
+
+test("range bounds refresh on commit while discrete day actions refresh immediately", () => {
+    jest.useFakeTimers();
+    window.htmx = {ajax: jest.fn()};
+    const editor = selectWeeklyBuilder();
+    jest.runOnlyPendingTimers();
+    const profile = profiles(editor)[0];
+    profile.querySelector("[data-action='add-weekly-range']").click();
+    jest.runOnlyPendingTimers();
+    const callsAfterAdd = window.htmx.ajax.mock.calls.length;
+    const start = profile.querySelector("[data-range-start]");
+
+    start.value = "2";
+    start.dispatchEvent(new Event("input", {bubbles: true}));
+    jest.runOnlyPendingTimers();
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(callsAfterAdd);
+    profile.querySelector("[data-range-end]").value = "3";
+    start.dispatchEvent(new Event("change", {bubbles: true}));
+    jest.runOnlyPendingTimers();
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(callsAfterAdd + 1);
+
+    const weekendMonday = profiles(editor)[1].querySelector("[data-profile-day][value='0']");
+    weekendMonday.checked = true;
+    weekendMonday.dispatchEvent(new Event("change", {bubbles: true}));
+    jest.runOnlyPendingTimers();
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(callsAfterAdd + 2);
+    jest.useRealTimers();
+});
+
+test("client-invalid drafts suppress requests and retain the preview chart area", () => {
+    jest.useFakeTimers();
+    window.htmx = {ajax: jest.fn()};
+    const editor = selectWeeklyBuilder();
+    jest.runOnlyPendingTimers();
+    const callsBeforeInvalidEdit = window.htmx.ajax.mock.calls.length;
+    const monday = profiles(editor)[0].querySelector("[data-profile-day][value='0']");
+
+    monday.checked = false;
+    monday.dispatchEvent(new Event("change", {bubbles: true}));
+    jest.runOnlyPendingTimers();
+
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(callsBeforeInvalidEdit);
+    expect(document.querySelector("[data-timeseries-preview-status]").textContent).toContain("last valid chart");
+    expect(document.querySelector("[data-timeseries-preview-canvas]")).not.toBeNull();
+    jest.useRealTimers();
+});
+
+test("preview validation errors map to the visible weekly control", () => {
+    const editor = selectWeeklyBuilder();
+    const region = document.querySelector("[data-timeseries-preview]");
+
+    region.dispatchEvent(new CustomEvent("timeseries-preview:response", {
+        bubbles: true,
+        detail: {
+            success: false,
+            errors: [{path: "profiles[0].baseline", message: "Server rejected this baseline."}],
+        },
+    }));
+
+    expect(editor.querySelector("[data-profile-baseline]").validationMessage)
+        .toBe("Server rejected this baseline.");
 });
 
 test("switching builders retains both drafts and submits only the active builder", () => {

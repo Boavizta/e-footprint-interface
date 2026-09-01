@@ -1,4 +1,5 @@
 """Unit tests for explainable_timeseries_utils helpers."""
+
 from datetime import datetime
 from types import SimpleNamespace
 
@@ -6,6 +7,7 @@ import numpy as np
 import pytz
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
+from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.constants.units import u
 
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
@@ -13,6 +15,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     prepare_hourly_quantity_data,
     prepare_recurrent_quantity_data,
     prepare_timeseries_chart_context,
+    weekly_hour_labels,
 )
 from tests.unit_tests.domain.entities.web_core.helpers import DummyExplainableWeb, DummyModelWeb, DummyWebObj
 
@@ -26,7 +29,7 @@ class TestExplainableTimeseriesUtils:
         values = np.array([1] * 24 + [2] * 24, dtype=np.float32) * u.kWh
         ehq = ExplainableHourlyQuantities(values, start_date=start, label="ehq")
 
-        data, extra = prepare_hourly_quantity_data(DummyExplainableWeb(ehq))
+        data, extra = prepare_hourly_quantity_data(ehq)
 
         assert data == {"2025-01-01": 24.0, "2025-01-02": 48.0}
         assert extra["aggregation_strategy"] == "sum"
@@ -37,20 +40,29 @@ class TestExplainableTimeseriesUtils:
         values = np.array([1, 2, 3, 4], dtype=np.float32) * u.kWh
         ehq = ExplainableHourlyQuantities(values, start_date=start, label="ehq")
 
-        data, _ = prepare_hourly_quantity_data(DummyExplainableWeb(ehq))
+        data, _ = prepare_hourly_quantity_data(ehq)
 
         # 6 hours padded with zeros before the 4 values → total sum 10 for the day
         assert data == {"2025-01-01": 10.0}
 
     def test_prepare_recurrent_quantity_data(self):
         """Returns hour-indexed dict of recurrent magnitudes."""
-        recurrent = ExplainableHourlyQuantities(
-            np.array([1.5, 2.5, 3.5], dtype=np.float32) * u.kWh,
-            start_date=datetime(2025, 1, 1, tzinfo=pytz.utc), label="recurrent")
-        data, extra = prepare_recurrent_quantity_data(DummyExplainableWeb(recurrent))
+        recurrent = ExplainableRecurrentQuantities(
+            np.array([1.5, 2.5, 3.5], dtype=np.float32) * u.kWh, label="recurrent"
+        )
+        data, extra = prepare_recurrent_quantity_data(recurrent)
 
         assert data == {"0": 1.5, "1": 2.5, "2": 3.5}
         assert extra == {"display_unit": "kWh"}
+
+    def test_prepare_recurrent_quantity_data_accepts_canonical_week_labels(self):
+        recurrent = ExplainableRecurrentQuantities(np.arange(168, dtype=np.float32) * u.kWh, label="recurrent")
+
+        data, _ = prepare_recurrent_quantity_data(recurrent, weekly_hour_labels())
+
+        assert len(data) == 168
+        assert data["Mon 00:00"] == 0
+        assert data["Sun 23:00"] == 167
 
     def test_prepare_timeseries_chart_context_passes_literal_and_data(self):
         """prepare_timeseries_chart_context wires web_explainable and data together."""
@@ -62,7 +74,8 @@ class TestExplainableTimeseriesUtils:
         model_web = DummyModelWeb(web_obj)
 
         context, returned_explainable = prepare_timeseries_chart_context(
-            model_web, efootprint_id="obj1", attr_name="usage", data_preparer_func=prepare_hourly_quantity_data)
+            model_web, efootprint_id="obj1", attr_name="usage", data_preparer_func=prepare_hourly_quantity_data
+        )
 
         assert returned_explainable is web_explainable
         assert context["web_explainable"] is web_explainable

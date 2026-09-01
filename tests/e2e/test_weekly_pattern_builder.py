@@ -80,6 +80,8 @@ def test_weekly_pattern_save_reopen_and_download_upload_round_trip(recurrent_pro
     page.locator(f"#{storage_field_id}__builder_selector").select_option("weekly_pattern")
 
     editor = page.locator(f"#{field_id}__builder [data-weekly-pattern-editor]")
+    preview = page.locator(f"#{field_id}__builder [data-timeseries-preview]")
+    preview_status = preview.locator("[data-timeseries-preview-status]")
     profile_list = editor.locator("[data-weekly-profile]")
     expect(profile_list).to_have_count(2)
     expect(page.locator(f"#{field_id}")).to_be_disabled()
@@ -91,6 +93,13 @@ def test_weekly_pattern_save_reopen_and_download_upload_round_trip(recurrent_pro
     time_range.locator("[data-range-end]").fill("18")
     time_range.locator("[data-range-start]").fill("8")
     time_range.locator("[data-range-value]").fill("5")
+    expect(preview_status).to_have_text("Preview ready.")
+    preview_values = preview.locator("canvas").evaluate(
+        "element => element._timeseriesPreviewChart.data.datasets[0].data"
+    )
+    assert len(preview_values) == 168
+    assert preview_values[8:18] == [5] * 10
+    assert preview_values[24 + 8:24 + 18] == [5] * 10
 
     editor.locator("[data-action='add-weekly-profile']").click()
     expect(profile_list).to_have_count(3)
