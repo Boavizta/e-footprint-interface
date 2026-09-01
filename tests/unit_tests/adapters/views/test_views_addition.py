@@ -7,7 +7,7 @@ from model_builder.adapters.repositories import SessionSystemRepository
 
 
 @pytest.mark.django_db
-def test_weekly_validation_error_returns_structured_response_without_mutating_session(
+def test_weekly_validation_error_uses_standard_modal_without_mutating_session(
     client, minimal_system_data, monkeypatch
 ):
     repository = SessionSystemRepository(client.session)
@@ -29,8 +29,8 @@ def test_weekly_validation_error_returns_structured_response_without_mutating_se
         },
     )
 
-    assert response.status_code == 422
+    assert response.status_code == 200
     assert response.headers["HX-Reswap"] == "none"
-    assert response.json()["errors"][0]["code"] == "missing_day_assignment"
+    assert "Day 1 must be assigned to exactly one profile" in response.content.decode()
     execute.assert_not_called()
     assert SessionSystemRepository(client.session).get_system_data() == saved_before

@@ -1,8 +1,6 @@
 import json
 
-from django.http import JsonResponse
 from django.shortcuts import render
-from efootprint.builders.timeseries import WeeklyPatternValidationError
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
@@ -52,23 +50,18 @@ def add_object(request, object_type):
     repository = SessionWorkspaceRepository(request.session).active_repository()
 
     # 1. Parse form data (adapter responsibility - before use case)
-    try:
-        parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
+    parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
 
-        # 2. Map request to use case input (with parsed data)
-        input_data = CreateObjectInput(
-            object_type=object_type,
-            form_data=parsed_form_data,
-            parent_id=request.POST.get("efootprint_id_of_parent_to_link_to"),
-        )
+    # 2. Map request to use case input (with parsed data)
+    input_data = CreateObjectInput(
+        object_type=object_type,
+        form_data=parsed_form_data,
+        parent_id=request.POST.get("efootprint_id_of_parent_to_link_to"),
+    )
 
-        # 3. Execute use case
-        use_case = CreateObjectUseCase(repository)
-        output = use_case.execute(input_data)
-    except WeeklyPatternValidationError as error:
-        response = JsonResponse({"errors": error.errors}, status=422)
-        response["HX-Reswap"] = "none"
-        return response
+    # 3. Execute use case
+    use_case = CreateObjectUseCase(repository)
+    output = use_case.execute(input_data)
 
     # 4. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))

@@ -617,62 +617,6 @@
         initializeAll(event.detail?.target || event.target);
     });
 
-    document.addEventListener("htmx:afterRequest", function (event) {
-        const xhr = event.detail?.xhr;
-        const form = event.target.closest?.("form") || event.detail?.elt?.closest?.("form");
-        if (!xhr || xhr.status !== 422 || !form) return;
-        const activePanels = Array.from(form.querySelectorAll("[data-builder-panel]:not([hidden])"));
-        if (!activePanels.length) return;
-
-        let errors;
-        try {
-            errors = JSON.parse(xhr.responseText).errors;
-        } catch (error) {
-            return;
-        }
-        const editors = activePanels.map(function (panel) {
-            return panel.querySelector("[data-weekly-pattern-editor]");
-        }).filter(Boolean);
-        editors.forEach(clearEditorErrors);
-        const generalMessages = new Map(editors.map(function (editor) { return [editor, []]; }));
-        errors.forEach(function (error) {
-            const control = activePanels.flatMap(function (panel) {
-                return Array.from(panel.querySelectorAll("[data-error-path]"));
-            })
-                .find(function (candidate) { return candidate.dataset.errorPath === error.path; });
-            if (control) {
-                setControlError(control, error.message);
-                const profile = control.closest("[data-weekly-profile]");
-                if (control.matches("[data-profile-name]")) {
-                    profile.querySelector("[data-profile-name-error]").textContent = error.message;
-                } else if (control.matches("[data-profile-baseline]")) {
-                    profile.querySelector("[data-profile-baseline-error]").textContent = error.message;
-                } else if (control.closest("[data-weekly-range]")) {
-                    const rangeError = control.closest("[data-weekly-range]").querySelector("[data-range-error]");
-                    rangeError.textContent = error.message;
-                    rangeError.classList.remove("d-none");
-                }
-            } else if (editors.length) {
-                const profileMatch = error.path.match(/^profiles\[(\d+)](?:\.days(?:\[\d+])?)?/);
-                const editor = editors[0];
-                const profile = profileMatch ? profileElements(editor)[Number(profileMatch[1])] : null;
-                if (profile && error.path.includes(".days")) {
-                    const daysError = profile.querySelector("[data-profile-days-error]");
-                    daysError.textContent = error.message;
-                    daysError.classList.remove("d-none");
-                    profile.querySelectorAll("[data-profile-day]").forEach(function (day) {
-                        day.setAttribute("aria-invalid", "true");
-                    });
-                } else {
-                    generalMessages.get(editor).push(error.message);
-                }
-            }
-        });
-        generalMessages.forEach(function (messages, editor) { showGeneralError(editor, messages); });
-        const firstInvalid = form.querySelector("[data-builder-panel]:not([hidden]) :invalid");
-        if (firstInvalid) firstInvalid.focus();
-    });
-
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", function () { initializeAll(document); }, {once: true});
     } else {
