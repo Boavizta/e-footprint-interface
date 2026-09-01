@@ -4,7 +4,8 @@ const path = require("path");
 window.tagFormAsModified = jest.fn();
 window.hideLoadingBar = jest.fn();
 
-const {initializeAll} = require("../theme/static/scripts/weekly_pattern_builder.js");
+require("../theme/static/scripts/timeseries_preview.js");
+const {activateSelectedBuilder, initializeAll} = require("../theme/static/scripts/weekly_pattern_builder.js");
 
 const FIXTURE = fs.readFileSync(path.join(__dirname, "fixtures", "weekly_pattern_default.html"), "utf8");
 
@@ -201,6 +202,16 @@ test("switching builders retains both drafts and submits only the active builder
     expect(editor.querySelector("[data-profile-baseline]").value).toBe("9");
     expect(editor.querySelector("[data-weekly-pattern-payload]").disabled).toBe(true);
     expect(window.tagFormAsModified).toHaveBeenCalled();
+});
+
+test("reactivating a selected builder restores its named payload after transient disabling", () => {
+    const editor = selectWeeklyBuilder();
+    const payload = editor.querySelector("[data-weekly-pattern-payload]");
+    payload.disabled = true;
+
+    activateSelectedBuilder(document.querySelector("[data-timeseries-builder]"));
+
+    expect(payload.disabled).toBe(false);
 });
 
 test("switching away from an invalid weekly draft removes it from form validation", () => {

@@ -4,8 +4,6 @@
     const FLOAT32_MAX = 3.4028234663852886e38;
     const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const PREVIEW_DEBOUNCE_MS = 300;
-    const previewTimers = new WeakMap();
-    const activePreviewRequests = new WeakMap();
 
     function controlsIn(panel) {
         return panel.querySelectorAll("input, select, textarea, button");
@@ -14,15 +12,7 @@
     function setPanelActive(panel, active) {
         panel.hidden = !active;
         controlsIn(panel).forEach(function (control) {
-            if (!active) {
-                if (!Object.prototype.hasOwnProperty.call(control.dataset, "builderWasDisabled")) {
-                    control.dataset.builderWasDisabled = String(control.disabled);
-                }
-                control.disabled = true;
-            } else if (Object.prototype.hasOwnProperty.call(control.dataset, "builderWasDisabled")) {
-                control.disabled = control.dataset.builderWasDisabled === "true";
-                delete control.dataset.builderWasDisabled;
-            }
+            control.disabled = !active;
         });
     }
 
@@ -248,110 +238,36 @@
         if (status) status.textContent = message;
     }
 
-    function beginPreviewRevision(root) {
-        const region = root.querySelector("[data-timeseries-preview]");
-        if (!region) return 0;
-        const sequence = Number(region.dataset.latestRequestSequence || 0) + 1;
-        region.dataset.latestRequestSequence = String(sequence);
-        return sequence;
-    }
-
-    function abortActivePreview(root) {
-        const activeRequest = activePreviewRequests.get(root);
-        if (!activeRequest) return;
-        activePreviewRequests.delete(root);
-        activeRequest.source.dispatchEvent(new Event("htmx:abort"));
-        activeRequest.source.remove();
-    }
-
-    function finishPreviewRequest(root, activeRequest) {
-        if (activePreviewRequests.get(root) === activeRequest) activePreviewRequests.delete(root);
-        activeRequest.source.remove();
-    }
-
-    function handlePreviewFailure(root, sequence) {
-        const region = root.querySelector("[data-timeseries-preview]");
-        if (region && Number(region.dataset.latestRequestSequence) === sequence) {
-            setPreviewStatus(root, "Preview could not be refreshed; the last valid chart is retained.");
-        }
-    }
-
-    function sendPreview(editor, sequence) {
-        const root = editor.closest("[data-timeseries-builder]");
-        const region = root?.querySelector("[data-timeseries-preview]");
-        const sink = root?.querySelector("[data-timeseries-preview-responses]");
-        if (!root || !region || !sink || Number(region.dataset.latestRequestSequence) !== sequence) return;
-        if (!window.htmx?.ajax) return;
-
-        const fieldWebId = root.dataset.fieldWebId || "";
-        const separator = fieldWebId.indexOf("_");
-        const objectType = separator < 0 ? "" : fieldWebId.slice(0, separator);
-        const fieldName = root.dataset.fieldName || (separator < 0 ? "" : fieldWebId.slice(separator + 1));
-        setPreviewStatus(root, "Refreshing preview…");
-        const requestSource = document.createElement("span");
-        requestSource.hidden = true;
-        requestSource.dataset.timeseriesPreviewRequest = "";
-        document.body.appendChild(requestSource);
-        const activeRequest = {source: requestSource, sequence: sequence};
-        activePreviewRequests.set(root, activeRequest);
-        let request;
-        try {
-            request = window.htmx.ajax("POST", root.dataset.previewUrl, {
-                source: requestSource,
-                target: sink,
-                swap: "innerHTML",
-                values: {
-                    object_type: objectType,
-                    field_name: fieldName,
-                    builder: "weekly_pattern",
-                    form_inputs: editor.querySelector("[data-weekly-pattern-payload]").value,
-                    preview_id: root.dataset.previewId,
-                    request_sequence: String(sequence),
-                },
-            });
-        } catch (error) {
-            handlePreviewFailure(root, sequence);
-            finishPreviewRequest(root, activeRequest);
-            return;
-        }
-        if (request && typeof request.then === "function") {
-            Promise.resolve(request).then(
-                function () { finishPreviewRequest(root, activeRequest); },
-                function () {
-                    handlePreviewFailure(root, sequence);
-                    finishPreviewRequest(root, activeRequest);
-                }
-            );
-        } else {
-            finishPreviewRequest(root, activeRequest);
-        }
-    }
-
     function schedulePreview(editor, delay) {
         const root = editor?.closest("[data-timeseries-builder]");
-        if (!root) return;
-        const previousTimer = previewTimers.get(root);
-        if (previousTimer) window.clearTimeout(previousTimer);
-        const sequence = beginPreviewRevision(root);
-        abortActivePreview(root);
+        const region = root?.querySelector("[data-timeseries-preview]");
+        if (!root || !region) return;
         if (editor.closest("[data-builder-panel]")?.hidden || !validateAndSync(editor)) {
+            region.dispatchEvent(new CustomEvent("timeseries-preview:cancel", {bubbles: true}));
             setPreviewStatus(root, "Fix the highlighted errors to refresh the preview; the last valid chart is retained.");
             return;
         }
-        if (delay > 0) setPreviewStatus(root, "Waiting for the current edit to finish…");
-        const timer = window.setTimeout(function () {
-            previewTimers.delete(root);
-            sendPreview(editor, sequence);
-        }, delay);
-        previewTimers.set(root, timer);
+        const fieldWebId = root.dataset.fieldWebId || "";
+        const separator = fieldWebId.indexOf("_");
+        region.dispatchEvent(new CustomEvent("timeseries-preview:request", {
+            bubbles: true,
+            detail: {
+                delay: delay,
+                waitingStatus: delay > 0 ? "Waiting for the current edit to finish…" : "",
+                refreshingStatus: "Refreshing preview…",
+                values: {
+                    object_type: separator < 0 ? "" : fieldWebId.slice(0, separator),
+                    field_name: root.dataset.fieldName || (separator < 0 ? "" : fieldWebId.slice(separator + 1)),
+                    builder: "weekly_pattern",
+                    form_inputs: editor.querySelector("[data-weekly-pattern-payload]").value,
+                },
+            },
+        }));
     }
 
     function cancelPreview(root) {
-        const timer = previewTimers.get(root);
-        if (timer) window.clearTimeout(timer);
-        previewTimers.delete(root);
-        beginPreviewRevision(root);
-        abortActivePreview(root);
+        const region = root.querySelector("[data-timeseries-preview]");
+        if (region) region.dispatchEvent(new CustomEvent("timeseries-preview:cancel", {bubbles: true}));
     }
 
     function validateAndSync(editor) {
@@ -657,13 +573,6 @@
 
     document.addEventListener("htmx:afterSettle", function (event) {
         initializeAll(event.detail?.target || event.target);
-    });
-
-    document.addEventListener("htmx:beforeCleanupElement", function (event) {
-        const container = event.detail?.elt || event.target;
-        if (!container?.querySelectorAll) return;
-        if (container.matches?.("[data-timeseries-builder]")) cancelPreview(container);
-        container.querySelectorAll("[data-timeseries-builder]").forEach(cancelPreview);
     });
 
     document.addEventListener("htmx:afterRequest", function (event) {

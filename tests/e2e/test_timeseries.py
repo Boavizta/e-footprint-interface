@@ -6,9 +6,12 @@ These tests verify:
 3. Error message display and clearing
 4. Responsive behavior on mobile/tablet devices
 """
+
 import pytest
+from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
 from playwright.sync_api import expect
 
+from model_builder.domain.entities.web_core.explainable_timeseries_utils import prepare_hourly_quantity_period_data
 from tests.e2e.pages import ModelBuilderPage
 
 
@@ -57,6 +60,20 @@ class TestTimeseriesChartDisplay:
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").click()
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("25")
         page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan").select_option("year")
+        start_date = page.locator("#UsagePattern_hourly_usage_journey_starts__start_date").input_value()
+        expected = prepare_hourly_quantity_period_data(
+            ExplainableHourlyQuantitiesFromFormInputs(
+                {
+                    "start_date": start_date,
+                    "modeling_duration_value": "2",
+                    "modeling_duration_unit": "year",
+                    "initial_volume": "1000",
+                    "initial_volume_timespan": "month",
+                    "net_growth_rate_in_percentage": "25",
+                    "net_growth_rate_timespan": "year",
+                }
+            )
+        )
         preview_responses = []
         page.on(
             "response",
@@ -64,17 +81,32 @@ class TestTimeseriesChartDisplay:
         )
         with page.expect_response(lambda response: "timeseries-preview" in response.url):
             page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
-        expect(page.locator("#timeSeriesChart")).to_be_visible()
-        monthly_labels = page.locator("#timeSeriesChart").evaluate(
-            "canvas => canvas._timeseriesPreviewChart.data.labels"
+        page.wait_for_function(
+            "expectedLength => document.getElementById('timeSeriesChart')?._timeseriesPreviewChart?.data.labels.length "
+            "=== expectedLength",
+            arg=len(expected["month"]),
         )
+        monthly_chart_data = page.locator("#timeSeriesChart").evaluate(
+            "canvas => ({labels: canvas._timeseriesPreviewChart.data.labels, "
+            "values: canvas._timeseriesPreviewChart.data.datasets[0].data})"
+        )
+        assert monthly_chart_data["labels"] == list(expected["month"])
+        assert monthly_chart_data["values"] == pytest.approx(list(expected["month"].values()))
 
         request_count = len(preview_responses)
         page.locator("#display_granularity").select_option("year")
-        yearly_labels = page.locator("#timeSeriesChart").evaluate(
-            "canvas => canvas._timeseriesPreviewChart.data.labels"
+        page.wait_for_function(
+            "expectedLength => document.getElementById('timeSeriesChart')?._timeseriesPreviewChart?.data.labels.length "
+            "=== expectedLength",
+            arg=len(expected["year"]),
         )
-        assert len(yearly_labels) < len(monthly_labels)
+        yearly_chart_data = page.locator("#timeSeriesChart").evaluate(
+            "canvas => ({labels: canvas._timeseriesPreviewChart.data.labels, "
+            "values: canvas._timeseriesPreviewChart.data.datasets[0].data})"
+        )
+        assert yearly_chart_data["labels"] == list(expected["year"])
+        assert yearly_chart_data["values"] == pytest.approx(list(expected["year"].values()))
+        page.wait_for_timeout(350)
         assert len(preview_responses) == request_count
 
         # Submit first UP
@@ -112,7 +144,9 @@ class TestTimeseriesChartDisplay:
 class TestTimeseriesValidation:
     """Tests for modeling duration validation with different units."""
 
-    def test_modeling_duration_validation_with_day_and_month_units(self, seeded_journey_model_builder: ModelBuilderPage):
+    def test_modeling_duration_validation_with_day_and_month_units(
+        self, seeded_journey_model_builder: ModelBuilderPage
+    ):
         """Modeling duration should validate against max values that change based on unit.
 
         This test verifies:
@@ -197,7 +231,7 @@ class TestTimeseriesValidation:
         duration_unit_locator = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_unit")
         duration_unit_locator.click()
         duration_unit_locator.select_option("month")
-        duration_unit_locator.click() # Need to encapsulate selection between clicks to trigger hyperscript logic.
+        duration_unit_locator.click()  # Need to encapsulate selection between clicks to trigger hyperscript logic.
 
         # Set a valid value (15 months)
         duration_field = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value")
@@ -223,7 +257,8 @@ class TestTimeseriesValidation:
         duration_unit_locator.select_option("year")
         duration_unit_locator.click()
         expect(page.locator("#modeling_duration_value_error_message")).to_contain_text(
-            "Modeling duration value must be less than or equal to 10")
+            "Modeling duration value must be less than or equal to 10"
+        )
         current_value = int(duration_field.input_value())
         assert current_value == 10, f"Value should be corrected to 10 for year unit, but is {current_value}"
 
