@@ -16,16 +16,13 @@
   code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
   details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
   summary { cursor: pointer; font-weight: 600; }
-  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
   svg { display: block; width: 100%; height: auto; margin: 1rem 0; }
 </style>
 </head>
 <body>
 
 <h1>Weekly-pattern builder for recurrent quantities — Implementation plan</h1>
-<p class="status">Status: Draft plan — captured during specification, under review · 2026-08-31 · Spec: <a href="spec.html">spec.html</a></p>
-<blockquote>This draft preserves implementation-level content from the legacy specification. It must be reviewed and
-refined through <code>spec-plan</code> after the spec is approved; no tasks should be emitted from it yet.</blockquote>
+<p class="status">Status: Plan — approved · 2026-09-01 · Spec: <a href="spec.html">spec.html</a></p>
 
 <section>
   <h2>1. Approach</h2>
@@ -52,7 +49,7 @@ refined through <code>spec-plan</code> after the spec is approved; no tasks shou
     <rect x="10" y="55" width="175" height="100" rx="8" fill="#f5f5f5" stroke="#777"/>
     <text x="97" y="82" text-anchor="middle" font-size="14" font-weight="600">Interface registry</text>
     <text x="97" y="106" text-anchor="middle" font-size="12">builder labels + templates</text>
-    <text x="97" y="128" text-anchor="middle" font-size="12">selected/default builder</text>
+    <text x="97" y="128" text-anchor="middle" font-size="12">stored/default builder</text>
     <line x1="185" y1="105" x2="230" y2="105" stroke="#777" stroke-width="2"/>
     <polygon points="230,105 220,99 220,111" fill="#777"/>
     <rect x="230" y="35" width="175" height="140" rx="8" fill="#f0f7ff" stroke="#3570a0"/>
@@ -168,14 +165,14 @@ refined through <code>spec-plan</code> after the spec is approved; no tasks shou
   <table>
     <thead><tr><th>Repository / module</th><th>Change type</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td><code>e-footprint/efootprint/builders/timeseries/explainable_recurrent_quantities_from_weekly_pattern.py</code></td><td>New</td><td>Builder, validation, vectorized composition, copy, and JSON round-trip; retain the base recurrent text summary.</td></tr>
+      <tr><td><code>e-footprint/efootprint/builders/timeseries/explainable_recurrent_quantities_from_weekly_pattern.py</code></td><td>New</td><td>Builder, validation, vectorized composition, human-readable <code>form_inputs_for_display</code>, copy, and JSON round-trip; retain the base recurrent text summary.</td></tr>
       <tr><td><code>e-footprint/efootprint/builders/timeseries/__init__.py</code></td><td>Modified</td><td>Export and import the builder so its <code>ExplainableObject</code> matcher is registered during JSON loading.</td></tr>
-      <tr><td><code>e-footprint/tests/builders/timeseries/</code></td><td>New tests</td><td>Composition, validation, metadata/copy behavior, serialization, and deserialization.</td></tr>
+      <tr><td><code>e-footprint/tests/builders/timeseries/</code> and <code>e-footprint/tests/comparison/</code></td><td>New + modified tests</td><td>Composition, validation, metadata/copy behavior, serialization, deserialization, and human-readable authored-input comparison.</td></tr>
       <tr><td><code>e-footprint-interface/model_builder/adapters/forms/timeseries_builder_registry.py</code></td><td>New</td><td>Explicit UI registry by explainable base type; keeps labels and template names out of the library.</td></tr>
-      <tr><td><code>e-footprint-interface/model_builder/adapters/forms/form_field_generator.py</code></td><td>Modified</td><td>Emit a composite field description, resolve current/default builder, preserve single-builder rendering, and expose the negative-value constraint.</td></tr>
-      <tr><td><code>e-footprint-interface/model_builder/adapters/forms/form_data_parser.py</code></td><td>Modified</td><td>Decode the selected weekly payload into normalized <code>form_inputs</code> without mixing source metadata into it.</td></tr>
+      <tr><td><code>e-footprint-interface/model_builder/adapters/forms/form_field_generator.py</code></td><td>Modified</td><td>Emit a composite field description, select the builder already stored on an existing object (or the registry default for a new object), preserve single-builder rendering, and expose the negative-value constraint.</td></tr>
+      <tr><td><code>e-footprint-interface/model_builder/adapters/forms/form_data_parser.py</code></td><td>Modified</td><td>Decode the selected builder's structured payload into typed <code>form_inputs</code>, while preserving the existing metadata handling.</td></tr>
       <tr><td><code>e-footprint-interface/model_builder/adapters/views/views_timeseries_preview.py</code> and <code>model_builder/urls.py</code></td><td>New + modified</td><td>One thin POST endpoint for non-persisting weekly and hourly draft previews.</td></tr>
-      <tr><td><code>e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py</code></td><td>Modified</td><td>Extract raw-explainable chart-series preparation reusable by saved calculated charts and unsaved previews; keep wrapper/explanation context separate.</td></tr>
+      <tr><td><code>e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py</code></td><td>Modified</td><td>Extract timeseries-to-chart-data helpers that accept library timeseries directly, allowing reuse by saved charts and unsaved previews; keep saved-model explanation context in the existing outer layer.</td></tr>
       <tr><td><code>e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/</code></td><td>Modified + new</td><td>Add the composite wrapper, weekly-pattern sub-form, shared preview request metadata, and preview target; reuse the current constant and hourly controls.</td></tr>
       <tr><td><code>e-footprint-interface/model_builder/templates/model_builder/side_panels/timeseries_preview.html</code></td><td>New</td><td>HTMX partial with server-prepared chart payload and status updates for the side preview.</td></tr>
       <tr><td><code>e-footprint-interface/theme/static/scripts/weekly_pattern_builder.js</code></td><td>New</td><td>IIFE with delegated <code>data-action</code> handling for builder switching, profiles, ranges, day stealing, validation, payload sync, and valid-preview triggers.</td></tr>
@@ -212,7 +209,8 @@ refined through <code>spec-plan</code> after the spec is approved; no tasks shou
     <code>aria-describedby</code>; hidden inactive builders are not focusable or submitted.</li>
     <li><strong>Docs:</strong> if the registry/composite-field pattern ships, add a concise entry to
     <code>e-footprint-interface/specs/architecture.md</code> and the delegated-JavaScript convention if it gains a reusable rule.
-    Document the new library builder and authored-state persistence under the builders/persistence owning pages.</li>
+    Document the new library builder, authored-state persistence, and human-readable comparison surface under the
+    corresponding e-footprint layers/modeling, persistence, and comparison/display pages.</li>
   </ul>
 </section>
 
@@ -255,8 +253,8 @@ refined through <code>spec-plan</code> after the spec is approved; no tasks shou
     but request lifecycle, validation, bounded response, error state, and rendering contract are the same.</li>
     <li><strong>Infer UI builders from every <code>ExplainableObject</code> deserialization matcher.</strong> Rejected: those
     matchers are persistence concerns and do not carry safe UI labels, templates, defaults, or ordering.</li>
-    <li><strong>Encode every nested value as bracketed form keys.</strong> Kept as a fallback, but a single normalized hidden
-    payload is leaner for dynamic lists if parsing and server-side error mapping remain clear.</li>
+    <li><strong>Encode every nested value as bracketed form keys.</strong> Rejected: the chosen single normalized hidden JSON
+    payload is leaner for dynamic profile and range lists. Structured server-error paths map failures back to visible inputs.</li>
   </ul>
 </section>
 
@@ -278,15 +276,16 @@ refined through <code>spec-plan</code> after the spec is approved; no tasks shou
 </section>
 
 <section>
-  <h2>7. Open questions</h2>
+  <h2>7. Resolved decisions</h2>
   <ul>
-    <li>Approve <code>ExplainableRecurrentQuantitiesFromWeeklyPattern</code> as the class name and <em>Weekly pattern</em> as the label.</li>
-    <li>Confirm the explicit interface registry as the desired level of generality, rather than attaching form-builder
-    metadata to library classes.</li>
-    <li>Choose the submitted encoding after a small parser/error-display spike: one JSON profile payload as proposed, or
-    bracketed repeated fields if inline server-error mapping proves materially simpler.</li>
-    <li>Finalize the structured validation-error contract shared by preview and save so a server error can identify a specific
-    profile/range without replacing the last valid chart.</li>
+    <li>Use <code>ExplainableRecurrentQuantitiesFromWeeklyPattern</code> as the library class name and <em>Weekly pattern</em>
+    as its interface label.</li>
+    <li>Keep editable-builder labels, templates, ordering, and defaults in an explicit interface registry rather than on
+    library classes.</li>
+    <li>Submit the dynamic weekly profiles as one normalized hidden JSON value.</li>
+    <li>Return validation errors as a list of objects containing a normalized field path such as
+    <code>profiles[1].ranges[0].start</code>, a stable error code, and a user-facing message. Preview and save map the same
+    errors to visible controls. An invalid preview returns no replacement series, so the last valid chart remains visible.</li>
   </ul>
 </section>
 
