@@ -197,6 +197,8 @@ field, allow-listed registry builder, normalized form inputs, and preview revisi
 from the constructor signature, creates only a temporary library builder, and returns a bounded server-prepared chart
 payload. It never hydrates a `ModelWeb`, repository, or mutation use case. Chart preparation accepts raw library
 timeseries, while saved-object callers add their web wrapper, formula, and ancestor context separately.
+For relationship-dependent component needs, the preview accepts only the closed server-owned family of edge-component
+unit dimensions; binding the chosen unit to the selected component instance remains an authoritative save-time guard.
 `timeseries_preview.js` owns Chart.js create/update/destroy and newest-response selection across HTMX swaps. The weekly
 editor owns only form-specific request timing and error-to-control mapping; preview requests originate outside the save
 form so their lifecycle events cannot disable its controls or trigger its successful-save close handler.

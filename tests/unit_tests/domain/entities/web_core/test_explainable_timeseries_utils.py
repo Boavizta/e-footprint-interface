@@ -82,6 +82,29 @@ class TestExplainableTimeseriesUtils:
         assert context["literal_formula"] == "x"
         assert context["data_timeseries"]["2025-01-01"] == 4.0
 
+    def test_saved_recurrent_chart_context_uses_raw_timeseries_helper(self):
+        recurrent = ExplainableRecurrentQuantities(
+            np.arange(168, dtype=np.float32) * u.cpu_core, label="saved recurrent"
+        )
+        web_explainable = SimpleNamespace(
+            efootprint_object=recurrent,
+            compute_literal_formula_and_ancestors_mapped_to_symbols_list=lambda: ("saved formula", ["source"]),
+        )
+        model_web = DummyModelWeb(DummyWebObj("recurrent_need", web_explainable))
+
+        context, returned_explainable = prepare_timeseries_chart_context(
+            model_web,
+            efootprint_id="need-1",
+            attr_name="recurrent_need",
+            data_preparer_func=prepare_recurrent_quantity_data,
+        )
+
+        assert returned_explainable is web_explainable
+        assert context["data_timeseries"] == {str(hour): float(hour) for hour in range(168)}
+        assert context["display_unit"] == "cpu core"
+        assert context["literal_formula"] == "saved formula"
+        assert context["ancestors_mapped_to_symbols_list"] == ["source"]
+
     def test_get_web_explainable_from_attr_wraps_quantity_inside_dict(self):
         scalar = ExplainableQuantity(1 * u.dimensionless, label="scalar")
         dict_wrapper = SimpleNamespace(efootprint_object={"system-id": scalar})

@@ -79,7 +79,7 @@
                                value="{{ profile.baseline }}" step="0.1" required data-profile-baseline
                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline_error"
                                {% if not field.can_be_negative %}min="0"{% endif %}>
-                        <span class="input-group-text">{{ builder.default.unit }}</span>
+                        <span class="input-group-text" data-weekly-unit>{{ builder.default.unit }}</span>
                         <div class="invalid-feedback" id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline_error"
                              data-profile-baseline-error></div>
                     </div>

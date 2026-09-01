@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
 from efootprint.builders.timeseries import WeeklyPatternValidationError
+from efootprint.constants.units import u
+from efootprint.core.usage.edge.recurrent_edge_component_need import RecurrentEdgeComponentNeed
 from efootprint.utils.display import human_readable_unit
 from efootprint.utils.tools import get_init_signature_params
 
@@ -17,6 +19,14 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     weekly_hour_labels,
 )
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
+
+
+EDGE_COMPONENT_NEED_UNIT_FAMILY = (
+    u.cpu_core,
+    u.bit_ram,
+    u.bit_stored,
+    u.concurrent,
+)
 
 
 def _error(path: str, code: str, message: str) -> dict[str, str]:
@@ -92,6 +102,16 @@ def _preview_context(preview_id: str, request_sequence: str, errors=None, chart_
     }
 
 
+def _allowed_units(modeling_class: type, field_name: str) -> tuple:
+    """Return server-owned preview units; relationship-specific binding remains a save concern."""
+    expected_value = modeling_class.default_values.get(field_name)
+    if expected_value is not None:
+        return (expected_value.value.units,)
+    if field_name == "recurrent_need" and issubclass(modeling_class, RecurrentEdgeComponentNeed):
+        return EDGE_COMPONENT_NEED_UNIT_FAMILY
+    return ()
+
+
 @require_POST
 def timeseries_preview(request):
     """Render a draft chart response without hydrating or persisting a model."""
@@ -135,13 +155,18 @@ def timeseries_preview(request):
     if field_name not in modeling_class.attributes_that_can_have_negative_values():
         errors.extend(_negative_value_errors(form_inputs))
 
-    expected_value = modeling_class.default_values.get(field_name)
-    if expected_value is not None and not builder.value.is_compatible_with(expected_value.value.units):
+    allowed_units = _allowed_units(modeling_class, field_name)
+    if allowed_units and not any(builder.value.is_compatible_with(unit) for unit in allowed_units):
+        if len(allowed_units) == 1:
+            unit_message = f"Unit must be compatible with {human_readable_unit(allowed_units[0])}."
+        else:
+            allowed_units_label = ", ".join(human_readable_unit(unit) for unit in allowed_units)
+            unit_message = f"Unit must be compatible with one of: {allowed_units_label}."
         errors.append(
             _error(
                 "unit",
                 "incompatible_unit",
-                ("Unit must be compatible with " f"{human_readable_unit(expected_value.value.units)}."),
+                unit_message,
             )
         )
     if errors:
@@ -150,11 +175,6 @@ def timeseries_preview(request):
 
     labels = weekly_hour_labels()
     data, extra = prepare_recurrent_quantity_data(builder, labels)
-    if len(data) != 168:
-        errors = [_error("form_inputs", "invalid_week_length", "A recurrent preview must contain exactly 168 hours.")]
-        context = _preview_context(preview_id, request_sequence, errors=errors)
-        return render(request, "model_builder/side_panels/timeseries_preview.html", context)
-
     chart_config = {
         "type": "line",
         "data": {

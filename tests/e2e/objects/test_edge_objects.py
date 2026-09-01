@@ -375,5 +375,17 @@ class TestEdgeObjects:
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.select_option("edge_component", cpu_component_name)
         expect(page.locator("#RecurrentEdgeComponentNeed_recurrent_need__constant_unit")).to_have_value("cpu_core")
+        page.locator("#RecurrentEdgeComponentNeed_recurrent_need__builder_selector").select_option("weekly_pattern")
+        preview_canvas = page.locator(
+            "#RecurrentEdgeComponentNeed_recurrent_need__builder [data-timeseries-preview-canvas]"
+        )
+        page.wait_for_function(
+            "([canvas, unit]) => canvas._timeseriesPreviewChart?.options.scales.y.title.text === unit",
+            arg=[preview_canvas.element_handle(), "cpu core"],
+        )
         side_panel.select_option("edge_component", ram_component_name)
         expect(page.locator("#RecurrentEdgeComponentNeed_recurrent_need__constant_unit")).to_have_value("GB_ram")
+        page.wait_for_function(
+            "([canvas, unit]) => canvas._timeseriesPreviewChart?.options.scales.y.title.text === unit",
+            arg=[preview_canvas.element_handle(), "GB ram"],
+        )

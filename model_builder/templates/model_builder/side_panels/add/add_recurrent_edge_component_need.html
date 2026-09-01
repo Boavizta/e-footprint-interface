@@ -34,8 +34,9 @@
                     const selectedComponentId = componentSelect.value;
                     const compatibleUnit = componentUnitsMapping[selectedComponentId];
 
-                    if (compatibleUnit) {
+                    if (compatibleUnit && unitInput.value !== compatibleUnit) {
                         unitInput.value = compatibleUnit;
+                        unitInput.dispatchEvent(new CustomEvent('timeseries-unit:changed', {bubbles: true}));
                     }
                 }
             }

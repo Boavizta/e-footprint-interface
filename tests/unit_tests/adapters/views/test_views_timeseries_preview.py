@@ -6,6 +6,7 @@ import re
 from copy import deepcopy
 
 import numpy as np
+import pytest
 from django.test import RequestFactory
 from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWeeklyPattern
 
@@ -124,4 +125,53 @@ def test_incompatible_unit_is_rejected_from_field_signature():
 
     errors = json.loads(response_attribute(response, "data-errors"))
     assert errors[0]["path"] == "unit"
+    assert errors[0]["code"] == "incompatible_unit"
+
+
+@pytest.mark.parametrize("unit", ["cpu_core", "GB_ram", "GB_stored", "concurrent"])
+def test_relationship_dependent_component_need_accepts_only_server_owned_unit_family(unit):
+    inputs = weekly_inputs()
+    inputs["unit"] = unit
+
+    response = timeseries_preview(
+        preview_request(
+            inputs,
+            object_type="RecurrentEdgeComponentNeed",
+            field_name="recurrent_need",
+        )
+    )
+
+    assert response_attribute(response, "data-success") == "true"
+
+
+def test_relationship_dependent_component_need_rejects_arbitrary_unit():
+    inputs = weekly_inputs()
+    inputs["unit"] = "meter"
+
+    response = timeseries_preview(
+        preview_request(
+            inputs,
+            object_type="RecurrentEdgeComponentNeed",
+            field_name="recurrent_need",
+        )
+    )
+
+    errors = json.loads(response_attribute(response, "data-errors"))
+    assert errors[0]["path"] == "unit"
+    assert errors[0]["code"] == "incompatible_unit"
+
+
+def test_relationship_dependent_component_need_subclass_rejects_arbitrary_unit():
+    inputs = weekly_inputs()
+    inputs["unit"] = "meter"
+
+    response = timeseries_preview(
+        preview_request(
+            inputs,
+            object_type="RecurrentEdgeStorageNeed",
+            field_name="recurrent_need",
+        )
+    )
+
+    errors = json.loads(response_attribute(response, "data-errors"))
     assert errors[0]["code"] == "incompatible_unit"

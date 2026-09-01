@@ -54,6 +54,71 @@ test("valid continuous edits debounce preview requests and keep only the latest 
     jest.useRealTimers();
 });
 
+test("component-driven unit changes refresh the active preview immediately", () => {
+    jest.useFakeTimers();
+    window.htmx = {ajax: jest.fn()};
+    const editor = selectWeeklyBuilder();
+    jest.runOnlyPendingTimers();
+    const callsBeforeUnitChange = window.htmx.ajax.mock.calls.length;
+    const unitInput = document.getElementById("RecurrentEdgeProcess_recurrent_compute_needed__constant_unit");
+
+    unitInput.value = "GB_ram";
+    unitInput.dispatchEvent(new CustomEvent("timeseries-unit:changed", {bubbles: true}));
+    jest.runOnlyPendingTimers();
+
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(callsBeforeUnitChange + 1);
+    const values = window.htmx.ajax.mock.calls.at(-1)[2].values;
+    expect(JSON.parse(values.form_inputs).unit).toBe("GB_ram");
+    expect([...editor.querySelectorAll("[data-weekly-unit]")].map((element) => element.textContent.trim()))
+        .toEqual(["GB_ram", "GB_ram", "GB_ram"]);
+    jest.useRealTimers();
+});
+
+test("replacement and HTMX cleanup abort active preview requests", () => {
+    jest.useFakeTimers();
+    const abortedSources = [];
+    window.htmx = {ajax: jest.fn((_method, _url, config) => {
+        config.source.addEventListener("htmx:abort", function () { abortedSources.push(config.source); });
+        return new Promise(function () {});
+    })};
+    const editor = selectWeeklyBuilder();
+    jest.runOnlyPendingTimers();
+    const firstSource = window.htmx.ajax.mock.calls[0][2].source;
+
+    const baseline = editor.querySelector("[data-profile-baseline]");
+    baseline.value = "4";
+    baseline.dispatchEvent(new Event("input", {bubbles: true}));
+    expect(abortedSources).toEqual([firstSource]);
+    jest.advanceTimersByTime(300);
+    const secondSource = window.htmx.ajax.mock.calls[1][2].source;
+
+    document.querySelector("[data-timeseries-builder]").dispatchEvent(new CustomEvent("htmx:beforeCleanupElement", {
+        bubbles: true,
+        detail: {elt: document.querySelector("[data-timeseries-builder]")},
+    }));
+
+    expect(abortedSources).toEqual([firstSource, secondSource]);
+    jest.useRealTimers();
+});
+
+test("latest preview transport failures retain the chart and report local status", async () => {
+    jest.useFakeTimers();
+    window.htmx = {ajax: jest.fn(() => Promise.reject(new Error("network unavailable")))};
+    const chart = {sentinel: true};
+    document.querySelector("[data-timeseries-preview-canvas]")._timeseriesPreviewChart = chart;
+
+    selectWeeklyBuilder();
+    jest.runOnlyPendingTimers();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(document.querySelector("[data-timeseries-preview-canvas]")._timeseriesPreviewChart).toBe(chart);
+    expect(document.querySelector("[data-timeseries-preview-status]").textContent).toContain(
+        "could not be refreshed"
+    );
+    jest.useRealTimers();
+});
+
 test("range bounds refresh on commit while discrete day actions refresh immediately", () => {
     jest.useFakeTimers();
     window.htmx = {ajax: jest.fn()};
