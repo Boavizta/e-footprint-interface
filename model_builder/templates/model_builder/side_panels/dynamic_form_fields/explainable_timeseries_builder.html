@@ -3,7 +3,9 @@
      data-preview-id="{{ field.web_id }}__preview" class="weekly-timeseries-builder">
     {% if field.show_builder_selector %}
         <div class="weekly-builder-mode mb-2">
-            <label class="form-label" for="{{ field.web_id }}__builder_selector">Definition</label>
+            <label class="visually-hidden" for="{{ field.web_id }}__builder_selector">
+                Definition method for {{ field.label }}
+            </label>
             <select class="form-select form-select-sm" id="{{ field.web_id }}__builder_selector" data-builder-selector
                     aria-describedby="{{ field.web_id }}__weekly_error">
                 {% for builder in field.builders %}

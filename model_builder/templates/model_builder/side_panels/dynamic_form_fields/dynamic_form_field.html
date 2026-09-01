@@ -1,6 +1,9 @@
 <div id="field-group-{{ field.web_id }}"
-     class="mb-3{% if field.input_type == 'explainable_timeseries_builder' %} timeseries-field-group{% endif %}{% if field.hide_field %} d-none{% endif %}">
+    class="mb-3{% if field.input_type == 'explainable_timeseries_builder' %} timeseries-field-group{% endif %}{% if field.hide_field %} d-none{% endif %}">
     {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
+    {% if field.input_type == 'explainable_timeseries_builder' %}
+        <div class="timeseries-field-content">
+    {% endif %}
     {% if field.metadata.source %}
         <div class="input-row d-flex align-items-center gap-2">
             <div class="flex-grow-1">
@@ -11,5 +14,8 @@
         {% include "model_builder/side_panels/dynamic_form_fields/source.html" with source_dom_id=field.web_id source_name_prefix=field.web_id source_meta_source=field.metadata.source source_meta_comment=field.metadata.comment source_meta_available=field.metadata.available_sources %}
     {% else %}
         {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
+    {% endif %}
+    {% if field.input_type == 'explainable_timeseries_builder' %}
+        </div>
     {% endif %}
 </div>

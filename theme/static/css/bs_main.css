@@ -21017,24 +21017,19 @@ input:disabled {
 
 .timeseries-field-group {
   margin-bottom: 1.25rem !important;
+}
+
+.timeseries-field-content {
+  margin-top: 0.125rem;
   padding: 0 0 1rem 0.75rem;
   border-bottom: 1px solid var(--gray-200);
   border-left: 2px solid var(--gray-300);
 }
 
-.weekly-builder-mode .form-label {
-  margin-bottom: 0.2rem;
-  color: var(--gray-400);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 .weekly-builder-mode .form-select {
-  min-height: 2.25rem;
+  min-height: 2rem;
   color: var(--gray-500);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .weekly-pattern-summary {
