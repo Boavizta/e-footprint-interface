@@ -1,6 +1,6 @@
 # Weekly-pattern builder for recurrent quantities — Tasks
 
-**Status:** Tasks — under review.
+**Status:** Implementation complete.
 **Spec:** [`spec.html`](spec.html). **Plan:** [`plan.html`](plan.html).
 
 ## Task 1 — Add the library weekly-pattern builder
