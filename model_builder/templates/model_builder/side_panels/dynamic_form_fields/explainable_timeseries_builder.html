@@ -15,23 +15,9 @@
     {% endif %}
 
     <div class="weekly-pattern-preview-shell" data-timeseries-preview-column>
-        <aside class="weekly-pattern-preview" aria-live="polite" data-timeseries-preview
+        <aside class="weekly-pattern-preview timeseries-preview-panel text-start shadow-custom" aria-live="polite" data-timeseries-preview
                data-preview-id="{{ field.web_id }}__preview" data-latest-request-sequence="0">
-            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-                <div>
-                    <p class="weekly-pattern-preview__eyebrow mb-1">Live preview</p>
-                    <h3 class="weekly-pattern-preview__title mb-1">Generated week</h3>
-                    <p class="small text-muted mb-0">{{ field.label }}</p>
-                </div>
-                <span class="weekly-pattern-preview__badge">168 hours</span>
-            </div>
-            <div class="weekly-pattern-preview__chart">
-                <canvas aria-label="Preview of the generated 168-hour weekly timeseries" role="img"
-                        data-timeseries-preview-canvas></canvas>
-            </div>
-            <p class="weekly-pattern-preview__status mb-0" data-timeseries-preview-status>
-                Preparing preview…
-            </p>
+            {% include "model_builder/side_panels/timeseries_preview_panel.html" with preview_title="Weekly quantity projection" preview_subtitle=field.label preview_canvas_label="Preview of the generated 168-hour weekly timeseries" preview_status="Preparing preview…" %}
         </aside>
         <div class="d-none" id="{{ field.web_id }}__preview_responses"
              data-timeseries-preview-responses></div>

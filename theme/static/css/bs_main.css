@@ -21000,6 +21000,10 @@ input:disabled {
   position: fixed;
   height: 70vh !important;
   top: 15vh !important;
+}
+
+.timeseries-preview-panel,
+#chart-calculated-attribute {
   border-radius: 15px;
   background-color: #FFFFFF;
   padding: 2rem;
@@ -21060,8 +21064,7 @@ input:disabled {
   font-size: 0.6875rem;
 }
 
-.weekly-pattern-unit,
-.weekly-pattern-preview__badge {
+.weekly-pattern-unit {
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
@@ -21242,34 +21245,25 @@ input:disabled {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: 1.5rem;
-  border: 1px solid var(--gray-200);
-  border-radius: 0.9375rem;
-  background: #fff;
-  box-shadow: 0 1rem 3rem rgba(31, 41, 55, 0.1);
 }
 
-.weekly-pattern-preview__eyebrow {
-  color: var(--new-primary);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+.timeseries-preview-panel__title {
+  flex: 0 0 auto;
 }
 
-.weekly-pattern-preview__title {
-  color: var(--gray-500);
-  font-size: 1.25rem;
-  font-weight: 700;
+.timeseries-preview-panel__subtitle {
+  flex: 0 0 auto;
+  color: var(--gray-400);
+  font-size: 0.8rem;
 }
 
-.weekly-pattern-preview__chart {
+.timeseries-preview-panel__chart {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
 }
 
-.weekly-pattern-preview__status {
+.timeseries-preview-panel__status {
   margin-top: 0.875rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--gray-200);
@@ -21551,11 +21545,10 @@ input:disabled {
 @media (min-width: 992px) {
   .weekly-pattern-preview-shell {
     position: fixed;
-    top: max(15vh, 9.5rem);
+    top: 15vh;
     right: 33vw;
     width: 50vw;
-    height: min(70vh, 100vh - 13.5rem);
-    padding-right: 1.5rem;
+    height: 70vh;
   }
 }
 @media (min-width: 576px) and (max-width: 991.98px) {
@@ -21577,7 +21570,6 @@ input:disabled {
   }
   .weekly-pattern-preview {
     padding: 1rem;
-    box-shadow: none;
   }
 }
 .width-0 {

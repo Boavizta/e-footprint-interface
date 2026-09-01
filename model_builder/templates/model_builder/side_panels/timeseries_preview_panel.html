@@ -1,0 +1,34 @@
+<h5 class="timeseries-preview-panel__title my-2">
+    <b>{{ preview_title }}</b>
+</h5>
+{% if preview_subtitle %}
+    <p class="timeseries-preview-panel__subtitle mb-2">{{ preview_subtitle }}</p>
+{% endif %}
+{% if preview_controls == "hourly" %}
+    <div class="row align-items-center my-2">
+        <div class="col-auto">
+            <label for="display_granularity" class="form-label w-100 text-start fs-xl">Time period</label>
+            <select class="form-select light-select fs-xl height-30"
+                    id="display_granularity"
+                    name="display_granularity"
+                    _="on input createOrUpdateTimeSeriesChart()">
+                <option value="month" selected>Month</option>
+                <option value="year">Year</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-white border border-1 border-body-tertiary rounded-pill fs-xl"
+                    id="reset_zoom"
+                    onclick="window.chart.resetZoom();">
+                Reset zoom
+            </button>
+        </div>
+    </div>
+{% endif %}
+<div class="col-12 mt-2 flex-grow-1 timeseries-preview-panel__chart">
+    <canvas{% if preview_canvas_id %} id="{{ preview_canvas_id }}"{% else %} data-timeseries-preview-canvas{% endif %}
+            {% if preview_canvas_label %}aria-label="{{ preview_canvas_label }}" role="img"{% endif %}></canvas>
+</div>
+{% if preview_status %}
+    <p class="timeseries-preview-panel__status mb-0" data-timeseries-preview-status>{{ preview_status }}</p>
+{% endif %}

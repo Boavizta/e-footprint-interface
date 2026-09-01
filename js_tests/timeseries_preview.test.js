@@ -114,8 +114,23 @@ test("template gives the weekly preview its own external surface", () => {
 
     expect(preview.classList).toContain("weekly-pattern-preview-shell");
     expect(preview.querySelector("[data-timeseries-preview]").classList).toContain("weekly-pattern-preview");
+    expect(preview.querySelector("[data-timeseries-preview]").classList).toContain("timeseries-preview-panel");
+    expect(preview.querySelector(".timeseries-preview-panel__chart")).not.toBeNull();
     expect(editor.className).not.toContain("col-");
     expect(preview.className).not.toContain("col-");
+});
+
+test("weekly and hourly previews share the same panel template structure", () => {
+    const weeklyPanel = document.querySelector("[data-timeseries-preview]");
+    const weeklyStructure = Array.from(weeklyPanel.children).map((child) => child.className);
+
+    document.body.innerHTML = HOURLY_EDITOR_FIXTURE;
+    const hourlyPanel = document.getElementById("chartTimeseries");
+
+    expect(hourlyPanel.classList).toContain("timeseries-preview-panel");
+    expect(hourlyPanel.querySelector(".timeseries-preview-panel__title")).not.toBeNull();
+    expect(hourlyPanel.querySelector(".timeseries-preview-panel__chart")).not.toBeNull();
+    expect(weeklyStructure).toContain("timeseries-preview-panel__title my-2");
 });
 
 test("hourly granularity switches between server-prepared series without another request", () => {

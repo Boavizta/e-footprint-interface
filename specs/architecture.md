@@ -200,6 +200,8 @@ timeseries, while saved-object callers add their web wrapper, formula, and ances
 Hourly growth drafts use the same adapter and construct `ExplainableHourlyQuantitiesFromFormInputs` server-side. The
 response contains only calendar-month and calendar-year aggregates; the browser keeps those bounded series and switches
 granularity locally without projecting or aggregating the hourly values again.
+Hourly and weekly draft charts also share `timeseries_preview_panel.html`; their outer placement and timescale-specific
+controls differ, while the preview title, chart surface, spacing, and typography remain one presentational convention.
 For relationship-dependent component needs, the preview accepts only the closed server-owned family of edge-component
 unit dimensions; binding the chosen unit to the selected component instance remains an authoritative save-time guard.
 `timeseries_preview.js` owns request transport/cancellation, revision and newest-response selection, HTMX teardown, and
