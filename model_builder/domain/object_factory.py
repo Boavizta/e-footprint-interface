@@ -213,6 +213,13 @@ def edit_object_from_parsed_data(
         ) or (isinstance(annotation, type) and issubclass(annotation, ExplainableObjectDict))
         if is_explainable_object_dict:
             new_entries = _build_explainable_object_dict_entries(value, model_web, attr_name)
+            # The compact dict-count form submits only magnitudes. Reuse existing entry objects
+            # when their authored value is unchanged so an edit to one row cannot erase the
+            # source, confidence, comment, or label carried by untouched sibling rows.
+            for key, new_entry in new_entries.items():
+                current_entry = current_value.get(key)
+                if current_entry is not None and new_entry == current_entry:
+                    new_entries[key] = current_entry
             # Dict equality (!=) ignores key order, so a pure reorder would be missed. Compare the
             # ordered items so reordering an ordered dict (e.g. usage journey steps) is detected.
             if list(new_entries.items()) != list(current_value.items()):
