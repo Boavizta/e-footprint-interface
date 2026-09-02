@@ -99,6 +99,8 @@ def build_dict_count_field_from_annotation(
         field["min_items"] = field_config["min_items"]
     if field_config.get("min_count"):
         field["min_count"] = field_config["min_count"]
+    if field_config.get("strictly_positive"):
+        field["strictly_positive"] = True
     return field
 
 

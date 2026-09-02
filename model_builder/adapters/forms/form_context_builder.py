@@ -167,6 +167,7 @@ class FormContextBuilder:
             "title": config.get("membership_title", "Membership"),
             "add_to_label": config.get("add_to_label", "Add"),
             "min_count": config.get("min_count", 0),
+            "strictly_positive": config.get("strictly_positive", False),
         }
 
     @staticmethod

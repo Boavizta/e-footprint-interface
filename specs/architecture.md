@@ -347,7 +347,7 @@ required, preselect the first available journey during creation, and set `nests_
 generic mirrored-card traversal does not treat these references as rendered ownership containers. Journeys therefore
 remain single top-level cards; `links_to` emits one canvas edge from the pattern to each selected journey.
 
-`field_ui_config.json` supplies `min_items: 1` (and `min_count: 1` for web weights). The shared widgets expose those
+`field_ui_config.json` supplies `min_items: 1` and `strictly_positive: true` for required web weights. The shared widgets expose those
 limits as data attributes, disable removal of the final row, and reject non-positive weights before submission. These
 are usability guards only: malformed requests still flow through the normal form parser to the library constructors,
 which remain authoritative for non-empty, positive-weight, and duplicate-free invariants. Deleting a journey is also

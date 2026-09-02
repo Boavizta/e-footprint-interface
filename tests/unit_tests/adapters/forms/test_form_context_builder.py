@@ -99,7 +99,7 @@ class TestParentGroupMembershipField:
             == device_context["parent_group_membership_field"]["tooltip"]
 
 
-def test_required_weighted_membership_hydrates_positive_minimum():
+def test_required_weighted_membership_hydrates_exclusive_positive_constraint():
     section = FormContextBuilder._hydrate_membership_section({
         "parent_class_name": "UsagePattern",
         "attr_name": "usage_journeys",
@@ -107,7 +107,8 @@ def test_required_weighted_membership_hydrates_positive_minimum():
         "available_parents": [],
     })
 
-    assert section["min_count"] == 0.000001
+    assert section["min_count"] == 0
+    assert section["strictly_positive"] is True
     assert section["title"] == "Used in usage patterns"
 
 

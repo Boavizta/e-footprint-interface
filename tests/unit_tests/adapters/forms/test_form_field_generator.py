@@ -227,7 +227,8 @@ def test_usage_pattern_creation_preselects_one_positive_weighted_journey():
     assert field["selected_json"] == '{"mock_journey_efootprint_id": 1.0}'
     assert field["count_label"] == "Journeys per pattern occurrence"
     assert field["min_items"] == 1
-    assert field["min_count"] == 0.000001
+    assert "min_count" not in field
+    assert field["strictly_positive"] is True
 
 
 def test_edge_usage_pattern_creation_preselects_one_bundle():

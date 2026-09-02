@@ -176,7 +176,10 @@ def render_source_table_row(case_ctx):
 # ---------------------------------------------------------------------------
 
 
-def dict_count_field(web_id, options, selected=None, count_label=None, ordered=False, min_items=0, min_count=0):
+def dict_count_field(
+    web_id, options, selected=None, count_label=None, ordered=False,
+    min_items=0, min_count=0, strictly_positive=False,
+):
     selected = selected or {}
     return {
         "web_id": web_id,
@@ -187,6 +190,7 @@ def dict_count_field(web_id, options, selected=None, count_label=None, ordered=F
         "ordered": ordered,
         "min_items": min_items,
         "min_count": min_count,
+        "strictly_positive": strictly_positive,
     }
 
 
@@ -215,7 +219,12 @@ DICT_COUNT_CASES = {
         selected={"journey-1": 1},
         count_label="Journeys per pattern occurrence",
         min_items=1,
-        min_count=0.000001,
+        strictly_positive=True,
+    ),
+    "dict_count_untrusted_label": dict_count_field(
+        web_id="Test_counts",
+        options=[{"value": "unsafe", "label": '<img src=x onerror="alert(1)">'}],
+        selected={"unsafe": 1},
     ),
 }
 
@@ -239,6 +248,17 @@ SELECT_MULTIPLE_CASES = {
         "selected_json": json.dumps([{"value": "bundle-1", "label": "Bundle 1"}]),
         "unselected_json": json.dumps([{"value": "bundle-2", "label": "Bundle 2"}]),
     },
+    "select_multiple_untrusted_label": {
+        "web_id": "Test_values",
+        "label": "Values",
+        "tooltip": None,
+        "ordered": False,
+        "min_items": 0,
+        "selected": [{"value": "unsafe", "label": '<img src=x onerror="alert(1)">'}],
+        "unselected": [],
+        "selected_json": json.dumps([{"value": "unsafe", "label": '<img src=x onerror="alert(1)">'}]),
+        "unselected_json": "[]",
+    },
 }
 
 
@@ -261,6 +281,16 @@ INLINE_COUNT_CASES = {
         "parent_name": "Test Journey",
         "parent_efootprint_id": "journey-1",
         "entry_efootprint_id": "step-1",
+        "count_only": True,
+    },
+    "inline_count_strictly_positive": {
+        "entry_count": "0.5",
+        "min_val": 0,
+        "strictly_positive": True,
+        "step": "any",
+        "parent_name": "Pattern",
+        "parent_efootprint_id": "pattern-1",
+        "entry_efootprint_id": "journey-1",
         "count_only": True,
     },
 }

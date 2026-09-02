@@ -1,162 +1,170 @@
-function _getDictCountSelectedMap(fieldId) {
-    return convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
-}
+(function () {
+    "use strict";
 
-function _getDictCountAvailableOptions(fieldId) {
-    return convertStringLikeJsonToRealJsonFromElementWeb("available_data_" + fieldId);
-}
+    function state(fieldId) { return document.getElementById("selected_data_" + fieldId); }
+    function selected(fieldId) { return convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId); }
+    function options(fieldId) { return convertStringLikeJsonToRealJsonFromElementWeb("available_data_" + fieldId); }
+    function write(fieldId, value) { state(fieldId).dataset.json = convertJsonToStringLikeDjango(value); }
+    function minimum(fieldId, name) { return Number(state(fieldId).dataset[name] || 0); }
 
-function _setDictCountSelectedMap(fieldId, selectedMap) {
-    document.getElementById("selected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(selectedMap);
-}
-
-function _isDictCountOrdered(fieldId) {
-    return document.getElementById("selected_data_" + fieldId).dataset.ordered === "true";
-}
-
-function _getDictCountMinimum(fieldId, name) {
-    return Number(document.getElementById("selected_data_" + fieldId).dataset[name] || 0);
-}
-
-function moveDictCountEntry(fieldId, objectId, direction) {
-    const selectedMap = _getDictCountSelectedMap(fieldId);
-    const keys = Object.keys(selectedMap);
-    const index = keys.indexOf(objectId);
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (index === -1 || targetIndex < 0 || targetIndex >= keys.length) {
-        return;
-    }
-    [keys[index], keys[targetIndex]] = [keys[targetIndex], keys[index]];
-    const reorderedMap = {};
-    keys.forEach((key) => { reorderedMap[key] = selectedMap[key]; });
-    _setDictCountSelectedMap(fieldId, reorderedMap);
-    refreshDictCountField(fieldId);
-    tagFormAsModified();
-}
-
-function addDictCountEntry(fieldId) {
-    const selectElement = document.getElementById("select-new-object-" + fieldId);
-    const objectId = selectElement.value;
-    if (!objectId) {
-        return;
+    function button(label, action, fieldId, objectId, direction, text) {
+        const element = document.createElement("button");
+        element.type = "button";
+        element.className = "btn btn-white border-0 rounded-2 fs-xl p-2";
+        element.setAttribute("aria-label", label);
+        Object.assign(element.dataset, {action, fieldId});
+        if (objectId !== undefined) element.dataset.objectId = objectId;
+        if (direction !== undefined) element.dataset.direction = direction;
+        element.textContent = text;
+        return element;
     }
 
-    const selectedMap = _getDictCountSelectedMap(fieldId);
-    if (!selectedMap[objectId]) {
-        selectedMap[objectId] = 1;
-        _setDictCountSelectedMap(fieldId, selectedMap);
-    }
-    refreshDictCountField(fieldId);
-}
-
-function removeDictCountEntry(fieldId, objectId) {
-    const selectedMap = _getDictCountSelectedMap(fieldId);
-    if (Object.keys(selectedMap).length <= _getDictCountMinimum(fieldId, "minItems")) {
-        return;
-    }
-    delete selectedMap[objectId];
-    _setDictCountSelectedMap(fieldId, selectedMap);
-    refreshDictCountField(fieldId);
-    tagFormAsModified();
-}
-
-function updateDictCountEntry(fieldId, objectId, rawValue) {
-    const parsed = parseFloat(rawValue);
-    const selectedMap = _getDictCountSelectedMap(fieldId);
-    if (!Number.isFinite(parsed) || parsed < _getDictCountMinimum(fieldId, "minCount")) {
+    function moveDictCountEntry(fieldId, objectId, direction) {
+        const value = selected(fieldId);
+        const keys = Object.keys(value);
+        const index = keys.indexOf(objectId);
+        const target = direction === "up" ? index - 1 : index + 1;
+        if (index === -1 || target < 0 || target >= keys.length) return;
+        [keys[index], keys[target]] = [keys[target], keys[index]];
+        const reordered = {};
+        keys.forEach((key) => { reordered[key] = value[key]; });
+        write(fieldId, reordered);
         refreshDictCountField(fieldId);
-        return;
-    }
-    selectedMap[objectId] = parsed;
-    _setDictCountSelectedMap(fieldId, selectedMap);
-    refreshDictCountField(fieldId);
-    tagFormAsModified();
-}
-
-function refreshDictCountField(fieldId) {
-    const selectedMap = _getDictCountSelectedMap(fieldId);
-    const availableOptions = _getDictCountAvailableOptions(fieldId);
-    const tableElement = document.getElementById("objects-already-selected-for-" + fieldId);
-    const selectElement = document.getElementById("select-new-object-" + fieldId);
-    const hiddenInput = document.getElementById(fieldId);
-    const addButton = document.getElementById("add-btn-" + fieldId);
-
-    const unselectedOptions = availableOptions.filter((option) => selectedMap[option.value] === undefined);
-    selectElement.innerHTML = "";
-    unselectedOptions.forEach((option) => {
-        const newOption = document.createElement("option");
-        newOption.value = option.value;
-        newOption.textContent = option.label;
-        selectElement.appendChild(newOption);
-    });
-
-    // Iterate the selected map (insertion-ordered) rather than the alphabetical options list,
-    // so rows keep their domain order (e.g. usage journey steps in journey order).
-    const labelsByValue = new Map(availableOptions.map((option) => [option.value, option.label]));
-    const selectedEntries = Object.keys(selectedMap)
-        .filter((value) => labelsByValue.has(value))
-        .map((value) => ({value: value, label: labelsByValue.get(value)}));
-    if (selectedEntries.length === 0) {
-        tableElement.innerHTML = `
-            <tr>
-                <td colspan="3"><span class="text-muted">No values selected</span></td>
-            </tr>`;
-    } else {
-        const ordered = _isDictCountOrdered(fieldId);
-        tableElement.innerHTML = selectedEntries.map((option, index) => {
-            const upButton = ordered && index !== 0 ? `
-                    <button type="button" class="btn btn-white border-0 rounded-2 p-1" aria-label="Move up"
-                        onclick="event.stopPropagation();moveDictCountEntry('${fieldId}', '${option.value}', 'up')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/>
-                        </svg>
-                    </button>` : "";
-            const downButton = ordered && index !== selectedEntries.length - 1 ? `
-                    <button type="button" class="btn btn-white border-0 rounded-2 p-1" aria-label="Move down"
-                        onclick="event.stopPropagation();moveDictCountEntry('${fieldId}', '${option.value}', 'down')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
-                        </svg>
-                    </button>` : "";
-            return `
-            <tr>
-                <td class="width-70">${option.label}</td>
-                <td class="width-20">
-                    <input type="number" min="${_getDictCountMinimum(fieldId, "minCount")}" step="any" class="form-control"
-                        value="${selectedMap[option.value]}"
-                        onchange="event.stopPropagation();updateDictCountEntry('${fieldId}', '${option.value}', this.value)">
-                </td>
-                <td class="width-10 text-end text-nowrap">${upButton}${downButton}
-                    <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2"
-                        ${selectedEntries.length <= _getDictCountMinimum(fieldId, "minItems") ? "disabled" : ""}
-                        onclick="event.stopPropagation();removeDictCountEntry('${fieldId}', '${option.value}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                        </svg>
-                    </button>
-                </td>
-            </tr>`;
-        }).join("");
+        tagFormAsModified();
     }
 
-    const disabled = unselectedOptions.length === 0;
-    if (disabled) {
-        addButton.setAttribute("disabled", "true");
-        selectElement.setAttribute("disabled", "true");
-    } else {
-        addButton.removeAttribute("disabled");
-        selectElement.removeAttribute("disabled");
+    function addDictCountEntry(fieldId) {
+        const objectId = document.getElementById("select-new-object-" + fieldId)?.value;
+        if (!objectId) return;
+        const value = selected(fieldId);
+        if (value[objectId] === undefined) {
+            value[objectId] = 1;
+            write(fieldId, value);
+            tagFormAsModified();
+        }
+        refreshDictCountField(fieldId);
     }
 
-    hiddenInput.value = JSON.stringify(selectedMap);
-}
+    function removeDictCountEntry(fieldId, objectId) {
+        const value = selected(fieldId);
+        if (Object.keys(value).length <= minimum(fieldId, "minItems")) return;
+        delete value[objectId];
+        write(fieldId, value);
+        refreshDictCountField(fieldId);
+        tagFormAsModified();
+    }
 
-if (typeof module !== "undefined") {
-    module.exports = {
-        addDictCountEntry,
-        moveDictCountEntry,
-        removeDictCountEntry,
-        refreshDictCountField,
-        updateDictCountEntry,
-    };
-}
+    function updateDictCountEntry(fieldId, objectId, rawValue) {
+        const parsed = Number(rawValue);
+        const invalid = rawValue === "" || !Number.isFinite(parsed) || parsed < minimum(fieldId, "minCount")
+            || (state(fieldId).dataset.strictlyPositive === "true" && parsed <= 0);
+        if (invalid) {
+            refreshDictCountField(fieldId);
+            return;
+        }
+        const value = selected(fieldId);
+        value[objectId] = parsed;
+        write(fieldId, value);
+        refreshDictCountField(fieldId);
+        tagFormAsModified();
+    }
+
+    function emptyRow(message) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 3;
+        const span = document.createElement("span");
+        span.className = "text-muted";
+        span.textContent = message;
+        cell.appendChild(span);
+        row.appendChild(cell);
+        return row;
+    }
+
+    function refreshDictCountField(fieldId) {
+        const value = selected(fieldId);
+        const available = options(fieldId);
+        const table = document.getElementById("objects-already-selected-for-" + fieldId);
+        const select = document.getElementById("select-new-object-" + fieldId);
+        const hidden = document.getElementById(fieldId);
+        const add = document.getElementById("add-btn-" + fieldId);
+        if (!table || !select || !hidden || !add) return;
+
+        const pendingSelection = select.value;
+        const unselected = available.filter((item) => value[item.value] === undefined);
+        select.replaceChildren(...unselected.map((item) => {
+            const option = document.createElement("option");
+            option.value = item.value;
+            option.textContent = item.label;
+            return option;
+        }));
+        if (unselected.some((item) => String(item.value) === String(pendingSelection))) {
+            select.value = pendingSelection;
+        }
+
+        const labels = new Map(available.map((item) => [item.value, item.label]));
+        const entries = Object.keys(value).filter((id) => labels.has(id)).map((id) => ({id, label: labels.get(id)}));
+        if (!entries.length) {
+            table.replaceChildren(emptyRow("No values selected"));
+        } else {
+            const ordered = state(fieldId).dataset.ordered === "true";
+            table.replaceChildren(...entries.map((entry, index) => {
+                const row = document.createElement("tr");
+                const label = document.createElement("td");
+                label.className = "width-70";
+                label.textContent = entry.label;
+                const count = document.createElement("td");
+                count.className = "width-20";
+                const input = document.createElement("input");
+                input.type = "number";
+                input.min = String(minimum(fieldId, "minCount"));
+                input.step = "any";
+                input.className = "form-control";
+                input.value = value[entry.id];
+                Object.assign(input.dataset, {action: "update-dict-count", fieldId, objectId: entry.id});
+                count.appendChild(input);
+                const actions = document.createElement("td");
+                actions.className = "width-10 text-end text-nowrap";
+                if (ordered && index > 0) actions.appendChild(button("Move up", "move-dict-count", fieldId, entry.id, "up", "↑"));
+                if (ordered && index < entries.length - 1) actions.appendChild(button("Move down", "move-dict-count", fieldId, entry.id, "down", "↓"));
+                const remove = button("Remove", "remove-dict-count", fieldId, entry.id, undefined, "×");
+                remove.disabled = entries.length <= minimum(fieldId, "minItems");
+                actions.appendChild(remove);
+                row.append(label, count, actions);
+                return row;
+            }));
+        }
+        add.disabled = unselected.length === 0;
+        select.disabled = unselected.length === 0;
+        hidden.value = JSON.stringify(value);
+    }
+
+    function initializeIn(container) {
+        const nodes = [];
+        if (container?.matches?.("[data-dict-count-field]")) nodes.push(container);
+        if (container?.querySelectorAll) nodes.push(...container.querySelectorAll("[data-dict-count-field]"));
+        nodes.forEach((node) => refreshDictCountField(node.dataset.dictCountField));
+    }
+
+    if (document.documentElement.dataset.dictCountListenersBound !== "true") {
+        document.documentElement.dataset.dictCountListenersBound = "true";
+        document.addEventListener("click", function (event) {
+            const control = event.target.closest?.("[data-action]");
+            if (!control) return;
+            const {action, fieldId, objectId, direction} = control.dataset;
+            if (action === "add-dict-count") addDictCountEntry(fieldId);
+            else if (action === "remove-dict-count") removeDictCountEntry(fieldId, objectId);
+            else if (action === "move-dict-count") moveDictCountEntry(fieldId, objectId, direction);
+        });
+        document.addEventListener("change", function (event) {
+            const input = event.target.closest?.("[data-action='update-dict-count']");
+            if (input) updateDictCountEntry(input.dataset.fieldId, input.dataset.objectId, input.value);
+        });
+        document.addEventListener("DOMContentLoaded", () => initializeIn(document));
+        document.addEventListener("htmx:load", (event) => initializeIn(event.detail?.elt || event.target));
+    }
+
+    if (typeof module !== "undefined") {
+        module.exports = {addDictCountEntry, moveDictCountEntry, removeDictCountEntry, refreshDictCountField, updateDictCountEntry};
+    }
+}());

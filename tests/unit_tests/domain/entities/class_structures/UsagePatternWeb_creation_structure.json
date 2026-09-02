@@ -41,7 +41,7 @@
                 "selected_json": "{\"mock_journey_efootprint_id\": 1.0}",
                 "hide_field": false,
                 "min_items": 1,
-                "min_count": 1e-06
+                "strictly_positive": true
             },
             {
                 "web_id": "UsagePattern_devices",

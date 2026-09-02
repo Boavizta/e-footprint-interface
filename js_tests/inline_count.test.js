@@ -49,3 +49,22 @@ test.each(["0", "3", "1.25"])("valid numeric value %s reaches the change listene
     expect(accepted).toBe(true);
     expect(requestListener).toHaveBeenCalledTimes(1);
 });
+
+test("strictly-positive relationships reject zero without imposing an epsilon", () => {
+    document.body.innerHTML = fs.readFileSync(
+        path.join(__dirname, "fixtures", "inline_count_strictly_positive.html"), "utf8"
+    );
+    const field = input();
+    const requestListener = jest.fn();
+    field.addEventListener("change", requestListener);
+    field.dispatchEvent(new FocusEvent("focusin", {bubbles: true}));
+    field.value = "0";
+
+    expect(field.dispatchEvent(new Event("change", {bubbles: true, cancelable: true}))).toBe(false);
+    expect(field.value).toBe("0.5");
+    expect(requestListener).not.toHaveBeenCalled();
+
+    field.value = "0.000000000001";
+    expect(field.dispatchEvent(new Event("change", {bubbles: true, cancelable: true}))).toBe(true);
+    expect(requestListener).toHaveBeenCalledTimes(1);
+});

@@ -24,16 +24,18 @@
         id="add-btn-{{ field.web_id }}"
         type="button"
         class="btn btn-white border border-dark rounded-2 fs-xl p-2"
-        onclick="event.stopPropagation();tagFormAsModified();addDictCountEntry('{{ field.web_id }}')">
+        data-action="add-dict-count"
+        data-field-id="{{ field.web_id }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
         </svg>
     </button>
 </div>
-<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}" data-ordered="{{ field.ordered|yesno:"true,false" }}" data-min-items="{{ field.min_items|default:0 }}" data-min-count="{{ field.min_count|default:0 }}"></div>
+<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}"
+     data-dict-count-field="{{ field.web_id }}"
+     data-ordered="{{ field.ordered|yesno:"true,false" }}"
+     data-min-items="{{ field.min_items|default:0 }}"
+     data-min-count="{{ field.min_count|default:0 }}"
+     data-strictly-positive="{{ field.strictly_positive|yesno:"true,false" }}"></div>
 <div id="available_data_{{ field.web_id }}" data-json="{{ field.options_json }}"></div>
 <input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value="">
-
-<script>
-    refreshDictCountField('{{ field.web_id }}');
-</script>

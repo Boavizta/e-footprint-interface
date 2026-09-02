@@ -304,7 +304,7 @@
         "label": "Usage journeys",
         "count_label": "Journeys per pattern occurrence",
         "min_items": 1,
-        "min_count": 0.000001,
+        "strictly_positive": true,
         "membership_title": "Used in usage patterns",
         "add_to_label": "Add to pattern"
     },
