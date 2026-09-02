@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const {selectResponse} = require("../theme/static/scripts/timeseries_preview.js");
+const {scheduleRequest, selectResponse} = require("../theme/static/scripts/timeseries_preview.js");
 
 const EDITOR_FIXTURE = fs.readFileSync(
     path.join(__dirname, "fixtures", "weekly_pattern_default.html"), "utf8"
@@ -60,6 +60,33 @@ test("stale responses cannot update the active preview", () => {
     expect(selectResponse(responseFrom(SUCCESS_FIXTURE))).toBe(false);
     expect(window.Chart).not.toHaveBeenCalled();
     expect(region.querySelector("[data-timeseries-preview-status]").textContent.trim()).toBe("Preparing preview…");
+});
+
+test("delete readiness follows pending preview work", async () => {
+    jest.useFakeTimers();
+    const panel = document.createElement("div");
+    panel.id = "sidePanel";
+    const button = document.createElement("button");
+    button.dataset.waitForTimeseriesPreview = "";
+    button.dataset.timeseriesPreviewReady = "true";
+    panel.append(button, document.getElementById("sidePanelForm"));
+    document.body.appendChild(panel);
+    let resolveRequest;
+    window.htmx = {ajax: jest.fn(() => new Promise((resolve) => { resolveRequest = resolve; }))};
+    const region = panel.querySelector("[data-timeseries-preview]");
+
+    scheduleRequest(region, {delay: 10, values: {}});
+    expect(button.disabled).toBe(true);
+    expect(button.dataset.timeseriesPreviewReady).toBe("false");
+
+    jest.advanceTimersByTime(10);
+    expect(button.disabled).toBe(true);
+    resolveRequest();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(button.disabled).toBe(false);
+    expect(button.dataset.timeseriesPreviewReady).toBe("true");
+    jest.useRealTimers();
 });
 
 test("invalid newest response retains the last valid chart and publishes structured errors", () => {

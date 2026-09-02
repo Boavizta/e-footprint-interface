@@ -46,10 +46,22 @@
         return sequence;
     }
 
+    function updateDeleteReadiness(region) {
+        const panel = region?.closest("#sidePanel");
+        const deleteButton = panel?.querySelector("[data-wait-for-timeseries-preview]");
+        if (!deleteButton) return;
+        const pending = Array.from(panel.querySelectorAll("[data-timeseries-preview]")).some(function (candidate) {
+            return requestTimers.has(candidate) || activeRequests.has(candidate);
+        });
+        deleteButton.disabled = pending;
+        deleteButton.dataset.timeseriesPreviewReady = String(!pending);
+    }
+
     function finishRequest(region, activeRequest) {
         if (activeRequests.get(region) === activeRequest) activeRequests.delete(region);
         activeRequest.source.remove();
         if (!requestTimers.has(region) && !activeRequests.has(region)) managedRegions.delete(region);
+        updateDeleteReadiness(region);
     }
 
     function abortRequest(region) {
@@ -68,6 +80,7 @@
         beginRequestRevision(region);
         abortRequest(region);
         managedRegions.delete(region);
+        updateDeleteReadiness(region);
     }
 
     function handleTransportFailure(region, sequence, message) {
@@ -81,6 +94,7 @@
         const sink = owner?.querySelector("[data-timeseries-preview-responses]");
         if (!owner || !sink || Number(region.dataset.latestRequestSequence) !== sequence || !window.htmx?.ajax) {
             managedRegions.delete(region);
+            updateDeleteReadiness(region);
             return;
         }
 
@@ -91,6 +105,7 @@
         document.body.appendChild(source);
         const activeRequest = {source: source, sequence: sequence};
         activeRequests.set(region, activeRequest);
+        updateDeleteReadiness(region);
         const values = {
             ...detail.values,
             preview_id: region.dataset.previewId || owner.dataset.previewId,
@@ -135,6 +150,7 @@
             sendRequest(region, sequence, detail);
         }, detail.delay || 0);
         requestTimers.set(region, timer);
+        updateDeleteReadiness(region);
     }
 
     function previewRegionsIn(container) {
@@ -284,7 +300,7 @@
     if (typeof module !== "undefined" && module.exports) {
         module.exports = {
             cancelRequest, consumeResponses, destroyIn, destroyPreview, renderChart, renderSelectedSeries,
-            scheduleRequest, selectResponse, setPreviewVisibility,
+            scheduleRequest, selectResponse, setPreviewVisibility, updateDeleteReadiness,
         };
     }
 }());
