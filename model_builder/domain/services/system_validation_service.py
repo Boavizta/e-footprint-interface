@@ -58,7 +58,7 @@ class SystemValidationService:
         if uj_error:
             errors.append(uj_error)
 
-        # Check edge usage journeys have edge functions
+        # Check edge functionality bundles have edge functions
         euj_error = self._check_edge_usage_journeys_have_functions(model_web)
         if euj_error:
             errors.append(euj_error)
@@ -104,7 +104,7 @@ class SystemValidationService:
         return None
 
     def _check_edge_usage_journeys_have_functions(self, model_web: "ModelWeb") -> ValidationError | None:
-        """Check that edge usage journeys linked to patterns have at least one edge function."""
+        """Check that edge functionality bundles linked to patterns have at least one edge function."""
         journeys_without_functions = []
         for edge_usage_journey in model_web.edge_usage_journeys:
             if (len(edge_usage_journey.edge_usage_patterns) > 0
@@ -114,11 +114,11 @@ class SystemValidationService:
         if journeys_without_functions:
             return ValidationError(
                 message=(
-                    f"The following edge usage journey(s) have no edge function: {journeys_without_functions}. "
-                    f"Please add at least one edge function in each of the above edge usage journey(s), "
+                    f"The following functionality bundle(s) have no edge function: {journeys_without_functions}. "
+                    f"Please add at least one edge function in each of the above functionality bundle(s), "
                     f"so that the model can be computed.\n\n"
                     "(Alternatively, if they are work in progress, you can delete the edge usage patterns "
-                    "pointing to them: in that way the edge usage journeys will be ignored in the computation.)"
+                    "pointing to them: in that way the functionality bundles will be ignored in the computation.)"
                 ),
                 affected_objects=journeys_without_functions
             )

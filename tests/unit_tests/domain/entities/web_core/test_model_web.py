@@ -201,7 +201,9 @@ class TestToJsonHoldsOnlyReferencedSources:
     @staticmethod
     def _simple_model_web():
         from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.abstract_modeling_classes.source_objects import SourceValue
         from efootprint.constants.countries import Countries
+        from efootprint.constants.units import u
         from efootprint.core.hardware.device import Device
         from efootprint.core.hardware.network import Network
         from efootprint.core.hardware.server import Server
@@ -219,9 +221,9 @@ class TestToJsonHoldsOnlyReferencedSources:
         job = Job.from_defaults("Job", server=server)
         uj = UsageJourney("Journey", uj_steps=[UsageJourneyStep.from_defaults("Step", jobs=[job])])
         usage_pattern = UsagePattern(
-            "UP", usage_journey=uj, devices=[Device.from_defaults("Device")],
+            "UP", usage_journeys={uj: SourceValue(1 * u.dimensionless)}, devices=[Device.from_defaults("Device")],
             network=Network.from_defaults("Network"), country=Countries.FRANCE(),
-            hourly_usage_journey_starts=create_hourly_usage())
+            hourly_occurrences=create_hourly_usage())
         system = System("System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
         # Inputs-only so the loaded ModelWeb recomputes its whole cone on first read below.
         return ModelWeb(InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False)))
@@ -336,7 +338,9 @@ class TestGetEfootprintObjectsFromEfootprintType:
 
     def _model_web_with_france(self):
         from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.abstract_modeling_classes.source_objects import SourceValue
         from efootprint.constants.countries import Countries
+        from efootprint.constants.units import u
         from efootprint.core.hardware.device import Device
         from efootprint.core.hardware.network import Network
         from efootprint.core.hardware.server import Server
@@ -354,9 +358,9 @@ class TestGetEfootprintObjectsFromEfootprintType:
         job = Job.from_defaults("Job", server=server)
         uj = UsageJourney("Journey", uj_steps=[UsageJourneyStep.from_defaults("Step", jobs=[job])])
         usage_pattern = UsagePattern(
-            "UP", usage_journey=uj, devices=[Device.from_defaults("Device")],
+            "UP", usage_journeys={uj: SourceValue(1 * u.dimensionless)}, devices=[Device.from_defaults("Device")],
             network=Network.from_defaults("Network"), country=Countries.FRANCE(),
-            hourly_usage_journey_starts=create_hourly_usage())
+            hourly_occurrences=create_hourly_usage())
         system = System("System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
         repository = InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False))
         return ModelWeb(repository)

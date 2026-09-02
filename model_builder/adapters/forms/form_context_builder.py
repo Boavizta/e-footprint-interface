@@ -166,6 +166,7 @@ class FormContextBuilder:
             "section_id": f"{section['parent_class_name']}-{section['attr_name']}",
             "title": config.get("membership_title", "Membership"),
             "add_to_label": config.get("add_to_label", "Add"),
+            "min_count": config.get("min_count", 0),
         }
 
     @staticmethod

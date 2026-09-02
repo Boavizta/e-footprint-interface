@@ -102,7 +102,7 @@ def test_hourly_preview_returns_bounded_monthly_and_yearly_library_aggregates():
         preview_request(
             inputs,
             object_type="UsagePattern",
-            field_name="hourly_usage_journey_starts",
+            field_name="hourly_occurrences",
             builder="growth",
         )
     )
@@ -135,7 +135,7 @@ def test_hourly_preview_aggregates_raw_counts_exactly_across_calendar_boundaries
         preview_request(
             inputs,
             object_type="UsagePattern",
-            field_name="hourly_usage_journey_starts",
+            field_name="hourly_occurrences",
             builder="growth",
         )
     )
@@ -164,7 +164,7 @@ def test_hourly_preview_reports_invalid_builder_inputs_without_a_chart():
         preview_request(
             inputs,
             object_type="UsagePattern",
-            field_name="hourly_usage_journey_starts",
+            field_name="hourly_occurrences",
             builder="growth",
         )
     )
@@ -179,7 +179,7 @@ def test_hourly_preview_rejects_duration_beyond_the_form_limit_before_projection
         preview_request(
             hourly_inputs(duration_value=11),
             object_type="UsagePattern",
-            field_name="hourly_usage_journey_starts",
+            field_name="hourly_occurrences",
             builder="growth",
         )
     )

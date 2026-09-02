@@ -410,10 +410,10 @@ def test_middleware_populates_topology_after_real_edge_model_hydration(monkeypat
     monkeypatch.setattr(middleware_module.logger, "info", log.info)
     edge_pattern = EdgeUsagePattern(
         "Edge pattern",
-        edge_usage_journey=EdgeUsageJourney.from_defaults("Edge journey", edge_functions=[]),
+            edge_usage_journeys=[EdgeUsageJourney.from_defaults("Edge journey", edge_functions=[])],
         network=Network.wifi_network(),
         country=Countries.FRANCE(),
-        hourly_edge_usage_journey_starts=create_hourly_usage(),
+        hourly_deployment_starts=create_hourly_usage(),
     )
     system_data = system_to_json(System("Edge system", usage_patterns=[], edge_usage_patterns=[edge_pattern]))
 
@@ -438,7 +438,7 @@ def test_model_hydration_keeps_hours_unavailable_for_invalid_edge_duration(monke
     model_web = SimpleNamespace(
         usage_patterns=[],
         edge_usage_patterns=[
-            SimpleNamespace(modeling_obj=SimpleNamespace(hourly_edge_usage_journey_starts=invalid_hourly_values))
+            SimpleNamespace(modeling_obj=SimpleNamespace(hourly_deployment_starts=invalid_hourly_values))
         ],
     )
 

@@ -338,6 +338,21 @@ mirrored server-side by a guard in `link_dict_entry`).
 
 The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-entry count inputs on the parent panel; its options pass through the symmetric `filter_dict_count_options` hook (`EdgeDeviceGroupWeb` excludes the group itself and all its ancestors from the sub-group picker).
 
+### Required pattern-to-journey relationships
+
+Usage patterns are top-level drivers rather than ownership containers. `UsagePattern.usage_journeys` is a weighted dict
+(`dict_count`, labelled “Journeys per pattern occurrence”), while `EdgeUsagePattern.edge_usage_journeys` is a unique
+membership list (`select_multiple`, labelled “Functionality bundles”). Their wrappers declare the relationship as
+required, preselect the first available journey during creation, and set `nests_relationship_children = False` so the
+generic mirrored-card traversal does not treat these references as rendered ownership containers. Journeys therefore
+remain single top-level cards; `links_to` emits one canvas edge from the pattern to each selected journey.
+
+`field_ui_config.json` supplies `min_items: 1` (and `min_count: 1` for web weights). The shared widgets expose those
+limits as data attributes, disable removal of the final row, and reject non-positive weights before submission. These
+are usability guards only: malformed requests still flow through the normal form parser to the library constructors,
+which remain authoritative for non-empty, positive-weight, and duplicate-free invariants. Deleting a journey is also
+blocked when it is the sole member of a required pattern relationship.
+
 Dict relationships now cover journeys/steps/needs with a shared inline-count UX: canvas step rows and job chips render an always-visible "× n" count via `partials/inline_count.html` (count-only mode of `dict_entry_count_unlink.html` — no inline unlink there, unlike edge group entries), 0-count entries get the `dict-entry-zero` dimming class, and creation panels opened from a dict-relationship parent offer a `parent_link_count` multiplier field (prefilled at 1) that the create use case passes to `ObjectLinkingService.link_child_to_parent`.
 
 ### "Link existing" flow

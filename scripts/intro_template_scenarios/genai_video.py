@@ -136,7 +136,8 @@ def build_system() -> System:
 
     # Representative cadence: one social video per week (52 / year), flat over a year.
     usage_pattern = UsagePattern(
-        "Video production users", journey, [Device.laptop()], Network.wifi_network(),
+        "Video production users", {journey: SourceValue(1 * u.dimensionless)},
+        [Device.laptop()], Network.wifi_network(),
         Countries.FRANCE(),
         ExplainableHourlyQuantitiesFromFormInputs({
             "start_date": "2026-01-01",

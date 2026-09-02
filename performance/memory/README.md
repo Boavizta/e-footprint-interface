@@ -1,6 +1,11 @@
-# Memory performance laboratory
+# Production interface memory laboratory
 
-This folder makes interface memory investigations reproducible. It complements the historical
+This folder measures interface-only production costs: Django imports, session-to-`ModelWeb` hydration, rendered Sankey
+payloads, computation-memory monitoring, cgroup enforcement, and production-container calibration. Core calculation,
+cache-scaling, attribution-source lifetime, and retained-result investigations belong in the canonical
+[`e-footprint model-engine laboratory`](../../../e-footprint/performance/memory/README.md).
+
+It complements the historical
 [`MEMORY_LEAK_INVESTIGATION.md`](../../archives/investigations/MEMORY_LEAK_INVESTIGATION.md): the archive explains why
 freed objects do not necessarily reduce RSS, while this laboratory measures the current application and model topology.
 
@@ -143,18 +148,9 @@ is a topology calibration, not a general memory guarantee.
 | `warm-sankey` | Construct the same Sankey twice in one hydrated model; the second build reuses the matrix |
 | `results-primed-sankey` | Compute results and then Sankey on the same hydrated model, preserving any shared calculated slots |
 | `results-then-sankey` | Compute results, delete the model, collect, rehydrate, then compute Sankey to preserve allocator history without calculation-cache priming |
-| `attributed-manufacturing` | Compute and retain one unwrapped edge usage pattern's non-zero manufacturing attribution |
-| `attributed-usage` | Compute and retain one unwrapped edge usage pattern's non-zero usage attribution |
-| `attributed-both` | Compute and retain manufacturing then usage attribution for the same unwrapped target |
-| `attributed-five-usage` | Compute and retain usage attribution for five unwrapped, non-zero edge usage patterns |
 
 Synthetic usage patterns duplicate the first pattern and attach it to the same system. This intentionally stresses the
 shared-topology combinatorics seen in production while keeping the source fixture unchanged.
-
-The attributed scenarios emit each result's shape, dtype, start date, unit, label, period sum and magnitude SHA-256 in
-both an `ATTRIBUTED` record and the final `RESULT`. Run them in fresh processes with `--patterns 5`, using the same
-container command above and replacing `cold-sankey` with each attributed scenario name. Each target is deliberately
-unwrapped from its relationship context and every period sum must be positive before a measurement is accepted.
 
 ## Reading results
 

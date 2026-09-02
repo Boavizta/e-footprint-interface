@@ -92,7 +92,8 @@ class TestEdgeDeviceGroupWeb:
         assert len(sections) == 1
         assert sections[0]["attr_name"] == "sub_group_counts"
         assert sections[0]["memberships"] == [
-            {"parent_id": building.efootprint_id, "parent_name": "Building", "count": 2.0}]
+            {"parent_id": building.efootprint_id, "parent_name": "Building", "count": 2.0,
+             "can_remove": True, "unlink_disabled": False}]
         assert [parent["name"] for parent in sections[0]["available_parents"]] == ["Annex"]
 
     # --- pre_delete ---

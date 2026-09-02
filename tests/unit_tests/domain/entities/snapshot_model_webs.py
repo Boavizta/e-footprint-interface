@@ -7,7 +7,7 @@ from efootprint.all_classes_in_order import SERVICE_CLASSES
 from efootprint.constants.units import u
 
 
-@dataclass
+@dataclass(frozen=True)
 class _MockModelingObjectWeb:
     id: str
     name: str
@@ -29,6 +29,9 @@ def build_usage_pattern_model_web():
     mock_journey = MagicMock()
     mock_journey.name = "mock_journey"
     mock_journey.id = "mock_journey_efootprint_id"
+    mock_journey.efootprint_id = "mock_journey_efootprint_id"
+    mock_journey.modeling_obj = _MockModelingObjectWeb(
+        id="mock_journey_efootprint_id", name="mock_journey")
     model_web.usage_journeys = [mock_journey]
     model_web.edge_usage_journeys = [mock_journey]
     return model_web

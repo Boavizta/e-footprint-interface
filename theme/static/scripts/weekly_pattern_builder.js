@@ -490,6 +490,14 @@
         });
     });
 
+    document.addEventListener("submit", function (event) {
+        const form = event.target;
+        if (!form?.querySelectorAll) return;
+        form.querySelectorAll("[data-timeseries-builder]").forEach(function (root) {
+            activateSelectedBuilder(root);
+        });
+    }, true);
+
     document.addEventListener("change", function (event) {
         syncUnitsFromConstantInputs(event.target.closest("form"));
         const selector = event.target.closest("[data-builder-selector]");

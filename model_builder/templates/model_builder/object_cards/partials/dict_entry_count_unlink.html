@@ -15,6 +15,7 @@
 <button type="button"
         class="unlink-btn btn {{ extra_class }}"
         title="Remove from {{ parent_name }}"
+        {% if unlink_disabled %}disabled{% endif %}
         hx-post="/model_builder/unlink-dict-entry/{{ parent_efootprint_id }}/{{ entry_efootprint_id }}/"
         hx-swap="none"
         hx-vals='js:{...recomputationVals()}'>

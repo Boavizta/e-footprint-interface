@@ -14,6 +14,10 @@ function _isDictCountOrdered(fieldId) {
     return document.getElementById("selected_data_" + fieldId).dataset.ordered === "true";
 }
 
+function _getDictCountMinimum(fieldId, name) {
+    return Number(document.getElementById("selected_data_" + fieldId).dataset[name] || 0);
+}
+
 function moveDictCountEntry(fieldId, objectId, direction) {
     const selectedMap = _getDictCountSelectedMap(fieldId);
     const keys = Object.keys(selectedMap);
@@ -47,6 +51,9 @@ function addDictCountEntry(fieldId) {
 
 function removeDictCountEntry(fieldId, objectId) {
     const selectedMap = _getDictCountSelectedMap(fieldId);
+    if (Object.keys(selectedMap).length <= _getDictCountMinimum(fieldId, "minItems")) {
+        return;
+    }
     delete selectedMap[objectId];
     _setDictCountSelectedMap(fieldId, selectedMap);
     refreshDictCountField(fieldId);
@@ -56,7 +63,7 @@ function removeDictCountEntry(fieldId, objectId) {
 function updateDictCountEntry(fieldId, objectId, rawValue) {
     const parsed = parseFloat(rawValue);
     const selectedMap = _getDictCountSelectedMap(fieldId);
-    if (!Number.isFinite(parsed) || parsed < 0) {
+    if (!Number.isFinite(parsed) || parsed < _getDictCountMinimum(fieldId, "minCount")) {
         refreshDictCountField(fieldId);
         return;
     }
@@ -115,12 +122,13 @@ function refreshDictCountField(fieldId) {
             <tr>
                 <td class="width-70">${option.label}</td>
                 <td class="width-20">
-                    <input type="number" min="0" step="any" class="form-control"
+                    <input type="number" min="${_getDictCountMinimum(fieldId, "minCount")}" step="any" class="form-control"
                         value="${selectedMap[option.value]}"
                         onchange="event.stopPropagation();updateDictCountEntry('${fieldId}', '${option.value}', this.value)">
                 </td>
                 <td class="width-10 text-end text-nowrap">${upButton}${downButton}
                     <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2"
+                        ${selectedEntries.length <= _getDictCountMinimum(fieldId, "minItems") ? "disabled" : ""}
                         onclick="event.stopPropagation();removeDictCountEntry('${fieldId}', '${option.value}')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                             <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>

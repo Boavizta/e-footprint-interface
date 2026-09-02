@@ -18,11 +18,11 @@ from tests.fixtures.use_case_helpers import create_object, delete_object, edit_o
 def _usage_pattern_post_data(name: str, uj_id: str) -> dict:
     return create_post_data_from_class_default_values(
         name, "UsagePattern",
-        usage_journey=uj_id,
+        usage_journeys={uj_id: 1},
         devices=next(iter(DEFAULT_DEVICES.keys())),
         network=next(iter(DEFAULT_NETWORKS.keys())),
         country=next(iter(DEFAULT_COUNTRIES.keys())),
-        hourly_usage_journey_starts__initial_volume=100000,
+        hourly_occurrences__initial_volume=100000,
     )
 
 
@@ -135,22 +135,50 @@ def test_usage_pattern_create_edit_delete_flow(default_system_repository_with_jo
     assert len(default_system_repository.get_system_data()["System"]["uuid-system-1"]["usage_patterns"]) == nb_patterns_before + 1
 
     edit_object(default_system_repository, up_id, "UsagePattern", {
-        "hourly_usage_journey_starts__start_date": "2025-02-02",
-        "hourly_usage_journey_starts__modeling_duration_value": "5",
-        "hourly_usage_journey_starts__modeling_duration_unit": "month",
-        "hourly_usage_journey_starts__initial_volume": "10000",
-        "hourly_usage_journey_starts__initial_volume_timespan": "month",
-        "hourly_usage_journey_starts__net_growth_rate_in_percentage": "10",
-        "hourly_usage_journey_starts__net_growth_rate_timespan": "month",
+        "hourly_occurrences__start_date": "2025-02-02",
+        "hourly_occurrences__modeling_duration_value": "5",
+        "hourly_occurrences__modeling_duration_unit": "month",
+        "hourly_occurrences__initial_volume": "10000",
+        "hourly_occurrences__initial_volume_timespan": "month",
+        "hourly_occurrences__net_growth_rate_in_percentage": "10",
+        "hourly_occurrences__net_growth_rate_timespan": "month",
     })
 
     sd = default_system_repository.get_system_data()
-    assert sd["UsagePattern"][up_id]["hourly_usage_journey_starts"]["form_inputs"]["start_date"][:10] == "2025-02-02"
+    assert sd["UsagePattern"][up_id]["hourly_occurrences"]["form_inputs"]["start_date"][:10] == "2025-02-02"
 
     delete_object(default_system_repository, up_id)
 
     sd = default_system_repository.get_system_data()
     assert len(sd["System"]["uuid-system-1"]["usage_patterns"]) == nb_patterns_before
+
+
+def test_usage_pattern_edits_weighted_journeys_but_cannot_remove_the_last(
+    default_system_repository_with_journey,
+):
+    repository = default_system_repository_with_journey
+    first_journey_id = ModelWeb(repository).usage_journeys[0].efootprint_id
+    second_journey_id = create_object(
+        repository,
+        create_post_data_from_class_default_values("Second journey", "UsageJourney", uj_steps=""),
+    )
+    pattern_id = create_object(repository, _usage_pattern_post_data("Weighted UP", first_journey_id))
+
+    edit_object(
+        repository,
+        pattern_id,
+        "UsagePattern",
+        {"usage_journeys": {first_journey_id: 1, second_journey_id: 0.25}},
+    )
+    pattern = ModelWeb(repository).flat_efootprint_objs_dict[pattern_id]
+    assert [weight.value.magnitude for weight in pattern.usage_journeys.values()] == [1, 0.25]
+
+    edit_object(repository, pattern_id, "UsagePattern", {"usage_journeys": {second_journey_id: 0.25}})
+    with pytest.raises(ValueError, match="at least one usage journey"):
+        edit_object(repository, pattern_id, "UsagePattern", {"usage_journeys": {}})
+
+    persisted_pattern = ModelWeb(repository).flat_efootprint_objs_dict[pattern_id]
+    assert [journey.id for journey in persisted_pattern.usage_journeys] == [second_journey_id]
 
 
 def test_incomplete_modeling_raises_error_when_uj_has_no_steps(default_system_repository_with_journey):

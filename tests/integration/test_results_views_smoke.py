@@ -68,15 +68,27 @@ def _build_basic_web() -> System:
     job = Job.from_defaults("Web Job", server=server)
     step = UsageJourneyStep.from_defaults("Web Step", jobs=[job])
     journey = UsageJourney("Web Journey", uj_steps=[step])
+    alternate_journey = UsageJourney("Alternate Web Journey", uj_steps=[step])
     up = UsagePattern(
         "Web UP",
-        usage_journey=journey,
+        usage_journeys={
+            journey: SourceValue(1 * u.dimensionless),
+            alternate_journey: SourceValue(0.25 * u.dimensionless),
+        },
         devices=[Device.from_defaults("Web Device")],
         network=Network.from_defaults("Web Network"),
         country=Countries.FRANCE(),
-        hourly_usage_journey_starts=create_hourly_usage(),
+        hourly_occurrences=create_hourly_usage(),
     )
-    return System("Smoke Basic Web", usage_patterns=[up], edge_usage_patterns=[])
+    shared_journey_up = UsagePattern(
+        "Shared Journey UP",
+        usage_journeys={journey: SourceValue(0.5 * u.dimensionless)},
+        devices=[Device.from_defaults("Shared Web Device")],
+        network=up.network,
+        country=up.country,
+        hourly_occurrences=create_hourly_usage(),
+    )
+    return System("Smoke Basic Web", usage_patterns=[up, shared_journey_up], edge_usage_patterns=[])
 
 
 def _build_basic_edge_no_server() -> System:
@@ -87,12 +99,13 @@ def _build_basic_edge_no_server() -> System:
     process = RecurrentEdgeProcess.from_defaults("Edge Process", edge_device=computer)
     function = EdgeFunction("Edge Function", recurrent_edge_device_needs=[process], recurrent_server_needs=[])
     journey = EdgeUsageJourney.from_defaults("Edge UJ", edge_functions=[function])
+    alternate_journey = EdgeUsageJourney.from_defaults("Alternate Edge UJ", edge_functions=[function])
     eup = EdgeUsagePattern(
         "Edge UP",
-        edge_usage_journey=journey,
+        edge_usage_journeys=[journey, alternate_journey],
         network=Network.wifi_network(),
         country=Countries.FRANCE(),
-        hourly_edge_usage_journey_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
+        hourly_deployment_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
     )
     return System("Smoke Basic Edge No Server", usage_patterns=[], edge_usage_patterns=[eup])
 
@@ -123,10 +136,10 @@ def _build_edge_with_server_need() -> System:
     journey = EdgeUsageJourney.from_defaults("Edge UJ", edge_functions=[function])
     eup = EdgeUsagePattern(
         "Edge UP",
-        edge_usage_journey=journey,
+        edge_usage_journeys=[journey],
         network=Network.wifi_network(),
         country=Countries.FRANCE(),
-        hourly_edge_usage_journey_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
+        hourly_deployment_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
     )
     return System("Smoke Edge With Server", usage_patterns=[], edge_usage_patterns=[eup])
 
@@ -153,10 +166,10 @@ def _build_edge_device_group() -> System:
     journey = EdgeUsageJourney.from_defaults("Edge UJ", edge_functions=[function])
     eup = EdgeUsagePattern(
         "Edge UP",
-        edge_usage_journey=journey,
+        edge_usage_journeys=[journey],
         network=Network.wifi_network(),
         country=Countries.FRANCE(),
-        hourly_edge_usage_journey_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
+        hourly_deployment_starts=create_source_hourly_values_from_list(_EUP_HOURS, START_DATE),
     )
 
     floor = EdgeDeviceGroup("Floor", sub_group_counts={}, edge_device_counts={device: SourceValue(4 * u.dimensionless)})

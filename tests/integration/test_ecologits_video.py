@@ -46,11 +46,11 @@ def _system_data_from_jobs(jobs: list) -> dict:
     uj = UsageJourney("Video journey", uj_steps=[uj_step])
     usage_pattern = UsagePattern(
         "Video Usage Pattern",
-        usage_journey=uj,
+        usage_journeys={uj: SourceValue(1 * u.dimensionless)},
         devices=[Device.from_defaults("Test Device")],
         network=Network.from_defaults("Test Network"),
         country=country_generator("Test Country", "TST", SourceValue(100 * u.g / u.kWh), tz('Europe/Paris'))(),
-        hourly_usage_journey_starts=create_hourly_usage())
+        hourly_occurrences=create_hourly_usage())
     system = System("Video system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     try:
         materialize_serialized_state(system)

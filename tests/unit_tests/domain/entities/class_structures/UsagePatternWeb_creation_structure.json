@@ -29,22 +29,19 @@
                 "default": "Usage pattern 1"
             },
             {
-                "web_id": "UsagePattern_usage_journey",
-                "attr_name": "usage_journey",
-                "label": "usage journey",
-                "tooltip": "The <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"UsageJourney\">Usage journey</button> performed by users in this pattern.",
-                "input_type": "select_object",
-                "selected": "efootprint_id1",
-                "options": [
-                    {
-                        "label": "option1",
-                        "value": "efootprint_id1"
-                    },
-                    {
-                        "label": "option2",
-                        "value": "efootprint_id2"
-                    }
-                ]
+                "web_id": "UsagePattern_usage_journeys",
+                "attr_name": "usage_journeys",
+                "label": "Usage journeys",
+                "tooltip": "Non-empty mapping from each <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"UsageJourney\">Usage journey</button> to its average number of executions per pattern occurrence. Weights must be strictly positive and do not need to sum to one.",
+                "input_type": "dict_count",
+                "count_label": "Journeys per pattern occurrence",
+                "ordered": false,
+                "options": [],
+                "options_json": "[]",
+                "selected_json": "{\"mock_journey_efootprint_id\": 1.0}",
+                "hide_field": false,
+                "min_items": 1,
+                "min_count": 1e-06
             },
             {
                 "web_id": "UsagePattern_devices",
@@ -86,7 +83,7 @@
                 "web_id": "UsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
-                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Country\">Country</button> where the users are located. Drives device-side electricity carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly number of usage journey starts</span>.",
+                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Country\">Country</button> where the users are located. Drives device-side electricity carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly pattern occurrences</span>.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -101,10 +98,10 @@
                 ]
             },
             {
-                "web_id": "UsagePattern_hourly_usage_journey_starts",
-                "attr_name": "hourly_usage_journey_starts",
-                "label": "hourly number of usage journey starts",
-                "tooltip": "Hourly timeseries giving the number of usage journeys that begin in each hour of the modeling period, expressed in the country's local timezone.",
+                "web_id": "UsagePattern_hourly_occurrences",
+                "attr_name": "hourly_occurrences",
+                "label": "hourly pattern occurrences",
+                "tooltip": "Hourly timeseries giving the number of pattern occurrences in each hour of the modeling period, expressed in the country's local timezone.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -127,8 +124,8 @@
                 },
                 "subfields_ui_config": {
                     "initial_volume": {
-                        "label": "Initial number of usage journey starts",
-                        "tooltip": "The number of usage journeys started in the chosen period at the beginning of the projection."
+                        "label": "Initial number of pattern occurrences",
+                        "tooltip": "The number of usage-pattern occurrences in the chosen period at the beginning of the projection. Each journey's weight is applied to this shared volume."
                     }
                 }
             }

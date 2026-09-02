@@ -38,17 +38,17 @@ class TestParseFormData:
     def test_parses_nested_fields_with_double_underscore(self):
         """Should group nested fields (attr__field) into dicts."""
         form_data = {
-            "UsagePattern_hourly_usage_journey_starts__start_date": "2025-02-01",
-            "UsagePattern_hourly_usage_journey_starts__modeling_duration_value": "5",
-            "UsagePattern_hourly_usage_journey_starts__modeling_duration_unit": "month",
+            "UsagePattern_hourly_occurrences__start_date": "2025-02-01",
+            "UsagePattern_hourly_occurrences__modeling_duration_value": "5",
+            "UsagePattern_hourly_occurrences__modeling_duration_unit": "month",
             "UsagePattern_name": "Test Pattern",
         }
 
         result = parse_form_data(form_data, "UsagePattern")
 
         assert result["name"] == "Test Pattern"
-        assert "hourly_usage_journey_starts" in result
-        nested = result["hourly_usage_journey_starts"]["form_inputs"]
+        assert "hourly_occurrences" in result
+        nested = result["hourly_occurrences"]["form_inputs"]
         assert nested["start_date"] == "2025-02-01"
         assert nested["modeling_duration_value"] == "5"
         assert nested["modeling_duration_unit"] == "month"
@@ -270,13 +270,13 @@ class TestMetadataSuffixes:
     def test_metadata_suffixes_do_not_go_into_form_inputs(self):
         """Metadata suffixes must not fall through to the generic __ → form_inputs branch."""
         form_data = {
-            "UsagePattern_hourly_usage_journey_starts__start_date": "2025-01-01",
-            "UsagePattern_hourly_usage_journey_starts__confidence": "low",
+            "UsagePattern_hourly_occurrences__start_date": "2025-01-01",
+            "UsagePattern_hourly_occurrences__confidence": "low",
             "UsagePattern_name": "test",
         }
         result = parse_form_data(form_data, "UsagePattern")
-        assert "confidence" not in result["hourly_usage_journey_starts"].get("form_inputs", {})
-        assert result["hourly_usage_journey_starts"]["confidence"] == "low"
+        assert "confidence" not in result["hourly_occurrences"].get("form_inputs", {})
+        assert result["hourly_occurrences"]["confidence"] == "low"
 
     def test_metadata_only_submission_sets_flag(self):
         """Only metadata suffixes with no value key → _metadata_only True on the parsed attribute."""

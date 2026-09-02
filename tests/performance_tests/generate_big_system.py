@@ -95,7 +95,7 @@ def generate_big_system(
                 usage_patterns.append(
                     UsagePattern(
                         f"usage pattern {up_nb} of uj {uj_index}",
-                        usage_journey=usage_journey,
+                        usage_journeys={usage_journey: SourceValue(1 * u.dimensionless)},
                         devices=[
                             Device(name=f"device on which the user journey {uj_index} is made",
                                    carbon_footprint_fabrication=SourceValue(156 * u.kg, source=None),
@@ -106,7 +106,7 @@ def generate_big_system(
                         country=country_generator(
                             f"devices country {uj_index}", "its 3 letter shortname, for example FRA",
                             SourceValue(85 * u.g / u.kWh, source=None), tz('Europe/Paris'))(),
-                        hourly_usage_journey_starts=ExplainableHourlyQuantitiesFromFormInputs(
+                        hourly_occurrences=ExplainableHourlyQuantitiesFromFormInputs(
                             {"start_date": "2024-01-01", "modeling_duration_value": nb_years,
                              "modeling_duration_unit": "year",
                              "net_growth_rate_in_percentage": 0, "net_growth_rate_timespan": "month",
@@ -161,14 +161,14 @@ def generate_big_system(
         edge_usage_journey = EdgeUsageJourney(
             f"Default edge usage journey {edge_usage_pattern_index}",
             edge_functions=[edge_function],
-            usage_span=SourceValue(6 * u.year)
         )
 
         edge_usage_pattern = EdgeUsagePattern(
             f"Default edge usage pattern {edge_usage_pattern_index}",
-            edge_usage_journey=edge_usage_journey,
+            edge_usage_journeys=[edge_usage_journey],
             country=Countries.FRANCE(),
-            hourly_edge_usage_journey_starts=ExplainableHourlyQuantitiesFromFormInputs(
+            usage_span=SourceValue(6 * u.year),
+            hourly_deployment_starts=ExplainableHourlyQuantitiesFromFormInputs(
                             {"start_date": "2024-01-01", "modeling_duration_value": nb_years,
                              "modeling_duration_unit": "year",
                              "net_growth_rate_in_percentage": 0, "net_growth_rate_timespan": "month",

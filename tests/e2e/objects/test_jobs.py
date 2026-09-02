@@ -35,11 +35,11 @@ def model_with_server_service_no_jobs(model_builder_page: ModelBuilderPage):
 
     usage_pattern = UsagePattern(
         "Test Usage Pattern",
-        usage_journey=uj,
+        usage_journeys={uj: SourceValue(1 * u.dimensionless)},
         devices=[Device.from_defaults("Test Device")],
         network=Network.from_defaults("Test Network"),
         country=country_generator("Test Country", "TST", SourceValue(100 * u.g / u.kWh), tz("Europe/Paris"))(),
-        hourly_usage_journey_starts=create_hourly_usage()
+        hourly_occurrences=create_hourly_usage()
     )
 
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
@@ -74,11 +74,11 @@ def model_with_two_steps_one_job(model_builder_page: ModelBuilderPage):
 
     usage_pattern = UsagePattern(
         "Test Usage Pattern",
-        usage_journey=uj,
+        usage_journeys={uj: SourceValue(1 * u.dimensionless)},
         devices=[Device.from_defaults("Test Device")],
         network=Network.from_defaults("Test Network"),
         country=country_generator("Test Country", "TST", SourceValue(100 * u.g / u.kWh), tz("Europe/Paris"))(),
-        hourly_usage_journey_starts=create_hourly_usage()
+        hourly_occurrences=create_hourly_usage()
     )
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     system_dict = system_to_json(system, save_computed_state=False)

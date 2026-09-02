@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "23.1.0",
+    "efootprint_version": "24.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -46,7 +46,7 @@
         "Video-production-users": {
             "name": "Video production users",
             "id": "Video-production-users",
-            "hourly_usage_journey_starts": {
+            "hourly_occurrences": {
                 "form_inputs": {
                     "start_date": "2026-01-01",
                     "modeling_duration_value": 1,
@@ -56,54 +56,23 @@
                     "net_growth_rate_in_percentage": 0,
                     "net_growth_rate_timespan": "year"
                 },
-                "label": "Hourly nb of usage journey starts",
+                "label": "Hourly nb of pattern occurrences",
                 "source": "user_data",
                 "comment": "52 journeys per year = one short social video produced and posted per week."
             },
-            "usage_journey": "Create-a-social-video",
+            "usage_journeys": {
+                "Create-a-social-video": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "unnamed source",
+                    "source": "hypothesis"
+                }
+            },
             "devices": [
                 "Default-laptop"
             ],
             "network": "Default-wifi-network",
             "country": "France"
-        }
-    },
-    "UsageJourney": {
-        "Create-a-social-video": {
-            "name": "Create a social video",
-            "id": "Create-a-social-video",
-            "uj_steps": {
-                "Create-a-prompt-for-video-gen": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Explore-and-iterate": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Generate-the-final-video": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Edit-and-mix-the-final-clips-on-computer": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Publish-to-the-social-network": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                }
-            }
         }
     },
     "Device": {
@@ -167,98 +136,39 @@
             }
         }
     },
-    "UsageJourneyStep": {
-        "Create-a-prompt-for-video-gen": {
-            "name": "Create a prompt for video gen",
-            "id": "Create-a-prompt-for-video-gen",
-            "user_time_spent": {
-                "value": 5.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Prompt-writing-iteration": {
-                    "value": 3.0,
+    "UsageJourney": {
+        "Create-a-social-video": {
+            "name": "Create a social video",
+            "id": "Create-a-social-video",
+            "uj_steps": {
+                "Create-a-prompt-for-video-gen": {
+                    "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
-        },
-        "Explore-and-iterate": {
-            "name": "Explore and iterate",
-            "id": "Explore-and-iterate",
-            "user_time_spent": {
-                "value": 9.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Draft-clip-attempt-28Seedance29": {
-                    "value": 3.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
                     "source": "hypothesis"
                 },
-                "Draft-clip-attempt-28Veo29": {
-                    "value": 3.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
-        },
-        "Generate-the-final-video": {
-            "name": "Generate the final video",
-            "id": "Generate-the-final-video",
-            "user_time_spent": {
-                "value": 3.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Final-clip-28Veo2c-8s29": {
+                "Explore-and-iterate": {
                     "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
                     "source": "hypothesis"
                 },
-                "Final-clip-28Seedance2c-8s29": {
+                "Generate-the-final-video": {
                     "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
                     "source": "hypothesis"
-                }
-            }
-        },
-        "Edit-and-mix-the-final-clips-on-computer": {
-            "name": "Edit and mix the final clips on computer",
-            "id": "Edit-and-mix-the-final-clips-on-computer",
-            "user_time_spent": {
-                "value": 15.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {}
-        },
-        "Publish-to-the-social-network": {
-            "name": "Publish to the social network",
-            "id": "Publish-to-the-social-network",
-            "user_time_spent": {
-                "value": 2.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Upload-final-video-to-social-network-CDN": {
+                },
+                "Edit-and-mix-the-final-clips-on-computer": {
                     "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
+                    "source": "hypothesis"
+                },
+                "Publish-to-the-social-network": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per journey",
                     "source": "hypothesis"
                 }
             }
@@ -432,6 +342,103 @@
             "fixed_nb_of_instances": {
                 "value": null,
                 "label": "User defined number of instances"
+            }
+        }
+    },
+    "UsageJourneyStep": {
+        "Create-a-prompt-for-video-gen": {
+            "name": "Create a prompt for video gen",
+            "id": "Create-a-prompt-for-video-gen",
+            "user_time_spent": {
+                "value": 5.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Prompt-writing-iteration": {
+                    "value": 3.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Explore-and-iterate": {
+            "name": "Explore and iterate",
+            "id": "Explore-and-iterate",
+            "user_time_spent": {
+                "value": 9.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Draft-clip-attempt-28Seedance29": {
+                    "value": 3.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Draft-clip-attempt-28Veo29": {
+                    "value": 3.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Generate-the-final-video": {
+            "name": "Generate the final video",
+            "id": "Generate-the-final-video",
+            "user_time_spent": {
+                "value": 3.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Final-clip-28Veo2c-8s29": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Final-clip-28Seedance2c-8s29": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Edit-and-mix-the-final-clips-on-computer": {
+            "name": "Edit and mix the final clips on computer",
+            "id": "Edit-and-mix-the-final-clips-on-computer",
+            "user_time_spent": {
+                "value": 15.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {}
+        },
+        "Publish-to-the-social-network": {
+            "name": "Publish to the social network",
+            "id": "Publish-to-the-social-network",
+            "user_time_spent": {
+                "value": 2.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Upload-final-video-to-social-network-CDN": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
             }
         }
     },

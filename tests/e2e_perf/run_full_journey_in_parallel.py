@@ -158,13 +158,13 @@ async def run_full_journey(page: Page, run_number: int, user_id: int) -> None:
     # --- Create usage pattern with timeseries ---
     await click_and_wait_for_htmx(page, page.locator("#add_usage_pattern"))
     await fill_field("UsagePattern_name", up_name)
-    await page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").fill("2")
-    await page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").dispatch_event("change")
-    await page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
-    await page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("25")
-    await page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").dispatch_event("change")
-    await select_option("UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan", "year")
-    await select_option("UsagePattern_usage_journey", uj_name_one)
+    await page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").fill("2")
+    await page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").dispatch_event("change")
+    await page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
+    await page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").fill("25")
+    await page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").dispatch_event("change")
+    await select_option("UsagePattern_hourly_occurrences__net_growth_rate_timespan", "year")
+    # The first created journey is selected by default.
     await submit_and_wait_for_close()
 
     # --- Delete unused UJ 2 ---

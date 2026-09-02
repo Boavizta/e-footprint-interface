@@ -86,6 +86,19 @@ test("the hidden JSON payload stays in sync after multiple add remove edit opera
     expect(document.getElementById(FIELD_ID).value).toBe('{"device-2":5}');
 });
 
+test("a required journey cannot be removed or assigned a non-positive weight", () => {
+    const fieldId = "UsagePattern_usage_journeys";
+    document.body.innerHTML = loadFixture("dict_count_required_journey");
+    refreshDictCountField(fieldId);
+
+    removeDictCountEntry(fieldId, "journey-1");
+    updateDictCountEntry(fieldId, "journey-1", "0");
+
+    expect(document.getElementById(fieldId).value).toBe('{"journey-1":1}');
+    expect(document.querySelector(`#objects-already-selected-for-${fieldId} button`).disabled).toBe(true);
+    expect(document.querySelector(`#objects-already-selected-for-${fieldId} input`).min).toBe("0.000001");
+});
+
 describe("insertion-ordered rendering", () => {
     const STEPS_FIELD_ID = "UsageJourney_uj_steps";
 

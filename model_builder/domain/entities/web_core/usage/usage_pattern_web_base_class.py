@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Tuple, Optional
 
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.constants.units import u
+
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
 
 if TYPE_CHECKING:
@@ -13,8 +16,9 @@ def default_modeling_start_date() -> str:
 
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
+    nests_relationship_children = False
     attr_name_in_system = "value to override in subclass"
-    object_type_in_volume = "value to override in subclass"
+    journey_relationship_attr = "value to override in subclass"
 
     # Declarative form configuration
     form_creation_config = {
@@ -52,7 +56,26 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
 
     @property
     def accordion_children(self):
+        """Patterns link reusable top-level journeys; they never render them as nested cards."""
         return []
+
+    @property
+    def links_to(self):
+        """Draw one canvas relationship from the pattern to each selected top-level journey."""
+        relationship = self.get_efootprint_value(self.journey_relationship_attr)
+        journeys = relationship.keys() if isinstance(relationship, dict) else relationship
+        return "".join(
+            f"|{self.model_web.get_web_object_from_efootprint_id(journey.id).web_id}"
+            for journey in journeys
+        )
+
+    @classmethod
+    def get_creation_default_values(cls, model_web: "ModelWeb") -> dict:
+        """Preselect the first available journey so required relationships start valid."""
+        journeys = getattr(model_web, cls.journey_relationship_attr)
+        if cls.journey_relationship_attr == "usage_journeys":
+            return {cls.journey_relationship_attr: {journeys[0].modeling_obj: SourceValue(1 * u.dimensionless)}}
+        return {cls.journey_relationship_attr: [journeys[0].modeling_obj]}
 
     @classmethod
     def get_htmx_form_config(cls, context_data: dict) -> dict:

@@ -132,10 +132,10 @@ class ComputationMemoryMonitor:
         edge_usage_patterns = model_web.edge_usage_patterns
         self.usage_pattern_count = len(usage_patterns) + len(edge_usage_patterns)
         pattern_hours = [
-            self._hourly_value_count(pattern.modeling_obj.hourly_usage_journey_starts) for pattern in usage_patterns
+            self._hourly_value_count(pattern.modeling_obj.hourly_occurrences) for pattern in usage_patterns
         ]
         pattern_hours.extend(
-            self._hourly_value_count(pattern.modeling_obj.hourly_edge_usage_journey_starts)
+            self._hourly_value_count(pattern.modeling_obj.hourly_deployment_starts)
             for pattern in edge_usage_patterns
         )
         self.modeled_hours = (

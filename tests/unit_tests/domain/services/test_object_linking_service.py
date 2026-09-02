@@ -8,6 +8,7 @@ from efootprint.core.usage.edge.recurrent_server_need import RecurrentServerNeed
 from efootprint.core.usage.job import Job, JobBase
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+from efootprint.core.usage.usage_pattern import UsagePattern
 
 from model_builder.domain.services.object_linking_service import (
     dict_attr_names_for_class, dict_membership_specs, dict_relationship_registry, resolve_dict_attr,
@@ -19,6 +20,7 @@ def test_registry_is_exactly_the_known_weighted_relationships():
     surface as a deliberate update here (and bring its wording in `field_ui_config.json` — see the
     membership-wording consistency test)."""
     assert set(dict_relationship_registry()) == {
+        (UsagePattern, "usage_journeys", UsageJourney),
         (UsageJourney, "uj_steps", UsageJourneyStep),
         (UsageJourneyStep, "jobs", JobBase),
         (RecurrentServerNeed, "jobs", JobBase),
@@ -30,6 +32,7 @@ def test_registry_is_exactly_the_known_weighted_relationships():
 @pytest.mark.parametrize(
     ("parent_class", "key_class", "expected_attr"),
     [
+        (UsagePattern, UsageJourney, "usage_journeys"),
         (UsageJourney, UsageJourneyStep, "uj_steps"),
         (UsageJourneyStep, Job, "jobs"),
         (RecurrentServerNeed, Job, "jobs"),
@@ -69,6 +72,7 @@ def test_dict_membership_specs_for_jobs_cover_steps_and_recurrent_server_needs()
 
 
 def test_dict_membership_specs_for_steps_and_devices():
+    assert set(dict_membership_specs(UsageJourney)) == {(UsagePattern, "usage_journeys")}
     assert set(dict_membership_specs(UsageJourneyStep)) == {(UsageJourney, "uj_steps")}
     assert set(dict_membership_specs(EdgeDevice)) == {(EdgeDeviceGroup, "edge_device_counts")}
 
@@ -76,4 +80,5 @@ def test_dict_membership_specs_for_steps_and_devices():
 def test_dict_attr_names_for_class():
     assert dict_attr_names_for_class(EdgeDeviceGroup) == ["sub_group_counts", "edge_device_counts"]
     assert dict_attr_names_for_class(UsageJourney) == ["uj_steps"]
+    assert dict_attr_names_for_class(UsagePattern) == ["usage_journeys"]
     assert dict_attr_names_for_class(Job) == []

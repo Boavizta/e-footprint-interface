@@ -9,6 +9,7 @@ from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWee
 from efootprint.constants.units import u
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.reference_data import DEFAULT_COUNTRIES, DEFAULT_NETWORKS
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
 from tests.fixtures.use_case_helpers import create_object, delete_object, edit_object
 
@@ -24,6 +25,43 @@ def test_create_edge_usage_journey(default_system_repository):
     )
     assert len(ModelWeb(default_system_repository).edge_usage_journeys) == 1
     assert ModelWeb(default_system_repository).edge_usage_journeys[0].name == "Test Edge Usage Journey"
+
+
+def test_edge_usage_pattern_selects_multiple_bundles_but_cannot_remove_the_last(default_system_repository):
+    journey_ids = [
+        create_object(
+            default_system_repository,
+            create_post_data_from_class_default_values(
+                f"Bundle {index}", "EdgeUsageJourney", edge_functions=""),
+        )
+        for index in (1, 2)
+    ]
+    pattern_id = create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Multi-bundle deployment",
+            "EdgeUsagePattern",
+            edge_usage_journeys=";".join(journey_ids),
+            network=next(iter(DEFAULT_NETWORKS)),
+            country=next(iter(DEFAULT_COUNTRIES)),
+            hourly_deployment_starts__initial_volume=1,
+        ),
+    )
+
+    pattern = ModelWeb(default_system_repository).flat_efootprint_objs_dict[pattern_id]
+    assert [journey.id for journey in pattern.edge_usage_journeys] == journey_ids
+
+    edit_object(
+        default_system_repository,
+        pattern_id,
+        "EdgeUsagePattern",
+        {"edge_usage_journeys": journey_ids[1]},
+    )
+    with pytest.raises(ValueError, match="at least one edge usage journey"):
+        edit_object(default_system_repository, pattern_id, "EdgeUsagePattern", {"edge_usage_journeys": ""})
+
+    persisted_pattern = ModelWeb(default_system_repository).flat_efootprint_objs_dict[pattern_id]
+    assert [journey.id for journey in persisted_pattern.edge_usage_journeys] == [journey_ids[1]]
 
 
 def test_recurrent_edge_process_is_linked_through_hierarchy(default_system_repository):
@@ -299,14 +337,13 @@ def test_recurrent_edge_device_need_with_component_needs(default_system_reposito
 
 
 def test_failed_creation_leaves_system_unchanged(default_system_repository):
-    """Creating a RecurrentEdgeProcess fails when EdgeComputer.lifespan < EdgeUsageJourney.usage_span."""
+    """Creating a process fails when its computer lifespan is shorter than its deployment pattern span."""
     edge_usage_journey_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
             "Long Journey",
             "EdgeUsageJourney",
             edge_functions="",
-            usage_span=SourceValue(10 * u.yr),  # longer than EdgeComputer default lifespan (6yr)
         ),
     )
     edge_function_id = create_object(
@@ -322,6 +359,18 @@ def test_failed_creation_leaves_system_unchanged(default_system_repository):
             "Short-Lived Computer",
             "EdgeComputer",
             EdgeStorage_form_data=create_post_data_from_class_default_values("Test Edge Storage", "EdgeStorage"),
+        ),
+    )
+    create_object(
+        default_system_repository,
+        create_post_data_from_class_default_values(
+            "Long deployment",
+            "EdgeUsagePattern",
+            edge_usage_journeys=edge_usage_journey_id,
+            network=next(iter(DEFAULT_NETWORKS)),
+            country=next(iter(DEFAULT_COUNTRIES)),
+            usage_span=SourceValue(10 * u.yr),
+            hourly_deployment_starts__initial_volume=1,
         ),
     )
 

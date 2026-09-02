@@ -90,7 +90,6 @@ class TestEdgeObjects:
         click_and_wait_for_htmx(page, page.locator("#btn-add-edge-usage-journey"))
         page.locator("#sidePanelForm").wait_for(state="visible")
         side_panel.fill_field("EdgeUsageJourney_name", edge_journey_name)
-        side_panel.fill_field("EdgeUsageJourney_usage_span", "6")
         side_panel.submit_and_wait_for_close()
 
         model_builder.object_should_exist("EdgeUsageJourney", edge_journey_name)
@@ -165,26 +164,26 @@ class TestEdgeObjects:
         model_builder.click_add_edge_usage_pattern()
         side_panel.fill_field("EdgeUsagePattern_name", edge_usage_pattern_name)
         modeling_duration_field = (
-            "#EdgeUsagePattern_hourly_edge_usage_journey_starts__modeling_duration_value"
+            "#EdgeUsagePattern_hourly_deployment_starts__modeling_duration_value"
         )
         page.locator(modeling_duration_field).fill("2")
         page.locator(modeling_duration_field).dispatch_event("change")
         side_panel.fill_field(
-            "EdgeUsagePattern_hourly_edge_usage_journey_starts__initial_volume",
+            "EdgeUsagePattern_hourly_deployment_starts__initial_volume",
             "1000"
         )
         side_panel.fill_field(
-            "EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_in_percentage",
+            "EdgeUsagePattern_hourly_deployment_starts__net_growth_rate_in_percentage",
             "25"
         )
         page.locator(
-            "#EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_in_percentage"
+            "#EdgeUsagePattern_hourly_deployment_starts__net_growth_rate_in_percentage"
         ).dispatch_event("change")
         side_panel.select_option(
-            "EdgeUsagePattern_hourly_edge_usage_journey_starts__net_growth_rate_timespan",
+            "EdgeUsagePattern_hourly_deployment_starts__net_growth_rate_timespan",
             "year"
         )
-        side_panel.select_option("EdgeUsagePattern_edge_usage_journey", edge_journey_name)
+        # The first available functionality bundle is selected by default.
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("EdgeUsagePattern", edge_usage_pattern_name)
 
@@ -194,6 +193,33 @@ class TestEdgeObjects:
         server_energy = page.evaluate("window.emissions.values['Servers_and_storage_energy']")
         server_fabrication = page.evaluate("window.emissions.values['Servers_and_storage_fabrication']")
         assert any(value > 0 for value in server_energy) or any(value > 0 for value in server_fabrication)
+
+    def test_edge_pattern_selects_multiple_functionality_bundles(
+        self, edge_system_in_browser: ModelBuilderPage
+    ):
+        model_builder = edge_system_in_browser
+        side_panel = model_builder.side_panel
+        page = model_builder.page
+
+        model_builder.click_add_edge_usage_pattern()
+        side_panel.fill_field("EdgeUsagePattern_name", "Shared deployment")
+        side_panel.fill_field("EdgeUsagePattern_hourly_deployment_starts__initial_volume", "1")
+        side_panel.add_to_select_multiple(
+            "EdgeUsagePattern_edge_usage_journeys", "Edge Journey 2"
+        )
+        rows = page.locator(
+            "#objects-already-selected-for-EdgeUsagePattern_edge_usage_journeys tr"
+        )
+        expect(rows).to_have_count(2)
+        rows.filter(has_text="Edge Journey 1").locator("button").click()
+        expect(rows).to_have_count(1)
+        expect(rows.locator("button")).to_be_disabled()
+        side_panel.submit_and_wait_for_close()
+
+        model_builder.get_object_card("EdgeUsagePattern", "Shared deployment").click_edit_button()
+        expect(page.locator(
+            "#objects-already-selected-for-EdgeUsagePattern_edge_usage_journeys tr"
+        )).to_contain_text("Edge Journey 2")
 
     def test_edge_device_with_advanced_options(self, empty_model_builder: ModelBuilderPage):
         """Create edge device with advanced parameters."""

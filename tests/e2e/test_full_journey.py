@@ -80,6 +80,10 @@ class TestFullJourney:
         scaleway_instances = set(instance_select.locator("option").evaluate_all("els => els.map(e => e.value)"))
         side_panel.select_option("BoaviztaCloudServer_provider", "aws")
         expect(instance_select).to_have_value("")
+        page.wait_for_function(
+            "element => element.options.length > 1",
+            arg=instance_select.element_handle(),
+        )
         aws_instances = set(instance_select.locator("option").evaluate_all("els => els.map(e => e.value)"))
         assert aws_instances and aws_instances != scaleway_instances
         side_panel.select_option("BoaviztaCloudServer_provider", "scaleway")
@@ -117,19 +121,19 @@ class TestFullJourney:
         side_panel.fill_field("UsagePattern_name", up_name)
 
         # Set modeling duration
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").fill("2")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").dispatch_event("change")
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").fill("2")
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").dispatch_event("change")
 
         # Set initial volume
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
 
         # Set growth rate
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("25")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").dispatch_event("change")
-        side_panel.select_option("UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan", "year")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").fill("25")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").dispatch_event("change")
+        side_panel.select_option("UsagePattern_hourly_occurrences__net_growth_rate_timespan", "year")
 
         # Select usage journey
-        side_panel.select_option("UsagePattern_usage_journey", uj_name_one)
+        # The first created journey is selected by default.
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("UsagePattern", up_name)
 

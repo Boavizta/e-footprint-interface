@@ -115,8 +115,8 @@ test("template gives the weekly preview its own external surface", () => {
     const editor = document.querySelector("[data-timeseries-editor-column]");
     const preview = document.querySelector("[data-timeseries-preview-column]");
 
-    expect(preview.classList).toContain("weekly-pattern-preview-shell");
-    expect(preview.querySelector("[data-timeseries-preview]").classList).toContain("weekly-pattern-preview");
+    expect(preview.classList).toContain("recurrent-timeseries-preview-shell");
+    expect(preview.querySelector("[data-timeseries-preview]").classList).toContain("recurrent-timeseries-preview");
     expect(preview.querySelector("[data-timeseries-preview]").classList).toContain("timeseries-preview-panel");
     expect(preview.querySelector(".timeseries-preview-panel__chart")).not.toBeNull();
     expect(editor.className).not.toContain("col-");

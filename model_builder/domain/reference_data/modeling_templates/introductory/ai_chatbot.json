@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "23.1.0",
+    "efootprint_version": "24.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -46,7 +46,7 @@
         "Daily-conversations": {
             "name": "Daily conversations",
             "id": "Daily-conversations",
-            "hourly_usage_journey_starts": {
+            "hourly_occurrences": {
                 "form_inputs": {
                     "start_date": "2025-01-01",
                     "modeling_duration_value": 3,
@@ -56,41 +56,22 @@
                     "net_growth_rate_in_percentage": 35,
                     "net_growth_rate_timespan": "year"
                 },
-                "label": "Hourly nb of usage journey starts",
+                "label": "Hourly nb of pattern occurrences",
                 "source": "user_data"
             },
-            "usage_journey": "Chatbot-conversation",
+            "usage_journeys": {
+                "Chatbot-conversation": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "unnamed source",
+                    "source": "hypothesis"
+                }
+            },
             "devices": [
                 "Default-laptop"
             ],
             "network": "Default-wifi-network",
             "country": "France"
-        }
-    },
-    "UsageJourney": {
-        "Chatbot-conversation": {
-            "name": "Chatbot conversation",
-            "id": "Chatbot-conversation",
-            "uj_steps": {
-                "Open-the-assistant": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Ask-a-quick-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                },
-                "Ask-a-detailed-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per journey",
-                    "source": "hypothesis"
-                }
-            }
         }
     },
     "Device": {
@@ -154,75 +135,27 @@
             }
         }
     },
-    "UsageJourneyStep": {
-        "Open-the-assistant": {
-            "name": "Open the assistant",
-            "id": "Open-the-assistant",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Serve-chat-interface": {
+    "UsageJourney": {
+        "Chatbot-conversation": {
+            "name": "Chatbot conversation",
+            "id": "Chatbot-conversation",
+            "uj_steps": {
+                "Open-the-assistant": {
                     "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
-        },
-        "Ask-a-quick-question": {
-            "name": "Ask a quick question",
-            "id": "Ask-a-quick-question",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Handle-quick-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
                     "source": "hypothesis"
                 },
-                "Small-LLM-short-answer": {
+                "Ask-a-quick-question": {
                     "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
-        },
-        "Ask-a-detailed-question": {
-            "name": "Ask a detailed question",
-            "id": "Ask-a-detailed-question",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Prepare-detailed-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
                     "source": "hypothesis"
                 },
-                "Small-LLM-route-complex-request": {
+                "Ask-a-detailed-question": {
                     "value": 1.0,
                     "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                },
-                "Big-LLM-detailed-answer": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
+                    "label": "Times per journey",
                     "source": "hypothesis"
                 }
             }
@@ -465,6 +398,80 @@
             "fixed_nb_of_instances": {
                 "value": null,
                 "label": "User defined number of instances"
+            }
+        }
+    },
+    "UsageJourneyStep": {
+        "Open-the-assistant": {
+            "name": "Open the assistant",
+            "id": "Open-the-assistant",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Serve-chat-interface": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Ask-a-quick-question": {
+            "name": "Ask a quick question",
+            "id": "Ask-a-quick-question",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Handle-quick-question": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Small-LLM-short-answer": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Ask-a-detailed-question": {
+            "name": "Ask a detailed question",
+            "id": "Ask-a-detailed-question",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Prepare-detailed-question": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Small-LLM-route-complex-request": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Big-LLM-detailed-answer": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
             }
         }
     },

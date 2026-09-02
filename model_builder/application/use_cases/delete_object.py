@@ -87,6 +87,19 @@ class DeleteObjectUseCase:
         list_containers, _, dict_containers, _ = self._container_removal_targets(web_obj, web_class)
         list_or_dict_containers = list_containers + dict_containers
 
+        blocking_required_containers = []
+        for container in list_or_dict_containers:
+            required_attrs = getattr(type(container), "required_non_empty_relationships", frozenset())
+            for attr_name in required_attrs:
+                relationship = container.get_efootprint_value(attr_name)
+                if relationship is not None and web_obj.modeling_obj in relationship and len(relationship) == 1:
+                    blocking_required_containers.append(container.name)
+        if blocking_required_containers:
+            return DeleteCheckResult(
+                can_delete=False,
+                blocking_containers=sorted(set(blocking_required_containers)),
+            )
+
         # Check for blocking containers (direct references, not through list nor dict)
         if web_obj.modeling_obj_containers and not list_or_dict_containers:
             # Check if class has custom blocking logic via can_delete hook

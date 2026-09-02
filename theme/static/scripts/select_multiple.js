@@ -17,6 +17,8 @@ function sortSelectMultipleFields(fieldId, selectedValue, direction) {
 
 function removeValueFromSelectMultiple(fieldId, selectedValue) {
     let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
+    const minItems = Number(document.getElementById("selected_data_" + fieldId).dataset.minItems || 0);
+    if (selectedOptions.length <= minItems) return;
     let unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data_" + fieldId);
     let index = selectedOptions.findIndex(option => option.value === selectedValue);
     if (index === -1) return;
@@ -78,6 +80,7 @@ function refreshSelectMultipleFields(fieldId) {
 
     let tableHTML = '';
     selectedOptions.forEach((selectedValue, index) => {
+        const minItems = Number(document.getElementById("selected_data_" + fieldId).dataset.minItems || 0);
         // Use event.stopPropagation(); in buttons to avoid htmx errors
         let upButton = ordered && index !== 0 ? `
             <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="event.stopPropagation();sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','up')">
@@ -101,6 +104,7 @@ function refreshSelectMultipleFields(fieldId) {
                 <td class="width-10">
                     <button type="button" id="remove-${selectedValue.value}"
                         class="btn btn-white border-0 rounded-2 fs-xl p-2"
+                        ${selectedOptions.length <= minItems ? "disabled" : ""}
                         onclick="event.stopPropagation();removeValueFromSelectMultiple('${fieldId}','${selectedValue.value}')"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
@@ -119,4 +123,13 @@ function refreshSelectMultipleFields(fieldId) {
     }
 
     document.getElementById(fieldId).value = selectedOptions.map(option => option.value).join(";");
+}
+
+if (typeof module !== "undefined") {
+    module.exports = {
+        addValueToSelectMultiple,
+        refreshSelectMultipleFields,
+        removeValueFromSelectMultiple,
+        sortSelectMultipleFields,
+    };
 }

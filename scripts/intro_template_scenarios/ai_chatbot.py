@@ -88,7 +88,8 @@ def build_system() -> System:
         uj_steps=[open_step, quick_question_step, detailed_question_step])
 
     usage_pattern = UsagePattern(
-        "Daily conversations", journey, [Device.laptop()], Network.wifi_network(),
+        "Daily conversations", {journey: SourceValue(1 * u.dimensionless)},
+        [Device.laptop()], Network.wifi_network(),
         Countries.FRANCE(),
         ExplainableHourlyQuantitiesFromFormInputs({
             "start_date": "2025-01-01",
