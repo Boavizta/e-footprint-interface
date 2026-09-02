@@ -185,6 +185,8 @@ library builders that the interface can edit, together with interface-only ident
 initializers. Single-builder hourly fields keep their existing direct rendering. Recurrent fields render the registered
 constant and weekly-pattern builders together, select the stored/default concrete builder, and disable the inactive
 sub-form so only one canonical payload submits while both unsaved drafts remain in the DOM.
+Builder form configurations retain their native value types; templates apply `unlocalize` only where numeric values
+cross into HTML attributes, which preserves typed structures such as weekly day indexes.
 
 `ExplainableRecurrentQuantitiesFromWeeklyPattern` remains library-owned. The interface editor serializes its visible
 profiles into one normalized hidden JSON field; the form parser validates and decodes that payload, mirroring the

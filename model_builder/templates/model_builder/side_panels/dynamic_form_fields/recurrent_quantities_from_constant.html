@@ -1,15 +1,16 @@
+{% load l10n %}
 <div class="mb-3">
     <div class="input-group">
         <input type="number"
                class="form-control input_with_add_on"
                name="{{ field.web_id }}__constant_value"
                id="{{ field.web_id }}"
-               value="{{ builder.default.constant_value }}"
+               value="{{ builder.default.constant_value|unlocalize }}"
                step="0.1"
                {% if not field.can_be_negative %}min="0"{% endif %}
                placeholder="Input a constant value"
                required
-               data-default-value="{{ builder.default.constant_value }}"
+               data-default-value="{{ builder.default.constant_value|unlocalize }}"
                aria-describedby="{{ field.web_id }}__constant_value_help"
                {% if field.metadata.source %}
                oninput="onInputValueChange('{{ field.web_id }}');tagFormAsModified();"

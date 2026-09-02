@@ -1,3 +1,4 @@
+{% load l10n %}
 <div class="weekly-pattern-editor"
      data-weekly-pattern-editor
      data-field-web-id="{{ field.web_id }}"
@@ -86,7 +87,7 @@
                     <div class="input-group input-group-sm">
                         <input class="form-control" type="number"
                                id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline"
-                               value="{{ profile.baseline }}" step="0.1" required data-profile-baseline
+                               value="{{ profile.baseline|unlocalize }}" step="0.1" required data-profile-baseline
                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline_error"
                                {% if not field.can_be_negative %}min="0"{% endif %}>
                         <span class="input-group-text" data-weekly-unit>{{ builder.default.unit }}</span>
@@ -103,17 +104,17 @@
                             {% for range in profile.ranges %}
                                 <tr data-weekly-range>
                                     <td><input class="form-control form-control-sm" type="number" min="0" max="23" step="1"
-                                               value="{{ range.start }}" required data-range-start
+                                               value="{{ range.start|unlocalize }}" required data-range-start
                                                aria-label="Range start hour"
                                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error">
                                         <div class="text-danger small d-none"
                                              id="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"
                                              role="alert" data-range-error></div></td>
                                     <td><input class="form-control form-control-sm" type="number" min="1" max="24" step="1"
-                                               value="{{ range.end }}" required data-range-end aria-label="Range end hour"
+                                               value="{{ range.end|unlocalize }}" required data-range-end aria-label="Range end hour"
                                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"></td>
                                     <td><input class="form-control form-control-sm" type="number" step="0.1"
-                                               value="{{ range.value }}" required data-range-value
+                                               value="{{ range.value|unlocalize }}" required data-range-value
                                                aria-label="Range value"
                                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"
                                                {% if not field.can_be_negative %}min="0"{% endif %}></td>

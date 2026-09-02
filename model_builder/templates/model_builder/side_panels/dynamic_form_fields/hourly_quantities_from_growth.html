@@ -1,3 +1,4 @@
+{% load l10n %}
 <div class="mb-3" id="{{ field.web_id }}" data-timeseries-preview data-hourly-timeseries-preview
      data-field-web-id="{{ field.web_id }}" data-field-name="{{ field.attr_name }}"
      data-preview-url="{% url 'timeseries-preview' %}" data-preview-id="{{ field.web_id }}__preview"
@@ -38,11 +39,11 @@
                             <input type="number" class="form-control input_with_add_on"
                                    name="{{ field.web_id }}__modeling_duration_value"
                                    id="{{ field.web_id }}__modeling_duration_value"
-                                   value="{{ field.default.modeling_duration_value }}"
+                                   value="{{ field.default.modeling_duration_value|unlocalize }}"
                                    max="{% if field.default.modeling_duration_unit == 'year' %}10{% else %}120{% endif %}"
                                    aria-describedby="basic-addon3 basic-addon4"
                                    required
-                                   data-default-value="{{ field.default.modeling_duration_value }}"
+                                   data-default-value="{{ field.default.modeling_duration_value|unlocalize }}"
                                    data-associated-unit-id="{{ field.web_id }}__modeling_duration_unit"
                                    data-hourly-preview-input
                             >
@@ -75,11 +76,11 @@
                                    name="{{ field.web_id }}__initial_volume"
                                    id="{{ field.web_id }}__initial_volume"
                                    min="0"
-                                   value="{{ field.default.initial_volume }}"
+                                   value="{{ field.default.initial_volume|unlocalize }}"
                                    placeholder="Input a number"
                                    aria-describedby="basic-addon3 basic-addon4"
                                    required
-                                   data-default-value="{{ field.default.initial_volume }}"
+                                   data-default-value="{{ field.default.initial_volume|unlocalize }}"
                                    data-associated-unit-id="{{ field.web_id }}__initial_volume_timespan"
                                    data-hourly-preview-input
                             >
@@ -105,10 +106,10 @@
                                    name="{{ field.web_id }}__net_growth_rate_in_percentage"
                                    id="{{ field.web_id }}__net_growth_rate_in_percentage"
                                    min="0"
-                                   value="{{ field.default.net_growth_rate_in_percentage }}"
+                                   value="{{ field.default.net_growth_rate_in_percentage|unlocalize }}"
                                    aria-describedby="basic-addon3 basic-addon4"
                                    required
-                                   data-default-value="{{ field.default.net_growth_rate_in_percentage }}"
+                                   data-default-value="{{ field.default.net_growth_rate_in_percentage|unlocalize }}"
                                    data-associated-unit-id="{{ field.web_id }}__net_growth_rate_timespan"
                                    data-hourly-preview-input
                             >

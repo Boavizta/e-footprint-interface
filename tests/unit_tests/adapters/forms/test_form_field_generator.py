@@ -1,6 +1,10 @@
+import re
 from types import SimpleNamespace
 from unittest.mock import MagicMock
+
 import pytest
+from django.template.loader import render_to_string
+from django.utils import translation
 
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -106,8 +110,8 @@ def test_generate_dynamic_form_registers_both_recurrent_builders_with_constant_d
     assert weekly == {
         "unit": "cpu_core",
         "profiles": [
-            {"name": "weekday", "days": [0, 1, 2, 3, 4], "baseline": "1.0", "ranges": []},
-            {"name": "weekend", "days": [5, 6], "baseline": "1.0", "ranges": []},
+            {"name": "weekday", "days": [0, 1, 2, 3, 4], "baseline": 1.0, "ranges": []},
+            {"name": "weekend", "days": [5, 6], "baseline": 1.0, "ranges": []},
         ],
     }
     assert field["can_be_negative"] is False
@@ -138,7 +142,37 @@ def test_generate_dynamic_form_selects_and_preserves_a_stored_weekly_builder(min
     field = _get_field_by_web_id(fields, "RecurrentEdgeProcess_recurrent_compute_needed")
     assert field["selected_builder"] == "weekly_pattern"
     assert field["builders"][1]["default"]["profiles"][1]["name"] == "unused"
-    assert field["builders"][1]["default"]["profiles"][0]["ranges"][0] == {"start": "8", "end": "18", "value": "5"}
+    assert field["builders"][1]["default"]["profiles"][0]["ranges"][0] == {"start": 8, "end": 18, "value": 5}
+
+
+def test_weekly_builder_template_keeps_typed_days_and_unlocalizes_numbers(minimal_model_web):
+    recurrent_class = MODELING_OBJECT_CLASSES_DICT["RecurrentEdgeProcess"]
+    recurrent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["RecurrentEdgeProcess"]
+    defaults = {"name": "Process", **recurrent_class.default_values, **recurrent_web_class.default_values}
+    fields, _, _ = generate_dynamic_form("RecurrentEdgeProcess", defaults, minimal_model_web)
+    field = _get_field_by_web_id(fields, "RecurrentEdgeProcess_recurrent_compute_needed")
+    builder = field["builders"][1]
+    builder["default"]["profiles"] = [
+        {
+            "name": "monday",
+            "days": [0],
+            "baseline": 1.5,
+            "ranges": [{"start": 8, "end": 18, "value": 2.5}],
+        }
+    ]
+
+    with translation.override("fr"):
+        rendered = render_to_string(
+            "model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_weekly_pattern.html",
+            {"field": field, "builder": builder},
+        )
+
+    assert 'value="1.5" step="0.1"' in rendered
+    assert 'value="2.5" required data-range-value' in rendered
+    assert 'value="1,5"' not in rendered
+    monday_input = re.search(r'id="[^"]+_day_0"[^>]+>', rendered)
+    assert monday_input is not None
+    assert "checked" in monday_input.group()
 
 
 def test_generate_dynamic_form_allows_negative_recurrent_storage(minimal_model_web):

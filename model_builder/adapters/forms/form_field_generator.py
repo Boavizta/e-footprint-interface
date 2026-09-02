@@ -32,20 +32,14 @@ def _format_decimal_for_number_input(value: Decimal) -> str:
     return format(value.normalize(), "f")
 
 
-def _stringify_form_value(value):
-    """Convert numeric default values to strings for template rendering."""
+def _format_form_input_value(value):
+    """Format one scalar value for an HTML form control."""
     if isinstance(value, bool):
         return value
     if isinstance(value, Decimal):
         return _format_decimal_for_number_input(value)
     if isinstance(value, (int, float)):
         return str(value)
-    if isinstance(value, dict):
-        return {key: _stringify_form_value(val) for key, val in value.items()}
-    if isinstance(value, list):
-        return [_stringify_form_value(val) for val in value]
-    if isinstance(value, tuple):
-        return tuple(_stringify_form_value(val) for val in value)
     return value
 
 
@@ -53,7 +47,7 @@ def _get_compatible_step(value: Decimal, configured_step: int | float | None) ->
     """Return the configured step unless it rejects the rendered value."""
     step_decimal = Decimal(str(configured_step if configured_step is not None else 0.1))
     if step_decimal > 0 and value % step_decimal == 0:
-        return _stringify_form_value(configured_step if configured_step is not None else 0.1)
+        return _format_form_input_value(configured_step if configured_step is not None else 0.1)
 
     decimal_places = max(0, -value.as_tuple().exponent)
     return _format_decimal_for_number_input(Decimal("1").scaleb(-decimal_places))
@@ -268,7 +262,9 @@ def generate_dynamic_form(
                 )
             )
         elif issubclass(annotation, str):
-            structure_field.update({"input_type": "str", "default": _stringify_form_value(default_values[attr_name])})
+            structure_field.update(
+                {"input_type": "str", "default": _format_form_input_value(default_values[attr_name])}
+            )
         elif issubclass(annotation, ModelingObject):
             mod_obj_attribute_object_type_str = annotation.__name__
             selection_options = model_web.get_efootprint_objects_from_efootprint_type(mod_obj_attribute_object_type_str)
@@ -328,30 +324,25 @@ def generate_dynamic_form(
                     structure_field.update(
                         {
                             "input_type": only_builder["template_name"].removesuffix(".html"),
-                            "default": _stringify_form_value(only_builder["default"]),
+                            "default": deepcopy(only_builder["default"]),
                         }
                     )
                     structure_field["subfields_ui_config"] = (
                         corresponding_web_class.hourly_quantities_from_growth_ui_config
                     )
                 else:
+                    # Read-only: base efootprint class
                     structure_field.update({"input_type": "timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableRecurrentQuantities):
                 form_config = build_timeseries_form_config(annotation, default)
                 if form_config:
-                    rendered_config = _stringify_form_value(form_config)
-                    for rendered_builder, builder in zip(rendered_config["builders"], form_config["builders"]):
-                        if rendered_builder["identifier"] == "weekly_pattern":
-                            for rendered_profile, profile in zip(
-                                rendered_builder["default"]["profiles"], builder["default"]["profiles"]
-                            ):
-                                rendered_profile["days"] = list(profile["days"])
-                    structure_field.update(rendered_config)
+                    structure_field.update(deepcopy(form_config))
                     structure_field["can_be_negative"] = attr_name in attributes_that_can_have_negative_values
                 else:
+                    # Read-only: base efootprint class
                     structure_field.update({"input_type": "recurrent_timeseries_input", "default": default})
             elif issubclass(annotation, ExplainableObject):
-                structure_field.update({"default": _stringify_form_value(default.value)})
+                structure_field.update({"default": _format_form_input_value(default.value)})
                 if isinstance(default.value, bool):
                     structure_field.update({"input_type": "bool"})
                 elif attr_name in list_values.keys():
