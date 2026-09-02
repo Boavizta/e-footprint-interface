@@ -2,18 +2,29 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.repositories import SessionSystemRepository
 
 
 @pytest.mark.django_db
-def test_weekly_validation_error_uses_standard_modal_without_mutating_session(
+def test_weekly_library_validation_error_uses_standard_modal_without_mutating_session(
     client, minimal_system_data, monkeypatch
 ):
     repository = SessionSystemRepository(client.session)
     repository.save_data(minimal_system_data)
     saved_before = repository.get_system_data()
-    execute = MagicMock()
+    execute = MagicMock(
+        side_effect=WeeklyPatternValidationError(
+            [
+                {
+                    "path": "profiles",
+                    "code": "missing_day_assignment",
+                    "message": "Day 1 must be assigned to exactly one profile.",
+                }
+            ]
+        )
+    )
     monkeypatch.setattr("model_builder.adapters.views.views_addition.CreateObjectUseCase.execute", execute)
     invalid_pattern = {
         "unit": "cpu_core",
@@ -32,5 +43,5 @@ def test_weekly_validation_error_uses_standard_modal_without_mutating_session(
     assert response.status_code == 200
     assert response.headers["HX-Reswap"] == "none"
     assert "Day 1 must be assigned to exactly one profile" in response.content.decode()
-    execute.assert_not_called()
+    execute.assert_called_once()
     assert SessionSystemRepository(client.session).get_system_data() == saved_before

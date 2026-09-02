@@ -5,8 +5,8 @@ from copy import deepcopy
 
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
-from efootprint.constants.units import u
 from efootprint.builders.timeseries import ExplainableRecurrentQuantitiesFromWeeklyPattern
+from efootprint.constants.units import u
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
@@ -57,7 +57,7 @@ def test_recurrent_edge_process_is_linked_through_hierarchy(default_system_repos
     assert edge_function_id in sd["EdgeUsageJourney"][edge_usage_journey_id]["edge_functions"]
 
 
-def test_recurrent_constant_negativity_uses_model_validation(default_system_repository):
+def test_recurrent_negativity_uses_model_validation(default_system_repository):
     edge_device_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
@@ -75,6 +75,20 @@ def test_recurrent_constant_negativity_uses_model_validation(default_system_repo
                 "RecurrentEdgeProcess",
                 edge_device=edge_device_id,
                 recurrent_compute_needed__constant_value="-1",
+            ),
+        )
+
+    with pytest.raises(ValueError, match="should be positive but is negative"):
+        create_object(
+            default_system_repository,
+            create_post_data_from_class_default_values(
+                "Negative Weekly Compute Process",
+                "RecurrentEdgeProcess",
+                edge_device=edge_device_id,
+                recurrent_compute_needed__weekly_pattern={
+                    "unit": "cpu_core",
+                    "profiles": [{"name": "all week", "days": list(range(7)), "baseline": -1, "ranges": []}],
+                },
             ),
         )
 

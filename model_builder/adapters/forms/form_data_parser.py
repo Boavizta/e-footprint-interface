@@ -12,10 +12,6 @@ from typing import Any, Dict, Mapping, get_origin, List
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.builders.timeseries import (
-    ExplainableRecurrentQuantitiesFromWeeklyPattern,
-    WeeklyPatternValidationError,
-)
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
@@ -25,59 +21,6 @@ from model_builder.domain.type_annotation_utils import resolve_optional_annotati
 
 
 _METADATA_ONLY_KEYS = frozenset({"confidence", "comment", "source"})
-
-
-def _parse_weekly_pattern_input(raw_value: Any, *, can_be_negative: bool) -> dict:
-    """Decode a normalized weekly payload and enforce the owning attribute's sign policy."""
-    if isinstance(raw_value, str):
-        try:
-            form_inputs = json.loads(raw_value)
-        except json.JSONDecodeError as exc:
-            raise WeeklyPatternValidationError(
-                [{"path": "form_inputs", "code": "invalid_json", "message": "Weekly pattern must be valid JSON."}]
-            ) from exc
-    else:
-        form_inputs = raw_value
-
-    # Validate at the HTTP boundary so every malformed or tampered save receives the same
-    # normalized path/code/message response instead of falling through to a generic modal.
-    ExplainableRecurrentQuantitiesFromWeeklyPattern(form_inputs=form_inputs)
-
-    if not can_be_negative and isinstance(form_inputs, dict):
-        errors = []
-        profiles = form_inputs.get("profiles")
-        if isinstance(profiles, list):
-            for profile_index, profile in enumerate(profiles):
-                if not isinstance(profile, dict):
-                    continue
-                baseline = profile.get("baseline")
-                if isinstance(baseline, (int, float)) and not isinstance(baseline, bool) and baseline < 0:
-                    errors.append(
-                        {
-                            "path": f"profiles[{profile_index}].baseline",
-                            "code": "negative_value_not_allowed",
-                            "message": "Baseline must be zero or greater for this field.",
-                        }
-                    )
-                ranges = profile.get("ranges")
-                if not isinstance(ranges, list):
-                    continue
-                for range_index, time_range in enumerate(ranges):
-                    if not isinstance(time_range, dict):
-                        continue
-                    value = time_range.get("value")
-                    if isinstance(value, (int, float)) and not isinstance(value, bool) and value < 0:
-                        errors.append(
-                            {
-                                "path": f"profiles[{profile_index}].ranges[{range_index}].value",
-                                "code": "negative_value_not_allowed",
-                                "message": "Range value must be zero or greater for this field.",
-                            }
-                        )
-        if errors:
-            raise WeeklyPatternValidationError(errors)
-
-    return form_inputs
 
 
 def parse_count(raw_value: Any, *, error_prefix: str) -> float:
@@ -235,11 +178,8 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             # Builder selectors are UI-only and normally have no name; tolerate a submitted one without leaking it.
             continue
         elif attr_key.endswith("__weekly_pattern"):
-            base_attr = attr_key[: -len("__weekly_pattern")]
-            form_inputs = _parse_weekly_pattern_input(
-                value,
-                can_be_negative=base_attr in new_efootprint_obj_class.attributes_that_can_have_negative_values(),
-            )
+            base_attr = attr_key.removesuffix("__weekly_pattern")
+            form_inputs = json.loads(value) if isinstance(value, str) else value
             parsed.setdefault(base_attr, {}).update({"form_inputs": form_inputs, "label": "no label"})
         elif "__" in attr_key:
             base_attr, field_name = attr_key.split("__", 1)

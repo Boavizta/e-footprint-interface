@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 from efootprint.constants.units import u
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
@@ -43,7 +44,7 @@ def _extract_select_html(response_body: str, select_id: str) -> str:
 @pytest.mark.django_db
 class TestViewsEdition:
 
-    def test_weekly_validation_error_uses_standard_modal_without_mutating_session(
+    def test_weekly_library_validation_error_uses_standard_modal_without_mutating_session(
         self, client, minimal_system_data, monkeypatch
     ):
         _setup_session(client, minimal_system_data)
@@ -54,7 +55,17 @@ class TestViewsEdition:
             class_as_simple_str="RecurrentEdgeProcess"
         )
         monkeypatch.setattr("model_builder.adapters.views.views_edition.ModelWeb", MagicMock(return_value=model_web))
-        execute = MagicMock()
+        execute = MagicMock(
+            side_effect=WeeklyPatternValidationError(
+                [
+                    {
+                        "path": "profiles",
+                        "code": "missing_day_assignment",
+                        "message": "Day 1 must be assigned to exactly one profile.",
+                    }
+                ]
+            )
+        )
         monkeypatch.setattr("model_builder.adapters.views.views_edition.EditObjectUseCase.execute", execute)
         invalid_pattern = {
             "unit": "cpu_core",
@@ -72,7 +83,7 @@ class TestViewsEdition:
         assert response.status_code == 200
         assert response.headers["HX-Reswap"] == "none"
         assert "Day 1 must be assigned to exactly one profile" in response.content.decode()
-        execute.assert_not_called()
+        execute.assert_called_once()
         assert SessionSystemRepository(client.session).get_system_data() == saved_before
 
     def test_memory_limited_edit_uses_generic_modal_and_preserves_persisted_model(

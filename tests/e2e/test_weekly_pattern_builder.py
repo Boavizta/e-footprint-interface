@@ -100,7 +100,7 @@ def test_weekly_pattern_save_reopen_and_download_upload_round_trip(recurrent_pro
     )
     assert len(preview_values) == 168
     assert preview_values[8:18] == [5] * 10
-    assert preview_values[24 + 8:24 + 18] == [5] * 10
+    assert preview_values[24 + 8 : 24 + 18] == [5] * 10
 
     editor.locator("[data-action='add-weekly-profile']").click()
     expect(profile_list).to_have_count(3)
@@ -119,22 +119,13 @@ def test_weekly_pattern_save_reopen_and_download_upload_round_trip(recurrent_pro
     expect(editor.locator("[data-weekly-error]")).to_contain_text("Mon must be assigned")
     monday.check()
 
-    payload = editor.locator("[data-weekly-pattern-payload]")
-    payload.evaluate(
-        """element => {
-            const value = JSON.parse(element.value);
-            value.profiles[0].baseline = -1;
-            element.value = JSON.stringify(value);
-        }"""
-    )
-    side_panel.submit()
+    baseline = weekday.locator("[data-profile-baseline]")
+    baseline.fill("-1")
+    side_panel.submit_button.click()
     expect(side_panel.form).to_be_visible()
-    expect(weekday.locator("[data-profile-baseline]")).to_have_js_property(
-        "validationMessage", "Baseline must be zero or greater for this field."
-    )
+    expect(baseline).to_have_js_property("validationMessage", "Baseline must be zero or greater for this field.")
     expect(page.locator(f"#{field_id}")).to_be_disabled()
-    weekday.locator("[data-profile-baseline]").fill("2")
-    weekday.locator("[data-profile-baseline]").fill("1")
+    baseline.fill("1")
 
     side_panel.submit_and_wait_for_close()
     open_process_editor(model_builder)

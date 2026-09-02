@@ -3,7 +3,6 @@
 import json
 
 import pytest
-from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from tests.utils import assert_dicts_equal
@@ -346,25 +345,18 @@ class TestWeeklyPatternParsing:
         assert parsed["comment"] == "weekday peak"
         assert "builder_selector" not in parsed["form_inputs"]
 
-    def test_rejects_negative_values_for_an_attribute_that_disallows_them(self):
+    def test_leaves_negative_weekly_validation_to_the_model(self):
         weekly_pattern = {
             "unit": "cpu_core",
             "profiles": [{"name": "all week", "days": list(range(7)), "baseline": -1, "ranges": []}],
         }
 
-        with pytest.raises(WeeklyPatternValidationError) as error:
-            parse_form_data(
-                {"RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": json.dumps(weekly_pattern)},
-                "RecurrentEdgeProcess",
-            )
+        result = parse_form_data(
+            {"RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": json.dumps(weekly_pattern)},
+            "RecurrentEdgeProcess",
+        )
 
-        assert error.value.errors == [
-            {
-                "path": "profiles[0].baseline",
-                "code": "negative_value_not_allowed",
-                "message": "Baseline must be zero or greater for this field.",
-            }
-        ]
+        assert result["recurrent_compute_needed"] == {"form_inputs": weekly_pattern, "label": "no label"}
 
     def test_leaves_negative_constant_validation_to_the_model(self):
         result = parse_form_data(
@@ -380,11 +372,9 @@ class TestWeeklyPatternParsing:
             "label": "no label",
         }
 
-    def test_rejects_malformed_weekly_json_with_structured_error(self):
-        with pytest.raises(WeeklyPatternValidationError) as error:
+    def test_rejects_malformed_weekly_json(self):
+        with pytest.raises(json.JSONDecodeError):
             parse_form_data(
                 {"RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern": "{bad"},
                 "RecurrentEdgeProcess",
             )
-
-        assert error.value.errors[0]["code"] == "invalid_json"
