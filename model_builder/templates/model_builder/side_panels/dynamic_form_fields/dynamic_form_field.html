@@ -1,7 +1,7 @@
 <div id="field-group-{{ field.web_id }}"
-    class="mb-3{% if field.input_type == 'explainable_timeseries_builder' %} timeseries-field-group{% endif %}{% if field.hide_field %} d-none{% endif %}">
+    class="mb-3{% if field.input_type == 'recurrent_timeseries_builder' %} timeseries-field-group{% endif %}{% if field.hide_field %} d-none{% endif %}">
     {% include "model_builder/side_panels/dynamic_form_fields/label.html" %}
-    {% if field.input_type == 'explainable_timeseries_builder' %}
+    {% if field.input_type == 'recurrent_timeseries_builder' %}
         <div class="timeseries-field-content">
     {% endif %}
     {% if field.metadata.source %}
@@ -15,7 +15,7 @@
     {% else %}
         {% include "model_builder/side_panels/dynamic_form_fields/"|add:field.input_type|add:".html" %}
     {% endif %}
-    {% if field.input_type == 'explainable_timeseries_builder' %}
+    {% if field.input_type == 'recurrent_timeseries_builder' %}
         </div>
     {% endif %}
 </div>

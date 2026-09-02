@@ -336,7 +336,7 @@ def generate_dynamic_form(
             elif issubclass(annotation, ExplainableRecurrentQuantities):
                 form_config = build_timeseries_form_config(annotation, default)
                 if form_config:
-                    structure_field.update(deepcopy(form_config))
+                    structure_field.update({"input_type": "recurrent_timeseries_builder", **deepcopy(form_config)})
                     structure_field["can_be_negative"] = attr_name in attributes_that_can_have_negative_values
                 else:
                     # Read-only: base efootprint class
@@ -407,7 +407,7 @@ def generate_dynamic_form(
             structure_fields.append(structure_field)
 
     # Reorder fields so timeseries fields appear last (preserving order within each group)
-    timeseries_input_types = ["explainable_timeseries_builder", "timeseries_input", "recurrent_timeseries_input"]
+    timeseries_input_types = ["recurrent_timeseries_builder", "timeseries_input", "recurrent_timeseries_input"]
 
     non_timeseries_fields = [f for f in structure_fields if f["input_type"] not in timeseries_input_types]
     timeseries_fields = [f for f in structure_fields if f["input_type"] in timeseries_input_types]

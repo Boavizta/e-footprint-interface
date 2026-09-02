@@ -61,7 +61,7 @@
                     },
                     "available_sources": []
                 },
-                "input_type": "explainable_timeseries_builder",
+                "input_type": "recurrent_timeseries_builder",
                 "selected_builder": "constant",
                 "show_builder_selector": true,
                 "builders": [

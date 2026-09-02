@@ -1,8 +1,8 @@
 <div id="{{ field.web_id }}__builder" data-timeseries-builder data-field-web-id="{{ field.web_id }}"
      data-field-name="{{ field.attr_name }}" data-preview-url="{% url 'timeseries-preview' %}"
-     data-preview-id="{{ field.web_id }}__preview" class="weekly-timeseries-builder">
+     data-preview-id="{{ field.web_id }}__preview" class="recurrent-timeseries-builder">
     {% if field.show_builder_selector %}
-        <div class="weekly-builder-mode mb-2">
+        <div class="recurrent-builder-mode mb-2">
             <label class="visually-hidden" for="{{ field.web_id }}__builder_selector">
                 Definition method for {{ field.label }}
             </label>
@@ -16,8 +16,8 @@
         </div>
     {% endif %}
 
-    <div class="weekly-pattern-preview-shell" data-timeseries-preview-column>
-        <aside class="weekly-pattern-preview timeseries-preview-panel text-start shadow-custom" aria-live="polite" data-timeseries-preview
+    <div class="recurrent-timeseries-preview-shell" data-timeseries-preview-column>
+        <aside class="recurrent-timeseries-preview timeseries-preview-panel text-start shadow-custom" aria-live="polite" data-timeseries-preview
                data-preview-id="{{ field.web_id }}__preview" data-latest-request-sequence="0">
             {% include "model_builder/side_panels/timeseries_preview_panel.html" with preview_title="Weekly quantity projection" preview_subtitle=field.label preview_canvas_label="Preview of the generated 168-hour weekly timeseries" preview_status="Preparing preview…" %}
         </aside>
@@ -25,7 +25,7 @@
              data-timeseries-preview-responses></div>
     </div>
 
-    <div class="weekly-definition" data-timeseries-editor-column>
+    <div class="recurrent-timeseries-definition" data-timeseries-editor-column>
         {% for builder in field.builders %}
             <section data-builder-panel="{{ builder.identifier }}"
                      {% if builder.identifier != field.selected_builder %}hidden{% endif %}>

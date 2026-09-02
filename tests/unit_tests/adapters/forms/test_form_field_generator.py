@@ -103,7 +103,7 @@ def test_generate_dynamic_form_registers_both_recurrent_builders_with_constant_d
     fields, _, _ = generate_dynamic_form("RecurrentEdgeProcess", defaults, minimal_model_web)
 
     field = _get_field_by_web_id(fields, "RecurrentEdgeProcess_recurrent_compute_needed")
-    assert field["input_type"] == "explainable_timeseries_builder"
+    assert field["input_type"] == "recurrent_timeseries_builder"
     assert field["selected_builder"] == "constant"
     assert [builder["identifier"] for builder in field["builders"]] == ["constant", "weekly_pattern"]
     weekly = field["builders"][1]["default"]

@@ -60,7 +60,7 @@ weekly side preview.
 - `model_builder/adapters/views/views_addition.py`
 - `model_builder/adapters/views/views_edition.py`
 - `model_builder/templates/model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html`
-- `model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_timeseries_builder.html` (new)
+- `model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_timeseries_builder.html` (new)
 - `model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_weekly_pattern.html` (new)
 - `model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html`
 - `theme/static/scripts/weekly_pattern_builder.js` (new)
@@ -119,7 +119,7 @@ then use them to show the generated canonical week beside the weekly editor.
 - `model_builder/adapters/views/views.py`
 - `model_builder/urls.py`
 - `model_builder/domain/entities/web_core/explainable_timeseries_utils.py`
-- `model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_timeseries_builder.html`
+- `model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_timeseries_builder.html`
 - `model_builder/templates/model_builder/side_panels/timeseries_preview.html` (new)
 - `theme/static/scripts/timeseries_preview.js` (new)
 - `theme/static/scripts/weekly_pattern_builder.js`

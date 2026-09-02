@@ -98,7 +98,6 @@ def build_timeseries_form_config(annotation: type, value) -> dict | None:
         return None
 
     return {
-        "input_type": "explainable_timeseries_builder",
         "selected_builder": selected.identifier,
         "show_builder_selector": len(builders) > 1,
         "builders": [

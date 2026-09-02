@@ -21011,7 +21011,7 @@ input:disabled {
 
 /* Weekly-pattern editor: the chart occupies the canvas beside the side panel,
    while the form stays compact enough to scan as a weekly schedule. */
-.weekly-timeseries-builder {
+.recurrent-timeseries-builder {
   position: relative;
 }
 
@@ -21026,7 +21026,7 @@ input:disabled {
   border-left: 2px solid var(--gray-300);
 }
 
-.weekly-builder-mode .form-select {
+.recurrent-builder-mode .form-select {
   min-height: 2rem;
   color: var(--gray-500);
   font-size: 0.75rem;
@@ -21224,11 +21224,11 @@ input:disabled {
   color: var(--new-primary);
 }
 
-.weekly-pattern-preview-shell {
+.recurrent-timeseries-preview-shell {
   z-index: 2;
 }
 
-.weekly-pattern-preview {
+.recurrent-timeseries-preview {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -21531,7 +21531,7 @@ input:disabled {
   }
 }
 @media (min-width: 992px) {
-  .weekly-pattern-preview-shell {
+  .recurrent-timeseries-preview-shell {
     position: fixed;
     top: 15vh;
     right: 33vw;
@@ -21540,7 +21540,7 @@ input:disabled {
   }
 }
 @media (min-width: 576px) and (max-width: 991.98px) {
-  .weekly-pattern-preview-shell {
+  .recurrent-timeseries-preview-shell {
     position: fixed;
     top: max(10vh, 9.5rem);
     right: 50vw;
@@ -21550,13 +21550,13 @@ input:disabled {
   }
 }
 @media (max-width: 575.98px) {
-  .weekly-pattern-preview-shell {
+  .recurrent-timeseries-preview-shell {
     position: static;
     width: 100%;
     height: 22rem;
     margin-bottom: 1rem;
   }
-  .weekly-pattern-preview {
+  .recurrent-timeseries-preview {
     padding: 1rem;
   }
 }
