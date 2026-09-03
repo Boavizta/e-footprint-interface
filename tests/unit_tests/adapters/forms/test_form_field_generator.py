@@ -247,7 +247,14 @@ def test_edge_usage_pattern_creation_preselects_one_journey():
 
     assert field["selected"] == [{"value": "mock_journey_efootprint_id", "label": "mock_journey"}]
     assert field["label"] == "Edge usage journeys"
+    assert "Non-empty" in str(field["tooltip"])
     assert field["min_items"] == 1
+
+    rendered = render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/select_multiple.html", {"field": field})
+    assert rendered.index("Edge usage journeys") < rendered.index("data-bs-content")
+    assert rendered.index("data-bs-content") < rendered.index(
+        "objects-already-selected-for-EdgeUsagePattern_edge_usage_journeys")
 
 
 def test_generate_dynamic_form_dict_field_selected_json_preserves_journey_order(minimal_model_web):
