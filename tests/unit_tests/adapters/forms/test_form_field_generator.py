@@ -231,7 +231,7 @@ def test_usage_pattern_creation_preselects_one_positive_weighted_journey():
     assert field["strictly_positive"] is True
 
 
-def test_edge_usage_pattern_creation_preselects_one_bundle():
+def test_edge_usage_pattern_creation_preselects_one_journey():
     from model_builder.domain.entities.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
     from tests.unit_tests.domain.entities.snapshot_model_webs import build_usage_pattern_model_web
 
@@ -246,7 +246,7 @@ def test_edge_usage_pattern_creation_preselects_one_bundle():
     field = _get_field_by_web_id(fields, "EdgeUsagePattern_edge_usage_journeys")
 
     assert field["selected"] == [{"value": "mock_journey_efootprint_id", "label": "mock_journey"}]
-    assert field["label"] == "Functionality bundles"
+    assert field["label"] == "Edge usage journeys"
     assert field["min_items"] == 1
 
 

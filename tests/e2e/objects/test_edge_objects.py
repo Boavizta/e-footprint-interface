@@ -183,7 +183,7 @@ class TestEdgeObjects:
             "EdgeUsagePattern_hourly_deployment_starts__net_growth_rate_timespan",
             "year"
         )
-        # The first available functionality bundle is selected by default.
+        # The first available edge usage journey is selected by default.
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("EdgeUsagePattern", edge_usage_pattern_name)
 
@@ -194,7 +194,7 @@ class TestEdgeObjects:
         server_fabrication = page.evaluate("window.emissions.values['Servers_and_storage_fabrication']")
         assert any(value > 0 for value in server_energy) or any(value > 0 for value in server_fabrication)
 
-    def test_edge_pattern_selects_multiple_functionality_bundles(
+    def test_edge_pattern_selects_multiple_edge_usage_journeys(
         self, edge_system_in_browser: ModelBuilderPage
     ):
         model_builder = edge_system_in_browser

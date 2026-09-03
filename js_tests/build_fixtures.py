@@ -239,7 +239,7 @@ def render_dict_count(field_ctx):
 SELECT_MULTIPLE_CASES = {
     "select_multiple_required_bundle": {
         "web_id": "EdgeUsagePattern_edge_usage_journeys",
-        "label": "Functionality bundles",
+        "label": "Edge usage journeys",
         "tooltip": None,
         "ordered": False,
         "min_items": 1,

@@ -25,8 +25,8 @@ class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
         "initial_volume": {
             "label": "Initial number of edge devices put in service",
             "tooltip": (
-                "The number of edge deployments put in service in the chosen period. Every selected functionality "
-                "bundle applies throughout the deployment usage span."
+                "The number of edge deployments put in service in the chosen period. Every selected edge usage "
+                "journey applies throughout the deployment usage span."
             ),
         },
     }

@@ -27,7 +27,7 @@ def test_create_edge_usage_journey(default_system_repository):
     assert ModelWeb(default_system_repository).edge_usage_journeys[0].name == "Test Edge Usage Journey"
 
 
-def test_edge_usage_pattern_selects_multiple_bundles_but_cannot_remove_the_last(default_system_repository):
+def test_edge_usage_pattern_selects_multiple_journeys_but_cannot_remove_the_last(default_system_repository):
     journey_ids = [
         create_object(
             default_system_repository,
@@ -39,7 +39,7 @@ def test_edge_usage_pattern_selects_multiple_bundles_but_cannot_remove_the_last(
     pattern_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Multi-bundle deployment",
+            "Multi-journey deployment",
             "EdgeUsagePattern",
             edge_usage_journeys=";".join(journey_ids),
             network=next(iter(DEFAULT_NETWORKS)),

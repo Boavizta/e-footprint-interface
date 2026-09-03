@@ -31,8 +31,8 @@
             {
                 "web_id": "EdgeUsagePattern_edge_usage_journeys",
                 "attr_name": "edge_usage_journeys",
-                "label": "Functionality bundles",
-                "tooltip": "Non-empty, duplicate-free list of <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"EdgeUsageJourney\">Edge usage journey</button> functionality bundles carried by every deployment in this pattern.",
+                "label": "Edge usage journeys",
+                "tooltip": "Non-empty, duplicate-free selection of <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"EdgeUsageJourney\">Edge usage journey</button> objects carried by every deployment in this pattern.",
                 "input_type": "select_multiple",
                 "ordered": false,
                 "selected": [
@@ -120,7 +120,7 @@
                 "subfields_ui_config": {
                     "initial_volume": {
                         "label": "Initial number of edge devices put in service",
-                        "tooltip": "The number of edge deployments put in service in the chosen period. Every selected functionality bundle applies throughout the deployment usage span."
+                        "tooltip": "The number of edge deployments put in service in the chosen period. Every selected edge usage journey applies throughout the deployment usage span."
                     }
                 }
             },
@@ -128,7 +128,7 @@
                 "web_id": "EdgeUsagePattern_usage_span",
                 "attr_name": "usage_span",
                 "label": "deployment usage span",
-                "tooltip": "How long each physical deployment remains active. All selected functionality bundles share this span.",
+                "tooltip": "How long each physical deployment remains active. All selected edge usage journeys share this span.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

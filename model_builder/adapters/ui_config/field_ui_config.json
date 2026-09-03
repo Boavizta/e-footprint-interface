@@ -666,7 +666,7 @@
         "modeling_obj_containers": [
             "EdgeUsagePattern"
         ],
-        "label": "Functionality bundles",
+        "label": "Edge usage journeys",
         "min_items": 1
     },
     "hourly_deployment_starts": {
