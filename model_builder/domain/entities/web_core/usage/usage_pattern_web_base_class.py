@@ -16,7 +16,7 @@ def default_modeling_start_date() -> str:
 
 
 class UsagePatternWebBaseClass(ModelingObjectWeb):
-    nests_relationship_children = False
+    renders_relationship_children_as_nested_cards = False
     attr_name_in_system = "value to override in subclass"
     journey_relationship_attr = "value to override in subclass"
 

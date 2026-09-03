@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class ModelingObjectWeb:
-    nests_relationship_children = True
+    renders_relationship_children_as_nested_cards = True
     default_values = {}
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
@@ -377,12 +377,12 @@ class ModelingObjectWeb:
         dict_containers, _ = self.dict_containers_and_attr_name_in_dict_container
 
         for container in list_containers:
-            if not container.nests_relationship_children:
+            if not container.renders_relationship_children_as_nested_cards:
                 continue
             for container_mirror in container.mirrored_cards:
                 result.append(type(self)(self._modeling_obj, self.model_web, list_container=container_mirror))
         for container in dict_containers:
-            if not container.nests_relationship_children:
+            if not container.renders_relationship_children_as_nested_cards:
                 continue
             for container_mirror in container.mirrored_cards:
                 result.append(type(self)(self._modeling_obj, self.model_web, dict_container=container_mirror))

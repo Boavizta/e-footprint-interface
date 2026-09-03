@@ -343,7 +343,8 @@ The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-
 Usage patterns are top-level drivers rather than ownership containers. `UsagePattern.usage_journeys` is a weighted dict
 (`dict_count`, labelled “Journeys per pattern occurrence”), while `EdgeUsagePattern.edge_usage_journeys` is a unique
 membership list (`select_multiple`, labelled “Functionality bundles”). Their wrappers declare the relationship as
-required, preselect the first available journey during creation, and set `nests_relationship_children = False` so the
+required, preselect the first available journey during creation, and set
+`renders_relationship_children_as_nested_cards = False` so the
 generic mirrored-card traversal does not treat these references as rendered ownership containers. Journeys therefore
 remain single top-level cards; `links_to` emits one canvas edge from the pattern to each selected journey.
 
