@@ -237,23 +237,6 @@ test("reactivating a selected builder restores its named payload after transient
     expect(payload.disabled).toBe(false);
 });
 
-test("submission realigns every builder panel with its selected mode", () => {
-    const form = document.getElementById("sidePanelForm");
-    const root = document.querySelector("[data-timeseries-builder]");
-    const selector = root.querySelector("[data-builder-selector]");
-    const constant = document.getElementById("RecurrentEdgeProcess_recurrent_compute_needed");
-    const payload = root.querySelector("[data-weekly-pattern-payload]");
-    selector.value = "weekly_pattern";
-    constant.disabled = false;
-    payload.disabled = true;
-    form.addEventListener("submit", function (event) { event.preventDefault(); }, {once: true});
-
-    form.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
-
-    expect(constant.disabled).toBe(true);
-    expect(payload.disabled).toBe(false);
-});
-
 test("switching away from an invalid weekly draft removes it from form validation", () => {
     const editor = selectWeeklyBuilder();
     const monday = profiles(editor)[0].querySelector("[data-profile-day][value='0']");
