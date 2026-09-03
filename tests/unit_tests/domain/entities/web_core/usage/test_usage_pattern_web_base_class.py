@@ -80,7 +80,6 @@ class TestUsagePatternWebBaseClass:
             if section["parent_class_name"] == "UsagePattern"
         )["memberships"][0]
 
-        assert membership["can_remove"] is False
         assert membership["unlink_disabled"] is True
 
         second_journey = UsageJourney("Second journey", uj_steps=[])
@@ -91,7 +90,6 @@ class TestUsagePatternWebBaseClass:
             section for section in journey.dict_membership_sections
             if section["parent_class_name"] == "UsagePattern"
         )["memberships"][0]
-        assert membership["can_remove"] is True
         assert membership["unlink_disabled"] is False
 
     # --- pre_add_to_system ---

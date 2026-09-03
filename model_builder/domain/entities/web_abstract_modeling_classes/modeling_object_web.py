@@ -232,7 +232,6 @@ class ModelingObjectWeb:
                     "parent_id": parent.id,
                     "parent_name": parent.name,
                     "count": relationship[self._modeling_obj].value.magnitude,
-                    "can_remove": attr_name not in required_attrs or len(relationship) > 1,
                     "unlink_disabled": attr_name in required_attrs and len(relationship) == 1,
                 })
             member_ids = {membership["parent_id"] for membership in memberships}
