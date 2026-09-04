@@ -43,7 +43,7 @@ class TestModelWeb(unittest.TestCase):
         self.model_web._system_emissions = None
 
         self.model_web.system = MagicMock()
-        self.model_web.system.total_energy_footprints = {
+        self.model_web.system.total_use_footprints = {
             "Servers": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
             "Storage": {"value": [300, 400], "start_date": "2023-01-01 00:00"},
             "ExternalAPIs": {"value": [100, 300], "start_date": "2023-01-01 00:00"},
@@ -51,7 +51,7 @@ class TestModelWeb(unittest.TestCase):
             "Network": {"value": [700, 800], "start_date": "2023-01-01 00:00"},
             "EdgeDevices": {"value": [100, 200], "start_date": "2023-01-01 00:00"},
         }
-        self.model_web.system.total_fabrication_footprints = {
+        self.model_web.system.total_manufacturing_footprints = {
             "Servers": {"value": [900, 1000], "start_date": "2023-01-01 00:00"},
             "Storage": {"value": [1100, 1200], "start_date": "2023-01-01 00:00"},
             "ExternalAPIs": {"value": [500, 700], "start_date": "2023-01-01 00:00"},
@@ -61,7 +61,7 @@ class TestModelWeb(unittest.TestCase):
         }
 
         for footprint_dict in [
-            self.model_web.system.total_energy_footprints, self.model_web.system.total_fabrication_footprints]:
+            self.model_web.system.total_use_footprints, self.model_web.system.total_manufacturing_footprints]:
             for key, data in footprint_dict.items():
                 if not isinstance(data, EmptyExplainableObject):
                     footprint_dict[key] = ExplainableHourlyQuantities(
@@ -83,17 +83,17 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["values"]["Devices_energy"], [0, 1.1])
         self.assertListEqual(emissions["values"]["ExternalAPIs_energy"], [0.4, 0])
         self.assertListEqual(emissions["values"]["Network_energy"], [1.5, 0])
-        self.assertListEqual(emissions["values"]["Servers_and_storage_fabrication"], [4.2, 0])
-        self.assertListEqual(emissions["values"]["ExternalAPIs_fabrication"], [1.2, 0])
-        self.assertListEqual(emissions["values"]["Devices_fabrication"], [0, 2.7])
+        self.assertListEqual(emissions["values"]["Servers_and_storage_manufacturing"], [4.2, 0])
+        self.assertListEqual(emissions["values"]["ExternalAPIs_manufacturing"], [1.2, 0])
+        self.assertListEqual(emissions["values"]["Devices_manufacturing"], [0, 2.7])
         self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
-        self.assertListEqual(emissions["values"]["Edge_devices_fabrication"], [3.1, 0])
+        self.assertListEqual(emissions["values"]["Edge_devices_manufacturing"], [3.1, 0])
 
     def test_system_emissions_returns_empty_result_when_no_hourly_quantities(self):
         empty_model_web = ModelWeb.__new__(ModelWeb)
         empty_model_web._system_emissions = None
         empty_model_web.system = MagicMock()
-        empty_model_web.system.total_energy_footprints = {
+        empty_model_web.system.total_use_footprints = {
             "Servers": EmptyExplainableObject(),
             "Storage": EmptyExplainableObject(),
             "ExternalAPIs": EmptyExplainableObject(),
@@ -101,7 +101,7 @@ class TestModelWeb(unittest.TestCase):
             "Network": EmptyExplainableObject(),
             "EdgeDevices": EmptyExplainableObject(),
         }
-        empty_model_web.system.total_fabrication_footprints = {
+        empty_model_web.system.total_manufacturing_footprints = {
             "Servers": EmptyExplainableObject(),
             "Storage": EmptyExplainableObject(),
             "ExternalAPIs": EmptyExplainableObject(),
@@ -116,8 +116,8 @@ class TestModelWeb(unittest.TestCase):
         self.assertEqual(emissions["display_unit"], "kg")
         for key in [
             "Servers_and_storage_energy", "ExternalAPIs_energy", "Edge_devices_energy", "Devices_energy",
-            "Network_energy", "Servers_and_storage_fabrication", "ExternalAPIs_fabrication",
-            "Edge_devices_fabrication", "Devices_fabrication",
+            "Network_energy", "Servers_and_storage_manufacturing", "ExternalAPIs_manufacturing",
+            "Edge_devices_manufacturing", "Devices_manufacturing",
         ]:
             self.assertListEqual(emissions["values"][key], [])
 
@@ -318,7 +318,7 @@ class TestExportSerialization:
         assert "impact_repartition_matrix" not in persisted["System"][raw_system.id]
         for obj in minimal_model_web.flat_efootprint_objs_dict.values():
             obj_slots = serialized_slots(obj.efootprint_class)
-            for footprint_name in {"energy_footprint", "instances_fabrication_footprint"} & obj_slots.keys():
+            for footprint_name in {"use_footprint", "instances_manufacturing_footprint"} & obj_slots.keys():
                 assert obj_slots[footprint_name].peek(obj) is not None
                 assert footprint_name in persisted[obj.class_as_simple_str][obj.id]
 

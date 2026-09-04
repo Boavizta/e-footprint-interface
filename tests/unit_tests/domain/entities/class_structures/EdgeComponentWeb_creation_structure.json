@@ -106,9 +106,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeCPUComponent_carbon_footprint_fabrication_per_unit",
-                "attr_name": "carbon_footprint_fabrication_per_unit",
-                "label": "carbon footprint fabrication per unit",
+                "web_id": "EdgeCPUComponent_carbon_footprint_manufacturing_per_unit",
+                "attr_name": "carbon_footprint_manufacturing_per_unit",
+                "label": "carbon footprint manufacturing per unit",
                 "tooltip": "Embodied carbon emitted to manufacture one unit of the component.",
                 "metadata": {
                     "confidence": null,
@@ -269,9 +269,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeRAMComponent_carbon_footprint_fabrication_per_unit",
-                "attr_name": "carbon_footprint_fabrication_per_unit",
-                "label": "carbon footprint fabrication per unit",
+                "web_id": "EdgeRAMComponent_carbon_footprint_manufacturing_per_unit",
+                "attr_name": "carbon_footprint_manufacturing_per_unit",
+                "label": "carbon footprint manufacturing per unit",
                 "tooltip": "Embodied carbon emitted to manufacture one unit of the component.",
                 "metadata": {
                     "confidence": null,
@@ -432,9 +432,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeStorage_carbon_footprint_fabrication_per_storage_capacity",
-                "attr_name": "carbon_footprint_fabrication_per_storage_capacity",
-                "label": "carbon footprint fabrication per storage capacity",
+                "web_id": "EdgeStorage_carbon_footprint_manufacturing_per_storage_capacity",
+                "attr_name": "carbon_footprint_manufacturing_per_storage_capacity",
+                "label": "carbon footprint manufacturing per storage capacity",
                 "tooltip": "Embodied carbon emitted to manufacture one unit of storage capacity.",
                 "metadata": {
                     "confidence": null,
@@ -532,9 +532,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeWorkloadComponent_carbon_footprint_fabrication_per_unit",
-                "attr_name": "carbon_footprint_fabrication_per_unit",
-                "label": "carbon footprint fabrication per unit",
+                "web_id": "EdgeWorkloadComponent_carbon_footprint_manufacturing_per_unit",
+                "attr_name": "carbon_footprint_manufacturing_per_unit",
+                "label": "carbon footprint manufacturing per unit",
                 "tooltip": "Embodied carbon emitted to manufacture one unit of the component.",
                 "metadata": {
                     "confidence": null,

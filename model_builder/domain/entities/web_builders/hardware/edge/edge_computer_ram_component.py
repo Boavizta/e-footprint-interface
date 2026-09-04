@@ -11,4 +11,4 @@ class EdgeComputerRAMComponentWeb(ModelingObjectWeb):
     def calculated_attributes_without_validations(self):
         return [elt for elt in self.modeling_obj.calculated_attributes_without_validations
                 if elt not in ["ram", "base_ram_consumption", "lifespan",
-                               "instances_fabrication_footprint_per_usage_pattern", "instances_fabrication_footprint"]]
+                               "instances_manufacturing_footprint_per_usage_pattern", "instances_manufacturing_footprint"]]

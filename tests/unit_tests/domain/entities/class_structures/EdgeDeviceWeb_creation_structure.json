@@ -102,9 +102,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeComputer_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
+                "web_id": "EdgeComputer_carbon_footprint_manufacturing",
+                "attr_name": "carbon_footprint_manufacturing",
+                "label": "carbon footprint manufacturing",
                 "tooltip": "Embodied carbon emitted to manufacture one computer.",
                 "metadata": {
                     "confidence": null,
@@ -244,9 +244,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeAppliance_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
+                "web_id": "EdgeAppliance_carbon_footprint_manufacturing",
+                "attr_name": "carbon_footprint_manufacturing",
+                "label": "carbon footprint manufacturing",
                 "tooltip": "Embodied carbon emitted to manufacture one appliance.",
                 "metadata": {
                     "confidence": null,
@@ -344,9 +344,9 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "EdgeDevice_structure_carbon_footprint_fabrication",
-                "attr_name": "structure_carbon_footprint_fabrication",
-                "label": "structure carbon footprint fabrication",
+                "web_id": "EdgeDevice_structure_carbon_footprint_manufacturing",
+                "attr_name": "structure_carbon_footprint_manufacturing",
+                "label": "structure carbon footprint manufacturing",
                 "tooltip": "Embodied carbon of the chassis or structural envelope, separate from individual components.",
                 "metadata": {
                     "confidence": null,

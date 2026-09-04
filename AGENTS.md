@@ -22,6 +22,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | What's planned and in flight | `specs/roadmap.md` |
 | The spec-driven workflow (specify → plan → tasks → implement) | `specs/workflow.md` |
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
+| UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
 | Active feature work | `specs/features/<feature-name>/` |
 | Past investigations and dated decisions | `archives/` |
 

@@ -7,27 +7,27 @@ import { CHART_FONT, CHART_COLORS } from "./config.js";
 import { formatEmissionsQuantity } from "./display.js";
 
 /**
- * Categorize and sort tooltip items into fabrication and usage groups
+ * Categorize and sort tooltip items into manufacturing and usage groups
  * @param {Array} tooltipItems - Array of Chart.js tooltip items
- * @returns {Object} Object with sorted fabrication and usage arrays
+ * @returns {Object} Object with sorted manufacturing and usage arrays
  */
 function categorizeAndSortTooltipItems(tooltipItems) {
-    const fabrication = [];
+    const manufacturing = [];
     const usage = [];
 
     tooltipItems.forEach((item) => {
-        if (item.dataset.label.includes("fabrication")) {
-            fabrication.push(item);
+        if (item.dataset.label.includes("manufacturing")) {
+            manufacturing.push(item);
         } else if (item.dataset.label.includes("usage")) {
             usage.push(item);
         }
     });
 
     // Reverse both arrays to show items in reverse order
-    fabrication.reverse();
+    manufacturing.reverse();
     usage.reverse();
 
-    return { fabrication, usage };
+    return { manufacturing, usage };
 }
 
 /**
@@ -65,7 +65,7 @@ export function customTooltipHandler(context) {
     // Set Text
     if (tooltipModel.body) {
         const titleLines = tooltipModel.title || [];
-        const { fabrication, usage } = categorizeAndSortTooltipItems(tooltipModel.dataPoints);
+        const { manufacturing, usage } = categorizeAndSortTooltipItems(tooltipModel.dataPoints);
 
         let innerHtml = "<thead>";
         titleLines.forEach((title) => {
@@ -73,13 +73,13 @@ export function customTooltipHandler(context) {
         });
         innerHtml += "</thead><tbody>";
 
-        // Add FABRICATION section
-        if (fabrication.length > 0) {
-            const fabricationTotal = calculateTotal(fabrication);
+        // Add MANUFACTURING section
+        if (manufacturing.length > 0) {
+            const manufacturingTotal = calculateTotal(manufacturing);
             innerHtml +=
-                '<tr><td class="section-header">FABRICATION: <span class="section-total">' +
-                `${formatEmissionsQuantity(fabricationTotal, unit)}</span></td></tr>`;
-            fabrication.forEach((item) => {
+                '<tr><td class="section-header">MANUFACTURING: <span class="section-total">' +
+                `${formatEmissionsQuantity(manufacturingTotal, unit)}</span></td></tr>`;
+            manufacturing.forEach((item) => {
                 const colors = item.dataset.backgroundColor;
                 const label = item.dataset.label;
 
@@ -92,7 +92,7 @@ export function customTooltipHandler(context) {
 
         // Add USAGE section
         if (usage.length > 0) {
-            if (fabrication.length > 0) {
+            if (manufacturing.length > 0) {
                 innerHtml += '<tr><td class="section-spacer"></td></tr>';
             }
             const usageTotal = calculateTotal(usage);
@@ -111,10 +111,10 @@ export function customTooltipHandler(context) {
         }
 
         // Add total if both categories exist
-        if (fabrication.length > 0 && usage.length > 0) {
-            const fabricationTotal = calculateTotal(fabrication);
+        if (manufacturing.length > 0 && usage.length > 0) {
+            const manufacturingTotal = calculateTotal(manufacturing);
             const usageTotal = calculateTotal(usage);
-            const grandTotal = fabricationTotal + usageTotal;
+            const grandTotal = manufacturingTotal + usageTotal;
 
             innerHtml += '<tr><td class="section-spacer"></td></tr>';
             innerHtml += `<tr><td class="total-row">Total: ${formatEmissionsQuantity(grandTotal, unit)}</td></tr>`;

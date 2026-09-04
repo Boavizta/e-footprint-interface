@@ -341,8 +341,8 @@
                 <text x="197" y="73" font-size="7" fill="#6B7280" text-anchor="middle">2026</text><text x="267" y="73" font-size="7" fill="#6B7280" text-anchor="middle">2027</text>
               </svg>
               <div class="slegend">
-                <div><div class="gh">Fabrication</div><span class="cap"><i style="background:#7c91b6"></i>Servers and storage</span><span class="cap"><i style="background:#9aa7c2"></i>Devices</span></div>
-                <div><div class="gh">Usage</div><span class="cap"><i style="background:#2D4675"></i>Servers and storage</span><span class="cap"><i style="background:#4b5e8a"></i>Network</span></div>
+                <div><div class="gh">Manufacturing</div><span class="cap"><i style="background:#7c91b6"></i>Servers and storage</span><span class="cap"><i style="background:#9aa7c2"></i>Devices</span></div>
+                <div><div class="gh">Use</div><span class="cap"><i style="background:#2D4675"></i>Servers and storage</span><span class="cap"><i style="background:#4b5e8a"></i>Network</span></div>
               </div>
             </div>
             <div class="ccard">
@@ -359,7 +359,7 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Results opens exactly as it reads today — <b>Yearly CO2 emissions</b> and <b>Cumulative CO2 emissions over time</b>, by object category, with the split <em>Fabrication / Usage</em> legend. The difference: both are now <b>cards</b> — title (renamable ✎), reorder ↑↓, settings ⚙, delete ✕ — and an <b>＋ Add another chart</b> button closes the stack.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Results opens exactly as it reads today — <b>Yearly CO2 emissions</b> and <b>Cumulative CO2 emissions over time</b>, by object category, with the split <em>Manufacturing / Use</em> legend. The difference: both are now <b>cards</b> — title (renamable ✎), reorder ↑↓, settings ⚙, delete ✕ — and an <b>＋ Add another chart</b> button closes the stack.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>The default stack reproduces today's read</h3></div>
@@ -389,7 +389,7 @@
               <div class="chead"><span class="ct">CO2 emissions per usage journey <span class="pencil">✎</span></span><span class="ctrl">↑</span><span class="ctrl">↓</span><span class="ctrl" style="color:var(--primary)">⚙</span><span class="ctrl">✕</span></div>
               <div class="setrow"><span class="sk">Break down by</span><select class="dd" style="font-size:.55rem;padding:.08rem 1rem .08rem .35rem"><option>Usage journeys</option><option>Object category</option><option>Hardware</option><option>Usage patterns</option><option>Steps / Functions</option><option>Jobs / component needs</option><option>Countries</option></select></div>
               <div class="setrow"><span class="sk">Mode</span><span class="chips"><span class="chip on">Per period</span><span class="chip">Cumulative</span></span><span class="sk" style="flex:0 0 auto;margin-left:.4rem">Granularity</span><select class="dd" style="font-size:.55rem;padding:.08rem 1rem .08rem .35rem"><option>Year</option><option>Month</option></select></div>
-              <div class="setrow"><span class="sk">Lifecycle phase</span><select class="dd" style="font-size:.55rem;padding:.08rem 1rem .08rem .35rem"><option>All phases</option><option>Fabrication only</option><option>Usage only</option></select></div>
+              <div class="setrow"><span class="sk">Lifecycle phase</span><select class="dd" style="font-size:.55rem;padding:.08rem 1rem .08rem .35rem"><option>All phases</option><option>Manufacturing only</option><option>Use only</option></select></div>
               <div class="setrow"><span class="sk">Aggregation</span><span style="flex:1;height:.3rem;background:var(--g200);border-radius:99px;position:relative"><span style="position:absolute;left:10%;top:-.12rem;width:.55rem;height:.55rem;border-radius:50%;background:var(--primary)"></span></span><span style="font-size:.52rem;color:var(--muted)">1%</span></div>
               <div class="cu" style="margin-top:.25rem">t CO₂-eq · by usage journey · per period (Year)</div>
               <svg viewBox="0 0 320 76" role="img" aria-label="Yearly stacked emissions bars by usage journey">
@@ -421,8 +421,8 @@
        way.</p>
     <div class="states">
       <div class="state"><span class="k">Break down by</span><span class="v"><b>Object category</b> (default) · Hardware · Usage patterns · Usage journeys · Steps / Functions · Jobs / component needs · Countries — the Sankey's "Analyse by" groups; only present classes offered.</span></div>
-      <div class="state"><span class="k">Phase handling</span><span class="v">The <b>category</b> view keeps today's split Fabrication / Usage legend. Object-level views <b>sum phases per object</b> by default — the <b>Lifecycle phase</b> select refines — so series counts stay readable.</span></div>
-      <div class="state"><span class="k">Sums to total</span><span class="v">When an angle doesn't cover every flow (e.g. device fabrication isn't a job's), an explicit grey <b>"Not attributable to …"</b> remainder series keeps every stack equal to the system total. A silently short stack reads as a bug.</span></div>
+      <div class="state"><span class="k">Phase handling</span><span class="v">The <b>category</b> view keeps today's split Manufacturing / Use legend. Object-level views <b>sum phases per object</b> by default — the <b>Lifecycle phase</b> select refines — so series counts stay readable.</span></div>
+      <div class="state"><span class="k">Sums to total</span><span class="v">When an angle doesn't cover every flow (e.g. device manufacturing isn't a job's), an explicit grey <b>"Not attributable to …"</b> remainder series keeps every stack equal to the system total. A silently short stack reads as a bug.</span></div>
       <div class="state"><span class="k">Aggregation</span><span class="v">The slider folds sub-threshold contributors into <em>"Other (n)"</em> — same control, same semantics as the Sankey card.</span></div>
       <div class="state"><span class="k">Legend</span><span class="v">Capsules toggle a series; hover offers <b>Only</b> to isolate one — today's legend behavior, kept.</span></div>
       <div class="state deferred"><span class="k">Day granularity</span><span class="v">The data contract already stores daily series; a <b>Day</b> option in Granularity is a later UI addition, not a data change.</span></div>
@@ -455,7 +455,7 @@
             </div>
             <div class="ccard" style="border-color:var(--ok);box-shadow:0 0 0 2px var(--ok-bg)">
               <div class="chead"><span class="ct">Server load — which jobs dominate? <span class="pencil">✎</span></span><span class="ctrl">↑</span><span class="ctrl">↓</span><span class="ctrl">⚙</span><span class="ctrl">✕</span></div>
-              <div class="cu">t CO₂-eq · by job / component need · cumulative · Usage only</div>
+              <div class="cu">t CO₂-eq · by job / component need · cumulative · Use only</div>
               <svg viewBox="0 0 320 46" role="img" aria-label="Cumulative curves by job">
                 <line x1="14" y1="40" x2="316" y2="40" stroke="#D1D5DB"/>
                 <path d="M18 39 C 100 35, 200 24, 306 12 L306 40 L18 40 Z" fill="#2D4675" opacity=".14"/>
@@ -469,7 +469,7 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span><b>＋ Add another chart</b> appended a second card (fresh-green ring, like a newly created object) — retitled <em>"Server load — which jobs dominate?"</em>, set to <b>jobs / cumulative / Usage only</b>. Cards are independent: each keeps its own settings, and <b>↑ ↓</b> set the reading order.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span><b>＋ Add another chart</b> appended a second card (fresh-green ring, like a newly created object) — retitled <em>"Server load — which jobs dominate?"</em>, set to <b>jobs / cumulative / Use only</b>. Cards are independent: each keeps its own settings, and <b>↑ ↓</b> set the reading order.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">3</span><h3>Stack as many views as the analysis needs</h3></div>
@@ -508,12 +508,12 @@
                 <rect x="40" y="20" width="34" height="14" fill="#2D4675"/><rect x="110" y="16" width="34" height="18" fill="#2D4675"/>
                 <rect x="180" y="12" width="34" height="22" fill="#2D4675"/><rect x="250" y="8" width="34" height="26" fill="#2D4675"/>
               </svg>
-              <div class="commentary">Total footprint grows ~18%/year, driven by the fleet ramp-up. Fabrication dominates from
+              <div class="commentary">Total footprint grows ~18%/year, driven by the fleet ramp-up. Manufacturing dominates from
                 2026 — see the per-journey view below for where usage concentrates.</div>
             </div>
             <div class="ccard">
               <div class="chead"><span class="ct">Server load — which jobs dominate? <span class="pencil">✎</span></span><span class="ctrl">↑</span><span class="ctrl">↓</span><span class="ctrl">⚙</span><span class="ctrl">✕</span></div>
-              <div class="cu">t CO₂-eq · by job / component need · cumulative · Usage only</div>
+              <div class="cu">t CO₂-eq · by job / component need · cumulative · Use only</div>
               <svg viewBox="0 0 320 40" role="img" aria-label="Compact cumulative curves">
                 <line x1="14" y1="34" x2="316" y2="34" stroke="#D1D5DB"/>
                 <path d="M18 33 C 100 29, 200 20, 306 10" fill="none" stroke="#2D4675" stroke-width="1.6"/>
@@ -602,8 +602,8 @@
   <tr><td><b>One configurable card type replaces the two fixed charts; the default stack reproduces today's read.</b></td><td>Continuity for every existing user (zero-config parity) while unlocking the analysis system beneath. A zoo of chart types would multiply UI and code paths; per-period vs cumulative is a mode of one card, not a different artefact.</td></tr>
   <tr><td><b>Chart angles mirror the Sankey's "Analyse by" class groups, gated on present classes.</b></td><td>One mental model for "angle of analysis" across all of Results. The groups already exist in the library and the gating logic is proven on the Sankey card.</td></tr>
   <tr><td><b>Series come from the library's attributed footprints — the interface never computes attribution.</b></td><td>The library is the domain truth (constitution §1.3). Chart values, Sankey values and the system total agree by construction because they fold the same attribution; the interface-side per-category aggregation path retires.</td></tr>
-  <tr><td><b>Non-covering angles show an explicit "Not attributable to …" remainder series.</b></td><td>Some flows can't belong to some classes (device fabrication is nobody's job). A stack that silently sums below the headline total reads as a bug and erodes trust; an explicit grey remainder keeps every chart conservative and honest.</td></tr>
-  <tr><td><b>The category view keeps the split Fabrication / Usage legend; object-level views sum phases by default, refined by the Lifecycle phase select.</b></td><td>Category view = today's read, preserved exactly. Object views can carry dozens of series; doubling each into two phases would drown the signal — the phase select recovers the split on demand, mirroring the Sankey's phase filter.</td></tr>
+  <tr><td><b>Non-covering angles show an explicit "Not attributable to …" remainder series.</b></td><td>Some flows can't belong to some classes (device manufacturing is nobody's job). A stack that silently sums below the headline total reads as a bug and erodes trust; an explicit grey remainder keeps every chart conservative and honest.</td></tr>
+  <tr><td><b>The category view keeps the split Manufacturing / Use legend; object-level views sum phases by default, refined by the Lifecycle phase select.</b></td><td>Category view = today's read, preserved exactly. Object views can carry dozens of series; doubling each into two phases would drown the signal — the phase select recovers the split on demand, mirroring the Sankey's phase filter.</td></tr>
   <tr><td><b>Cards persist in the model file's UI config (settings, order, titles, commentary).</b></td><td>An analysis angle and its narrative are viewing choices, not model facts — same posture as Sankey cards. Riding the existing UI-config round-trip means share-by-file works with zero new persistence machinery.</td></tr>
   <tr><td><b>Commentary is plain text on a card; the report is the ordered stack.</b></td><td>A separate document model (report builder, rich text) would drift from the live charts and triple the scope. Title + chart + commentary in reading order already is a report — and it stays live over the model.</td></tr>
   <tr><td><b>Reorder via ↑ ↓ buttons, not drag-and-drop.</b></td><td>HTMX-first, minimize JS (constitution §1.4): two buttons are one POST each; drag needs a library, ghost states and touch handling for a rare, deliberate action.</td></tr>
@@ -621,7 +621,7 @@
       <dt>Today's anchors (what this replaces / mirrors)</dt>
       <dd>Fixed charts: <code>result/result_graph.html</code> + <code>result_charts</code> esbuild bundle (<code>chart.js</code>, <code>config.js</code>, <code>legend.js</code> — split-capsule legend, <code>timeseries_utils.js</code> rollups), fed by <code>window.emissions</code> = <code>ModelWeb.system_emissions</code> → <code>EmissionsCalculationService.calculate_daily_emissions</code> (daily per category — <b>to retire</b>). Card pattern to mirror: <code>adapters/views/sankey_views.py</code> (<code>sankey_cards</code> / <code>sankey_form</code> / <code>sankey_diagram</code> / <code>sankey_delete_card</code>), templates <code>result/sankey_{section,card,diagram}.html</code>, persistence <code>repository.interface_config["sankey_diagrams"]</code> + <code>persist_to_cache()</code>.</dd>
       <dt>Data (library, companion feature)</dt>
-      <dd>Impact sources: serialized hourly <code>energy_footprint</code> / <code>instances_fabrication_footprint</code> pairs (pull-based contract) — daily reduction computed on read. Other objects: serialized <b>daily attributed footprint projections</b> per phase (<code>@lazy_attribute(serialize=True)</code> over a lazy hourly <code>@computed_attribute</code>). Category view = category grouping over source pairs (<code>System.energy_footprints</code> / <code>fabrication_footprints</code>). The Sankey's <code>impact_repartition_matrix</code> is untouched.</dd>
+      <dd>Impact sources: serialized hourly <code>use_footprint</code> / <code>instances_manufacturing_footprint</code> pairs (pull-based contract) — daily reduction computed on read. Other objects: serialized <b>daily attributed footprint projections</b> per phase (<code>@lazy_attribute(serialize=True)</code> over a lazy hourly <code>@computed_attribute</code>). Category view = category grouping over source pairs (<code>System.use_footprints</code> / <code>manufacturing_footprints</code>). The Sankey's <code>impact_repartition_matrix</code> is untouched.</dd>
       <dt>Target shape (draft — see plan.html)</dt>
       <dd>Chart-card routes/views/templates mirroring the Sankey set; per-card series payload with <code>efootprint_id</code> on every series (the audit seam) + precomputed tooltips; server-side rollup to the requested granularity so payloads stay small; config persisted under <code>interface_config["result_charts"]</code> (list — id, title, breakdown, mode, granularity, phase, aggregation, commentary, order). Chart.js stays the renderer.</dd>
       <dt>Supersession</dt>

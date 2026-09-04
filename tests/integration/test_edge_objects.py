@@ -208,12 +208,12 @@ def test_edge_computer_cpu_component_fixed_inputs_are_excluded_from_source_table
         for row in model_web.web_explainable_quantities_sources
     }
 
-    # The CPU component's per-unit fabrication carries a source but is a fixed spec, not a constructor
+    # The CPU component's per-unit manufacturing carries a source but is a fixed spec, not a constructor
     # input, so it is excluded from the editable source table — a non-trivial exclusion (the value is
     # genuinely sourced, it is filtered out by not being an init/computed attribute, not by lacking a
     # source).
-    assert cpu_component.modeling_obj.carbon_footprint_fabrication_per_unit.source is not None
-    assert (cpu_component_id, "carbon_footprint_fabrication_per_unit") not in source_table_rows
+    assert cpu_component.modeling_obj.carbon_footprint_manufacturing_per_unit.source is not None
+    assert (cpu_component_id, "carbon_footprint_manufacturing_per_unit") not in source_table_rows
 
 
 def test_recurrent_edge_device_need_with_component_needs(default_system_repository):

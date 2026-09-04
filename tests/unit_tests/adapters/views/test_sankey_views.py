@@ -40,8 +40,8 @@ def _make_sankey_mock(mock_cls):
     mock_cls.return_value = instance
     instance.build.return_value = None
     instance.total_system_value = 1_000_000.0  # kg, i.e. 1000 t
-    instance.node_labels = ["Test System", "Usage"]
-    instance.full_node_labels = ["Test System", "Usage"]
+    instance.node_labels = ["Test System", "Use"]
+    instance.full_node_labels = ["Test System", "Use"]
     instance.link_sources = [0]
     instance.link_targets = [1]
     instance.link_values = [1_000_000.0]
@@ -222,7 +222,7 @@ class TestSankeyCards:
             "sankey_diagrams": [
                 {
                     "id": "deadbeef",
-                    "lifecycle_phase_filter": "Usage",
+                    "lifecycle_phase_filter": "Use",
                     "aggregation_threshold_percent": 3.5,
                     "active_columns": ["phase", "category", "7"],
                     "excluded_types": ["Network"],
@@ -253,7 +253,7 @@ class TestSankeyCards:
         content = response.content.decode()
 
         assert 'value="deadbeef"' in content
-        assert 'option value="Usage" selected' in content
+        assert 'option value="Use" selected' in content
         assert 'name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="3.5"' in content
         assert 'name="node_label_max_length" value="22"' in content
         assert 'name="excluded_types" value="Network"' in content
@@ -463,8 +463,8 @@ class TestSankeyDiagramParameterMapping:
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_lifecycle_filter_usage(self, mock_cls, sankey_client, default_post):
         _make_sankey_mock(mock_cls)
-        sankey_client.post("/model_builder/sankey-diagram/", {**default_post, "lifecycle_phase_filter": "Usage"})
-        assert mock_cls.call_args.kwargs["lifecycle_phase_filter"] == LifeCyclePhases.USAGE
+        sankey_client.post("/model_builder/sankey-diagram/", {**default_post, "lifecycle_phase_filter": "Use"})
+        assert mock_cls.call_args.kwargs["lifecycle_phase_filter"] == LifeCyclePhases.USE
 
     @patch("model_builder.adapters.views.sankey_views.ImpactRepartitionSankey")
     def test_skip_phase_true_when_phase_not_in_active_columns(self, mock_cls, sankey_client, default_post):

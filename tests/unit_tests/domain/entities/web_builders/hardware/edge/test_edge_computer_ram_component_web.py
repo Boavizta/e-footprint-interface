@@ -38,8 +38,8 @@ class TestEdgeComputerRAMComponentWeb:
                 "ram",
                 "base_ram_consumption",
                 "lifespan",
-                "instances_fabrication_footprint_per_usage_pattern",
-                "instances_fabrication_footprint",
+                "instances_manufacturing_footprint_per_usage_pattern",
+                "instances_manufacturing_footprint",
                 "other",
             ],
         )

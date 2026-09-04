@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "24.0.0",
+    "efootprint_version": "25.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -80,10 +80,10 @@
         "Default-laptop": {
             "name": "Default laptop",
             "id": "Default-laptop",
-            "carbon_footprint_fabrication": {
+            "carbon_footprint_manufacturing": {
                 "value": 156.0,
                 "unit": "kilogram",
-                "label": "Carbon footprint fabrication",
+                "label": "Carbon footprint manufacturing",
                 "source": "Base-ADEME_V19"
             },
             "power": {
@@ -275,10 +275,10 @@
                 "Sensor-local-storage"
             ],
             "storage": "Sensor-local-storage",
-            "carbon_footprint_fabrication": {
+            "carbon_footprint_manufacturing": {
                 "value": 60.0,
                 "unit": "kilogram",
-                "label": "Carbon footprint fabrication",
+                "label": "Carbon footprint manufacturing",
                 "source": "hypothesis"
             },
             "power": {
@@ -323,10 +323,10 @@
         "Factory-sensor-CPU": {
             "name": "Factory sensor CPU",
             "id": "Factory-sensor-CPU",
-            "carbon_footprint_fabrication_per_unit": {
+            "carbon_footprint_manufacturing_per_unit": {
                 "value": 0.0,
                 "unit": "kilogram",
-                "label": "Carbon footprint fabrication per unit",
+                "label": "Carbon footprint manufacturing per unit",
                 "source": "hypothesis"
             },
             "nb_of_units": {
@@ -341,10 +341,10 @@
         "Factory-sensor-RAM": {
             "name": "Factory sensor RAM",
             "id": "Factory-sensor-RAM",
-            "carbon_footprint_fabrication_per_unit": {
+            "carbon_footprint_manufacturing_per_unit": {
                 "value": 0.0,
                 "unit": "kilogram",
-                "label": "Carbon footprint fabrication per unit",
+                "label": "Carbon footprint manufacturing per unit",
                 "source": "hypothesis"
             },
             "power_per_unit": {
@@ -371,10 +371,10 @@
         "Sensor-local-storage": {
             "name": "Sensor local storage",
             "id": "Sensor-local-storage",
-            "carbon_footprint_fabrication_per_unit": {
+            "carbon_footprint_manufacturing_per_unit": {
                 "value": 0.0,
                 "unit": "kilogram",
-                "label": "Carbon footprint fabrication per unit",
+                "label": "Carbon footprint manufacturing per unit",
                 "source": "hypothesis"
             },
             "power_per_unit": {
@@ -401,10 +401,10 @@
                 "label": "Number of units",
                 "source": "hypothesis"
             },
-            "carbon_footprint_fabrication_per_storage_capacity": {
+            "carbon_footprint_manufacturing_per_storage_capacity": {
                 "value": 160.0,
                 "unit": "kilogram / terabyte_stored",
-                "label": "Fabrication carbon footprint per unit per storage capacity",
+                "label": "Manufacturing carbon footprint per unit per storage capacity",
                 "source": "hypothesis"
             },
             "storage_capacity_per_unit": {
@@ -786,10 +786,10 @@
                 "label": "Fraction of usage time",
                 "source": "hypothesis"
             },
-            "carbon_footprint_fabrication_per_storage_capacity": {
+            "carbon_footprint_manufacturing_per_storage_capacity": {
                 "value": 160.0,
                 "unit": "kilogram / terabyte_stored",
-                "label": "Fabrication carbon footprint per storage capacity",
+                "label": "Manufacturing carbon footprint per storage capacity",
                 "source": "hypothesis"
             },
             "storage_capacity": {

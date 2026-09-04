@@ -37,7 +37,7 @@
                 <select name="lifecycle_phase_filter">
                     <option value="" {% if not initial_settings or initial_settings.lifecycle_phase_filter == "" %}selected{% endif %}>All phases</option>
                     <option value="Manufacturing" {% if initial_settings and initial_settings.lifecycle_phase_filter == "Manufacturing" %}selected{% endif %}>Manufacturing only</option>
-                    <option value="Usage" {% if initial_settings and initial_settings.lifecycle_phase_filter == "Usage" %}selected{% endif %}>Usage only</option>
+                    <option value="Use" {% if initial_settings and initial_settings.lifecycle_phase_filter == "Use" %}selected{% endif %}>Use only</option>
                 </select>
             </div>
 

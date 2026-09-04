@@ -46,7 +46,7 @@ logger.info(f"Finished importing modules in {round((perf_counter() - start), 3)}
 
 storage = Storage(
     "storage",
-    carbon_footprint_fabrication_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
+    carbon_footprint_manufacturing_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
     power_per_storage_capacity=SourceValue(1.3 * u.W / u.TB, source=None),
     lifespan=SourceValue(6 * u.years, source=None),
     idle_power=SourceValue(0 * u.W, source=None),
@@ -59,7 +59,7 @@ storage = Storage(
 autoscaling_server = Server(
     "server",
     server_type=ServerTypes.autoscaling(),
-    carbon_footprint_fabrication=SourceValue(600 * u.kg, source=None),
+    carbon_footprint_manufacturing=SourceValue(600 * u.kg, source=None),
     power=SourceValue(300 * u.W, source=None),
     lifespan=SourceValue(6 * u.year, source=None),
     idle_power=SourceValue(50 * u.W, source=None),
@@ -119,7 +119,7 @@ usage_pattern = UsagePattern(
     usage_journeys={usage_journey: SourceValue(1 * u.dimensionless)},
     devices=[
         Device(name="device on which the user journey is made",
-                 carbon_footprint_fabrication=SourceValue(156 * u.kg, source=None),
+                 carbon_footprint_manufacturing=SourceValue(156 * u.kg, source=None),
                  power=SourceValue(50 * u.W, source=None),
                  lifespan=SourceValue(6 * u.year, source=None),
                  fraction_of_usage_time=SourceValue(7 * u.hour / u.day, source=None))],
@@ -130,7 +130,7 @@ usage_pattern = UsagePattern(
 
 edge_storage = EdgeStorage(
     "edge SSD storage",
-    carbon_footprint_fabrication_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
+    carbon_footprint_manufacturing_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
     power_per_storage_capacity=SourceValue(1.3 * u.W / u.TB, source=None),
     lifespan=SourceValue(6 * u.years, source=None),
     idle_power=SourceValue(0.1 * u.W, source=None),
@@ -140,7 +140,7 @@ edge_storage = EdgeStorage(
 
 edge_computer = EdgeComputer(
     "edge computer",
-    carbon_footprint_fabrication=SourceValue(60 * u.kg, source=None),
+    carbon_footprint_manufacturing=SourceValue(60 * u.kg, source=None),
     power=SourceValue(30 * u.W, source=None),
     lifespan=SourceValue(8 * u.year, source=None),
     idle_power=SourceValue(5 * u.W, source=None),
@@ -164,7 +164,7 @@ edge_process = RecurrentEdgeProcess(
 
 edge_appliance = EdgeAppliance(
     "edge appliance",
-    carbon_footprint_fabrication=SourceValue(60 * u.kg, source=None),
+    carbon_footprint_manufacturing=SourceValue(60 * u.kg, source=None),
     power=SourceValue(30 * u.W, source=None),
     lifespan=SourceValue(8 * u.year, source=None),
     idle_power=SourceValue(5 * u.W, source=None)
@@ -179,7 +179,7 @@ edge_workload = RecurrentEdgeWorkload(
 
 ram_component = EdgeRAMComponent(
     "edge RAM component",
-    carbon_footprint_fabrication=SourceValue(20 * u.kg, source=None),
+    carbon_footprint_manufacturing=SourceValue(20 * u.kg, source=None),
     power=SourceValue(10 * u.W, source=None),
     lifespan=SourceValue(6 * u.year, source=None),
     idle_power=SourceValue(2 * u.W, source=None),
@@ -189,7 +189,7 @@ ram_component = EdgeRAMComponent(
 
 cpu_component = EdgeCPUComponent(
     "edge CPU component",
-    carbon_footprint_fabrication=SourceValue(20 * u.kg, source=None),
+    carbon_footprint_manufacturing=SourceValue(20 * u.kg, source=None),
     power=SourceValue(15 * u.W, source=None),
     lifespan=SourceValue(6 * u.year, source=None),
     idle_power=SourceValue(3 * u.W, source=None),
@@ -199,7 +199,7 @@ cpu_component = EdgeCPUComponent(
 
 storage_component = EdgeStorage(
     "edge storage component",
-    carbon_footprint_fabrication_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
+    carbon_footprint_manufacturing_per_storage_capacity=SourceValue(160 * u.kg / u.TB, source=None),
     power_per_storage_capacity=SourceValue(1.3 * u.W / u.TB, source=None),
     lifespan=SourceValue(6 * u.years, source=None),
     idle_power=SourceValue(0.1 * u.W, source=None),
@@ -209,7 +209,7 @@ storage_component = EdgeStorage(
 
 edge_device = EdgeDevice(
     "custom edge device",
-    structure_carbon_footprint_fabrication=SourceValue(50 * u.kg, source=None),
+    structure_carbon_footprint_manufacturing=SourceValue(50 * u.kg, source=None),
     components=[ram_component, cpu_component, storage_component],
     lifespan=SourceValue(6 * u.year, source=None)
 )

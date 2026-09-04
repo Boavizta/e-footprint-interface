@@ -98,7 +98,7 @@ def build_system() -> System:
     upload_job = Job(
         "Upload final video to social network CDN", server=cdn_server,
         # The CDN belongs to the social network, not the team. e-footprint allocates a
-        # server's fabrication + energy footprint across jobs in proportion to the server
+        # server's manufacturing + use footprint across jobs in proportion to the server
         # time and resources each one occupies — so this brief 2s upload only draws the
         # tiny quota of the CDN's footprint that corresponds to our usage, never its whole impact.
         request_duration=SourceValue(

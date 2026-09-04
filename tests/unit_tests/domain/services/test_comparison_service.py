@@ -6,7 +6,7 @@ exposes (totals, per-(category, phase) decomposition, an aligned hourly time-ser
 so the assertions are about the view model — not about recomputing footprints.
 
 The load-bearing invariants checked here: the decomposition bars sum to the headline Δ, the KPI cards'
-usage+fabrication split each total their model, the paired/cumulative chart payloads carry one shared
+usage+manufacturing split each total their model, the paired/cumulative chart payloads carry one shared
 unit and the constant model-identity colour pair (magnitude honesty), and the diff shows only
 differences, id-first.
 """
@@ -53,41 +53,41 @@ def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
     """A SystemComparison stub with the same attribute surface as the library object.
 
     ``decomposition`` is a fixed, deliberately mixed set of (category, phase) rows: a reduction in
-    servers usage, an increase in edge fabrication, several unchanged rows, so the sum is a non-trivial
+    servers usage, an increase in edge manufacturing, several unchanged rows, so the sum is a non-trivial
     Δ. The hourly time-series is *derived from* the decomposition totals (spread over the requested
     span), reproducing the library's own consistency between the per-category totals and the hourly
     series — so the cumulative curve ends at each model's total, as in production. The per-phase series
-    (``usage_*`` / ``fabrication_*``) carry each phase's own subtotal and sum to the combined total
+    (``usage_*`` / ``manufacturing_*``) carry each phase's own subtotal and sum to the combined total
     hour-by-hour, mirroring the library's ``TimeSeries``. ``usage_front_load_a`` concentrates model A's
-    usage in the first half of its span (fabrication stays spread), so its per-year usage/fab mix is
+    usage in the first half of its span (manufacturing stays spread), so its per-year usage/fab mix is
     non-uniform across years — the shape that distinguishes an exact per-year split from a global ratio.
     """
     start_a = start_a or datetime(2025, 1, 1, tzinfo=timezone.utc)
     start_b = start_b or datetime(2025, 1, 1, tzinfo=timezone.utc)
 
     decomposition = [
-        _row("Servers", "energy", before=1590.0, after=930.0),       # −660 reduction
-        _row("Storage", "energy", before=0.0, after=0.0),            # unchanged
-        _row("Servers", "fabrication", before=540.0, after=240.0),   # −300 reduction
-        _row("Storage", "fabrication", before=10.0, after=10.0),     # unchanged
-        _row("Network", "energy", before=330.0, after=90.0),         # −240 reduction
-        _row("Network", "fabrication", before=0.0, after=0.0),
-        _row("Devices", "energy", before=400.0, after=400.0),        # unchanged
-        _row("Devices", "fabrication", before=1000.0, after=1000.0), # unchanged
-        _row("ExternalAPIs", "energy", before=0.0, after=0.0),
-        _row("ExternalAPIs", "fabrication", before=0.0, after=0.0),
-        _row("EdgeDevices", "energy", before=0.0, after=0.0),
-        _row("EdgeDevices", "fabrication", before=0.0, after=90.0),  # +90 increase, new in B
+        _row("Servers", "use", before=1590.0, after=930.0),       # −660 reduction
+        _row("Storage", "use", before=0.0, after=0.0),            # unchanged
+        _row("Servers", "manufacturing", before=540.0, after=240.0),   # −300 reduction
+        _row("Storage", "manufacturing", before=10.0, after=10.0),     # unchanged
+        _row("Network", "use", before=330.0, after=90.0),         # −240 reduction
+        _row("Network", "manufacturing", before=0.0, after=0.0),
+        _row("Devices", "use", before=400.0, after=400.0),        # unchanged
+        _row("Devices", "manufacturing", before=1000.0, after=1000.0), # unchanged
+        _row("ExternalAPIs", "use", before=0.0, after=0.0),
+        _row("ExternalAPIs", "manufacturing", before=0.0, after=0.0),
+        _row("EdgeDevices", "use", before=0.0, after=0.0),
+        _row("EdgeDevices", "manufacturing", before=0.0, after=90.0),  # +90 increase, new in B
     ]
     # ``kg_scale`` blows every figure up (e.g. ×1000 → tonne-scale) so the same fixture can exercise
     # the axis-unit adaptation without re-stating the row set.
     if kg_scale != 1.0:
         for r in decomposition:
             r.delta = _delta(r.delta.before * kg_scale, r.delta.after * kg_scale)
-    usage_a = sum(r.delta.before for r in decomposition if r.phase == "energy")
-    fab_a = sum(r.delta.before for r in decomposition if r.phase == "fabrication")
-    usage_b = sum(r.delta.after for r in decomposition if r.phase == "energy")
-    fab_b = sum(r.delta.after for r in decomposition if r.phase == "fabrication")
+    usage_a = sum(r.delta.before for r in decomposition if r.phase == "use")
+    fab_a = sum(r.delta.before for r in decomposition if r.phase == "manufacturing")
+    usage_b = sum(r.delta.after for r in decomposition if r.phase == "use")
+    fab_b = sum(r.delta.after for r in decomposition if r.phase == "manufacturing")
     total_a = usage_a + fab_a
     total_b = usage_b + fab_b
 
@@ -97,7 +97,7 @@ def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
 
     # The library aligns both onto one calendar axis starting at the earliest start, zero-padding the
     # gaps — reproduce that so the shared time-series is realistic. Each phase is placed on that axis
-    # so usage + fabrication == the combined total per hour, exactly as the library guarantees.
+    # so usage + manufacturing == the combined total per hour, exactly as the library guarantees.
     axis_start = min(start_a, start_b)
     offset_a = int((start_a - axis_start).total_seconds() // 3600)
     offset_b = int((start_b - axis_start).total_seconds() // 3600)
@@ -120,7 +120,7 @@ def build_comparison(*, hours_a=None, hours_b=None, start_a=None, start_b=None,
     time_series = SimpleNamespace(
         start_date=axis_start, values_a=series_a, values_b=series_b,
         usage_a=usage_series_a, usage_b=usage_series_b,
-        fabrication_a=fab_series_a, fabrication_b=fab_series_b)
+        manufacturing_a=fab_series_a, manufacturing_b=fab_series_b)
 
     input_diff = SimpleNamespace(
         changed=[SimpleNamespace(
@@ -159,14 +159,14 @@ class TestKpiStrip:
         assert view.card_a.total_kg == pytest.approx(540 + 10 + 1590 + 330 + 400 + 1000)
         assert view.card_a.period_label == "2025"
 
-    def test_card_usage_plus_fabrication_equals_total(self, view):
-        assert view.card_a.usage_kg + view.card_a.fabrication_kg == pytest.approx(view.card_a.total_kg)
-        assert view.card_b.usage_kg + view.card_b.fabrication_kg == pytest.approx(view.card_b.total_kg)
+    def test_card_usage_plus_manufacturing_equals_total(self, view):
+        assert view.card_a.usage_kg + view.card_a.manufacturing_kg == pytest.approx(view.card_a.total_kg)
+        assert view.card_b.usage_kg + view.card_b.manufacturing_kg == pytest.approx(view.card_b.total_kg)
 
     def test_delta_is_b_minus_a_with_relative_and_phase_split(self, view):
         assert view.delta.absolute_kg == pytest.approx(view.card_b.total_kg - view.card_a.total_kg)
         assert view.delta.relative == pytest.approx(view.delta.absolute_kg / view.card_a.total_kg)
-        assert view.delta.usage_kg + view.delta.fabrication_kg == pytest.approx(view.delta.absolute_kg)
+        assert view.delta.usage_kg + view.delta.manufacturing_kg == pytest.approx(view.delta.absolute_kg)
 
 
 class TestDecomposition:
@@ -176,15 +176,15 @@ class TestDecomposition:
 
     def test_drops_unchanged_rows_and_merges_servers_and_storage(self, view):
         labels = [bar.label for bar in view.decomposition]
-        # Servers + Storage usage are merged under one display label; unchanged rows are absent.
-        assert "Servers & storage usage" in labels
-        assert "Servers & storage fabrication" in labels
-        assert "Network usage" in labels
-        assert "Edge devices fabrication" in labels
+        # Servers + Storage use are merged under one display label; unchanged rows are absent.
+        assert "Servers & storage use" in labels
+        assert "Servers & storage manufacturing" in labels
+        assert "Network use" in labels
+        assert "Edge devices manufacturing" in labels
         assert "User devices usage" not in labels  # unchanged → not a bar
 
     def test_servers_and_storage_usage_bar_sums_its_member_categories(self, view):
-        bar = next(b for b in view.decomposition if b.label == "Servers & storage usage")
+        bar = next(b for b in view.decomposition if b.label == "Servers & storage use")
         assert bar.delta_kg == pytest.approx(930.0 - 1590.0)  # Servers usage moved, Storage usage flat
 
 
@@ -197,9 +197,9 @@ class TestPairedChart:
     def test_model_identity_is_the_constant_colour_pair(self, view):
         datasets = view.paired_chart["datasets"]
         assert datasets[0]["backgroundColor"] == MODEL_A_COLOR        # A usage
-        assert datasets[1]["backgroundColor"] == MODEL_A_COLOR_LIGHT  # A fabrication
+        assert datasets[1]["backgroundColor"] == MODEL_A_COLOR_LIGHT  # A manufacturing
         assert datasets[2]["backgroundColor"] == MODEL_B_COLOR        # B usage
-        assert datasets[3]["backgroundColor"] == MODEL_B_COLOR_LIGHT  # B fabrication
+        assert datasets[3]["backgroundColor"] == MODEL_B_COLOR_LIGHT  # B manufacturing
 
     def test_payload_carries_both_model_names_for_the_grouped_html_legend(self, view):
         assert view.paired_chart["modelAName"] == "Streaming app"
@@ -242,7 +242,7 @@ class TestPairedChart:
     def test_per_year_usage_fab_split_is_exact_not_a_global_ratio(self):
         """The #2 fix: the dark/light split is the exact per-year usage/fab split from the library's
         per-phase series, not one full-period ratio applied to every year. Model A's usage is front-
-        loaded into 2025 while fabrication spreads across 2025+2026, so 2026 is fabrication-only — a
+        loaded into 2025 while manufacturing spreads across 2025+2026, so 2026 is manufacturing-only — a
         global ratio would instead paint 2026 with A's overall usage share."""
         comparison = build_comparison(
             hours_a=24 * 400, hours_b=24 * 400,   # both span 2025 + 2026
@@ -255,7 +255,7 @@ class TestPairedChart:
         a_fab = view.paired_chart["datasets"][1]["data"]
         i2026 = labels.index("2026")
 
-        # 2026 is fabrication-only for A (usage was front-loaded into 2025) — exact per-year split.
+        # 2026 is manufacturing-only for A (usage was front-loaded into 2025) — exact per-year split.
         assert a_usage[i2026] == pytest.approx(0.0, abs=1e-3)
         assert a_fab[i2026] > 0
         # A global ratio (usage / total over the whole period) would have stained 2026 with that share.

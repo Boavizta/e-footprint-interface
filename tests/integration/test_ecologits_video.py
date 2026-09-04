@@ -104,7 +104,7 @@ def test_video_system_feeds_results_pipeline_with_non_zero_footprint():
 
     emissions = model_web.system_emissions["values"]
     assert sum(emissions["ExternalAPIs_energy"]) > 0
-    assert sum(emissions["ExternalAPIs_fabrication"]) > 0
+    assert sum(emissions["ExternalAPIs_manufacturing"]) > 0
 
 
 def test_video_system_round_trips_through_persistence():
@@ -112,12 +112,12 @@ def test_video_system_round_trips_through_persistence():
     ModelWeb(repository).persist_to_cache()
 
     # Under the minimal serialization contract the persisted JSON carries the serialize-flagged
-    # footprint slots (the server's energy and fabrication footprints) plus the calculation graph, so
+    # footprint slots (the server's energy and manufacturing footprints) plus the calculation graph, so
     # an exact-version reload attaches them as trusted caches instead of recomputing. The Job's
     # per-call intermediates are not flagged and recompute lazily on read.
     persisted = repository.get_system_data()
     (server_data,) = persisted["EcoLogitsVideoGenExternalAPIServer"].values()
-    for footprint_attr in ("energy_footprint", "instances_fabrication_footprint"):
+    for footprint_attr in ("use_footprint", "instances_manufacturing_footprint"):
         assert footprint_attr in server_data, f"{footprint_attr} not preserved in persisted server JSON"
         assert server_data[footprint_attr], f"{footprint_attr} serialized empty"
 

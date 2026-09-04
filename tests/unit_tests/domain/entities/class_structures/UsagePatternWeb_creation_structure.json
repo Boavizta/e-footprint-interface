@@ -47,7 +47,7 @@
                 "web_id": "UsagePattern_devices",
                 "attr_name": "devices",
                 "label": "devices",
-                "tooltip": "Devices that users perform the journey on. Fabrication and energy footprints of each device are weighted by the time the journey occupies on it.",
+                "tooltip": "Devices that users perform the journey on. Manufacturing and use footprints of each device are weighted by the time the journey occupies on it.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [

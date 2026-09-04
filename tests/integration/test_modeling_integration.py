@@ -57,13 +57,13 @@ def test_integration_create_edit_delete_flow(default_system_repository_with_jour
     )
 
     previous_network_energy = (
-        ModelWeb(default_system_repository).system.usage_patterns[0].network.energy_footprint.sum())
+        ModelWeb(default_system_repository).system.usage_patterns[0].network.use_footprint.sum())
 
     # --- Edit job data_transferred and verify it impacts computed footprints ---
     edit_object(default_system_repository, job_id, "Job", {"data_transferred": "20", "data_transferred__unit": str(u.MB)})
 
     updated_network_energy = (
-        ModelWeb(default_system_repository).system.usage_patterns[0].network.energy_footprint.sum())
+        ModelWeb(default_system_repository).system.usage_patterns[0].network.use_footprint.sum())
     assert updated_network_energy > previous_network_energy
 
     # --- Delete created objects and verify system is back to baseline structure ---
@@ -120,7 +120,7 @@ def test_integration_edge_modeling_emissions_non_zero(default_system_repository)
     emissions = ModelWeb(default_system_repository).system_emissions
     for key, values in emissions["values"].items():
         assert len(values) > 0
-        if key in ["Edge_devices_energy", "Edge_devices_fabrication"]:
+        if key in ["Edge_devices_energy", "Edge_devices_manufacturing"]:
             assert np.max(np.abs(values)) > 0
 
 

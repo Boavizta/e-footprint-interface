@@ -1,6 +1,6 @@
 """Service for calculating system emissions.
 
-This service aggregates energy and fabrication footprints into daily emissions
+This service aggregates energy and manufacturing footprints into daily emissions
 timeseries for visualization.
 """
 import math
@@ -19,11 +19,11 @@ from model_builder.domain.entities.web_core.model_web_utils import (
 
 @runtime_checkable
 class SystemWithFootprints(Protocol):
-    """Protocol for objects that have energy and fabrication footprints."""
+    """Protocol for objects that have energy and manufacturing footprints."""
     @property
-    def total_energy_footprints(self) -> Dict: ...
+    def total_use_footprints(self) -> Dict: ...
     @property
-    def total_fabrication_footprints(self) -> Dict: ...
+    def total_manufacturing_footprints(self) -> Dict: ...
     @property
     def total_footprint(self): ...
 
@@ -43,7 +43,7 @@ class EmissionsResult:
 class EmissionsCalculationService:
     """Service for calculating system emissions timeseries.
 
-    This service aggregates energy and fabrication footprints from
+    This service aggregates energy and manufacturing footprints from
     servers, storage, edge devices, devices, and network into daily
     emissions values suitable for charting.
     """
@@ -54,10 +54,10 @@ class EmissionsCalculationService:
         "Edge_devices_energy",
         "Devices_energy",
         "Network_energy",
-        "Servers_and_storage_fabrication",
-        "ExternalAPIs_fabrication",
-        "Edge_devices_fabrication",
-        "Devices_fabrication",
+        "Servers_and_storage_manufacturing",
+        "ExternalAPIs_manufacturing",
+        "Edge_devices_manufacturing",
+        "Devices_manufacturing",
     )
 
     def calculate_daily_emissions(self, system: SystemWithFootprints) -> EmissionsResult:
@@ -72,8 +72,8 @@ class EmissionsCalculationService:
             usage but no hardware contributing emissions), an empty result is
             returned so the chart can render a blank state instead of erroring.
         """
-        energy = system.total_energy_footprints
-        fab = system.total_fabrication_footprints
+        energy = system.total_use_footprints
+        fab = system.total_manufacturing_footprints
 
         ehqs = [q for q in list(energy.values()) + list(fab.values()) if isinstance(q, ExplainableHourlyQuantities)]
 
@@ -104,15 +104,15 @@ class EmissionsCalculationService:
             "Edge_devices_energy": _daily_values("EdgeDevices", energy),
             "Devices_energy": _daily_values("Devices", energy),
             "Network_energy": _daily_values("Network", energy),
-            "Servers_and_storage_fabrication": to_rounded_daily_values(
+            "Servers_and_storage_manufacturing": to_rounded_daily_values(
                 (
                     get_reindexed_array_from_dict("Servers", fab, global_start, total_hours)
                     + get_reindexed_array_from_dict("Storage", fab, global_start, total_hours)
                 ).to(display_unit)
             ),
-            "ExternalAPIs_fabrication": _daily_values("ExternalAPIs", fab),
-            "Edge_devices_fabrication": _daily_values("EdgeDevices", fab),
-            "Devices_fabrication": _daily_values("Devices", fab),
+            "ExternalAPIs_manufacturing": _daily_values("ExternalAPIs", fab),
+            "Edge_devices_manufacturing": _daily_values("EdgeDevices", fab),
+            "Devices_manufacturing": _daily_values("Devices", fab),
         }
 
         return EmissionsResult(dates=dates, values=values, display_unit=human_readable_unit(display_unit))

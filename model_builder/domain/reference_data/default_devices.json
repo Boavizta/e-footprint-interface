@@ -2,10 +2,10 @@
     "435f6a": {
         "name": "Default laptop",
         "id": "435f6a",
-        "carbon_footprint_fabrication": {
+        "carbon_footprint_manufacturing": {
             "value": 156.0,
             "unit": "kilogram",
-            "label": "Carbon footprint fabrication",
+            "label": "Carbon footprint manufacturing",
             "source": "8bffc1"
         },
         "power": {
@@ -30,10 +30,10 @@
     "462461": {
         "name": "Default smartphone",
         "id": "462461",
-        "carbon_footprint_fabrication": {
+        "carbon_footprint_manufacturing": {
             "value": 30.0,
             "unit": "kilogram",
-            "label": "Carbon footprint fabrication",
+            "label": "Carbon footprint manufacturing",
             "source": "8bffc1"
         },
         "power": {

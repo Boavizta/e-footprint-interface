@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Lifecycle terminology is now manufacturing and use throughout the interface, including results, Sankey filters, comparison views, template data, and the local e-footprint integration.
+
 ### Added
 - Web usage-pattern forms can select several journeys and edit a positive, fractional “Journeys per pattern occurrence” weight for each one. Edge usage-pattern forms can select several edge usage journeys and now own deployment starts and usage span; creation preselects the first available journey in both paradigms.
 - Pattern cards remain top-level and draw one canvas relationship to every selected journey, so the same journey can be reused by several patterns without cloning or nesting it.
@@ -65,7 +68,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [V1.9.4]
 
 ### Fixed
-- Comparison paired bar chart: the built-in legend (which interleaved usage and fabrication items across lines) is replaced by a custom HTML legend. It shows one row per system, each labelled with the real model name, left-aligned and never wrapping.
+- Comparison paired bar chart: the built-in legend (which interleaved usage and manufacturing items across lines) is replaced by a custom HTML legend. It shows one row per system, each labelled with the real model name, left-aligned and never wrapping.
 - Comparison cumulative overlay chart: its built-in legend is replaced by the same left-aligned HTML treatment, with one row per model.
 - Single-model results bar chart: edge-device legend capsules are now hidden when the edge-modeling toggle is off. The state is read at render time, so no live update is needed while viewing results.
 
@@ -264,7 +267,7 @@ current validation state until a full page reload: - bootstrap_widgets.js initia
 ## [1.3.4] - 2026-04-27
 
 ### Fixed
-- Upgrade to e-footprint 20.0.2 to fix upgrade_version_19_to_20 to handle Network’s bandwidth_energy_intensity and Storage’s carbon_footprint_fabrication_per_storage_capacity.
+- Upgrade to e-footprint 20.0.2 to fix upgrade_version_19_to_20 to handle Network’s bandwidth_energy_intensity and Storage’s carbon_footprint_manufacturing_per_storage_capacity.
 - Filter to only explainable quantities with source in Sources table.
 - Change from re-rendering cards to re-rendering top parent cards, to make sure that rendering is always rightly done, because some cards’ rendering depend on their parents.
 

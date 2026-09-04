@@ -191,8 +191,8 @@ class TestEdgeObjects:
         model_builder.open_result_panel()
         model_builder.result_chart_should_be_visible()
         server_energy = page.evaluate("window.emissions.values['Servers_and_storage_energy']")
-        server_fabrication = page.evaluate("window.emissions.values['Servers_and_storage_fabrication']")
-        assert any(value > 0 for value in server_energy) or any(value > 0 for value in server_fabrication)
+        server_manufacturing = page.evaluate("window.emissions.values['Servers_and_storage_manufacturing']")
+        assert any(value > 0 for value in server_energy) or any(value > 0 for value in server_manufacturing)
 
     def test_edge_pattern_selects_multiple_edge_usage_journeys(
         self, edge_system_in_browser: ModelBuilderPage
@@ -242,8 +242,8 @@ class TestEdgeObjects:
         # Set advanced parameters
         page.locator("#EdgeComputer_lifespan").clear()
         page.locator("#EdgeComputer_lifespan").fill("3")
-        page.locator("#EdgeComputer_carbon_footprint_fabrication").clear()
-        page.locator("#EdgeComputer_carbon_footprint_fabrication").fill("100")
+        page.locator("#EdgeComputer_carbon_footprint_manufacturing").clear()
+        page.locator("#EdgeComputer_carbon_footprint_manufacturing").fill("100")
 
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("EdgeComputer", edge_device_name)
@@ -254,7 +254,7 @@ class TestEdgeObjects:
 
         page.locator("#display-advanced-EdgeComputer").click()
         expect(page.locator("#EdgeComputer_lifespan")).to_have_value("3")
-        expect(page.locator("#EdgeComputer_carbon_footprint_fabrication")).to_have_value("100")
+        expect(page.locator("#EdgeComputer_carbon_footprint_manufacturing")).to_have_value("100")
 
     def test_multiple_edge_journeys_share_edge_device(self, edge_system_in_browser: ModelBuilderPage):
         """Verify multiple edge usage journeys can share the same edge device."""

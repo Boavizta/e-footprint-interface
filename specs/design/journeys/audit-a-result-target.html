@@ -420,7 +420,7 @@
        global graph is anchored to nothing; the audit question always starts from a <em>number</em>. The graph views live one
        level down, anchored (Phases D–E).</p>
     <div class="states">
-      <div class="state"><span class="k">Table of contents</span><span class="v"><b>Total footprint</b> + each impact source's <b>Usage / Fabrication</b> pair — all read from the model file, zero compute.</span></div>
+      <div class="state"><span class="k">Table of contents</span><span class="v"><b>Total footprint</b> + each impact source's <b>Use / Manufacturing</b> pair — all read from the model file, zero compute.</span></div>
       <div class="state"><span class="k">One click in</span><span class="v">Any row → that footprint's <b>Value</b> view (Phase C), where the <b>Influence lens</b> is one more click (Phase D).</span></div>
       <div class="state"><span class="k">No global map</span><span class="v">Rejected: the canvas already renders structure; an unanchored graph repeats the pyvis failure one altitude up. Influence views are anchored per footprint instead.</span></div>
       <div class="state"><span class="k">Attributed side</span><span class="v">Non-source objects are audited from their badges, chart series or impact headers — their pages and the <b>Contribution lens</b> (Phase E) explain where their numbers come from.</span></div>
@@ -444,12 +444,12 @@
           <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode here">Web server</span></div>
           <div class="rpbody">
             <div class="oimp">
-              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="iv">1.83 t CO₂-eq</span><span class="ish">· 23% of system total · Usage <b>0.63 t</b> · Fabrication <b>1.2 t</b></span><span class="ish" style="margin-left:auto;color:var(--primary);font-weight:600">Open object ↗</span></div>
+              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="iv">1.83 t CO₂-eq</span><span class="ish">· 23% of system total · Usage <b>0.63 t</b> · Manufacturing <b>1.2 t</b></span><span class="ish" style="margin-left:auto;color:var(--primary);font-weight:600">Open object ↗</span></div>
             </div>
             <div class="orows">
               <div class="oh">Calculated attributes — Web server (Server)</div>
-              <div class="orow"><span class="on">Energy footprint</span><span class="ov">0.63 t CO₂-eq</span><span class="go">›</span></div>
-              <div class="orow"><span class="on">Instances fabrication footprint</span><span class="ov">1.2 t CO₂-eq</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Use footprint</span><span class="ov">0.63 t CO₂-eq</span><span class="go">›</span></div>
+              <div class="orow"><span class="on">Instances manufacturing footprint</span><span class="ov">1.2 t CO₂-eq</span><span class="go">›</span></div>
               <div class="orow"><span class="on">Nb of instances</span><span class="ov">2.0</span><span class="go">›</span></div>
               <div class="orow"><span class="on">Hour by hour compute need</span><span class="ov">timeseries</span><span class="go">›</span></div>
               <div class="orow"><span class="on">Hour by hour electricity consumption</span><span class="lazyfill">computing…</span><span class="go">›</span></div>
@@ -491,10 +491,10 @@
       <div class="stage" style="min-height:360px">
         <div class="rpanel">
           <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
-          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode here">Energy footprint</span><span style="margin-left:auto" class="cnode">◉ Influence</span></div>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode here">Use footprint</span><span style="margin-left:auto" class="cnode">◉ Influence</span></div>
           <div class="rpbody">
             <div class="vcard">
-              <div class="vt">Energy footprint <span class="vo">· Web server (Server)</span></div>
+              <div class="vt">Use footprint <span class="vo">· Web server (Server)</span></div>
               <div class="docstring">Emissions from the electricity consumed by the server during the usage phase: hourly power
                 drawn by compute and RAM needs, converted through the carbon intensity of the electricity mix at the server's
                 location.</div>
@@ -506,7 +506,7 @@
               </svg>
               <div class="formula" style="margin-top:.4rem">
                 <div class="fh">Formula</div>
-                <div class="eq">energy_footprint = <span class="syms">a</span> × <span class="syms">b</span></div>
+                <div class="eq">use_footprint = <span class="syms">a</span> × <span class="syms">b</span></div>
                 <div class="fh">Input variables</div>
                 <div class="var"><b>a</b> = <a href="#">Hour by hour electricity consumption</a> <span class="vo">· Web server · calculated</span></div>
                 <div class="var"><b>b</b> = <a href="#">Average carbon intensity</a> <span class="vo">· France</span> <span class="srcchip">RTE 2023</span> <span class="conf high">High</span></div>
@@ -560,7 +560,7 @@
                 <div class="var"><b>b</b> = <a href="#">Hour by hour compute need</a> <span class="vo">· Web server · calculated</span></div>
                 <div class="var"><b>c</b> = <a href="#">Power per unit of compute</a> <span class="vo">· Web server</span> <span class="conf low">Low</span></div>
                 <div class="fh">Feeds into</div>
-                <div class="var">→ <a href="#">Energy footprint</a> <span class="vo">· Web server</span></div>
+                <div class="var">→ <a href="#">Use footprint</a> <span class="vo">· Web server</span></div>
               </div>
             </div>
           </div>
@@ -599,7 +599,7 @@
       <div class="stage" style="min-height:330px">
         <div class="rpanel">
           <div class="rphead"><span class="rt">Audit</span><span class="chev">×</span></div>
-          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode">Energy footprint</span><span class="sep">·</span><span class="cnode here">◉ Influence</span>
+          <div class="crumbtrail"><span class="backfwd">‹ ›</span><span class="cnode">System</span><span class="sep">›</span><span class="cnode">Web server</span><span class="sep">›</span><span class="cnode">Use footprint</span><span class="sep">·</span><span class="cnode here">◉ Influence</span>
             <span style="margin-left:auto" class="lenschips"><span class="lenschip on">Objects</span><span class="lenschip">Calculated attributes</span></span></div>
           <div class="rpbody">
             <svg viewBox="0 0 400 240" role="img" aria-label="Influence view: objects whose inputs shape this footprint" font-family="Inter, system-ui, sans-serif">
@@ -638,7 +638,7 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Influence lens</b> for <em>Web server · Energy footprint</em>: only the objects <b>whose inputs shape this number</b>, each annotated with the participating inputs, arrows pointing at the audited footprint. The chip toggle switches to <b>Calculated attributes</b> — the same cone at attribute level, each object's lateral detail collapsed. Anchored, never global.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Influence lens</b> for <em>Web server · Use footprint</em>: only the objects <b>whose inputs shape this number</b>, each annotated with the participating inputs, arrows pointing at the audited footprint. The chip toggle switches to <b>Calculated attributes</b> — the same cone at attribute level, each object's lateral detail collapsed. Anchored, never global.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">6</span><h3>The Influence lens — what shapes this footprint</h3></div>
@@ -678,17 +678,17 @@
             <div class="orows">
               <div class="oh">Where it comes from — contributions by impact source</div>
               <div class="contrib">
-                <div class="cl1"><span class="on">Web server · Energy footprint</span><span class="ov">1.55 t · 60%</span><span class="go">›</span></div>
+                <div class="cl1"><span class="on">Web server · Use footprint</span><span class="ov">1.55 t · 60%</span><span class="go">›</span></div>
                 <div class="cbar"><i style="width:60%"></i></div>
                 <div class="cwhy">this job drives 60% of the server's compute-hours over the period</div>
               </div>
               <div class="contrib">
-                <div class="cl1"><span class="on">Web server · Fabrication footprint</span><span class="ov">0.74 t · 28%</span><span class="go">›</span></div>
+                <div class="cl1"><span class="on">Web server · Manufacturing footprint</span><span class="ov">0.74 t · 28%</span><span class="go">›</span></div>
                 <div class="cbar"><i style="width:28%"></i></div>
-                <div class="cwhy">fabrication follows the same usage share, over the server's lifespan</div>
+                <div class="cwhy">manufacturing follows the same usage share, over the server's lifespan</div>
               </div>
               <div class="contrib">
-                <div class="cl1"><span class="on">SSD storage · Energy + Fabrication</span><span class="ov">0.31 t · 12%</span><span class="go">›</span></div>
+                <div class="cl1"><span class="on">SSD storage · Energy + Manufacturing</span><span class="ov">0.31 t · 12%</span><span class="go">›</span></div>
                 <div class="cbar"><i style="width:12%"></i></div>
                 <div class="cwhy">share of storage need written and held by this job's data</div>
               </div>

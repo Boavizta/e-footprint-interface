@@ -115,10 +115,10 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "Storage_carbon_footprint_fabrication_per_storage_capacity",
-                "attr_name": "carbon_footprint_fabrication_per_storage_capacity",
-                "label": "carbon footprint fabrication per storage capacity",
-                "tooltip": "Embodied carbon emitted to manufacture one unit of storage capacity. Multiplied by capacity to obtain the per-instance fabrication footprint.",
+                "web_id": "Storage_carbon_footprint_manufacturing_per_storage_capacity",
+                "attr_name": "carbon_footprint_manufacturing_per_storage_capacity",
+                "label": "carbon footprint manufacturing per storage capacity",
+                "tooltip": "Embodied carbon emitted to manufacture one unit of storage capacity. Multiplied by capacity to obtain the per-instance manufacturing footprint.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

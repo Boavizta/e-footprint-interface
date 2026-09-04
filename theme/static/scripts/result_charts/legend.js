@@ -287,14 +287,14 @@ export const splitCapsuleLegendPlugin = {
 
         // Split and render legend items by category
         const usageItems = filterItemsByCategory(visibleItems, LEGEND_CATEGORIES.USAGE.key).reverse();
-        const fabricationItems = filterItemsByCategory(visibleItems, LEGEND_CATEGORIES.FABRICATION.key).reverse();
+        const manufacturingItems = filterItemsByCategory(visibleItems, LEGEND_CATEGORIES.MANUFACTURING.key).reverse();
 
-        if (fabricationItems.length > 0) {
+        if (manufacturingItems.length > 0) {
             sectionsContainer.appendChild(
                 createLegendSection(
-                    LEGEND_CATEGORIES.FABRICATION.title,
-                    LEGEND_CATEGORIES.FABRICATION.key,
-                    fabricationItems,
+                    LEGEND_CATEGORIES.MANUFACTURING.title,
+                    LEGEND_CATEGORIES.MANUFACTURING.key,
+                    manufacturingItems,
                     chart,
                     legendContainer
                 )

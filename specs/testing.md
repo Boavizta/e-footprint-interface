@@ -95,7 +95,7 @@ Prefer **structure-based** assertions over full JSON equality. Use a helper like
 
 For computed impacts, assert coarse signals:
 
-- "network energy footprint increases after increasing data transferred"
+- "network use footprint increases after increasing data transferred"
 - "emissions series is non-empty and non-zero for key categories"
 
 ### Dict-based relationships

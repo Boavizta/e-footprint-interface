@@ -54,14 +54,14 @@
         ],
         "label": "infrastructure type"
     },
-    "carbon_footprint_fabrication": {
+    "carbon_footprint_manufacturing": {
         "modeling_obj_containers": [
             "Device",
             "EdgeAppliance",
             "EdgeComputer",
             "Server"
         ],
-        "label": "carbon footprint fabrication",
+        "label": "carbon footprint manufacturing",
         "is_advanced_parameter": true,
         "step": 1
     },
@@ -243,19 +243,19 @@
         "is_advanced_parameter": true,
         "step": 1
     },
-    "carbon_footprint_fabrication_per_gpu": {
+    "carbon_footprint_manufacturing_per_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
-        "label": "carbon footprint fabrication per GPU",
+        "label": "carbon footprint manufacturing per GPU",
         "is_advanced_parameter": true,
         "step": 1
     },
-    "carbon_footprint_fabrication_without_gpu": {
+    "carbon_footprint_manufacturing_without_gpu": {
         "modeling_obj_containers": [
             "GPUServer"
         ],
-        "label": "carbon footprint fabrication without GPU",
+        "label": "carbon footprint manufacturing without GPU",
         "is_advanced_parameter": true,
         "step": 1
     },
@@ -568,12 +568,12 @@
         ],
         "label": "technology"
     },
-    "carbon_footprint_fabrication_per_storage_capacity": {
+    "carbon_footprint_manufacturing_per_storage_capacity": {
         "modeling_obj_containers": [
             "EdgeStorage",
             "Storage"
         ],
-        "label": "carbon footprint fabrication per storage capacity",
+        "label": "carbon footprint manufacturing per storage capacity",
         "is_advanced_parameter": true,
         "step": 1
     },
@@ -769,11 +769,11 @@
         ],
         "label": "recurrent need"
     },
-    "structure_carbon_footprint_fabrication": {
+    "structure_carbon_footprint_manufacturing": {
         "modeling_obj_containers": [
             "EdgeDevice"
         ],
-        "label": "structure carbon footprint fabrication",
+        "label": "structure carbon footprint manufacturing",
         "is_advanced_parameter": true,
         "step": 1
     },
@@ -807,13 +807,13 @@
         ],
         "label": "external api"
     },
-    "carbon_footprint_fabrication_per_unit": {
+    "carbon_footprint_manufacturing_per_unit": {
         "modeling_obj_containers": [
             "EdgeRAMComponent",
             "EdgeCPUComponent",
             "EdgeWorkloadComponent"
         ],
-        "label": "carbon footprint fabrication per unit",
+        "label": "carbon footprint manufacturing per unit",
         "is_advanced_parameter": true,
         "step": 1
     },

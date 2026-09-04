@@ -48,7 +48,7 @@ DEFAULT_ACTIVE_COLUMNS = {"0", "phase", "1", "3", "4", "category", "7", str(_BRE
 
 _LIFECYCLE_PHASE_MAP = {
     "Manufacturing": LifeCyclePhases.MANUFACTURING,
-    "Usage": LifeCyclePhases.USAGE,
+    "Use": LifeCyclePhases.USE,
 }
 
 _SANKEY_NAME_DELIMITER = "\u2063"
@@ -370,7 +370,7 @@ def sankey_diagram(request):
         subtitle_map = {
             None: "All phases",
             LifeCyclePhases.MANUFACTURING: "Manufacturing only",
-            LifeCyclePhases.USAGE: "Usage only",
+            LifeCyclePhases.USE: "Use only",
         }
         subtitle = subtitle_map[lifecycle_phase_filter]
 

@@ -15,16 +15,16 @@ const {
 } = require("../theme/static/scripts/result_charts/comparison_charts.js");
 
 function pairedPayload() {
-    // A's usage/fabrication mix differs per year (usage-heavy 2026, fabrication-heavy 2027): the
+    // A's usage/manufacturing mix differs per year (usage-heavy 2026, manufacturing-heavy 2027): the
     // adapter ships the EXACT per-year split (from the library per-phase series), so the builder must
     // carry the distinct per-year values through verbatim — never collapse them to one global ratio.
     return {
         labels: ["2026", "2027"],
         datasets: [
             { label: "A usage", data: [200, 30], backgroundColor: "#4878a8", stack: "A", valueLabels: ["200 kg", "30 kg"] },
-            { label: "A fabrication", data: [40, 130], backgroundColor: "#9db9d8", stack: "A", valueLabels: ["40 kg", "130 kg"] },
+            { label: "A manufacturing", data: [40, 130], backgroundColor: "#9db9d8", stack: "A", valueLabels: ["40 kg", "130 kg"] },
             { label: "B usage", data: [60, null], backgroundColor: "#e09f3e", stack: "B", valueLabels: ["60 kg", null] },
-            { label: "B fabrication", data: [40, null], backgroundColor: "#f0cf94", stack: "B", valueLabels: ["40 kg", null] },
+            { label: "B manufacturing", data: [40, null], backgroundColor: "#f0cf94", stack: "B", valueLabels: ["40 kg", null] },
         ],
     };
 }
@@ -41,7 +41,7 @@ function cumulativePayload() {
 
 function decompositionPayload() {
     return {
-        labels: ["Servers & storage usage", "Edge devices fabrication"],
+        labels: ["Servers & storage usage", "Edge devices manufacturing"],
         axisUnit: "kg",
         axisScale: 1,
         datasets: [{
@@ -80,10 +80,10 @@ describe("buildPairedChartConfig", () => {
 
     test("carries the exact per-year usage/fab split through verbatim (no global-ratio flattening)", () => {
         const config = buildPairedChartConfig(pairedPayload());
-        // A is usage-heavy in 2026 and fabrication-heavy in 2027 — the builder must keep each year's
+        // A is usage-heavy in 2026 and manufacturing-heavy in 2027 — the builder must keep each year's
         // own split, not redistribute it by one period-wide ratio.
         expect(config.data.datasets[0].data).toEqual([200, 30]); // A usage per year
-        expect(config.data.datasets[1].data).toEqual([40, 130]); // A fabrication per year
+        expect(config.data.datasets[1].data).toEqual([40, 130]); // A manufacturing per year
     });
 
     test("tooltip prints the adapter's pre-formatted figure, not the raw number", () => {
@@ -188,11 +188,11 @@ describe("renderPairedLegend", () => {
         expect(rows[1].textContent).toContain("Streaming app — edge caching");
     });
 
-    test("each row contains one color swatch per dataset in that stack (usage + fabrication)", () => {
+    test("each row contains one color swatch per dataset in that stack (usage + manufacturing)", () => {
         setupCanvas("testPairedChart");
         renderPairedLegend(pairedPayloadWithNames(), "testPairedChart");
         const rows = Array.from(document.getElementById("testPairedChart-legend").children);
-        // Each row: name label + 2 items (usage, fabrication) = 3 children.
+        // Each row: name label + 2 items (usage, manufacturing) = 3 children.
         expect(rows[0].children).toHaveLength(3);
         expect(rows[1].children).toHaveLength(3);
     });

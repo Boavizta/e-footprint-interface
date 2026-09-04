@@ -48,8 +48,8 @@ Normative UX: <a href="../../design/journeys/analyse-results.html">analyse-resul
   <p>Driven from <code>e-footprint/specs/features/</code> (library repo); contract settled in the 2026-07-03
   discussion:</p>
   <ul>
-    <li>Per non-impact-source object and phase: hourly <code>attributed_energy_footprint</code> /
-      <code>attributed_fabrication_footprint</code> as ordinary non-serialized <code>@computed_attribute</code>s
+    <li>Per non-impact-source object and phase: hourly <code>attributed_use_footprint</code> /
+      <code>attributed_manufacturing_footprint</code> as ordinary non-serialized <code>@computed_attribute</code>s
       (lazy intermediates, full ancestry), plus a <b>daily</b> reduction projection slot per phase flagged
       <code>@lazy_attribute(serialize=True)</code> — computed on first read, persisted, invalidated by the ordinary
       deletion wave. Requires a uniform-step daily explainable-timeseries type (sibling of
@@ -78,8 +78,8 @@ Normative UX: <a href="../../design/journeys/analyse-results.html">analyse-resul
         present-classes logic.</td></tr>
       <tr><td><code>model_builder/domain/services/chart_series_service.py</code></td><td>new</td>
         <td>Thin adapter: card settings → series payload. Reads library accessors only (daily reductions of source
-        pairs; daily attributed projections; category grouping via <code>System.energy_footprints</code> /
-        <code>fabrication_footprints</code>). Computes remainder series and "Other" aggregation folding. No Django
+        pairs; daily attributed projections; category grouping via <code>System.use_footprints</code> /
+        <code>manufacturing_footprints</code>). Computes remainder series and "Other" aggregation folding. No Django
         imports (constitution §1.1).</td></tr>
       <tr><td><code>model_builder/domain/services/emissions_calculation_service.py</code></td><td>removed</td>
         <td>Retired with <code>ModelWeb.system_emissions</code> and the inline <code>window.emissions</code>

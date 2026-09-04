@@ -8,7 +8,7 @@
 // adapter — never by per-chart auto-colours.
 //
 //   - paired bars: per-year, model A | model B side by side; within each model usage stacks on
-//     fabrication (dark = usage, light = fabrication). Two stacks ("A", "B") on one shared y-axis.
+//     manufacturing (dark = usage, light = manufacturing). Two stacks ("A", "B") on one shared y-axis.
 //   - cumulative overlay: two curves on one axis; the gap between them is the running avoided/added
 //     emissions, the end gap the headline Δ. The area between is shaded.
 //   - decomposition: horizontal diverging bars, one per category × phase, signed (green left =
@@ -217,7 +217,7 @@ function buildDecompositionChartConfig(payload) {
 /**
  * Render a grouped HTML legend for the paired bar chart below its canvas. Produces one row per
  * model (stack "A" / "B"), each row labelled with the real system name and showing one color swatch
- * per series (usage / fabrication). Falls back to "System A" / "System B" when name fields are absent.
+ * per series (usage / manufacturing). Falls back to "System A" / "System B" when name fields are absent.
  * @param {Object} payload - The paired chart payload (includes modelAName, modelBName, datasets).
  * @param {string} canvasId - The id of the canvas the paired chart is drawn on.
  */
@@ -237,7 +237,7 @@ function renderPairedLegend(payload, canvasId) {
 
     const systemNames = { A: payload.modelAName || "System A", B: payload.modelBName || "System B" };
 
-    // Collect datasets per stack, preserving insertion order (usage then fabrication).
+    // Collect datasets per stack, preserving insertion order (usage then manufacturing).
     const groups = {};
     for (const dataset of payload.datasets) {
         const stack = dataset.stack;
@@ -262,7 +262,7 @@ function renderPairedLegend(payload, canvasId) {
             swatch.style.cssText = `display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: ${dataset.backgroundColor}; flex-shrink: 0;`;
 
             const phase = document.createElement("span");
-            // The dataset label is "<model name> usage" or "<model name> fabrication"; take the last word.
+            // The dataset label is "<model name> usage" or "<model name> manufacturing"; take the last word.
             phase.textContent = dataset.label.split(" ").pop();
             phase.style.color = "#6b7280";
 

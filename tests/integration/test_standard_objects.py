@@ -240,4 +240,4 @@ def test_create_ecologits_external_api_and_job(default_system_repository_with_jo
 
     model_web = ModelWeb(default_system_repository)
     assert sum(model_web.system_emissions["values"]["ExternalAPIs_energy"]) > 0
-    assert sum(model_web.system_emissions["values"]["ExternalAPIs_fabrication"]) > 0
+    assert sum(model_web.system_emissions["values"]["ExternalAPIs_manufacturing"]) > 0

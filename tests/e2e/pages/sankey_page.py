@@ -46,7 +46,7 @@ class SankeyCard:
         self.plot_locator().locator("canvas").first.wait_for(state="attached", timeout=timeout)
 
     def set_lifecycle_filter(self, value: str) -> None:
-        """Set the lifecycle phase filter. value: '' | 'Manufacturing' | 'Usage'."""
+        """Set the lifecycle phase filter. value: '' | 'Manufacturing' | 'Use'."""
         with self.page.expect_response(lambda r: "sankey-diagram" in r.url):
             self._container.locator('[name="lifecycle_phase_filter"]').select_option(value)
 

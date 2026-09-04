@@ -2,6 +2,8 @@
 
 Design strategy hub — the canonical, **visual** record of how the main usage journeys of e-footprint-interface work, and of the design decisions that become code. **[`index.html`](index.html) is the navigable entry point** to every artefact here; this README carries the strategy and rationale behind them.
 
+Copy in these artefacts follows the [writing style guide](writing-style-guide.md), including its lifecycle terminology.
+
 **Visual artefacts are HTML.** Journeys are authored as self-contained HTML files — rendered, navigable, *seeable* — the same posture this repo already uses for `spec.html` / `plan.html` review docs (see [`../workflow.md`](../workflow.md)). No build step, no framework, no CDN: open the file in a browser. Tokens and components are served live by the app at `/design` instead.
 
 **What's live now:** all six journeys are authored — [`build-a-model`](journeys/build-a-model.html) is the **reference** (its `<style>` block is the shared toolkit the others copy) — and **tokens + components** are the live `/design` route (see below). [`index.html`](index.html) indexes everything.

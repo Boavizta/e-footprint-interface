@@ -12,7 +12,7 @@ class TestEdgeApplianceWeb:
         """Calculated attributes should filter appliance component values and append base values."""
         appliance_component = SimpleNamespace(
             calculated_attributes_values=[
-                SimpleNamespace(attr_name_in_mod_obj_container="instances_fabrication_footprint"),
+                SimpleNamespace(attr_name_in_mod_obj_container="instances_manufacturing_footprint"),
                 SimpleNamespace(attr_name_in_mod_obj_container="power"),
             ]
         )
@@ -22,9 +22,9 @@ class TestEdgeApplianceWeb:
             name="appliance",
             appliance_component=appliance_component,
             calculated_attributes_without_validations=[
-                "instances_fabrication_footprint_per_usage_pattern", "instances_fabrication_footprint"],
-            instances_fabrication_footprint_per_usage_pattern="per-usage",
-            instances_fabrication_footprint="fabrication",
+                "instances_manufacturing_footprint_per_usage_pattern", "instances_manufacturing_footprint"],
+            instances_manufacturing_footprint_per_usage_pattern="per-usage",
+            instances_manufacturing_footprint="manufacturing",
         )
 
         web_obj = EdgeApplianceWeb(modeling_obj, MagicMock())
@@ -34,5 +34,5 @@ class TestEdgeApplianceWeb:
         assert values == [
             appliance_component.calculated_attributes_values[1],
             "per-usage",
-            "fabrication",
+            "manufacturing",
         ]

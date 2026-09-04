@@ -68,8 +68,8 @@ def test_edit_server_updates_nested_storage(default_system_repository):
     storage_form_data = create_post_data_from_class_default_values(
         "Updated Storage",
         "Storage",
-        carbon_footprint_fabrication_per_storage_capacity="160.0",
-        carbon_footprint_fabrication_per_storage_capacity__unit=str(u.kg / u.TB_stored),
+        carbon_footprint_manufacturing_per_storage_capacity="160.0",
+        carbon_footprint_manufacturing_per_storage_capacity__unit=str(u.kg / u.TB_stored),
     )
 
     edit_object(
@@ -78,17 +78,17 @@ def test_edit_server_updates_nested_storage(default_system_repository):
         "Server",
         {
             "name": "Updated server",
-            "carbon_footprint_fabrication": "60",
-            "carbon_footprint_fabrication__unit": str(u.kg),
+            "carbon_footprint_manufacturing": "60",
+            "carbon_footprint_manufacturing__unit": str(u.kg),
             "Storage_form_data": json.dumps(storage_form_data),
         },
     )
 
     sd = default_system_repository.get_system_data()
     assert sd["Server"][server_id]["name"] == "Updated server"
-    assert sd["Server"][server_id]["carbon_footprint_fabrication"]["value"] == 60.0
+    assert sd["Server"][server_id]["carbon_footprint_manufacturing"]["value"] == 60.0
     assert sd["Storage"][storage_id]["name"] == "Updated Storage"
-    assert sd["Storage"][storage_id]["carbon_footprint_fabrication_per_storage_capacity"]["value"] == 160.0
+    assert sd["Storage"][storage_id]["carbon_footprint_manufacturing_per_storage_capacity"]["value"] == 160.0
 
 
 def test_memory_interruption_rolls_transactional_edit_back_without_persisting(

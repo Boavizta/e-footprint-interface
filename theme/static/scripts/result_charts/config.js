@@ -111,8 +111,8 @@ export const LEGEND_STYLES = {
  * Categories for splitting legend items
  */
 export const LEGEND_CATEGORIES = {
-    FABRICATION: { key: "fabrication", title: "Fabrication" },
-    USAGE: { key: "usage", title: "Usage" },
+    MANUFACTURING: { key: "manufacturing", title: "Manufacturing" },
+    USAGE: { key: "usage", title: "Use" },
 };
 
 /**
@@ -207,21 +207,21 @@ export const HARDWARE_TYPE_CONFIG = {
         label: "Network usage",
         backgroundColor: "#006B6B",
     },
-    Servers_and_storage_fabrication: {
-        label: "Servers and storage fabrication",
+    Servers_and_storage_manufacturing: {
+        label: "Servers and storage manufacturing",
         backgroundColor: "#9DC4E6",
     },
-    ExternalAPIs_fabrication: {
-        label: "External APIs fabrication",
+    ExternalAPIs_manufacturing: {
+        label: "External APIs manufacturing",
         backgroundColor: "#85AFD8",
     },
-    Edge_devices_fabrication: {
-        label: "Edge devices and storage fabrication",
+    Edge_devices_manufacturing: {
+        label: "Edge devices and storage manufacturing",
         backgroundColor: "#6595C8",
         isEdge: true,
     },
-    Devices_fabrication: {
-        label: "Devices fabrication",
+    Devices_manufacturing: {
+        label: "Devices manufacturing",
         backgroundColor: "#2E75B6",
     },
 };

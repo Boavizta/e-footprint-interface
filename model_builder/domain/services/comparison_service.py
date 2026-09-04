@@ -19,8 +19,8 @@ from typing import Dict, List, Optional
 
 # Constant model-identity colours, shared across every chart (the KPI cards' left border, both chart
 # series, the cumulative curves). Model A is the cool blue, model B the warm amber. Usage is the
-# saturated tone, fabrication the lighter tint of the same hue, so one capsule legend
-# (Usage / Fabrication × A / B) reads across both models.
+# saturated tone, manufacturing the lighter tint of the same hue, so one capsule legend
+# (Use / Manufacturing × A / B) reads across both models.
 MODEL_A_COLOR = "#4878a8"
 MODEL_A_COLOR_LIGHT = "#9db9d8"
 MODEL_B_COLOR = "#e09f3e"
@@ -42,7 +42,7 @@ DISPLAY_CATEGORY_LABELS = {
 }
 # Display order for the decomposition rows (largest, most-expected movers first).
 DISPLAY_CATEGORY_ORDER = ["Servers & storage", "External APIs", "Network", "Edge devices", "User devices"]
-PHASE_LABELS = {"energy": "usage", "fabrication": "fabrication"}
+PHASE_LABELS = {"use": "use", "manufacturing": "manufacturing"}
 
 
 @dataclass
@@ -51,11 +51,11 @@ class KpiCard:
     name: str
     total_kg: float
     usage_kg: float
-    fabrication_kg: float
+    manufacturing_kg: float
     period_label: str
     total_display: str = ""
     usage_display: str = ""
-    fabrication_display: str = ""
+    manufacturing_display: str = ""
 
 
 @dataclass
@@ -64,11 +64,11 @@ class KpiDelta:
     absolute_kg: float
     relative: Optional[float]
     usage_kg: float
-    fabrication_kg: float
+    manufacturing_kg: float
     absolute_display: str = ""
     relative_display: str = ""
     usage_display: str = ""
-    fabrication_display: str = ""
+    manufacturing_display: str = ""
     # "lower" when B emits less than A (a reduction, green), "higher" otherwise (red), "" when equal.
     direction: str = ""
 
@@ -193,7 +193,7 @@ class ComparisonService:
             return f"{format_display_number(magnitude)} {unit_str}"
 
         # The decomposition rows AND the headline Δ span very different magnitudes (a few grams of
-        # network impact next to half a tonne of device fabrication), so each gets its own best unit and
+        # network impact next to half a tonne of device manufacturing), so each gets its own best unit and
         # rounding via the library's display helpers rather than the strip's shared unit. This is also
         # what keeps the Δ figures clean: forcing a small value into the shared unit and converting back
         # leaves float-representation noise (e.g. "0.5710000000000001 t" instead of "+571 kg").
@@ -205,11 +205,11 @@ class ComparisonService:
         for card in (card_a, card_b):
             card.total_display = fmt(card.total_kg)
             card.usage_display = fmt(card.usage_kg)
-            card.fabrication_display = fmt(card.fabrication_kg)
+            card.manufacturing_display = fmt(card.manufacturing_kg)
 
         delta.absolute_display = fmt_best_signed(delta.absolute_kg)
         delta.usage_display = fmt_best_signed(delta.usage_kg)
-        delta.fabrication_display = fmt_best_signed(delta.fabrication_kg)
+        delta.manufacturing_display = fmt_best_signed(delta.manufacturing_kg)
         delta.relative_display = (
             "" if delta.relative is None else f"{'+' if delta.relative > 0 else ''}{round(delta.relative * 100)} %")
         delta.direction = "lower" if delta.absolute_kg < 0 else ("higher" if delta.absolute_kg > 0 else "")
@@ -223,32 +223,32 @@ class ComparisonService:
     def _kpi_card(self, system, total_kg, decomposition, is_model_a) -> KpiCard:
         # ``decomposition`` carries each system's own subtotals on the Delta (``before`` = A,
         # ``after`` = B), so derive both cards from it rather than re-summing the library dicts.
-        usage_kg, fab_kg = self._usage_fabrication_split(decomposition, is_model_a)
+        usage_kg, fab_kg = self._usage_manufacturing_split(decomposition, is_model_a)
         return KpiCard(
             name=system.name,
             total_kg=total_kg,
             usage_kg=usage_kg,
-            fabrication_kg=fab_kg,
+            manufacturing_kg=fab_kg,
             period_label=self._period_label(system))
 
     @staticmethod
-    def _usage_fabrication_split(decomposition, is_model_a):
-        """(usage, fabrication) subtotals for one model, summed from the decomposition rows."""
+    def _usage_manufacturing_split(decomposition, is_model_a):
+        """(usage, manufacturing) subtotals for one model, summed from the decomposition rows."""
         usage = sum((row.delta.before if is_model_a else row.delta.after)
-                    for row in decomposition if row.phase == "energy")
+                    for row in decomposition if row.phase == "use")
         fab = sum((row.delta.before if is_model_a else row.delta.after)
-                  for row in decomposition if row.phase == "fabrication")
+                  for row in decomposition if row.phase == "manufacturing")
         return usage, fab
 
     def _kpi_delta(self, comparison) -> KpiDelta:
         decomposition = comparison.decomposition
-        usage_delta = sum(row.delta.absolute for row in decomposition if row.phase == "energy")
-        fab_delta = sum(row.delta.absolute for row in decomposition if row.phase == "fabrication")
+        usage_delta = sum(row.delta.absolute for row in decomposition if row.phase == "use")
+        fab_delta = sum(row.delta.absolute for row in decomposition if row.phase == "manufacturing")
         return KpiDelta(
             absolute_kg=comparison.total_delta.absolute,
             relative=comparison.total_delta.relative,
             usage_kg=usage_delta,
-            fabrication_kg=fab_delta)
+            manufacturing_kg=fab_delta)
 
     @staticmethod
     def _period_label(system) -> str:
@@ -288,18 +288,18 @@ class ComparisonService:
         category = next((c for c in DISPLAY_CATEGORY_ORDER if label.startswith(c)), label)
         order = DISPLAY_CATEGORY_ORDER.index(category) if category in DISPLAY_CATEGORY_ORDER else len(
             DISPLAY_CATEGORY_ORDER)
-        # usage before fabrication within a category
+        # usage before manufacturing within a category
         return order, 0 if label.endswith("usage") else 1
 
     # --- time-series charts --------------------------------------------------------------------
 
     def _paired_chart(self, comparison) -> Dict:
-        """Per-year paired bars: model A | model B per year, dark = usage, light = fabrication.
+        """Per-year paired bars: model A | model B per year, dark = usage, light = manufacturing.
 
         Both models bucket onto one shared yearly calendar axis (the union of their periods); a year
         outside a model's own modeling period is left blank (``null``), not a zero bar.
-        The usage / fabrication split is *exact per year*: the library's per-phase aligned series
-        (``usage_*`` / ``fabrication_*``) are summed per calendar year, never a single full-period
+        The usage / manufacturing split is *exact per year*: the library's per-phase aligned series
+        (``usage_*`` / ``manufacturing_*``) are summed per calendar year, never a single full-period
         ratio applied to every year — so the dark / light segmentation reads truthfully even when a
         model's mix shifts across years. One y-axis (kg), one legend over the four series, model
         identity by the constant colour pair — the magnitude-honesty rule.
@@ -310,14 +310,14 @@ class ComparisonService:
         years_b = self._model_years(comparison.system_b)
 
         usage_a = _yearly_totals(time_series.start_date, time_series.usage_a, years, years_a)
-        fabrication_a = _yearly_totals(time_series.start_date, time_series.fabrication_a, years, years_a)
+        manufacturing_a = _yearly_totals(time_series.start_date, time_series.manufacturing_a, years, years_a)
         usage_b = _yearly_totals(time_series.start_date, time_series.usage_b, years, years_b)
-        fabrication_b = _yearly_totals(time_series.start_date, time_series.fabrication_b, years, years_b)
+        manufacturing_b = _yearly_totals(time_series.start_date, time_series.manufacturing_b, years, years_b)
 
-        # The axis tops out at the tallest stacked bar (a model's usage+fabrication in one year), so
+        # The axis tops out at the tallest stacked bar (a model's usage+manufacturing in one year), so
         # derive the display unit from that — not the grand total, which sums across years.
         stack_heights = [(u_val or 0.0) + (f_val or 0.0)
-                         for usage, fab in ((usage_a, fabrication_a), (usage_b, fabrication_b))
+                         for usage, fab in ((usage_a, manufacturing_a), (usage_b, manufacturing_b))
                          for u_val, f_val in zip(usage, fab)]
         return {
             "labels": [str(year) for year in years],
@@ -326,9 +326,9 @@ class ComparisonService:
             "modelBName": comparison.system_b.name,
             "datasets": [
                 _bar_dataset(f"{comparison.system_a.name} usage", usage_a, MODEL_A_COLOR, stack="A"),
-                _bar_dataset(f"{comparison.system_a.name} fabrication", fabrication_a, MODEL_A_COLOR_LIGHT, stack="A"),
+                _bar_dataset(f"{comparison.system_a.name} manufacturing", manufacturing_a, MODEL_A_COLOR_LIGHT, stack="A"),
                 _bar_dataset(f"{comparison.system_b.name} usage", usage_b, MODEL_B_COLOR, stack="B"),
-                _bar_dataset(f"{comparison.system_b.name} fabrication", fabrication_b, MODEL_B_COLOR_LIGHT, stack="B"),
+                _bar_dataset(f"{comparison.system_b.name} manufacturing", manufacturing_b, MODEL_B_COLOR_LIGHT, stack="B"),
             ],
         }
 

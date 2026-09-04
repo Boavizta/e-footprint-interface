@@ -198,9 +198,9 @@
                 "step": "1"
             },
             {
-                "web_id": "GPUServer_carbon_footprint_fabrication_per_gpu",
-                "attr_name": "carbon_footprint_fabrication_per_gpu",
-                "label": "carbon footprint fabrication per GPU",
+                "web_id": "GPUServer_carbon_footprint_manufacturing_per_gpu",
+                "attr_name": "carbon_footprint_manufacturing_per_gpu",
+                "label": "carbon footprint manufacturing per GPU",
                 "tooltip": "Embodied carbon emitted to manufacture one GPU.",
                 "metadata": {
                     "confidence": null,
@@ -219,9 +219,9 @@
                 "step": "1"
             },
             {
-                "web_id": "GPUServer_carbon_footprint_fabrication_without_gpu",
-                "attr_name": "carbon_footprint_fabrication_without_gpu",
-                "label": "carbon footprint fabrication without GPU",
+                "web_id": "GPUServer_carbon_footprint_manufacturing_without_gpu",
+                "attr_name": "carbon_footprint_manufacturing_without_gpu",
+                "label": "carbon footprint manufacturing without GPU",
                 "tooltip": "Embodied carbon of one server chassis excluding GPUs (CPUs, motherboard, chassis).",
                 "metadata": {
                     "confidence": null,
@@ -714,10 +714,10 @@
         ],
         "advanced_fields": [
             {
-                "web_id": "Server_carbon_footprint_fabrication",
-                "attr_name": "carbon_footprint_fabrication",
-                "label": "carbon footprint fabrication",
-                "tooltip": "Embodied carbon emitted to manufacture one unit of the hardware. Amortised over the lifespan when computing the hourly fabrication footprint.",
+                "web_id": "Server_carbon_footprint_manufacturing",
+                "attr_name": "carbon_footprint_manufacturing",
+                "label": "carbon footprint manufacturing",
+                "tooltip": "Embodied carbon emitted to manufacture one unit of the hardware. Amortised over the lifespan when computing the hourly manufacturing footprint.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,

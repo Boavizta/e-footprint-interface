@@ -9,13 +9,13 @@ function dataset(label, isEdge = false) {
 }
 
 const edgeEnergyItem = item(0, "Edge devices and storage usage");
-const edgeFabItem    = item(1, "Edge devices and storage fabrication");
+const edgeFabItem    = item(1, "Edge devices and storage manufacturing");
 const serverItem     = item(2, "Servers and storage usage");
 const networkItem    = item(3, "Network usage");
 
 const mixedDatasets = [
     dataset("Edge_devices_energy", true),
-    dataset("Edge_devices_fabrication", true),
+    dataset("Edge_devices_manufacturing", true),
     dataset("Servers_and_storage_energy"),
     dataset("Network_energy"),
 ];

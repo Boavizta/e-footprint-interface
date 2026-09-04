@@ -15,7 +15,7 @@ arithmetic parents are cleared. The on-demand attributed-footprint result never 
 formula is not finalized. Calling `explain()` currently renders an empty derivation resembling:
 
 ```text
-Attributed energy footprint =  =  = <hourly result summary>
+Attributed use footprint =  =  = <hourly result summary>
 ```
 
 The hourly values, plotting and period sums are correct; only the displayed derivation is missing.
