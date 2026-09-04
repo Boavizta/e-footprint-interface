@@ -60,15 +60,17 @@
   <p>Each criterion is user-observable and testable.</p>
   <ul>
     <li><strong>Publish:</strong> a signed-in user can publish the modeling in their current session
-    with a title, a set of tags chosen from a curated list, an optional link to the article or page
-    that references it, and a public author/organization name. Publishing yields a stable public
-    URL.</li>
+    with a title, free-text tags, an optional link to the article or page that references it, and a
+    free-text public author/organization name specific to that modeling. Publishing yields a stable
+    public URL.</li>
     <li><strong>View without an account:</strong> anyone opening a share link sees the modeling
     read-only — objects, hypotheses, results and visualizations, with the usual explainability
     (every value's derivation reachable) — without signing in.</li>
     <li><strong>Fork without an account:</strong> from a shared modeling, any visitor can load a
     copy into their own editing session and modify it freely. The fork is theirs; the original is
-    untouched. Forking requires no account (an account is only needed to <em>publish</em>).</li>
+    untouched. Forking requires no account (an account is only needed to <em>publish</em>). The fork
+    records the source modeling and exact source version so that, if later published, its public
+    page links visibly back to that provenance.</li>
     <li><strong>Update with history:</strong> the owner can publish a new version of their modeling.
     The canonical link always shows the latest version; every previously published version remains
     reachable at an immutable permalink, and the page makes it visible which version is displayed
@@ -76,10 +78,11 @@
     <li><strong>Discover:</strong> a public index page lists all published modelings, searchable by
     title and filterable by tag. Each entry shows title, author name, tags, last-update date, and
     the article link when present.</li>
-    <li><strong>Thin accounts:</strong> a user can create an account with an email address only, and
-    must prove control of that email before publishing. The account exists solely to own published
-    modelings; it stores no personal data beyond the email (the public author name is chosen by the
-    user and displayed instead of the email, which is never shown publicly).</li>
+    <li><strong>Thin accounts:</strong> a user can create an account with an email address and
+    password, and must prove control of that email before publishing. Email-and-password sign-in
+    allows credentials to be shared by members managing a modeling as a team. The account exists
+    solely to own published modelings; public author names belong to individual modelings and the
+    account email is never shown publicly.</li>
     <li><strong>Erasure:</strong> a user can delete any of their published modelings, and can delete
     their account entirely (which deletes all their published modelings, breaking their share
     links); both actions take effect immediately and are user-triggered, with no Boavizta-volunteer
@@ -90,9 +93,11 @@
     of published modelings, modeling size, and publish rate) so that a hostile script with a burner
     email cannot meaningfully grow the database. Exceeding a quota produces a clear, non-destructive
     error.</li>
-    <li><strong>Moderation:</strong> any visitor can report a published modeling, and an
-    administrator can unpublish one — covering illegal or abusive content without making volunteers
-    a routine editorial bottleneck.</li>
+    <li><strong>Moderation safety valve:</strong> each public modeling has a discreet email-based
+    report link that includes its URL, and an account with moderation privileges can unpublish it.
+    Administrators can grant or revoke that permission and promote other accounts to administrator;
+    the maintainer starts as the initial administrator. V1 does not require an internal reporting
+    or case-management workflow.</li>
     <li><strong>No private storage channel:</strong> there is no way to store a modeling server-side
     beyond the existing ephemeral session other than publishing it publicly (public by
     construction).</li>
@@ -106,25 +111,30 @@
   <code>plan.html</code>, not here.</blockquote>
   <details open><summary>In scope</summary>
     <ul>
-      <li>Thin user accounts: email-only sign-up with email verification; sign-in; account
-      deletion; a user-chosen public author/organization name.</li>
-      <li>Publishing the session's modeling as a public modeling: title, curated tags, optional
-      article backlink, author name.</li>
+      <li>Thin user accounts: email-and-password sign-up with email verification; sign-in and
+      password recovery; account deletion.</li>
+      <li>Publishing the session's modeling as a public modeling: title, free-text tags, optional
+      article backlink, and a free-text author name stored per modeling.</li>
       <li><strong>Public by construction:</strong> every long-lived stored modeling is public and
       listed in the index. No private or unlisted drafts; the ephemeral session and the JSON
       download remain the only private workspaces.</li>
       <li>Read-only public view of a shared modeling, with full explainability and results
       visualizations, accessible without an account.</li>
-      <li>Fork-to-session from any shared modeling (any version), without an account.</li>
+      <li>Fork-to-session from any shared modeling (any version), without an account, capturing the
+      source modeling and version for visible provenance if the fork is later published.</li>
       <li>Versioning: canonical latest URL + immutable per-version permalinks + visible version
       history.</li>
-      <li>Owner management: publish an update, edit metadata (title, tags, article link), delete a
-      published modeling.</li>
-      <li>Public index: search by title, filter by curated tags, sorted listing with basic
-      metadata.</li>
+      <li>Owner management: publish an update, edit metadata (title, tags, article link, author
+      name), delete a published modeling.</li>
+      <li>Public index: search by title, filter by free-text tags, sorted listing with basic
+      metadata. Tags remain unconstrained initially and may be consolidated once actual usage data
+      shows which vocabulary is useful.</li>
       <li>Anti-abuse: per-account quotas (count, size, rate) and verified-email gate on
       publishing.</li>
-      <li>Moderation: visitor-facing report action; administrator unpublish capability.</li>
+      <li>Lightweight moderation: a visitor-facing email report link carrying the modeling URL;
+      moderator unpublish capability; administrators can promote other accounts to administrator
+      and grant or revoke moderation privileges, with the maintainer seeded as the initial
+      administrator.</li>
       <li>Legal surfaces: privacy notice, terms of use covering published-content ownership and the
       reuse implied by forking, consent at account creation.</li>
       <li>Governance-doc updates shipped with the feature: amend <code>specs/mission.md</code>
@@ -141,13 +151,14 @@
       name.</li>
       <li>Full-text or semantic search inside modeling contents; search covers title and tags
       only.</li>
-      <li>User-created tags (the tag list is curated; extending it is a maintainer action).</li>
-      <li>Third-party sign-in (OAuth/SSO), password-recovery flows beyond what the chosen auth
-      mechanism needs.</li>
+      <li>Curating or consolidating the free-text tag vocabulary before usage data exists.</li>
+      <li>Third-party sign-in (OAuth/SSO).</li>
       <li>Embeddable widgets for articles (readers click through to the public view).</li>
       <li>DOI minting or formal academic-citation tooling (immutable permalinks are the v1
       citation mechanism).</li>
       <li>Email notifications of any kind (e.g. "a modeling you forked was updated").</li>
+      <li>A stored moderation queue, dedicated dashboard, report tracking or statuses, automated
+      acknowledgements, and a public response-time commitment.</li>
       <li>Automatic content-quality review of published modelings (publication is
       self-service; moderation is reactive).</li>
     </ul>
@@ -177,7 +188,7 @@
         <strong>Publish this modeling publicly</strong>
         <p style="margin:.4rem 0; font-size:.9rem;">
           <label>Title<br><input type="text" value="Streaming service — 2026 ecodesign baseline" style="width:100%;"></label></p>
-        <p style="margin:.4rem 0; font-size:.9rem;">Tags (curated list):<br>
+        <p style="margin:.4rem 0; font-size:.9rem;">Tags (free text):<br>
           <span style="border:1px solid #888; border-radius:12px; padding:.1rem .6rem; background:#eef;">video streaming</span>
           <span style="border:1px solid #888; border-radius:12px; padding:.1rem .6rem; background:#eef;">ecodesign case study</span>
           <span style="border:1px solid #ccc; border-radius:12px; padding:.1rem .6rem; color:#888;">+ add tag</span></p>
@@ -218,7 +229,7 @@
               <option>Version 1 — 2026-03-02</option>
             </select><br>
             <button type="button" style="margin-top:.4rem; padding:.35rem .9rem; cursor:pointer;">⑂ Fork into my session</button>
-            <a href="#" style="display:block; font-size:.75rem; color:#888; margin-top:.3rem;">Report this modeling</a>
+            <a href="#" style="display:block; font-size:.75rem; color:#888; margin-top:.3rem;">Report this modeling by email</a>
           </div>
         </div>
         <div style="margin-top:.8rem; border:1px dashed #bbb; border-radius:6px; padding:1.2rem; text-align:center; color:#888;">
@@ -275,10 +286,11 @@
   <h2>5. Constraints</h2>
   <ul>
     <li><strong>Data minimization is the pitch.</strong> Boavizta is a French non-profit that has
-    never handled personal data. The only personal data stored is the account email (plus the
-    user-chosen, deliberately public author name). This must remain literally true — it is the core
-    of the case to be made to the Boavizta board. GDPR obligations follow: consent at sign-up, a
-    privacy notice, self-service erasure, and a data-processing register entry for Boavizta.</li>
+    never handled personal data. Account data must remain limited to the email address, password
+    hash, verification and authorization state; each deliberately public author name is stored as
+    modeling metadata rather than account profile data. This narrow footprint is core to the case
+    made to the Boavizta board. GDPR obligations follow: consent at sign-up, a privacy notice,
+    self-service erasure, and a data-processing register entry for Boavizta.</li>
     <li><strong>Board approval gates production.</strong> The feature must be deployable and
     demonstrable on pre-production (<code>dev.e-footprint.boavizta.org</code>) while the Boavizta
     board decision is pending; production activation is a deliberate, separate step.</li>
@@ -293,9 +305,10 @@
     <li><strong>Bounded storage.</strong> Long-lived storage on Boavizta's hosting (Clever Cloud)
     is a new standing cost; quotas must keep it bounded and predictable. Quota values are a plan
     decision, referenced symbolically here.</li>
-    <li><strong>Read traffic must be cheap.</strong> A share link may sit in a widely-read article;
-    anonymous read-only views must not inherit the per-request model-rebuild cost of the editing
-    session, and must not degrade builder performance for active sessions.</li>
+    <li><strong>Public views use the standard request lifecycle.</strong> Anonymous read-only views
+    rebuild a <code>ModelWeb</code> from the serialized modeling data like editing requests do. They
+    do not require a separate no-rebuild path; their defining difference is that they cannot mutate
+    the modeling.</li>
     <li><strong>Constitution:</strong> Clean Architecture layering and HTMX-first apply to all new
     surfaces; multi-user collaborative editing stays rejected (§4). No constitution amendment is
     required, but <code>mission.md</code> and <code>roadmap.md</code> must be amended deliberately
@@ -307,25 +320,25 @@
 </section>
 
 <section>
-  <h2>6. Open questions</h2>
+  <h2>6. Decisions and remaining open question</h2>
   <ul>
-    <li><strong>Auth mechanism:</strong> passwordless magic-link vs. email + password. Outbound
-    email is a new operational dependency for Boavizta hosting <em>either way</em> (email
-    verification gates publishing), so the choice is purely about sign-in UX and whether a
-    credential hash is stored at all. Leaning passwordless (nothing to store, nothing to reset);
-    settle in <code>plan.html</code>.</li>
-    <li><strong>Author name placement:</strong> one display name per account vs. free-text per
-    modeling (a consultant publishing for several clients would want per-modeling).</li>
-    <li><strong>Initial curated tag list:</strong> which tags ship at launch, and what the process
-    is for extending the list.</li>
-    <li><strong>Moderation policy:</strong> who among Boavizta volunteers holds the unpublish
-    capability, and what response commitment (if any) is stated publicly.</li>
+    <li><strong>Authentication:</strong> email and password, with email verification and password
+    recovery. This is easier for members of a team to share when they jointly manage published
+    modelings.</li>
+    <li><strong>Author name:</strong> free text stored per modeling, not a single account-level
+    display name.</li>
+    <li><strong>Tags:</strong> free text at launch. Consolidation or curation is deferred until
+    actual usage provides evidence for a useful vocabulary.</li>
+    <li><strong>Moderation:</strong> V1 provides only a lightweight safety valve: a report-by-email
+    link containing the modeling URL and an unpublish permission that administrators may grant or
+    revoke. Administrators may promote other administrators, and the maintainer is the initial one.
+    Moderation queues, dashboards, case tracking, statuses, acknowledgements, and response
+    commitments are deferred until usage demonstrates a need.</li>
+    <li><strong>Fork provenance:</strong> capture the source modeling and exact version at fork time
+    and display that link if the fork is later published.</li>
     <li><strong>Content license:</strong> drafted in <code>content-license.md</code> (this folder)
     — CC BY 4.0 proposed. Remaining open point: Boavizta board validation, alongside the
     personal-data pitch.</li>
-    <li><strong>Fork provenance:</strong> when a fork is later published, should it visibly link
-    back to the modeling (and version) it was forked from? Cheap to capture at fork time,
-    impossible to reconstruct later.</li>
   </ul>
 </section>
 
@@ -338,10 +351,14 @@
     <code>specs/conventions.md</code> for code-style and architectural constraints.</li>
     <li>Context: decisions locked at spec time — public-by-construction (no private/unlisted
     saves), all published modelings listed in the index, latest-at-canonical-URL with immutable
-    version permalinks, accounts are email-only and exist solely to own published modelings,
-    account deletion cascades to the account's published modelings (author keeps agency over
-    their data; already-published forks by others are unaffected), published content carries the
-    license drafted in <code>content-license.md</code> (CC BY 4.0, pending board validation).</li>
+    version permalinks, accounts use verified email and password and exist solely to own published
+    modelings, author names and free-text tags belong to individual modelings, fork provenance is
+    captured at fork time, reports use an email link rather than an internal workflow, designated
+    moderators can unpublish content, administrators can promote other administrators and manage
+    moderator privileges with the maintainer as initial administrator, account deletion
+    cascades to the account's published modelings (author keeps agency over their data;
+    already-published forks by others are unaffected), and published content carries the license
+    drafted in <code>content-license.md</code> (CC BY 4.0, pending board validation).</li>
   </ol>
 </section>
 

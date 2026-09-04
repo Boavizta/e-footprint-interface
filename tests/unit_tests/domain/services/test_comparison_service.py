@@ -368,7 +368,7 @@ class TestAssumptionsDiffTemplate:
     def test_form_input_parameter_lines_render_stacked(self):
         view = ComparisonService().build_from_comparison(build_comparison(changed=[
             {"object_class": "UsagePattern", "object_name_a": "Web users", "object_name_b": "Web users",
-             "attribute": "hourly_usage_journey_starts",
+             "attribute": "hourly_occurrences",
              "value_a": "initial volume: 100 per month\nnet growth rate: 10 % per year",
              "value_b": "initial volume: 250 per month\nnet growth rate: 20 % per year"}]))
         html = self._render(view)

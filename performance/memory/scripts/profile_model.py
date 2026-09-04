@@ -6,7 +6,6 @@ large or sensitive fixtures do not become repository test data.
 
 import argparse
 import gc
-import hashlib
 import json
 import os
 import platform
@@ -167,21 +166,6 @@ def build_sankey(model_web):
     return sankey, payload
 
 
-def attributed_result_metadata(target, phase, result, period_sum_kg):
-    magnitudes = result.magnitude
-    return {
-        "target_id": target.id,
-        "phase": phase.value,
-        "shape": list(magnitudes.shape),
-        "dtype": str(magnitudes.dtype),
-        "start_date": result.start_date.isoformat(),
-        "unit": str(result.unit),
-        "label": result.label,
-        "period_sum_kg": period_sum_kg,
-        "magnitude_sha256": hashlib.sha256(magnitudes.tobytes()).hexdigest(),
-    }
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("model", type=Path)
@@ -195,10 +179,6 @@ def main():
             "warm-sankey",
             "results-primed-sankey",
             "results-then-sankey",
-            "attributed-manufacturing",
-            "attributed-usage",
-            "attributed-both",
-            "attributed-five-usage",
         ),
         required=True,
     )
@@ -223,9 +203,6 @@ def main():
 
     from efootprint import __version__ as efootprint_version
     from efootprint.abstract_modeling_classes.reactive_core import observe_computations
-    from efootprint.constants.units import u
-    from efootprint.core.attribution import attributed_footprint
-    from efootprint.core.lifecycle_phases import LifeCyclePhases
     from e_footprint_interface.computation_memory_middleware import ComputationMemoryMonitor
     from model_builder.adapters.repositories import InMemorySystemRepository
     from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
@@ -247,53 +224,10 @@ def main():
     calculation_aborted = False
     active_calculation_started_at = time.perf_counter()
     model_web = result = sankey = payload = None
-    attributed_results = []
-    attributed_metadata = []
 
     def noop_callback(_slot):
         nonlocal noop_callback_count
         noop_callback_count += 1
-
-    def profile_attributed_scenario(model_web):
-        patterns = list(model_web.system.modeling_obj.edge_usage_patterns)
-        target_count = 5 if args.scenario == "attributed-five-usage" else 1
-        if len(patterns) < target_count:
-            raise ValueError(
-                f"Scenario {args.scenario} requires at least {target_count} edge usage patterns, got {len(patterns)}"
-            )
-        targets = [pattern._value for pattern in patterns[:target_count]]
-        if args.scenario == "attributed-manufacturing":
-            requests = ((targets[0], LifeCyclePhases.MANUFACTURING),)
-        elif args.scenario == "attributed-usage":
-            requests = ((targets[0], LifeCyclePhases.USAGE),)
-        elif args.scenario == "attributed-both":
-            requests = ((targets[0], LifeCyclePhases.MANUFACTURING), (targets[0], LifeCyclePhases.USAGE))
-        else:
-            requests = tuple((target, LifeCyclePhases.USAGE) for target in targets)
-
-        retained_results = []
-        measured_results = []
-        for target, phase in requests:
-            attributed_result = attributed_footprint(target, phase)
-            period_sum_kg = float(attributed_result.sum().to(u.kg).magnitude)
-            if not period_sum_kg > 0:
-                raise ValueError(
-                    f"Attributed {phase.value} result for unwrapped target {target.id} must be non-zero, "
-                    f"got {period_sum_kg}"
-                )
-            retained_results.append(attributed_result)
-            measured_results.append((target, phase, attributed_result, period_sum_kg))
-        elapsed_seconds = time.perf_counter() - active_calculation_started_at
-        sampler.snapshot("attributed_footprint", "after_attributed_footprint")
-
-        sampler.begin("attribution_verification")
-        metadata = [
-            attributed_result_metadata(target, phase, attributed_result, period_sum_kg)
-            for target, phase, attributed_result, period_sum_kg in measured_results
-        ]
-        print("ATTRIBUTED " + json.dumps(metadata, sort_keys=True), flush=True)
-        sampler.snapshot("attribution_verification", "after_attribution_verification")
-        return retained_results, metadata, elapsed_seconds
 
     observer_scope = nullcontext()
     if args.monitor_mode == "noop":
@@ -314,14 +248,6 @@ def main():
             active_calculation_started_at = time.perf_counter()
             model_web = ModelWeb(InMemorySystemRepository(), data)
             sampler.snapshot("hydrate", "after_hydration")
-
-            if args.scenario.startswith("attributed-"):
-                sampler.begin("attributed_footprint")
-                active_calculation_started_at = time.perf_counter()
-                attributed_results, attributed_metadata, attributed_elapsed_seconds = profile_attributed_scenario(
-                    model_web
-                )
-                calculation_elapsed_seconds += attributed_elapsed_seconds
 
             if args.scenario in {"results", "results-primed-sankey", "results-then-sankey"}:
                 sampler.begin("results")
@@ -370,7 +296,7 @@ def main():
         monitor.finish("abort" if calculation_aborted else "complete")
 
     sampler.begin("post_gc")
-    del model_web, data, result, sankey, payload, attributed_results
+    del model_web, data, result, sankey, payload
     collected = gc.collect()
     gc.enable()
     sampler.snapshot("post_gc", "after_delete_and_full_gc")
@@ -395,7 +321,6 @@ def main():
         "calculation_elapsed_seconds": round(calculation_elapsed_seconds, 3),
         "usage_patterns": args.patterns,
         "source_model": args.model.name,
-        "attributed_results": attributed_metadata,
         "runtime": {
             "python": platform.python_version(),
             "platform": platform.platform(),

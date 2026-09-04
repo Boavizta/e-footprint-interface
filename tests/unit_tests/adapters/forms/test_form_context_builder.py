@@ -99,6 +99,19 @@ class TestParentGroupMembershipField:
             == device_context["parent_group_membership_field"]["tooltip"]
 
 
+def test_required_weighted_membership_hydrates_exclusive_positive_constraint():
+    section = FormContextBuilder._hydrate_membership_section({
+        "parent_class_name": "UsagePattern",
+        "attr_name": "usage_journeys",
+        "memberships": [],
+        "available_parents": [],
+    })
+
+    assert section["min_count"] == 0
+    assert section["strictly_positive"] is True
+    assert section["title"] == "Used in usage patterns"
+
+
 class TestParentLinkCountField:
     """Creation panels opened from a dict-relationship parent offer a multiplier field prefilled at 1."""
 

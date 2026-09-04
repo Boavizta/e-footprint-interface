@@ -43,8 +43,8 @@ class TestExternalAPIObjects:
         # Step 3: Create a usage pattern linked to the default usage journey
         model_builder.click_add_usage_pattern()
         side_panel.fill_field("UsagePattern_name", usage_pattern_name)
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
-        side_panel.select_option("UsagePattern_usage_journey", uj_name)
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
+        # The only available journey is selected by default.
         side_panel.submit_and_wait_for_close()
         model_builder.object_should_exist("UsagePattern", usage_pattern_name)
 

@@ -41,7 +41,7 @@ test("valid hourly controls post the fixed growth inputs to the common preview e
     expect(window.htmx.ajax).toHaveBeenCalledWith("POST", "/model_builder/timeseries-preview/", expect.objectContaining({
         values: expect.objectContaining({
             object_type: "UsagePattern",
-            field_name: "hourly_usage_journey_starts",
+            field_name: "hourly_occurrences",
             builder: "growth",
         }),
     }));

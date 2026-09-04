@@ -17,6 +17,7 @@ These are the strong preferences and patterns the project follows. They are soft
 
 - **Views are thin adapters.** They map request to use case input, call the use case, format response via the presenter. No business logic in views.
 - **Templates are small composable partials.** See `model_builder/templates/model_builder/...` for the pattern.
+- **Keep form data typed until rendering.** Preserve native numbers, collections, and identifiers in form configuration; localize or stringify them only where they cross into HTML attributes.
 - **Session is authoritative for the current modeling system.** Every request reconstructs `ModelWeb` from the repository.
 - **No domain-layer imports of Django, HTMX, or other presentation concerns** (constitution §1.1).
 

@@ -158,11 +158,11 @@ class TestSourceLabels:
 
         # Create usage pattern
         model_builder.click_add_usage_pattern()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").fill("2")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").fill("2")
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
 
         # Source label should show "user data"
-        expect(page.locator("#source-UsagePattern_hourly_usage_journey_starts")).to_contain_text("Source: user data")
+        expect(page.locator("#source-UsagePattern_hourly_occurrences")).to_contain_text("Source: user data")
 
         side_panel.submit_and_wait_for_close()
 
@@ -170,11 +170,11 @@ class TestSourceLabels:
         up_card = model_builder.get_object_card("UsagePattern", "Usage pattern 1")
         up_card.click_edit_button()
 
-        expect(page.locator("#source-UsagePattern_hourly_usage_journey_starts")).to_contain_text("Source: user data")
+        expect(page.locator("#source-UsagePattern_hourly_occurrences")).to_contain_text("Source: user data")
 
         # Modify and verify source still shows
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("5")
-        expect(page.locator("#source-UsagePattern_hourly_usage_journey_starts")).to_contain_text("Source: user data")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").fill("5")
+        expect(page.locator("#source-UsagePattern_hourly_occurrences")).to_contain_text("Source: user data")
 
 
 @pytest.fixture

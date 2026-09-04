@@ -45,11 +45,11 @@ def sankey_system(model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
     uj = UsageJourney("Test Journey", uj_steps=[uj_step])
     usage_pattern = UsagePattern(
         "Test UP",
-        usage_journey=uj,
+        usage_journeys={uj: SourceValue(1 * u.dimensionless)},
         devices=[device],
         network=network,
         country=country,
-        hourly_usage_journey_starts=create_hourly_usage(),
+        hourly_occurrences=create_hourly_usage(),
     )
     system = System("Test System", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     system_dict = system_to_json(system, save_computed_state=False)

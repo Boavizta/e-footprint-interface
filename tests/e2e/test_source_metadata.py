@@ -26,7 +26,8 @@ SOURCE_BLOCK_STABLE_MARKER = "source-table-was-not-replaced"
 @pytest.fixture
 def source_metadata_model_builder(minimal_system, model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
     """Load a complete model with one existing custom source available in source pickers."""
-    uj_step = next(iter(minimal_system.usage_patterns[0].usage_journey.uj_steps))
+    journey = next(iter(minimal_system.usage_patterns[0].usage_journeys))
+    uj_step = next(iter(journey.uj_steps))
     server = next(iter(uj_step.jobs)).server
     server.power.source = Source(CUSTOM_SOURCE_NAME, CUSTOM_SOURCE_LINK, id="labsrc")
     server.power.comment = EXISTING_SERVER_POWER_COMMENT
@@ -41,7 +42,12 @@ def _open_server_form(model_builder: ModelBuilderPage) -> None:
     power_input = model_builder.page.locator(SERVER_POWER_INPUT)
     expect(power_input).to_be_attached()
     if not power_input.is_visible():
-        model_builder.page.locator("#display-advanced-Server").click()
+        model_builder.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
+        advanced_toggle = model_builder.page.locator("#display-advanced-Server")
+        advanced_toggle.click()
+        expect(model_builder.page.locator("#advanced-Server")).to_be_visible()
     expect(power_input).to_be_visible()
 
 

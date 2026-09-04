@@ -46,8 +46,8 @@ class TestEdgeDeviceBaseWeb:
             "parent_class_name": "EdgeDeviceGroup",
             "attr_name": "edge_device_counts",
             "memberships": [
-                {"parent_id": alpha.id, "parent_name": "Alpha", "count": 2.0},
-                {"parent_id": beta.id, "parent_name": "Beta", "count": 0.3},
+                {"parent_id": alpha.id, "parent_name": "Alpha", "count": 2.0, "unlink_disabled": False},
+                {"parent_id": beta.id, "parent_name": "Beta", "count": 0.3, "unlink_disabled": False},
             ],
             "available_parents": [{"efootprint_id": empty.id, "name": "Empty"}],
         }]

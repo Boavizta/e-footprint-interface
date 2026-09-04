@@ -61,6 +61,7 @@ class TestCheckEdgeUsageJourneysHaveFunctions:
         assert result is not None
         assert result.affected_objects == ["empty_euj"]
         assert "empty_euj" in result.message
+        assert "edge usage journey" in result.message
         assert "edge function" in result.message
 
 

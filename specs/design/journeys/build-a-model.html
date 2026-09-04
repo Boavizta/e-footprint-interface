@@ -654,7 +654,7 @@
       <div class="hint">Other existing ones you can reuse</div>
       <div class="selrow"><select class="dd"><option>Stock alert</option><option>Price sync</option></select><span class="plus-btn">＋</span></div>
     </div>
-    <div class="mock-help"><span class="lbl">List link</span>A plain set — <b>which</b> children belong, <b>no per-row number</b>. The row widget (label · <b>×</b>) + a reuse select. <b>↑↓</b> reordering shows only where order matters; this list isn't ordered. <em>e.g. a journey's edge functions.</em></div>
+    <div class="mock-help"><span class="lbl">List link</span>A plain set — <b>which</b> objects belong, <b>no per-row number</b>. The row widget (label · <b>×</b>) + a reuse select. <b>↑↓</b> reordering shows only where order matters; this list isn't ordered. A required list disables the final ×. <em>e.g. an edge pattern's functionality bundles; a bundle's edge functions.</em></div>
   </div>
 
   <div class="cmpcol">
@@ -670,7 +670,7 @@
       <div class="hint">Other existing ones you can reuse</div>
       <div class="selrow"><select class="dd"><option>Search</option><option>Wishlist</option></select><span class="plus-btn">＋</span></div>
     </div>
-    <div class="mock-help"><span class="lbl">Weighted dict</span><b>Same row widget, plus a count column</b> (the weight, labeled by the parent — here <em>"Times per journey"</em>). The count is the only structural difference from a list link; ordered ones keep the <b>↑↓</b>. <em>e.g. a journey's steps; a step's jobs ("Times per step").</em></div>
+    <div class="mock-help"><span class="lbl">Weighted dict</span><b>Same row widget, plus a count column</b> (the weight, labeled by the parent — here <em>"Times per journey"</em>). The count is the only structural difference from a list link; ordered ones keep the <b>↑↓</b>. Required weights stay positive and keep one row. <em>e.g. a web pattern's journeys ("Journeys per pattern occurrence"); a journey's steps.</em></div>
   </div>
 
   <div class="cmpcol">
@@ -698,8 +698,8 @@
 <table>
   <tr><th>Shape</th><th>What each row carries</th><th>Reorder</th><th>Example</th></tr>
   <tr><td><b>Single link</b></td><td>one reference (1:1), usually <b>fixed at creation</b></td><td>—</td><td>the server a job runs on</td></tr>
-  <tr><td><b>List link</b></td><td>membership only — no number</td><td>only if the attribute is ordered</td><td>a journey's edge functions</td></tr>
-  <tr><td><b>Weighted dict</b></td><td>membership <b>+ a count</b> (the weight)</td><td>only if ordered</td><td>a journey's steps; a step's jobs</td></tr>
+  <tr><td><b>List link</b></td><td>membership only — no number</td><td>only if the attribute is ordered</td><td>an edge pattern's functionality bundles; a bundle's edge functions</td></tr>
+  <tr><td><b>Weighted dict</b></td><td>membership <b>+ a count</b> (the weight)</td><td>only if ordered</td><td>a web pattern's journeys; a journey's steps</td></tr>
   <tr><td><b>Nested dict</b> (edge group)</td><td>counts of devices <b>and</b> of sub-groups → a tree</td><td>no</td><td>an edge device group</td></tr>
 </table>
 
@@ -801,7 +801,7 @@
         </table>
       </dd>
       <dt>Relationships</dt>
-      <dd>Widgets: <code>select_object.html</code> (single), <code>select_multiple.html</code> (list), <code>dict_count.html</code> (weighted dict). Reverse view: <code>dict_membership_section.html</code> + <code>dict_entry_count_unlink.html</code>. Registry (one source of truth): <code>object_linking_service.dict_relationship_registry()</code> — every <code>ExplainableObjectDict[X]</code> as <code>(parent, attr, child)</code>; serialization preserves untouched entries' weight/label/source. Routes <code>update-dict-count</code> / <code>link-dict-entry</code> / <code>unlink-dict-entry</code>, <code>open-link-existing-panel</code>. Per-attribute config (label, count_label, <code>ordered</code>, membership_title, add_to_label): <code>field_ui_config.json</code>. Single-link FKs are kept out of edit forms via <code>attributes_to_skip_in_forms</code> (a list typed attribute can be coerced to a single select by <code>convert_multiselect_to_single</code>). Canvas inline counts (the <em>× n</em> on nested cards): <code>inline_count.html</code> wraps <code>dict_entry_count_unlink.html</code> with <code>count_only=True</code> for step / job rows (min 0; 0 adds <code>dict-entry-zero</code>), while <code>group_entry_row.html</code> renders it <em>with</em> the unlink ✕ for edge-group entries (min 1); both <code>hx-post</code> to <code>update-dict-count</code> on change with <code>hx-swap="none"</code>. An emptied list/dict submits explicitly (<code>addEmptyValueWhenSelectMultipleFieldsHaveNoSelectedOption()</code>) so a cleared relationship sticks. Real examples — list: <code>EdgeUsageJourney.edge_functions</code>; weighted dict: <code>UsageJourney.uj_steps</code> (ordered, "Times per journey"), <code>UsageJourneyStep.jobs</code> ("Times per step"); nested: <code>EdgeDeviceGroup.edge_device_counts</code> + <code>sub_group_counts</code> ("Count in group").</dd>
+      <dd>Widgets: <code>select_object.html</code> (single), <code>select_multiple.html</code> (list), <code>dict_count.html</code> (weighted dict). Reverse view: <code>dict_membership_section.html</code> + <code>dict_entry_count_unlink.html</code>. Registry (one source of truth): <code>object_linking_service.dict_relationship_registry()</code> — every <code>ExplainableObjectDict[X]</code> as <code>(parent, attr, child)</code>; serialization preserves untouched entries' weight/label/source. Routes <code>update-dict-count</code> / <code>link-dict-entry</code> / <code>unlink-dict-entry</code>, <code>open-link-existing-panel</code>. Per-attribute config (label, count_label, <code>ordered</code>, membership_title, add_to_label, <code>min_items</code>/<code>strictly_positive</code>): <code>field_ui_config.json</code>. Required relationship widgets disable their final remove action; library constructors remain the validation authority. Pattern-to-journey relationships stay top-level: <code>renders_relationship_children_as_nested_cards=False</code> excludes them from generic mirrored-card nesting and <code>links_to</code> draws one canvas link per reused journey. Canvas inline counts (the <em>× n</em> on nested cards): <code>inline_count.html</code> wraps <code>dict_entry_count_unlink.html</code> with <code>count_only=True</code> for step / job rows, while <code>group_entry_row.html</code> renders it <em>with</em> the unlink ✕ for edge-group entries. Real examples — list: <code>EdgeUsagePattern.edge_usage_journeys</code> (required functionality bundles), <code>EdgeUsageJourney.edge_functions</code>; weighted dict: <code>UsagePattern.usage_journeys</code> (required, "Journeys per pattern occurrence"), <code>UsageJourney.uj_steps</code>; nested: <code>EdgeDeviceGroup.edge_device_counts</code> + <code>sub_group_counts</code>.</dd>
       <dt>Edge (Phase E)</dt>
       <dd><code>edge_modeling_toggle.html</code>; edge Add buttons / lists live behind <code>data-modeling-paradigm="edge"</code>; <code>edge_device_group_card.html</code>; recurrent-need gating in <code>constraint_messages.py</code>.</dd>
       <dt>Two consistency alignments made in code</dt>

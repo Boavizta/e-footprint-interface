@@ -132,7 +132,7 @@ def build_system() -> System:
     france = Countries.FRANCE()
 
     analyst_usage_pattern = UsagePattern(
-        "Daily analyst sessions", analyst_journey, [laptop],
+        "Daily analyst sessions", {analyst_journey: SourceValue(1 * u.dimensionless)}, [laptop],
         network, france,
         ExplainableHourlyQuantitiesFromFormInputs({
             "start_date": "2025-01-01",
@@ -146,10 +146,10 @@ def build_system() -> System:
 
     edge_usage_pattern = EdgeUsagePattern(
         "Factory sensors starting up",
-        edge_usage_journey=edge_usage_journey,
+        edge_usage_journeys=[edge_usage_journey],
         network=network,
         country=france,
-        hourly_edge_usage_journey_starts=ExplainableHourlyQuantitiesFromFormInputs({
+        hourly_deployment_starts=ExplainableHourlyQuantitiesFromFormInputs({
             "start_date": "2025-01-01",
             "modeling_duration_value": 1,
             "modeling_duration_unit": "month",

@@ -29,22 +29,32 @@
                 "default": "Edge usage pattern 1"
             },
             {
-                "web_id": "EdgeUsagePattern_edge_usage_journey",
-                "attr_name": "edge_usage_journey",
-                "label": "edge usage journey",
-                "tooltip": "The <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"EdgeUsageJourney\">Edge usage journey</button> performed by the deployed edge devices.",
-                "input_type": "select_object",
-                "selected": "efootprint_id1",
-                "options": [
+                "web_id": "EdgeUsagePattern_edge_usage_journeys",
+                "attr_name": "edge_usage_journeys",
+                "label": "Edge usage journeys",
+                "tooltip": "Non-empty, duplicate-free selection of <button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"EdgeUsageJourney\">Edge usage journey</button> objects carried by every deployment in this pattern.",
+                "input_type": "select_multiple",
+                "ordered": false,
+                "selected": [
                     {
-                        "label": "option1",
-                        "value": "efootprint_id1"
+                        "value": "mock_journey_efootprint_id",
+                        "label": "mock_journey"
+                    }
+                ],
+                "unselected": [
+                    {
+                        "value": "efootprint_id1",
+                        "label": "option1"
                     },
                     {
-                        "label": "option2",
-                        "value": "efootprint_id2"
+                        "value": "efootprint_id2",
+                        "label": "option2"
                     }
-                ]
+                ],
+                "selected_json": "[{\"value\": \"mock_journey_efootprint_id\", \"label\": \"mock_journey\"}]",
+                "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]",
+                "hide_field": false,
+                "min_items": 1
             },
             {
                 "web_id": "EdgeUsagePattern_network",
@@ -68,7 +78,7 @@
                 "web_id": "EdgeUsagePattern_country",
                 "attr_name": "country",
                 "label": "country",
-                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Country\">Country</button> where the edge devices are deployed. Drives grid carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly edge usage journey starts</span>.",
+                "tooltip": "<button type=\"button\" data-action=\"open-help-drawer\" data-help-class=\"Country\">Country</button> where the edge devices are deployed. Drives grid carbon intensity and the timezone of <span class=\"ssot-param-ref\">hourly deployment starts</span>.",
                 "input_type": "select_object",
                 "selected": "efootprint_id1",
                 "options": [
@@ -83,10 +93,10 @@
                 ]
             },
             {
-                "web_id": "EdgeUsagePattern_hourly_edge_usage_journey_starts",
-                "attr_name": "hourly_edge_usage_journey_starts",
-                "label": "hourly edge usage journey starts",
-                "tooltip": "Hourly timeseries giving how many edge devices are deployed in each hour of the modeling period.",
+                "web_id": "EdgeUsagePattern_hourly_deployment_starts",
+                "attr_name": "hourly_deployment_starts",
+                "label": "hourly deployment starts",
+                "tooltip": "Hourly timeseries giving how many deployment cohorts begin in each hour of the modeling period.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -110,9 +120,30 @@
                 "subfields_ui_config": {
                     "initial_volume": {
                         "label": "Initial number of edge devices put in service",
-                        "tooltip": "The number of edge devices put in service in the chosen period that execute the selected edge usage journey throughout their usage span."
+                        "tooltip": "The number of edge deployments put in service in the chosen period. Every selected edge usage journey applies throughout the deployment usage span."
                     }
                 }
+            },
+            {
+                "web_id": "EdgeUsagePattern_usage_span",
+                "attr_name": "usage_span",
+                "label": "deployment usage span",
+                "tooltip": "How long each physical deployment remains active. All selected edge usage journeys share this span.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "yr",
+                "default": "6",
+                "can_be_negative": false,
+                "step": "1"
             }
         ],
         "advanced_fields": []

@@ -126,6 +126,9 @@ Each test should cover a **distinct user workflow**. Avoid redundant tests that 
 - **Good:** One test that creates multiple items, implicitly covering single creation.
 - **Good:** Testing chart behavior inline while testing usage pattern creation.
 
+Test behavior through the boundary that owns it: parser tests cover decoding, integration tests cover domain validation,
+and E2E tests operate visible controls. Mutate hidden transport fields only in an explicitly adversarial scenario.
+
 ### Test data: programmatic fixtures
 
 Build test data using efootprint classes, not JSON files. Use `from_defaults()` where available.

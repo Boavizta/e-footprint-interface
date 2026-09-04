@@ -97,7 +97,10 @@ class SidePanelPage:
 
     def click_delete_button(self):
         """Click the delete button in the panel (triggers HTMX)."""
-        click_and_wait_for_htmx(self.page, self.panel.locator("button[hx-get*='ask-delete-object']"))
+        delete_button = self.panel.locator("button[hx-get*='ask-delete-object']")
+        expect(delete_button).to_have_attribute("data-timeseries-preview-ready", "true")
+        expect(delete_button).to_be_enabled()
+        click_and_wait_for_htmx(self.page, delete_button)
         return self
 
     def confirm_delete(self):

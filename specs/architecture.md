@@ -116,7 +116,7 @@ Notable:
 ### Adapters
 
 - **`adapters/repositories/session_system_repository.py`** — loads/saves system from Django session. Holds `interface_config` in RAM and merges it on `save_data()`.
-- **`adapters/forms/form_data_parser.py`** — parses HTTP form data before passing to use cases. Parsing happens here, never in domain — the domain receives parsed dicts.
+- **`adapters/forms/form_data_parser.py`** — decodes and normalizes HTTP transport data before passing parsed dicts to use cases. It does not enforce semantic invariants: those belong to the owning domain or library object. Browser validation provides immediate UX feedback but never replaces authoritative domain validation.
 - **`adapters/forms/form_field_generator.py`** — form field generation utilities. Includes `generate_select_multiple_field()` as a standalone reusable helper. A class's `conditional_list_values` produces a required native select plus a one-hop `dynamic_lists` entry (`filter_by` = the parent field's web_id, `list_value` keyed by the parent's values); `dynamic_forms.js` populates the options, restores a valid saved/default value, and clears stale selections when the parent changes. When `depends_on` is a **cross-object dotted path** (e.g. `external_api.model_name`), the generator collapses the hop at generation time: it keys `list_value` by each available referenced object's id (resolving the remaining path on the object) and points `filter_by` at the DOM element that carries that object's selection. That element defaults to `{class}_{first_segment}`, but a web class can redirect it via `conditional_list_filter_overrides` when the reference isn't rendered as its own field (e.g. `JobWeb` maps `external_api` → the `service_or_external_api` parent-selection helper). This reuses the single-hop cascade with no extra JS.
 - **`adapters/presenters/htmx_presenter.py`** — formats use case outputs as HTMX responses.
 - **`adapters/ui_config/`** — provides UI configuration (class labels, field metadata).
@@ -337,6 +337,22 @@ wrapper (default: exclude self; `EdgeDeviceGroupWeb` also excludes ancestor grou
 mirrored server-side by a guard in `link_dict_entry`).
 
 The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-entry count inputs on the parent panel; its options pass through the symmetric `filter_dict_count_options` hook (`EdgeDeviceGroupWeb` excludes the group itself and all its ancestors from the sub-group picker).
+
+### Required pattern-to-journey relationships
+
+Usage patterns are top-level drivers rather than ownership containers. `UsagePattern.usage_journeys` is a weighted dict
+(`dict_count`, labelled “Journeys per pattern occurrence”), while `EdgeUsagePattern.edge_usage_journeys` is a unique
+membership list (`select_multiple`, labelled “Functionality bundles”). Their wrappers declare the relationship as
+required, preselect the first available journey during creation, and set
+`renders_relationship_children_as_nested_cards = False` so the
+generic mirrored-card traversal does not treat these references as rendered ownership containers. Journeys therefore
+remain single top-level cards; `links_to` emits one canvas edge from the pattern to each selected journey.
+
+`field_ui_config.json` supplies `min_items: 1` and `strictly_positive: true` for required web weights. The shared widgets expose those
+limits as data attributes, disable removal of the final row, and reject non-positive weights before submission. These
+are usability guards only: malformed requests still flow through the normal form parser to the library constructors,
+which remain authoritative for non-empty, positive-weight, and duplicate-free invariants. Deleting a journey is also
+blocked when it is the sole member of a required pattern relationship.
 
 Dict relationships now cover journeys/steps/needs with a shared inline-count UX: canvas step rows and job chips render an always-visible "× n" count via `partials/inline_count.html` (count-only mode of `dict_entry_count_unlink.html` — no inline unlink there, unlike edge group entries), 0-count entries get the `dict-entry-zero` dimming class, and creation panels opened from a dict-relationship parent offer a `parent_link_count` multiplier field (prefilled at 1) that the create use case passes to `ObjectLinkingService.link_child_to_parent`.
 

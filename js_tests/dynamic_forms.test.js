@@ -4,6 +4,7 @@
 // single form ever holds a three-level chain.)
 
 require("../theme/static/scripts/dynamic_forms.js");
+const {initializeAll} = require("../theme/static/scripts/weekly_pattern_builder.js");
 
 const fs = require("fs");
 const path = require("path");
@@ -78,4 +79,55 @@ test("selection attribution appears only for the attributed option", () => {
     select.dispatchEvent(new Event("change", { bubbles: true }));
     expect(attribution.classList).toContain("d-none");
     expect(attribution.textContent).toBe("");
+});
+
+test("object-type switching preserves control state owned by a nested timeseries builder", () => {
+    const builder = fs.readFileSync(path.join(FIXTURES, "weekly_pattern_default.html"), "utf8");
+    document.body.innerHTML = `
+        <select id="type_object_available">
+            <option value="recurrent" selected>Recurrent</option>
+            <option value="other">Other</option>
+        </select>
+        <div id="item-recurrent">${builder}</div>
+        <div id="item-other"><input name="other_name" required></div>
+        <script id="dynamic-form-data" type="application/json"></script>
+    `;
+    document.getElementById("dynamic-form-data").textContent = JSON.stringify({
+        switch_item: "type_object_available",
+        switch_values: ["recurrent", "other"],
+    });
+    initializeAll(document);
+
+    const recurrentSection = document.getElementById("item-recurrent");
+    const namedControlStates = () => Array.from(recurrentSection.querySelectorAll("[name]"), function (control) {
+        return {name: control.name, disabled: control.disabled, required: control.required};
+    });
+    const expectedStates = [
+        {
+            name: "RecurrentEdgeProcess_recurrent_compute_needed__constant_value",
+            disabled: false,
+            required: true,
+        },
+        {
+            name: "RecurrentEdgeProcess_recurrent_compute_needed__constant_unit",
+            disabled: false,
+            required: false,
+        },
+        {
+            name: "RecurrentEdgeProcess_recurrent_compute_needed__weekly_pattern",
+            disabled: true,
+            required: false,
+        },
+    ];
+
+    document.dispatchEvent(new Event("initDynamicForm"));
+    expect(namedControlStates()).toEqual(expectedStates);
+
+    const typeSelector = document.getElementById("type_object_available");
+    typeSelector.value = "other";
+    typeSelector.dispatchEvent(new Event("change", {bubbles: true}));
+    typeSelector.value = "recurrent";
+    typeSelector.dispatchEvent(new Event("change", {bubbles: true}));
+
+    expect(namedControlStates()).toEqual(expectedStates);
 });

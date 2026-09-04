@@ -48,11 +48,11 @@ def test_integration_create_edit_delete_flow(default_system_repository_with_jour
         default_system_repository,
         create_post_data_from_class_default_values(
             "Test Usage Pattern", "UsagePattern",
-            usage_journey=usage_journey_id,
+            usage_journeys={usage_journey_id: 1},
             devices=next(iter(DEFAULT_DEVICES.keys())),
             network=next(iter(DEFAULT_NETWORKS.keys())),
             country=next(iter(DEFAULT_COUNTRIES.keys())),
-            hourly_usage_journey_starts__initial_volume=1000,
+            hourly_occurrences__initial_volume=1000,
         ),
     )
 
@@ -110,10 +110,10 @@ def test_integration_edge_modeling_emissions_non_zero(default_system_repository)
         default_system_repository,
         create_post_data_from_class_default_values(
             "Test Edge Usage Pattern", "EdgeUsagePattern",
-            edge_usage_journey=edge_usage_journey_id,
+            edge_usage_journeys=edge_usage_journey_id,
             network=network_id,
             country=country_id,
-            hourly_edge_usage_journey_starts__initial_volume=100,
+            hourly_deployment_starts__initial_volume=100,
         ),
     )
 

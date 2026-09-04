@@ -25,11 +25,11 @@ def system_with_multiple_usage_patterns(minimal_system: System, model_builder_pa
 
     extra_usage_pattern = UsagePattern(
         "Calc Attr Usage Pattern 2",
-        usage_journey=minimal_system.usage_journeys[0],
+        usage_journeys={minimal_system.usage_journeys[0]: SourceValue(1 * u.dimensionless)},
         devices=[Device.from_defaults("Calc Device 2")],
         network=Network.from_defaults("Calc Network 2"),
         country=country,
-        hourly_usage_journey_starts=create_hourly_usage()
+        hourly_occurrences=create_hourly_usage()
     )
     minimal_system.usage_patterns.append(extra_usage_pattern)
 

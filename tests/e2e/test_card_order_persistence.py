@@ -28,11 +28,11 @@ def two_server_model_builder(model_builder_page: ModelBuilderPage) -> ModelBuild
     journey = UsageJourney("Test journey", uj_steps=[step])
     usage_pattern = UsagePattern(
         "Test usage pattern",
-        usage_journey=journey,
+        usage_journeys={journey: SourceValue(1 * u.dimensionless)},
         devices=[Device.from_defaults("Test device")],
         network=Network.from_defaults("Test network"),
         country=country_generator("Test Country", "TST", SourceValue(100 * u.g / u.kWh), tz("Europe/Paris"))(),
-        hourly_usage_journey_starts=create_hourly_usage(),
+        hourly_occurrences=create_hourly_usage(),
     )
     system = System("Card order model", usage_patterns=[usage_pattern], edge_usage_patterns=[])
     return load_system_dict_into_browser(model_builder_page, system_to_json(system, save_computed_state=False))

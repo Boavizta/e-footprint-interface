@@ -5,6 +5,8 @@
             type="button"
             class="btn border border-2 border-light rounded-2"
             aria-label="Delete"
+            data-wait-for-timeseries-preview
+            data-timeseries-preview-ready="true"
             hx-get="/model_builder/ask-delete-object/{{ object_to_edit.efootprint_id }}/"
             hx-swap="innerHTML"
             hx-target="#modal-container">

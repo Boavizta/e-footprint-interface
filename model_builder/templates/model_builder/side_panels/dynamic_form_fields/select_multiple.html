@@ -4,6 +4,9 @@
             {{ field.label|capfirst }}
         </label>
     </div>
+    {% if field.tooltip %}
+        {% include "model_builder/side_panels/components/tooltip.html" with tooltip_html=True %}
+    {% endif %}
     <div class="mb-3 bg-light rounded-2 p-2">
         <table class="w-100" id="objects-already-selected-for-{{ field.web_id }}">
             <tr>
@@ -15,9 +18,6 @@
             </tr>
         </table>
     </div>
-    {% if field.tooltip %}
-        {% include "model_builder/side_panels/components/tooltip.html" with tooltip_html=True %}
-    {% endif %}
     <div class="col-auto">
         <p class="form-label">
             Other existing ones you can reuse
@@ -37,16 +37,16 @@
             id="add-btn-{{ field.web_id }}"
             type="button"
             class="btn btn-white border border-dark rounded-2 fs-xl p-2"
-            onclick="tagFormAsModified();addValueToSelectMultiple('{{ field.web_id }}')">
+            data-action="add-select-multiple"
+            data-field-id="{{ field.web_id }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
         </svg>
     </button>
 </div>
-<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}" data-ordered="{{ field.ordered|yesno:"true,false" }}"></div>
+<div id="selected_data_{{ field.web_id }}" data-json="{{ field.selected_json }}"
+     data-select-multiple-field="{{ field.web_id }}"
+     data-ordered="{{ field.ordered|yesno:"true,false" }}"
+     data-min-items="{{ field.min_items|default:0 }}"></div>
 <div id="unselected_data_{{ field.web_id }}" data-json="{{ field.unselected_json }}"></div>
 <input type="hidden" id="{{ field.web_id }}" name="{{ field.web_id }}" value="">
-
-<script>
-    refreshSelectMultipleFields('{{ field.web_id }}');
-</script>

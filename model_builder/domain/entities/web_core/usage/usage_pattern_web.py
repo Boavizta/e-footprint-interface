@@ -12,19 +12,21 @@ if TYPE_CHECKING:
 
 
 class UsagePatternWeb(UsagePatternWebBaseClass):
-    default_values = {"hourly_usage_journey_starts": ExplainableHourlyQuantitiesFromFormInputs(
+    required_non_empty_relationships = frozenset({"usage_journeys"})
+    default_values = {"hourly_occurrences": ExplainableHourlyQuantitiesFromFormInputs(
         {"start_date": default_modeling_start_date(), "modeling_duration_value": 3, "modeling_duration_unit": "year",
          "net_growth_rate_in_percentage": 10, "net_growth_rate_timespan": "year",
          "initial_volume": None, "initial_volume_timespan": "month"}, source=Sources.USER_DATA)
     }
     attr_name_in_system = "usage_patterns"
-    object_type_in_volume = "usage_journey"
+    journey_relationship_attr = "usage_journeys"
 
     hourly_quantities_from_growth_ui_config = {
         "initial_volume": {
-            "label": "Initial number of usage journey starts",
+            "label": "Initial number of pattern occurrences",
             "tooltip": (
-                "The number of usage journeys started in the chosen period at the beginning of the projection."
+                "The number of usage-pattern occurrences in the chosen period at the beginning of the projection. "
+                "Each journey's weight is applied to this shared volume."
             ),
         },
     }

@@ -55,12 +55,12 @@ class TestTimeseriesChartDisplay:
 
         # Fill in timeseries form fields
         page.locator("#UsagePattern_name").fill(up_name_one)
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").click()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").fill("2")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").click()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("25")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan").select_option("year")
-        start_date = page.locator("#UsagePattern_hourly_usage_journey_starts__start_date").input_value()
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").click()
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").fill("2")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").click()
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").fill("25")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_timespan").select_option("year")
+        start_date = page.locator("#UsagePattern_hourly_occurrences__start_date").input_value()
         expected = prepare_hourly_quantity_period_data(
             ExplainableHourlyQuantitiesFromFormInputs(
                 {
@@ -80,7 +80,7 @@ class TestTimeseriesChartDisplay:
             lambda response: preview_responses.append(response.url) if "timeseries-preview" in response.url else None,
         )
         with page.expect_response(lambda response: "timeseries-preview" in response.url):
-            page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+            page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
         page.wait_for_function(
             "expectedLength => document.getElementById('timeSeriesChart')?._timeseriesPreviewChart?.data.labels.length "
             "=== expectedLength",
@@ -116,12 +116,12 @@ class TestTimeseriesChartDisplay:
         model_builder.click_add_usage_pattern()
         model_builder.side_panel.should_be_visible()
         page.locator("#UsagePattern_name").fill(up_name_two)
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").click()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value").fill("5")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").click()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_in_percentage").fill("15")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__net_growth_rate_timespan").select_option("month")
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").click()
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value").fill("5")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").click()
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_in_percentage").fill("15")
+        page.locator("#UsagePattern_hourly_occurrences__net_growth_rate_timespan").select_option("month")
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
 
         # Verify canvas still exists and is attached
         expect(page.locator("#timeSeriesChart")).to_be_attached()
@@ -162,7 +162,7 @@ class TestTimeseriesValidation:
         model_builder.click_add_usage_pattern()
 
         # Test valid value (2 days) - no error
-        duration_field = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value")
+        duration_field = page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value")
         duration_field.click()
         duration_field.fill("2")
         duration_field.dispatch_event("input")
@@ -187,7 +187,7 @@ class TestTimeseriesValidation:
         expect(error_message).to_contain_text("Modeling duration value must be greater than 0 and can't be empty")
 
         # Switch to month unit
-        page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_unit").select_option("month")
+        page.locator("#UsagePattern_hourly_occurrences__modeling_duration_unit").select_option("month")
         # Test valid value for month (12 months) - no error
         duration_field.fill("12")
         expect(error_message).not_to_be_visible()
@@ -228,19 +228,19 @@ class TestTimeseriesValidation:
         model_builder.click_add_usage_pattern()
         model_builder.side_panel.should_be_visible()
         page.locator("#UsagePattern_name").fill(up_name)
-        duration_unit_locator = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_unit")
+        duration_unit_locator = page.locator("#UsagePattern_hourly_occurrences__modeling_duration_unit")
         duration_unit_locator.click()
         duration_unit_locator.select_option("month")
         duration_unit_locator.click()  # Need to encapsulate selection between clicks to trigger hyperscript logic.
 
         # Set a valid value (15 months)
-        duration_field = page.locator("#UsagePattern_hourly_usage_journey_starts__modeling_duration_value")
+        duration_field = page.locator("#UsagePattern_hourly_occurrences__modeling_duration_value")
         duration_field.fill("15")
         # Should not show error for 15 months
         expect(page.locator("#modeling_duration_value_error_message")).not_to_be_visible()
 
         # Fill initial volume and submit
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
         model_builder.side_panel.submit_and_wait_for_close()
 
         # Re-open the usage pattern for editing
@@ -281,7 +281,7 @@ class TestTimeseriesResponsiveChart:
 
         # Open usage pattern form
         page.locator("button").filter(has_text="Add usage pattern").click()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
 
         # Chart canvas should exist but be empty (not rendered on mobile)
         chart_canvas = page.locator("#timeSeriesChart")
@@ -304,7 +304,7 @@ class TestTimeseriesResponsiveChart:
 
         # Open usage pattern form
         page.locator("button").filter(has_text="Add usage pattern").click()
-        page.locator("#UsagePattern_hourly_usage_journey_starts__initial_volume").fill("1000")
+        page.locator("#UsagePattern_hourly_occurrences__initial_volume").fill("1000")
 
         # Chart canvas should exist but be empty (not rendered on tablet)
         chart_canvas = page.locator("#timeSeriesChart")

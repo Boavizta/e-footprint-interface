@@ -46,6 +46,28 @@ test("adding an entry removes it from the dropdown and inserts a row with count 
         .toEqual(["device-2"]);
 });
 
+test("template actions use the delegated data-action handler", () => {
+    document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
+    const addButton = document.getElementById(`add-btn-${FIELD_ID}`);
+
+    expect(addButton.getAttribute("onclick")).toBeNull();
+    addButton.click();
+
+    expect(document.getElementById(FIELD_ID).value).toBe('{"device-1":1}');
+    expect(document.querySelector(`[data-action="remove-dict-count"]`).getAttribute("onclick")).toBeNull();
+});
+
+test("late HTMX initialization preserves a selection already made by the user", () => {
+    const select = document.getElementById(`select-new-object-${FIELD_ID}`);
+    select.value = "device-2";
+
+    document.getElementById(`selected_data_${FIELD_ID}`).dispatchEvent(
+        new CustomEvent("htmx:load", {bubbles: true})
+    );
+
+    expect(select.value).toBe("device-2");
+});
+
 test("editing a count updates the hidden JSON field", () => {
     document.getElementById(`select-new-object-${FIELD_ID}`).value = "device-1";
     addDictCountEntry(FIELD_ID);
@@ -84,6 +106,30 @@ test("the hidden JSON payload stays in sync after multiple add remove edit opera
     removeDictCountEntry(FIELD_ID, "device-1");
 
     expect(document.getElementById(FIELD_ID).value).toBe('{"device-2":5}');
+});
+
+test("a required journey rejects zero but accepts every positive fractional weight", () => {
+    const fieldId = "UsagePattern_usage_journeys";
+    document.body.innerHTML = loadFixture("dict_count_required_journey");
+    refreshDictCountField(fieldId);
+
+    removeDictCountEntry(fieldId, "journey-1");
+    updateDictCountEntry(fieldId, "journey-1", "0");
+
+    expect(document.getElementById(fieldId).value).toBe('{"journey-1":1}');
+    expect(document.querySelector(`#objects-already-selected-for-${fieldId} button`).disabled).toBe(true);
+    updateDictCountEntry(fieldId, "journey-1", "0.000000000001");
+    expect(document.getElementById(fieldId).value).toBe('{"journey-1":1e-12}');
+    expect(document.querySelector(`#objects-already-selected-for-${fieldId} input`).min).toBe("0");
+});
+
+test("renders object labels as text, never markup", () => {
+    document.body.innerHTML = loadFixture("dict_count_untrusted_label");
+    refreshDictCountField("Test_counts");
+
+    expect(document.querySelector("#objects-already-selected-for-Test_counts img")).toBeNull();
+    expect(document.querySelector("#objects-already-selected-for-Test_counts td").textContent)
+        .toBe('<img src=x onerror="alert(1)">');
 });
 
 describe("insertion-ordered rendering", () => {

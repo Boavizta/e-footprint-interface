@@ -35,11 +35,11 @@ def _usage_pattern_post_data(name: str, uj_id: str, initial_volume: int) -> dict
     return create_post_data_from_class_default_values(
         name,
         "UsagePattern",
-        usage_journey=uj_id,
+        usage_journeys={uj_id: 1},
         devices=next(iter(DEFAULT_DEVICES.keys())),
         network=next(iter(DEFAULT_NETWORKS.keys())),
         country=next(iter(DEFAULT_COUNTRIES.keys())),
-        hourly_usage_journey_starts__initial_volume=initial_volume,
+        hourly_occurrences__initial_volume=initial_volume,
     )
 
 
@@ -237,13 +237,13 @@ def test_edit_usage_pattern_initial_volume_increases_total_footprint(default_sys
         up_id,
         "UsagePattern",
         {
-            "hourly_usage_journey_starts__start_date": "2025-02-02",
-            "hourly_usage_journey_starts__modeling_duration_value": "1",
-            "hourly_usage_journey_starts__modeling_duration_unit": "year",
-            "hourly_usage_journey_starts__net_growth_rate_in_percentage": "10",
-            "hourly_usage_journey_starts__net_growth_rate_timespan": "month",
-            "hourly_usage_journey_starts__initial_volume": "20000",
-            "hourly_usage_journey_starts__initial_volume_timespan": "month",
+            "hourly_occurrences__start_date": "2025-02-02",
+            "hourly_occurrences__modeling_duration_value": "1",
+            "hourly_occurrences__modeling_duration_unit": "year",
+            "hourly_occurrences__net_growth_rate_in_percentage": "10",
+            "hourly_occurrences__net_growth_rate_timespan": "month",
+            "hourly_occurrences__initial_volume": "20000",
+            "hourly_occurrences__initial_volume_timespan": "month",
         },
     )
     after = _total_emissions(ModelWeb(default_system_repository))

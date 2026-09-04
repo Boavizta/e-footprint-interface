@@ -191,7 +191,7 @@ def test_generate_dynamic_form_keeps_single_builder_hourly_field_appearance(mini
 
     fields, _, _ = generate_dynamic_form("UsagePattern", usage_pattern.__dict__, minimal_model_web)
 
-    field = _get_field_by_web_id(fields, "UsagePattern_hourly_usage_journey_starts")
+    field = _get_field_by_web_id(fields, "UsagePattern_hourly_occurrences")
     assert field["input_type"] == "hourly_quantities_from_growth"
     assert "builders" not in field
     assert "selected_builder" not in field
@@ -209,6 +209,52 @@ def test_generate_dynamic_form_builds_weighted_dict_fields_with_count_wording(mi
     jobs_field = _get_field_by_web_id(fields, "UsageJourneyStep_jobs")
     assert jobs_field["input_type"] == "dict_count"
     assert jobs_field["count_label"] == "Times per step"
+
+
+def test_usage_pattern_creation_preselects_one_positive_weighted_journey():
+    from model_builder.domain.entities.web_core.usage.usage_pattern_web import UsagePatternWeb
+    from tests.unit_tests.domain.entities.snapshot_model_webs import build_usage_pattern_model_web
+
+    model_web = build_usage_pattern_model_web()
+    defaults = UsagePatternWeb.get_creation_default_values(model_web)
+    fields, _, _ = generate_dynamic_form(
+        "UsagePattern",
+        {"name": "Pattern", **UsagePatternWeb.default_values, **defaults},
+        model_web,
+    )
+    field = _get_field_by_web_id(fields, "UsagePattern_usage_journeys")
+
+    assert field["selected_json"] == '{"mock_journey_efootprint_id": 1.0}'
+    assert field["count_label"] == "Journeys per pattern occurrence"
+    assert field["min_items"] == 1
+    assert "min_count" not in field
+    assert field["strictly_positive"] is True
+
+
+def test_edge_usage_pattern_creation_preselects_one_journey():
+    from model_builder.domain.entities.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
+    from tests.unit_tests.domain.entities.snapshot_model_webs import build_usage_pattern_model_web
+
+    model_web = build_usage_pattern_model_web()
+    defaults = EdgeUsagePatternWeb.get_creation_default_values(model_web)
+    fields, _, _ = generate_dynamic_form(
+        "EdgeUsagePattern",
+        {"name": "Pattern", **MODELING_OBJECT_CLASSES_DICT["EdgeUsagePattern"].default_values,
+         **EdgeUsagePatternWeb.default_values, **defaults},
+        model_web,
+    )
+    field = _get_field_by_web_id(fields, "EdgeUsagePattern_edge_usage_journeys")
+
+    assert field["selected"] == [{"value": "mock_journey_efootprint_id", "label": "mock_journey"}]
+    assert field["label"] == "Edge usage journeys"
+    assert "Non-empty" in str(field["tooltip"])
+    assert field["min_items"] == 1
+
+    rendered = render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/select_multiple.html", {"field": field})
+    assert rendered.index("Edge usage journeys") < rendered.index("data-bs-content")
+    assert rendered.index("data-bs-content") < rendered.index(
+        "objects-already-selected-for-EdgeUsagePattern_edge_usage_journeys")
 
 
 def test_generate_dynamic_form_dict_field_selected_json_preserves_journey_order(minimal_model_web):

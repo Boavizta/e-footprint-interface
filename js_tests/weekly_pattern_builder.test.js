@@ -324,7 +324,6 @@ test("duplicate names and forbidden negative values block submission inline", ()
 
 test("authoritative errors map normalized paths back to visible controls", () => {
     const editor = selectWeeklyBuilder();
-    const form = document.getElementById("sidePanelForm");
     const response = {
         errors: [{
             path: "profiles[0].baseline",
@@ -332,9 +331,10 @@ test("authoritative errors map normalized paths back to visible controls", () =>
             message: "Server says this baseline is invalid.",
         }],
     };
-    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {
+    editor.closest("[data-timeseries-builder]").querySelector("[data-timeseries-preview]")
+        .dispatchEvent(new CustomEvent("timeseries-preview:response", {
         bubbles: true,
-        detail: {xhr: {status: 422, responseText: JSON.stringify(response)}, elt: form},
+        detail: {...response, success: false},
     }));
 
     expect(editor.querySelector("[data-profile-baseline]").validationMessage)
@@ -343,35 +343,19 @@ test("authoritative errors map normalized paths back to visible controls", () =>
 
 test("authoritative day paths follow serialized selection order and fall back to the profile", () => {
     const editor = selectWeeklyBuilder();
-    const form = document.getElementById("sidePanelForm");
+    const preview = editor.closest("[data-timeseries-builder]").querySelector("[data-timeseries-preview]");
     const weekend = profiles(editor)[1];
     const saturday = weekend.querySelector("[data-profile-day][value='5']");
 
-    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {
+    preview.dispatchEvent(new CustomEvent("timeseries-preview:response", {
         bubbles: true,
-        detail: {
-            xhr: {
-                status: 422,
-                responseText: JSON.stringify({
-                    errors: [{path: "profiles[1].days[0]", message: "Duplicate Saturday."}],
-                }),
-            },
-            elt: form,
-        },
+        detail: {success: false, errors: [{path: "profiles[1].days[0]", message: "Duplicate Saturday."}]},
     }));
     expect(saturday.validationMessage).toBe("Duplicate Saturday.");
 
-    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {
+    preview.dispatchEvent(new CustomEvent("timeseries-preview:response", {
         bubbles: true,
-        detail: {
-            xhr: {
-                status: 422,
-                responseText: JSON.stringify({
-                    errors: [{path: "profiles[1].days[2]", message: "Injected day is invalid."}],
-                }),
-            },
-            elt: form,
-        },
+        detail: {success: false, errors: [{path: "profiles[1].days[2]", message: "Injected day is invalid."}]},
     }));
     expect(weekend.querySelector("[data-profile-days-error]").textContent).toBe("Injected day is invalid.");
 });

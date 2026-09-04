@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 
 class ModelingObjectWeb:
+    renders_relationship_children_as_nested_cards = True
     default_values = {}
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
@@ -218,10 +219,21 @@ class ModelingObjectWeb:
             parents = sorted(
                 (obj for obj in self.model_web.flat_efootprint_objs_dict.values() if isinstance(obj, parent_class)),
                 key=lambda parent: parent.name)
-            memberships = [
-                {"parent_id": parent.id, "parent_name": parent.name,
-                 "count": getattr(parent, attr_name)[self._modeling_obj].value.magnitude}
-                for parent in parents if self._modeling_obj in getattr(parent, attr_name)]
+            from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+
+            memberships = []
+            for parent in parents:
+                relationship = getattr(parent, attr_name)
+                if self._modeling_obj not in relationship:
+                    continue
+                parent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(parent.class_as_simple_str)
+                required_attrs = getattr(parent_web_class, "required_non_empty_relationships", frozenset())
+                memberships.append({
+                    "parent_id": parent.id,
+                    "parent_name": parent.name,
+                    "count": relationship[self._modeling_obj].value.magnitude,
+                    "unlink_disabled": attr_name in required_attrs and len(relationship) == 1,
+                })
             member_ids = {membership["parent_id"] for membership in memberships}
             available_parents = self.filter_available_membership_parents(
                 attr_name, [parent for parent in parents if parent.id not in member_ids])
@@ -365,9 +377,13 @@ class ModelingObjectWeb:
         dict_containers, _ = self.dict_containers_and_attr_name_in_dict_container
 
         for container in list_containers:
+            if not container.renders_relationship_children_as_nested_cards:
+                continue
             for container_mirror in container.mirrored_cards:
                 result.append(type(self)(self._modeling_obj, self.model_web, list_container=container_mirror))
         for container in dict_containers:
+            if not container.renders_relationship_children_as_nested_cards:
+                continue
             for container_mirror in container.mirrored_cards:
                 result.append(type(self)(self._modeling_obj, self.model_web, dict_container=container_mirror))
 

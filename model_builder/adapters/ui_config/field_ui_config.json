@@ -297,11 +297,16 @@
         "membership_title": "Used in usage journeys",
         "add_to_label": "Add to journey"
     },
-    "usage_journey": {
+    "usage_journeys": {
         "modeling_obj_containers": [
             "UsagePattern"
         ],
-        "label": "usage journey"
+        "label": "Usage journeys",
+        "count_label": "Journeys per pattern occurrence",
+        "min_items": 1,
+        "strictly_positive": true,
+        "membership_title": "Used in usage patterns",
+        "add_to_label": "Add to pattern"
     },
     "devices": {
         "modeling_obj_containers": [
@@ -323,11 +328,11 @@
         ],
         "label": "country"
     },
-    "hourly_usage_journey_starts": {
+    "hourly_occurrences": {
         "modeling_obj_containers": [
             "UsagePattern"
         ],
-        "label": "hourly number of usage journey starts"
+        "label": "hourly pattern occurrences"
     },
     "start_date": {
         "modeling_obj_containers": [
@@ -355,14 +360,14 @@
             "UsagePattern",
             "EdgeUsagePattern"
         ],
-        "label": "initial usage journey volume"
+        "label": "initial volume"
     },
     "initial_volume_timespan": {
         "modeling_obj_containers": [
             "UsagePattern",
             "EdgeUsagePattern"
         ],
-        "label": "initial usage journey volume timespan"
+        "label": "initial volume timespan"
     },
     "net_growth_rate_in_percentage": {
         "modeling_obj_containers": [
@@ -378,11 +383,11 @@
         ],
         "label": "net growth rate timespan"
     },
-    "utc_hourly_usage_journey_starts": {
+    "utc_hourly_occurrences": {
         "modeling_obj_containers": [
             "UsagePattern"
         ],
-        "label": "hourly number of usage journey starts UTC"
+        "label": "hourly pattern occurrences UTC"
     },
     "nb_usage_journeys_in_parallel": {
         "modeling_obj_containers": [
@@ -617,9 +622,9 @@
     },
     "usage_span": {
         "modeling_obj_containers": [
-            "EdgeUsageJourney"
+            "EdgeUsagePattern"
         ],
-        "label": "usage span",
+        "label": "deployment usage span",
         "step": 1
     },
     "bandwidth_energy_intensity": {
@@ -657,17 +662,18 @@
         ],
         "label": "edge device"
     },
-    "edge_usage_journey": {
+    "edge_usage_journeys": {
         "modeling_obj_containers": [
             "EdgeUsagePattern"
         ],
-        "label": "edge usage journey"
+        "label": "Edge usage journeys",
+        "min_items": 1
     },
-    "hourly_edge_usage_journey_starts": {
+    "hourly_deployment_starts": {
         "modeling_obj_containers": [
             "EdgeUsagePattern"
         ],
-        "label": "hourly edge usage journey starts"
+        "label": "hourly deployment starts"
     },
     "recurrent_compute_needed": {
         "modeling_obj_containers": [

@@ -1,6 +1,24 @@
 document.addEventListener("initDynamicForm", function () {
     const dynamicFormData = JSON.parse(document.getElementById('dynamic-form-data').textContent);
 
+    function suspendFormControls(section) {
+        section.querySelectorAll('input[name], select[name]').forEach(function(input) {
+            if (!input.disabled) input.dataset.dynamicFormWasEnabled = "true";
+            if (input.required) input.dataset.dynamicFormWasRequired = "true";
+            input.required = false;
+            input.disabled = true;
+        });
+    }
+
+    function restoreFormControls(section) {
+        section.querySelectorAll('input[name], select[name]').forEach(function(input) {
+            if (input.dataset.dynamicFormWasEnabled === "true") input.disabled = false;
+            if (input.dataset.dynamicFormWasRequired === "true") input.required = true;
+            delete input.dataset.dynamicFormWasEnabled;
+            delete input.dataset.dynamicFormWasRequired;
+        });
+    }
+
     function updateSelectionAttribution(selectElement) {
         const attributionElement = document.getElementById(`${selectElement.id}-attribution`);
         if (!attributionElement) return;
@@ -44,10 +62,7 @@ document.addEventListener("initDynamicForm", function () {
                     );
                 }
                 itemToHide.classList.add('d-none');
-                itemToHide.querySelectorAll('input[name], select[name]').forEach(function(input) {
-                    input.required = false;
-                    input.disabled = true;
-                });
+                suspendFormControls(itemToHide);
             }
         });
 
@@ -66,13 +81,7 @@ document.addEventListener("initDynamicForm", function () {
             );
         }
         itemToShow.classList.remove('d-none');
-        // Only flip name-bearing controls: nameless inputs (e.g. source-editor scratch
-        // fields) are UI helpers that never submit, and marking them `required` blocks
-        // the form because hidden invalid controls can't be focused.
-        itemToShow.querySelectorAll('input[name], select[name]').forEach(function(input) {
-            input.required = true;
-            input.disabled = false;
-        });
+        restoreFormControls(itemToShow);
     }
 
     /** Populate a select from the options associated with another control's value. */

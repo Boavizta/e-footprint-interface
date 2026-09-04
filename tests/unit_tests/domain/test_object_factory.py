@@ -87,6 +87,41 @@ class TestCreateEfootprintObjFromParsedData:
         assert parent.modeling_obj.sub_group_counts[child.modeling_obj].value.magnitude == 2
         assert parent.modeling_obj.edge_device_counts[device.modeling_obj].value.magnitude == 3
 
+    def test_edit_preserves_metadata_on_untouched_dict_entries(self, minimal_model_web):
+        parent = minimal_model_web.add_new_efootprint_object_to_system(
+            create_efootprint_obj_from_parsed_data({"name": "Parent"}, minimal_model_web, "EdgeDeviceGroup")
+        )
+        first = minimal_model_web.add_new_efootprint_object_to_system(
+            create_efootprint_obj_from_parsed_data({"name": "First"}, minimal_model_web, "EdgeDeviceGroup")
+        )
+        second = minimal_model_web.add_new_efootprint_object_to_system(
+            create_efootprint_obj_from_parsed_data({"name": "Second"}, minimal_model_web, "EdgeDeviceGroup")
+        )
+        edit_object_from_parsed_data({
+            "sub_group_counts": {
+                first.efootprint_id: {"value": 2, "unit": "dimensionless", "label": "original label"},
+            },
+        }, parent)
+        original = parent.modeling_obj.sub_group_counts[first.modeling_obj]
+        original.source = Source("Measured", "https://example.test")
+        original.confidence = "high"
+        original.comment = "keep this"
+
+        edit_object_from_parsed_data({
+            "sub_group_counts": {
+                first.efootprint_id: {"value": 2, "unit": "dimensionless", "label": "no label"},
+                second.efootprint_id: {"value": 3, "unit": "dimensionless", "label": "no label"},
+            },
+        }, parent)
+
+        preserved = parent.modeling_obj.sub_group_counts[first.modeling_obj]
+        assert preserved is original
+        assert preserved.source.name == "Measured"
+        assert preserved.confidence == "high"
+        assert preserved.comment == "keep this"
+        assert preserved.label == "original label"
+        assert parent.modeling_obj.sub_group_counts[second.modeling_obj].source == Sources.USER_DATA
+
     def test_edit_updates_explainable_object_dicts_without_breaking_serialization(self):
         model_web = ModelWeb(InMemorySystemRepository(initial_data=DEFAULT_SYSTEM_DATA))
 

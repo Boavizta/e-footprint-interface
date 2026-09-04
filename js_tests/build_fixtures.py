@@ -176,7 +176,10 @@ def render_source_table_row(case_ctx):
 # ---------------------------------------------------------------------------
 
 
-def dict_count_field(web_id, options, selected=None, count_label=None, ordered=False):
+def dict_count_field(
+    web_id, options, selected=None, count_label=None, ordered=False,
+    min_items=0, min_count=0, strictly_positive=False,
+):
     selected = selected or {}
     return {
         "web_id": web_id,
@@ -185,6 +188,9 @@ def dict_count_field(web_id, options, selected=None, count_label=None, ordered=F
         "options_json": json.dumps(options),
         "count_label": count_label,
         "ordered": ordered,
+        "min_items": min_items,
+        "min_count": min_count,
+        "strictly_positive": strictly_positive,
     }
 
 
@@ -207,12 +213,58 @@ DICT_COUNT_CASES = {
         count_label="Times per journey",
         ordered=True,
     ),
+    "dict_count_required_journey": dict_count_field(
+        web_id="UsagePattern_usage_journeys",
+        options=[{"value": "journey-1", "label": "Journey 1"}],
+        selected={"journey-1": 1},
+        count_label="Journeys per pattern occurrence",
+        min_items=1,
+        strictly_positive=True,
+    ),
+    "dict_count_untrusted_label": dict_count_field(
+        web_id="Test_counts",
+        options=[{"value": "unsafe", "label": '<img src=x onerror="alert(1)">'}],
+        selected={"unsafe": 1},
+    ),
 }
 
 
 def render_dict_count(field_ctx):
     return render_to_string(
         "model_builder/side_panels/dynamic_form_fields/dict_count.html",
+        {"field": field_ctx},
+    )
+
+
+SELECT_MULTIPLE_CASES = {
+    "select_multiple_required_bundle": {
+        "web_id": "EdgeUsagePattern_edge_usage_journeys",
+        "label": "Edge usage journeys",
+        "tooltip": None,
+        "ordered": False,
+        "min_items": 1,
+        "selected": [{"value": "bundle-1", "label": "Bundle 1"}],
+        "unselected": [{"value": "bundle-2", "label": "Bundle 2"}],
+        "selected_json": json.dumps([{"value": "bundle-1", "label": "Bundle 1"}]),
+        "unselected_json": json.dumps([{"value": "bundle-2", "label": "Bundle 2"}]),
+    },
+    "select_multiple_untrusted_label": {
+        "web_id": "Test_values",
+        "label": "Values",
+        "tooltip": None,
+        "ordered": False,
+        "min_items": 0,
+        "selected": [{"value": "unsafe", "label": '<img src=x onerror="alert(1)">'}],
+        "unselected": [],
+        "selected_json": json.dumps([{"value": "unsafe", "label": '<img src=x onerror="alert(1)">'}]),
+        "unselected_json": "[]",
+    },
+}
+
+
+def render_select_multiple(field_ctx):
+    return render_to_string(
+        "model_builder/side_panels/dynamic_form_fields/select_multiple.html",
         {"field": field_ctx},
     )
 
@@ -229,6 +281,16 @@ INLINE_COUNT_CASES = {
         "parent_name": "Test Journey",
         "parent_efootprint_id": "journey-1",
         "entry_efootprint_id": "step-1",
+        "count_only": True,
+    },
+    "inline_count_strictly_positive": {
+        "entry_count": "0.5",
+        "min_val": 0,
+        "strictly_positive": True,
+        "step": "any",
+        "parent_name": "Pattern",
+        "parent_efootprint_id": "pattern-1",
+        "entry_efootprint_id": "journey-1",
         "count_only": True,
     },
 }
@@ -412,7 +474,7 @@ def render_weekly_pattern(field_ctx):
     return (
         '<form id="sidePanelForm">'
         + render_to_string(
-            "model_builder/side_panels/dynamic_form_fields/explainable_timeseries_builder.html",
+            "model_builder/side_panels/dynamic_form_fields/recurrent_timeseries_builder.html",
             {"field": field_ctx},
         )
         + '<button type="submit">Save</button></form>'
@@ -421,8 +483,8 @@ def render_weekly_pattern(field_ctx):
 
 HOURLY_PREVIEW_CASES = {
     "hourly_preview_default": {
-        "web_id": "UsagePattern_hourly_usage_journey_starts",
-        "attr_name": "hourly_usage_journey_starts",
+        "web_id": "UsagePattern_hourly_occurrences",
+        "attr_name": "hourly_occurrences",
         "default": {
             "start_date": "2025-01-01",
             "modeling_duration_value": "2",
@@ -476,7 +538,7 @@ TIMESERIES_PREVIEW_CASES = {
         "chart_configs_json": "",
     },
     "timeseries_preview_hourly_success": {
-        "preview_id": "UsagePattern_hourly_usage_journey_starts__preview",
+        "preview_id": "UsagePattern_hourly_occurrences__preview",
         "request_sequence": "2",
         "success": True,
         "status": "",
@@ -513,6 +575,7 @@ GROUPS = [
     (ROW_EDITOR_CASES, render_row_editor),
     (SOURCE_TABLE_ROW_CASES, render_source_table_row),
     (DICT_COUNT_CASES, render_dict_count),
+    (SELECT_MULTIPLE_CASES, render_select_multiple),
     (INLINE_COUNT_CASES, render_inline_count),
     (SELECT_OBJECT_CASES, render_select_object),
     (CONDITIONAL_SELECT_CASES, render_select_str_input),

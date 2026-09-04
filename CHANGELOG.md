@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Web usage-pattern forms can select several journeys and edit a positive, fractional “Journeys per pattern occurrence” weight for each one. Edge usage-pattern forms can select several edge usage journeys and now own deployment starts and usage span; creation preselects the first available journey in both paradigms.
+- Pattern cards remain top-level and draw one canvas relationship to every selected journey, so the same journey can be reused by several patterns without cloning or nesting it.
+
+### Changed
+- Validation, model hydration, results, Sankey rendering, introductory templates, and production profiling now understand weighted web journeys and shared edge usage journeys. Core calculation and cache profiling is delegated to the library-native memory laboratory.
+
+### Fixed
+- Required relationship controls prevent removing the final journey, accept every strictly positive fractional web weight, preserve in-progress selections across HTMX updates, and render relationship labels as text rather than markup.
+- Editing one weighted relationship no longer erases the source, confidence, comment, or label of untouched sibling weights.
+- Delete actions now wait for in-flight timeseries previews, preventing a preview response from racing with object deletion.
+
 ## [V1.11.0] - 2026-09-02
 
 ### Added

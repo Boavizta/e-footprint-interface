@@ -1,122 +1,144 @@
-function sortSelectMultipleFields(fieldId, selectedValue, direction) {
-    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
-    let index = selectedOptions.findIndex(option => String(option.value) === String(selectedValue));
-    if (index === -1) return;
-    if (direction === "up" && index > 0) {
-        [selectedOptions[index - 1], selectedOptions[index]] =
-            [selectedOptions[index], selectedOptions[index - 1]];
+(function () {
+    "use strict";
+
+    function read(fieldId, prefix) { return convertStringLikeJsonToRealJsonFromElementWeb(prefix + fieldId); }
+    function write(fieldId, prefix, value) {
+        document.getElementById(prefix + fieldId).dataset.json = convertJsonToStringLikeDjango(value);
     }
-    if (direction === "down" && index < selectedOptions.length - 1) {
-        [selectedOptions[index + 1], selectedOptions[index]] =
-            [selectedOptions[index], selectedOptions[index + 1]];
-    }
-    document.getElementById("selected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(selectedOptions);
-    refreshSelectMultipleFields(fieldId);
-    tagFormAsModified();
-}
-
-function removeValueFromSelectMultiple(fieldId, selectedValue) {
-    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
-    let unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data_" + fieldId);
-    let index = selectedOptions.findIndex(option => option.value === selectedValue);
-    if (index === -1) return;
-    let removedItem = selectedOptions.splice(index, 1)[0];
-    unselectedOptions.push(removedItem);
-    let newOption = document.createElement("option");
-    newOption.value = removedItem.value;
-    newOption.textContent = removedItem.label;
-    document.getElementById("select-new-object-"+fieldId).appendChild(newOption);
-    document.getElementById("unselected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(unselectedOptions);
-    document.getElementById("selected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(selectedOptions);
-    document.getElementById("add-btn-" + fieldId).removeAttribute("disabled");
-    document.getElementById("select-new-object-"+fieldId).removeAttribute("disabled");
-    refreshSelectMultipleFields(fieldId);
-    tagFormAsModified();
-}
-
-function addValueToSelectMultiple(fieldId) {
-    const selectElement = document.getElementById("select-new-object-" + fieldId);
-    if (!selectElement.value) return;
-    const selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
-    const unselectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("unselected_data_" + fieldId);
-
-    const idx = unselectedOptions.findIndex(o => String(o.value) === String(selectElement.value));
-    if (idx !== -1) {
-        const [item] = unselectedOptions.splice(idx, 1);
-        selectedOptions.push(item);
+    function button(label, action, fieldId, selectedValue, text) {
+        const element = document.createElement("button");
+        element.type = "button";
+        element.className = "btn btn-white border-0 rounded-2 fs-xl p-2";
+        element.setAttribute("aria-label", label);
+        Object.assign(element.dataset, {action, fieldId, selectedValue});
+        element.textContent = text;
+        return element;
     }
 
-    const opt = selectElement.querySelector(`option[value="${selectElement.value}"]`);
-    if (opt) opt.remove();
+    function sortSelectMultipleFields(fieldId, selectedValue, direction) {
+        const selected = read(fieldId, "selected_data_");
+        const index = selected.findIndex((item) => String(item.value) === String(selectedValue));
+        const target = direction === "up" ? index - 1 : index + 1;
+        if (index === -1 || target < 0 || target >= selected.length) return;
+        [selected[index], selected[target]] = [selected[target], selected[index]];
+        write(fieldId, "selected_data_", selected);
+        refreshSelectMultipleFields(fieldId);
+        tagFormAsModified();
+    }
 
-    document.getElementById("selected_data_" + fieldId).dataset.json   = convertJsonToStringLikeDjango(selectedOptions);
-    document.getElementById("unselected_data_" + fieldId).dataset.json = convertJsonToStringLikeDjango(unselectedOptions);
+    function removeValueFromSelectMultiple(fieldId, selectedValue) {
+        const selected = read(fieldId, "selected_data_");
+        const state = document.getElementById("selected_data_" + fieldId);
+        if (selected.length <= Number(state.dataset.minItems || 0)) return;
+        const unselected = read(fieldId, "unselected_data_");
+        const index = selected.findIndex((item) => String(item.value) === String(selectedValue));
+        if (index === -1) return;
+        unselected.push(selected.splice(index, 1)[0]);
+        write(fieldId, "selected_data_", selected);
+        write(fieldId, "unselected_data_", unselected);
+        refreshSelectMultipleFields(fieldId);
+        tagFormAsModified();
+    }
 
-    refreshSelectMultipleFields(fieldId);
-}
+    function addValueToSelectMultiple(fieldId) {
+        const select = document.getElementById("select-new-object-" + fieldId);
+        if (!select?.value) return;
+        const selected = read(fieldId, "selected_data_");
+        const unselected = read(fieldId, "unselected_data_");
+        const index = unselected.findIndex((item) => String(item.value) === String(select.value));
+        if (index === -1) return;
+        selected.push(unselected.splice(index, 1)[0]);
+        write(fieldId, "selected_data_", selected);
+        write(fieldId, "unselected_data_", unselected);
+        refreshSelectMultipleFields(fieldId);
+        tagFormAsModified();
+    }
 
-function refreshSelectMultipleFields(fieldId) {
-    let objectsAlreadySelectedElement = document.getElementById("objects-already-selected-for-" + fieldId);
-    let selectedOptions = convertStringLikeJsonToRealJsonFromElementWeb("selected_data_" + fieldId);
-    let selectNewObjectElement = document.getElementById("select-new-object-" + fieldId);
-    // Reorder controls only where order is meaningful (mirrors dict_count's `ordered` gate).
-    let ordered = document.getElementById("selected_data_" + fieldId)?.dataset.ordered === "true";
+    function emptyRow(message) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 4;
+        const span = document.createElement("span");
+        span.className = "text-muted";
+        span.textContent = message;
+        cell.appendChild(span);
+        row.appendChild(cell);
+        return row;
+    }
 
-    objectsAlreadySelectedElement.innerHTML = '';
-
-    if(!selectedOptions || selectedOptions.length === 0) {
-        if(selectNewObjectElement.options.length === 0 ){
-            document.getElementById("add-btn-" + fieldId).setAttribute("disabled", "true");
-            selectNewObjectElement.setAttribute("disabled", "true");
-            objectsAlreadySelectedElement.innerHTML = `<tr><td colspan="4"><span class="text-muted">No available options</span></td></tr>`;
-        }else{
-            objectsAlreadySelectedElement.innerHTML = `<tr><td colspan="4"><span class="text-muted">No values selected</span></td></tr>`;
+    function refreshSelectMultipleFields(fieldId) {
+        const table = document.getElementById("objects-already-selected-for-" + fieldId);
+        const select = document.getElementById("select-new-object-" + fieldId);
+        const add = document.getElementById("add-btn-" + fieldId);
+        const state = document.getElementById("selected_data_" + fieldId);
+        const hidden = document.getElementById(fieldId);
+        if (!table || !select || !add || !state || !hidden) return;
+        const selected = read(fieldId, "selected_data_") || [];
+        const unselected = read(fieldId, "unselected_data_") || [];
+        const pendingSelection = select.value;
+        select.replaceChildren(...unselected.map((item) => {
+            const option = document.createElement("option");
+            option.value = item.value;
+            option.textContent = item.label;
+            return option;
+        }));
+        if (unselected.some((item) => String(item.value) === String(pendingSelection))) {
+            select.value = pendingSelection;
         }
-        document.getElementById(fieldId).value = "";
-        return;
+        if (!selected.length) {
+            table.replaceChildren(emptyRow(unselected.length ? "No values selected" : "No available options"));
+        } else {
+            const ordered = state.dataset.ordered === "true";
+            const minItems = Number(state.dataset.minItems || 0);
+            table.replaceChildren(...selected.map((item, index) => {
+                const row = document.createElement("tr");
+                const label = document.createElement("td");
+                label.className = "width-70";
+                label.textContent = item.label;
+                const up = document.createElement("td");
+                up.className = "width-10";
+                if (ordered && index > 0) up.appendChild(button("Move up", "move-select-multiple-up", fieldId, item.value, "↑"));
+                const down = document.createElement("td");
+                down.className = "width-10";
+                if (ordered && index < selected.length - 1) down.appendChild(button("Move down", "move-select-multiple-down", fieldId, item.value, "↓"));
+                const removeCell = document.createElement("td");
+                removeCell.className = "width-10";
+                const remove = button("Remove", "remove-select-multiple", fieldId, item.value, "×");
+                remove.id = "remove-" + item.value;
+                remove.disabled = selected.length <= minItems;
+                removeCell.appendChild(remove);
+                row.append(label, up, down, removeCell);
+                return row;
+            }));
+        }
+        add.disabled = unselected.length === 0;
+        select.disabled = unselected.length === 0;
+        hidden.value = selected.map((item) => item.value).join(";");
     }
 
-    let tableHTML = '';
-    selectedOptions.forEach((selectedValue, index) => {
-        // Use event.stopPropagation(); in buttons to avoid htmx errors
-        let upButton = ordered && index !== 0 ? `
-            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="event.stopPropagation();sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','up')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/>
-                </svg>
-            </button>` : '';
-
-        let downButton = ordered && index !== selectedOptions.length - 1 ? `
-            <button type="button" class="btn btn-white border-0 rounded-2 fs-xl p-2" onclick="event.stopPropagation();sortSelectMultipleFields('${fieldId}', '${selectedValue.value}','down')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
-                </svg>
-            </button>` : '';
-
-        tableHTML += `
-            <tr>
-                <td class="width-70">${selectedValue.label}</td>
-                <td class="width-10">${upButton}</td>
-                <td class="width-10">${downButton}</td>
-                <td class="width-10">
-                    <button type="button" id="remove-${selectedValue.value}"
-                        class="btn btn-white border-0 rounded-2 fs-xl p-2"
-                        onclick="event.stopPropagation();removeValueFromSelectMultiple('${fieldId}','${selectedValue.value}')"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                        </svg>
-                    </button>
-                </td>
-            </tr>`;
-    });
-
-    objectsAlreadySelectedElement.innerHTML = tableHTML;
-
-    if(selectNewObjectElement.options.length === 0){
-        document.getElementById("add-btn-" + fieldId).setAttribute("disabled", "true");
-        selectNewObjectElement.setAttribute("disabled", "true");
+    function initializeIn(container) {
+        const nodes = [];
+        if (container?.matches?.("[data-select-multiple-field]")) nodes.push(container);
+        if (container?.querySelectorAll) nodes.push(...container.querySelectorAll("[data-select-multiple-field]"));
+        nodes.forEach((node) => refreshSelectMultipleFields(node.dataset.selectMultipleField));
     }
 
-    document.getElementById(fieldId).value = selectedOptions.map(option => option.value).join(";");
-}
+    if (document.documentElement.dataset.selectMultipleListenersBound !== "true") {
+        document.documentElement.dataset.selectMultipleListenersBound = "true";
+        document.addEventListener("click", function (event) {
+            const control = event.target.closest?.("[data-action]");
+            if (!control) return;
+            const {action, fieldId, selectedValue} = control.dataset;
+            if (action === "add-select-multiple") addValueToSelectMultiple(fieldId);
+            else if (action === "remove-select-multiple") removeValueFromSelectMultiple(fieldId, selectedValue);
+            else if (action === "move-select-multiple-up") sortSelectMultipleFields(fieldId, selectedValue, "up");
+            else if (action === "move-select-multiple-down") sortSelectMultipleFields(fieldId, selectedValue, "down");
+        });
+        document.addEventListener("DOMContentLoaded", () => initializeIn(document));
+        document.addEventListener("htmx:load", (event) => initializeIn(event.detail?.elt || event.target));
+    }
+
+    if (typeof module !== "undefined") {
+        module.exports = {addValueToSelectMultiple, refreshSelectMultipleFields, removeValueFromSelectMultiple, sortSelectMultipleFields};
+    }
+}());

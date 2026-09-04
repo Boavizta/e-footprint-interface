@@ -12,20 +12,21 @@ if TYPE_CHECKING:
 
 
 class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
-    default_values = {"hourly_edge_usage_journey_starts": ExplainableHourlyQuantitiesFromFormInputs(
+    required_non_empty_relationships = frozenset({"edge_usage_journeys"})
+    default_values = {"hourly_deployment_starts": ExplainableHourlyQuantitiesFromFormInputs(
         {"start_date": default_modeling_start_date(), "modeling_duration_value": 3, "modeling_duration_unit": "year",
          "net_growth_rate_in_percentage": 10, "net_growth_rate_timespan": "year",
          "initial_volume": None, "initial_volume_timespan": "month"}, source=Sources.USER_DATA)
     }
     attr_name_in_system = "edge_usage_patterns"
-    object_type_in_volume = "edge_usage_journey"
+    journey_relationship_attr = "edge_usage_journeys"
 
     hourly_quantities_from_growth_ui_config = {
         "initial_volume": {
             "label": "Initial number of edge devices put in service",
             "tooltip": (
-                "The number of edge devices put in service in the chosen period that execute the selected "
-                "edge usage journey throughout their usage span."
+                "The number of edge deployments put in service in the chosen period. Every selected edge usage "
+                "journey applies throughout the deployment usage span."
             ),
         },
     }
