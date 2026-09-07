@@ -1,0 +1,205 @@
+{% load static %}
+{% if standalone %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data &amp; privacy · e-footprint</title>
+    <link rel="stylesheet" href="{% static 'css/bs_main.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'icons/sidenav/e-footprint-logo.svg' %}">
+</head>
+<body>
+{% include "navbar.html" %}
+<main class="data-privacy-standalone-main w-100">
+{% endif %}
+
+<section class="{% if standalone %}container py-5{% else %}container-fluid py-3 z-2{% endif %} text-start data-privacy-panel"
+         {% if not standalone %}id="sidePanelContent"{% endif %} style="max-width: 840px;">
+    <header class="d-flex align-items-center justify-content-between border-bottom mb-3 pb-3">
+        <h1 id="sidePanelTitle" class="h5 m-0" tabindex="-1">Data &amp; privacy</h1>
+        {% if not standalone %}
+        {% include "model_builder/components/close_cross.html" with onclick="closeAndEmptySidePanel()"
+            btn_id="btn-close-side-panel" %}
+        {% endif %}
+    </header>
+
+    <p>
+        This page explains how this browser session uses storage. There is no account or server-side library of
+        modelings.
+    </p>
+
+    <div class="data-privacy-grid mb-4">
+        <article class="data-privacy-card">
+            <h2 class="h6 fw-semibold">Browser session</h2>
+            <p class="mb-0">
+                An opaque session identifier—not your modeling—is kept in the browser for up to
+                {{ data_status.session_cookie_age_display }}. A small workspace index and preferences are kept in the
+                server-side <code>django_session</code> record for that session. Clearing the cookie makes stored recovery
+                copies unreachable from that browser, even before their server expiry.
+            </p>
+        </article>
+        <article class="data-privacy-card">
+            <h2 class="h6 fw-semibold">Redis hot cache</h2>
+            <p class="mb-0">
+                The latest saved modeling and available calculations stay in the fast Redis cache for up to
+                {{ data_status.hot_cache_retention_display }} after the latest save. Reads do not extend that time, and
+                eviction or infrastructure failure can remove this copy sooner.
+            </p>
+        </article>
+        <article class="data-privacy-card">
+            <h2 class="h6 fw-semibold">Live PostgreSQL recovery storage</h2>
+            <p class="mb-0">
+                A smaller, inputs-only recovery copy is kept in live PostgreSQL for
+                {{ data_status.recovery_retention_display }} after the latest save or retention change. If Redis has
+                expired, the first recovery load can be slower while calculations are rebuilt. Expired recovery rows and
+                server-side sessions are physically purged within {{ data_status.live_cleanup_lag_display }} during normal
+                service operation.
+            </p>
+        </article>
+        <article class="data-privacy-card">
+            <h2 class="h6 fw-semibold">Protection</h2>
+            <p>
+                {% if data_status.https_enabled == True %}
+                HTTPS protects data in transit for this deployment.
+                {% else %}
+                No transport-protection assurance is configured for this deployment.
+                {% endif %}
+            </p>
+            <p>
+                {% if data_status.postgres_encrypted_at_rest == True %}
+                Live PostgreSQL storage is encrypted at rest.
+                {% elif data_status.postgres_encrypted_at_rest == False %}
+                Live PostgreSQL storage is not encrypted at rest.
+                {% else %}
+                No at-rest encryption assurance is configured for live PostgreSQL storage.
+                {% endif %}
+                No at-rest encryption claim is made here for the Redis hot cache.
+            </p>
+        </article>
+        <article class="data-privacy-card">
+            <h2 class="h6 fw-semibold">PostgreSQL backups</h2>
+            {% if data_status.postgres_backups_enabled == True %}
+            <p>
+                {{ data_status.postgres_backup_frequency|capfirst }} PostgreSQL backups are retained for
+                {{ data_status.postgres_backup_retention_days }} days. They are separate from live recovery storage.
+                {% if data_status.postgres_backups_encrypted_at_rest == True %}
+                These backups are encrypted at rest.
+                {% elif data_status.postgres_backups_encrypted_at_rest == False %}
+                These backups are not encrypted at rest.
+                {% else %}
+                No at-rest encryption assurance is configured for these backups.
+                {% endif %}
+            </p>
+            <p class="mb-0">
+                Backups are observed to run overnight, but their timing can vary. A short recovery period such as six
+                hours normally expires before that window and reduces the chance of capture; it does not guarantee
+                exclusion. Any modeling still stored when a backup runs can remain in that backup for up to
+                {{ data_status.postgres_backup_retention_days }} days.
+            </p>
+            {% else %}
+            <p class="mb-0">No PostgreSQL backup lifecycle is configured for this deployment.</p>
+            {% endif %}
+        </article>
+        <article class="data-privacy-card">
+            <h2 class="h6 fw-semibold">Operation, hosting &amp; security</h2>
+            {% if data_status.operator_name or data_status.hosting_provider_name or data_status.hosting_region %}
+            <p>
+                {% if data_status.operator_name %}Operated by {{ data_status.operator_name }}.{% endif %}
+                {% if data_status.hosting_provider_name %}
+                {{ data_status.hosting_provider_name }} is the data processor and hosting provider for the application
+                containers, PostgreSQL, and Redis{% if data_status.hosting_region %}, hosted in
+                {{ data_status.hosting_region }}{% endif %}.
+                {% endif %}
+            </p>
+            {% else %}
+            <p>Deployment-specific operator, processor, hosting, and region details are not configured.</p>
+            {% endif %}
+            {% if data_status.security_contact %}
+            <p class="mb-0">
+                Security contact:
+                <a href="mailto:{{ data_status.security_contact }}">{{ data_status.security_contact }}</a>.
+            </p>
+            {% endif %}
+        </article>
+    </div>
+
+    <section class="workspace-size-detail mb-4" aria-labelledby="workspace-size-heading">
+        <h2 id="workspace-size-heading" class="h6 fw-semibold">Workspace storage</h2>
+        <progress class="workspace-size-progress w-100" value="{{ data_status.workspace_size_bytes }}"
+                  max="{{ data_status.workspace_limit_bytes }}"
+                  aria-label="{{ data_status.workspace_size_display }} of {{ data_status.workspace_limit_display }} used">
+            {{ data_status.workspace_size_display }} of {{ data_status.workspace_limit_display }}
+        </progress>
+        <p class="mb-1">
+            <strong>{{ data_status.workspace_size_display }} of {{ data_status.workspace_limit_display }}</strong>
+            across the modelings in this browser session.
+        </p>
+        <p class="small text-muted mb-0">
+            This is the latest successfully saved size, read from existing storage metadata.
+            {% if data_status.public_shared_instance %}
+            The {{ data_status.workspace_limit_display }} limit is a capacity policy for this shared public deployment;
+            it is not an e-footprint modeling or file-format limit.
+            {% else %}
+            The {{ data_status.workspace_limit_display }} limit is the capacity policy configured for this deployment;
+            it is not an e-footprint modeling or file-format limit.
+            {% endif %}
+            A self-hosted installation can raise the limit to match its infrastructure.
+        </p>
+    </section>
+
+    <section aria-labelledby="recovery-retention-heading">
+        <h2 id="recovery-retention-heading" class="h6 fw-semibold">Recovery retention</h2>
+        <p>
+            This choice applies to every modeling in this browser session. Expiry is measured from the latest save or
+            retention change. Changing it updates the expiry of recovery copies that are still available; it does not
+            extend the Redis hot cache.
+        </p>
+        <form method="post" action="{% url 'update-recovery-retention' %}"
+              hx-post="{% url 'update-recovery-retention' %}" hx-target="#sidePanel" hx-swap="innerHTML">
+            {% csrf_token %}
+            <label class="form-label fw-semibold" for="retention-seconds">Keep the recovery copy for</label>
+            <select class="form-select mb-3" id="retention-seconds" name="retention_seconds">
+                {% for choice in data_status.recovery_retention_choices %}
+                <option value="{{ choice.seconds }}"
+                        {% if choice.seconds == data_status.recovery_retention_seconds %}selected{% endif %}>
+                    {{ choice.label }}
+                </option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary rounded-pill w-100" type="submit">Save retention</button>
+        </form>
+
+        {% if retention_results %}
+        <div class="alert alert-success mt-3 mb-0" id="retention-update-result" role="status" aria-live="polite"
+             tabindex="-1">
+            <p class="fw-semibold mb-1">{{ retention_results.summary }}</p>
+            {% if retention_results.slots %}
+            <ul class="mb-0">
+                {% for result in retention_results.slots %}
+                <li>
+                    {{ result.label }}:
+                    {% if result.updated %}existing recovery expiry updated.{% else %}the recovery copy had already
+                    expired or was no longer available.{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="mb-0">No saved recovery copy needed an expiry update; future saves will use this period.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+</section>
+
+{% if standalone %}
+</main>
+</body>
+</html>
+{% else %}
+<script>
+    openSidePanel();
+    document.getElementById("{% if retention_results %}retention-update-result{% else %}sidePanelTitle{% endif %}")
+        .focus({preventScroll: true});
+</script>
+{% endif %}

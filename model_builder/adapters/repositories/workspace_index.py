@@ -91,6 +91,10 @@ class WorkspaceIndex:
         index.setdefault("active", 0)
         self._write(index)
 
+    def workspace_size_bytes(self) -> int:
+        """Return the latest successfully saved canonical size across all workspace slots."""
+        return sum(self.slot_sizes().values())
+
     def forget_slot_size(self, slot: int) -> None:
         index = self._raw()
         sizes = index.get("sizes", {})

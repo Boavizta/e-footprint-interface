@@ -267,17 +267,25 @@
   .recbtn { font-size: .62rem; border-radius: 7px; padding: .3rem .8rem; border: 1px solid var(--g300); background: #fff; color: var(--ink); }
   .recbtn.green { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 600; }
   .recbtn.link { border: none; color: var(--primary); padding: .15rem; }
+  /* data-and-privacy panel */
+  .privacygrid { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; }
+  .privacycard { border: 1px solid var(--g200); border-radius: 6px; background: var(--g50); padding: .4rem; font-size: .55rem; color: var(--muted); }
+  .privacycard b { display: block; color: var(--ink); margin-bottom: .12rem; }
+  .sizetrack { height: .38rem; border-radius: 999px; background: var(--g200); overflow: hidden; margin: .4rem 0 .2rem; }
+  .sizetrack span { display: block; width: 16%; height: 100%; background: var(--primary); }
+  .retentionselect { width: 100%; border: 1px solid var(--g300); border-radius: 6px; background: #fff; padding: .28rem; font-size: .6rem; color: var(--ink); }
 </style>
 </head>
 <body>
 
 <p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
 <h1>save-and-load</h1>
-<p class="lede">There are no accounts and no server-side library here — a modeling lives in your session, and <b>persisting it means
+<p class="lede">There are no accounts and no permanent server-side library here — a modeling lives in your session, and <b>persisting it means
   moving a file</b>. <b>save-and-load</b> is that round-trip: <b>Export</b> downloads a <code>.e-f.json</code>, <b>Open file</b> reads
   one back, and a single modeling or the whole two-model workspace travels the same way. Success isn't "a file downloaded" — it's a
-  <b>faithful round-trip</b>: the modeling (and its Sankey/UI settings) comes back intact, recomputed and verified, and when a file
-  <em>can't</em> be opened the app <b>never loses your work</b> — it routes you to a recovery page that still hands it back.</p>
+  <b>faithful round-trip</b>: the modeling (and its Sankey/UI settings) comes back intact, recomputed and verified. Session recovery is
+  deliberately time-limited; while a stored copy remains, a modeling that <em>can't</em> be opened routes to a recovery page that can
+  still hand the raw data back.</p>
 <p class="note">Faithful to the deployed app. Draws from the per-model <b>toolbar</b> (<code>upload_download_reboot_model_tooltips.html</code>),
   the <b>Open a file</b> side panel, the <code>download-json</code> / <code>download-workspace</code> / <code>upload-json</code> views, and
   the standalone <code>recovery.html</code>. Code-level pointers — the file documents, content-routing, session persistence — are
@@ -419,12 +427,13 @@
             <span class="recbtn">⬇ Download modeling A</span>
             <span class="recbtn">⬇ Download modeling B</span>
             <span class="recbtn link">Report this bug on GitHub ↗</span>
+            <span class="recbtn link">Use email instead</span>
             <span class="recbtn green">Reset to a blank modeling</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>When the stored modeling can't be deserialized, a standalone <b>recovery page</b> replaces the builder — <b>Something went wrong loading your modeling</b>. It offers a <b>raw download</b> per slot (<em>Download modeling A / B</em>, or <em>Download your current modeling</em>), <b>Report this bug on GitHub</b>, and <b>Reset to a blank modeling</b>. It never tries to render the broken modeling.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>When the stored modeling can't be deserialized, a standalone <b>recovery page</b> replaces the builder — <b>Something went wrong loading your modeling</b>. It offers a <b>raw download</b> per slot, GitHub and email reporting choices, and <b>Reset to a blank modeling</b>. It warns that the file can contain entered data and must be reviewed and attached manually. It never tries to render the broken modeling.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">3</span><h3>Recovery — get your work back, don't lose it</h3></div>
@@ -436,8 +445,53 @@
       <div class="state"><span class="k">Decoupled by design</span><span class="v">The page reads only the slot index and a cache check — it never deserializes, so it works on a dead modeling.</span></div>
       <div class="state"><span class="k">Raw download</span><span class="v">Per slot — <em>Download your current modeling</em> (one) or <em>Download modeling A / B</em> (two) — serves the stored JSON verbatim.</span></div>
       <div class="state"><span class="k">Reset to blank</span><span class="v">A green <b>Reset to a blank modeling</b> (POST, confirmed) discards to an empty modeling and re-opens the picker.</span></div>
-      <div class="state"><span class="k">Safe bug report</span><span class="v">The GitHub link prefills versions + error type only, and asks you to attach the file you just downloaded — no data leaks into a public issue.</span></div>
+      <div class="state"><span class="k">Safe bug report</span><span class="v">GitHub and email links prefill versions + error type only, and ask you to attach a reviewed file manually — no modeling data or exception message enters either URL.</span></div>
       <div class="state deferred"><span class="k">Always reachable</span><span class="v">Also at <code>/recover/</code> and as the production 500 handler — a read-only escape hatch that's always available.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE D — SESSION DATA ============ -->
+<div class="phase">
+  <span class="tag">D · Session data — understand and control recovery</span><span class="conn">Help → Data &amp; privacy · metadata only</span><span class="rule"></span>
+</div>
+
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/data-privacy/</span></div>
+      <div class="stage" style="min-height:310px">
+        <div class="canvas dim" style="min-height:310px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+        <div class="panel" style="width:68%">
+          <div class="phead"><b>Data &amp; privacy</b><span class="x">×</span></div>
+          <div class="privacygrid">
+            <div class="privacycard"><b>Browser session</b>Opaque identifier for up to two weeks; small index and preferences stay server-side.</div>
+            <div class="privacycard"><b>Redis hot cache</b>Latest saved modeling stays hot for up to one hour after a save.</div>
+            <div class="privacycard"><b>Live PostgreSQL recovery</b>Inputs-only copy follows the selected recovery period.</div>
+            <div class="privacycard"><b>Backups</b>Daily, seven-day rotation; separate from live expiry and disclosed independently.</div>
+          </div>
+          <p class="helptxt" style="margin:.55rem 0 .1rem"><b>Workspace storage</b></p>
+          <div class="sizetrack"><span></span></div>
+          <p class="helptxt">7.8 MB of 50 MB · latest successfully saved metadata</p>
+          <div class="field"><label>Keep the recovery copy for</label></div>
+          <select class="retentionselect"><option>12 hours (default)</option></select>
+          <button class="savebtn" style="margin-top:.45rem">Save retention</button>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span><b>Help → Data &amp; privacy</b> opens the reusable side panel; its ordinary URL also works alone. The panel separates the browser identifier, Redis hot cache, live PostgreSQL recovery rows, and backups. It shows the last saved workspace size and lets the user choose 1, 3, 6, or 12 hours, or 1–14 days.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>Recovery is explicit, bounded, and session-wide</h3></div>
+    <p>The default recovery period is <b>12 hours</b>. A change is remembered in the browser session, applies to future saves, and
+       updates the expiry of each recovery copy that is still present. The result names which modelings were updated or had already
+       disappeared. Expiry runs from the <b>latest save or retention change</b>; it never extends Redis.</p>
+    <div class="states">
+      <div class="state"><span class="k">Metadata-only detail</span><span class="v">Size is the sum of existing per-slot byte integers. Opening or refreshing the panel never loads or serializes either modeling.</span></div>
+      <div class="state"><span class="k">Four separate lifecycles</span><span class="v">The cookie/session record, one-hour Redis copy, selectable live recovery row, and seven-day backup rotation are described independently.</span></div>
+      <div class="state"><span class="k">Truthful protection copy</span><span class="v">HTTPS, live PostgreSQL encryption, Redis protection, and backup encryption are separate deployment facts; unknowns are never promoted to general assurances.</span></div>
+      <div class="state"><span class="k">Backups qualify short retention</span><span class="v">Six hours normally expires before the observed overnight window, but cannot guarantee exclusion from a backup whose timing varies.</span></div>
+      <div class="state"><span class="k">Capacity, not format</span><span class="v">The public 50 MB value is a configurable shared-deployment policy. A suitably provisioned self-hosted installation can raise it.</span></div>
     </div>
   </div>
 </div>
@@ -454,7 +508,7 @@
   <tr><td><b>Workspace</b><br><code>… comparison (A vs B).e-f.json</code></td><td>an envelope: <code>{ active_slot, models: [ &lt;single-model doc&gt;, … ] }</code> — each entry byte-for-byte a single-model document</td><td>opens by <b>restoring both slots</b> and the active one</td></tr>
   <tr><td><b>Recovered (raw)</b><br><code>… recovered-model.e-f.json</code></td><td>the stored session data <b>verbatim</b> — never rebuilt</td><td>served by the recovery page, even on a corrupt modeling</td></tr>
 </table>
-<p class="note" style="margin-top:.5rem">A modeling is held only in your <b>session</b> (a cache with a short TTL) — there's no account and no server-side saved-models library. Closing the tab and coming back later is exactly what export/import is for.</p>
+<p class="note" style="margin-top:.5rem">A modeling is held only in your <b>session</b>: a one-hour hot copy plus an inputs-only recovery copy kept for the selected 1-hour-to-14-day period. The opaque browser cookie and small server-side workspace index last for up to two weeks. There is no account or permanent saved-modelings library, so export/import remains the durable round-trip.</p>
 
 <!-- ============ DECISIONS ============ -->
 <h2 class="sec">Decisions taken</h2>
@@ -465,6 +519,8 @@
   <tr><td><b>Loading is POST-only; the recovery download and <code>/recover/</code> are GET.</b></td><td>A bare GET must not mutate the session modeling. But a read-only escape hatch has to stay reachable even when the modeling is what crashes the deserializer — so the recovery reads and the raw download are safe GETs that never build the modeling.</td></tr>
   <tr><td><b>The recovery page is fully decoupled from the modeling.</b></td><td>It must render precisely when the modeling is broken, so it reads only the slot index + a cache-existence check and never deserializes. Anything that touched the modeling could fail the same way the builder just did.</td></tr>
   <tr><td><b>The bug report carries versions and the error type only — no traceback, no modeling data.</b></td><td>The report opens a public GitHub issue; leaking modeling contents or a stack trace there would be a privacy and noise problem. The user is asked to attach the file they just downloaded if they choose to.</td></tr>
+  <tr><td><b>Recovery retention is session-wide and changes expiry in place.</b></td><td>The allowlisted 1-hour-to-14-day choice is browser-session policy, not modeling content. It touches each live PostgreSQL expiry once, leaves Redis unchanged, and reports partial disappearance without loading or rewriting payloads.</td></tr>
+  <tr><td><b>Workspace size is read from the slot index.</b></td><td>The panel sums the canonical per-slot byte integers written after successful saves. It never hydrates or serializes a modeling just to explain storage.</td></tr>
   <tr><td><b>Destructive confirms are decided at click time from the live DOM, not baked into the markup.</b></td><td>The toolbar outlives partial swaps, so a baked-in <code>hx-confirm</code> would go stale; reset only prompts when the modeling is actually non-empty, read live at click time.</td></tr>
   <tr><td><b>"Open file" (replace here) and "+Add → Import" (add as second) are distinct intents with separate panels.</b></td><td>Opening-into-the-current-slot and adding-a-second-model-to-compare are different actions; collapsing them into one would make it ambiguous whether a file replaces or augments your work.</td></tr>
 </table>
@@ -482,7 +538,9 @@
       <dt>Recovery &amp; reset (Phase C)</dt>
       <dd><code>render_recovery_page</code> (from <code>model_builder_main</code>'s try/except), <code>recover/</code> → <code>recover_model</code>, project <code>handler500</code> → <code>server_error</code>; template <code>model_builder/recovery.html</code> (never references <code>model_web</code>). Raw download <code>download-raw-json/?slot=N</code> → <code>download_raw_json</code> (serves <code>get_system_data()</code> verbatim). Bug URL <code>build_report_bug_url</code> (versions + error type only). Reset <code>reset-model/</code> → <code>reset_model</code> (POST; scratch baseline; re-opens picker). Click-time confirms in <code>model_builder_main.js</code> (<code>data-confirm-when-model-not-empty</code>).</dd>
       <dt>Persistence</dt>
-      <dd><code>adapters/repositories/session_system_repository.py</code> (cache key <code>system_data:{session}:{slot}</code>; Redis TTL 600s / Postgres 43200s; <code>save_data</code> merges <code>interface_config</code> + version; <code>MAX_PAYLOAD_SIZE_MB</code> ≈ 30, a <b>shared budget</b> across both slots → <code>PayloadSizeLimitExceeded</code> on save), <code>session_workspace_repository.py</code>, <code>workspace_index.py</code>; serialization/migration in <code>system_import_service.py</code>, <code>version_upgrade_handlers.py</code>; library <code>system_to_json</code>, <code>duplicate_system</code>.</dd>
+      <dd><code>adapters/repositories/session_system_repository.py</code> (cache key <code>system_data:{session}:{slot}</code>; one-hour Redis TTL; Postgres TTL from the validated session preference; <code>save_data</code> merges <code>interface_config</code> + version; <code>MAX_PAYLOAD_SIZE_MB</code> is a <b>shared budget</b> across both slots → <code>PayloadSizeLimitExceeded</code> on save), <code>recovery_retention.py</code>, <code>session_workspace_repository.py</code>, <code>workspace_index.py</code>; serialization/migration in <code>system_import_service.py</code>, <code>version_upgrade_handlers.py</code>.</dd>
+      <dt>Data &amp; privacy</dt>
+      <dd><code>data-privacy/</code> → <code>views_support.data_privacy</code> → <code>side_panels/data_privacy.html</code>; <code>recovery-retention/</code> validates the closed duration set and touches existing Postgres rows. <code>data_status.py</code> reads disclosure settings and <code>WorkspaceIndex.workspace_size_bytes()</code> only. Deployment facts remain configured independently so self-hosted instances do not inherit public-service claims.</dd>
       <dt>Not built (clarifications)</dt>
       <dd>No drag-and-drop and no client-side validation — a plain native file input, validated server-side only. No accounts / named server-side saved modelings — session cache only (a modeling is lost when its TTL lapses unless exported). The Sources <em>xlsx</em> is the only spreadsheet; the modeling itself is JSON.</dd>
     </dl>

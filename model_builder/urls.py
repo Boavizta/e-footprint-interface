@@ -16,6 +16,9 @@ from .adapters.views import sankey_views
 urlpatterns = [
     path("", views.model_builder_main, name="model-builder"),
     path("support/", model_builder.adapters.views.views_support.support, name="model-builder-support"),
+    path("data-privacy/", model_builder.adapters.views.views_support.data_privacy, name="data-privacy"),
+    path("recovery-retention/", model_builder.adapters.views.views_support.update_recovery_retention,
+         name="update-recovery-retention"),
     path("open-template-picker/", model_builder.adapters.views.views_onboarding.open_template_picker,
          name="open-template-picker"),
     path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,
