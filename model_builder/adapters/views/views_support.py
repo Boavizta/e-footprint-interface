@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from model_builder.adapters.repositories import SessionWorkspaceRepository
+from model_builder.adapters.repositories.cache_backend import CacheTouchOutcome
 from model_builder.adapters.repositories.recovery_retention import set_recovery_retention
 from model_builder.adapters.repositories.workspace_index import WorkspaceIndex
 from model_builder.adapters.views.data_status import build_data_status, format_duration
@@ -73,6 +74,7 @@ def update_recovery_retention(request):
         }
     retention_results = {
         "summary": f"Recovery retention is now {format_duration(retention_seconds)}.",
-        "slots": [{"label": role_labels[slot], "updated": updated} for slot, updated in results.items()],
+        "slots": [{"label": role_labels[slot], "outcome": outcome.value} for slot, outcome in results.items()],
+        "has_errors": any(outcome is CacheTouchOutcome.ERROR for outcome in results.values()),
     }
     return _render_data_privacy(request, retention_results)

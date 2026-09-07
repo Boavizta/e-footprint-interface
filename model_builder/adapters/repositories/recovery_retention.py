@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sessions.backends.base import SessionBase
 
-from model_builder.adapters.repositories.cache_backend import CacheBackend
+from model_builder.adapters.repositories.cache_backend import CacheBackend, CacheTouchOutcome
 from model_builder.adapters.repositories.workspace_index import WorkspaceIndex
 
 SYSTEM_DATA_CACHE_NAMESPACE = "system_data"
@@ -47,7 +47,7 @@ def get_recovery_retention_seconds(
     return value
 
 
-def set_recovery_retention(session: SessionBase, seconds: int) -> Dict[int, bool]:
+def set_recovery_retention(session: SessionBase, seconds: int) -> Dict[int, CacheTouchOutcome]:
     """Persist a valid preference and touch each saved slot's Postgres recovery expiry.
 
     The preference is committed before touches so a concurrently expired slot cannot roll back the
@@ -62,7 +62,7 @@ def set_recovery_retention(session: SessionBase, seconds: int) -> Dict[int, bool
 
     index = WorkspaceIndex(session)
     saved_slots = index.slot_sizes()
-    results: Dict[int, bool] = {}
+    results: Dict[int, CacheTouchOutcome] = {}
     cache_backend = CacheBackend()
     session_key = session.session_key
     for slot in index.slots():

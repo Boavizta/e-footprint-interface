@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from django.test import Client
 
-from model_builder.adapters.repositories.cache_backend import CacheBackend
+from model_builder.adapters.repositories.cache_backend import CacheBackend, CacheTouchOutcome
 from model_builder.adapters.repositories.recovery_retention import (
     APPROVED_RECOVERY_RETENTION_SECONDS,
     RECOVERY_RETENTION_SESSION_KEY,
@@ -31,6 +31,7 @@ def _configure_public_deployment(settings):
     settings.DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY = "daily"
     settings.DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS = 7
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = False
+    settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW = "overnight"
     settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = True
 
 
@@ -112,6 +113,7 @@ def test_data_privacy_route_is_standalone_and_self_host_facts_are_not_assumed(cl
     settings.DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST = None
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED = None
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = None
+    settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW = ""
     settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = False
 
     with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 8):
@@ -125,6 +127,8 @@ def test_data_privacy_route_is_standalone_and_self_host_facts_are_not_assumed(cl
     assert "Paris" not in content
     assert "8 MB limit is the capacity policy configured for this deployment" in content
     assert "No at-rest encryption assurance is configured" in content
+    assert "No PostgreSQL backup-lifecycle assurance is configured" in content
+    assert "PostgreSQL backups are disabled" not in content
 
 
 @pytest.mark.django_db
@@ -136,7 +140,12 @@ def test_retention_update_persists_the_choice_and_reports_each_saved_slot(client
     index.set_slot_size(1, 200)
     session.save()
 
-    with patch.object(CacheBackend, "touch_postgres", autospec=True, side_effect=[True, False]) as touch:
+    with patch.object(
+        CacheBackend,
+        "touch_postgres",
+        autospec=True,
+        side_effect=[CacheTouchOutcome.UPDATED, CacheTouchOutcome.MISSING],
+    ) as touch:
         response = client.post(
             "/model_builder/recovery-retention/",
             {"retention_seconds": 6 * 3600},
@@ -152,10 +161,32 @@ def test_retention_update_persists_the_choice_and_reports_each_saved_slot(client
     assert "Reference modeling: existing recovery expiry updated" in normalized_content
     assert "Comparison modeling:" in normalized_content
     assert "had already" in normalized_content
+    assert "storage was unavailable" not in normalized_content
     assert re.search(r'<option value="21600"\s+selected>', content)
 
     navigation_response = client.get("/model_builder/data-privacy/", HTTP_HX_REQUEST="true")
     assert re.search(r'<option value="21600"\s+selected>', navigation_response.content.decode())
+
+
+@pytest.mark.django_db
+def test_retention_update_reports_backend_failure_without_claiming_disappearance(client, settings):
+    _configure_public_deployment(settings)
+    session = client.session
+    WorkspaceIndex(session).set_slot_size(0, 100)
+    session.save()
+
+    with patch.object(CacheBackend, "touch_postgres", autospec=True, return_value=CacheTouchOutcome.ERROR):
+        response = client.post(
+            "/model_builder/recovery-retention/",
+            {"retention_seconds": 6 * 3600},
+            HTTP_HX_REQUEST="true",
+        )
+
+    content = " ".join(response.content.decode().split())
+    assert response.status_code == 200
+    assert "alert-warning" in content
+    assert "storage was unavailable" in content
+    assert "had already expired" not in content
 
 
 @pytest.mark.django_db
