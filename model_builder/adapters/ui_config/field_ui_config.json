@@ -667,7 +667,9 @@
             "EdgeUsagePattern"
         ],
         "label": "Edge usage journeys",
-        "min_items": 1
+        "min_items": 1,
+        "membership_title": "Used in usage patterns",
+        "add_to_label": "Add to pattern"
     },
     "hourly_deployment_starts": {
         "modeling_obj_containers": [

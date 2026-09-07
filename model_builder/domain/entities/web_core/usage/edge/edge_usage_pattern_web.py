@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class EdgeUsagePatternWeb(UsagePatternWebBaseClass):
     required_non_empty_relationships = frozenset({"edge_usage_journeys"})
+    reverse_list_membership_relationships = frozenset({"edge_usage_journeys"})
     default_values = {"hourly_deployment_starts": ExplainableHourlyQuantitiesFromFormInputs(
         {"start_date": default_modeling_start_date(), "modeling_duration_value": 3, "modeling_duration_unit": "year",
          "net_growth_rate_in_percentage": 10, "net_growth_rate_timespan": "year",

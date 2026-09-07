@@ -84,6 +84,60 @@ def dict_membership_specs(child_class: type) -> List[Tuple[type, str]]:
             in dict_relationship_registry() if issubclass(child_class, registry_child_class)]
 
 
+@lru_cache(maxsize=1)
+def reverse_list_membership_registry() -> Tuple[Tuple[type, str, type], ...]:
+    """Opted-in non-nested list relationships exposed from the child's edit panel.
+
+    Parent web wrappers declare attribute names in ``reverse_list_membership_relationships``.
+    The child type remains derived from the library constructor annotation so the declaration
+    cannot drift into a second source of relationship truth.
+    """
+    from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+
+    entries = []
+    for parent_class_name, parent_web_class in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.items():
+        attr_names = getattr(parent_web_class, "reverse_list_membership_relationships", frozenset())
+        if not attr_names or parent_class_name not in MODELING_OBJECT_CLASSES_DICT:
+            continue
+        parent_class = MODELING_OBJECT_CLASSES_DICT[parent_class_name]
+        init_params = get_init_signature_params(parent_class)
+        for attr_name in attr_names:
+            if attr_name not in init_params:
+                raise ValueError(
+                    f"{parent_web_class.__name__}.reverse_list_membership_relationships names unknown "
+                    f"constructor attribute {parent_class.__name__}.{attr_name}.")
+            annotation = init_params[attr_name].annotation
+            if get_origin(annotation) not in (list, List):
+                raise ValueError(
+                    f"{parent_class.__name__}.{attr_name} must be annotated as a list to expose reverse membership.")
+            type_arg = get_args(annotation)[0]
+            child_class = MODELING_OBJECT_CLASSES_DICT[type_arg] if isinstance(type_arg, str) else type_arg
+            entries.append((parent_class, attr_name, child_class))
+    return tuple(dict.fromkeys(entries))
+
+
+def reverse_list_membership_specs(child_class: type) -> List[Tuple[type, str]]:
+    """Opted-in ``(parent class, list attr)`` pairs accepting ``child_class``."""
+    return [(parent_class, attr_name) for parent_class, attr_name, registry_child_class
+            in reverse_list_membership_registry() if issubclass(child_class, registry_child_class)]
+
+
+def resolve_reverse_list_attr(parent_obj: ModelingObject, child_obj: ModelingObject) -> str:
+    """Resolve the opted-in list relationship between a parent and child instance."""
+    matches = list(dict.fromkeys(
+        attr_name for parent_class, attr_name, child_class in reverse_list_membership_registry()
+        if isinstance(parent_obj, parent_class) and isinstance(child_obj, child_class)))
+    if not matches:
+        raise ValueError(
+            f"Object {child_obj.id} cannot be linked into any exposed list attribute of "
+            f"{type(parent_obj).__name__} {parent_obj.id}.")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Object {child_obj.id} cannot be unambiguously linked into an exposed list attribute of "
+            f"{type(parent_obj).__name__} {parent_obj.id} (matching attributes: {matches}).")
+    return matches[0]
+
+
 def serialize_weighted_dict_entry(value) -> dict:
     """Serialize one weighted-dict value into the parsed-form-data shape, preserving its label and source."""
     entry = {"value": value.value.magnitude, "unit": "dimensionless", "label": value.label}

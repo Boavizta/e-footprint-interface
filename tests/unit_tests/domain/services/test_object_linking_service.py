@@ -4,6 +4,8 @@ from unittest.mock import MagicMock
 import pytest
 from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
+from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
+from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 from efootprint.core.usage.edge.recurrent_server_need import RecurrentServerNeed
 from efootprint.core.usage.job import Job, JobBase
 from efootprint.core.usage.usage_journey import UsageJourney
@@ -12,7 +14,8 @@ from efootprint.core.usage.usage_pattern import UsagePattern
 
 from model_builder.domain.services.object_linking_service import (
     dict_attr_names_for_class, dict_membership_specs, dict_relationship_registry, resolve_dict_attr,
-    resolve_dict_attr_for_classes)
+    resolve_dict_attr_for_classes, resolve_reverse_list_attr, reverse_list_membership_registry,
+    reverse_list_membership_specs)
 
 
 def test_registry_is_exactly_the_known_weighted_relationships():
@@ -82,3 +85,25 @@ def test_dict_attr_names_for_class():
     assert dict_attr_names_for_class(UsageJourney) == ["uj_steps"]
     assert dict_attr_names_for_class(UsagePattern) == ["usage_journeys"]
     assert dict_attr_names_for_class(Job) == []
+
+
+def test_reverse_list_membership_registry_is_explicitly_opted_in():
+    assert reverse_list_membership_registry() == (
+        (EdgeUsagePattern, "edge_usage_journeys", EdgeUsageJourney),
+    )
+    assert reverse_list_membership_specs(EdgeUsageJourney) == [
+        (EdgeUsagePattern, "edge_usage_journeys")
+    ]
+    # Other list relationships remain parent-owned/nested and do not grow backlink sections.
+    assert reverse_list_membership_specs(EdgeDevice) == []
+
+
+def test_resolve_reverse_list_attr_rejects_non_exposed_list_relationship():
+    parent = MagicMock(spec=EdgeUsagePattern)
+    child = MagicMock(spec=EdgeUsageJourney)
+    assert resolve_reverse_list_attr(parent, child) == "edge_usage_journeys"
+
+    journey = UsageJourney("Journey", uj_steps=[])
+    step = UsageJourneyStep.from_defaults("Step", jobs=[])
+    with pytest.raises(ValueError, match="cannot be linked into any exposed list attribute"):
+        resolve_reverse_list_attr(journey, step)

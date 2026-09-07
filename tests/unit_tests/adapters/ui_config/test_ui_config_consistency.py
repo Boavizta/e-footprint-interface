@@ -12,7 +12,8 @@ from model_builder.adapters.ui_config import CLASS_UI_CONFIG
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.domain.services.object_linking_service import dict_relationship_registry
+from model_builder.domain.services.object_linking_service import (
+    dict_relationship_registry, reverse_list_membership_registry)
 
 
 # Interface-side abstract bases that legitimately key `class_ui_config.json` entries
@@ -106,4 +107,17 @@ def test_every_dict_relationship_has_membership_wording_configured():
     assert not missing, (
         f"Dict relationships missing membership wording in field_ui_config.json: {missing}. "
         f"Add the keys under the attribute entry (class-qualified key if the attr name is shared)."
+    )
+
+
+def test_every_reverse_list_membership_has_wording_configured():
+    missing = []
+    for parent_class, attr_name, _ in reverse_list_membership_registry():
+        config = FieldUIConfigProvider.get_config(attr_name, parent_class.__name__)
+        for key in ("membership_title", "add_to_label"):
+            if not config.get(key):
+                missing.append(f"{parent_class.__name__}.{attr_name}: {key}")
+    assert not missing, (
+        f"Reverse list memberships missing wording in field_ui_config.json: {missing}. "
+        f"Add membership_title and add_to_label under the attribute entry."
     )

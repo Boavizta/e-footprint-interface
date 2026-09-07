@@ -141,6 +141,7 @@ class FormContextBuilder:
         strategy = strategy_class(self.model_web)
         context = strategy.build_edition_context(obj_to_edit, config)
         context.update(self.build_dict_membership_section_context(obj_to_edit))
+        context.update(self.build_list_membership_section_context(obj_to_edit))
         return context
 
     @staticmethod
@@ -168,6 +169,16 @@ class FormContextBuilder:
             "add_to_label": config.get("add_to_label", "Add"),
             "min_count": config.get("min_count", 0),
             "strictly_positive": config.get("strictly_positive", False),
+        }
+
+    @staticmethod
+    def build_list_membership_section_context(web_obj: "ModelingObjectWeb") -> dict:
+        """Build editable backlinks for opted-in, non-nested list relationships."""
+        return {
+            "object_to_edit": web_obj,
+            "list_membership_sections": [
+                FormContextBuilder._hydrate_membership_section(section)
+                for section in web_obj.list_membership_sections],
         }
 
     @staticmethod

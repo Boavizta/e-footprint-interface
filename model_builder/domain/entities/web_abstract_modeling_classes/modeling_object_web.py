@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 
 class ModelingObjectWeb:
     renders_relationship_children_as_nested_cards = True
+    # List relationships are ownership/nesting by default. Top-level reference relationships that
+    # need an editable backlink from the child panel opt in by attribute name on their parent wrapper.
+    reverse_list_membership_relationships = frozenset()
     default_values = {}
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
@@ -243,6 +246,46 @@ class ModelingObjectWeb:
                     "memberships": memberships,
                     "available_parents": [
                         {"efootprint_id": parent.id, "name": parent.name} for parent in available_parents]})
+        return sections
+
+    @property
+    def list_membership_sections(self) -> List[dict]:
+        """Reverse view of opted-in, non-nested list relationships.
+
+        This is the list counterpart of ``dict_membership_sections``. It intentionally covers only
+        relationships declared by the parent web wrapper, because most list relationships represent
+        nested ownership and already have their own parent-side editing journey.
+        """
+        from model_builder.domain.services.object_linking_service import reverse_list_membership_specs
+        from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+
+        sections = []
+        for parent_class, attr_name in reverse_list_membership_specs(type(self._modeling_obj)):
+            parents = sorted(
+                (obj for obj in self.model_web.flat_efootprint_objs_dict.values() if isinstance(obj, parent_class)),
+                key=lambda parent: parent.name)
+            parent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(parent_class.__name__)
+            required_attrs = getattr(parent_web_class, "required_non_empty_relationships", frozenset())
+            memberships = [
+                {
+                    "parent_id": parent.id,
+                    "parent_name": parent.name,
+                    "unlink_disabled": attr_name in required_attrs and len(getattr(parent, attr_name)) == 1,
+                }
+                for parent in parents
+                if self._modeling_obj in getattr(parent, attr_name)
+            ]
+            member_ids = {membership["parent_id"] for membership in memberships}
+            available_parents = self.filter_available_membership_parents(
+                attr_name, [parent for parent in parents if parent.id not in member_ids])
+            if memberships or available_parents:
+                sections.append({
+                    "parent_class_name": parent_class.__name__,
+                    "attr_name": attr_name,
+                    "memberships": memberships,
+                    "available_parents": [
+                        {"efootprint_id": parent.id, "name": parent.name} for parent in available_parents],
+                })
         return sections
 
     def filter_available_membership_parents(self, attr_name: str, candidate_parents: list) -> list:

@@ -194,7 +194,7 @@ class TestEdgeObjects:
         server_manufacturing = page.evaluate("window.emissions.values['Servers_and_storage_manufacturing']")
         assert any(value > 0 for value in server_energy) or any(value > 0 for value in server_manufacturing)
 
-    def test_edge_pattern_selects_multiple_edge_usage_journeys(
+    def test_edge_pattern_and_journey_forms_update_shared_relationship(
         self, edge_system_in_browser: ModelBuilderPage
     ):
         model_builder = edge_system_in_browser
@@ -220,6 +220,23 @@ class TestEdgeObjects:
         expect(page.locator(
             "#objects-already-selected-for-EdgeUsagePattern_edge_usage_journeys tr"
         )).to_contain_text("Edge Journey 2")
+        side_panel.close()
+
+        model_builder.get_object_card("EdgeUsageJourney", "Edge Journey 1").click_edit_button()
+        expect(page.get_by_text("Used in usage patterns", exact=True)).to_be_visible()
+        side_panel.add_list_membership("Shared deployment")
+        membership = page.locator("[data-list-membership-name='Shared deployment']")
+        expect(membership).to_be_visible()
+        expect(membership.locator("button.unlink-btn")).to_be_enabled()
+
+        side_panel.remove_list_membership("Shared deployment")
+        expect(membership).to_have_count(0)
+        side_panel.close()
+
+        model_builder.get_object_card("EdgeUsageJourney", "Edge Journey 2").click_edit_button()
+        required_membership = page.locator("[data-list-membership-name='Shared deployment']")
+        expect(required_membership).to_be_visible()
+        expect(required_membership.locator("button.unlink-btn")).to_be_disabled()
 
     def test_edge_device_with_advanced_options(self, empty_model_builder: ModelBuilderPage):
         """Create edge device with advanced parameters."""

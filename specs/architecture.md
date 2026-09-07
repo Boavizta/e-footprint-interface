@@ -338,6 +338,22 @@ mirrored server-side by a guard in `link_dict_entry`).
 
 The `dict_count` form widget (`dict_count.html` + `dict_count.js`) provides per-entry count inputs on the parent panel; its options pass through the symmetric `filter_dict_count_options` hook (`EdgeDeviceGroupWeb` excludes the group itself and all its ancestors from the sub-group picker).
 
+### Non-nested list backlinks
+
+Most list relationships are ownership containers and are edited from their parent. Reusable top-level objects can
+instead expose an editable reverse membership section by declaring the attribute name in the parent web wrapper's
+`reverse_list_membership_relationships`. The parent and child types still come from the library constructor annotation
+through `reverse_list_membership_registry()`; the web declaration only opts the relationship into this UI.
+`ModelingObjectWeb.list_membership_sections` supplies the child's edit panel with current and available parents, and
+`list_membership_section.html` provides add/remove actions. The generic `link-list-entry` and `unlink-list-entry`
+endpoints edit the parent through `EditObjectUseCase`, refresh its card and canvas links, and OOB-refresh the open child
+membership section. Required relationships disable removal of their final member in the UI, while the library
+constructor remains the authoritative server-side validation.
+
+`EdgeUsagePatternWeb` opts `edge_usage_journeys` into this pattern. An edge usage journey can therefore update every
+usage pattern that references it without treating those reusable journeys as nested pattern children. Other list
+relationships remain unchanged unless their parent wrapper explicitly opts in.
+
 ### Required pattern-to-journey relationships
 
 Usage patterns are top-level drivers rather than ownership containers. `UsagePattern.usage_journeys` is a weighted dict
@@ -346,7 +362,9 @@ membership list (`select_multiple`, labelled “Functionality bundles”). Their
 required, preselect the first available journey during creation, and set
 `renders_relationship_children_as_nested_cards = False` so the
 generic mirrored-card traversal does not treat these references as rendered ownership containers. Journeys therefore
-remain single top-level cards; `links_to` emits one canvas edge from the pattern to each selected journey.
+remain single top-level cards; `links_to` emits one canvas edge from the pattern to each selected journey. The ordinary
+journey's reverse edit section comes from the weighted-dict mechanism; the edge journey's equivalent comes from the
+opted-in non-nested list backlink mechanism above.
 
 `field_ui_config.json` supplies `min_items: 1` and `strictly_positive: true` for required web weights. The shared widgets expose those
 limits as data attributes, disable removal of the final row, and reject non-positive weights before submission. These

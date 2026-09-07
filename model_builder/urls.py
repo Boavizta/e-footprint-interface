@@ -3,6 +3,7 @@ from django.urls import path
 import model_builder.adapters.views.views_addition
 import model_builder.adapters.views.views_deletion
 import model_builder.adapters.views.views_dict_mutation
+import model_builder.adapters.views.views_list_mutation
 import model_builder.adapters.views.views_edition
 import model_builder.adapters.views.views_help
 import model_builder.adapters.views.views_onboarding
@@ -51,6 +52,12 @@ urlpatterns = [
     path("link-dict-entry/<str:key_id>/",
          model_builder.adapters.views.views_dict_mutation.link_dict_entry,
          name="link-dict-entry"),
+    path("unlink-list-entry/<str:parent_id>/<str:child_id>/",
+         model_builder.adapters.views.views_list_mutation.unlink_list_entry,
+         name="unlink-list-entry"),
+    path("link-list-entry/<str:child_id>/",
+         model_builder.adapters.views.views_list_mutation.link_list_entry,
+         name="link-list-entry"),
     path("delete-object/<object_id>/", model_builder.adapters.views.views_deletion.delete_object, name="delete-object"),
     path("ask-delete-object/<object_id>/", model_builder.adapters.views.views_deletion.ask_delete_object, name="ask-delete-object"),
     path("download-json/", views.download_json, name="download-json"),

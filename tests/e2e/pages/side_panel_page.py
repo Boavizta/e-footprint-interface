@@ -210,6 +210,19 @@ class SidePanelPage:
         )
         return self
 
+    def add_list_membership(self, parent_name: str):
+        """Add the edited object to a parent through a non-nested list backlink section."""
+        section = self.panel.locator(".list-membership-section").first
+        section.locator("select[name='parent_id']").select_option(label=parent_name)
+        click_and_wait_for_htmx(self.page, section.get_by_role("button", name="Add to pattern"))
+        return self
+
+    def remove_list_membership(self, parent_name: str):
+        """Remove the edited object from a parent through a non-nested list backlink section."""
+        row = self.panel.locator(f"[data-list-membership-name='{parent_name}']").first
+        click_and_wait_for_htmx(self.page, row.locator("button.unlink-btn"))
+        return self
+
     def get_type_selector(self):
         """Get the object type selector dropdown (scoped to the visible form)."""
         # Scope to sidePanelForm to avoid matching hidden storage form selector
