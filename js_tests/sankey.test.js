@@ -7,7 +7,7 @@
  */
 
 // Mock htmx before requiring sankey.js (it runs addEventListener at load time)
-global.htmx = { trigger: jest.fn() };
+global.htmx = { ajax: jest.fn(() => Promise.resolve()), trigger: jest.fn() };
 global.ResizeObserver = class {
     observe() {}
     disconnect() {}
@@ -15,7 +15,7 @@ global.ResizeObserver = class {
 global.echarts = {
     init: jest.fn()
 };
-global.fetch = jest.fn(() => Promise.resolve());
+global.fetch = jest.fn(() => Promise.resolve({ok: true}));
 
 // Mock document.body.addEventListener for HTMX events (added at module load)
 // jsdom supports this natively, so no special setup needed.
@@ -65,6 +65,7 @@ function getHiddenInput(form, inputKey) {
 // ---------------------------------------------------------------------------
 
 beforeEach(() => {
+    htmx.ajax.mockClear();
     htmx.trigger.mockClear();
     echarts.init.mockReset();
     fetch.mockClear();
@@ -246,17 +247,23 @@ describe('ECharts rendering', () => {
 });
 
 describe('sankeyRemoveCard', () => {
-    test('posts persisted deletion before removing the card', () => {
+    test('posts persisted deletion and refreshes storage metadata through the real producer', async () => {
         jest.useFakeTimers();
-        document.body.innerHTML = '<input name="csrfmiddlewaretoken" value="token-123"><div id="sankey-card-1"></div><div id="sankey-plot-1"></div>';
+        document.body.innerHTML = '<input name="csrfmiddlewaretoken" value="token-123"><div id="workspace-storage-status"></div><div id="sankey-card-1"></div><div id="sankey-plot-1"></div>';
 
-        sankeyRemoveCard('1');
+        const deletionRequest = sankeyRemoveCard('1');
 
         expect(fetch).toHaveBeenCalledWith('/model_builder/sankey-delete-card/', expect.objectContaining({
             method: 'POST',
             headers: expect.objectContaining({ 'X-CSRFToken': 'token-123' }),
             body: 'card_id=1'
         }));
+        await deletionRequest;
+        expect(htmx.ajax).toHaveBeenCalledWith(
+            'GET',
+            '/model_builder/workspace-storage-status/',
+            {target: '#workspace-storage-status', swap: 'none'}
+        );
 
         jest.runAllTimers();
         expect(document.getElementById('sankey-card-1')).toBeNull();

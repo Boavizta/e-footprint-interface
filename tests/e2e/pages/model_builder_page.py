@@ -116,6 +116,20 @@ class ModelBuilderPage:
         )
         return self
 
+    def close_side_panel(self):
+        """Close the open side panel through its visible close control."""
+        self.side_panel.close_button.click()
+        self.side_panel.panel.wait_for(state="hidden")
+        return self
+
+    def open_feedback_from_desktop_navbar(self):
+        """Open the feedback flow through the visible desktop navigation entry."""
+        link = self.page.locator("a.custom-github-button[data-action='open-feedback']")
+        with self.page.expect_response(lambda response: "/model_builder/support/" in response.url):
+            link.click()
+        self.page.locator("#sidePanelTitle", has_text="Report or give feedback").wait_for(state="visible")
+        return self
+
     def pick_template(self, template_id: str):
         """Click a template card in the picker and wait for the canvas to load."""
         click_and_wait_for_htmx(self.page, self.template_picker.locator(f"[data-template-id='{template_id}']"))

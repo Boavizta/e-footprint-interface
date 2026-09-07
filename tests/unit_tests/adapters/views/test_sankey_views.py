@@ -273,9 +273,7 @@ class TestSankeyCards:
         response = client.post("/model_builder/sankey-delete-card/", {"card_id": "deadbeef"})
 
         assert response.status_code == 200
-        content = response.content.decode()
-        assert content.count('id="workspace-storage-status"') == 1
-        assert 'hx-swap-oob="innerHTML:#workspace-storage-status"' in content
+        assert response.content == b""
         repository = SessionSystemRepository(client.session)
         saved_data = repository.get_system_data()
         assert saved_data["interface_config"]["sankey_diagrams"] == [

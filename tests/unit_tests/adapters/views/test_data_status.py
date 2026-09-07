@@ -62,21 +62,23 @@ def test_data_status_uses_integer_workspace_metadata_and_configured_facts(settin
 
 
 @pytest.mark.parametrize(
-    ("workspace_size_bytes", "expected_warning"),
+    ("workspace_limit_mb", "workspace_size_bytes", "expected_warning"),
     [
-        (4 * 1024 * 1024 - 1, False),
-        (4 * 1024 * 1024, True),
-        (5 * 1024 * 1024, True),
+        (5, 4 * 1024 * 1024 - 1, False),
+        (5, 4 * 1024 * 1024, True),
+        (5, 5 * 1024 * 1024, True),
+        (0.001, 838, False),
+        (0.001, 839, True),
     ],
 )
 def test_workspace_storage_warning_uses_the_exact_eighty_percent_boundary(
-    settings, workspace_size_bytes, expected_warning
+    settings, workspace_limit_mb, workspace_size_bytes, expected_warning
 ):
     _configure_public_deployment(settings)
     session = DictSession()
     WorkspaceIndex(session).set_slot_size(0, workspace_size_bytes)
 
-    with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 5):
+    with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", workspace_limit_mb):
         status = build_data_status(session)
 
     assert status.show_workspace_storage_warning is expected_warning
@@ -100,8 +102,8 @@ def test_workspace_storage_status_is_metadata_only_and_keeps_one_accessible_oob_
     assert response.status_code == 200
     assert content.count('id="workspace-storage-status"') == 1
     assert 'hx-swap-oob="innerHTML:#workspace-storage-status"' in content
-    assert 'aria-live="polite"' in content
-    assert 'role="status"' in content
+    assert content.count('aria-live="polite"') == 1
+    assert 'role="status"' not in content
     assert "4 MB of 5 MB" in content
     assert 'href="/model_builder/data-privacy/"' in content
     assert "Workspace storage is nearly full" in content
