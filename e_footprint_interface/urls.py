@@ -2,10 +2,12 @@ from django.contrib import admin
 from django.urls import include, path
 from . import views
 from model_builder.adapters.views.views_onboarding import load_template_deeplink
+from model_builder.adapters.views.views_support import support
 
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("support/", support, name="support"),
     # Live, intentionally-unlinked design catalogue for contributors (tokens + real components).
     path("design/", views.design_catalogue, name="design-catalogue"),
     # Shareable deep link from the docs' "Load this scenario" links → load it and land on the canvas.

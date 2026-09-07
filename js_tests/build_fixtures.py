@@ -567,6 +567,27 @@ def render_timeseries_preview(case_ctx):
 
 
 # ---------------------------------------------------------------------------
+# support.test.js — support.html progressive-enhancement content
+# ---------------------------------------------------------------------------
+
+SUPPORT_CASES = {
+    "support_panel_with_model": {
+        "standalone": False,
+        "has_saved_model": True,
+        "download_model_url": "/model_builder/download-json/",
+        "github_bug_url": "https://github.com/example/issues/new?title=bug",
+        "github_feedback_url": "https://github.com/example/issues/new?title=feedback",
+        "email_bug_url": "mailto:feedback@example.com?subject=bug",
+        "email_feedback_url": "mailto:feedback@example.com?subject=feedback",
+    },
+}
+
+
+def render_support(case_ctx):
+    return render_to_string("model_builder/support.html", case_ctx)
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -584,6 +605,7 @@ GROUPS = [
     (WEEKLY_PATTERN_CASES, render_weekly_pattern),
     (HOURLY_PREVIEW_CASES, render_hourly_preview),
     (TIMESERIES_PREVIEW_CASES, render_timeseries_preview),
+    (SUPPORT_CASES, render_support),
 ]
 
 
