@@ -40,7 +40,9 @@ const FORMATTED_VALUE_TOOLTIP = {
 // Format a value-axis tick in the chart's shared display unit. The data rides in kg; the adapter
 // ships ``axisScale`` (the kg → display-unit factor) and ``axisUnit`` (the axis-title label) so a
 // tonne-scale comparison reads on a tonne axis instead of a six-figure kg one. The unit lives in the
-// axis title, so a tick is just the scaled number with its float-conversion noise trimmed.
+// axis title, so a tick is just the scaled number with its float-conversion noise trimmed. The
+// six-significant-figure cap is only that floating-point guard; it is not the precision policy for
+// reported values.
 function formatAxisTick(value, scale) {
     return Number((value * (scale || 1)).toPrecision(6)).toLocaleString("en-US");
 }

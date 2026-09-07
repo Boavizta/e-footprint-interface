@@ -39,6 +39,11 @@ Scope: interface labels, docs, and training material. English (US spelling).
 - Unit choice: pick the unit that makes the number read **≥ 1** ("3 mg", not "0.003 g") — also
   the core code's behavior (`best_display_unit`). Exception: a comparison table may fix one
   unit for the whole column, even if small values go below 1.
+- Timeseries charts: pick one shared display unit from the mean absolute magnitude of the full
+  series. In chart tooltips, show each point in that unit with exactly one decimal place
+  (for example, `12.0 kg`). This is a deliberate exception to the general precision rule.
+- Chart axes: retain the chart library's readable tick values; format them with English thousands
+  separators and decimal points. Do not apply the general significant-figure rule to axis ticks.
 - Multiplication sign: **×** (never the letter x) — "×5", "10–100×".
 - Ranges: en dash without spaces — "10–100×".
 - Approximation: **~** before a number ("~2,000×"); **≈** between quantities ("1 clip ≈ 400
