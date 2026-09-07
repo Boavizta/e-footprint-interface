@@ -15,6 +15,11 @@ from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.adapters.repositories.cache_backend import CacheBackend
+from model_builder.adapters.repositories.recovery_retention import (
+    DEFAULT_RECOVERY_RETENTION_SECONDS,
+    SYSTEM_DATA_CACHE_NAMESPACE,
+    get_recovery_retention_seconds,
+)
 from model_builder.adapters.repositories.workspace_index import WorkspaceIndex
 
 
@@ -33,13 +38,13 @@ class SessionSystemRepository(ISystemRepository):
         repository.save_data(modified_data)
     """
 
-    SYSTEM_DATA_KEY = "system_data"
+    SYSTEM_DATA_KEY = SYSTEM_DATA_CACHE_NAMESPACE
     INTERFACE_CONFIG_SESSION_KEY = "interface_config"
     INTERFACE_VERSION_SESSION_KEY = "efootprint_interface_version"
     REDIS_CACHE_ALIAS = os.environ.get("SYSTEM_DATA_REDIS_CACHE_ALIAS", "redis")
     POSTGRES_CACHE_ALIAS = os.environ.get("SYSTEM_DATA_POSTGRES_CACHE_ALIAS", "postgres")
-    REDIS_CACHE_TIMEOUT_SECONDS = int(os.environ.get("SYSTEM_DATA_REDIS_TTL_SECONDS", "600"))
-    POSTGRES_CACHE_TIMEOUT_SECONDS = int(os.environ.get("SYSTEM_DATA_POSTGRES_TTL_SECONDS", "43200"))
+    REDIS_CACHE_TIMEOUT_SECONDS = int(os.environ.get("SYSTEM_DATA_REDIS_TTL_SECONDS", "3600"))
+    POSTGRES_CACHE_TIMEOUT_SECONDS = DEFAULT_RECOVERY_RETENTION_SECONDS
     MAX_PAYLOAD_SIZE_MB = float(os.environ.get("MAX_PAYLOAD_SIZE_MB", 30.0))
 
     def __init__(self, session: SessionBase, slot: Optional[int] = None):
@@ -79,6 +84,9 @@ class SessionSystemRepository(ISystemRepository):
         if not session_key:
             return None
         return f"{self.SYSTEM_DATA_KEY}:{session_key}"
+
+    def _recovery_timeout_seconds(self) -> int:
+        return get_recovery_retention_seconds(self._session)
 
     def get_system_data(self) -> Optional[Dict[str, Any]]:
         """Retrieve the current system data from Redis, falling back to Postgres.
@@ -124,7 +132,7 @@ class SessionSystemRepository(ISystemRepository):
             self._cache_backend.set(
                 suffixed_key, cached_data,
                 redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
-                postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
+                postgres_timeout_seconds=self._recovery_timeout_seconds(),
             )
             self._cache_backend.delete(legacy_key)
             self._index.set_slot_size(self._slot, compute_json_size(cached_data).size_bytes)
@@ -215,7 +223,7 @@ class SessionSystemRepository(ISystemRepository):
             self._cache_backend.set(
                 cache_key,
                 postgres_data,
-                postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
+                postgres_timeout_seconds=self._recovery_timeout_seconds(),
                 write_redis=False,
             )
 
@@ -263,7 +271,7 @@ class SessionSystemRepository(ISystemRepository):
             self._cache_backend.set(
                 cache_key,
                 postgres_payload,
-                postgres_timeout_seconds=self.POSTGRES_CACHE_TIMEOUT_SECONDS,
+                postgres_timeout_seconds=self._recovery_timeout_seconds(),
                 write_redis=False,
             )
             self._index.set_slot_size(self._slot, size_result.size_bytes)

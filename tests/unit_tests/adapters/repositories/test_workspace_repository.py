@@ -13,6 +13,7 @@ from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
 from model_builder.adapters.repositories.session_workspace_repository import SessionWorkspaceRepository
 from model_builder.adapters.repositories.workspace_index import WorkspaceIndex
+from model_builder.adapters.repositories.recovery_retention import RECOVERY_RETENTION_SESSION_KEY
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 
 
@@ -180,6 +181,23 @@ class TestSharedBudget:
             repo.save_data(canonical_data, recovery_data=oversized_recovery_data)
 
         assert WorkspaceIndex(session).slot_sizes()[0] == compute_json_size(canonical_data).size_bytes
+
+    def test_future_recovery_writes_use_session_retention_without_changing_redis_ttl(self):
+        session = DictSession()
+        session[RECOVERY_RETENTION_SESSION_KEY] = 3 * 60 * 60
+        repo = SessionSystemRepository(session)
+
+        with patch.object(CacheBackend, "set", autospec=True) as cache_set:
+            repo.save_data(_data("sys-0"))
+
+        assert cache_set.call_args_list[0].kwargs == {
+            "redis_timeout_seconds": 60 * 60,
+            "write_postgres": False,
+        }
+        assert cache_set.call_args_list[1].kwargs == {
+            "postgres_timeout_seconds": 3 * 60 * 60,
+            "write_redis": False,
+        }
 
 
 # --------------------------------------------------------------------------- #

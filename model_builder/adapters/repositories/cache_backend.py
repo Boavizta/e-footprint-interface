@@ -1,9 +1,13 @@
 """Shared cache backend helper for Redis/Postgres-backed repositories."""
 import os
+from datetime import datetime, timezone
 from time import perf_counter
 from typing import Optional
 
+from django.conf import settings
 from django.core.cache import caches
+from django.db import connections, router, transaction
+from django.utils.timezone import now as tz_now
 from efootprint.logger import logger
 
 
@@ -125,6 +129,55 @@ class CacheBackend:
             # ("allowed to fail silently to be threadsafe"). Surface it so lost writes aren't invisible.
             if set_result is False:
                 logger.warning(f"{self.POSTGRES_CACHE_ALIAS} cache set for key {cache_key} was dropped (write lost)")
+
+    def touch_postgres(self, cache_key: str, timeout_seconds: int) -> bool:
+        """Update a live Postgres cache expiry without reading, rewriting, or reviving its value."""
+        postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
+        if postgres_cache is None:
+            return False
+
+        def touch_live_row():
+            key = postgres_cache.make_and_validate_key(cache_key)
+            database = router.db_for_write(postgres_cache.cache_model_class)
+            connection = connections[database]
+            table = connection.ops.quote_name(settings.CACHES[self.POSTGRES_CACHE_ALIAS]["LOCATION"])
+            expires = connection.ops.quote_name("expires")
+            cache_key_column = connection.ops.quote_name("cache_key")
+            now = tz_now().replace(microsecond=0)
+            backend_timeout = postgres_cache.get_backend_timeout(timeout_seconds)
+            tz = timezone.utc if settings.USE_TZ else None
+            new_expiry = datetime.fromtimestamp(backend_timeout, tz=tz).replace(microsecond=0)
+            with transaction.atomic(using=database), connection.cursor() as cursor:
+                cursor.execute(
+                    f"UPDATE {table} SET {expires} = %s WHERE {cache_key_column} = %s AND {expires} > %s",
+                    [
+                        connection.ops.adapt_datetimefield_value(new_expiry),
+                        key,
+                        connection.ops.adapt_datetimefield_value(now),
+                    ],
+                )
+                return cursor.rowcount == 1
+
+        return bool(
+            self._time_cache_call(
+                "touch",
+                self.POSTGRES_CACHE_ALIAS,
+                touch_live_row,
+                default=False,
+            )
+        )
+
+    def delete_expired_postgres(self, now) -> int:
+        """Delete expired rows from the configured Postgres cache table."""
+        postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
+        database = router.db_for_write(postgres_cache.cache_model_class)
+        connection = connections[database]
+        table = connection.ops.quote_name(settings.CACHES[self.POSTGRES_CACHE_ALIAS]["LOCATION"])
+        expires = connection.ops.quote_name("expires")
+        adapted_now = connection.ops.adapt_datetimefield_value(now)
+        with connection.cursor() as cursor:
+            cursor.execute(f"DELETE FROM {table} WHERE {expires} < %s", [adapted_now])
+            return cursor.rowcount
 
     def delete(self, cache_key: str) -> None:
         redis_cache = self._get_cache(self.REDIS_CACHE_ALIAS)
