@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.12.0] - 2026-09-07
 
 ### Changed
 - Lifecycle terminology is now manufacturing and use throughout the interface, including results, Sankey filters, comparison views, template data, and the local e-footprint integration.
+- UI and writing conventions consolidated in specs/design/writing-style-guide.md and applied throughout the project.
 
 ### Added
 - Web usage-pattern forms can select several journeys and edit a positive, fractional “Journeys per pattern occurrence” weight for each one. Edge usage-pattern forms can select several edge usage journeys and now own deployment starts and usage span; creation preselects the first available journey in both paradigms.

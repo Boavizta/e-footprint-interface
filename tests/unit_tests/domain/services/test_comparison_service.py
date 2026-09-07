@@ -300,12 +300,22 @@ class TestAxisUnit:
             assert chart["axisUnit"] == "kg"
             assert chart["axisScale"] == pytest.approx(1.0)
 
-    def test_tonne_scale_comparison_reads_on_a_tonne_axis(self):
+    def test_large_comparison_uses_the_smallest_readable_axis_units(self):
         view = ComparisonService().build_from_comparison(build_comparison(kg_scale=1000.0))
-        for chart in (view.decomposition_chart, view.paired_chart, view.cumulative_chart):
-            assert chart["axisUnit"] == "t"
-            assert chart["axisScale"] == pytest.approx(0.001)
-        # The data is still kg — a tick value times axisScale is what the axis prints (e.g. 660 t).
+
+        # The largest delta is 660,000 kg = 660 t, so the decomposition axis remains in tonnes.
+        assert view.decomposition_chart["axisUnit"] == "t"
+        assert view.decomposition_chart["axisScale"] == pytest.approx(0.001)
+
+        # The per-year totals exceed 1,000 t, so the paired chart advances to kilotonnes.
+        assert view.paired_chart["axisUnit"] == "kt"
+        assert view.paired_chart["axisScale"] == pytest.approx(0.000001)
+
+        # The running total also exceeds 1,000 t, so the cumulative chart uses kilotonnes.
+        assert view.cumulative_chart["axisUnit"] == "kt"
+        assert view.cumulative_chart["axisScale"] == pytest.approx(0.000001)
+
+        # Chart data remains in kg; multiplying ticks by axisScale produces their displayed values.
         assert view.decomposition_chart["datasets"][0]["data"][0] == pytest.approx(930_000.0 - 1_590_000.0)
 
 

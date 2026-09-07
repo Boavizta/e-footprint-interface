@@ -6,7 +6,7 @@ from tests.e2e.pages import ModelBuilderPage
 from tests.e2e.utils import click_and_wait_for_htmx
 
 
-LATCH_POPOVER_CONTENT = "This model contains edge objects. Remove them to turn edge modeling off."
+LATCH_POPOVER_CONTENT = "This modeling contains edge objects. Remove them to turn edge modeling off."
 
 
 @pytest.mark.e2e

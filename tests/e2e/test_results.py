@@ -133,7 +133,7 @@ class TestResultsPanel:
         model_builder.open_result_panel()
 
         # Verify chart title
-        expect(page.locator("#barChartTitle")).to_contain_text("Yearly CO2 emissions")
+        expect(page.locator("#barChartTitle")).to_contain_text("Yearly CO2-eq emissions")
 
         # Verify panel has result-width class (indicating side panel is open)
         expect(page.locator("#panel-result-btn")).to_have_class(re.compile(r"result-width"))
