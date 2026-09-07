@@ -6,7 +6,7 @@ type) in the library; a pure rename is not a difference (the library excludes ``
 inputs are not listed. Differences only — no "show identical rows" mode.
 {% endcomment %}
 {% load label_filters %}
-<p class="mb-1 mt-4"><strong>What differs between the models</strong>
+<p class="mb-1 mt-4"><strong>What differs between the modelings</strong>
     <span class="text-muted small">— inputs only, differences shown directly</span></p>
 
 {% if comparison.diff_changed or comparison.diff_only_in_a or comparison.diff_only_in_b %}
@@ -58,7 +58,7 @@ Objects present in only one model: Object (instance name) | Object type (the cla
 (the owning model, in that model's identity colour). The "Only in" value varies per row, so — unlike
 the changed sub-table — this one keeps its third column.
 {% endcomment %}
-<p class="mb-1 mt-3 small text-muted">Objects in only one model</p>
+<p class="mb-1 mt-3 small text-muted">Objects in only one modeling</p>
 <table class="table table-sm small align-middle comparison-diff-table" id="comparison-only-in-table">
     <colgroup>
         <col style="width: 40%;">
@@ -93,5 +93,5 @@ the changed sub-table — this one keeps its third column.
 
 <p class="small text-muted mb-0">Objects are matched by id first, then by name and type; renaming an object is not counted as a difference. Identical inputs are not listed.</p>
 {% else %}
-<p class="text-muted small">The two models have identical inputs.</p>
+<p class="text-muted small">The two modelings have identical inputs.</p>
 {% endif %}

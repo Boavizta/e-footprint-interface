@@ -241,7 +241,7 @@ class ModelBuilderPage:
     def add_model_by_duplication(self):
         """Open the +Add menu and duplicate the current model; the new model becomes active (slot 1)."""
         self.page.locator("#add-model-toggle").click()
-        click_and_wait_for_htmx(self.page, self.page.locator(".dropdown-item", has_text="Duplicate current model"))
+        click_and_wait_for_htmx(self.page, self.page.locator(".dropdown-item", has_text="Duplicate current modeling"))
         # The full builder re-rendered with both canvases; wait for the new active slot to settle.
         expect(self.page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", "1")
         self.page.locator("[data-model-canvas='1']").wait_for(state="visible")

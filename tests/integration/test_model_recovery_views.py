@@ -97,19 +97,19 @@ def test_recovery_offers_one_download_link_per_occupied_slot(client, corrupt_sys
     # One labelled link per slot, each targeting that slot explicitly.
     assert 'href="/model_builder/download-raw-json/?slot=0"' in content
     assert 'href="/model_builder/download-raw-json/?slot=1"' in content
-    assert "Download model A" in content
-    assert "Download model B" in content
+    assert "Download modeling A" in content
+    assert "Download modeling B" in content
 
 
 @pytest.mark.django_db
 def test_recovery_single_slot_keeps_the_unlabelled_download_link(client, corrupt_system_data):
-    """A single-model session keeps the original unlabelled "Download your current model" wording."""
+    """A single-modeling session keeps the original unlabelled "Download your current modeling" wording."""
     SessionSystemRepository(client.session).save_data(corrupt_system_data)
 
     content = client.get("/model_builder/recover/").content.decode()
-    assert "Download your current model" in content
+    assert "Download your current modeling" in content
     assert 'href="/model_builder/download-raw-json/?slot=0"' in content
-    assert "Download model A" not in content
+    assert "Download modeling A" not in content
 
 
 @pytest.mark.django_db

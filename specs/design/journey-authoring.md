@@ -28,7 +28,7 @@ Start from `specs/architecture.md` — it maps the layers (views, presenters, re
 
 1. `.crumb` — `← Design hub · journeys`
 2. `<h1>`, optionally a `.role` pill — only when a journey is scoped to one audience/paradigm. `build-a-model` spans both web and edge, so it carries none; use `.role` (or `.role.edge`) only if a future journey is genuinely paradigm-specific.
-3. `.lede` — who & why, 2–3 sentences. Success = the real outcome (a complete, computable model — not "an object created").
+3. `.lede` — who & why, 2–3 sentences. Success = the real outcome (a complete, computable modeling — not "an object created").
 4. `.note` — **provenance**: the real template / view / presenter files this draws from + the spec sections.
 5. `.phase` dividers grouping screens — **named to match the real flow** (Add an object, Edit, Delete), not abstract phases.
 6. Per-screen **blended units** (see below).
@@ -53,12 +53,12 @@ One `.screen` = two columns, blending sequence / mock / states into one place, f
 
 The mock unit is `.win` — a desktop browser window (titlebar + URL chip) wrapping the app chrome, because this is a **desktop-first** app (see `mission.md`). Inside the window, build only what the screen needs from the chrome:
 
-- `.appbar` — the model **tab strip** (`.tab.active` "Reference model", `.tab.add` "＋ Add ▾", `.tab.compare.disabled` "⇄ Compare") + the per-model `.toolbar` (open / export / reset `.tbtn`s and the `.edgetoggle`).
+- `.appbar` — the modeling **tab strip** (`.tab.active` "Reference modeling", `.tab.add` "＋ Add ▾", `.tab.compare.disabled` "⇄ Compare") + the per-modeling `.toolbar` (open / export / reset `.tbtn`s and the `.edgetoggle`).
 - `.stage` — the workspace, `position:relative` so a panel/modal can dock over it.
 - `.canvas` with three `.col`s (Usage patterns · Usage journeys · Infrastructure), each with `<h5>`, `.addbtn`s, and `.ocard` object cards. Add `.canvas.dim` behind a panel/modal.
 - `.panel` — the right-docked side panel for add/edit forms (dock it over a dimmed canvas).
 - `.modal-mock` > `.dialog` — centered confirm/can't-delete dialogs.
-- `.resultsbar` (`.locked` when the model isn't computable) and a transient `.toast-mock`.
+- `.resultsbar` (`.locked` when the modeling isn't computable) and a transient `.toast-mock`.
 
 Simplified but faithful: real structure, real copy, app palette; never pixel-perfect. One window per screen.
 

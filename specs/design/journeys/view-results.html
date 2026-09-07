@@ -293,11 +293,11 @@
 
 <p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
 <h1>view-results</h1>
-<p class="lede">The model is built — now <b>read its footprint</b>. <b>view-results</b> opens the Results panel over the canvas:
+<p class="lede">The modeling is built — now <b>read its footprint</b>. <b>view-results</b> opens the Results panel over the canvas:
   the <b>emissions over time</b> (yearly bars and a cumulative curve) and the <b>Impact repartition</b> Sankey that shows where the
   CO2-eq actually flows. Success isn't "a chart appeared" — it's <b>reading the number, filtering it to the angle you care about, and
   exporting it</b>. Trusting it — tracing any value back to its inputs — is the companion methodology journey
-  <a href="audit-a-result.html">audit-a-result</a>. Results open <b>in place</b> over a model that's already computable; the button
+  <a href="audit-a-result.html">audit-a-result</a>. Results open <b>in place</b> over a modeling that's already computable; the button
   stays <b>disabled with the live reason</b> until it is.</p>
 <p class="note">Faithful to the deployed app. Draws from the <b>Results</b> bar / <b>Show results</b> pill, the <code>result-chart</code>
   panel and its graph + Sankey partials, and the <code>source-table</code>. Value derivations (formulas, the calculus graph) live in
@@ -308,7 +308,7 @@
 
 <!-- ============ PHASE A — THE GATE ============ -->
 <div class="phase">
-  <span class="tag">A · The gate</span><span class="conn">Results stays disabled — with the live reason — until the model computes</span><span class="rule"></span>
+  <span class="tag">A · The gate</span><span class="conn">Results stays disabled — with the live reason — until the modeling computes</span><span class="rule"></span>
 </div>
 
 <!-- screen 1 — gated results -->
@@ -317,7 +317,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span><span class="tbtn" style="width:auto;padding:0 .4rem;font-size:.6rem;color:var(--g400)">Show results</span></div>
       </div>
       <div class="stage">
@@ -332,14 +332,14 @@
     <div class="mock-help"><span class="lbl">On this screen</span>Two co-equal ways in, both <b>dimmed</b> here: the bottom <b>Results</b> bar and the toolbar <b>Show results</b> pill. Hovering either shows <b>the actual validation error</b> — e.g. <em>"No impact could be computed because the modeling is incomplete. Please make sure you have at least one usage pattern…"</em> — not generic copy.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">1</span><h3>Results waits until the model computes</h3></div>
-    <p>Both entry points — the bottom bar and the toolbar pill — gate on the model being <b>computable</b>. While it isn't, they're
+    <div class="step"><span class="n">1</span><h3>Results waits until the modeling computes</h3></div>
+    <p>Both entry points — the bottom bar and the toolbar pill — gate on the modeling being <b>computable</b>. While it isn't, they're
        disabled and the tooltip is the <b>live reason</b> from validation, so the user reads exactly what's missing rather than a
-       flat "complete your model." It's the canvas's <em>disabled, never errored</em> rule, applied to results.</p>
+       flat "complete your modeling." It's the canvas's <em>disabled, never errored</em> rule, applied to results.</p>
     <div class="states">
       <div class="state"><span class="k">Two synced buttons</span><span class="v">The bottom <b>Results</b> bar and the toolbar <b>Show results</b> pill always agree — one shared region rebuilds both, so they never drift.</span></div>
       <div class="state"><span class="k">Live reason</span><span class="v">The locked tooltip is the real validation text (missing usage pattern, a journey with no steps, …) — not a static string.</span></div>
-      <div class="state"><span class="k">Unlock = one beat</span><span class="v">When the last missing piece lands, both buttons enable and a toast fires: <em>"Your model is complete — results are now available."</em> Remove it and they re-lock with <em>"Results are no longer available."</em></span></div>
+      <div class="state"><span class="k">Unlock = one beat</span><span class="v">When the last missing piece lands, both buttons enable and a toast fires: <em>"Your modeling is complete — results are now available."</em> Remove it and they re-lock with <em>"Results are no longer available."</em></span></div>
     </div>
   </div>
 </div>
@@ -393,11 +393,11 @@
   <div class="info-col">
     <div class="step"><span class="n">2</span><h3>Open Results — emissions over time</h3></div>
     <p>Results opens <b>in place</b> — a panel over the canvas, not a new page. It leads with the two time views: a <b>stacked
-       yearly bar</b> (toggle to monthly) and a <b>cumulative curve</b>, both in the model's own display unit. The legend is split
+       yearly bar</b> (toggle to monthly) and a <b>cumulative curve</b>, both in the modeling's own display unit. The legend is split
        into <b>Manufacturing</b> and <b>Use</b> so the two halves of the lifecycle read at a glance; clicking a capsule isolates or
        hides a series.</p>
     <div class="states">
-      <div class="state"><span class="k">In-place panel</span><span class="v">Slides up over the canvas (full-screen on mobile); a down-chevron / <em>Back to model</em> closes it. No URL change.</span></div>
+      <div class="state"><span class="k">In-place panel</span><span class="v">Slides up over the canvas (full-screen on mobile); a down-chevron / <em>Back to modeling</em> closes it. No URL change.</span></div>
       <div class="state"><span class="k">Results / Sources tabs</span><span class="v">Client-side toggles; <b>Sources</b> is loaded lazily the first time it's opened (see Phase D).</span></div>
       <div class="state"><span class="k">Granularity</span><span class="v">The <b>Year / Month</b> select redraws the bar and rewrites its title (<em>Yearly → Monthly CO2-eq emissions</em>). Default is Year.</span></div>
       <div class="state"><span class="k">Split legend</span><span class="v">Series grouped under <b>Manufacturing</b> / <b>Use</b>; a capsule toggles its dataset, and hovering offers <b>Only</b> to isolate one. Edge-device capsules are omitted when the edge-modeling toggle is off.</span></div>
@@ -454,7 +454,7 @@
        breakdown); the diagram <b>re-renders on every change</b>. The heavy repartition maths runs server-side; the browser only
        lays the diagram out, with hover tooltips carrying each node's value and share.</p>
     <div class="states">
-      <div class="state"><span class="k">Analyse by</span><span class="v">Chips toggle the columns shown left-to-right; only chips whose objects exist in the model appear. Default shows phase, journeys, steps, category &amp; hardware.</span></div>
+      <div class="state"><span class="k">Analyse by</span><span class="v">Chips toggle the columns shown left-to-right; only chips whose objects exist in the modeling appear. Default shows phase, journeys, steps, category &amp; hardware.</span></div>
       <div class="state"><span class="k">Refine</span><span class="v"><b>Lifecycle phase</b> (All / Manufacturing only / Use only) and an <b>Aggregation threshold</b> that folds sub-threshold flows into <em>"Other."</em></span></div>
       <div class="state"><span class="k">Advanced</span><span class="v"><b>Excluded types</b> chips, a <b>Show</b> column-headers toggle, and a <b>Label length</b> cap.</span></div>
       <div class="state"><span class="k">Stack views</span><span class="v"><b>Add another analysis view</b> appends an independent card; each card's settings <b>persist</b> across reloads and survive export / import.</span></div>
@@ -487,19 +487,19 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Sources</b> tab lists every input behind the model — <b>Item name · Attribute of · Value · Unit · Source · Confidence · Comment</b>. Input rows carry a <b>✎</b> to edit the source / confidence / comment inline (metadata-only, no recompute); <b>calculated</b> values show <b>(see graph)</b> instead. <b>Export to xslx</b> downloads the whole table.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>Sources</b> tab lists every input behind the modeling — <b>Item name · Attribute of · Value · Unit · Source · Confidence · Comment</b>. Input rows carry a <b>✎</b> to edit the source / confidence / comment inline (metadata-only, no recompute); <b>calculated</b> values show <b>(see graph)</b> instead. <b>Export to xslx</b> downloads the whole table.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">4</span><h3>Sources — provenance, editable and exportable</h3></div>
     <p>Numbers are only as trustworthy as their origins, so the <b>Sources</b> tab puts every input's provenance in one table:
        its value, unit, cited source and a confidence badge. Input rows are <b>editable in place</b> — fixing a source or
-       confidence is a metadata-only change that doesn't recompute the model. Calculated values aren't sourced; they link to
+       confidence is a metadata-only change that doesn't recompute the modeling. Calculated values aren't sourced; they link to
        their <b>(see graph)</b> derivation instead.</p>
     <div class="states">
       <div class="state"><span class="k">One row per input</span><span class="v">Item · Attribute of · Object type · Value · Unit · Source · Confidence · Comment.</span></div>
       <div class="state"><span class="k">Inline edit</span><span class="v">The <b>✎</b> opens a row editor for source / confidence / comment; saving doesn't reload the table or recompute.</span></div>
       <div class="state"><span class="k">Calculated rows</span><span class="v">Show <b>(see graph)</b> — a link to the value's full calculus graph — rather than a source.</span></div>
-      <div class="state"><span class="k">Export to xlsx</span><span class="v">The button (labelled <em>"Export to xslx"</em> in the app) downloads a sources spreadsheet. The model itself exports as JSON from the toolbar — see <a href="save-and-load.html">save-and-load</a>.</span></div>
+      <div class="state"><span class="k">Export to xlsx</span><span class="v">The button (labelled <em>"Export to xslx"</em> in the app) downloads a sources spreadsheet. The modeling itself exports as JSON from the toolbar — see <a href="save-and-load.html">save-and-load</a>.</span></div>
     </div>
   </div>
 </div>
@@ -516,11 +516,11 @@
 <h2 class="sec">Decisions taken</h2>
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
-  <tr><td><b>Results is disabled with the live validation reason — never offered then errored.</b></td><td>Opening results on an incomplete model would compute nothing. The button gates on computability and the tooltip is the actual error (which usage pattern / journey step is missing), so the user reads the fix — disabled-instead-of-error, with specifics.</td></tr>
+  <tr><td><b>Results is disabled with the live validation reason — never offered then errored.</b></td><td>Opening results on an incomplete modeling would compute nothing. The button gates on computability and the tooltip is the actual error (which usage pattern / journey step is missing), so the user reads the fix — disabled-instead-of-error, with specifics.</td></tr>
   <tr><td><b>Two synced entry points (bottom bar + toolbar pill), one shared region.</b></td><td>The bar is discoverable (swipe-up on mobile); the pill is always in reach. Both are rebuilt by a single region so their enabled/disabled state can never drift apart.</td></tr>
-  <tr><td><b>Results open in place over the canvas, not as a new page or URL.</b></td><td>The model stays loaded behind the panel; closing is instant and keeps context. Consistent with the rest of the app's no-reload, no-push-state behaviour.</td></tr>
+  <tr><td><b>Results open in place over the canvas, not as a new page or URL.</b></td><td>The modeling stays loaded behind the panel; closing is instant and keeps context. Consistent with the rest of the app's no-reload, no-push-state behaviour.</td></tr>
   <tr><td><b>Charts are drawn client-side; the Sankey's repartition maths runs server-side.</b></td><td>Chart.js builds the time charts from emissions data already in the page; the Sankey's heavy attribution is the library's, kept as the single source of modeling truth — the browser only lays it out and shows precomputed tooltips.</td></tr>
-  <tr><td><b>Sankey settings live in UI config, not in the model; views stack as independent cards.</b></td><td>An analysis angle is a viewing choice, not a model fact — so it persists per card across reloads and survives export/import without touching the model. Stacking cards beats one over-configurable diagram for comparing angles side by side.</td></tr>
+  <tr><td><b>Sankey settings live in UI config, not in the modeling; views stack as independent cards.</b></td><td>An analysis angle is a viewing choice, not a modeling fact — so it persists per card across reloads and survives export/import without touching the modeling. Stacking cards beats one over-configurable diagram for comparing angles side by side.</td></tr>
   <tr><td><b>Derivations use lightweight surfaces (tooltips, inline expanders, a new tab) — not a modal.</b></td><td>A glance wants a tooltip; the formula wants to stay next to the value; the full graph is large, so it's cached and opened out-of-line in a new tab. A heavyweight modal would interrupt the read and bloat the payload.</td></tr>
 </table>
 
@@ -531,7 +531,7 @@
     <p>Where this lives in code. Start with <code>specs/architecture.md</code> (render layer, OOB regions, <code>interface_config</code> / Sankey persistence). The gate &amp; live reason mirror <a href="build-a-model.html">build-a-model</a>'s Results bar.</p>
     <dl>
       <dt>The gate (Phase A)</dt>
-      <dd><code>components/results_bar_button.html</code> (<code>#btn-open-panel-result</code>) + <code>components/show_results_toolbar_button.html</code> (<code>#show-results-toolbar-btn</code>, label "Show results"), both gating on <code>creation_constraints["__results__"]</code>. Live reason from <code>ModelWeb._build_creation_constraints</code> → <code>SystemValidationService.validate_for_computation</code>. Lock/unlock toast: <code>results_buttons</code> OOB region (<code>modeling_object_web.py</code>, <code>oob_regions.py</code>) + <code>CONSTRAINT_MESSAGES["__results__"]</code> ("Your model is complete — results are now available" / "Results are no longer available").</dd>
+      <dd><code>components/results_bar_button.html</code> (<code>#btn-open-panel-result</code>) + <code>components/show_results_toolbar_button.html</code> (<code>#show-results-toolbar-btn</code>, label "Show results"), both gating on <code>creation_constraints["__results__"]</code>. Live reason from <code>ModelWeb._build_creation_constraints</code> → <code>SystemValidationService.validate_for_computation</code>. Lock/unlock toast: <code>results_buttons</code> OOB region (<code>modeling_object_web.py</code>, <code>oob_regions.py</code>) + <code>CONSTRAINT_MESSAGES["__results__"]</code> ("Your modeling is complete — results are now available" / "Results are no longer available").</dd>
       <dt>Panel &amp; charts (Phase B)</dt>
       <dd>Route <code>result-chart/</code> → <code>result_chart</code> (sets <code>HX-Trigger-After-Settle: triggerResultRendering</code>), template <code>result/result_panel.html</code> (Results/Sources sub-tabs, hyperscript toggle; Sources <code>hx-trigger="click once"</code>) → <code>result/result_graph.html</code>. Charts: the <b>result_charts</b> esbuild bundle (<code>theme/static/scripts/result_charts/{index,chart,config,legend,tooltip,display}.js</code> → <code>bundles/result_charts.js</code>), data = <code>window.emissions</code> (<code>ModelWeb.system_emissions</code>). Split legend = <code>legend.js</code> <code>splitCapsuleLegendPlugin</code>; its edge entries carry <code>isEdge</code> from <code>config.js</code> and are filtered against the body's <code>edge-modeling-on</code> class at render time. Panel slide = <code>hammer_utils.js</code> (<code>displayPanelResult</code> / <code>hidePanelResult</code>).</dd>
       <dt>Sankey (Phase C)</dt>
@@ -541,7 +541,7 @@
       <dt>Derivation surfaces</dt>
       <dd>The formula expander and the calculus graph (and the <code>(see graph)</code> link on calculated source-table rows) are documented in <a href="audit-a-result.html#pointers">audit-a-result</a> — <code>calculated_attributes_section.html</code>, <code>get_calculated_attribute_explanation/…</code>, <code>display-calculus-graph/…</code>.</dd>
       <dt>Not in the panel (clarifications)</dt>
-      <dd>No hourly chart in the Results panel — only yearly/monthly bar + cumulative line + Sankey; the only hourly chart is the per-attribute explain chart in the edit panel. No centered explain modal. The model exports as JSON (not xlsx); xlsx is sources-only.</dd>
+      <dd>No hourly chart in the Results panel — only yearly/monthly bar + cumulative line + Sankey; the only hourly chart is the per-attribute explain chart in the edit panel. No centered explain modal. The modeling exports as JSON (not xlsx); xlsx is sources-only.</dd>
     </dl>
   </div>
 </details>

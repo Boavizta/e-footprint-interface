@@ -302,12 +302,12 @@
   journey <b>supersedes view-results Phases B–C</b> and this banner comes off. Decisions here were ratified in the 2026-07-03
   design discussion (attributed-footprints serialization contract, Sankey-card pattern reuse).</div>
 
-<p class="lede">The model computes — now <b>build the analysis</b>, don't just read a chart. <b>analyse-results</b> turns the Results
+<p class="lede">The modeling computes — now <b>build the analysis</b>, don't just read a chart. <b>analyse-results</b> turns the Results
   panel's two fixed CO2 charts into a <b>stack of configurable emission chart cards</b>: each card picks its <b>angle</b> (the same
-  "analyse by" mental model as the Sankey — categories, hardware, journeys, steps, jobs…), its <b>mode</b> (per period or
+  "analyse by" mental framework as the Sankey — categories, hardware, journeys, steps, jobs…), its <b>mode</b> (per period or
   cumulative) and its <b>refinements</b> (granularity, lifecycle phase, small-contributor folding), and carries its own
   <b>commentary</b>. Success isn't "a chart appeared" — it's <b>an ordered, annotated stack of views that reads as a standalone
-  analysis and travels with the model file</b>.</p>
+  analysis and travels with the modeling file</b>.</p>
 <p class="note">Prospective — grounded in <a href="view-results.html">view-results</a> (the current panel and its Sankey card
   pattern, which this design generalizes to charts) and the library's pull-based results contract (serialized per-source hourly
   footprints; serialized <b>daily attributed footprints</b> for every other object — the companion library feature). Tracing any
@@ -370,7 +370,7 @@
     <div class="states">
       <div class="state"><span class="k">Default stack</span><span class="v">Two cards — <b>per period (Year)</b> + <b>cumulative</b>, both <b>by object category</b>. Same numbers, same split legend as today.</span></div>
       <div class="state"><span class="k">Card chrome</span><span class="v">Renamable title (✎), <b>↑ ↓</b> reorder, <b>⚙</b> settings, <b>✕</b> delete — the Sankey card's controls, extended with ordering.</span></div>
-      <div class="state"><span class="k">No recompute</span><span class="v">Opening Results reads persisted results (footprints and attributed footprints come from the saved model) — no model recomputation on view.</span></div>
+      <div class="state"><span class="k">No recompute</span><span class="v">Opening Results reads persisted results (footprints and attributed footprints come from the saved modeling) — no modeling recomputation on view.</span></div>
       <div class="state"><span class="k">Gate unchanged</span><span class="v">The Results bar / pill still gate on computability with the live validation reason (see <a href="view-results.html">view-results</a> Phase A — unchanged).</span></div>
     </div>
   </div>
@@ -411,12 +411,12 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The <b>⚙</b> gear unfolds the card's settings — <b>Break down by</b> (only angles whose objects exist in the model), <b>Mode</b> (Per period / Cumulative), <b>Granularity</b> (Year / Month), <b>Lifecycle phase</b>, and the <b>Aggregation</b> slider folding small contributors into <em>"Other"</em>. Here the card was switched to <b>Usage journeys</b>: one series per journey, plus the explicit grey <b>"Not attributable to usage journeys"</b> remainder so the stack still sums to the system total.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>⚙</b> gear unfolds the card's settings — <b>Break down by</b> (only angles whose objects exist in the modeling), <b>Mode</b> (Per period / Cumulative), <b>Granularity</b> (Year / Month), <b>Lifecycle phase</b>, and the <b>Aggregation</b> slider folding small contributors into <em>"Other"</em>. Here the card was switched to <b>Usage journeys</b>: one series per journey, plus the explicit grey <b>"Not attributable to usage journeys"</b> remainder so the stack still sums to the system total.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">2</span><h3>One card, any angle — the Sankey's mental model, on a time axis</h3></div>
+    <div class="step"><span class="n">2</span><h3>One card, any angle — the Sankey's mental framework, on a time axis</h3></div>
     <p>A card's settings mirror the Sankey's: the <b>same class groups</b> answer "analyse by what?", gated on what exists in the
-       model. The chart re-renders on every change (server computes the series, browser draws), and the settings persist on the
+       modeling. The chart re-renders on every change (server computes the series, browser draws), and the settings persist on the
        card. Per-period and cumulative are <b>modes of one card</b>, not different chart types — so any angle can be read either
        way.</p>
     <div class="states">
@@ -476,11 +476,11 @@
     <p>An analysis is rarely one chart. <b>Add another chart</b> appends an independent card — same defaults, own settings — and
        the ↑ ↓ controls order the stack. This is the Sankey's proven "stack analysis views" pattern, extended with ordering
        because a report reads top to bottom. Everything persists: close and reopen Results, reload the session, export and
-       re-import the model — the stack comes back as left.</p>
+       re-import the modeling — the stack comes back as left.</p>
     <div class="states">
       <div class="state"><span class="k">Add / delete</span><span class="v"><b>＋ Add another chart</b> appends with defaults; <b>✕</b> removes after the same confirm pattern as a Sankey card.</span></div>
       <div class="state"><span class="k">Reorder</span><span class="v"><b>↑ ↓</b> move a card one slot — deliberate, HTMX-simple, no drag machinery.</span></div>
-      <div class="state"><span class="k">Persistence</span><span class="v">Card list, order, settings, titles and commentary live in the model file's <b>UI config</b> — they survive reload and travel with export / import, exactly like Sankey cards.</span></div>
+      <div class="state"><span class="k">Persistence</span><span class="v">Card list, order, settings, titles and commentary live in the modeling file's <b>UI config</b> — they survive reload and travel with export / import, exactly like Sankey cards.</span></div>
       <div class="state"><span class="k">Charts + Sankeys</span><span class="v">The <em>Impact repartition</em> Sankey section keeps its own card stack below, unchanged — charts answer "how much, when"; Sankeys answer "through what".</span></div>
     </div>
   </div>
@@ -531,11 +531,11 @@
     <div class="step"><span class="n">4</span><h3>Annotate — the stack becomes the report</h3></div>
     <p>A chart shows <em>what</em>; the commentary says <em>so what</em>. With titles, ordering and per-card commentary, the
        Results panel <b>is</b> the analysis report — no separate document to maintain, nothing to drift. Because it lives in the
-       model file's UI config, sharing the <code>.json</code> shares the full annotated analysis: the recipient opens the model
+       modeling file's UI config, sharing the <code>.json</code> shares the full annotated analysis: the recipient opens the modeling
        and reads the same story over live, auditable numbers.</p>
     <div class="states">
       <div class="state"><span class="k">Plain text</span><span class="v">Commentary is plain text this iteration — rendered escaped, edited inline, saved on blur.</span></div>
-      <div class="state"><span class="k">Config-only save</span><span class="v">Saving commentary (or a title) never recomputes the model and never reloads the chart — metadata semantics, like source edits.</span></div>
+      <div class="state"><span class="k">Config-only save</span><span class="v">Saving commentary (or a title) never recomputes the modeling and never reloads the chart — metadata semantics, like source edits.</span></div>
       <div class="state"><span class="k">Report = the stack</span><span class="v">Title + chart + commentary, in card order. The export / import round-trip carries it whole.</span></div>
       <div class="state deferred"><span class="k">Report output</span><span class="v">A print / PDF / share rendering of the stack is deliberately out of this iteration — the panel is the report for now.</span></div>
       <div class="state deferred"><span class="k">Rich text</span><span class="v">Markdown or formatting in commentary — deferred until plain text proves limiting.</span></div>
@@ -578,10 +578,10 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Hovering a bar segment: the tooltip names the <b>object</b>, the value and its <b>share of the period total</b> — and (deferred) links to the value's derivation. Every series in a chart <b>is</b> a calculated attribute of a real model object (its attributed footprint), so the road from any pixel to its inputs already exists in the data.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Hovering a bar segment: the tooltip names the <b>object</b>, the value and its <b>share of the period total</b> — and (deferred) links to the value's derivation. Every series in a chart <b>is</b> a calculated attribute of a real modeling object (its attributed footprint), so the road from any pixel to its inputs already exists in the data.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n alt">5</span><h3>Every series is an auditable model value</h3></div>
+    <div class="step"><span class="n alt">5</span><h3>Every series is an auditable modeling value</h3></div>
     <p>Because chart series come from the library's attributed footprints — real calculated attributes with full ancestry — the
        chart is the natural <b>entry point into explainability</b>. This iteration designs the seams and ships the tooltip;
        the destinations are their own prospective journeys — <a href="impact-on-canvas.html">impact-on-canvas</a> (the object's
@@ -600,12 +600,12 @@
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>One configurable card type replaces the two fixed charts; the default stack reproduces today's read.</b></td><td>Continuity for every existing user (zero-config parity) while unlocking the analysis system beneath. A zoo of chart types would multiply UI and code paths; per-period vs cumulative is a mode of one card, not a different artefact.</td></tr>
-  <tr><td><b>Chart angles mirror the Sankey's "Analyse by" class groups, gated on present classes.</b></td><td>One mental model for "angle of analysis" across all of Results. The groups already exist in the library and the gating logic is proven on the Sankey card.</td></tr>
+  <tr><td><b>Chart angles mirror the Sankey's "Analyse by" class groups, gated on present classes.</b></td><td>One mental framework for "angle of analysis" across all of Results. The groups already exist in the library and the gating logic is proven on the Sankey card.</td></tr>
   <tr><td><b>Series come from the library's attributed footprints — the interface never computes attribution.</b></td><td>The library is the domain truth (constitution §1.3). Chart values, Sankey values and the system total agree by construction because they fold the same attribution; the interface-side per-category aggregation path retires.</td></tr>
   <tr><td><b>Non-covering angles show an explicit "Not attributable to …" remainder series.</b></td><td>Some flows can't belong to some classes (device manufacturing is nobody's job). A stack that silently sums below the headline total reads as a bug and erodes trust; an explicit grey remainder keeps every chart conservative and honest.</td></tr>
   <tr><td><b>The category view keeps the split Manufacturing / Use legend; object-level views sum phases by default, refined by the Lifecycle phase select.</b></td><td>Category view = today's read, preserved exactly. Object views can carry dozens of series; doubling each into two phases would drown the signal — the phase select recovers the split on demand, mirroring the Sankey's phase filter.</td></tr>
-  <tr><td><b>Cards persist in the model file's UI config (settings, order, titles, commentary).</b></td><td>An analysis angle and its narrative are viewing choices, not model facts — same posture as Sankey cards. Riding the existing UI-config round-trip means share-by-file works with zero new persistence machinery.</td></tr>
-  <tr><td><b>Commentary is plain text on a card; the report is the ordered stack.</b></td><td>A separate document model (report builder, rich text) would drift from the live charts and triple the scope. Title + chart + commentary in reading order already is a report — and it stays live over the model.</td></tr>
+  <tr><td><b>Cards persist in the e-footprint file's UI config (settings, order, titles, commentary).</b></td><td>An analysis angle and its narrative are viewing choices, not modeling data — same posture as Sankey cards. Riding the existing UI-config round-trip means share-by-file works with zero new persistence machinery.</td></tr>
+  <tr><td><b>Commentary is plain text on a card; the report is the ordered stack.</b></td><td>A separate document modeling (report builder, rich text) would drift from the live charts and triple the scope. Title + chart + commentary in reading order already is a report — and it stays live over the modeling.</td></tr>
   <tr><td><b>Reorder via ↑ ↓ buttons, not drag-and-drop.</b></td><td>HTMX-first, minimize JS (constitution §1.4): two buttons are one POST each; drag needs a library, ghost states and touch handling for a rare, deliberate action.</td></tr>
   <tr><td><b>Month / Year granularity now; Day designed-for but deferred.</b></td><td>The serialized data is daily, so Day is purely a UI toggle later — no data or contract change. Shipping it now adds legend/axis complexity without a validated need.</td></tr>
 </table>

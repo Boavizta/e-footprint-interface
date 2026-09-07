@@ -81,7 +81,7 @@ _SHARED_STEPS = [
     {
         "target": _sel("results"),
         "title": "Watch the results add up",
-        "body": "Once the model is complete, its environmental footprint appears here.",
+        "body": "Once the modeling is complete, its environmental footprint appears here.",
     },
     {
         "target": _sel("comparison"),
@@ -89,7 +89,7 @@ _SHARED_STEPS = [
         # the burger as a fallback, the same pattern as the edge-modeling and help-menu steps.
         "mobile_target": ".navbar-toggler",
         "title": "Compare two scenarios side by side",
-        "body": "You're not limited to one model. Add a second one here, then open the Compare view to "
+        "body": "You're not limited to one modeling. Add a second one here, then open the Compare view to "
                 "see both footprints next to each other — the headline difference, what drives it, and "
                 "how their assumptions differ.",
     },
@@ -123,7 +123,7 @@ _SHARED_STEPS = [
 _BLANK_FIRST_ACTION_STEP = {
     "target": _sel("usage-journeys"),
     "title": "Your first step",
-    "body": "Your model is empty. Suggested first step: create a usage journey — what a user does with "
+    "body": "Your modeling is empty. Suggested first step: create a usage journey — what a user does with "
             "your service.",
 }
 

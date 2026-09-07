@@ -303,19 +303,19 @@
 
 <p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
 <h1>compare-models</h1>
-<p class="lede">You've built a model; now you want to know whether a change actually helps. <b>compare-models</b> sets two computable
-  models side by side and quantifies the difference — the common path is <b>duplicate the current one, tweak the copy, read the
-  delta</b>. Success isn't "two models open" — it's a <b>clear, honest comparison</b>: how much CO2-eq separates them, what
-  explains the gap, and which inputs differ. Comparison is <b>additive and non-destructive</b> — both models stay exactly as you
+<p class="lede">You've built a modeling; now you want to know whether a change actually helps. <b>compare-models</b> sets two computable
+  modelings side by side and quantifies the difference — the common path is <b>duplicate the current one, tweak the copy, read the
+  delta</b>. Success isn't "two modelings open" — it's a <b>clear, honest comparison</b>: how much CO2-eq separates them, what
+  explains the gap, and which inputs differ. Comparison is <b>additive and non-destructive</b> — both modelings stay exactly as you
   left them; the dashboard is a fresh projection you open and dismiss without touching either.</p>
-<p class="note">Faithful to the deployed app. Draws from the model <b>tab strip</b>, the <b>＋ Add a model to compare</b> dropdown,
+<p class="note">Faithful to the deployed app. Draws from the modeling <b>tab strip</b>, the <b>＋ Add a modeling to compare</b> dropdown,
   the <code>compare/</code> dashboard (KPI strip · decomposition · paired &amp; cumulative charts · assumptions diff) and the
   comparison service. Code-level pointers — routes, the resident-sibling reveal, the comparison service — are collected for
   agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
 
 <!-- ============ PHASE A — ADD A MODEL TO COMPARE ============ -->
 <div class="phase">
-  <span class="tag">A · Add a model to compare</span><span class="conn">one model → Compare is gated · the ＋ tab makes a second</span><span class="rule"></span>
+  <span class="tag">A · Add a modeling to compare</span><span class="conn">one modeling → Compare is gated · the ＋ tab makes a second</span><span class="rule"></span>
 </div>
 
 <!-- screen 1 — single model, Compare disabled -->
@@ -324,7 +324,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add a model to compare ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add a modeling to compare ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -336,17 +336,17 @@
         <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>A single complete model. The <b>⇄ Compare</b> tab is greyed — comparison needs a second model — and hovering it says <em>"Add a second model to compare."</em> The way in is the <b>＋ Add a model to compare</b> tab.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>A single complete modeling. The <b>⇄ Compare</b> tab is greyed — comparison needs a second modeling — and hovering it says <em>"Add a second modeling to compare."</em> The way in is the <b>＋ Add a modeling to compare</b> tab.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">1</span><h3>One model — Compare waits for a second</h3></div>
-    <p>Comparison is a two-model feature, so with one model the <b>⇄ Compare</b> tab is disabled-with-reason — the same
-       <em>disabled, never errored</em> rule that runs the canvas. The model itself is complete (its <b>Results</b> are live);
+    <div class="step"><span class="n">1</span><h3>One modeling — Compare waits for a second</h3></div>
+    <p>Comparison is a two-modeling feature, so with one modeling the <b>⇄ Compare</b> tab is disabled-with-reason — the same
+       <em>disabled, never errored</em> rule that runs the canvas. The modeling itself is complete (its <b>Results</b> are live);
        it just has nothing to be compared against yet.</p>
     <div class="states">
-      <div class="state"><span class="k">Compare gated</span><span class="v">⇄ Compare is greyed; hovering names the unblock step — <em>"Add a second model to compare."</em></span></div>
-      <div class="state"><span class="k">Same readiness bar</span><span class="v">Compare keys off the <b>same computable check</b> as Results — comparing reads each model's footprint, so an incomplete model can't take part.</span></div>
-      <div class="state"><span class="k">The way in</span><span class="v">The <b>＋ Add a model to compare</b> tab is the single entry point to a second model.</span></div>
+      <div class="state"><span class="k">Compare gated</span><span class="v">⇄ Compare is greyed; hovering names the unblock step — <em>"Add a second modeling to compare."</em></span></div>
+      <div class="state"><span class="k">Same readiness bar</span><span class="v">Compare keys off the <b>same computable check</b> as Results — comparing reads each modeling's footprint, so an incomplete modeling can't take part.</span></div>
+      <div class="state"><span class="k">The way in</span><span class="v">The <b>＋ Add a modeling to compare</b> tab is the single entry point to a second modeling.</span></div>
     </div>
   </div>
 </div>
@@ -357,7 +357,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add a model to compare ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add a modeling to compare ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span></div>
       </div>
       <div class="stage" style="min-height:190px">
@@ -365,31 +365,31 @@
           <div class="col"><h5><b>Usage patterns</b></h5></div><div class="col"><h5><b>Usage journeys</b></h5></div><div class="col"><h5><b>Infrastructure</b></h5></div>
         </div>
         <div class="menu" style="top:2.1rem; left:6.4rem">
-          <div class="mi"><span class="g">⧉</span> Duplicate current model</div>
+          <div class="mi"><span class="g">⧉</span> Duplicate current modeling</div>
           <div class="mi"><span class="g">⬆</span> Import from file…</div>
           <div class="mi"><span class="g">✚</span> Start blank / from template</div>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The <b>＋ Add a model to compare</b> dropdown offers three ways to get a second model: <b>Duplicate current model</b> (named <em>Copy of {name}</em>), <b>Import from file…</b> (opens a side panel to upload a <code>.json</code>), or <b>Start blank / from template</b>. Whichever you pick becomes the <b>Comparison model</b> and the workspace re-renders with two tabs.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>＋ Add a modeling to compare</b> dropdown offers three ways to get a second modeling: <b>Duplicate current modeling</b> (named <em>Copy of {name}</em>), <b>Import from file…</b> (opens a side panel to upload a <code>.json</code>), or <b>Start blank / from template</b>. Whichever you pick becomes the <b>Comparison modeling</b> and the workspace re-renders with two tabs.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">2</span><h3>Add the second model — usually a duplicate</h3></div>
+    <div class="step"><span class="n">2</span><h3>Add the second modeling — usually a duplicate</h3></div>
     <p>The common path is <b>Duplicate, then tweak</b>: it gives an apples-to-apples baseline so the only differences are the
-       ones you make. <b>Import</b> brings in an independently-built model; <b>Start blank</b> begins from scratch or a template.
-       Whichever you choose becomes the active <b>Comparison model</b> and the builder re-renders with two tabs.</p>
+       ones you make. <b>Import</b> brings in an independently-built modeling; <b>Start blank</b> begins from scratch or a template.
+       Whichever you choose becomes the active <b>Comparison modeling</b> and the builder re-renders with two tabs.</p>
     <div class="states">
-      <div class="state"><span class="k">Duplicate</span><span class="v">Deep-copies the current model as <em>"Copy of {name}"</em> — the editable name you'll then change.</span></div>
-      <div class="state"><span class="k">Import from file…</span><span class="v">Opens the <em>"Add a model from a file"</em> side panel — <em>Choose a json file</em> → <em>Add this model</em>.</span></div>
+      <div class="state"><span class="k">Duplicate</span><span class="v">Deep-copies the current modeling as <em>"Copy of {name}"</em> — the editable name you'll then change.</span></div>
+      <div class="state"><span class="k">Import from file…</span><span class="v">Opens the <em>"Add a modeling from a file"</em> side panel — <em>Choose a json file</em> → <em>Add this modeling</em>.</span></div>
       <div class="state"><span class="k">Start blank</span><span class="v">A scratch / template baseline, built up from nothing.</span></div>
-      <div class="state"><span class="k">New slot active</span><span class="v">The added model becomes the Comparison model; the whole builder re-renders. A failed add returns an error modal, not a broken page.</span></div>
+      <div class="state"><span class="k">New slot active</span><span class="v">The added modeling becomes the Comparison modeling; the whole builder re-renders. A failed add returns an error modal, not a broken page.</span></div>
     </div>
   </div>
 </div>
 
 <!-- ============ PHASE B — TWO MODELS, ONE WORKSPACE ============ -->
 <div class="phase">
-  <span class="tag">B · Two models, one workspace</span><span class="conn">fixed-role tabs · switch in place · Compare unlocks when both compute</span><span class="rule"></span>
+  <span class="tag">B · Two modelings, one workspace</span><span class="conn">fixed-role tabs · switch in place · Compare unlocks when both compute</span><span class="rule"></span>
 </div>
 
 <!-- screen 3 — two models -->
@@ -398,7 +398,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab">Reference model<span class="cx">✕</span></span><span class="tab active">Comparison model<span class="cx">✕</span></span><span class="tab compare">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab">Reference modeling<span class="cx">✕</span></span><span class="tab active">Comparison modeling<span class="cx">✕</span></span><span class="tab compare">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -410,18 +410,18 @@
         <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Two tabs now — fixed roles <b>Reference model</b> and <b>Comparison model</b>, each with an <b>✕</b> to remove. The name you edit lives in the toolbar, not the tab. Clicking a tab switches canvases instantly (no reload). With <b>both models computable</b>, <b>⇄ Compare</b> lights up.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Two tabs now — fixed roles <b>Reference modeling</b> and <b>Comparison modeling</b>, each with an <b>✕</b> to remove. The name you edit lives in the toolbar, not the tab. Clicking a tab switches canvases instantly (no reload). With <b>both modelings computable</b>, <b>⇄ Compare</b> lights up.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">3</span><h3>Two models, one workspace</h3></div>
-    <p>The two models share one workspace; switching between them is a <b>client-side canvas reveal</b> — both stay live, nothing
-       re-renders, an open edit survives the switch. Tabs are <b>fixed role labels</b> (Reference / Comparison) so a long model
-       name never stretches them — the name sits in the toolbar. <b>⇄ Compare</b> enables only once <em>both</em> models compute.</p>
+    <div class="step"><span class="n">3</span><h3>Two modelings, one workspace</h3></div>
+    <p>The two modelings share one workspace; switching between them is a <b>client-side canvas reveal</b> — both stay live, nothing
+       re-renders, an open edit survives the switch. Tabs are <b>fixed role labels</b> (Reference / Comparison) so a long modeling
+       name never stretches them — the name sits in the toolbar. <b>⇄ Compare</b> enables only once <em>both</em> modelings compute.</p>
     <div class="states">
-      <div class="state"><span class="k">Switch in place</span><span class="v">Clicking a tab reveals that model's canvas instantly — no reload, no re-render.</span></div>
-      <div class="state"><span class="k">Compare gating</span><span class="v">Enabled only if both models are computable; otherwise <em>"Complete both models (each needs a computable footprint) to compare."</em></span></div>
-      <div class="state"><span class="k">Remove a model</span><span class="v">A tab's <b>✕</b> confirms <em>"Remove this model and return to a single-model session?"</em> and drops back to one model.</span></div>
-      <div class="state variant"><span class="k">Mobile</span><span class="v">On small screens the tab strip hides; switching moves to a role pill — <em>"Switch to Reference model" / "Switch to Comparison model."</em></span></div>
+      <div class="state"><span class="k">Switch in place</span><span class="v">Clicking a tab reveals that modeling's canvas instantly — no reload, no re-render.</span></div>
+      <div class="state"><span class="k">Compare gating</span><span class="v">Enabled only if both modelings are computable; otherwise <em>"Complete both modelings (each needs a computable footprint) to compare."</em></span></div>
+      <div class="state"><span class="k">Remove a modeling</span><span class="v">A tab's <b>✕</b> confirms <em>"Remove this modeling and return to a single-model session?"</em> and drops back to one modeling.</span></div>
+      <div class="state variant"><span class="k">Mobile</span><span class="v">On small screens the tab strip hides; switching moves to a role pill — <em>"Switch to Reference modeling" / "Switch to Comparison modeling."</em></span></div>
     </div>
   </div>
 </div>
@@ -437,13 +437,13 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab">Reference model</span><span class="tab">Comparison model</span><span class="tab compare on">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab">Reference modeling</span><span class="tab">Comparison modeling</span><span class="tab compare on">⇄ Compare</span></div>
       </div>
       <div class="stage">
         <div class="dash">
           <div class="kpis">
-            <div class="kpi a"><div class="lbl2">Reference model</div><div class="big">12.4 t</div><div class="sub2">2024–2030 · CO2-eq</div></div>
-            <div class="kpi b"><div class="lbl2">Comparison model</div><div class="big">10.1 t</div><div class="sub2">2024–2030 · CO2-eq</div></div>
+            <div class="kpi a"><div class="lbl2">Reference modeling</div><div class="big">12.4 t</div><div class="sub2">2024–2030 · CO2-eq</div></div>
+            <div class="kpi b"><div class="lbl2">Comparison modeling</div><div class="big">10.1 t</div><div class="sub2">2024–2030 · CO2-eq</div></div>
             <div class="kpi delta"><div class="lbl2">Δ second − first</div><div class="big">−2.3 t (−18%)</div><div class="sub2">usage −1.9 · fab. −0.4</div></div>
           </div>
           <div class="bars">
@@ -452,22 +452,22 @@
             <div class="bar"><span class="lab">Network</span><span class="track"><span class="ax"></span><span class="seg up" style="width:11%"></span><span class="v up">+0.4 t</span></span></div>
           </div>
           <div class="chartbox"><h6 style="margin-top:0">CO2-eq emissions over time</h6></div>
-          <div class="difftab" style="border:none"><h6 style="margin-top:0">What differs between the models</h6></div>
+          <div class="difftab" style="border:none"><h6 style="margin-top:0">What differs between the modelings</h6></div>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Clicking <b>⇄ Compare</b> reveals the <b>comparison dashboard</b> in place — one scrolling page, no per-model toolbar. Top to bottom: a <b>KPI strip</b>, <b>What explains the difference</b> (decomposition), the <b>CO2-eq emissions over time</b> paired chart, the <b>Cumulative</b> overlay, and <b>What differs between the models</b> (the inputs diff). Both models stay resident behind it.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking <b>⇄ Compare</b> reveals the <b>comparison dashboard</b> in place — one scrolling page, no per-model toolbar. Top to bottom: a <b>KPI strip</b>, <b>What explains the difference</b> (decomposition), the <b>CO2-eq emissions over time</b> paired chart, the <b>Cumulative</b> overlay, and <b>What differs between the modelings</b> (the inputs diff). Both modelings stay resident behind it.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">4</span><h3>Compare — the dashboard, in place</h3></div>
     <p><b>⇄ Compare</b> doesn't navigate; it <b>reveals a resident dashboard</b> over the hidden builder, rebuilt fresh from both
-       models each time. One identity-colour language runs throughout — <b>Reference blue, Comparison amber; reductions green,
-       increases red</b>. Every figure is a full-timespan sum, and the delta convention is fixed: <em>second model minus first</em>.</p>
+       modelings each time. One identity-colour language runs throughout — <b>Reference blue, Comparison amber; reductions green,
+       increases red</b>. Every figure is a full-timespan sum, and the delta convention is fixed: <em>second modeling minus first</em>.</p>
     <div class="states">
       <div class="state"><span class="k">Reveal, not navigate</span><span class="v">The dashboard is a resident region toggled into view — so dismissing it is instant (Phase D). It isn't a URL.</span></div>
       <div class="state"><span class="k">Colour language</span><span class="v">Reference <b style="color:#4878a8">blue</b>, Comparison <b style="color:#e09f3e">amber</b>; <b style="color:#2e7d32">lower/avoided green</b>, <b style="color:#c62828">higher red</b> — consistent across KPIs, bars and charts.</span></div>
-      <div class="state"><span class="k">Δ convention</span><span class="v"><em>"second model minus first. Totals are full-timespan sums."</em></span></div>
-      <div class="state"><span class="k">Rebuilt fresh</span><span class="v">Recomputed on every open, never cached — an honest projection of the two current models, not a stored report.</span></div>
+      <div class="state"><span class="k">Δ convention</span><span class="v"><em>"second modeling minus first. Totals are full-timespan sums."</em></span></div>
+      <div class="state"><span class="k">Rebuilt fresh</span><span class="v">Recomputed on every open, never cached — an honest projection of the two current modelings, not a stored report.</span></div>
     </div>
   </div>
 </div>
@@ -484,13 +484,13 @@
     <p class="ttl">① KPI strip <span class="kind">· the headline</span></p>
     <div class="dash" style="padding:0">
       <div class="kpis">
-        <div class="kpi a"><div class="lbl2">Reference model</div><div class="big">12.4 t CO2-eq</div><div class="sub2">2024–2030 · usage 9.8 · fab. 2.6</div></div>
-        <div class="kpi b"><div class="lbl2">Comparison model</div><div class="big">10.1 t CO2-eq</div><div class="sub2">2024–2030 · usage 7.9 · fab. 2.2</div></div>
+        <div class="kpi a"><div class="lbl2">Reference modeling</div><div class="big">12.4 t CO2-eq</div><div class="sub2">2024–2030 · usage 9.8 · fab. 2.6</div></div>
+        <div class="kpi b"><div class="lbl2">Comparison modeling</div><div class="big">10.1 t CO2-eq</div><div class="sub2">2024–2030 · usage 7.9 · fab. 2.2</div></div>
         <div class="kpi delta"><div class="lbl2">Δ second − first</div><div class="big">−2.3 t (−18%)</div><div class="sub2">usage −1.9 · fab. −0.4</div></div>
       </div>
-      <p class="foot">Δ convention: second model minus first. Totals are full-timespan sums.</p>
+      <p class="foot">Δ convention: second modeling minus first. Totals are full-timespan sums.</p>
     </div>
-    <div class="mock-help" style="width:auto"><span class="lbl">KPI strip</span>Two model cards (left edge in each model's colour) and a <b>delta card</b> — absolute and relative difference, split into usage and manufacturing. The delta card is <b>green when lower, red when higher</b>.</div>
+    <div class="mock-help" style="width:auto"><span class="lbl">KPI strip</span>Two modeling cards (left edge in each modeling's colour) and a <b>delta card</b> — absolute and relative difference, split into usage and manufacturing. The delta card is <b>green when lower, red when higher</b>.</div>
   </div>
 
   <!-- decomposition -->
@@ -503,7 +503,7 @@
       <div class="bar"><span class="lab">User devices</span><span class="track"><span class="ax"></span><span class="seg dn" style="width:14%"></span><span class="v dn">−0.5 t</span></span></div>
       <div class="bar"><span class="lab">Network</span><span class="track"><span class="ax"></span><span class="seg up" style="width:11%"></span><span class="v up">+0.4 t</span></span></div>
     </div>
-    <div class="mock-help" style="width:auto"><span class="lbl">Decomposition</span>Diverging bars per impact category — <b>green left = reduction, red right = increase</b> — each labelled with its Δ. Zero-difference categories drop out; the bars <b>sum to the headline Δ</b>. Empty state: <em>"No difference between the two models' category footprints."</em></div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Decomposition</span>Diverging bars per impact category — <b>green left = reduction, red right = increase</b> — each labelled with its Δ. Zero-difference categories drop out; the bars <b>sum to the headline Δ</b>. Empty state: <em>"No difference between the two modelings' category footprints."</em></div>
   </div>
 
   <!-- paired chart -->
@@ -527,7 +527,7 @@
         <div class="legend-row"><span class="legend-name">Edge caching:</span><span><i style="background:#e09f3e"></i>usage</span><span><i style="background:#f0cf94"></i>manufacturing</span></div>
       </div>
     </div>
-    <div class="mock-help" style="width:auto"><span class="lbl">Paired chart</span>Per-year paired bars: each year has a <b>Reference</b> stack and a <b>Comparison</b> stack, <b>dark = usage, light = manufacturing</b>. The left-aligned legend uses one non-wrapping row per model and labels it with the real model name; years outside a model's period are blank, not zero.</div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Paired chart</span>Per-year paired bars: each year has a <b>Reference</b> stack and a <b>Comparison</b> stack, <b>dark = usage, light = manufacturing</b>. The left-aligned legend uses one non-wrapping row per modeling and labels it with the real modeling name; years outside a modeling's period are blank, not zero.</div>
   </div>
 
   <!-- cumulative chart -->
@@ -545,34 +545,34 @@
       </svg>
       <div class="lgnd grouped"><div class="legend-row"><span><i style="width:1rem;height:.18rem;background:#4878a8"></i>Current service</span></div><div class="legend-row"><span><i style="width:1rem;height:.18rem;background:#e09f3e"></i>Edge caching</span></div></div>
     </div>
-    <div class="mock-help" style="width:auto"><span class="lbl">Cumulative chart</span>Two cumulative curves overlaid, with a left-aligned legend row for each model; the <b>shaded gap is emissions avoided (or added) to date</b> — green when the Comparison model is below, red when above. The <b>end gap equals the headline Δ.</b></div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Cumulative chart</span>Two cumulative curves overlaid, with a left-aligned legend row for each modeling; the <b>shaded gap is emissions avoided (or added) to date</b> — green when the Comparison modeling is below, red when above. The <b>end gap equals the headline Δ.</b></div>
   </div>
 
   <!-- assumptions diff -->
   <div>
-    <p class="ttl">⑤ What differs between the models <span class="kind">· the inputs diff</span></p>
+    <p class="ttl">⑤ What differs between the modelings <span class="kind">· the inputs diff</span></p>
     <div class="bars">
-      <h6 style="margin-top:0">What differs between the models <span class="sub">— inputs only, differences shown directly</span></h6>
+      <h6 style="margin-top:0">What differs between the modelings <span class="sub">— inputs only, differences shown directly</span></h6>
       <div style="font-size:.56rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin:.3rem 0 .1rem">Changed attribute values</div>
       <table class="difftab">
-        <tr><th>Object</th><th>Attribute</th><th>Reference model</th><th>Comparison model</th></tr>
+        <tr><th>Object</th><th>Attribute</th><th>Reference modeling</th><th>Comparison modeling</th></tr>
         <tr><td>Web server</td><td>RAM</td><td>128 GB</td><td><b>64 GB</b></td></tr>
         <tr><td>Purchase journey</td><td>Data downloaded</td><td>5 MB</td><td><b>1.8 MB</b></td></tr>
       </table>
-      <div style="font-size:.56rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin:.45rem 0 .1rem">Objects in only one model</div>
+      <div style="font-size:.56rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin:.45rem 0 .1rem">Objects in only one modeling</div>
       <table class="difftab">
         <tr><th>Object</th><th>Object type</th><th>Only in</th></tr>
-        <tr><td>Edge cache server</td><td>Server</td><td class="onlyB">Comparison model</td></tr>
+        <tr><td>Edge cache server</td><td>Server</td><td class="onlyB">Comparison modeling</td></tr>
       </table>
       <p class="foot">Objects are matched by id first, then by name and type; renaming an object is not counted as a difference. Identical inputs are not listed.</p>
     </div>
-    <div class="mock-help" style="width:auto"><span class="lbl">Assumptions diff</span>Two tables — <b>Changed attribute values</b> (same object, different numbers; the second model's value bold) and <b>Objects in only one model</b>. Matched by <b>id first</b>, so a duplicate-then-rename isn't flagged as a change. Empty state: <em>"The two models have identical inputs."</em></div>
+    <div class="mock-help" style="width:auto"><span class="lbl">Assumptions diff</span>Two tables — <b>Changed attribute values</b> (same object, different numbers; the second modeling's value bold) and <b>Objects in only one modeling</b>. Matched by <b>id first</b>, so a duplicate-then-rename isn't flagged as a change. Empty state: <em>"The two modelings have identical inputs."</em></div>
   </div>
 </div>
 
 <!-- ============ PHASE D — DISMISS ============ -->
 <div class="phase">
-  <span class="tag">D · Dismiss</span><span class="conn">click a model tab · the builder comes back exactly as it was</span><span class="rule"></span>
+  <span class="tag">D · Dismiss</span><span class="conn">click a modeling tab · the builder comes back exactly as it was</span><span class="rule"></span>
 </div>
 
 <!-- screen 5 — dismiss -->
@@ -581,7 +581,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model<span class="cx">✕</span></span><span class="tab">Comparison model<span class="cx">✕</span></span><span class="tab compare">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling<span class="cx">✕</span></span><span class="tab">Comparison modeling<span class="cx">✕</span></span><span class="tab compare">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -593,17 +593,17 @@
         <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Clicking a <b>model tab</b> dismisses the dashboard and reveals that model — <b>instantly, client-side</b>. Anything you had open (a side panel mid-edit, the help drawer) was only hidden, so it <b>comes back exactly as it was</b>.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking a <b>modeling tab</b> dismisses the dashboard and reveals that modeling — <b>instantly, client-side</b>. Anything you had open (a side panel mid-edit, the help drawer) was only hidden, so it <b>comes back exactly as it was</b>.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">5</span><h3>Dismiss — back to building, nothing lost</h3></div>
     <p>Dismissing is the reveal in reverse: the builder was never torn down, just hidden, so an in-progress edit resumes intact
-       and the return is instant. Clicking the <em>same</em> model you came from warns about nothing; the only place an
-       unsaved-edit guard can fire is switching to the <em>other</em> model on the way out — see the mechanism below.</p>
+       and the return is instant. Clicking the <em>same</em> modeling you came from warns about nothing; the only place an
+       unsaved-edit guard can fire is switching to the <em>other</em> modeling on the way out — see the mechanism below.</p>
     <div class="states">
       <div class="state"><span class="k">Instant return</span><span class="v">A client-side reveal — no reload; the dashboard fragment is emptied behind it.</span></div>
       <div class="state"><span class="k">Nothing lost</span><span class="v">A side panel or help drawer open before Compare rode along hidden and resumes intact — opening Compare discards nothing.</span></div>
-      <div class="state"><span class="k">Cross-model guard</span><span class="v">Leaving to the <em>other</em> model can trip the unsaved-changes guard — landing over the now-revealed edited model (mechanism fold).</span></div>
+      <div class="state"><span class="k">Cross-model guard</span><span class="v">Leaving to the <em>other</em> modeling can trip the unsaved-changes guard — landing over the now-revealed edited modeling (mechanism fold).</span></div>
     </div>
   </div>
 </div>
@@ -634,9 +634,9 @@
            client-side reveal — and makes opening Compare <b>non-destructive</b>: an open side panel rides along hidden.</p>
         <div class="states">
           <div class="state"><span class="k">Open = no warning</span><span class="v">Opening Compare discards nothing, so it deliberately does <b>not</b> trip the unsaved-changes guard.</span></div>
-          <div class="state"><span class="k">Dismiss, same model</span><span class="v">A capture-phase handler tears the dashboard down first, then <b>cancels</b> the navigation — the preserved panel just resumes. No warning.</span></div>
-          <div class="state"><span class="k">Dismiss, other model</span><span class="v">The switch proceeds; because switching <em>is</em> a discarding path, the guard — <em>"The currently opened side panel has pending changes. Would you like to continue and lose them ?"</em> (<b>No, Cancel</b> / <b>Yes, Continue</b>) — lands over the revealed edited model.</span></div>
-          <div class="state"><span class="k">Remove-model guard</span><span class="v">Removing a model has its own confirm, made unsaved-aware — it appends <em>"You also have unsaved changes in the open panel that will be lost."</em></span></div>
+          <div class="state"><span class="k">Dismiss, same modeling</span><span class="v">A capture-phase handler tears the dashboard down first, then <b>cancels</b> the navigation — the preserved panel just resumes. No warning.</span></div>
+          <div class="state"><span class="k">Dismiss, other modeling</span><span class="v">The switch proceeds; because switching <em>is</em> a discarding path, the guard — <em>"The currently opened side panel has pending changes. Would you like to continue and lose them ?"</em> (<b>No, Cancel</b> / <b>Yes, Continue</b>) — lands over the revealed edited modeling.</span></div>
+          <div class="state"><span class="k">Remove-model guard</span><span class="v">Removing a modeling has its own confirm, made unsaved-aware — it appends <em>"You also have unsaved changes in the open panel that will be lost."</em></span></div>
         </div>
       </div>
     </div>
@@ -647,14 +647,14 @@
 <h2 class="sec">Decisions taken</h2>
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
-  <tr><td><b>Comparison is a dedicated dashboard tab — additive, not a split-screen or a results-panel mode.</b></td><td>The per-model workspaces stay exactly as they are; the dashboard is a third surface laid on top. A split-screen or a "compare mode" inside Results would entangle two models in one workspace and complicate every builder interaction.</td></tr>
-  <tr><td><b>⇄ Compare is disabled until two complete models exist — never offered then errored.</b></td><td>Comparing reads each model's footprint; an incomplete model has none. The tab gates on the same readiness as Results, and names the unblock step — the disabled-instead-of-error rule, applied to comparison.</td></tr>
+  <tr><td><b>Comparison is a dedicated dashboard tab — additive, not a split-screen or a results-panel mode.</b></td><td>The per-model workspaces stay exactly as they are; the dashboard is a third surface laid on top. A split-screen or a "compare mode" inside Results would entangle two modelings in one workspace and complicate every builder interaction.</td></tr>
+  <tr><td><b>⇄ Compare is disabled until two complete modelings exist — never offered then errored.</b></td><td>Comparing reads each modeling's footprint; an incomplete modeling has none. The tab gates on the same readiness as Results, and names the unblock step — the disabled-instead-of-error rule, applied to comparison.</td></tr>
   <tr><td><b>The dashboard is a resident in-flow sibling, not a content swap or a floating overlay.</b></td><td>The old swap destroyed both canvases and cost a ~1.2 s reload on return. A floating overlay would fight the body-level leader-line SVGs and force a brittle z-index between the chrome bars. A resident sibling toggled by visibility makes dismiss instant and Compare non-destructive.</td></tr>
   <tr><td><b>One tab strip — the dashboard owns none.</b></td><td>Two strips would mean duplicate element ids, breaking the id-based switch JS. The single strip stays visible while comparing (⇄ Compare highlighted) and is how you dismiss.</td></tr>
-  <tr><td><b>Compare is not a URL.</b></td><td>It's an ephemeral projection of two models, rebuilt fresh — not a navigable resource. And a refreshed <code>/compare/</code> would error once a model's session slot expires, so it deliberately doesn't push to the address bar.</td></tr>
-  <tr><td><b>Tabs are fixed role labels (Reference / Comparison), not model names.</b></td><td>A long name can't stretch a fixed-width tab; the editable name lives in the toolbar. Roles also map cleanly to the Δ convention (second minus first).</td></tr>
+  <tr><td><b>Compare is not a URL.</b></td><td>It's an ephemeral projection of two modelings, rebuilt fresh — not a navigable resource. And a refreshed <code>/compare/</code> would error once a modeling's session slot expires, so it deliberately doesn't push to the address bar.</td></tr>
+  <tr><td><b>Tabs are fixed role labels (Reference / Comparison), not modeling names.</b></td><td>A long name can't stretch a fixed-width tab; the editable name lives in the toolbar. Roles also map cleanly to the Δ convention (second minus first).</td></tr>
   <tr><td><b>Figures are full-timespan sums (v1); decomposition merges Servers + Storage but keeps the full taxonomy.</b></td><td>Full-timespan sums are exact and need no normalization — the honest limitation is stated per card. Merging Servers + Storage by label keeps the bars readable while still summing exactly to the headline Δ.</td></tr>
-  <tr><td><b>The inputs diff matches objects by id first, then name + type.</b></td><td>The common workflow is duplicate-then-edit, so id-matching means a rename isn't reported as a change; falling back to name + type still diffs two independently-built models. Identical inputs are omitted to keep the diff to what matters.</td></tr>
+  <tr><td><b>The inputs diff matches objects by id first, then name + type.</b></td><td>The common workflow is duplicate-then-edit, so id-matching means a rename isn't reported as a change; falling back to name + type still diffs two independently-built modelings. Identical inputs are omitted to keep the diff to what matters.</td></tr>
 </table>
 
 <!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
@@ -672,13 +672,13 @@
       <dt>Reveal &amp; dismiss-before-warn (mechanism)</dt>
       <dd><code>#comparison-view</code> is a resident sibling in <code>model_builder_main.html</code>; <code>model_comparison.js</code> — <code>openCompareView</code> / <code>dismissCompareView</code> (<code>d-none</code> toggle), <code>setBuilderHidden</code> (<code>body.comparing</code>), the capture-phase tab handler (same-slot <code>preventDefault</code>, cross-slot lets <code>switch-model</code> proceed), <code>htmx:afterSwap</code> reveal. Unsaved guard: <code>PANEL_DISCARDING_PATHS</code> in <code>side_panel_utils.js</code> (<code>/switch-model/</code>, <code>/add-model/</code>, <code>/open-add-model-import-panel/</code> — note <code>/compare/</code> is deliberately absent), modal copy in <code>modals/warn_before_side_panel_closing_modal.html</code>. SCSS: <code>custom.scss</code> <code>#comparison-view</code>, <code>body.comparing</code> mobile reveal, <code>.model-tab</code>.</dd>
       <dt>Not in v1 (deferred)</dt>
-      <dd>Per-year / differing-timespan normalization (v1 is full-timespan sums; non-overlapping years render blank); a Δ-only per-period chart mode; Sankey repartition comparison; cause-linking input diffs to impact categories; a verdict sentence / delta-first ordering; a combined comparison xlsx; three+ models, and copy/move/merge between models (workspace is capped at two slots).</dd>
+      <dd>Per-year / differing-timespan normalization (v1 is full-timespan sums; non-overlapping years render blank); a Δ-only per-period chart mode; Sankey repartition comparison; cause-linking input diffs to impact categories; a verdict sentence / delta-first ordering; a combined comparison xlsx; three+ modelings, and copy/move/merge between modelings (workspace is capped at two slots).</dd>
     </dl>
   </div>
 </details>
 
 <footer>
-  Journey · compare-models · two computable models side by side · faithful to the deployed app. Shares the canonical
+  Journey · compare-models · two computable modelings side by side · faithful to the deployed app. Shares the canonical
   <code>&lt;style&gt;</code> toolkit from <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
   Hub: <a href="../index.html">design/index.html</a>.
 </footer>

@@ -24,13 +24,13 @@ floating "Show results" button — those are model-scoped and live on the builde
         {% include 'model_builder/compare/kpi_strip.html' %}
         {% include 'model_builder/compare/decomposition.html' %}
 
-        <p class="mb-1 mt-4"><strong>CO2 emissions over time</strong>
-            <span class="text-muted small">— paired bars, shared axis &amp; legend (dark = usage, light = manufacturing; one legend drives both models)</span></p>
+        <p class="mb-1 mt-4"><strong>CO2-eq emissions over time</strong>
+            <span class="text-muted small">— paired bars, shared axis &amp; legend (dark = usage, light = manufacturing; one legend drives both modelings)</span></p>
         <div class="content-result-chart">
             <canvas id="comparisonPairedChart" aria-label="Paired emissions over time"></canvas>
         </div>
 
-        <p class="mb-1 mt-4"><strong>Cumulative CO2 emissions over time</strong>
+        <p class="mb-1 mt-4"><strong>Cumulative CO2-eq emissions over time</strong>
             <span class="text-muted small">— overlay; the gap is emissions avoided to date; the end gap is the headline Δ</span></p>
         <div class="content-result-chart">
             <canvas id="comparisonCumulativeChart" aria-label="Cumulative emissions over time"></canvas>

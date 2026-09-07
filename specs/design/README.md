@@ -37,8 +37,8 @@ Journeys slot into the four-stage SDD workflow ([`../workflow.md`](../workflow.m
 - `journeys/onboarding.html` — first run: home → *Start modeling* → the template picker (templates / start from scratch / load a file) → land on the canvas → the guided tour and help drawer. (The web/edge toggle lives in `build-a-model`, Phase E — it's part of the build loop, not first-run onboarding.)
 - `journeys/view-results.html` — the Results panel: yearly & cumulative emission charts and the *Impact repartition* Sankey (+ "Analyse by" chips), the Sources tab and xlsx export. (Trusting the numbers is its companion, `audit-a-result`.)
 - `journeys/audit-a-result.html` — **methodology & auditability.** Trace any number to its inputs: *provenance* (every value's source & confidence, the Sources view) and *derivation* (the inline formula → the calculus graph → cited inputs). Surfaces are reached from `view-results` (Sources) and `build-a-model` (the edit panel's *Calculated attributes*); this journey is their canonical home as auditability becomes first-class.
-- `journeys/compare-models.html` — the second model slot and the comparison dashboard (KPI strip, decomposition, paired & cumulative charts, diff table), reached via the ⇄ Compare tab; non-destructive, dismiss in place.
-- `journeys/save-and-load.html` — export / open a single model or the two-model workspace (`.e-f.json`, routed by content, UI config included), and the recovery page when a session model fails to deserialize.
+- `journeys/compare-models.html` — the second modeling slot and the comparison dashboard (KPI strip, decomposition, paired & cumulative charts, diff table), reached via the ⇄ Compare tab; non-destructive, dismiss in place.
+- `journeys/save-and-load.html` — export / open a single modeling or the two-modeling workspace (`.e-f.json`, routed by content, UI config included), and the recovery page when a session modeling fails to deserialize.
 
 ### 2 & 3. Tokens and components — the live `/design` route
 
@@ -55,7 +55,7 @@ This is the **documentation + foundations** of a (code-first) design system, not
 A fuller design system would add the following — none required for what's here to be useful, listed so the gap is explicit:
 
 - **Accessibility guidance** — contrast, focus order, keyboard. Not documented yet.
-- **Component-state coverage** — `/design` shows the cheap states live plus one sample model; modals, the full set of form-field types, and empty/loading/error states aren't each catalogued.
+- **Component-state coverage** — `/design` shows the cheap states live plus one sample modeling; modals, the full set of form-field types, and empty/loading/error states aren't each catalogued.
 - **Explicit principles / voice** — today the rationale is scattered across the journeys' *Decisions taken*; there's no standalone principles page.
 - **Design-tool counterpart** — the system lives in code only; no Figma library for designers who don't work in code.
 - **Governance** — versioning / changelog / a contribution gate, beyond the sync protocol below.

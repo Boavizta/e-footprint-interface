@@ -273,10 +273,10 @@
 
 <p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
 <h1>save-and-load</h1>
-<p class="lede">There are no accounts and no server-side library here — a model lives in your session, and <b>persisting it means
+<p class="lede">There are no accounts and no server-side library here — a modeling lives in your session, and <b>persisting it means
   moving a file</b>. <b>save-and-load</b> is that round-trip: <b>Export</b> downloads a <code>.e-f.json</code>, <b>Open file</b> reads
-  one back, and a single model or the whole two-model workspace travels the same way. Success isn't "a file downloaded" — it's a
-  <b>faithful round-trip</b>: the model (and its Sankey/UI settings) comes back intact, recomputed and verified, and when a file
+  one back, and a single modeling or the whole two-model workspace travels the same way. Success isn't "a file downloaded" — it's a
+  <b>faithful round-trip</b>: the modeling (and its Sankey/UI settings) comes back intact, recomputed and verified, and when a file
   <em>can't</em> be opened the app <b>never loses your work</b> — it routes you to a recovery page that still hands it back.</p>
 <p class="note">Faithful to the deployed app. Draws from the per-model <b>toolbar</b> (<code>upload_download_reboot_model_tooltips.html</code>),
   the <b>Open a file</b> side panel, the <code>download-json</code> / <code>download-workspace</code> / <code>upload-json</code> views, and
@@ -285,7 +285,7 @@
 
 <!-- ============ PHASE A — SAVE (EXPORT) ============ -->
 <div class="phase">
-  <span class="tag">A · Save — export a file</span><span class="conn">one model downloads directly · two models offer This / Both</span><span class="rule"></span>
+  <span class="tag">A · Save — export a file</span><span class="conn">one modeling downloads directly · two modelings offer This / Both</span><span class="rule"></span>
 </div>
 
 <!-- screen 1 — export -->
@@ -294,29 +294,29 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab">Reference model</span><span class="tab active">Comparison model</span><span class="tab compare">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab">Reference modeling</span><span class="tab active">Comparison modeling</span><span class="tab compare">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn" style="width:auto;padding:0 .35rem;font-size:.58rem">Export ▾</span><span class="tbtn">⟳</span></div>
       </div>
       <div class="stage" style="min-height:180px">
         <div class="canvas dim" style="min-height:180px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
         <div class="menu" style="top:2.1rem; right:2.2rem">
-          <div class="mi"><span class="g">⬇</span> This model</div>
-          <div class="mi"><span class="g">⬇</span> Both models</div>
+          <div class="mi"><span class="g">⬇</span> This modeling</div>
+          <div class="mi"><span class="g">⬇</span> Both modelings</div>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>With one model the toolbar shows a direct <b>Export</b> (tooltip <em>"Export your model"</em>) that downloads it. With two, <b>Export ▾</b> opens a menu — <b>⬇ This model</b> or <b>⬇ Both models</b>. The file is named <code>{date} UTC {model name}.e-f.json</code> (a workspace is <code>… comparison (A vs B).e-f.json</code>).</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>With one modeling the toolbar shows a direct <b>Export</b> (tooltip <em>"Export your modeling"</em>) that downloads it. With two, <b>Export ▾</b> opens a menu — <b>⬇ This modeling</b> or <b>⬇ Both modelings</b>. The file is named <code>{date} UTC {name}.e-f.json</code> (a workspace is <code>… comparison (A vs B).e-f.json</code>).</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>Save = download a file</h3></div>
     <p>"Save" is a download. A single-model session exports straight to a <code>.e-f.json</code>; a two-model session lets you take
-       <b>just the active model</b> or the <b>whole workspace</b> in one file. The export deliberately drops calculated attributes
+       <b>just the active modeling</b> or the <b>whole workspace</b> in one file. The export deliberately drops calculated attributes
        (they're recomputed on load) and carries your UI settings along — so the file stays small but round-trips faithfully.</p>
     <div class="states">
-      <div class="state"><span class="k">One model</span><span class="v">A direct <b>Export</b> link downloads the model immediately (new tab, no screen change).</span></div>
-      <div class="state"><span class="k">Two models</span><span class="v"><b>Export ▾</b> → <b>This model</b> (<code>download-json</code>) or <b>Both models</b> (<code>download-workspace</code>, one envelope).</span></div>
-      <div class="state"><span class="k">Filename</span><span class="v"><code>{date} UTC {name}.e-f.json</code> — timestamped, sanitized; a workspace names both models.</span></div>
-      <div class="state deferred"><span class="k">Sources xlsx</span><span class="v">A separate <em>"Export to xslx"</em> in the Results panel exports the sources table — not the model. See <a href="view-results.html">view-results</a>.</span></div>
+      <div class="state"><span class="k">One modeling</span><span class="v">A direct <b>Export</b> link downloads the modeling immediately (new tab, no screen change).</span></div>
+      <div class="state"><span class="k">Two modelings</span><span class="v"><b>Export ▾</b> → <b>This modeling</b> (<code>download-json</code>) or <b>Both modelings</b> (<code>download-workspace</code>, one envelope).</span></div>
+      <div class="state"><span class="k">Filename</span><span class="v"><code>{date} UTC {name}.e-f.json</code> — timestamped, sanitized; a workspace names both modelings.</span></div>
+      <div class="state deferred"><span class="k">Sources xlsx</span><span class="v">A separate <em>"Export to xslx"</em> in the Results panel exports the sources table — not the modeling. See <a href="view-results.html">view-results</a>.</span></div>
     </div>
   </div>
 </div>
@@ -332,7 +332,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span></div>
       </div>
       <div class="stage">
@@ -341,7 +341,7 @@
           <div class="phead"><b>Open a file</b><span class="x">×</span></div>
           <div class="field"><label>Choose a file (.e-f.json)</label></div>
           <div class="fileinput"><span class="btn">Choose file</span> No file selected</div>
-          <p class="helptxt">A single-model file replaces this model; a workspace file restores both models.</p>
+          <p class="helptxt">A single-model file replaces this modeling; a workspace file restores both modelings.</p>
           <button class="savebtn">Open</button>
         </div>
       </div>
@@ -351,14 +351,14 @@
   <div class="info-col">
     <div class="step"><span class="n">2</span><h3>Load = open a file</h3></div>
     <p>One <b>Open file</b> entry handles everything. You pick a <code>.e-f.json</code> and hit <b>Open</b>; the app inspects the
-       contents and routes itself — a single-model file <b>replaces the active model</b>, a workspace file <b>restores both
-       slots</b>. Either way the model is re-deserialized and its calculated attributes <b>recomputed</b>, so what you see is
+       contents and routes itself — a single-model file <b>replaces the active modeling</b>, a workspace file <b>restores both
+       slots</b>. Either way the modeling is re-deserialized and its calculated attributes <b>recomputed</b>, so what you see is
        verified, not trusted from the file.</p>
     <div class="states">
       <div class="state"><span class="k">One entry, content-routed</span><span class="v">The same <b>Open</b> handles single vs workspace files — decided by the file's contents, not its name.</span></div>
-      <div class="state"><span class="k">Recomputed on load</span><span class="v">Calculated attributes are rebuilt on import; the model is migrated forward if it's from an older schema.</span></div>
-      <div class="state"><span class="k">Success</span><span class="v">A clean load redirects to a freshly rendered builder — the canvas comes back with the loaded model.</span></div>
-      <div class="state variant"><span class="k">Add-as-second is separate</span><span class="v">Importing a <em>second</em> model to compare is a different intent — the <b>＋ Add → Import from file…</b> panel (see <a href="compare-models.html">compare-models</a>). "Open file" opens-into-here; "Import" adds alongside.</span></div>
+      <div class="state"><span class="k">Recomputed on load</span><span class="v">Calculated attributes are rebuilt on import; the modeling is migrated forward if it's from an older schema.</span></div>
+      <div class="state"><span class="k">Success</span><span class="v">A clean load redirects to a freshly rendered builder — the canvas comes back with the loaded modeling.</span></div>
+      <div class="state variant"><span class="k">Add-as-second is separate</span><span class="v">Importing a <em>second</em> modeling to compare is a different intent — the <b>＋ Add → Import from file…</b> panel (see <a href="compare-models.html">compare-models</a>). "Open file" opens-into-here; "Import" adds alongside.</span></div>
       <div class="state"><span class="k">Bad file</span><span class="v">An unreadable or non-e-footprint file is rejected with an explained modal — never a broken canvas (fold below).</span></div>
     </div>
   </div>
@@ -366,7 +366,7 @@
 
 <!-- bad-file fold -->
 <details class="fold">
-  <summary><span class="s-tag danger">Rejected</span> Bad file — explained, never broken <span class="s-sub">— the upload is validated before it can replace your model</span></summary>
+  <summary><span class="s-tag danger">Rejected</span> Bad file — explained, never broken <span class="s-sub">— the upload is validated before it can replace your modeling</span></summary>
   <div class="fold-body">
     <div class="screen">
       <div class="mock-col">
@@ -384,15 +384,15 @@
             </div>
           </div>
         </div>
-        <div class="mock-help"><span class="lbl">Bad file</span>Validation runs server-side before anything is replaced. A non-JSON file → <em>"Invalid file format ! Please use a JSON file"</em>; malformed JSON → <em>"Invalid JSON data"</em>; valid JSON that isn't an e-footprint model → <em>"Not a valid e-footprint file !"</em> Each surfaces as a centered modal with <b>Go back</b>; the current model is untouched.</div>
+        <div class="mock-help"><span class="lbl">Bad file</span>Validation runs server-side before anything is replaced. A non-JSON file → <em>"Invalid file format ! Please use a JSON file"</em>; malformed JSON → <em>"Invalid JSON data"</em>; valid JSON that isn't an e-footprint modeling → <em>"Not a valid e-footprint file !"</em> Each surfaces as a centered modal with <b>Go back</b>; the current modeling is untouched.</div>
       </div>
       <div class="info-col">
-        <p>Because the file is validated and the model rebuilt before it can take over, a bad upload can never leave you on a broken
-           canvas. The error names what went wrong — wrong format, malformed JSON, or a valid file that isn't an e-footprint model —
-           and the only move is to back out; your current model stays exactly as it was.</p>
+        <p>Because the file is validated and the modeling rebuilt before it can take over, a bad upload can never leave you on a broken
+           canvas. The error names what went wrong — wrong format, malformed JSON, or a valid file that isn't an e-footprint modeling —
+           and the only move is to back out; your current modeling stays exactly as it was.</p>
         <div class="states">
           <div class="state"><span class="k">Three checks</span><span class="v">Extension/format → JSON parse → e-footprint deserialize, each with its own message.</span></div>
-          <div class="state"><span class="k">No partial load</span><span class="v">The replace only happens after the new model is built successfully — a failure changes nothing.</span></div>
+          <div class="state"><span class="k">No partial load</span><span class="v">The replace only happens after the new modeling is built successfully — a failure changes nothing.</span></div>
         </div>
       </div>
     </div>
@@ -401,7 +401,7 @@
 
 <!-- ============ PHASE C — RECOVERY ============ -->
 <div class="phase">
-  <span class="tag">C · When loading fails — recovery</span><span class="conn">the session model won't deserialize · get it back, don't lose it</span><span class="rule"></span>
+  <span class="tag">C · When loading fails — recovery</span><span class="conn">the session modeling won't deserialize · get it back, don't lose it</span><span class="rule"></span>
 </div>
 
 <!-- screen 3 — recovery page -->
@@ -412,30 +412,30 @@
       <div class="stage" style="min-height:280px">
         <div class="recpage">
           <div class="warn">⚠️</div>
-          <div class="rh">Something went wrong loading your model</div>
-          <p class="rb">Your model couldn't be opened — it may be corrupt or built with an incompatible version. Your work is still stored; you can download it before resetting, and reporting the bug helps us fix it.</p>
+          <div class="rh">Something went wrong loading your modeling</div>
+          <p class="rb">Your modeling couldn't be opened — it may be corrupt or built with an incompatible version. Your work is still stored; you can download it before resetting, and reporting the bug helps us fix it.</p>
           <p class="err">(Error: KeyError)</p>
           <div class="recacts">
-            <span class="recbtn">⬇ Download model A</span>
-            <span class="recbtn">⬇ Download model B</span>
+            <span class="recbtn">⬇ Download modeling A</span>
+            <span class="recbtn">⬇ Download modeling B</span>
             <span class="recbtn link">Report this bug on GitHub ↗</span>
-            <span class="recbtn green">Reset to a blank model</span>
+            <span class="recbtn green">Reset to a blank modeling</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>When the stored model can't be deserialized, a standalone <b>recovery page</b> replaces the builder — <b>Something went wrong loading your model</b>. It offers a <b>raw download</b> per slot (<em>Download model A / B</em>, or <em>Download your current model</em>), <b>Report this bug on GitHub</b>, and <b>Reset to a blank model</b>. It never tries to render the broken model.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>When the stored modeling can't be deserialized, a standalone <b>recovery page</b> replaces the builder — <b>Something went wrong loading your modeling</b>. It offers a <b>raw download</b> per slot (<em>Download modeling A / B</em>, or <em>Download your current modeling</em>), <b>Report this bug on GitHub</b>, and <b>Reset to a blank modeling</b>. It never tries to render the broken modeling.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">3</span><h3>Recovery — get your work back, don't lose it</h3></div>
-    <p>If the session model can't be loaded — a corrupt file, an incompatible version — the app doesn't crash to a 500. It shows a
-       recovery page that is <b>fully decoupled from the model</b> (it has to render when the model is exactly what's broken). The
+    <p>If the session modeling can't be loaded — a corrupt file, an incompatible version — the app doesn't crash to a 500. It shows a
+       recovery page that is <b>fully decoupled from the modeling</b> (it has to render when the modeling is exactly what's broken). The
        raw stored data is still there, so you can <b>download it verbatim</b> before resetting, and report the bug — with versions
-       and the error type only, never your model data or a traceback.</p>
+       and the error type only, never your modeling data or a traceback.</p>
     <div class="states">
-      <div class="state"><span class="k">Decoupled by design</span><span class="v">The page reads only the slot index and a cache check — it never deserializes, so it works on a dead model.</span></div>
-      <div class="state"><span class="k">Raw download</span><span class="v">Per slot — <em>Download your current model</em> (one) or <em>Download model A / B</em> (two) — serves the stored JSON verbatim.</span></div>
-      <div class="state"><span class="k">Reset to blank</span><span class="v">A green <b>Reset to a blank model</b> (POST, confirmed) discards to an empty model and re-opens the picker.</span></div>
+      <div class="state"><span class="k">Decoupled by design</span><span class="v">The page reads only the slot index and a cache check — it never deserializes, so it works on a dead modeling.</span></div>
+      <div class="state"><span class="k">Raw download</span><span class="v">Per slot — <em>Download your current modeling</em> (one) or <em>Download modeling A / B</em> (two) — serves the stored JSON verbatim.</span></div>
+      <div class="state"><span class="k">Reset to blank</span><span class="v">A green <b>Reset to a blank modeling</b> (POST, confirmed) discards to an empty modeling and re-opens the picker.</span></div>
       <div class="state"><span class="k">Safe bug report</span><span class="v">The GitHub link prefills versions + error type only, and asks you to attach the file you just downloaded — no data leaks into a public issue.</span></div>
       <div class="state deferred"><span class="k">Always reachable</span><span class="v">Also at <code>/recover/</code> and as the production 500 handler — a read-only escape hatch that's always available.</span></div>
     </div>
@@ -445,27 +445,27 @@
 <!-- file format section -->
 <h2 class="sec">What's in the file</h2>
 <p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">One extension, <code>.e-f.json</code>, for both shapes —
-  the app routes by <b>content, not extension</b>, so a single-model session can still open a workspace file. Models export
+  the app routes by <b>content, not extension</b>, so a single-model session can still open a workspace file. Modelings export
   with a <b>complete serialized result snapshot</b> and their UI settings (Sankey views, etc.), so an analysis round-trips intact
   regardless of which projections were opened before download.</p>
 <table>
   <tr><th>Shape</th><th>Contains</th><th>Notes</th></tr>
-  <tr><td><b>Single model</b><br><code>{date} UTC {name}.e-f.json</code></td><td>the model's inputs + complete serialized results and topology + its <code>interface_config</code> (Sankey settings, …) + the interface version</td><td>opens by <b>replacing the active model</b></td></tr>
+  <tr><td><b>Single modeling</b><br><code>{date} UTC {name}.e-f.json</code></td><td>the modeling's inputs + complete serialized results and topology + its <code>interface_config</code> (Sankey settings, …) + the interface version</td><td>opens by <b>replacing the active modeling</b></td></tr>
   <tr><td><b>Workspace</b><br><code>… comparison (A vs B).e-f.json</code></td><td>an envelope: <code>{ active_slot, models: [ &lt;single-model doc&gt;, … ] }</code> — each entry byte-for-byte a single-model document</td><td>opens by <b>restoring both slots</b> and the active one</td></tr>
-  <tr><td><b>Recovered (raw)</b><br><code>… recovered-model.e-f.json</code></td><td>the stored session data <b>verbatim</b> — never rebuilt</td><td>served by the recovery page, even on a corrupt model</td></tr>
+  <tr><td><b>Recovered (raw)</b><br><code>… recovered-model.e-f.json</code></td><td>the stored session data <b>verbatim</b> — never rebuilt</td><td>served by the recovery page, even on a corrupt modeling</td></tr>
 </table>
-<p class="note" style="margin-top:.5rem">A model is held only in your <b>session</b> (a cache with a short TTL) — there's no account and no server-side saved-models library. Closing the tab and coming back later is exactly what export/import is for.</p>
+<p class="note" style="margin-top:.5rem">A modeling is held only in your <b>session</b> (a cache with a short TTL) — there's no account and no server-side saved-models library. Closing the tab and coming back later is exactly what export/import is for.</p>
 
 <!-- ============ DECISIONS ============ -->
 <h2 class="sec">Decisions taken</h2>
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>One <code>.e-f.json</code> extension for both single-model and workspace files; route by content, not extension.</b></td><td>A single-model session can still open a workspace file and vice-versa — the user never has to know which kind they have. The workspace file is an additive envelope of byte-for-byte single-model documents, so the single-model format is never re-implemented or allowed to drift.</td></tr>
-  <tr><td><b>Explicit export materializes the complete serialized result set; automatic session saves stay lazy.</b></td><td>A downloaded model is self-contained and independent of which result views the user opened. Edit-time persistence remains fast and passive: it only stores results already in cache. UI-only state (<code>interface_config</code>) rides inside the file but the model never touches it; the session repository owns it.</td></tr>
-  <tr><td><b>Loading is POST-only; the recovery download and <code>/recover/</code> are GET.</b></td><td>A bare GET must not mutate the session model. But a read-only escape hatch has to stay reachable even when the model is what crashes the deserializer — so the recovery reads and the raw download are safe GETs that never build the model.</td></tr>
-  <tr><td><b>The recovery page is fully decoupled from the model.</b></td><td>It must render precisely when the model is broken, so it reads only the slot index + a cache-existence check and never deserializes. Anything that touched the model could fail the same way the builder just did.</td></tr>
-  <tr><td><b>The bug report carries versions and the error type only — no traceback, no model data.</b></td><td>The report opens a public GitHub issue; leaking model contents or a stack trace there would be a privacy and noise problem. The user is asked to attach the file they just downloaded if they choose to.</td></tr>
-  <tr><td><b>Destructive confirms are decided at click time from the live DOM, not baked into the markup.</b></td><td>The toolbar outlives partial swaps, so a baked-in <code>hx-confirm</code> would go stale; reset only prompts when the model is actually non-empty, read live at click time.</td></tr>
+  <tr><td><b>Explicit export materializes the complete serialized result set; automatic session saves stay lazy.</b></td><td>A downloaded modeling is self-contained and independent of which result views the user opened. Edit-time persistence remains fast and passive: it only stores results already in cache. UI-only state (<code>interface_config</code>) rides inside the file but the modeling never touches it; the session repository owns it.</td></tr>
+  <tr><td><b>Loading is POST-only; the recovery download and <code>/recover/</code> are GET.</b></td><td>A bare GET must not mutate the session modeling. But a read-only escape hatch has to stay reachable even when the modeling is what crashes the deserializer — so the recovery reads and the raw download are safe GETs that never build the modeling.</td></tr>
+  <tr><td><b>The recovery page is fully decoupled from the modeling.</b></td><td>It must render precisely when the modeling is broken, so it reads only the slot index + a cache-existence check and never deserializes. Anything that touched the modeling could fail the same way the builder just did.</td></tr>
+  <tr><td><b>The bug report carries versions and the error type only — no traceback, no modeling data.</b></td><td>The report opens a public GitHub issue; leaking modeling contents or a stack trace there would be a privacy and noise problem. The user is asked to attach the file they just downloaded if they choose to.</td></tr>
+  <tr><td><b>Destructive confirms are decided at click time from the live DOM, not baked into the markup.</b></td><td>The toolbar outlives partial swaps, so a baked-in <code>hx-confirm</code> would go stale; reset only prompts when the modeling is actually non-empty, read live at click time.</td></tr>
   <tr><td><b>"Open file" (replace here) and "+Add → Import" (add as second) are distinct intents with separate panels.</b></td><td>Opening-into-the-current-slot and adding-a-second-model-to-compare are different actions; collapsing them into one would make it ambiguous whether a file replaces or augments your work.</td></tr>
 </table>
 
@@ -484,7 +484,7 @@
       <dt>Persistence</dt>
       <dd><code>adapters/repositories/session_system_repository.py</code> (cache key <code>system_data:{session}:{slot}</code>; Redis TTL 600s / Postgres 43200s; <code>save_data</code> merges <code>interface_config</code> + version; <code>MAX_PAYLOAD_SIZE_MB</code> ≈ 30, a <b>shared budget</b> across both slots → <code>PayloadSizeLimitExceeded</code> on save), <code>session_workspace_repository.py</code>, <code>workspace_index.py</code>; serialization/migration in <code>system_import_service.py</code>, <code>version_upgrade_handlers.py</code>; library <code>system_to_json</code>, <code>duplicate_system</code>.</dd>
       <dt>Not built (clarifications)</dt>
-      <dd>No drag-and-drop and no client-side validation — a plain native file input, validated server-side only. No accounts / named server-side saved models — session cache only (a model is lost when its TTL lapses unless exported). The Sources <em>xlsx</em> is the only spreadsheet; the model itself is JSON.</dd>
+      <dd>No drag-and-drop and no client-side validation — a plain native file input, validated server-side only. No accounts / named server-side saved modelings — session cache only (a modeling is lost when its TTL lapses unless exported). The Sources <em>xlsx</em> is the only spreadsheet; the modeling itself is JSON.</dd>
     </dl>
   </div>
 </details>

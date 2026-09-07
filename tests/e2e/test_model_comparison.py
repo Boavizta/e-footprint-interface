@@ -45,8 +45,8 @@ class TestModelComparisonWorkspace:
         assert model_builder.active_model_tab_count() == 2
         assert model_builder.active_slot() == "1"
         expect(model_builder.active_model_name()).to_contain_text(new_name)
-        # The tab carries a fixed role label, not the model name (slot 1 = "Comparison model").
-        expect(page.locator("[data-model-tab='1']")).to_contain_text("Comparison model")
+        # The tab carries a fixed role label, not the modeling name (slot 1 = "Comparison modeling").
+        expect(page.locator("[data-model-tab='1']")).to_contain_text("Comparison modeling")
 
         # Switch back to model A with no full reload (client-side canvas toggle).
         model_builder.switch_to_model(0)

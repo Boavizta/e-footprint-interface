@@ -340,7 +340,7 @@
   answered in seconds, at any depth.</p>
 <p class="note">Prospective — grounded in <a href="audit-a-result.html">audit-a-result</a> (today's surfaces) and the library's
   explainability machinery: every calculated value carries its ancestry and formula, every calculated attribute has a
-  <b>docstring</b>, the model file persists the <b>values-free calculation graph</b>, valueless intermediates
+  <b>docstring</b>, the modeling file persists the <b>values-free calculation graph</b>, valueless intermediates
   <b>compute lazily on read</b>, and attribution atoms record how source footprints distribute. Entry seams from charts are
   designed in <a href="analyse-results.html">analyse-results</a>; from the impact header in
   <a href="impact-on-canvas.html">impact-on-canvas</a>; the Sankey stays the <em>system-level</em> rendering of the attribution
@@ -365,7 +365,7 @@
         <div class="resultsbar"><span class="rb">Results</span><span class="auditentry">⌕ Audit</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The bottom bar carries <b>two destinations</b>: <b>Results</b> (read the footprint) and <b>⌕ Audit</b> (trace it). Both gate on the model being computable, with the same live-reason tooltip when it isn't. Opening Audit from here lands on the <b>System page</b> — the index of auditable numbers; opening it from a number lands on that number.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The bottom bar carries <b>two destinations</b>: <b>Results</b> (read the footprint) and <b>⌕ Audit</b> (trace it). Both gate on the modeling being computable, with the same live-reason tooltip when it isn't. Opening Audit from here lands on the <b>System page</b> — the index of auditable numbers; opening it from a number lands on that number.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>Audit is a destination, not a corridor</h3></div>
@@ -377,7 +377,7 @@
       <div class="state"><span class="k">Standalone entry</span><span class="v"><b>⌕ Audit</b> beside <b>Results</b> in the bottom bar — same computability gate, same live validation reason while locked. Lands on the <b>System page</b>.</span></div>
       <div class="state"><span class="k">Focused entries</span><span class="v">The impact header's <b>⌕ Audit</b> (<a href="impact-on-canvas.html">impact-on-canvas</a>) → that object's <b>page</b>. A chart tooltip (<a href="analyse-results.html">analyse-results</a>) or a Sources calculated row → that <b>Value</b>.</span></div>
       <div class="state"><span class="k">Panel vs Audit</span><span class="v">A symmetric pair: the <b>edit panel changes</b> an object, the <b>audit view explains</b> it. <b>⌕ Audit</b> crosses one way, <b>Open object ↗</b> crosses back; only one of the two is open at a time.</span></div>
-      <div class="state"><span class="k">In place</span><span class="v">The audit view slides over the canvas like Results — closing it returns to the model untouched. No new tab, no page change.</span></div>
+      <div class="state"><span class="k">In place</span><span class="v">The audit view slides over the canvas like Results — closing it returns to the modeling untouched. No new tab, no page change.</span></div>
       <div class="state deferred"><span class="k">From the Sankey</span><span class="v">Clicking a Sankey node — needs object ids in the Sankey payload; same address scheme once added.</span></div>
     </div>
   </div>
@@ -416,11 +416,11 @@
   <div class="info-col">
     <div class="step"><span class="n">2</span><h3>Land on the System page — the index of auditable numbers</h3></div>
     <p>The System is just an object, so the landing is its page: the total footprint and the per-source pairs it sums. This
-       replaces the whole-model dependency map of an earlier draft — the canvas already shows the model's structure, and a
+       replaces the whole-model dependency map of an earlier draft — the canvas already shows the modeling's structure, and a
        global graph is anchored to nothing; the audit question always starts from a <em>number</em>. The graph views live one
        level down, anchored (Phases D–E).</p>
     <div class="states">
-      <div class="state"><span class="k">Table of contents</span><span class="v"><b>Total footprint</b> + each impact source's <b>Use / Manufacturing</b> pair — all read from the model file, zero compute.</span></div>
+      <div class="state"><span class="k">Table of contents</span><span class="v"><b>Total footprint</b> + each impact source's <b>Use / Manufacturing</b> pair — all read from the modeling file, zero compute.</span></div>
       <div class="state"><span class="k">One click in</span><span class="v">Any row → that footprint's <b>Value</b> view (Phase C), where the <b>Influence lens</b> is one more click (Phase D).</span></div>
       <div class="state"><span class="k">No global map</span><span class="v">Rejected: the canvas already renders structure; an unanchored graph repeats the pyvis failure one altitude up. Influence views are anchored per footprint instead.</span></div>
       <div class="state"><span class="k">Attributed side</span><span class="v">Non-source objects are audited from their badges, chart series or impact headers — their pages and the <b>Contribution lens</b> (Phase E) explain where their numbers come from.</span></div>
@@ -464,7 +464,7 @@
   <div class="info-col">
     <div class="step"><span class="n">3</span><h3>The object page — the full list lives here now</h3></div>
     <p>The edit panel's <em>Calculated attributes</em> accordion <b>retires</b>; this page is its new home. The move follows the
-       architecture: the panel shows only what the model file already knows (the persisted footprints in its impact header),
+       architecture: the panel shows only what the modeling file already knows (the persisted footprints in its impact header),
        while this page may <b>compute on demand</b> — it's an analytical surface, opened deliberately, and the cost is one
        object's cone. The panel gets simpler and faster; the attribute list gets a home where drilling deeper is natural rather
        than a dead end.</p>
@@ -567,7 +567,7 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Clicking input variable <b>a</b> on the previous screen navigated in place: the breadcrumb now reads <b>System › Web server › Hour by hour electricity consumption</b>; <b>‹</b> retraces. This value wasn't stored in the model file — the engine <b>computed it on demand</b> (grey chip), invisibly fast. A <b>Low</b>-confidence input surfaces two clicks from the headline total.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Clicking input variable <b>a</b> on the previous screen navigated in place: the breadcrumb now reads <b>System › Web server › Hour by hour electricity consumption</b>; <b>‹</b> retraces. This value wasn't stored in the modeling file — the engine <b>computed it on demand</b> (grey chip), invisibly fast. A <b>Low</b>-confidence input surfaces two clicks from the headline total.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">5</span><h3>Click through the derivation — never lose the thread</h3></div>
@@ -644,13 +644,13 @@
     <div class="step"><span class="n">6</span><h3>The Influence lens — what shapes this footprint</h3></div>
     <p>The macro question, anchored: <em>"which objects' inputs influence this footprint?"</em> For one audited number the
        answer is small — a handful of objects, each showing <em>which of its inputs</em> participate. This is where
-       non-obvious influences (the country's carbon intensity, a journey's frequency) become visible — the edges the model
+       non-obvious influences (the country's carbon intensity, a journey's frequency) become visible — the edges the modeling
        canvas never draws. One zoom down, the same cone at calculated-attribute level shows <b>how</b> the influence travels.</p>
     <div class="states">
       <div class="state"><span class="k">Objects altitude</span><span class="v">Nodes = the objects in this footprint's ancestry cone, annotated with their participating <b>inputs</b>; edges = "feeds". Typically 5–15 nodes — read at a glance.</span></div>
       <div class="state"><span class="k">Attribute altitude</span><span class="v">The chip toggle re-renders the cone as the <b>scoped DAG of calculated attributes</b> across those same objects — the spine of the derivation; each object's lateral side-branches are <b>collapsed by default</b> (expandable). Node detail stays in the Value view.</span></div>
-      <div class="state"><span class="k">Anchored only</span><span class="v">There is no whole-model graph — every Influence view belongs to one audited footprint. (The System total's cone is the whole model; its Influence view is the one case that resembles a global map, reached deliberately.)</span></div>
-      <div class="state"><span class="k">Zero compute</span><span class="v">Both altitudes render from the <b>calculation graph persisted in the model file</b> — structure needs no values; values appear on hover/click via lazy pulls.</span></div>
+      <div class="state"><span class="k">Anchored only</span><span class="v">There is no whole-model graph — every Influence view belongs to one audited footprint. (The System total's cone is the whole modeling; its Influence view is the one case that resembles a global map, reached deliberately.)</span></div>
+      <div class="state"><span class="k">Zero compute</span><span class="v">Both altitudes render from the <b>calculation graph persisted in the modeling file</b> — structure needs no values; values appear on hover/click via lazy pulls.</span></div>
       <div class="state"><span class="k">Exits</span><span class="v">Click an object → its page; click an attribute node → its Value view; <b>×</b> on the lens → back to the Value it came from.</span></div>
       <div class="state"><span class="k">Retirement</span><span class="v">The pyvis calculus-graph page (new-tab iframe) <b>retires</b> — legacy of the pre-product era, superseded by this lens.</span></div>
     </div>
@@ -720,7 +720,7 @@
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>Audit is the third workspace mode, with a standalone gated entry beside Results — landing on the System page.</b></td><td>Auditability is the product's strongest asset; a capability reachable only by stumbling onto the right icon stays invisible (today's failure). The landing is an <em>index of auditable numbers</em> (total + per-source pairs), because an audit always starts from a number.</td></tr>
-  <tr><td><b>No whole-model dependency map.</b></td><td>The canvas already renders the model's structure; a global computational graph is anchored to nothing and repeats the pyvis failure one altitude up. The non-obvious edges (carbon intensity, journey frequency…) surface in the anchored Influence lens, where they're readable.</td></tr>
+  <tr><td><b>No whole-model dependency map.</b></td><td>The canvas already renders the modeling's structure; a global computational graph is anchored to nothing and repeats the pyvis failure one altitude up. The non-obvious edges (carbon intensity, journey frequency…) surface in the anchored Influence lens, where they're readable.</td></tr>
   <tr><td><b>Two lenses on one surface, picked by the audited value's nature: ◉ Influence (upstream calculus) for source footprints, ◎ Contribution (downstream attribution) for attributed footprints.</b></td><td>The engine computes two different stories — how a footprint arises, and where it goes — with different directions, data and questions; one "Map" muddled them. But entries, navigation and the Value view are identical, so they're lenses of one mode, not two modes. Delivery splits accordingly: <code>audit-mode</code> (core calculus) then <code>audit-attribution</code>.</td></tr>
   <tr><td><b>The Influence lens is object-altitude first (inputs annotated), scoped-DAG on toggle, lateral branches collapsed.</b></td><td>5–15 annotated objects answer "what shapes this number" at a glance; the attribute-level DAG shows the spine of <em>how</em>, with per-object elaboration one expand away and per-node detail in the Value view. Spine over completeness — completeness is what made the old graph unreadable.</td></tr>
   <tr><td><b>The edit panel keeps only the impact header; the Calculated attributes accordion retires into the Object page.</b></td><td>The panel is an editor — its read-only job ends at the headline. The surface boundary matches the serialization boundary: the panel renders only persisted values (zero compute on open); the audit view computes on demand, scoped to what's asked.</td></tr>

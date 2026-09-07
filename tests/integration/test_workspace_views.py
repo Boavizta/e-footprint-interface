@@ -216,7 +216,7 @@ def test_compare_renders_dashboard_with_both_models_and_headline_delta(client, m
     assert "comparison-dashboard" in html
     assert "Test System" in html and "Copy of Test System" in html
     assert "What explains the difference" in html
-    assert "What differs between the models" in html
+    assert "What differs between the modelings" in html
     # Chart payloads are emitted for the JS to draw (shared-scale paired bars + cumulative overlay).
     assert "data-paired-chart" in html and "data-cumulative-chart" in html
 

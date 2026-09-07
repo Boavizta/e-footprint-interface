@@ -27,8 +27,8 @@ CONSTRAINT_MESSAGES = {
         "tooltip": "Add an edge device in the Infrastructure section first.",
     },
     "__results__": {
-        "unlocked": "Your model is complete — results are now available",
+        "unlocked": "Your modeling is complete — results are now available",
         "locked": "Results are no longer available",
-        "tooltip": "Complete your model to access results",
+        "tooltip": "Complete your modeling to access results",
     },
 }

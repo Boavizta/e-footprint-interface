@@ -284,7 +284,7 @@
   descriptions). At ship time this journey folds into <a href="build-a-model.html">build-a-model</a> (cards, panel) and the banner
   comes off. Decisions ratified in the 2026-07-03 design discussion.</div>
 
-<p class="lede">Today the model and its footprint live in <b>separate rooms</b>: you build on the canvas, then open Results to learn
+<p class="lede">Today the modeling and its footprint live in <b>separate rooms</b>: you build on the canvas, then open Results to learn
   what it weighs. <b>impact-on-canvas</b> puts the weight where the work is: every object card carries its <b>footprint badge</b>, a
   <b>system total</b> rides the Results bar, and the edit panel <b>leads with the object's impact</b> — updated after every edit, so
   modeling gets the feedback loop of a live instrument. Success is a modeler who can say, mid-edit, <em>"that change moved this
@@ -333,7 +333,7 @@
       <div class="state"><span class="k">Share of total</span><span class="v">Percentage + proportion bar against the system total footprint.</span></div>
       <div class="state"><span class="k">Phase split</span><span class="v"><b>Use</b> / <b>Manufacturing</b> sub-figures, matching the results legend vocabulary.</span></div>
       <div class="state"><span class="k">Impact sources too</span><span class="v">For hardware (servers, devices, network…) the attributed footprint <b>is</b> its own footprint — same header, no special case for the user.</span></div>
-      <div class="state"><span class="k">Not computable yet?</span><span class="v">While the model can't compute (no usage pattern…), the header shows a dimmed <em>"No impact yet — complete your model"</em> with the live validation reason — the app's disabled-not-errored rule.</span></div>
+      <div class="state"><span class="k">Not computable yet?</span><span class="v">While the modeling can't compute (no usage pattern…), the header shows a dimmed <em>"No impact yet — complete your modeling"</em> with the live validation reason — the app's disabled-not-errored rule.</span></div>
       <div class="state deferred"><span class="k">⌕ Audit</span><span class="v">Opens the audit view on this object's page — lands with <a href="audit-a-result-target.html">audit-mode</a>; until then the header links the calculated-attributes accordion (a stopgap that retires into that page).</span></div>
     </div>
   </div>
@@ -350,7 +350,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -374,15 +374,15 @@
     <div class="mock-help"><span class="lbl">On this screen</span>Every object card wears a <b>footprint badge</b> — its attributed CO2-eq over the modeling period, compact unit. The Results bar carries the <b>system total badge</b>, always visible. Hovering a badge tooltips the share of total and the Use / Manufacturing split; clicking the card opens the panel on the impact header (Phase A).</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">2</span><h3>The canvas becomes a heat map of the model</h3></div>
+    <div class="step"><span class="n">2</span><h3>The canvas becomes a heat map of the modeling</h3></div>
     <p>Badges turn the canvas from a wiring diagram into a triage view: the eye finds the heavy objects without opening
        anything. Values come straight from the persisted attributed footprints — displaying them costs no computation, on any
-       model size.</p>
+       modeling size.</p>
     <div class="states">
       <div class="state"><span class="k">Badge value</span><span class="v">The object's attributed footprint, period total, compact display unit. Absolute number — the share lives in the tooltip (two numbers on a card is noise).</span></div>
-      <div class="state"><span class="k">Total badge</span><span class="v">System total on the Results bar, always in view — the model's headline without opening Results.</span></div>
-      <div class="state"><span class="k">Zero-compute display</span><span class="v">Badges are read from the saved model (serialized attributed footprints) — rendering the canvas never triggers computation.</span></div>
-      <div class="state"><span class="k">Incomplete model</span><span class="v">No badges while the model can't compute — cards stay clean, the Results bar stays locked with its live reason (disabled-not-errored).</span></div>
+      <div class="state"><span class="k">Total badge</span><span class="v">System total on the Results bar, always in view — the modeling's headline without opening Results.</span></div>
+      <div class="state"><span class="k">Zero-compute display</span><span class="v">Badges are read from the saved modeling (serialized attributed footprints) — rendering the canvas never triggers computation.</span></div>
+      <div class="state"><span class="k">Incomplete modeling</span><span class="v">No badges while the modeling can't compute — cards stay clean, the Results bar stays locked with its live reason (disabled-not-errored).</span></div>
       <div class="state variant"><span class="k">Edge paradigm</span><span class="v">Edge devices, functions and recurrent needs carry the same badge — attribution covers both paradigms uniformly.</span></div>
       <div class="state deferred"><span class="k">Badge toggle</span><span class="v">A toolbar switch to hide badges (presentation / screenshot mode) — add if badge noise proves real.</span></div>
     </div>
@@ -446,7 +446,7 @@
   <tr><td><b>Total badge synchronous; attributed badges synchronous-if-cheap, else async with a pending chip — measurement decides.</b></td><td>The total is already recomputed on every save (engine guarantee) so it's free to show. Attribution's per-edit cost is real but bounded to the dirty cone; the library feature measures it, and the UI is designed to be correct under either policy rather than betting the edit latency on it.</td></tr>
   <tr><td><b>Precise updates only — affected badges change, others are untouched.</b></td><td>Wholesale refresh would flicker the whole canvas on every save and destroy the "ripple as signal" read. The engine's exact invalidation makes precision free.</td></tr>
   <tr><td><b>Badge shows the absolute value; share and phase split live in the tooltip / impact header.</b></td><td>One number per card keeps the canvas legible; percent-vs-absolute toggles and split badges were rejected as card-level noise.</td></tr>
-  <tr><td><b>No badges while the model isn't computable.</b></td><td>Zeros or stale numbers on an incomplete model would be lies; absence + the locked Results bar (with its live reason) already communicates the state — disabled-not-errored, applied to numbers.</td></tr>
+  <tr><td><b>No badges while the modeling isn't computable.</b></td><td>Zeros or stale numbers on an incomplete modeling would be lies; absence + the locked Results bar (with its live reason) already communicates the state — disabled-not-errored, applied to numbers.</td></tr>
 </table>
 
 <!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
@@ -483,7 +483,7 @@
 </details>
 
 <footer>
-  Journey · impact-on-canvas · <b>prospective</b> — the model wears its weight while you build it · normative for the future
+  Journey · impact-on-canvas · <b>prospective</b> — the modeling wears its weight while you build it · normative for the future
   <code>impact-on-canvas</code> feature. Shares the canonical <code>&lt;style&gt;</code> toolkit from
   <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
   Hub: <a href="../index.html">design/index.html</a>.

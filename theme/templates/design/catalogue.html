@@ -172,11 +172,11 @@
     <span style="text-align:center;font-size:.62rem;color:#6B7280;font-family:ui-monospace,Menlo,monospace"><span style="display:block;width:3.6rem;height:2.4rem;background:var(--new-light-primary);border:1px solid var(--new-primary);border-radius:999px;margin-bottom:.25rem"></span>pill</span>
   </div>
 
-  <!-- ============ COMPONENTS (live from a real sample model) ============ -->
-  <h2 class="dc-sec">Components <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#9CA3AF;font-size:.8rem">— live, from a real sample model</span></h2>
+  <!-- ============ COMPONENTS (live from a real sample modeling) ============ -->
+  <h2 class="dc-sec">Components <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#9CA3AF;font-size:.8rem">— live, from a real sample modeling</span></h2>
   <p class="dc-kick">Rendered from a real <code>ModelWeb</code> (the maintained <em>ecommerce</em> template, built in memory) through the
     real canvas and form pipeline — so these are <b>exactly</b> what ships, not mocks. Interactions (opening panels, drag, tooltips,
-    menus) are inert here since the app's scripts aren't loaded; click through in the <a href="/model_builder/">model builder</a> for those.</p>
+    menus) are inert here since the app's scripts aren't loaded; click through in the <a href="/model_builder/">modeling builder</a> for those.</p>
 
   <h3 class="dc-sub">The canvas — object cards, add buttons, relationships, edge groups</h3>
   <p class="dc-kick">The real three-column canvas: object cards (<code>basic_card</code> / <code>journey_card</code> / <code>server_card</code>), the
@@ -195,7 +195,7 @@
   <div class="dc-panelwrap">{{ edit_panel_html }}</div>
 
   <h3 class="dc-sub">Specific states</h3>
-  <p class="dc-kick">A couple of states a complete model doesn't surface on its own.</p>
+  <p class="dc-kick">A couple of states a complete modeling doesn't surface on its own.</p>
   <div class="dc-gallery">
     <div class="dc-comp">
       <div class="ch"><b>Results bar</b><span class="pt">components/results_bar_button.html</span></div>
@@ -203,7 +203,7 @@
         <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=model_web %}</div>
         <div style="height:50px">{% include "model_builder/components/results_bar_button.html" with model_web=results_locked %}</div>
       </div>
-      <div class="cd">Enabled (the sample model computes) vs <b>locked</b> (dimmed, the live validation reason as its tooltip).</div>
+      <div class="cd">Enabled (the sample modeling computes) vs <b>locked</b> (dimmed, the live validation reason as its tooltip).</div>
     </div>
     <div class="dc-comp">
       <div class="ch"><b>Add button — disabled</b><span class="pt">components/add_object_button.html</span></div>
@@ -215,10 +215,10 @@
   </div>
 
   <p class="dc-note" style="margin-top:1.4rem">Version-controlled narrative docs (journeys + design decisions) live under <code>specs/design/journeys/</code> in the repo.
-    <a href="/model_builder/">↗ Open the model builder</a> · <a href="/">↗ Home</a></p>
+    <a href="/model_builder/">↗ Open the modeling builder</a> · <a href="/">↗ Home</a></p>
 
   <footer>
-    Live design catalogue · real tokens (compiled CSS) + a real canvas &amp; edit panel from a sample model · unlinked, contributors only.
+    Live design catalogue · real tokens (compiled CSS) + a real canvas &amp; edit panel from a sample modeling · unlinked, contributors only.
     Narrative journeys: <code>specs/design/journeys/</code> in the repo.
   </footer>
 

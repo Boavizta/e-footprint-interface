@@ -57,7 +57,7 @@
                 models exist, or the +Add options while there is still only one.
                 {% endcomment %}
                 <li class="nav-item d-lg-none">
-                    <span class="nav-link text-uppercase small text-muted mx-2 mb-0 pe-none">Models</span>
+                    <span class="nav-link text-uppercase small text-muted mx-2 mb-0 pe-none">Modelings</span>
                 </li>
                 {% if workspace_slots|length > 1 %}
                     <li class="nav-item d-lg-none">
@@ -77,7 +77,7 @@
                         <button type="button" class="nav-link d-flex flex-row gap-2 mx-2 disabled text-muted" disabled>
                             <span>⇄</span><span>Compare</span>
                         </button>
-                        <span class="d-block small text-muted mx-2 mb-1">Complete both models to compare</span>
+                        <span class="d-block small text-muted mx-2 mb-1">Complete both modelings to compare</span>
                         {% endif %}
                     </li>
                 {% else %}
@@ -86,20 +86,20 @@
                                 hx-post="{% url 'add-model' %}" hx-vals='{"source": "duplicate"}'
                                 hx-target="#main-content-block" hx-swap="innerHTML"
                                 _="on click call collapseNavbarIfShown()">
-                            <span>⧉</span><span>Duplicate current model</span></button>
+                            <span>⧉</span><span>Duplicate current modeling</span></button>
                     </li>
                     <li class="nav-item d-lg-none">
                         <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
                                 data-action="open-add-model-import"
                                 _="on click call collapseNavbarIfShown()">
-                            <span>⬆</span><span>Import a model to compare…</span></button>
+                            <span>⬆</span><span>Import a modeling to compare…</span></button>
                     </li>
                     <li class="nav-item d-lg-none">
                         <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
                                 hx-post="{% url 'add-model' %}" hx-vals='{"source": "blank"}'
                                 hx-target="#main-content-block" hx-swap="innerHTML"
                                 _="on click call collapseNavbarIfShown()">
-                            <span>✚</span><span>Add a blank model to compare</span></button>
+                            <span>✚</span><span>Add a blank modeling to compare</span></button>
                     </li>
                 {% endif %}
                 <li class="nav-item d-lg-none"><hr class="dropdown-divider my-1"></li>
@@ -139,8 +139,8 @@
                         <p class="d-block d-lg-none mb-0">Export</p>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="download-menu-toggle">
-                        <li><a class="dropdown-item" href="download-json/" target="_blank">⬇ This model</a></li>
-                        <li><a class="dropdown-item" href="download-workspace/" target="_blank">⬇ Both models</a></li>
+                        <li><a class="dropdown-item" href="download-json/" target="_blank">⬇ This modeling</a></li>
+                        <li><a class="dropdown-item" href="download-workspace/" target="_blank">⬇ Both modelings</a></li>
                     </ul>
                 </li>
                 {% else %}
@@ -148,7 +148,7 @@
                     <a href="download-json/"
                            target="_blank"
                            class="nav-link d-flex flex-row gap-2 mx-2"
-                           data-bs-title="Export your model"
+                           data-bs-title="Export your modeling"
                            data-bs-placement="bottom"
                            data-bs-custom-class="custom-tooltip"
                            data-location="upload_download_reboot_model_tooltips"
@@ -156,7 +156,7 @@
                     >
                         <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
                         <p class="d-block d-lg-none">
-                            Export your model
+                            Export your modeling
                         </p>
                     </a>
                 </li>
@@ -168,9 +168,9 @@
                            hx-target="#main-content-block"
                            hx-swap="innerHTML"
                            hx-disabled-elt="this"
-                           data-confirm-when-model-not-empty="This will discard your current model and reset to an empty one. Continue?"
+                           data-confirm-when-model-not-empty="This will discard your current modeling and reset to an empty one. Continue?"
                            class="nav-link d-flex flex-row gap-2 mx-2"
-                           data-bs-title="Reset to default model"
+                           data-bs-title="Reset to default modeling"
                            data-bs-placement="bottom"
                            data-bs-custom-class="custom-tooltip"
                            data-location="upload_download_reboot_model_tooltips"
@@ -178,7 +178,7 @@
                     >
                         <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
                         <p class="d-block d-lg-none">
-                            Reset to default model
+                            Reset to default modeling
                         </p>
                     </button>
                 </li>

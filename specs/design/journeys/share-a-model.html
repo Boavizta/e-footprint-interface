@@ -335,7 +335,7 @@
       <div class="state"><span class="k">Thin account</span><span class="v">Email only — verified by a sign-in link. <b>No password stored</b> (leaning; the mechanism is a plan-stage call, the "email is the only personal data" promise is not).</span></div>
       <div class="state"><span class="k">Verification gates</span><span class="v">You cannot publish until you've proven control of the email — the first anti-abuse wall.</span></div>
       <div class="state"><span class="k">Consent up front</span><span class="v">Account creation shows the privacy notice: what's stored (the email), why, and how to erase it.</span></div>
-      <div class="state"><span class="k">Model not computable?</span><span class="v"><b>↗ Publish</b> is disabled with a tooltip reason until the model computes — disabled-not-errored, applied to publishing.</span></div>
+      <div class="state"><span class="k">Modeling not computable?</span><span class="v"><b>↗ Publish</b> is disabled with a tooltip reason until the modeling computes — disabled-not-errored, applied to publishing.</span></div>
       <div class="state variant"><span class="k">Edge paradigm</span><span class="v">Identical flow — a modeling is a modeling; web and edge publish the same way.</span></div>
     </div>
   </div>
@@ -415,7 +415,7 @@
     <div class="states">
       <div class="state"><span class="k">Canonical link</span><span class="v">One readable URL per modeling — follows the latest version forever.</span></div>
       <div class="state"><span class="k">Version permalinks</span><span class="v">Each publish freezes an immutable snapshot with its own link — citations can't silently drift.</span></div>
-      <div class="state"><span class="k">Session unchanged</span><span class="v">Publishing copies the model out; the session keeps its 12-hour life and stays the private editing space.</span></div>
+      <div class="state"><span class="k">Session unchanged</span><span class="v">Publishing copies the modeling out; the session keeps its 12-hour life and stays the private editing space.</span></div>
     </div>
   </div>
 </div>
@@ -450,7 +450,7 @@
         <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The public page is the <b>familiar model view, stripped of
+    <div class="mock-help"><span class="lbl">On this screen</span>The public page is the <b>familiar modeling view, stripped of
       editing</b>: no add buttons, no pencils, no toolbar — plus a header that answers <b>what / whose / which version / under
       what license</b> at a glance. Results and every value's derivation open exactly as in the builder. <b>⑂ Fork</b> and
       <b>⚑ Report</b> are the only actions.</div>
@@ -464,7 +464,7 @@
       <div class="state"><span class="k">No account to read</span><span class="v">Public means public — the page renders for anyone, indexable by search engines.</span></div>
       <div class="state"><span class="k">Full explainability</span><span class="v">Objects, hypotheses, results and each value's derivation — the same surfaces as <a href="view-results.html">view-results</a> / <a href="audit-a-result.html">audit-a-result</a>, editing affordances absent.</span></div>
       <div class="state"><span class="k">Version visible</span><span class="v">The selector states which version you're reading and that history exists — switching goes to that version's permalink.</span></div>
-      <div class="state"><span class="k">Cheap to serve</span><span class="v">A share link may sit in a widely-read article: anonymous views are served from pre-rendered/cached state, never a per-request model rebuild.</span></div>
+      <div class="state"><span class="k">Cheap to serve</span><span class="v">A share link may sit in a widely-read article: anonymous views are served from pre-rendered/cached state, never a per-request modeling rebuild.</span></div>
       <div class="state"><span class="k">⚑ Report</span><span class="v">One-click report → reviewed by an administrator who can unpublish. Reactive moderation; no volunteer approves publications.</span></div>
     </div>
   </div>
@@ -535,7 +535,7 @@
     <div class="states">
       <div class="state"><span class="k">No account to fork</span><span class="v">Forking lands straight in an anonymous session — the account wall only returns if they choose to <b>publish</b> the fork.</span></div>
       <div class="state"><span class="k">Original untouched</span><span class="v">A fork is a copy. Nothing a forker does reaches the source modeling — and deleting the source never reaches published forks.</span></div>
-      <div class="state"><span class="k">Session rules apply</span><span class="v">The fork is ephemeral like any session model: export it or publish it to keep it.</span></div>
+      <div class="state"><span class="k">Session rules apply</span><span class="v">The fork is ephemeral like any session modeling: export it or publish it to keep it.</span></div>
       <div class="state deferred"><span class="k">Fork provenance</span><span class="v">Whether a published fork shows "forked from X (v3)" — open spec question; capture-at-fork-time is cheap, reconstruction later impossible.</span></div>
     </div>
   </div>
@@ -570,7 +570,7 @@
   </div>
   <div class="info-col">
     <div class="step"><span class="n">6</span><h3>A commons, not a bucket of links</h3></div>
-    <p>Because everything published is listed, the index is complete by construction — a browsable record of who models what,
+    <p>Because everything published is listed, the index is complete by construction — a browsable record of who modelings what,
        and the discovery surface that turns one company's transparency page into the next company's starting template.</p>
     <div class="states">
       <div class="state"><span class="k">Complete by construction</span><span class="v">No unlisted modelings exist, so Explore <b>is</b> the database — which also keeps quasi-private storage unattractive.</span></div>
@@ -629,7 +629,7 @@
 <h2 class="sec">Decisions taken</h2>
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
-  <tr><td><b>Public by construction — no private or unlisted saves.</b></td><td>A private-draft tier would turn Boavizta's database into a free private model store (the overflow-abuse vector) and muddy the data-ownership pitch. The session and the JSON file already are the private workspace.</td></tr>
+  <tr><td><b>Public by construction — no private or unlisted saves.</b></td><td>A private-draft tier would turn Boavizta's database into a free private modeling store (the overflow-abuse vector) and muddy the data-ownership pitch. The session and the JSON file already are the private workspace.</td></tr>
   <tr><td><b>Accounts gate publishing only; reading and forking are anonymous.</b></td><td>The wall sits where it protects (writes to the shared database) and not where it kills the reach that motivates the feature (readers of articles).</td></tr>
   <tr><td><b>Thin accounts: a verified email, nothing else.</b></td><td>Boavizta has never handled personal data; "the only personal data is an email" is the whole board pitch. The public author name is user-chosen and deliberately public.</td></tr>
   <tr><td><b>Canonical latest link + immutable version permalinks.</b></td><td>Mutable-only links let citations silently drift (fatal for research use); immutable-only links break the "living transparency page" (fatal for company use). Both personas are served by the pair.</td></tr>
@@ -659,7 +659,7 @@
       <dd>Published modeling = immutable version snapshots (full system JSON) + mutable metadata row (title, tags, article link,
         author name, owner). Canonical URL resolves to the latest snapshot; <code>/v&lt;n&gt;</code> permalinks resolve to frozen
         ones. Fork = load a snapshot into a fresh session via the existing upload/deserialization path. Anonymous reads must be
-        cacheable — pre-render or cache the public page; never rebuild the model per request (the app's binding constraints are
+        cacheable — pre-render or cache the public page; never rebuild the modeling per request (the app's binding constraints are
         store weight and round-trips). Old snapshots ride the same schema-upgrade path the JSON upload already uses.</dd>
       <dt>Accounts & legal</dt>
       <dd>Email-only identity, verification link gate before first publish; auth mechanism (magic-link vs password) is a

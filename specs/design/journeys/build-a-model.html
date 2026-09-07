@@ -250,12 +250,12 @@
 
 <p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
 <h1>build-a-model</h1>
-<p class="lede">The <b>core loop</b> — a product person assembling a model on the canvas. They add the pieces of a digital
+<p class="lede">The <b>core loop</b> — a product person assembling a modeling on the canvas. They add the pieces of a digital
   service (a <b>usage journey</b>, the <b>servers</b> behind it, a <b>usage pattern</b> that drives it), then tune each
-  one's parameters until it matches reality. Success isn't "an object created" — it's a <b>complete, computable model</b>:
+  one's parameters until it matches reality. Success isn't "an object created" — it's a <b>complete, computable modeling</b>:
   enough connected objects that the <b>Results</b> button lights up. The canvas never lets the user reach a dead end —
   actions that aren't possible yet are <b>disabled with a reason</b>, not offered then rejected — and every change
-  <b>patches the canvas in place</b>, no full reload. The same loop builds both <b>web</b> and <b>edge</b> models; the
+  <b>patches the canvas in place</b>, no full reload. The same loop builds both <b>web</b> and <b>edge</b> modelings; the
   <b>Edge</b> toggle (Phase E) just reveals more object types.</p>
 <p class="note">A functional walkthrough, faithful to the deployed app. Code-level pointers — files, routes, the in-place-update
   mechanism — are collected for agents in <a href="#pointers">Implementation pointers</a> at the foot of the page.</p>
@@ -271,7 +271,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↑</span><span class="tbtn">↓</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -294,7 +294,7 @@
         <div class="resultsbar locked"><span class="rb">Results</span><span class="chev">︿</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Three columns — <b>Usage patterns</b>, <b>Usage journeys</b>, <b>Infrastructure</b>. Each <b>Add</b> button is a white dotted card with a <b>＋</b> and a <b>?</b> that opens help for that object type. <b>Add usage pattern</b> is <b>greyed</b> with a tooltip — there's no usage journey for it to drive yet. The bottom <b>Results</b> bar is dimmed until the model is computable.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Three columns — <b>Usage patterns</b>, <b>Usage journeys</b>, <b>Infrastructure</b>. Each <b>Add</b> button is a white dotted card with a <b>＋</b> and a <b>?</b> that opens help for that object type. <b>Add usage pattern</b> is <b>greyed</b> with a tooltip — there's no usage journey for it to drive yet. The bottom <b>Results</b> bar is dimmed until the modeling is computable.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>The workspace — and what you can't do yet</h3></div>
@@ -305,7 +305,7 @@
        never errored.</em></p>
     <div class="states">
       <div class="state"><span class="k">Gated add</span><span class="v">A not-yet-possible Add button is greyed; hovering it names the unblock step — e.g. <em>"Add a usage journey in the Usage journeys section first."</em> The reason is specific to what's missing.</span></div>
-      <div class="state"><span class="k">Results locked</span><span class="v">The bottom <b>Results</b> bar is dimmed with <em>"Complete your model to access results"</em> until the model is computable.</span></div>
+      <div class="state"><span class="k">Results locked</span><span class="v">The bottom <b>Results</b> bar is dimmed with <em>"Complete your modeling to access results"</em> until the modeling is computable.</span></div>
       <div class="state variant"><span class="k">Edge sections hidden</span><span class="v">The <b>Edge</b> toggle is off, so the edge Add buttons and lists aren't shown. Turning it on reveals them — see <b>Phase E</b>.</span></div>
       <div class="state"><span class="k">Help on demand</span><span class="v">The <b>?</b> beside each Add button opens a help drawer with the object type's description and field tips — depth without leaving the canvas.</span></div>
     </div>
@@ -323,7 +323,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↑</span><span class="tbtn">↓</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -367,7 +367,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↑</span><span class="tbtn">↓</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -398,12 +398,12 @@
     <div class="step"><span class="n">3</span><h3>Saved — the canvas patches itself in place</h3></div>
     <p>A change never reloads the page or re-renders the whole canvas — only what changed is patched: the new card drops
        into its column, and if a prerequisite was just satisfied the affected <b>Add buttons unlock</b>, with a toast pointing
-       them out. The user watches the model gain a piece and gain a capability in one beat — the disabled-instead-of-error
+       them out. The user watches the modeling gain a piece and gain a capability in one beat — the disabled-instead-of-error
        rule running in reverse.</p>
     <div class="states">
       <div class="state"><span class="k">New card in place</span><span class="v">The new card appears in its column; the rest of the canvas is untouched — no scroll jump, no flicker.</span></div>
       <div class="state"><span class="k">Constraint unlock</span><span class="v">Satisfying a prerequisite re-enables the Add buttons it gated and fires a <em>"You can now add …"</em> toast. The reverse of the gate in screen 1.</span></div>
-      <div class="state"><span class="k">Toward Results</span><span class="v">Each add moves the model toward computable. Once a usage pattern connects a journey to its infrastructure, the <b>Results</b> bar lights up (its own journey — <a href="view-results.html">view-results</a>).</span></div>
+      <div class="state"><span class="k">Toward Results</span><span class="v">Each add moves the modeling toward computable. Once a usage pattern connects a journey to its infrastructure, the <b>Results</b> bar lights up (its own journey — <a href="view-results.html">view-results</a>).</span></div>
       <div class="state variant"><span class="k">Edge object added</span><span class="v">Adding the first / removing the last edge object also flips the <b>Edge</b> toggle's state (and locks it while edge objects exist). See <b>Phase E</b>.</span></div>
     </div>
   </div>
@@ -420,7 +420,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↑</span><span class="tbtn">↓</span><span class="tbtn">⟳</span><span class="edgetoggle"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -452,7 +452,7 @@
     <div class="step"><span class="n">4</span><h3>Edit — the panel reopens with the full object</h3></div>
     <p>Add is deliberately shallow; <b>edit is where depth lives.</b> The same drawer comes back with every attribute
        (including the advanced ones), the object's links to other objects, and a read-only <b>Calculated attributes</b>
-       breakdown — its derived values with their full derivation, there to <b>audit</b> what the model currently computes.
+       breakdown — its derived values with their full derivation, there to <b>audit</b> what the modeling currently computes.
        <b>Save</b> closes the panel and patches the canvas in place — so the breakdown is an audit of the <em>saved</em>
        state, not a live preview of an unsaved edit.</p>
     <div class="states">
@@ -460,7 +460,7 @@
       <div class="state"><span class="k">Reverse membership</span><span class="v">If this object is held in some parent's weighted dict (a step in a journey, a job in a step, a device in a group), the panel also shows a <b>membership</b> section — which parents hold it, at what count, with an <b>×</b> to remove. A plain server isn't, so it shows none. (See Relationships.)</span></div>
       <div class="state"><span class="k">Calculated attributes</span><span class="v">A read-only breakdown for <b>auditing</b> the object's derived values, each with its full derivation — the formula and calculus graph behind every number, its own methodology journey: <a href="audit-a-result.html">audit-a-result</a>. It reflects the <b>currently saved</b> state — not a preview of unsaved edits, since Save closes the panel.</span></div>
       <div class="state"><span class="k">Edit patches in place</span><span class="v">Save updates only the edited card and anything its change affected (a constraint, the edge toggle) — never a full reload.</span></div>
-      <div class="state deferred"><span class="k">Rename model</span><span class="v">The model's own name is edited from a separate <em>"Rename your model"</em> panel, reached from the tab — not from an object card.</span></div>
+      <div class="state deferred"><span class="k">Rename modeling</span><span class="v">The modeling's own name is edited from a separate <em>"Rename your modeling"</em> panel, reached from the tab — not from an object card.</span></div>
     </div>
   </div>
 </div>
@@ -526,7 +526,7 @@
             </div>
           </div>
         </div>
-        <div class="mock-help"><span class="lbl">Why blocked</span>When jobs running on the server still point at it, the trash action returns the <b>can't-delete</b> modal — it <b>names the blockers</b> and the fix (<em>"first delete or reorient these …"</em>) and offers only <b>Go back</b>. No way to leave the model in a broken state.</div>
+        <div class="mock-help"><span class="lbl">Why blocked</span>When jobs running on the server still point at it, the trash action returns the <b>can't-delete</b> modal — it <b>names the blockers</b> and the fix (<em>"first delete or reorient these …"</em>) and offers only <b>Go back</b>. No way to leave the modeling in a broken state.</div>
       </div>
       <div class="info-col">
         <p>Before showing any confirm, the app checks whether removal would orphan something that depends on this object.
@@ -589,7 +589,7 @@
     <div class="win">
       <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
       <div class="appbar">
-        <div class="tabs"><span class="tab active">Reference model</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
         <div class="toolbar"><span class="tbtn">↑</span><span class="tbtn">↓</span><span class="tbtn">⟳</span><span class="edgetoggle on"><span class="sw"><i></i></span>Edge</span></div>
       </div>
       <div class="stage">
@@ -771,10 +771,10 @@
 <table>
   <tr><th>Decision</th><th>Why / why-not-X</th></tr>
   <tr><td><b>Actions that aren't possible yet are disabled with a tooltip reason, not offered then rejected.</b></td><td>The primary user is non-technical, so a dead end is worse than a missing button. The tooltip names the exact unblock step, turning a block into guidance.</td></tr>
-  <tr><td><b>Every change patches the canvas in place, never a full reload.</b></td><td>The canvas can be large; re-rendering all of it on every small change is wasteful and loses scroll &amp; focus. Only the regions that actually changed are patched — the model stays live without a reload.</td></tr>
+  <tr><td><b>Every change patches the canvas in place, never a full reload.</b></td><td>The canvas can be large; re-rendering all of it on every small change is wasteful and loses scroll &amp; focus. Only the regions that actually changed are patched — the modeling stays live without a reload.</td></tr>
   <tr><td><b>One right-docked side panel is the single surface for both add and edit.</b></td><td>Add carries only what's needed to create a valid object (advanced fields collapsed); edit reopens the same drawer with the full object — attributes, links, any reverse membership, calculated outputs. Light create path for newcomers, all depth one click away on the card.</td></tr>
   <tr><td><b>Add forms collapse advanced parameters by default; "edit later on the card" is stated in the form.</b></td><td>The full parameter set overwhelms the primary user. Defaults get them a valid object; the footer note sets the expectation. A validation error auto-expands its section, so nothing breaks silently.</td></tr>
-  <tr><td><b>Delete is confirm-or-explain: a consequence-free delete asks yes/no; a blocking one explains why and offers no destructive button.</b></td><td>The model must never be left broken, and the user must understand scope. A safe delete confirms; an owning delete spells out the child count; a blocked delete refuses and names the fix.</td></tr>
+  <tr><td><b>Delete is confirm-or-explain: a consequence-free delete asks yes/no; a blocking one explains why and offers no destructive button.</b></td><td>The modeling must never be left broken, and the user must understand scope. A safe delete confirms; an owning delete spells out the child count; a blocked delete refuses and names the fix.</td></tr>
   <tr><td><b>Every relationship shares one UX; they differ only in what each row carries.</b></td><td>Why-not-bespoke-widgets: one row-list / reuse-select-＋ / × pattern for list links, weighted dicts and nested edge groups (a single link is its 1:1 cousin) means the user learns connecting <em>once</em>. Objects are linked, not duplicated. Full treatment in <b>Relationships</b>.</td></tr>
   <tr><td><b>Web and edge are one journey behind a toggle, not two — edge adds object types, not a new loop.</b></td><td>The add/edit/delete loop, side panel, in-place patches and the gate are identical; only the object palette and one new relationship shape (the nested edge device group) differ. Splitting them would duplicate all of that and let the two drift. The toggle locks on while edge objects exist, so they can't be orphaned.</td></tr>
 </table>

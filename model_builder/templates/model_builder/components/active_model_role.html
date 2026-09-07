@@ -12,7 +12,7 @@ so renaming — which changes the name, not the slot — leaves it correct by co
     <button type="button"
             class="badge rounded-pill bg-light text-secondary border dropdown-toggle"
             data-bs-toggle="dropdown" aria-expanded="false"
-            aria-label="Active model — switch model">
+            aria-label="Active modeling — switch modeling">
         {% if active_slot == workspace_slots.0.slot %}Reference{% else %}Comparison{% endif %}
     </button>
     <ul class="dropdown-menu">
@@ -22,7 +22,7 @@ so renaming — which changes the name, not the slot — leaves it correct by co
                     hx-post="{% url 'switch-model' %}"
                     hx-vals='{"slot": "{{ slot_entry.slot }}"}'
                     hx-swap="none">
-                Switch to {% if forloop.first %}Reference{% else %}Comparison{% endif %} model
+                Switch to {% if forloop.first %}Reference{% else %}Comparison{% endif %} modeling
             </button>
         </li>
         {% endif %}{% endfor %}
