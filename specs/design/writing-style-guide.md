@@ -21,7 +21,8 @@ Scope: interface labels, docs, and training material. English (US spelling).
 
 ## Units
 
-- **CO₂eq** for CO₂ equivalent — subscript ₂, no hyphen.
+- **CO2-eq** for carbon-dioxide equivalent — plain ASCII, with a hyphen. This is the
+  default notation in interface copy, documentation, and training material.
 - **t** (lowercase) for metric tons.
 - Otherwise ISO units with their exact capitalization: kg, g, Wh, kWh, GB — including in table
   headers (never apply uppercase transforms to units).

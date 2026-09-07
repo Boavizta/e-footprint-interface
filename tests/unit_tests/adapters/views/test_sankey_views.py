@@ -307,7 +307,7 @@ class TestSankeyDiagramStructure:
     def test_title_contains_co2_unit(self, sankey_client, default_post):
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
         content = response.content.decode()
-        assert "CO" in content  # CO₂eq or CO2eq
+        assert "CO" in content  # CO2-eq or CO2-eq
 
     def test_column_headers_absent_without_flag(self, sankey_client, default_post):
         data = {k: v for k, v in default_post.items() if k != "display_column_headers"}
@@ -620,7 +620,7 @@ class TestBuildSankeyPayload:
                 "target_name_key": "Leaf⁣2",
                 "value": 1.0,
                 "color": "rgba(100,100,100,0.35)",
-                "tooltip_html": "Root → Leaf<br>1 t CO2eq (100.0%)",
+                "tooltip_html": "Root → Leaf<br>1 t CO2-eq (100.0%)",
             }
         ]
 
@@ -652,9 +652,9 @@ class TestBuildSankeyPayload:
 
         assert payload["nodes"][0]["label"] == "Edge devices Usage"
         assert payload["nodes"][0]["full_name"] == "Edge devices Usage"
-        assert payload["nodes"][0]["tooltip_html"] == "Edge devices Usage<br>1 t CO2eq (100.0%)"
+        assert payload["nodes"][0]["tooltip_html"] == "Edge devices Usage<br>1 t CO2-eq (100.0%)"
         assert payload["links"][0]["source_name_key"] == "Edge devices Usage⁣0"
-        assert payload["links"][0]["tooltip_html"] == "Edge devices Usage → Leaf<br>1 t CO2eq (100.0%)"
+        assert payload["links"][0]["tooltip_html"] == "Edge devices Usage → Leaf<br>1 t CO2-eq (100.0%)"
 
 
 class TestSankeyColumnsGuard:

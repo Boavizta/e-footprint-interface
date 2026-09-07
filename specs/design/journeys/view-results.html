@@ -295,7 +295,7 @@
 <h1>view-results</h1>
 <p class="lede">The model is built — now <b>read its footprint</b>. <b>view-results</b> opens the Results panel over the canvas:
   the <b>emissions over time</b> (yearly bars and a cumulative curve) and the <b>Impact repartition</b> Sankey that shows where the
-  CO₂e actually flows. Success isn't "a chart appeared" — it's <b>reading the number, filtering it to the angle you care about, and
+  CO2-eq actually flows. Success isn't "a chart appeared" — it's <b>reading the number, filtering it to the angle you care about, and
   exporting it</b>. Trusting it — tracing any value back to its inputs — is the companion methodology journey
   <a href="audit-a-result.html">audit-a-result</a>. Results open <b>in place</b> over a model that's already computable; the button
   stays <b>disabled with the live reason</b> until it is.</p>
@@ -360,7 +360,7 @@
           <div class="rpbody">
             <div class="cbox">
               <div class="crow"><span class="ct">Yearly CO2 emissions</span><select class="dd" style="font-size:.56rem;padding:.1rem 1rem .1rem .35rem"><option>Year</option><option>Month</option></select></div>
-              <div class="cu">t CO₂-eq</div>
+              <div class="cu">t CO2-eq</div>
               <svg viewBox="0 0 320 80" role="img" aria-label="Yearly stacked emissions bars">
                 <line x1="14" y1="68" x2="316" y2="68" stroke="#D1D5DB"/>
                 <rect x="40" y="44" width="34" height="24" fill="#2D4675"/><rect x="40" y="34" width="34" height="10" fill="#7c91b6"/>
@@ -373,7 +373,7 @@
             </div>
             <div class="cbox">
               <span class="ct">Cumulative CO2 emissions over time</span>
-              <div class="cu">t CO₂-eq</div>
+              <div class="cu">t CO2-eq</div>
               <svg viewBox="0 0 320 70" role="img" aria-label="Cumulative emissions curve">
                 <line x1="14" y1="60" x2="316" y2="60" stroke="#D1D5DB"/>
                 <path d="M18 58 C 90 52, 150 40, 210 26 S 300 12, 306 10 L306 60 L18 60 Z" fill="#2D4675" opacity=".12"/>
@@ -448,7 +448,7 @@
     <div class="mock-help"><span class="lbl">On this screen</span>The <b>Impact repartition</b> section: a dismissible explainer banner, then a Sankey <b>card</b>. <b>Analyse by</b> chips pick which columns appear (active = navy); <b>Lifecycle phase</b> and an <b>Aggregation</b> slider (group small flows into "Other") refine it; <b>Advanced options</b> hides excluded-types, headers and label length. <b>Add another analysis view</b> stacks a second card with its own settings.</div>
   </div>
   <div class="info-col">
-    <div class="step"><span class="n">3</span><h3>Impact repartition — where the CO₂e flows</h3></div>
+    <div class="step"><span class="n">3</span><h3>Impact repartition — where the CO2-eq flows</h3></div>
     <p>The Sankey answers <b>"where does it come from?"</b> — flow width is share of emissions, from the whole system down to
        components. <b>Analyse by</b> chips choose the columns (total → countries → journeys → steps → hardware → component
        breakdown); the diagram <b>re-renders on every change</b>. The heavy repartition maths runs server-side; the browser only
@@ -481,7 +481,7 @@
               <tr><th>Item name</th><th>Attribute of</th><th>Value</th><th>Unit</th><th>Source</th><th>Confidence</th><th></th></tr>
               <tr><td>RAM</td><td>Web server</td><td>128</td><td>GB</td><td>Boavizta</td><td><span class="badge-c">High</span></td><td>✎</td></tr>
               <tr><td>Carbon intensity</td><td>France</td><td>56</td><td>g/kWh</td><td>RTE 2023</td><td><span class="badge-c">High</span></td><td>✎</td></tr>
-              <tr><td>Embodied emissions</td><td>Web server</td><td>1.2</td><td>t CO₂-eq</td><td class="seeg">(see graph)</td><td>—</td><td></td></tr>
+              <tr><td>Embodied emissions</td><td>Web server</td><td>1.2</td><td>t CO2-eq</td><td class="seeg">(see graph)</td><td>—</td><td></td></tr>
             </table>
           </div>
         </div>

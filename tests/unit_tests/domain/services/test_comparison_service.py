@@ -167,6 +167,7 @@ class TestKpiStrip:
         assert view.delta.absolute_kg == pytest.approx(view.card_b.total_kg - view.card_a.total_kg)
         assert view.delta.relative == pytest.approx(view.delta.absolute_kg / view.card_a.total_kg)
         assert view.delta.usage_kg + view.delta.manufacturing_kg == pytest.approx(view.delta.absolute_kg)
+        assert view.delta.relative_display == "-29%"
 
 
 class TestDecomposition:

@@ -211,7 +211,7 @@ class ComparisonService:
         delta.usage_display = fmt_best_signed(delta.usage_kg)
         delta.manufacturing_display = fmt_best_signed(delta.manufacturing_kg)
         delta.relative_display = (
-            "" if delta.relative is None else f"{'+' if delta.relative > 0 else ''}{round(delta.relative * 100)} %")
+            "" if delta.relative is None else f"{'+' if delta.relative > 0 else ''}{round(delta.relative * 100)}%")
         delta.direction = "lower" if delta.absolute_kg < 0 else ("higher" if delta.absolute_kg > 0 else "")
 
         for bar in decomposition:
@@ -427,7 +427,7 @@ def _line_dataset(label, data, color) -> Dict:
 
 
 def _format_kg_value(kg) -> Optional[str]:
-    """One kg CO₂e magnitude as a display string (best unit + 3 sig figs), via the library helpers.
+    """One kg CO2-eq magnitude as a display string (best unit + 3 sig figs), via the library helpers.
 
     Mirrors the KPI/decomposition formatting (unsigned) so the time-series tooltips read in the same
     units as the rest of the dashboard. ``None`` for blank (non-covered) buckets, which carry no

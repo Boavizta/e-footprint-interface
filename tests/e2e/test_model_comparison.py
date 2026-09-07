@@ -79,7 +79,7 @@ class TestModelComparisonWorkspace:
         # Open Compare → the dashboard renders with both model cards and the headline Δ card.
         model_builder.open_compare()
         expect(page.locator("#comparison-dashboard")).to_be_visible()
-        expect(page.locator("#comparison-dashboard")).to_contain_text("CO₂e")          # KPI totals
+        expect(page.locator("#comparison-dashboard")).to_contain_text("CO2-eq")          # KPI totals
         expect(page.locator("#comparison-dashboard")).to_contain_text("What explains the difference")
         # The paired and cumulative chart canvases are present (Chart.js draws into them client-side).
         expect(page.locator("#comparisonPairedChart")).to_be_visible()

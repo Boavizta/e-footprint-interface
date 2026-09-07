@@ -139,7 +139,7 @@
             "GPUServer"
         ],
         "label": "average carbon intensity of electricity",
-        "tooltip": "Common values: global average ~450 gCO2eq/kWh, US average ~380 gCO2eq/kWh, EU average ~200 gCO2eq/kWh, France average ~50 gCO2eq/kWh.",
+        "tooltip": "Common values: global average ~450 g CO2-eq/kWh, US average ~380 g CO2-eq/kWh, EU average ~200 g CO2-eq/kWh, France average ~50 g CO2-eq/kWh.",
         "step": 1
     },
     "utilization_rate": {

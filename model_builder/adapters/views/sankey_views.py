@@ -193,11 +193,11 @@ def _build_node_tooltip(sankey: ImpactRepartitionSankey, node_idx: int, display_
     pct = _get_sankey_percentage(sankey, value)
     if node_idx in sankey.aggregated_node_members:
         members_str = "<br>".join(
-            f"{_get_display_category_label(label)}: {_format_sankey_value(sankey, member_value)} CO2eq"
+            f"{_get_display_category_label(label)}: {_format_sankey_value(sankey, member_value)} CO2-eq"
             for label, member_value in sankey.aggregated_node_members[node_idx]
         )
-        return f"{display_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)<br><br>Aggregated objects:<br>{members_str}"
-    return f"{display_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
+        return f"{display_full_label}<br>{amount_str} CO2-eq ({pct:.1f}%)<br><br>Aggregated objects:<br>{members_str}"
+    return f"{display_full_label}<br>{amount_str} CO2-eq ({pct:.1f}%)"
 
 
 def _build_link_tooltip(
@@ -205,7 +205,7 @@ def _build_link_tooltip(
 ) -> str:
     amount_str = _format_sankey_value(sankey, value_kg)
     pct = _get_sankey_percentage(sankey, value_kg)
-    return f"{source_full_label} → {target_full_label}<br>{amount_str} CO2eq ({pct:.1f}%)"
+    return f"{source_full_label} → {target_full_label}<br>{amount_str} CO2-eq ({pct:.1f}%)"
 
 
 def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
@@ -366,7 +366,7 @@ def sankey_diagram(request):
             labels = [ClassUIConfigProvider.get_label(cls) for cls in excluded_object_types]
             excluded_info = f" excluding {', '.join(labels)}"
         total_co2 = _format_sankey_value(sankey, _get_sankey_total_value(sankey))
-        title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info} (total {total_co2} CO₂eq)"
+        title = f"{system.name} — {lifecycle_info}impact repartition{excluded_info} (total {total_co2} CO2-eq)"
         subtitle_map = {
             None: "All phases",
             LifeCyclePhases.MANUFACTURING: "Manufacturing only",

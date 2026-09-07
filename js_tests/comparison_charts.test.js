@@ -291,13 +291,13 @@ describe("adaptive value-axis unit", () => {
     const tonne = (payload) => ({ ...payload, axisUnit: "t", axisScale: 0.001 });
 
     test("axis title carries the payload's unit, defaulting to kg when none is shipped", () => {
-        expect(valueAxis.paired(pairedPayload()).title.text).toBe("kg CO₂e");
-        expect(valueAxis.cumulative(tonne(cumulativePayload())).title.text).toBe("t CO₂e");
-        expect(valueAxis.decomposition(tonne(decompositionPayload())).title.text).toBe("t CO₂e difference (B − A)");
+        expect(valueAxis.paired(pairedPayload()).title.text).toBe("kg CO2-eq");
+        expect(valueAxis.cumulative(tonne(cumulativePayload())).title.text).toBe("t CO2-eq");
+        expect(valueAxis.decomposition(tonne(decompositionPayload())).title.text).toBe("t CO2-eq difference (B − A)");
         // A payload with no axisUnit (older shape) still reads kg rather than "undefined".
         const legacy = { ...decompositionPayload() };
         delete legacy.axisUnit;
-        expect(valueAxis.decomposition(legacy).title.text).toBe("kg CO₂e difference (B − A)");
+        expect(valueAxis.decomposition(legacy).title.text).toBe("kg CO2-eq difference (B − A)");
     });
 
     test("tick callback scales the kg value into the axis unit (660000 kg → 660 on a t axis)", () => {

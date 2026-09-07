@@ -47,7 +47,7 @@ function formatAxisTick(value, scale) {
 
 // The axis title carries the chart's shared unit (``axisUnit``, falling back to kg for older payloads).
 function axisTitle(payload, suffix) {
-    return `${payload.axisUnit || "kg"} CO₂e${suffix}`;
+    return `${payload.axisUnit || "kg"} CO2-eq${suffix}`;
 }
 
 /**
