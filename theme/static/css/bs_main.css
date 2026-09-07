@@ -21081,7 +21081,6 @@ input:disabled {
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .weekly-profile-card__remove {
@@ -21177,7 +21176,6 @@ input:disabled {
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .weekly-ranges-table th:nth-child(1),
@@ -23642,7 +23640,6 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   gap: 3px;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #888;
   margin-bottom: 0;
