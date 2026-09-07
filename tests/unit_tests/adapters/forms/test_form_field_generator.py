@@ -257,6 +257,27 @@ def test_edge_usage_pattern_creation_preselects_one_journey():
         "objects-already-selected-for-EdgeUsagePattern_edge_usage_journeys")
 
 
+def test_edge_usage_pattern_creation_puts_timeseries_fields_last():
+    from model_builder.domain.entities.web_core.usage.edge.edge_usage_pattern_web import EdgeUsagePatternWeb
+    from tests.unit_tests.domain.entities.snapshot_model_webs import build_usage_pattern_model_web
+
+    model_web = build_usage_pattern_model_web()
+    defaults = EdgeUsagePatternWeb.get_creation_default_values(model_web)
+    fields, _, _ = generate_dynamic_form(
+        "EdgeUsagePattern",
+        {
+            "name": "Pattern",
+            **MODELING_OBJECT_CLASSES_DICT["EdgeUsagePattern"].default_values,
+            **EdgeUsagePatternWeb.default_values,
+            **defaults,
+        },
+        model_web,
+    )
+
+    assert fields[-2]["web_id"] == "EdgeUsagePattern_usage_span"
+    assert fields[-1]["web_id"] == "EdgeUsagePattern_hourly_deployment_starts"
+
+
 def test_generate_dynamic_form_dict_field_selected_json_preserves_journey_order(minimal_model_web):
     import json
 

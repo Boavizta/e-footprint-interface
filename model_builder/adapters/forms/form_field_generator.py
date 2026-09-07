@@ -419,7 +419,12 @@ def generate_dynamic_form(
             structure_fields.append(structure_field)
 
     # Reorder fields so timeseries fields appear last (preserving order within each group)
-    timeseries_input_types = ["recurrent_timeseries_builder", "timeseries_input", "recurrent_timeseries_input"]
+    timeseries_input_types = [
+        "hourly_quantities_from_growth",
+        "recurrent_timeseries_builder",
+        "timeseries_input",
+        "recurrent_timeseries_input",
+    ]
 
     non_timeseries_fields = [f for f in structure_fields if f["input_type"] not in timeseries_input_types]
     timeseries_fields = [f for f in structure_fields if f["input_type"] in timeseries_input_types]
