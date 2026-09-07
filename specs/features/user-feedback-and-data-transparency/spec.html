@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User feedback and data transparency — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  body > small { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  [data-mockup] { margin: 1rem 0; }
+  [data-browser] { border: 1px solid #cfd3da; border-radius: 12px; overflow: hidden; background: #f9fafb;
+                   box-shadow: 0 6px 22px rgba(17, 25, 40, .1); }
+  [data-browser-bar] { display: flex; align-items: center; gap: .45rem; padding: .42rem .65rem;
+                       background: #eceef3; border-bottom: 1px solid #d1d5db; }
+  [data-browser-bar] i { display: block; width: .58rem; height: .58rem; border-radius: 50%; background: #c3c8d0; }
+  [data-address] { flex: 1; padding: .08rem .5rem; border: 1px solid #d1d5db; border-radius: 5px;
+                   background: white; color: #6b7280; font-size: .72rem; }
+  [data-global-navbar], [data-model-toolbar], [data-model-tabs] { display: flex; align-items: center; gap: .45rem; background: white; }
+  [data-global-navbar] { padding: .45rem .8rem; border-bottom: 1px solid #e5e7eb; }
+  [data-logo] { color: #2d4675; font-size: 1.05rem; margin-right: auto; }
+  [data-global-navbar] nav { display: flex; align-items: center; gap: .35rem; }
+  [data-model-tabs] { padding: .38rem .7rem 0; border-bottom: 1px solid #d1d5db; align-items: flex-end; }
+  [data-model-tabs] button { border-radius: 7px 7px 0 0; border-bottom: 0; color: #6b7280; background: #f3f4f6; }
+  [data-model-tabs] button[aria-current="page"] { color: #111928; background: white; font-weight: 650; }
+  [data-model-toolbar] { position: relative; padding: .5rem .7rem; border-bottom: 1px solid #e5e7eb; }
+  [data-model-name] { margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  [data-model-toolbar] > span { color: #7b5dc7; background: #f3effb; border: 1px solid #e0d7f3;
+                               border-radius: 999px; padding: .14rem .48rem; font-size: .72rem; white-space: nowrap; }
+  [data-help-wrap] { position: relative; }
+  [data-help-menu] { position: absolute; z-index: 4; right: 0; top: calc(100% + .3rem); min-width: 12rem;
+                     background: white; border: 1px solid #d1d5db; border-radius: 7px; padding: .3rem;
+                     box-shadow: 0 8px 18px rgba(17, 25, 40, .16); }
+  [data-help-menu] button { display: block; width: 100%; text-align: left; border: 0; border-radius: 4px; }
+  [data-help-menu] hr { border: 0; border-top: 1px solid #e5e7eb; margin: .25rem 0; }
+  [data-size] { color: #2d4675; background: #e8eaf4; border-color: #c7cee0; white-space: nowrap; }
+  [data-stage] { position: relative; min-height: 27rem; overflow: hidden; }
+  [data-canvas] { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; padding: .8rem;
+                  transition: opacity .15s ease; }
+  [data-canvas][data-dimmed="true"] { opacity: .35; }
+  [data-column] { min-height: 20rem; padding: .65rem; background: white; border: 1px solid #e5e7eb; border-radius: 10px; }
+  [data-column] h4 { margin: 0 0 .55rem; font-size: .85rem; }
+  [data-add] { display: block; width: 100%; border: 2px dotted #9ca3af; color: #2d4675; text-align: left; }
+  [data-model-card] { margin-top: .5rem; padding: .45rem .55rem; border: 1px solid #e5e7eb;
+                      border-radius: 7px; background: white; font-size: .78rem; }
+  [data-panel] { position: absolute; z-index: 3; inset: 0 0 0 auto; box-sizing: border-box; width: min(31rem, 62%);
+                 padding: 1rem; overflow-y: auto; background: white; border-left: 1px solid #d1d5db;
+                 box-shadow: -10px 0 24px rgba(17, 25, 40, .13); }
+  [data-panel] header { display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid #e5e7eb; margin-bottom: .8rem; }
+  [data-panel] header h3 { margin: 0 0 .6rem; }
+  [data-panel] header button { margin: 0 0 .6rem auto; }
+  [data-panel] label { display: block; margin-top: .7rem; font-weight: 600; }
+  [data-panel] select { box-sizing: border-box; width: 100%; padding: .45rem; }
+  [data-results-bar] { padding: .45rem .8rem; background: white; border-top: 1px solid #e5e7eb; font-size: .8rem; font-weight: 650; }
+  [data-placement] { margin-top: .8rem; padding: .65rem .8rem; background: #f5f7fb; border-left: 3px solid #2d4675; font-size: .9rem; }
+  button, select { font: inherit; }
+  button { cursor: pointer; border: 1px solid #9ca3af; border-radius: 6px; background: white; padding: .3rem .55rem; }
+  button[data-primary] { background: #2d4675; border-color: #2d4675; color: white; }
+  button[data-quiet] { border-color: transparent; color: #2d4675; }
+  [data-actions] { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  [data-note] { background: #fff8df; border-left: 3px solid #c49000; padding: .5rem .7rem; }
+  [data-grid] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+  [data-grid] article { border: 1px solid #ddd; border-radius: 6px; padding: .6rem; font-size: .82rem; }
+  [data-grid] h4 { margin: 0 0 .2rem; }
+  [data-grid] p { margin: 0; }
+  progress { width: 100%; height: 1rem; }
+  [data-result] { min-height: 1.6rem; color: #176b45; font-weight: 600; }
+  @media (max-width: 680px) {
+    [data-global-navbar] nav button:first-child, [data-model-tabs] button:not([aria-current="page"]),
+    [data-model-toolbar] > button:not([data-size]), [data-model-toolbar] > span { display: none; }
+    [data-model-toolbar]::after { content: "☰"; border: 1px solid #9ca3af; border-radius: 6px; padding: .25rem .5rem; }
+    [data-canvas] { grid-template-columns: 1fr; }
+    [data-column]:not(:first-child) { display: none; }
+    [data-panel] { width: 88%; }
+  }
+</style>
+</head>
+<body>
+
+<h1>User feedback and data transparency</h1>
+<small>Status: Spec — approved · 2026-09-07</small>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <ul>
+    <li>People using the public e-footprint interface lack an easy, contextual way to report a bug or share feedback, especially when the current modeling file would help reproduce a problem.</li>
+    <li>Users cannot currently see how long their modeling data remains available, what the browser cookie contains, or how close their workspace is to the server's JSON storage limit. The resulting uncertainty can reduce trust and make size-limit failures feel abrupt.</li>
+    <li>This affects all users, with greater impact on non-technical users who should not need to understand Django sessions, Redis, PostgreSQL, or GitHub workflows.</li>
+    <li>The feature is worth solving now because the application already has layered, time-limited persistence and computes the saved payload size; exposing those facts turns existing safeguards into understandable user assurances.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <ul>
+    <li>From the main modeling experience, a user can choose to report a bug or send general feedback without searching for contact information.</li>
+    <li>A bug report can be opened as a prefilled issue in the e-footprint-interface GitHub repository, with an optional, explicit workflow to download and manually attach the current modeling JSON.</li>
+    <li>A user who cannot or does not want to attach the file on GitHub can open a prefilled email to <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a> and is reminded to attach the downloaded file manually.</li>
+    <li>No modeling data, traceback, user-authored text, or JSON content is placed in a public issue URL, email URL, application log, or third-party service automatically.</li>
+    <li>Before sharing a modeling file, the user is told that it may contain their entered data and that GitHub issues and their attachments are normally public.</li>
+    <li>A user can open a concise data-and-privacy explanation that distinguishes the browser session identifier, the fast cache, and the recovery cache, including the current retention period and what resets it.</li>
+    <li>The interface accurately states that the modeling data is protected in transit by HTTPS. It only claims encryption at rest when that protection has been verified for the deployed Redis and PostgreSQL services.</li>
+    <li>The data-and-privacy explanation identifies Boavizta as the service operator and Clever Cloud as the hosting provider and, where applicable, data processor. It states that the application containers and the PostgreSQL and Redis add-ons are hosted in Paris, and publishes <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a> as the security contact.</li>
+    <li>Recovery availability in the live application is distinguished from residual presence in daily PostgreSQL operational backups retained for seven days. The interface only describes those backup files as encrypted after that separate guarantee is verified.</li>
+    <li>The detailed explanation says that backups are observed to run overnight. Short recovery periods reduce the chance that a modeling is present at snapshot time but never guarantee exclusion: any modeling still stored when a backup runs may be captured and retained with that backup for seven days.</li>
+    <li>The data-and-privacy panel shows the latest successfully saved workspace size and configured shared workspace limit in human-readable units. It clearly presents 50 MB as a capacity policy of the shared public instance, not a limitation of the e-footprint model or file format, and points advanced users to configurable self-hosting for larger workspaces. The value refreshes after successful persistence without requiring an extra full serialization; the interface does not expose “JSON” as an implementation concept.</li>
+    <li>A user can choose a recovery-cache retention period of 1, 3, 6, or 12 hours, or any whole number of days from 1 through 14, capped by the configured session-cookie lifetime. The default remains 12 hours, while the short choices give privacy-sensitive users deliberate alternatives. The choice applies to all modelings in the session and is remembered for that session.</li>
+    <li>Changing recovery retention immediately updates the expiry of recoverable data already stored for the session, and future saves use the chosen duration.</li>
+    <li>Expired recovery-cache rows and expired server-side Django sessions are removed from the live PostgreSQL database by scheduled cleanup independently of whether a user tries to read them; the privacy explanation states the maximum cleanup lag.</li>
+    <li>Below 80% of the shared size limit, no persistent quota indicator competes with modeling controls. At or above 80%, a concise warning appears near the modeling canvas, states the current size and limit, links to the detailed panel, and remains actionable before a save is rejected; the existing authoritative size guard remains unchanged.</li>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. Implementation details and operational recommendations are captured in the reviewed <a href="plan.html">implementation plan</a>.</blockquote>
+  <details open>
+    <summary>In scope</summary>
+    <ul>
+      <li>A discoverable support entry point for bug reports and general feedback.</li>
+      <li>Prefilled GitHub and email handoffs, with optional modeling-file download and clear manual-attachment guidance.</li>
+      <li>A data-and-privacy explanation covering the cookie, fast cache, recovery cache, retention triggers, session loss, operational-backup rotation, transport protection, and verified at-rest protection.</li>
+      <li>Verified operator disclosures: Boavizta's role, Clever Cloud's hosting/subprocessor role, Paris hosting for the application containers and both data stores, and a clearly labeled security contact.</li>
+      <li>An on-demand saved-workspace-size detail in the privacy panel, plus a contextual warning only from 80% of the shared storage budget.</li>
+      <li>Session-scoped recovery-retention choices from one hour to at most the session-cookie lifetime, applied across the whole workspace, with 12 hours as the default.</li>
+      <li>Bounded scheduled deletion of expired recovery-cache rows and expired server-side session rows from the live PostgreSQL database.</li>
+      <li>The same truthful reporting guidance on the existing recovery experience, where a broken modeling can already be downloaded safely.</li>
+      <li>Desktop and best-effort mobile access through the existing global navigation and modeling-toolbar menus.</li>
+    </ul>
+  </details>
+  <details>
+    <summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>An in-application ticket database, feedback inbox, account system, or automated email delivery.</li>
+      <li>Automatic upload of a modeling file to GitHub, email, or another storage service.</li>
+      <li>Collecting personal information, analytics, model contents, or diagnostics in the background.</li>
+      <li>User control over the fast-cache duration; it remains an operator-level performance setting.</li>
+      <li>Changing the shared JSON limit or redefining which serialized representation the limit measures.</li>
+      <li>Guaranteeing restoration after the browser cookie is deleted, the session expires, a cache entry is evicted early, or infrastructure is unavailable.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The mockup mirrors the existing desktop hierarchy. “Feedback” is global, so it replaces the generic GitHub link in the top navbar. Data handling and workspace size are modeling-session concerns, so they stay in the modeling toolbar.</p>
+  <div data-mockup>
+    <div data-browser>
+      <div data-browser-bar aria-hidden="true">
+        <i></i><i></i><i></i><span data-address>e-footprint.boavizta.org/model_builder/</span>
+      </div>
+
+      <header data-global-navbar>
+        <strong data-logo>e-footprint</strong>
+        <nav aria-label="Global navigation">
+          <button type="button" data-quiet>▤ Documentation</button>
+          <button type="button" data-primary data-open="report">♡ Feedback</button>
+        </nav>
+      </header>
+
+      <nav data-model-tabs aria-label="Modeling workspace">
+        <button type="button" aria-current="page">Reference modeling</button>
+        <button type="button">Comparison modeling</button>
+        <button type="button" data-quiet>⇄ Compare</button>
+      </nav>
+
+      <nav data-model-toolbar aria-label="Current modeling actions">
+        <strong data-model-name>E-commerce website</strong>
+        <span>Web modeling</span>
+        <div data-help-wrap>
+          <button type="button" data-action="toggle-help" aria-expanded="false">? Help ▾</button>
+          <div data-help-menu hidden>
+            <button type="button">↺ Replay tour</button>
+            <button type="button">▦ Open templates</button>
+            <hr>
+            <button type="button" data-open="privacy">▣ Data &amp; privacy</button>
+          </div>
+        </div>
+        <button type="button" title="Open a file">↑ Open</button>
+        <button type="button" title="Export this modeling">↓ Export</button>
+        <button type="button" title="Reset to an empty modeling">↻</button>
+      </nav>
+
+      <div data-stage>
+        <main data-canvas>
+          <section data-column>
+            <h4>Usage journeys</h4>
+            <button type="button" data-add>＋ Add your usage journey</button>
+            <article data-model-card>Browse and buy products</article>
+          </section>
+          <section data-column>
+            <h4>Infrastructure</h4>
+            <button type="button" data-add>＋ Add your server</button>
+            <article data-model-card>Application server</article>
+            <article data-model-card>Database server</article>
+          </section>
+          <section data-column>
+            <h4>Usage patterns</h4>
+            <button type="button" data-add>＋ Add your usage pattern</button>
+            <article data-model-card>Typical customer</article>
+          </section>
+        </main>
+
+        <aside data-panel="report" hidden>
+          <header><h3>Report or give feedback</h3><button type="button" data-close aria-label="Close">×</button></header>
+          <label for="report-kind">What would you like to share?</label>
+          <select id="report-kind">
+            <option>Report a bug</option>
+            <option>Give feedback or suggest an improvement</option>
+          </select>
+          <p>Describe what happened or what would help after opening GitHub or your email client.</p>
+          <p data-note>This file may contain data you entered. GitHub issues and attachments are normally public. Review the downloaded file before sharing it.</p>
+          <div data-actions>
+            <button type="button" data-action="download">↓ Download my current modeling to include</button>
+          </div>
+          <div data-actions>
+            <button type="button" data-primary data-action="github">Continue on GitHub</button>
+            <button type="button" data-action="email">Use email instead</button>
+          </div>
+          <p data-result aria-live="polite"></p>
+        </aside>
+
+        <aside data-panel="privacy" hidden>
+          <header><h3>Data &amp; privacy</h3><button type="button" data-close aria-label="Close">×</button></header>
+          <div data-grid>
+            <article>
+              <h4>Browser session</h4>
+              <p>An opaque identifier—not your modeling—is kept in the browser for up to two weeks. Small workspace preferences and indexes are kept server-side for the same session.</p>
+            </article>
+            <article>
+              <h4>Fast cache</h4>
+              <p>Saved modeling and calculations remain hot for one hour after the latest save.</p>
+            </article>
+            <article>
+              <h4>Recovery cache</h4>
+              <p>An inputs-only copy remains available for the duration you choose.</p>
+            </article>
+            <article>
+              <h4>Protection</h4>
+              <p>HTTPS protects data in transit. At-rest wording follows verified deployment settings.</p>
+            </article>
+            <article>
+              <h4>Hosting &amp; security contact</h4>
+              <p>Operated by Boavizta. Application containers, PostgreSQL, and Redis are hosted by Clever Cloud in Paris. PostgreSQL is backed up daily and each backup is retained for seven days. Security contact: <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a>.</p>
+            </article>
+          </div>
+          <h4>Public-instance workspace size</h4>
+          <progress value="7.8" max="50">7.8 MB of 50 MB</progress>
+          <p><strong>7.8 MB of 50 MB</strong> shared by both modelings.</p>
+          <p><small>This 50 MB limit protects the capacity of the shared public service; it is not an e-footprint file-format limit. A self-hosted deployment can configure a higher limit to match its infrastructure.</small></p>
+          <label for="retention">Keep the recovery copy for</label>
+          <select id="retention">
+            <option>1 hour (minimum)</option>
+            <option>3 hours</option>
+            <option>6 hours</option>
+            <option selected>12 hours (default)</option>
+            <option>1 day</option>
+            <option>2 days</option>
+            <option>3 days</option>
+            <option>4 days</option>
+            <option>5 days</option>
+            <option>6 days</option>
+            <option>7 days</option>
+            <option>8 days</option>
+            <option>9 days</option>
+            <option>10 days</option>
+            <option>11 days</option>
+            <option>12 days</option>
+            <option>13 days</option>
+            <option>14 days (maximum)</option>
+          </select>
+          <p><small>Changing this applies to recoverable data already stored in this browser session. Clearing the cookie makes that data unreachable even if its server expiry has not yet elapsed. During normal service operation, expired live recovery rows and server-side sessions are purged within one hour of their expiry. Backups are observed to run overnight: a short duration reduces the chance of capture, but any modeling still present at backup time can remain in that backup for up to seven days.</small></p>
+          <div data-actions><button type="button" data-primary data-action="save-retention">Save retention</button></div>
+          <p data-result aria-live="polite"></p>
+        </aside>
+      </div>
+
+      <div data-results-bar>Get results <span aria-hidden="true">⌃</span></div>
+    </div>
+    <p data-placement><strong>Size disclosure:</strong> this ordinary 7.8 MB workspace shows no quota in the toolbar. “Data &amp; privacy” contains the detailed value. From 40 MB (80% of the 50 MB limit), a shared desktop/mobile warning appears directly above the canvas and opens this panel. <strong>Mobile mapping:</strong> the top navbar is hidden today, so “Feedback” moves into the existing toolbar burger alongside Documentation while “Data &amp; privacy” stays in Help.</p>
+  </div>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li>The feature remains session-driven and does not introduce user accounts or persistent per-user libraries, in line with <code>mission.md</code>.</li>
+    <li>Feedback handoff and privacy controls stay in the Django/HTMX adapter layer. No presentation or session concern enters the domain or application layers, preserving constitution §1.1.</li>
+    <li>The existing repository remains the authority for cache persistence and payload-budget enforcement, preserving constitution §1.2.</li>
+    <li>Wording must describe observed guarantees, not infrastructure assumptions. In particular, Redis eviction is policy-dependent rather than FIFO, and encryption at rest is deployment-dependent.</li>
+    <li>The selected recovery duration describes availability through the live application, not immediate physical erasure from provider backups. PostgreSQL backups run daily and are retained for seven days; any encryption statement about the backup files still requires provider confirmation.</li>
+    <li>Backup timing is operational and may vary. The interface may describe it as an observed overnight schedule, but must not claim that choosing six hours or another short duration guarantees exclusion from backups.</li>
+    <li>The 50 MB production value is a configurable shared-instance capacity policy. Copy must not imply an inherent e-footprint model or JSON-format ceiling, and should identify self-hosting as the path for appropriately provisioned larger workloads.</li>
+    <li>The compact recovery representation may require lazy recomputation after the fast copy expires; the interface should explain this as a possible slower first load, not as data loss.</li>
+    <li>The retention selector cannot offer a duration longer than the configured session-cookie age.</li>
+    <li>JSON sharing is always opt-in and manual. The application must not place the file or user-authored content in query parameters.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Operational facts pending confirmation</h2>
+  <ul>
+    <li>Which production guarantees can be stated for encryption at rest and encrypted connections between the application, Redis, and PostgreSQL? This requires operator verification before final copy approval.</li>
+    <li>Paris hosting for the application containers, PostgreSQL, and Redis, plus the security contact and daily/seven-day PostgreSQL backup schedule, are confirmed. What encryption guarantee applies to the PostgreSQL backup files? Placeholders must not reach production.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <a href="plan.html">plan.html</a> for the implementation approach, retention mechanics, and operational decisions.</li>
+    <li>Re-read <code>specs/architecture.md</code>, especially “Persistence and interface_config”, “Workspace / multi-slot session”, “Error recovery”, and “Security and data”.</li>
+    <li>Read <code>specs/conventions.md</code>, <code>specs/testing.md</code>, and <code>specs/design/writing-style-guide.md</code>.</li>
+  </ol>
+</section>
+
+<script>
+(() => {
+  const mockup = document.querySelector("[data-mockup]");
+  if (!mockup) return;
+
+  const canvas = mockup.querySelector("[data-canvas]");
+  const helpButton = mockup.querySelector("[data-action='toggle-help']");
+  const helpMenu = mockup.querySelector("[data-help-menu]");
+
+  const openPanel = (name = null) => {
+    mockup.querySelectorAll("[data-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.panel !== name;
+    });
+    canvas.dataset.dimmed = name ? "true" : "false";
+    helpMenu.hidden = true;
+    helpButton.setAttribute("aria-expanded", "false");
+  };
+
+  mockup.addEventListener("click", (event) => {
+    const helpToggle = event.target.closest("[data-action='toggle-help']");
+    if (helpToggle) {
+      helpMenu.hidden = !helpMenu.hidden;
+      helpButton.setAttribute("aria-expanded", String(!helpMenu.hidden));
+      return;
+    }
+
+    const openButton = event.target.closest("[data-open]");
+    if (openButton) {
+      openPanel(openButton.dataset.open);
+      return;
+    }
+
+    if (event.target.closest("[data-close]")) {
+      openPanel();
+      return;
+    }
+
+    const actionButton = event.target.closest("[data-action]");
+    if (!actionButton) return;
+    const panel = actionButton.closest("[data-panel]");
+    const result = panel.querySelector("[data-result]");
+    if (actionButton.dataset.action === "download") {
+      result.textContent = "Your current modeling would download for you to review and attach manually.";
+    } else if (actionButton.dataset.action === "github") {
+      result.textContent = "GitHub would open with a prefilled issue and no modeling data in the URL.";
+    } else if (actionButton.dataset.action === "email") {
+      result.textContent = "A prefilled email would open. If you downloaded a file, attach it manually after reviewing it.";
+    } else if (actionButton.dataset.action === "save-retention") {
+      result.textContent = `Recovery retention saved as ${mockup.querySelector("#retention").value} for this session.`;
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>

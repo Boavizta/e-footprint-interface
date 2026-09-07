@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User feedback and data transparency — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  body > small { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; table-layout: fixed; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  th:nth-child(1), td:nth-child(1) { width: 27%; overflow-wrap: anywhere; }
+  th:nth-child(2), td:nth-child(2) { width: 13%; }
+  th:nth-child(3), td:nth-child(3) { width: 60%; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  blockquote { border-left: 3px solid #c49000; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  svg { width: 100%; height: auto; margin: 1rem 0; }
+</style>
+</head>
+<body>
+
+<h1>User feedback and data transparency — Implementation plan</h1>
+<small>Status: Plan — approved · 2026-09-07 · Spec: <a href="spec.html">approved spec</a></small>
+
+<section>
+  <h2>1. Approach</h2>
+  <p>Respect the existing chrome hierarchy instead of adding two more toolbar buttons. On desktop, replace the top navbar's generic “View on GitHub” link with the more useful global “Feedback” entry. Its ordinary <code>href</code> opens a standalone support route from pages without a modeling side panel (including Home and recovery); progressive enhancement opens the same content in the existing builder side panel when that target is present. Put “Data &amp; privacy” inside the modeling-toolbar Help menu, because its explanation and retention preference belong to the current browser session. Keep detailed workspace size inside that panel; only show a canvas-adjacent warning from 80% of the shared limit. On mobile, where the global navbar is hidden, Feedback joins the existing toolbar burger while Data &amp; privacy remains under Help.</p>
+  <p>The feedback UI collects no free-form text. It gives the user an explicit “Download my current modeling to include” action, explains that the file must be reviewed and attached manually, then separately opens a prefilled GitHub issue or email draft. This avoids implying that the application can upload an attachment and keeps user-authored content out of URLs. Existing dead-state recovery retains its raw, hydration-free downloads and receives the same truthful attachment guidance.</p>
+  <p>Keep all support, disclosure, and retention behavior in adapters. The session repository continues to own cache TTLs, but resolves the PostgreSQL recovery timeout from a validated session-level preference. Changing the preference updates only the PostgreSQL expiry for every occupied workspace slot; future saves use the same value. The existing workspace index supplies the last-saved canonical byte sizes, so size presentation never hydrates or reserializes a modeling. A shared response helper refreshes the conditional warning after every persistence boundary that can change the indexed size.</p>
+  <p>Make data minimization operational rather than merely logical. A supervised Django maintenance worker removes expired <code>django_cache</code> recovery rows and expired <code>django_session</code> rows immediately at startup and hourly thereafter. The browser cookie remains only an opaque session identifier; small server-side workspace indexes and preferences expire with the session. PostgreSQL live storage is confirmed encrypted at rest, while its daily seven-day backups are confirmed unencrypted at rest unless Clever Cloud's custom encryption option is activated; user-facing copy is derived from explicit deployment settings and must state the deployed truth.</p>
+
+  <svg viewBox="0 0 800 360" role="img" aria-labelledby="flow-title flow-desc">
+    <title id="flow-title">Support and data-transparency flow</title>
+    <desc id="flow-desc">The top navbar opens reporting, while the modeling toolbar's Help menu and conditional size warning open privacy details. Reporting offers an explicit modeling download before a separate GitHub or email handoff. Privacy reads workspace metadata and changes recovery expiry through the session repository.</desc>
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#555"/>
+      </marker>
+    </defs>
+    <rect x="20" y="130" width="130" height="70" rx="8" fill="#eef6f1" stroke="#176b45"/>
+    <text x="85" y="158" text-anchor="middle" font-size="16">Entry points</text>
+    <text x="85" y="180" text-anchor="middle" font-size="13">navbar + toolbar</text>
+    <rect x="230" y="35" width="175" height="100" rx="8" fill="#f7f7f7" stroke="#777"/>
+    <text x="317" y="65" text-anchor="middle" font-size="16">Report / feedback</text>
+    <text x="317" y="89" text-anchor="middle" font-size="13">explicit modeling download</text>
+    <text x="317" y="111" text-anchor="middle" font-size="13">separate prefilled handoff</text>
+    <rect x="495" y="20" width="125" height="55" rx="8" fill="#eef6f1" stroke="#176b45"/>
+    <text x="557" y="53" text-anchor="middle" font-size="15">GitHub issue</text>
+    <rect x="655" y="95" width="125" height="55" rx="8" fill="#eef6f1" stroke="#176b45"/>
+    <text x="717" y="128" text-anchor="middle" font-size="15">Email client</text>
+    <rect x="230" y="220" width="175" height="110" rx="8" fill="#f7f7f7" stroke="#777"/>
+    <text x="317" y="250" text-anchor="middle" font-size="16">Data &amp; privacy</text>
+    <text x="317" y="274" text-anchor="middle" font-size="13">retention explanation</text>
+    <text x="317" y="296" text-anchor="middle" font-size="13">size / limit</text>
+    <text x="317" y="318" text-anchor="middle" font-size="13">retention selector</text>
+    <rect x="500" y="220" width="250" height="110" rx="8" fill="#fff8df" stroke="#c49000"/>
+    <text x="625" y="248" text-anchor="middle" font-size="16">Session adapters</text>
+    <text x="625" y="273" text-anchor="middle" font-size="13">workspace byte-size index</text>
+    <text x="625" y="295" text-anchor="middle" font-size="13">validated PostgreSQL TTL</text>
+    <text x="625" y="317" text-anchor="middle" font-size="13">touch existing slot keys</text>
+    <line x1="150" y1="150" x2="230" y2="92" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="405" y1="67" x2="495" y2="50" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="405" y1="105" x2="655" y2="120" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="150" y1="182" x2="230" y2="258" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="405" y1="275" x2="500" y2="275" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  </svg>
+
+  <details open>
+    <summary>Reporting flow</summary>
+    <ol>
+      <li>A thin GET view renders one reusable support partial with “bug” and “feedback” choices. A non-HTMX request wraps it as a standalone page; a small delegated progressive-enhancement module intercepts the global navbar link only when the builder's <code>#sidePanel</code> exists and loads the partial there.</li>
+      <li>The panel contains no free-form text field. GitHub and email own authored report content; their prefilled templates contain prompts only.</li>
+      <li>“Download my current modeling to include” is a separate ordinary download link using the existing active-model export. Nearby copy states that the file may contain business data, must be reviewed, and must be attached manually. No automatic download/open sequence or new file format is introduced.</li>
+      <li>The GitHub action opens the e-footprint-interface issue form with a type-appropriate title and prompt-only body. The email fallback opens a prefilled <code>mailto:</code> subject/body with the same manual-attachment instruction. Neither URL contains report text, model content, a traceback, or an exception message.</li>
+      <li>General feedback uses the same panel and download action; attaching a modeling remains an explicit user choice rather than a bug-only checkbox.</li>
+      <li>The dead-state recovery page reuses the same URL builders and adds the email fallback and public-attachment warning, while keeping its raw download path independent of <code>ModelWeb</code>.</li>
+    </ol>
+  </details>
+
+  <details open>
+    <summary>Data, size, and retention flow</summary>
+    <ol>
+      <li>A shared adapter helper creates a presentation-only data-status object: session-cookie age, Redis TTL, selected PostgreSQL TTL, summed saved bytes, maximum bytes, ratio, caution state, and explicit operator disclosures. Those disclosures cover Boavizta, Clever Cloud, Paris hosting for containers and both data stores, daily PostgreSQL backups with seven-day rotation, the separately configured backup-encryption state, and the security contact.</li>
+      <li>The helper reads stored sizes from <code>WorkspaceIndex</code>. It never calls <code>ModelWeb.to_json()</code>; the repository already records the authoritative canonical size after every successful save.</li>
+      <li>The initial builder render includes a stable <code>workspace-storage-status</code> region above the canvas that is empty below 80% and becomes a concise warning at or above 80%. A shared adapter helper appends its out-of-band replacement after successful CRUD, result-materialization, and Sankey persistence. Import, reset, add, and remove paths already re-render the builder and therefore receive fresh initial context.</li>
+      <li>The card-order autosave remains a lightweight <code>fetch</code>. After a successful save, its script asks the dedicated status GET endpoint to replace only <code>#workspace-storage-status</code>; it never fetches or serializes either modeling.</li>
+      <li>The privacy side panel always renders the detailed human-readable saved size and limit from the same status object, without calling the payload “JSON”. Wording describes TTLs as “after the latest save or retention change”: cache reads do not renew expiry, while a deliberate retention change does. It labels 50 MB as the configurable capacity policy of this shared public deployment and links larger-workspace needs to self-hosting rather than implying a format limitation.</li>
+      <li>Backup detail says that snapshots are observed overnight and retained for seven days. It may explain that short recovery durations reduce capture likelihood, but never infer exclusion from a six-hour or other TTL: a modeling present at the actual snapshot time can be included, and the provider schedule may vary.</li>
+      <li>A POST endpoint accepts only the closed set of recovery periods: 1, 3, 6, and 12 hours, followed by every whole-day duration from 1 through 14 days. The minimum is 3,600 seconds (one hour), matching the hot-cache duration; the default remains 43,200 seconds (12 hours); and options above <code>settings.SESSION_COOKIE_AGE</code> are never offered or accepted (Django's current default is 1,209,600 seconds / 14 days). The selected value lives in the session as workspace-level UI policy and is not exported inside a modeling file.</li>
+      <li>On a valid change, the adapter calls the PostgreSQL <code>DatabaseCache.touch()</code> path for each occupied slot, setting <code>expires = now + selected duration</code> without selecting or rewriting its stored value. It persists the preference for future writes even if a key vanished concurrently, and reports whether all or only the still-recoverable entries were updated.</li>
+      <li>Subsequent repository writes use the validated session preference for the PostgreSQL timeout. Redis remains an operator-level fixed TTL.</li>
+      <li>A Django management command deletes rows whose <code>expires</code> timestamp has passed from the dedicated <code>django_cache</code> table and clears expired rows from <code>django_session</code> through the configured session backend. In production, the existing Supervisor process manager runs it as a lightweight worker: immediately on startup, then every hour. This bounds residual presence in the live database to one additional hour during normal service operation.</li>
+    </ol>
+  </details>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change type</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>theme/templates/navbar.html</code></td><td>modified</td><td>Replace the desktop “View on GitHub” link with a progressively enhanced “Feedback” link whose ordinary <code>href</code> remains usable on Home and recovery.</td></tr>
+      <tr><td><code>theme/templates/base.html</code></td><td>modified</td><td>Render the standalone support-route content on non-HTMX navigation and load the small support progressive-enhancement module.</td></tr>
+      <tr><td><code>theme/static/scripts/support.js</code></td><td>new</td><td>Delegated IIFE: when <code>#sidePanel</code> exists, intercept the Feedback link and load its partial there; otherwise preserve ordinary navigation. It never reads modeling or report content.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/components/help_menu.html</code></td><td>modified</td><td>Add “Data &amp; privacy” below the existing tour/template help actions, opening the shared side panel.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html</code></td><td>modified</td><td>Add the same Feedback link to the existing mobile burger without adding a persistent size control to the already busy desktop or mobile toolbar.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/model_builder_main.html</code></td><td>modified</td><td>Add the stable workspace-storage-status region between the active-model toolbar and canvas/comparison content.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/components/workspace_storage_status.html</code></td><td>new</td><td>Canvas-adjacent warning region, empty below 80% and cautionary from 80%; links to detailed storage information and supports OOB replacement.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/support.html</code></td><td>new</td><td>Reusable standalone/side-panel support content: bug/feedback choice, explicit current-modeling download, public-file warning, GitHub action, and email fallback; no free-text field.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/side_panels/data_privacy.html</code></td><td>new</td><td>Plain-language persistence explanation, detailed public-instance workspace budget with self-hosting escape hatch, backup timing/rotation qualification, and recovery-retention form.</td></tr>
+      <tr><td><code>e_footprint_interface/settings.py</code></td><td>modified</td><td>Make the two-week session age explicit and expose deployment-configured operator, processor, Paris region, security contact, backup schedule/retention, and separate live-store/backup encryption states. Self-hosted deployments must not inherit Boavizta-specific assurances silently.</td></tr>
+      <tr><td><code>e_footprint_interface/urls.py</code></td><td>modified</td><td>Register the globally reachable support route used by the navbar's ordinary-link fallback.</td></tr>
+      <tr><td><code>model_builder/adapters/views/views_support.py</code></td><td>new</td><td>Thin GET views for support, privacy, and storage-status partials plus a CSRF-protected POST view for session-scoped retention; owns safe prefilled external URLs.</td></tr>
+      <tr><td><code>model_builder/urls.py</code></td><td>modified</td><td>Register privacy/status partial routes and the POST-only recovery-retention route.</td></tr>
+      <tr><td><code>model_builder/adapters/views/data_status.py</code></td><td>new</td><td>Build the adapter-owned presentation object from settings, session policy, and workspace index metadata.</td></tr>
+      <tr><td><code>model_builder/adapters/views/exception_handling.py</code></td><td>modified</td><td>Generalize the prefilled GitHub URL builder, remove the currently exposed exception message (retain type only), add the safe email fallback, and share URL construction with support.</td></tr>
+      <tr><td><code>model_builder/templates/model_builder/recovery.html</code></td><td>modified</td><td>Add email fallback and accurate file-sharing/public-issue wording without depending on model hydration.</td></tr>
+      <tr><td><code>model_builder/adapters/repositories/workspace_index.py</code></td><td>modified</td><td>Expose the summed last-saved workspace size directly; keep the stored per-slot byte sizes as the source of truth.</td></tr>
+      <tr><td><code>model_builder/adapters/repositories/session_system_repository.py</code></td><td>modified</td><td>Make one hour the system-data Redis default and resolve the PostgreSQL timeout from the validated session preference, ranging from one hour to the cookie lifetime while retaining 12 hours as the default. Generic Redis cache defaults remain unchanged.</td></tr>
+      <tr><td><code>model_builder/adapters/repositories/cache_backend.py</code></td><td>modified</td><td>Add result-observable, backend-specific <code>touch</code> support so retention changes update existing PostgreSQL expiries without reading or rewriting payload values.</td></tr>
+      <tr><td><code>model_builder/management/commands/purge_expired_session_data.py</code></td><td>new</td><td>Delete expired recovery-cache rows and clear expired Django sessions. Run once by default for tests/manual operations; accept a repeat interval for the supervised production worker.</td></tr>
+      <tr><td><code>docker/conf/supervisord-prod.conf</code></td><td>modified</td><td>Start and restart the session-data cleanup worker alongside nginx and Gunicorn, with a 3,600-second interval and logs forwarded to the existing application stream.</td></tr>
+      <tr><td><code>model_builder/adapters/presenters/htmx_presenter.py</code></td><td>modified</td><td>Append the storage-status OOB partial after successful CRUD persistence, when the index contains the new size.</td></tr>
+      <tr><td><code>model_builder/adapters/views/views.py</code>, <code>sankey_views.py</code></td><td>modified</td><td>Include initial status context and append the same OOB status after result/Sankey materialization paths that persist new canonical state.</td></tr>
+      <tr><td><code>theme/static/scripts/model_builder_main.js</code></td><td>modified</td><td>After the existing card-order <code>fetch</code> succeeds, request only the server-rendered storage-status partial into its stable region.</td></tr>
+      <tr><td><code>theme/static/scss/custom.scss</code></td><td>modified</td><td>Style the contextual storage warning and side-panel progress states; rebuild generated Bootstrap CSS rather than editing it directly.</td></tr>
+      <tr><td><code>tests/unit_tests/...</code>, <code>js_tests/...</code>, <code>tests/e2e/...</code></td><td>modified</td><td>Add focused policy, Django adapter/database, progressive-enhancement, rendering, and one critical-flow coverage set described below. No Django-dependent cases enter the Django-free integration suite.</td></tr>
+      <tr><td><code>specs/architecture.md</code>, <code>specs/design/journeys/save-and-load.html</code></td><td>modified</td><td>Document the session retention policy, truthful security boundary, live size presentation, and support handoff.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Cross-cutting concerns</h2>
+  <ul>
+    <li><strong>Tests:</strong> unit-test allowed retention values, session-age capping, size aggregation, the exact 80% boundary, deployment-disclosure context, URL encoding, and absence of model/user/exception-message content from outbound URLs. Django adapter/database tests cover expiry touch across one and two slots, partial failure, future writes, removal of expired cache and session rows while preserving live rows, and OOB status responses at each persistence boundary. Jest covers progressive enhancement and the card-order status refresh using real rendered fixtures. One E2E flow covers Help discoverability, retention persistence, absence of a quota indicator below 80%, warning appearance/refresh at 80%, operator/region/security disclosures, the explicit download action, and GitHub/email links. Recovery-page tests remain hydration-free. The Django-free <code>tests/integration/</code> suite is not used for this adapter-only feature.</li>
+    <li><strong>Migrations:</strong> no Django model or JSON-schema migration. The new session key is additive, defaults to 12 hours when absent, accepts one hour as its privacy-minimizing value, and must not enter exported <code>interface_config</code>.</li>
+    <li><strong>Security and privacy:</strong> treat the session cookie as an opaque locator, not encryption. Never embed a traceback, exception message, user-authored text, or model content in external URLs. The support UI never stores report text. Use <code>noopener noreferrer</code> on new tabs and a CSRF-protected POST for retention changes.</li>
+    <li><strong>Accessibility:</strong> the storage warning and detailed progress need textual values; color is supplementary. Side-panel forms need associated labels, keyboard operation, and an <code>aria-live</code> confirmation.</li>
+    <li><strong>Performance:</strong> at the application level, size presentation is O(number of slots) over existing integer metadata and retention change performs one expiry touch per occupied slot. With the current two-slot cap both are bounded constant-time operations, apart from cache/database round trips. Neither path may hydrate, materialize, or serialize a modeling. Card-order refresh adds one metadata-only partial request after an infrequent drag save.</li>
+    <li><strong>Operational validation:</strong> before copy is finalized, verify production Redis at-rest encryption and TLS (or an equivalent encrypted private path), <code>maxmemory</code>, <code>maxmemory-policy</code>, cache hit rate, evictions, rejected writes, memory headroom, and presence of the supervised cleanup worker in deployment logs. The application containers, PostgreSQL, and Redis are confirmed in Paris; live PostgreSQL encryption at rest is confirmed; PostgreSQL backups are confirmed daily with seven-day rotation and confirmed <em>not</em> encrypted at rest today; and the security contact is <code>vincent.villet@publicissapient.com</code>. Clever Cloud offers custom backup encryption for €100, whose one-off/recurring nature and exact activation scope still need confirmation. Task generation must place a final Clever Cloud harmonization task after functional work: reconcile settings and copy with the provider's final written state for Redis encryption/TLS/backups and PostgreSQL backup encryption.</li>
+    <li><strong>Docs:</strong> update the persistence/security sections of <code>specs/architecture.md</code> and the save/load design journey. This is a new user-controlled persistence policy and should not be left only in feature history.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Risks</h2>
+  <ul>
+    <li><strong>False encryption assurance:</strong> the application performs no payload encryption of its own. Live PostgreSQL encryption is confirmed, but its seven-day backups are confirmed unencrypted at rest today; Redis facts remain pending. Mitigation: represent each store and backup layer separately in deployment settings, render only configured facts, and update the configuration after Clever Cloud's custom backup encryption is actually activated—not merely quoted. See <a href="https://www.clever-cloud.com/developers/doc/administrate/encryption-at-rest/">Clever Cloud's encryption-at-rest documentation</a>.</li>
+    <li><strong>GitHub attachments are not URL-prefillable:</strong> a new-issue URL can fill title/body but cannot safely attach the current file. Mitigation: make download/review/manual attachment explicit and keep the email fallback equally clear.</li>
+    <li><strong>TTL semantics become misleading:</strong> cache expiry resets on writes, not reads; the retention POST deliberately resets the PostgreSQL expiry from the time of that change. Mitigation: consistently say “after the latest save or retention change”, test the copy inputs against configured values, and avoid “active session” wording.</li>
+    <li><strong>Backup timing creates a false safe window:</strong> observed PostgreSQL backups run overnight, but their exact time varies and a six-hour recovery copy can still overlap a snapshot after late-evening use. Mitigation: describe short TTLs as reducing likelihood only, and base the guarantee on actual presence at snapshot time plus seven-day backup rotation.</li>
+    <li><strong>Large workspaces displace several casual workspaces:</strong> production Redis is currently capped at 128 MB while the production shared JSON limit is 50 MB. Most expected workspaces are below 3 MB, but one near-limit canonical snapshot can evict several of them and Redis serialization overhead is not represented by the JSON byte count. Mitigation: monitor payload distribution, Redis memory, evictions, hits, and misses; increase Redis capacity if normal traffic produces cold-cache churn.</li>
+    <li><strong>Retention preference outlives or underlives data:</strong> the two-week cookie can disappear before a server cache entry, leaving an inaccessible orphan until expiry; eviction can remove data earlier. Mitigation: state “up to”, cap the preference, and explain that clearing cookies or infrastructure eviction can end recovery sooner.</li>
+    <li><strong>Database-cache and session expiry are lazy:</strong> Django makes expired cache/session data unusable but does not guarantee prompt physical row deletion without maintenance. Mitigation: run and monitor the hourly supervised purge worker for both tables, describe logical expiry separately from the maximum one-hour live-table cleanup lag during normal service operation, and disclose the independent seven-day backup rotation. Concurrent workers during scaling or zero-downtime deployment are safe because deletion is idempotent; log only counts and duration, never cache keys, session keys, or payloads.</li>
+    <li><strong>Touch failure creates a false success:</strong> cache operations currently swallow backend errors. Mitigation: make the retention-change path observe per-key touch results and report partial/unavailable updates rather than confirming blindly.</li>
+    <li><strong>Stale size display:</strong> result materialization, Sankey changes, and card-order autosave can change canonical size outside standard CRUD. Mitigation: centralize the OOB partial append for HTMX persistence responses, explicitly refresh after the existing card-order <code>fetch</code>, and cover the enumerated boundaries with tests.</li>
+    <li><strong>Global Feedback target is absent:</strong> the navbar also renders on Home and the standalone recovery page, where the builder's <code>#sidePanel</code> does not exist. Mitigation: use a real standalone support URL as the baseline and intercept it only when the builder target is present.</li>
+    <li><strong>Public disclosure:</strong> a modeling JSON may contain names, comments, sources, and business assumptions. Mitigation: no automatic upload, an explicit opt-in, a public-issue warning, and a reminder to review the file.</li>
+</section>
+
+<section>
+  <h2>5. Alternatives considered</h2>
+  <ul>
+    <li><strong>Submit feedback through an application form:</strong> rejected for this iteration because it requires storage, abuse controls, personal-data handling, and an operator inbox. External handoff is lighter and more transparent.</li>
+    <li><strong>Automatically upload JSON to GitHub or temporary object storage:</strong> rejected because issue URLs cannot carry attachments and a relay service would materially expand the privacy and security surface.</li>
+    <li><strong>Automatically download then open the destination:</strong> rejected because browsers may block the second action and the sequence can imply that the file was attached. Keep “Download my current modeling to include” and “Continue on GitHub” / “Use email instead” as explicit separate actions.</li>
+    <li><strong>Collect report text in the application:</strong> rejected. Without an application-side submission endpoint the field would be misleading, while copying it into a GitHub or email URL would expand URL exposure and length. Users write their report at the selected destination.</li>
+    <li><strong>Show a permanent size chip in the modeling toolbar:</strong> rejected because most expected workspaces are below 3 MB, making a permanent 50 MB implementation limit distracting and potentially anxiety-inducing. Keep detailed size on demand in the privacy panel and surface an actionable canvas warning only from the selected 80% threshold.</li>
+    <li><strong>Present 50 MB as a model-format ceiling:</strong> rejected. <code>MAX_PAYLOAD_SIZE_MB</code> is deployment-configurable and exists to protect this shared public instance; larger models can use a suitably provisioned self-hosted e-footprint-interface.</li>
+    <li><strong>Re-serialize on every render:</strong> rejected because the authoritative byte count is already stored after persistence; re-serialization would add latency and could materialize or duplicate work.</li>
+    <li><strong>Save recovery retention inside <code>interface_config</code>:</strong> rejected because retention is browser-session/workspace policy, not modeling content, and should not silently travel with exported files.</li>
+    <li><strong>Keep Redis retention at 10 minutes:</strong> rejected. It needlessly sends a casual returning user through the slower inputs-only recovery path and recomputation after a short pause, even when the 128 MB Redis cache is lightly used.</li>
+    <li><strong>Set Redis retention to one hour:</strong> selected. Production uses <code>allkeys-lru</code>, so memory pressure evicts approximately least-recently-used keys rather than blocking all new keys; PostgreSQL remains the recoverable inputs-only fallback. One hour improves the common 10–60 minute return path without promising that Redis will retain a key for the full hour under pressure. Monitor the cumulative <code>evicted_keys</code> counter and hit/miss deltas. See <a href="https://redis.io/docs/latest/develop/reference/eviction/">Redis key-eviction documentation</a>.</li>
+    <li><strong>Use Clever Cloud native cron or a separate Clever Task for cleanup:</strong> rejected for this iteration. Native cron is unavailable for Docker applications, while a Clever Task has no built-in cron trigger and would add a second application plus an external trigger. The already-deployed Supervisor is the proportional execution boundary; a separately scheduled worker can replace it later if cleanup must continue while all web scalers are stopped.</li>
+    <li><strong>Disable PostgreSQL backups:</strong> rejected. Seven-day daily backups support platform recovery and are required by the forthcoming durable shared-model capability, even though that feature remains outside this plan. The proportional target is to encrypt retained backups, not remove them; until activation, the interface must disclose their unencrypted state accurately.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Constitutional notes</h2>
+  <p>The plan keeps Django sessions, external URLs, cache TTLs, and templates in adapters, respecting constitution §1.1. It retains <code>ISystemRepository</code> as the modeling persistence boundary (§1.2) and does not change e-footprint's modeling or serialization truth (§1.3). HTMX renders the side panels and OOB size update; any JavaScript is limited to the browser-required “download, then open external destination” enhancement (§1.4). No constitutional amendment is required.</p>
+</section>
+
+<section>
+  <h2>7. Remaining operational gate</h2>
+  <ul>
+    <li>No implementation-design question blocks task generation. Provider facts intentionally remain a final operational gate: confirm whether Clever Cloud's €100 PostgreSQL-backup encryption is one-off or recurring and when it is active; obtain the pending Redis at-rest, TLS/private-path, and backup answers; then harmonize production settings and copy as the final task.</li>
+  </ul>
+</section>
+
+</body>
+</html>
