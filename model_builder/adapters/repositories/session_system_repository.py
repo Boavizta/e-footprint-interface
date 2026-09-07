@@ -16,7 +16,6 @@ from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.recovery_retention import (
-    DEFAULT_RECOVERY_RETENTION_SECONDS,
     SYSTEM_DATA_CACHE_NAMESPACE,
     get_recovery_retention_seconds,
 )
@@ -44,7 +43,6 @@ class SessionSystemRepository(ISystemRepository):
     REDIS_CACHE_ALIAS = os.environ.get("SYSTEM_DATA_REDIS_CACHE_ALIAS", "redis")
     POSTGRES_CACHE_ALIAS = os.environ.get("SYSTEM_DATA_POSTGRES_CACHE_ALIAS", "postgres")
     REDIS_CACHE_TIMEOUT_SECONDS = int(os.environ.get("SYSTEM_DATA_REDIS_TTL_SECONDS", "3600"))
-    POSTGRES_CACHE_TIMEOUT_SECONDS = DEFAULT_RECOVERY_RETENTION_SECONDS
     MAX_PAYLOAD_SIZE_MB = float(os.environ.get("MAX_PAYLOAD_SIZE_MB", 30.0))
 
     def __init__(self, session: SessionBase, slot: Optional[int] = None):

@@ -133,8 +133,6 @@ class CacheBackend:
     def touch_postgres(self, cache_key: str, timeout_seconds: int) -> bool:
         """Update a live Postgres cache expiry without reading, rewriting, or reviving its value."""
         postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
-        if postgres_cache is None:
-            return False
 
         def touch_live_row():
             key = postgres_cache.make_and_validate_key(cache_key)
