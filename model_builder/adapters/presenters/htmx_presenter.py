@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 
 from model_builder.adapters.presenters.oob_regions import oob_regions_cover_all_cards, render_oob_regions
 from model_builder.adapters.ui_config.constraint_messages import CONSTRAINT_MESSAGES
+from model_builder.adapters.views.data_status import append_workspace_storage_status
 from model_builder.application.use_cases import CreateObjectOutput, EditObjectOutput, DeleteObjectOutput
 from model_builder.application.use_cases.delete_object import DeleteCheckResult
 
@@ -59,6 +60,13 @@ class HtmxPresenter:
         canvas_oob = oob_regions_cover_all_cards(oob_regions)
         extra_settle = {"initModelBuilderMain": ""} if canvas_oob else {}
         return canvas_oob, extra_settle, self._constraint_toast_messages()
+
+    def _append_workspace_storage_status(self, response: HttpResponse) -> HttpResponse:
+        """Append the live request's metadata status, if session middleware supplied one."""
+        session = getattr(self.request, "session", None)
+        if session is not None:
+            append_workspace_storage_status(response, session)
+        return response
 
     def _recomputation_html(self) -> str:
         """HTML for re-rendering the result panel as an OOB innerHTML swap."""
@@ -123,7 +131,7 @@ class HtmxPresenter:
             response["HX-Trigger-After-Settle"] = json.dumps(after_settle)
             if recompute:
                 response.content += self._recomputation_html().encode("utf-8")
-            return response
+            return self._append_workspace_storage_status(response)
 
         # Standalone object - render its card (unless side-effects own the layout instead)
         if output.replaces_primary_render:
@@ -155,7 +163,7 @@ class HtmxPresenter:
 
         if recompute:
             response.content += self._recomputation_html().encode("utf-8")
-        return response
+        return self._append_workspace_storage_status(response)
 
     def present_created_object_with_parent_link(
         self, output: CreateObjectOutput, parent_html_updates: str
@@ -267,7 +275,7 @@ class HtmxPresenter:
         if extra_settle_triggers:
             after_settle_trigger.update(extra_settle_triggers)
         response["HX-Trigger-After-Settle"] = json.dumps(after_settle_trigger)
-        return response
+        return self._append_workspace_storage_status(response)
 
     def present_deleted_object(self, output: DeleteObjectOutput) -> HttpResponse:
         """Format a deleted object as an HTTP response.
@@ -305,12 +313,13 @@ class HtmxPresenter:
                 render_oob_regions(self.model_web, output.oob_regions), toast_and_highlight_data,
                 extra_settle_triggers=extra_settle)
 
-        response = HttpResponse(status=204)
+        response = HttpResponse()
+        response["HX-Reswap"] = "none"
         response["HX-Trigger"] = json.dumps({
             "resetLeaderLines": "",
             "displayToastAndHighlightObjects": toast_and_highlight_data
         })
-        return response
+        return self._append_workspace_storage_status(response)
 
     def present_delete_confirmation(
         self, check_result: DeleteCheckResult, web_obj, object_id: str

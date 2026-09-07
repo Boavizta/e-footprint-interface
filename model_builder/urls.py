@@ -17,6 +17,8 @@ urlpatterns = [
     path("", views.model_builder_main, name="model-builder"),
     path("support/", model_builder.adapters.views.views_support.support, name="model-builder-support"),
     path("data-privacy/", model_builder.adapters.views.views_support.data_privacy, name="data-privacy"),
+    path("workspace-storage-status/", model_builder.adapters.views.views_support.workspace_storage_status,
+         name="workspace-storage-status"),
     path("recovery-retention/", model_builder.adapters.views.views_support.update_recovery_retention,
          name="update-recovery-retention"),
     path("open-template-picker/", model_builder.adapters.views.views_onboarding.open_template_picker,

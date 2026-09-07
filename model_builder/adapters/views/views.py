@@ -25,6 +25,7 @@ from model_builder.adapters.card_order import CARD_ORDER_LIST_IDS, ordered_card_
 from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
 from model_builder.adapters.views.source_table_row_editor_context import build_source_table_row_editor_context
+from model_builder.adapters.views.data_status import append_workspace_storage_status, build_data_status
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     get_web_explainable_from_attr,
@@ -139,6 +140,7 @@ def render_model_builder(request, model_web, show_template_picker, workspace=Non
                "workspace_slots": workspace_slots,
                "compare_enabled": compare_enabled(workspace_slots),
                "active_slot": active_slot,
+               "data_status": build_data_status(request.session),
                "tour_steps": build_tour_steps(is_blank=model_is_empty)}
     if show_template_picker:
         context["template_picker_groups"] = build_picker_groups()
@@ -410,6 +412,7 @@ def result_chart(request):
         request, "model_builder/result/result_panel.html", context={"model_web": model_web})
     if not total_footprint_was_cached and total_footprint_slot.peek(system) is not None:
         model_web.persist_to_cache()
+    append_workspace_storage_status(http_response, request.session)
     http_response["HX-Trigger-After-Settle"] = "triggerResultRendering"
 
     return http_response

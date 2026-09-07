@@ -73,6 +73,49 @@ class ModelBuilderPage:
         self.template_picker.wait_for(state="visible")
         return self
 
+    def open_data_privacy_from_help_menu(self):
+        """Open the session's Data & privacy panel from Help."""
+        self.page.locator("#help-menu-toggle").click()
+        click_and_wait_for_htmx(self.page, self.page.locator("a[href='/model_builder/data-privacy/']"))
+        self.page.locator("#sidePanelTitle", has_text="Data & privacy").wait_for(state="visible")
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
+        return self
+
+    def set_recovery_retention(self, seconds: int):
+        """Save one offered recovery-retention choice in the open privacy panel."""
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
+        self.page.locator("#retention-seconds").select_option(str(seconds))
+        click_and_wait_for_htmx(
+            self.page,
+            self.page.locator("form[action$='/recovery-retention/'] button[type='submit']"),
+        )
+        self.page.locator("#retention-update-result").wait_for(state="visible")
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
+        return self
+
+    @property
+    def workspace_storage_status(self):
+        return self.page.locator("#workspace-storage-status")
+
+    @property
+    def workspace_storage_warning(self):
+        return self.workspace_storage_status.locator(".workspace-storage-warning")
+
+    def open_data_privacy_from_storage_warning(self):
+        """Open Data & privacy through the contextual shared-budget warning."""
+        click_and_wait_for_htmx(self.page, self.workspace_storage_warning.locator("a"))
+        self.page.locator("#sidePanelTitle", has_text="Data & privacy").wait_for(state="visible")
+        self.page.wait_for_function(
+            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
+        )
+        return self
+
     def pick_template(self, template_id: str):
         """Click a template card in the picker and wait for the canvas to load."""
         click_and_wait_for_htmx(self.page, self.template_picker.locator(f"[data-template-id='{template_id}']"))

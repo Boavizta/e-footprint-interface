@@ -6,6 +6,7 @@ pattern — tab strip, then the active tab's toolbar beneath it).
 {% endcomment %}
 {% include 'model_builder/components/model_tab_strip.html' %}
 {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
+{% include 'model_builder/components/workspace_storage_status.html' %}
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
         {% for slot_entry in workspace_slots %}

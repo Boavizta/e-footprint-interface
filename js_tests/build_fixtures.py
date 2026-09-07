@@ -420,7 +420,11 @@ def render_sortable_canvas(_case_ctx):
         "ordered_root_edge_device_groups": cards("group"),
         "ordered_ungrouped_edge_devices": cards("device"),
     }
-    return render_to_string(
+    status = render_to_string(
+        "model_builder/components/workspace_storage_status.html",
+        {"data_status": SimpleNamespace(show_workspace_storage_warning=False), "oob": False},
+    )
+    canvas = render_to_string(
         "model_builder/components/model_canvas_content.html",
         {
             "slot_entry": slot_entry,
@@ -430,6 +434,7 @@ def render_sortable_canvas(_case_ctx):
             "class_help_info": {},
         },
     )
+    return status + '<div id="sidePanel"></div>' + canvas
 
 
 SORTABLE_CANVAS_CASES = {"sortable_canvas_six_lists": {}}

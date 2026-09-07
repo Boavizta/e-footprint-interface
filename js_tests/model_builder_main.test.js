@@ -13,6 +13,7 @@ beforeEach(() => {
     document.body.setAttribute("hx-headers", JSON.stringify({"X-CSRFToken": "csrf-token"}));
     global.updateLines = jest.fn();
     global.fetch = jest.fn(() => Promise.resolve({ok: true}));
+    global.htmx = {ajax: jest.fn(() => Promise.resolve())};
     const sortablesByElement = new Map();
     global.Sortable = jest.fn(function (element, options) {
         this.el = element;
@@ -27,6 +28,7 @@ beforeEach(() => {
 afterEach(() => {
     delete global.Sortable;
     delete global.fetch;
+    delete global.htmx;
     delete global.updateLines;
 });
 
@@ -64,15 +66,21 @@ test("every initialized sortable drag persists the current order of every initia
     });
 });
 
-test("one drag end sends one request, clears grab state, and updates leader lines", () => {
+test("one drag end saves once, refreshes only storage metadata, clears grab state, and updates leader lines", async () => {
     const {initSortableObjectCards} = loadModule();
     initSortableObjectCards();
     const grabbed = document.querySelector("#server-list > div");
     grabbed.classList.add("grabbing");
 
     global.Sortable.mock.instances[0].options.onEnd();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.htmx.ajax).toHaveBeenCalledWith(
+        "GET",
+        "/model_builder/workspace-storage-status/",
+        {target: "#workspace-storage-status", swap: "none"},
+    );
     expect(grabbed.classList.contains("grabbing")).toBe(false);
     expect(global.updateLines).toHaveBeenCalledTimes(1);
 });
@@ -104,6 +112,34 @@ test("a rejected background save keeps the DOM order and is handled", async () =
     await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(Array.from(serverList.children, child => child.id)).toEqual(reorderedIds);
+    expect(global.htmx.ajax).not.toHaveBeenCalled();
+});
+
+test("a rejected card-order response does not refresh storage metadata", async () => {
+    global.fetch.mockResolvedValue({ok: false});
+    const {initSortableObjectCards} = loadModule();
+    initSortableObjectCards();
+
+    global.Sortable.mock.instances[0].options.onEnd();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(global.htmx.ajax).not.toHaveBeenCalled();
+});
+
+test("a successful Sankey deletion refreshes storage metadata through its fetch boundary", async () => {
+    const originalFetch = global.fetch;
+    const {installSankeyStorageStatusRefresh} = loadModule();
+    installSankeyStorageStatusRefresh();
+
+    await global.fetch("/model_builder/sankey-delete-card/", {method: "POST"});
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(originalFetch).toHaveBeenCalledTimes(1);
+    expect(global.htmx.ajax).toHaveBeenCalledWith(
+        "GET",
+        "/model_builder/workspace-storage-status/",
+        {target: "#workspace-storage-status", swap: "none"},
+    );
 });
 
 test("HTMX button restoration does not overwrite control state changed during a request", () => {
