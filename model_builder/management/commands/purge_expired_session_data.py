@@ -22,7 +22,7 @@ class PurgeResult:
 def purge_expired_session_data() -> PurgeResult:
     """Delete expired rows once; concurrent invocations are safe and idempotent."""
     started = time.perf_counter()
-    now = timezone.now().replace(microsecond=0)
+    now = timezone.now()
     cache_rows = CacheBackend().delete_expired_postgres(now)
     session_rows, _details = Session.objects.filter(expire_date__lt=now).delete()
     duration_ms = (time.perf_counter() - started) * 1000

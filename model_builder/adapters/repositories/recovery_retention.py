@@ -67,9 +67,6 @@ def set_recovery_retention(session: SessionBase, seconds: int) -> Dict[int, bool
     session_key = session.session_key
     for slot in index.slots():
         if slot in saved_slots:
-            if not session_key:
-                results[slot] = False
-                continue
             cache_key = f"{SYSTEM_DATA_CACHE_NAMESPACE}:{session_key}:{slot}"
             results[slot] = cache_backend.touch_postgres(cache_key, seconds)
     return results

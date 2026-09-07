@@ -1,7 +1,9 @@
 """Database tests for physical removal of expired cache and session rows."""
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from io import StringIO
+from threading import Barrier, Lock
 from unittest.mock import patch
 
 import pytest
@@ -11,6 +13,7 @@ from django.core.management import call_command
 from django.db import connection
 from django.utils import timezone
 
+from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.management.commands.purge_expired_session_data import PurgeResult, purge_expired_session_data
 
 
@@ -31,6 +34,31 @@ def _cache_row_count() -> int:
     with connection.cursor() as cursor:
         cursor.execute("SELECT COUNT(*) FROM django_cache")
         return cursor.fetchone()[0]
+
+
+class AtomicRows:
+    """Barrier-controlled stand-in for an atomic conditional database delete."""
+
+    def __init__(self, count: int):
+        self._count = count
+        self._barrier = Barrier(2)
+        self._lock = Lock()
+
+    def delete_once(self) -> int:
+        self._barrier.wait(timeout=5)
+        with self._lock:
+            deleted = self._count
+            self._count = 0
+            return deleted
+
+
+class AtomicSessionQuery:
+    def __init__(self, rows: AtomicRows):
+        self._rows = rows
+
+    def delete(self):
+        deleted = self._rows.delete_once()
+        return deleted, {"sessions.Session": deleted}
 
 
 @pytest.mark.django_db
@@ -59,7 +87,7 @@ def test_purge_removes_only_expired_cache_and_session_rows():
 
 
 @pytest.mark.django_db
-def test_repeated_or_overlapping_cleanup_is_idempotent():
+def test_repeated_cleanup_is_idempotent():
     caches["postgres"].set("expired-cache", "payload", timeout=-1)
     Session.objects.create(
         session_key="expired-session",
@@ -72,6 +100,45 @@ def test_repeated_or_overlapping_cleanup_is_idempotent():
 
     assert (first.cache_rows, first.session_rows) == (1, 1)
     assert (second.cache_rows, second.session_rows) == (0, 0)
+
+
+def test_overlapping_cleanup_reports_each_atomic_deletion_exactly_once():
+    cache_rows = AtomicRows(3)
+    session_rows = AtomicRows(2)
+
+    def delete_cache_rows(_backend, _now):
+        return cache_rows.delete_once()
+
+    def filter_sessions(**_kwargs):
+        return AtomicSessionQuery(session_rows)
+
+    with (
+        patch.object(CacheBackend, "delete_expired_postgres", autospec=True, side_effect=delete_cache_rows),
+        patch.object(Session.objects, "filter", side_effect=filter_sessions),
+        ThreadPoolExecutor(max_workers=2) as executor,
+    ):
+        futures = [executor.submit(purge_expired_session_data) for _ in range(2)]
+        results = [future.result(timeout=5) for future in futures]
+
+    assert sum(result.cache_rows for result in results) == 3
+    assert sum(result.session_rows for result in results) == 2
+    assert all(result.duration_ms >= 0 for result in results)
+
+
+@pytest.mark.django_db
+def test_purge_removes_a_session_that_expired_earlier_in_the_current_second():
+    now = timezone.now().replace(microsecond=900_000)
+    Session.objects.create(
+        session_key="same-second-expired-session",
+        session_data="payload",
+        expire_date=now - timedelta(microseconds=400_000),
+    )
+
+    with patch("model_builder.management.commands.purge_expired_session_data.timezone.now", return_value=now):
+        result = purge_expired_session_data()
+
+    assert result.session_rows == 1
+    assert not Session.objects.filter(session_key="same-second-expired-session").exists()
 
 
 @pytest.mark.django_db

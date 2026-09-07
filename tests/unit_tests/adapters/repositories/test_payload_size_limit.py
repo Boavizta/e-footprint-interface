@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from e_footprint_interface.json_payload_utils import compute_json_size, JsonSizeResult
 from model_builder.adapters.repositories.in_memory_system_repository import InMemorySystemRepository
+from model_builder.adapters.repositories.recovery_retention import DEFAULT_RECOVERY_RETENTION_SECONDS
 from model_builder.adapters.repositories.session_system_repository import SessionSystemRepository
 from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
@@ -144,7 +145,7 @@ class TestSessionSystemRepositorySizeLimit:
             cache_key, small_data, timeout=SessionSystemRepository.REDIS_CACHE_TIMEOUT_SECONDS
         )
         postgres_cache.set.assert_called_once_with(
-            cache_key, small_data, timeout=SessionSystemRepository.POSTGRES_CACHE_TIMEOUT_SECONDS
+            cache_key, small_data, timeout=DEFAULT_RECOVERY_RETENTION_SECONDS
         )
 
     def test_save_exceeding_limit_raises_exception(self):

@@ -1,5 +1,6 @@
 """Tests for session-scoped recovery retention and expiry-only slot updates."""
 
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -7,6 +8,7 @@ from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
 from django.db import connection
+from django.utils import timezone
 
 from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.recovery_retention import (
@@ -128,11 +130,29 @@ def test_expired_database_row_is_reported_missing_and_is_not_revived(database_ca
     index.set_slot_size(0, 100)
     index.set_slot_size(1, 200)
     cache = caches["postgres"]
-    cache.set("system_data:session-key:0", {"payload": "live"}, timeout=3600)
+    live_key = "system_data:session-key:0"
+    cache.set(live_key, {"payload": "live"}, timeout=3600)
     cache.set("system_data:session-key:1", {"payload": "expired"}, timeout=-1)
+    stored_key = cache.make_and_validate_key(live_key)
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT value, expires FROM django_cache WHERE cache_key = %s", [stored_key])
+        original_value, original_expiry = cursor.fetchone()
+
+    before_touch = timezone.now()
 
     results = set_recovery_retention(session, 12 * 3600)
+    after_touch = timezone.now()
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT value, expires FROM django_cache WHERE cache_key = %s", [stored_key])
+        updated_value, updated_expiry = cursor.fetchone()
+    if timezone.is_naive(updated_expiry):
+        updated_expiry = timezone.make_aware(updated_expiry, timezone.get_current_timezone())
 
     assert results == {0: True, 1: False}
-    assert cache.get("system_data:session-key:0") == {"payload": "live"}
+    assert updated_value == original_value
+    assert updated_expiry != original_expiry
+    assert (before_touch + timedelta(hours=12)).replace(microsecond=0) <= updated_expiry
+    assert updated_expiry <= (after_touch + timedelta(hours=12)).replace(microsecond=0)
+    assert cache.get(live_key) == {"payload": "live"}
     assert cache.get("system_data:session-key:1") is None
