@@ -2,12 +2,12 @@
     <div class="col-12 col-xl-6">
         <div class="row bg-white border border-light rounded-4 m-1 g-4 align-items-start position-relative">
             <div class="col-12">
-                <p class="h5 mb-0" id="barChartTitle">Yearly CO2 emissions</p>
+                <p class="h5 mb-0" id="barChartTitle">Yearly CO2-eq emissions</p>
             </div>
             <div class="position-absolute top-0 end-0 mt-3 me-3" id="form-result-panel">
                 <div class="d-flex flex-column align-items-end">
                     <label for="results_temporal_granularity" class="form-label text-secondary small mb-1">Time granularity</label>
-                    <select class="form-select form-select-sm" id="results_temporal_granularity" name="results_temporal_granularity" onchange="drawBarResultChart()" _="on change set #barChartTitle.innerText to my.value.charAt(0).toUpperCase() + my.value.slice(1) + 'ly CO2 emissions'" style="width: auto">
+                    <select class="form-select form-select-sm" id="results_temporal_granularity" name="results_temporal_granularity" onchange="drawBarResultChart()" _="on change set #barChartTitle.innerText to my.value.charAt(0).toUpperCase() + my.value.slice(1) + 'ly CO2-eq emissions'" style="width: auto">
                         <option value="month">Month</option>
                         <option value="year" selected>Year</option>
                     </select>
@@ -27,7 +27,7 @@
     <div class="col-12 col-xl-6">
         <div class="row g-4 bg-white border border-light rounded-4 m-1 align-items-center">
             <div class="col-12">
-                <p class="h5 mb-0">Cumulative CO2 emissions over time</p>
+                <p class="h5 mb-0">Cumulative CO2-eq emissions over time</p>
             </div>
             <div class="col-12 my-5 mx-auto spinner-border spinner-result-chart d-none" role="status">
                 <span class="visually-hidden">Loading...</span>
