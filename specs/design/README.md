@@ -22,7 +22,7 @@ Three artefact types, in order of how often they change:
 
 ### 1. Journey docs — `journeys/<journey>.html`
 
-One HTML doc per core user journey. Each captures:
+One HTML doc per core usage journey. Each captures:
 
 - **Who & why** — which user (the non-technical product person is the primary audience; see [`../mission.md`](../mission.md)), what they're trying to do, what success looks like.
 - **Screen sequence** — numbered steps, one desktop browser-window mock per step, real structure and real copy. Intent-level + UI-faithful, not pixel-perfect.
