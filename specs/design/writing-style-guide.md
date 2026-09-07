@@ -14,10 +14,11 @@ Scope: interface labels, docs, and training material. English (US spelling).
 - When pointing at the screen, quote labels **verbatim**, even where they deviate from this
   guide.
 - Lifecycle phases in prose: **manufacturing** and **use**.
-- **model vs modeling**: reserve **model** for AI models (veo-3.0, gpt-4o). Call the
-  e-footprint artifact a **modeling** in UI labels and prose: "your modeling", "a second
-  modeling", "Reference modeling". Do not use a bare "model" for the e-footprint artifact;
-  recast awkward phrases where needed (for example, "Assess it" rather than "Model it").
+- **model vs modeling**: **model** is correct for AI models (veo-3.0, gpt-4o) and for the
+  computing logic encoded in e-footprint. Call a user-created e-footprint artifact a
+  **modeling** in UI labels and prose: "your modeling", "a second modeling", "Reference
+  modeling". The verb **model** is also correct for the activity of constructing an
+  e-footprint modeling: "Model it", "How to model a database".
 
 ## Units
 
