@@ -392,6 +392,7 @@ def upload_json(request):
         context["workspace_slots"] = workspace_slots
         context["compare_enabled"] = compare_enabled(workspace_slots)
         context["active_slot"] = workspace.active_slot()
+    context["data_status"] = build_data_status(request.session)
 
     http_response = render(request, "model_builder/model_builder_main.html", context=context)
     http_response["HX-Trigger"] = json.dumps({"resetLeaderLines": ""})

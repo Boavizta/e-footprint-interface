@@ -4,8 +4,7 @@
      aria-atomic="true"
      {% if oob %}hx-swap-oob="innerHTML:#workspace-storage-status"{% endif %}>
     {% if data_status.show_workspace_storage_warning %}
-    <div class="workspace-storage-warning d-flex flex-column flex-md-row align-items-md-center gap-2"
-         role="status">
+    <div class="workspace-storage-warning d-flex flex-column flex-md-row align-items-md-center gap-2">
         <p class="mb-0 flex-grow-1">
             <strong>Workspace storage is nearly full.</strong>
             {{ data_status.workspace_size_display }} of {{ data_status.workspace_limit_display }} is used across this

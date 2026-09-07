@@ -491,4 +491,4 @@ def sankey_delete_card(request):
     diagrams = config.get("sankey_diagrams", [])
     config["sankey_diagrams"] = [diagram for diagram in diagrams if diagram["id"] != card_id]
     model_web.persist_to_cache()
-    return append_workspace_storage_status(HttpResponse(""), request.session)
+    return HttpResponse("")

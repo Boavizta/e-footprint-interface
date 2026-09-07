@@ -67,7 +67,9 @@ def test_edge_group_child_sections_and_edit_rendering_are_deliberate(default_sys
 
     parsed = parse_form_data({"name": "Building renamed", "csrfmiddlewaretoken": "token"}, "EdgeDeviceGroup")
     output = EditObjectUseCase(model_web).execute(EditObjectInput(object_id=parent_id, form_data=parsed))
-    response = HtmxPresenter(rf.post("/model_builder/edit-object/"), model_web).present_edited_object(output)
+    request = rf.post("/model_builder/edit-object/")
+    request.session = {}
+    response = HtmxPresenter(request, model_web).present_edited_object(output)
 
     assert response.status_code == 200
     assert "Building renamed" in response.content.decode()

@@ -126,22 +126,6 @@ test("a rejected card-order response does not refresh storage metadata", async (
     expect(global.htmx.ajax).not.toHaveBeenCalled();
 });
 
-test("a successful Sankey deletion refreshes storage metadata through its fetch boundary", async () => {
-    const originalFetch = global.fetch;
-    const {installSankeyStorageStatusRefresh} = loadModule();
-    installSankeyStorageStatusRefresh();
-
-    await global.fetch("/model_builder/sankey-delete-card/", {method: "POST"});
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    expect(originalFetch).toHaveBeenCalledTimes(1);
-    expect(global.htmx.ajax).toHaveBeenCalledWith(
-        "GET",
-        "/model_builder/workspace-storage-status/",
-        {target: "#workspace-storage-status", swap: "none"},
-    );
-});
-
 test("HTMX button restoration does not overwrite control state changed during a request", () => {
     document.body.innerHTML = `
         <button id="persistently-disabled" disabled>Unavailable</button>

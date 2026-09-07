@@ -62,10 +62,8 @@ class HtmxPresenter:
         return canvas_oob, extra_settle, self._constraint_toast_messages()
 
     def _append_workspace_storage_status(self, response: HttpResponse) -> HttpResponse:
-        """Append the live request's metadata status, if session middleware supplied one."""
-        session = getattr(self.request, "session", None)
-        if session is not None:
-            append_workspace_storage_status(response, session)
+        """Append the live request's metadata status."""
+        append_workspace_storage_status(response, self.request.session)
         return response
 
     def _recomputation_html(self) -> str:

@@ -209,9 +209,11 @@ def test_country_metadata_only_confidence_edit_from_source_table_does_not_requir
     output = EditObjectUseCase(model_web).execute(
         EditObjectInput(object_id=country_web.efootprint_id, form_data=parsed))
 
-    response = HtmxPresenter(rf.post("/model_builder/edit-object/"), model_web).present_edited_object(output)
+    request = rf.post("/model_builder/edit-object/")
+    request.session = {}
+    response = HtmxPresenter(request, model_web).present_edited_object(output)
 
     assert output.refresh_cards is False
     assert response.status_code == 200
-    assert response.content == b""
+    assert b'id="workspace-storage-status"' in response.content
     assert country_web.modeling_obj.average_carbon_intensity.confidence == "medium"

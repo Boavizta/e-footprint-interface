@@ -210,20 +210,29 @@ function sankeyRemoveCard(cardId) {
     if (!card) return;
     var plotEl = document.getElementById('sankey-plot-' + cardId);
     disposeSankeyPlot(plotEl);
+    var deletionRequest = null;
     if (window.fetch) {
-        fetch('/model_builder/sankey-delete-card/', {
+        deletionRequest = fetch('/model_builder/sankey-delete-card/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCsrfToken(),
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: 'card_id=' + encodeURIComponent(cardId)
+        }).then(function(response) {
+            var statusRegion = document.getElementById('workspace-storage-status');
+            if (!response.ok || !statusRegion || !window.htmx) return;
+            return window.htmx.ajax('GET', '/model_builder/workspace-storage-status/', {
+                target: '#workspace-storage-status',
+                swap: 'none'
+            });
         }).catch(function() {});
     }
     card.style.transition = 'opacity 0.2s, transform 0.2s';
     card.style.opacity = '0';
     card.style.transform = 'translateY(-10px)';
     setTimeout(function() { card.remove(); }, 200);
+    return deletionRequest;
 }
 
 function sankeyToggleChip(chipEl) {

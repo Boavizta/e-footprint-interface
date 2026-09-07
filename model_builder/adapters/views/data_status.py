@@ -96,11 +96,12 @@ def build_data_status(session: SessionBase) -> DataStatus:
         for seconds in recovery_retention_choices()
     )
     workspace_size_bytes = WorkspaceIndex(session).workspace_size_bytes()
-    workspace_limit_bytes = round(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB * MEBIBYTE)
+    workspace_limit_mb = SessionSystemRepository.MAX_PAYLOAD_SIZE_MB
+    workspace_limit_bytes = round(workspace_limit_mb * MEBIBYTE)
     show_workspace_storage_warning = (
-        workspace_limit_bytes > 0
+        workspace_limit_mb > 0
         and workspace_size_bytes * WORKSPACE_STORAGE_WARNING_DENOMINATOR
-        >= workspace_limit_bytes * WORKSPACE_STORAGE_WARNING_NUMERATOR
+        >= workspace_limit_mb * MEBIBYTE * WORKSPACE_STORAGE_WARNING_NUMERATOR
     )
 
     return DataStatus(
