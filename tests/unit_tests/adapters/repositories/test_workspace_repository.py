@@ -131,6 +131,13 @@ class TestWorkspaceIndexLifecycle:
         index.set_slot_size(0, 123)
         assert index.slots() == [1, 0]             # appended, not sorted back to [0, 1]
 
+    def test_workspace_size_sums_existing_integer_metadata(self):
+        index = WorkspaceIndex(DictSession())
+        index.set_slot_size(0, 1_024)
+        index.set_slot_size(1, 2_048)
+
+        assert index.workspace_size_bytes() == 3_072
+
     def test_cannot_activate_unoccupied_slot(self):
         index = WorkspaceIndex(DictSession())
         with pytest.raises(ValueError):

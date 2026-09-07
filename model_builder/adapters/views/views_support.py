@@ -1,6 +1,12 @@
+from django.http import HttpResponseBadRequest
+from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.http import require_GET, require_POST
 
 from model_builder.adapters.repositories import SessionWorkspaceRepository
+from model_builder.adapters.repositories.recovery_retention import set_recovery_retention
+from model_builder.adapters.repositories.workspace_index import WorkspaceIndex
+from model_builder.adapters.views.data_status import build_data_status, format_duration
 from model_builder.adapters.views.exception_handling import build_feedback_email_url, build_github_feedback_url
 from utils import htmx_render
 
@@ -20,3 +26,53 @@ def support(request):
         "email_feedback_url": build_feedback_email_url("feedback"),
     }
     return htmx_render(request, "model_builder/support.html", context)
+
+
+def _data_privacy_context(request, retention_results=None):
+    return {
+        "standalone": request.headers.get("HX-Request") != "true",
+        "data_status": build_data_status(request.session),
+        "retention_results": retention_results,
+    }
+
+
+def _render_data_privacy(request, retention_results=None):
+    return render(
+        request,
+        "model_builder/side_panels/data_privacy.html",
+        _data_privacy_context(request, retention_results),
+    )
+
+
+@require_GET
+def data_privacy(request):
+    """Render deployment disclosures and session controls without loading either modeling."""
+    return _render_data_privacy(request)
+
+
+@require_POST
+def update_recovery_retention(request):
+    """Apply one allowlisted retention period and render the per-slot outcomes."""
+    try:
+        retention_seconds = int(request.POST.get("retention_seconds", ""))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Choose one of the available recovery periods.")
+
+    slots = WorkspaceIndex(request.session).slots()
+    try:
+        results = set_recovery_retention(request.session, retention_seconds)
+    except ValueError:
+        return HttpResponseBadRequest("Choose one of the available recovery periods.")
+
+    if len(slots) == 1:
+        role_labels = {slots[0]: "Current modeling"}
+    else:
+        role_labels = {
+            slot: "Reference modeling" if position == 0 else "Comparison modeling"
+            for position, slot in enumerate(slots)
+        }
+    retention_results = {
+        "summary": f"Recovery retention is now {format_duration(retention_seconds)}.",
+        "slots": [{"label": role_labels[slot], "updated": updated} for slot, updated in results.items()],
+    }
+    return _render_data_privacy(request, retention_results)

@@ -63,6 +63,15 @@ def test_mobile_builder_menu_contains_feedback_entry(settings):
     assert ">Feedback<" in content
 
 
+def test_help_menu_links_data_privacy_as_a_normal_route_and_side_panel_partial():
+    content = render_to_string("model_builder/components/help_menu.html")
+
+    assert 'href="/model_builder/data-privacy/"' in content
+    assert 'hx-boost="true"' in content
+    assert 'hx-target="#sidePanel"' in content
+    assert "Data &amp; privacy" in content
+
+
 @pytest.mark.parametrize("kind", ["bug", "feedback"])
 def test_github_feedback_urls_contain_prompts_only(kind):
     url = build_github_feedback_url(kind)

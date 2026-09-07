@@ -183,6 +183,56 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Browser sessions and their small server-side indexes/preferences share this lifetime.
 SESSION_COOKIE_AGE = 14 * 24 * 60 * 60
 
+
+def optional_env_bool(name: str, default: bool | None = None) -> bool | None:
+    """Read an optional deployment fact without turning an absent value into an assurance."""
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    normalized = raw_value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    raise ValueError(f"{name} must be a boolean value.")
+
+
+IS_CLEVER_CLOUD_DEPLOYMENT = os.getenv("DJANGO_CLEVER_CLOUD") == "True"
+DATA_PRIVACY_OPERATOR_NAME = os.getenv(
+    "DATA_PRIVACY_OPERATOR_NAME", "Boavizta" if IS_CLEVER_CLOUD_DEPLOYMENT else ""
+)
+DATA_PRIVACY_HOSTING_PROVIDER_NAME = os.getenv(
+    "DATA_PRIVACY_HOSTING_PROVIDER_NAME", "Clever Cloud" if IS_CLEVER_CLOUD_DEPLOYMENT else ""
+)
+DATA_PRIVACY_HOSTING_REGION = os.getenv(
+    "DATA_PRIVACY_HOSTING_REGION", "Paris" if IS_CLEVER_CLOUD_DEPLOYMENT else ""
+)
+DATA_PRIVACY_SECURITY_CONTACT = os.getenv(
+    "DATA_PRIVACY_SECURITY_CONTACT",
+    "vincent.villet@publicissapient.com" if IS_CLEVER_CLOUD_DEPLOYMENT else "",
+)
+DATA_PRIVACY_HTTPS_ENABLED = optional_env_bool(
+    "DATA_PRIVACY_HTTPS_ENABLED", True if IS_CLEVER_CLOUD_DEPLOYMENT else None
+)
+DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST = optional_env_bool(
+    "DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST", True if IS_CLEVER_CLOUD_DEPLOYMENT else None
+)
+DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED = optional_env_bool(
+    "DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED", True if IS_CLEVER_CLOUD_DEPLOYMENT else None
+)
+DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY = os.getenv(
+    "DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY", "daily" if IS_CLEVER_CLOUD_DEPLOYMENT else ""
+)
+DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS = int(
+    os.getenv("DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS", "7" if IS_CLEVER_CLOUD_DEPLOYMENT else "0")
+)
+DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = optional_env_bool(
+    "DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST", False if IS_CLEVER_CLOUD_DEPLOYMENT else None
+)
+DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = optional_env_bool(
+    "DATA_PRIVACY_PUBLIC_SHARED_INSTANCE", IS_CLEVER_CLOUD_DEPLOYMENT
+)
+
 # Base URL of the published e-footprint mkdocs site. Used to render `{doc:slug}`
 # placeholders as outbound links from interface help content.
 MKDOCS_BASE_URL = os.getenv("MKDOCS_BASE_URL", "https://boavizta.github.io/e-footprint")

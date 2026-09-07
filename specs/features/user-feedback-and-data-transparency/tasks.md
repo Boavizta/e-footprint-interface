@@ -96,6 +96,8 @@ Dependencies: none.
 
 ## 3. Expose an accurate Data & privacy panel and retention controls
 
+**Status:** Done
+
 Add the user-facing explanation and controls on top of Task 2. Present operational facts in plain language, distinguish the browser, Redis, live PostgreSQL, and backup lifecycles, and show detailed storage size from existing integer metadata.
 
 Implementation units:
