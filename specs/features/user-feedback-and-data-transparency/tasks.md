@@ -52,6 +52,8 @@ Dependencies: none.
 
 ## 2. Implement bounded cache retention and supervised expiry cleanup
 
+**Status:** Done
+
 Establish the lifecycle foundation before exposing it in the UI: a one-hour hot-cache TTL for system model data, a session-bound recovery-retention preference, in-place expiry updates for existing recovery entries, and reliable physical deletion of expired cache and session rows.
 
 Implementation units:

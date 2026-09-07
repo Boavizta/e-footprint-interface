@@ -246,6 +246,14 @@ render, the adapter performs a stable rank merge for each resident model using t
 stale IDs are ignored and current objects absent from the saved order are appended in their natural relative order.
 The explicitly ordered lists are template context, so this interface-only state never enters `ModelWeb`.
 
+**Bounded recovery retention.** System-model Redis entries stay hot for one hour; the generic cache policy is separate.
+The inputs-only Postgres recovery copy uses a session-scoped allowlisted preference (1, 3, 6, or 12 hours, or 1–14
+whole days), defaults to 12 hours, and can never exceed the 14-day session-cookie lifetime. A preference change touches
+only the expiry of each saved slot's Postgres row—never Redis or either payload—and reports each touch independently so
+a concurrently expired slot does not roll back successful updates or the stored preference. A supervised maintenance
+command physically removes expired `django_cache` and `django_session` rows immediately at container startup and hourly
+thereafter; concurrent workers are safe because deletion is idempotent, and logs contain aggregate counts/duration only.
+
 Import recomputation payloads must be assembled from `efootprint.api_utils.system_to_json.system_to_json()` fragments (the connected `System` plus any orphaned objects) rather than hand-serializing objects in the interface. Import and workspace re-id are explicit complete-snapshot boundaries: they call `materialize_serialized_state()` before passive serialization; hydration itself never calls construction-time `after_init()` hooks. This keeps object serialization and top-level `Sources` hoisting owned by e-footprint and prevents dangling source references after calculated attributes are recomputed.
 
 Computed-dict keys may be stable coordinate values rather than `ModelingObject`s. `ObjectLinkedToModelingObjWeb.key_in_dict` exposes those as immutable display identities with a raw `efootprint_id` and URL-safe `route_id`; modeling-object wrappers expose the same route contract. This is deliberately separate from `web_id`, which is a system-prefixed DOM identity. Calculated-attribute endpoints resolve either the raw or route token against the owning dict. Coordinate keys render as text; only true modeling-object keys link to an edit panel.

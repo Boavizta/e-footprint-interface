@@ -180,6 +180,9 @@ INTERNAL_IPS = ["127.0.0.1"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Browser sessions and their small server-side indexes/preferences share this lifetime.
+SESSION_COOKIE_AGE = 14 * 24 * 60 * 60
+
 # Base URL of the published e-footprint mkdocs site. Used to render `{doc:slug}`
 # placeholders as outbound links from interface help content.
 MKDOCS_BASE_URL = os.getenv("MKDOCS_BASE_URL", "https://boavizta.github.io/e-footprint")

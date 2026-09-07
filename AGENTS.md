@@ -62,6 +62,12 @@ Conversational bug batches use `bug-fixes`: diagnostics plus `tasks.md`, followe
 
 When you implement a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), update the relevant spec file (`specs/architecture.md`, `specs/conventions.md`, or `specs/testing.md`) — a one-line mention in the right section is enough. The goal is to keep specs accurate so future agents don't rediscover patterns from code.
 
+## Production maintenance workers
+
+Long-running periodic maintenance commands run as dedicated Supervisor programs in `docker/conf/supervisord-prod.conf`.
+They perform their first pass immediately, own their repeat interval, remain safe when multiple web scalers overlap, and
+log aggregate counts and duration only—never cache keys, session identifiers, or payloads.
+
 ## Git commit style
 
 Prefix your commit messages with the relevant tag among [FIX], [REFACTO], [ADD], [REMOVE], [OPTIM], [UPDATE]. The user might specify another tag. Always use brackets and uppercase. Example: `[FIX] Handle missing data in timeseries rendering`.
