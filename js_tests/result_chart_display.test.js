@@ -3,6 +3,7 @@ const {
     formatDisplayNumber,
     formatEmissionsQuantity,
     formatQuantityForDisplay,
+    roundToSigFigs,
 } = require("../theme/static/scripts/result_charts/display.js");
 
 test("bestDisplayUnit keeps kilogram values when they already fit well", () => {
@@ -29,6 +30,15 @@ test("formatQuantityForDisplay trims trailing zeroes", () => {
     });
 });
 
+test("roundToSigFigs preserves non-zero integer digits above 1,000", () => {
+    expect(roundToSigFigs(1234.56)).toBe(1235);
+    expect(roundToSigFigs(-1234.56)).toBe(-1235);
+});
+
+test("formatDisplayNumber uses thousands separators", () => {
+    expect(formatDisplayNumber(1235)).toBe("1,235");
+});
+
 test("formatDisplayNumber normalizes negative zero", () => {
     expect(formatDisplayNumber(-0)).toBe("0");
 });
@@ -38,5 +48,5 @@ test("formatEmissionsQuantity builds the tooltip label with dynamic unit scaling
 });
 
 test("formatEmissionsQuantity handles very large values without toFixed overflows", () => {
-    expect(formatEmissionsQuantity(123456789, "kg")).toBe("123000 t CO2-eq");
+    expect(formatEmissionsQuantity(123456789, "kg")).toBe("123,457 t CO2-eq");
 });

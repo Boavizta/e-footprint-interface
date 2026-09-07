@@ -32,8 +32,10 @@ Scope: interface labels, docs, and training material. English (US spelling).
 ## Numbers
 
 - Format: **1,345,000.10** — comma as thousands separator, period as decimal separator.
-- Precision: **3 significant figures**, trailing zeros trimmed — the convention implemented in
-  the core repo's `efootprint/utils/display.py` (`sig_figs=3`).
+- Precision: **3 significant figures**, trailing zeros trimmed. Never round a non-zero digit in
+  the integer part to zero: for values of 1,000 or more, round to the nearest whole number.
+  Thus `1.23456 kg` → `1.23 kg`, while `1,234.56 kg` → `1,235 kg`. The convention is
+  implemented in the core repo's `efootprint/utils/display.py` (`sig_figs=3`).
 - Unit choice: pick the unit that makes the number read **≥ 1** ("3 mg", not "0.003 g") — also
   the core code's behavior (`best_display_unit`). Exception: a comparison table may fix one
   unit for the whole column, even if small values go below 1.

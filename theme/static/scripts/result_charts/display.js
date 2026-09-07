@@ -1,5 +1,5 @@
 const UNIT_FAMILIES = [
-    ["mg", "g", "kg", "t"],
+    ["mg", "g", "kg", "t", "Mt", "Gt", "Tt"],
 ];
 
 function normalizeUnit(unit) {
@@ -17,7 +17,7 @@ function getUnitFamily(unit) {
 function convertValue(value, fromUnit, toUnit) {
     const normalizedFrom = normalizeUnit(fromUnit);
     const normalizedTo = normalizeUnit(toUnit);
-    const conversionToKg = { mg: 1e-6, g: 1e-3, kg: 1, t: 1e3 };
+    const conversionToKg = { mg: 1e-6, g: 1e-3, kg: 1, t: 1e3, Mt: 1e9, Gt: 1e12, Tt: 1e15 };
 
     if (!(normalizedFrom in conversionToKg) || !(normalizedTo in conversionToKg)) {
         throw new Error(`Unsupported unit conversion from ${fromUnit} to ${toUnit}`);
@@ -51,6 +51,9 @@ function roundToSigFigs(value, sigFigs = 3) {
     if (value === 0) {
         return 0;
     }
+    if (Math.abs(value) >= 1000) {
+        return Math.round(value);
+    }
     const digits = sigFigs - Math.floor(Math.log10(Math.abs(value))) - 1;
     const scale = 10 ** digits;
     return Math.round(value * scale) / scale;
@@ -60,7 +63,7 @@ function formatDisplayNumber(value) {
     if (Object.is(value, -0)) {
         return "0";
     }
-    return value.toString();
+    return Number(value).toLocaleString("en-US", { maximumFractionDigits: 20 });
 }
 
 function humanReadableUnit(unit) {
