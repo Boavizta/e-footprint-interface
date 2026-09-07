@@ -14,6 +14,10 @@ test("bestDisplayUnit promotes kilogram values to tonnes when appropriate", () =
     expect(bestDisplayUnit(4200, "kg")).toBe("t");
 });
 
+test("bestDisplayUnit promotes large tonne values to kilotonnes", () => {
+    expect(bestDisplayUnit(1234560, "kg")).toBe("kt");
+});
+
 test("formatQuantityForDisplay rounds to three significant figures", () => {
     expect(formatQuantityForDisplay(1234, "kg")).toEqual({
         value: 1.23,
@@ -48,5 +52,5 @@ test("formatEmissionsQuantity builds the tooltip label with dynamic unit scaling
 });
 
 test("formatEmissionsQuantity handles very large values without toFixed overflows", () => {
-    expect(formatEmissionsQuantity(123456789, "kg")).toBe("123,457 t CO2-eq");
+    expect(formatEmissionsQuantity(123456789, "kg")).toBe("123 kt CO2-eq");
 });
