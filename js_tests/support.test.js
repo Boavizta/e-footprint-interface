@@ -15,11 +15,15 @@ beforeEach(() => {
     document.body.innerHTML = "";
     global.openSidePanel = jest.fn();
     global.htmx = {ajax: jest.fn()};
+    global.runAfterSidePanelDiscardConfirmation = action => action();
 });
 
 afterEach(() => {
     delete global.openSidePanel;
     delete global.htmx;
+    delete global.runAfterSidePanelDiscardConfirmation;
+    delete global.hideEditIcons;
+    delete global.closeCalculatedAttributesChart;
 });
 
 test("feedback uses ordinary navigation when the builder side panel is absent", () => {
@@ -32,11 +36,18 @@ test("feedback uses ordinary navigation when the builder side panel is absent", 
     expect(global.htmx.ajax).not.toHaveBeenCalled();
 });
 
-test("feedback loads into the builder panel and moves focus to its heading", async () => {
-    document.body.innerHTML = '<div id="sidePanel" class="d-none"></div>'
+test("feedback loads through the real builder panel opener and moves focus to its heading", async () => {
+    document.body.innerHTML = '<div id="panel-result-btn"></div>'
+        + '<div id="btn-open-panel-result" class="w-100"></div>'
+        + '<div id="sidePanel" class="d-none"></div>'
         + '<a href="/support/" data-panel-url="/model_builder/support/" data-action="open-feedback">Feedback</a>';
+    const sidePanel = document.getElementById("sidePanel");
+    sidePanel.scrollTo = jest.fn();
+    global.hideEditIcons = jest.fn();
+    global.closeCalculatedAttributesChart = jest.fn();
+    global.openSidePanel = require("../theme/static/scripts/side_panel_utils.js").openSidePanel;
     global.htmx.ajax.mockImplementation(() => {
-        document.getElementById("sidePanel").innerHTML = fixture;
+        sidePanel.innerHTML = fixture;
         return Promise.resolve();
     });
     const event = new MouseEvent("click", {bubbles: true, cancelable: true});
@@ -48,8 +59,26 @@ test("feedback loads into the builder panel and moves focus to its heading", asy
     expect(global.htmx.ajax).toHaveBeenCalledWith("GET", "/model_builder/support/", expect.objectContaining({
         target: "#sidePanel", swap: "innerHTML",
     }));
-    expect(global.openSidePanel).toHaveBeenCalled();
-    expect(document.activeElement.id).toBe("feedback-panel-title");
+    expect(sidePanel.classList.contains("d-none")).toBe(false);
+    expect(sidePanel.scrollTo).toHaveBeenCalledWith({top: 0, behavior: "smooth"});
+    expect(document.activeElement.id).toBe("sidePanelTitle");
+});
+
+test("feedback waits for confirmation before replacing a modified side panel", () => {
+    document.body.innerHTML = '<div id="sidePanel"></div>'
+        + '<a href="/support/" data-panel-url="/model_builder/support/" data-action="open-feedback">Feedback</a>';
+    let confirmedAction;
+    global.runAfterSidePanelDiscardConfirmation = jest.fn(action => { confirmedAction = action; });
+    const event = new MouseEvent("click", {bubbles: true, cancelable: true});
+
+    document.querySelector("a").dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(global.runAfterSidePanelDiscardConfirmation).toHaveBeenCalledTimes(1);
+    expect(global.htmx.ajax).not.toHaveBeenCalled();
+
+    confirmedAction();
+    expect(global.htmx.ajax).toHaveBeenCalledTimes(1);
 });
 
 test("failed panel loading retries the standalone URL as ordinary navigation", async () => {
