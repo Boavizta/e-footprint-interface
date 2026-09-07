@@ -35,6 +35,8 @@
         <main id="main-content-block" class="text-center w-100 position-relative">
                 {% if home %}
                 {% include "home.html" %}
+                {% elif support %}
+                {% include "model_builder/support.html" %}
                 {% elif modelBuilderMain %}
                 {% include "model_builder/model_builder_main.html" %}
                 {% endif %}
@@ -56,6 +58,7 @@
         <script src="{% static 'scripts/onboarding_first_run.js' %}"></script>
         <script src="{% static 'scripts/model_comparison.js' %}"></script>
         <script src="{% static 'scripts/tour.js' %}"></script>
+        <script src="{% static 'scripts/support.js' %}"></script>
         <script type="module" src="{% static 'bundles/result_charts.js' %}"></script>
         <script src="{% static 'scripts/model_builder_main.js' %}"></script>
         <script src="{% static 'scripts/timeseries_utils.js' %}"></script>

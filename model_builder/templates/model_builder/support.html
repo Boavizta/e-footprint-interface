@@ -1,0 +1,49 @@
+{% if standalone %}
+<section class="container py-5 text-start" style="max-width: 720px;">
+{% else %}
+<section class="container-fluid text-start py-3 z-2" id="sidePanelContent">
+{% endif %}
+    <header class="d-flex align-items-center justify-content-between border-bottom mb-3 pb-3">
+        <h1 id="feedback-panel-title" class="h5 m-0" tabindex="-1">Report or give feedback</h1>
+        {% if not standalone %}
+        {% include "model_builder/components/close_cross.html" with onclick="closeAndEmptySidePanel()"
+            btn_id="btn-close-side-panel" %}
+        {% endif %}
+    </header>
+
+    <label class="form-label fw-semibold" for="feedback-kind">What would you like to share?</label>
+    <select id="feedback-kind" class="form-select mb-3" data-action="select-feedback-kind">
+        <option value="bug">Report a bug</option>
+        <option value="feedback">Give feedback or suggest an improvement</option>
+    </select>
+    <p>Describe what happened or what would help after opening GitHub or your email client.</p>
+
+    {% if has_saved_model %}
+    <div class="alert alert-warning text-start" role="note">
+        This file may contain data you entered. GitHub issues and their attachments are normally public.
+        Review the downloaded file before sharing it.
+    </div>
+    <a class="btn btn-outline-secondary rounded-pill w-100 mb-3" href="{{ download_model_url }}" target="_blank"
+       rel="noopener noreferrer" data-feedback-download>
+        Download my current modeling to include
+    </a>
+    {% else %}
+    <p class="small text-muted">No saved modeling is available to download in this browser session.</p>
+    {% endif %}
+
+    <p class="small text-muted">
+        Downloading does not open or submit a report. If you share the file, attach it manually after reviewing it.
+    </p>
+    <div class="d-grid gap-2">
+        <a class="btn btn-cta-green rounded-pill" href="{{ github_bug_url }}" target="_blank"
+           rel="noopener noreferrer" data-feedback-destination="github"
+           data-url-bug="{{ github_bug_url }}" data-url-feedback="{{ github_feedback_url }}">
+            Continue on GitHub
+        </a>
+        <a class="btn btn-outline-secondary rounded-pill" href="{{ email_bug_url }}"
+           data-feedback-destination="email"
+           data-url-bug="{{ email_bug_url }}" data-url-feedback="{{ email_feedback_url }}">
+            Use email instead
+        </a>
+    </div>
+</section>

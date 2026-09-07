@@ -9,11 +9,13 @@ import model_builder.adapters.views.views_help
 import model_builder.adapters.views.views_onboarding
 import model_builder.adapters.views.views_timeseries_preview
 import model_builder.adapters.views.views_workspace
+import model_builder.adapters.views.views_support
 from .adapters.views import views
 from .adapters.views import sankey_views
 
 urlpatterns = [
     path("", views.model_builder_main, name="model-builder"),
+    path("support/", model_builder.adapters.views.views_support.support, name="model-builder-support"),
     path("open-template-picker/", model_builder.adapters.views.views_onboarding.open_template_picker,
          name="open-template-picker"),
     path("load-template/<template_id>/", model_builder.adapters.views.views_onboarding.load_template,

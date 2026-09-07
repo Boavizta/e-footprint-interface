@@ -8,30 +8,65 @@ from efootprint import __version__ as efootprint_version
 from e_footprint_interface import __version__ as interface_version
 
 GITHUB_NEW_ISSUE_URL = "https://github.com/Boavizta/e-footprint-interface/issues/new"
+FEEDBACK_EMAIL = "vincent.villet@publicissapient.com"
+
+
+def _feedback_details(report_kind, error=None):
+    if report_kind == "bug":
+        title = "[Bug] e-footprint interface issue"
+        body_lines = [
+            "## What happened",
+            "<!-- What were you doing, and what did you expect to happen? -->",
+            "",
+            "## Modeling file (optional)",
+            "<!-- If useful, review the downloaded file, then attach it manually. -->",
+            "",
+            "## Environment",
+            f"- e-footprint version: {efootprint_version}",
+            f"- interface version: {interface_version}",
+        ]
+        if error is not None:
+            body_lines.append(f"- Error type: {type(error).__name__}")
+        email_intro = "Please describe what happened and what you expected to happen."
+    elif report_kind == "feedback":
+        title = "[Feedback] e-footprint interface"
+        body_lines = [
+            "## Your feedback",
+            "<!-- What would make e-footprint more useful or easier to use? -->",
+            "",
+            "## Modeling file (optional)",
+            "<!-- If useful, review the downloaded file, then attach it manually. -->",
+        ]
+        email_intro = "Please describe what would make e-footprint more useful or easier to use."
+    else:
+        raise ValueError(f"Unsupported feedback kind: {report_kind}")
+    return title, body_lines, email_intro
+
+
+def build_github_feedback_url(report_kind="bug", error=None):
+    """Build a prompt-only GitHub URL without report, model, or exception content."""
+    title, body_lines, _ = _feedback_details(report_kind, error)
+    query = urlencode({"title": title, "body": "\n".join(body_lines)})
+    return f"{GITHUB_NEW_ISSUE_URL}?{query}"
+
+
+def build_feedback_email_url(report_kind="bug", error=None):
+    """Build a prompt-only email draft URL with manual-attachment guidance."""
+    title, _, email_intro = _feedback_details(report_kind, error)
+    body_lines = [
+        email_intro,
+        "",
+        "If you downloaded a modeling file, review it and attach it manually if useful.",
+    ]
+    if error is not None and report_kind == "bug":
+        body_lines.append(f"Error type: {type(error).__name__}")
+    query = urlencode({"subject": title, "body": "\n".join(body_lines)})
+    return f"mailto:{FEEDBACK_EMAIL}?{query}"
 
 
 def build_report_bug_url(error=None):
-    """Build a GitHub "new issue" URL with a prefilled bug-report template.
-
-    The body never includes a traceback or model data (it would leak into the URL and the
-    public issue); it only carries the versions and the exception type, and asks the user to
-    attach the model they downloaded from the recovery page.
-    """
-    body_lines = [
-        "## What happened",
-        "<!-- What were you doing when the error occurred? -->",
-        "",
-        "## Model file",
-        "<!-- Please drag-and-drop the model you downloaded from the recovery page here. -->",
-        "",
-        "## Environment",
-        f"- e-footprint version: {efootprint_version}",
-        f"- interface version: {interface_version}",
-    ]
-    if error is not None:
-        body_lines.append(f"- Error: {type(error).__name__}: {error}")
-    query = urlencode({"title": "[Bug] e-footprint interface error", "body": "\n".join(body_lines)})
-    return f"{GITHUB_NEW_ISSUE_URL}?{query}"
+    """Compatibility wrapper for the recovery page's GitHub action."""
+    return build_github_feedback_url("bug", error)
 
 
 def _slot_label(slot: int) -> str:
@@ -70,6 +105,7 @@ def render_recovery_page(request, error=None, status=200):
 
     context = {
         "report_bug_url": build_report_bug_url(error),
+        "report_bug_email_url": build_feedback_email_url("bug", error),
         "recovery_slots": recovery_slots,
         "show_slot_labels": show_slot_labels,
         "has_saved_model": bool(recovery_slots),

@@ -8,6 +8,8 @@ Each numbered task is one review-sized, independently shippable commit or pull r
 
 ## 1. Add a safe, attachment-explicit feedback flow
 
+**Status:** Done
+
 Replace the global GitHub shortcut with a useful Feedback entry that works with and without the model-builder side panel. Keep report content under the user's control: the application may help download the current modeling JSON, but it must never attach it or put model data, user-entered text, exception messages, or tracebacks in a URL.
 
 Implementation units:

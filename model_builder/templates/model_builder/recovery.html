@@ -23,6 +23,12 @@
             </p>
 
             <div class="d-flex flex-column gap-3 w-100" style="max-width: 360px;">
+                {% if recovery_slots %}
+                <p class="alert alert-warning text-start small mb-0" role="note">
+                    A downloaded modeling may contain data you entered. Review it before sharing.
+                    GitHub issues and their attachments are normally public.
+                </p>
+                {% endif %}
                 {% for slot_entry in recovery_slots %}
                 <a href="{% url 'download-raw-json' %}?slot={{ slot_entry.slot }}"
                    class="btn btn-outline-secondary rounded-pill px-3 py-2">
@@ -34,6 +40,16 @@
                    class="btn btn-outline-secondary rounded-pill px-3 py-2">
                     Report this bug on GitHub
                 </a>
+
+                <a href="{{ report_bug_email_url }}"
+                   class="btn btn-outline-secondary rounded-pill px-3 py-2">
+                    Report this bug by email
+                </a>
+
+                <p class="small text-muted mb-0">
+                    Downloading and reporting are separate. If you choose to share a downloaded file,
+                    review it first and attach it manually.
+                </p>
 
                 <form action="{% url 'reset-model' %}" method="post"
                       onsubmit="return confirm('This will discard your current modeling and reset to an empty one. Continue?');">
