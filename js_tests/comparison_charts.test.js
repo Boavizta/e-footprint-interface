@@ -64,6 +64,7 @@ describe("buildPairedChartConfig", () => {
 
     test("uses a single shared stacked y-axis; built-in legend is off (replaced by renderPairedLegend)", () => {
         const config = buildPairedChartConfig(pairedPayload());
+        expect(config.options.locale).toBe("en-US");
         expect(config.options.scales.y.stacked).toBe(true);
         expect(config.options.scales.y.beginAtZero).toBe(true);
         expect(config.options.scales.x.stacked).toBe(true);
@@ -97,6 +98,7 @@ describe("buildPairedChartConfig", () => {
 describe("buildCumulativeChartConfig", () => {
     test("overlays two curves on one shared y-axis; built-in legend is off (replaced by renderCumulativeLegend)", () => {
         const config = buildCumulativeChartConfig(cumulativePayload());
+        expect(config.options.locale).toBe("en-US");
         expect(config.type).toBe("line");
         expect(config.data.datasets).toHaveLength(2);
         expect(Object.keys(config.options.scales)).toEqual(["x", "y"]);
@@ -134,6 +136,7 @@ describe("buildCumulativeChartConfig", () => {
 describe("buildDecompositionChartConfig", () => {
     test("renders horizontal bars on a single value axis, per-bar signed colours", () => {
         const config = buildDecompositionChartConfig(decompositionPayload());
+        expect(config.options.locale).toBe("en-US");
         expect(config.type).toBe("bar");
         expect(config.options.indexAxis).toBe("y");
         expect(config.data.datasets[0].data).toEqual([-660, 90]);

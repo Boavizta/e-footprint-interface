@@ -67,7 +67,7 @@ function buildPairedChartConfig(payload) {
         type: "bar",
         data: { labels: payload.labels, datasets },
         options: {
-            locale: "en-EN",
+            locale: "en-US",
             responsive: true,
             maintainAspectRatio: true,
             aspectRatio: 2,
@@ -116,7 +116,7 @@ function buildCumulativeChartConfig(payload) {
         type: "line",
         data: { labels: payload.labels, datasets },
         options: {
-            locale: "en-EN",
+            locale: "en-US",
             responsive: true,
             maintainAspectRatio: true,
             aspectRatio: 2,
@@ -186,7 +186,7 @@ function buildDecompositionChartConfig(payload) {
         data: payload,
         options: {
             indexAxis: "y", // horizontal bars
-            locale: "en-EN",
+            locale: "en-US",
             responsive: true,
             maintainAspectRatio: true,
             aspectRatio: 2.5,

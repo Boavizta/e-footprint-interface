@@ -136,7 +136,7 @@ export const CHART_COLORS = {
  * Base Chart.js options configuration
  */
 export const RESULT_CHART_OPTIONS = {
-    locale: "en-EN",
+    locale: "en-US",
     responsive: true,
     maintainAspectRatio: true,
     aspectRatio: 2,
