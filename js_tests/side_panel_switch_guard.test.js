@@ -118,3 +118,35 @@ test("isSidePanelFormModified reflects the modified flag", () => {
     tagFormAsModified();
     expect(isSidePanelFormModified()).toBe(true);
 });
+
+test("a modified side-panel replacement waits for confirmation", () => {
+    const {
+        tagFormAsModified,
+        runAfterSidePanelDiscardConfirmation,
+        proceedWithPendingSidePanelReplacement,
+        isSidePanelFormModified,
+    } = require("../theme/static/scripts/side_panel_utils.js");
+    const replacePanel = jest.fn();
+    tagFormAsModified();
+
+    runAfterSidePanelDiscardConfirmation(replacePanel);
+
+    expect(replacePanel).not.toHaveBeenCalled();
+    expect(shownTimes).toBe(1);
+    expect(document.getElementById("continue-unsaved-modal").getAttribute("onclick"))
+        .toBe("proceedWithPendingSidePanelReplacement()");
+
+    proceedWithPendingSidePanelReplacement();
+    expect(replacePanel).toHaveBeenCalledTimes(1);
+    expect(isSidePanelFormModified()).toBe(false);
+});
+
+test("an unmodified side-panel replacement runs immediately", () => {
+    const { runAfterSidePanelDiscardConfirmation } = require("../theme/static/scripts/side_panel_utils.js");
+    const replacePanel = jest.fn();
+
+    runAfterSidePanelDiscardConfirmation(replacePanel);
+
+    expect(replacePanel).toHaveBeenCalledTimes(1);
+    expect(shownTimes).toBe(0);
+});

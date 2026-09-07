@@ -1,5 +1,6 @@
 let formModified = false;
 let pendingRequest = null;
+let pendingSidePanelReplacement = null;
 
 function recomputationVals() {
     let btnResultPanel = document.getElementById("btn-open-panel-result");
@@ -100,6 +101,27 @@ function setRecomputationToTrueIfResultPaneIsOpen(){
 
 function tagFormAsModified(){
     formModified = true;
+}
+
+function runAfterSidePanelDiscardConfirmation(action) {
+    if (!formModified) {
+        action();
+        return;
+    }
+
+    pendingSidePanelReplacement = action;
+    const modal = new bootstrap.Modal(document.getElementById("unsavedModal"));
+    document.getElementById("continue-unsaved-modal")
+        .setAttribute("onclick", "proceedWithPendingSidePanelReplacement()");
+    modal.show();
+}
+
+function proceedWithPendingSidePanelReplacement() {
+    const action = pendingSidePanelReplacement;
+    pendingSidePanelReplacement = null;
+    formModified = false;
+    closeWarningModal();
+    if (action) action();
 }
 
 document.body.addEventListener("htmx:beforeRequest", function (event) {
@@ -203,6 +225,7 @@ function closeWarningModalAndCloseSidePanel() {
 }
 
 function closeWarningModal(){
+    pendingSidePanelReplacement = null;
     const modalEl = document.getElementById("unsavedModal");
     const modal = bootstrap.Modal.getInstance(modalEl);
     if (document.activeElement) {
@@ -212,5 +235,12 @@ function closeWarningModal(){
 }
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { tagFormAsModified, proceedWithPendingNavigation, isSidePanelFormModified };
+    module.exports = {
+        openSidePanel,
+        tagFormAsModified,
+        runAfterSidePanelDiscardConfirmation,
+        proceedWithPendingSidePanelReplacement,
+        proceedWithPendingNavigation,
+        isSidePanelFormModified,
+    };
 }

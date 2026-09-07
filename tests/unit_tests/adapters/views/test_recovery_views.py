@@ -44,3 +44,23 @@ def test_recovery_download_serves_raw_corrupt_data_without_hydration(client, cor
 
     assert response.status_code == 200
     assert "Storage" not in json.loads(response.content)
+
+
+@pytest.mark.django_db
+def test_recovery_feedback_keeps_the_download_path_hydration_free(client, corrupt_system_data, settings):
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    SessionSystemRepository(client.session).save_data(corrupt_system_data)
+
+    recovery = client.get("/model_builder/recover/")
+    assert 'href="/support/?recovery=1"' in recovery.content.decode()
+
+    support = client.get("/support/?recovery=1")
+    assert support.status_code == 200
+    assert 'href="/model_builder/download-raw-json/"' in support.content.decode()
+
+    download = client.get("/model_builder/download-raw-json/")
+    assert download.status_code == 200
+    assert "Storage" not in json.loads(download.content)

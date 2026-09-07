@@ -104,6 +104,7 @@ def render_recovery_page(request, error=None, status=200):
     show_slot_labels = len(recovery_slots) > 1
 
     context = {
+        "recovery_mode": True,
         "report_bug_url": build_report_bug_url(error),
         "report_bug_email_url": build_feedback_email_url("bug", error),
         "recovery_slots": recovery_slots,

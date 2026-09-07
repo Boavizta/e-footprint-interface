@@ -8,12 +8,7 @@
         link.click();
     }
 
-    function openFeedbackPanel(link) {
-        const sidePanel = document.getElementById("sidePanel");
-        if (!sidePanel || typeof htmx === "undefined") {
-            return false;
-        }
-
+    function loadFeedbackPanel(link) {
         pendingFeedbackLink = link;
         link.setAttribute("aria-busy", "true");
         let request;
@@ -25,18 +20,26 @@
             });
         } catch (error) {
             followOrdinaryLink(link);
-            return true;
+            return;
         }
 
         Promise.resolve(request).then(() => {
             if (pendingFeedbackLink !== link) return;
             pendingFeedbackLink = null;
-            if (typeof openSidePanel === "function") openSidePanel();
-            const title = document.getElementById("feedback-panel-title");
-            if (title) title.focus();
+            openSidePanel();
+            document.getElementById("sidePanelTitle").focus();
         }).catch(() => {
             if (pendingFeedbackLink === link) followOrdinaryLink(link);
         }).finally(() => link.removeAttribute("aria-busy"));
+    }
+
+    function openFeedbackPanel(link) {
+        const sidePanel = document.getElementById("sidePanel");
+        if (!sidePanel) {
+            return false;
+        }
+
+        runAfterSidePanelDiscardConfirmation(() => loadFeedbackPanel(link));
         return true;
     }
 
