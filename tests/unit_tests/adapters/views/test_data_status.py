@@ -61,6 +61,97 @@ def test_data_status_uses_integer_workspace_metadata_and_configured_facts(settin
     assert status.postgres_backups_encrypted_at_rest is False
 
 
+@pytest.mark.parametrize(
+    ("workspace_size_bytes", "expected_warning"),
+    [
+        (4 * 1024 * 1024 - 1, False),
+        (4 * 1024 * 1024, True),
+        (5 * 1024 * 1024, True),
+    ],
+)
+def test_workspace_storage_warning_uses_the_exact_eighty_percent_boundary(
+    settings, workspace_size_bytes, expected_warning
+):
+    _configure_public_deployment(settings)
+    session = DictSession()
+    WorkspaceIndex(session).set_slot_size(0, workspace_size_bytes)
+
+    with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 5):
+        status = build_data_status(session)
+
+    assert status.show_workspace_storage_warning is expected_warning
+
+
+@pytest.mark.django_db
+def test_workspace_storage_status_is_metadata_only_and_keeps_one_accessible_oob_region(client, settings):
+    _configure_public_deployment(settings)
+    session = client.session
+    WorkspaceIndex(session).set_slot_size(0, 4 * 1024 * 1024)
+    session.save()
+
+    with (
+        patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 5),
+        patch.object(SessionSystemRepository, "get_system_data", side_effect=AssertionError("must not hydrate")),
+        patch.object(ModelWeb, "to_json", side_effect=AssertionError("must not serialize")),
+    ):
+        response = client.get("/model_builder/workspace-storage-status/", HTTP_HX_REQUEST="true")
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert content.count('id="workspace-storage-status"') == 1
+    assert 'hx-swap-oob="innerHTML:#workspace-storage-status"' in content
+    assert 'aria-live="polite"' in content
+    assert 'role="status"' in content
+    assert "4 MB of 5 MB" in content
+    assert 'href="/model_builder/data-privacy/"' in content
+    assert "Workspace storage is nearly full" in content
+
+
+@pytest.mark.django_db
+def test_workspace_storage_status_is_visually_empty_below_the_warning_threshold(client, settings):
+    _configure_public_deployment(settings)
+    session = client.session
+    WorkspaceIndex(session).set_slot_size(0, 4 * 1024 * 1024 - 1)
+    session.save()
+
+    with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 5):
+        response = client.get("/model_builder/workspace-storage-status/")
+
+    content = response.content.decode()
+    assert 'id="workspace-storage-status"' in content
+    assert "Workspace storage is nearly full" not in content
+    assert "MB of 5 MB" not in content
+
+
+@pytest.mark.django_db
+def test_full_builder_render_contains_one_stable_storage_status_region(client, minimal_system_data, settings):
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    SessionSystemRepository(client.session).save_data(minimal_system_data)
+
+    response = client.get("/model_builder/")
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert content.count('id="workspace-storage-status"') == 1
+    assert 'aria-live="polite"' in content
+    assert "Workspace storage is nearly full" not in content
+
+
+@pytest.mark.django_db
+def test_result_materialization_response_refreshes_workspace_storage_status(client, minimal_system_data):
+    SessionSystemRepository(client.session).save_data(minimal_system_data)
+
+    response = client.get("/model_builder/result-chart/", HTTP_HX_REQUEST="true")
+
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert content.count('id="workspace-storage-status"') == 1
+    assert 'hx-swap-oob="innerHTML:#workspace-storage-status"' in content
+
+
 @pytest.mark.django_db
 def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retention_choices(client, settings):
     _configure_public_deployment(settings)

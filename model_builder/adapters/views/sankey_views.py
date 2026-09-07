@@ -17,6 +17,7 @@ from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 from model_builder.adapters.ui_config.object_category_ui_config_provider import ObjectCategoryUIConfigProvider
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+from model_builder.adapters.views.data_status import append_workspace_storage_status
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
 
@@ -392,7 +393,7 @@ def sankey_diagram(request):
             diagrams[existing_index] = card_settings
         model_web.persist_to_cache()
 
-        return render(
+        response = render(
             request,
             "model_builder/result/sankey_diagram.html",
             {
@@ -406,6 +407,7 @@ def sankey_diagram(request):
                 "subtitle": subtitle,
             },
         )
+        return append_workspace_storage_status(response, request.session)
     except ComputationMemoryLimitExceeded as error:
         cached_slots, total_slots = impact_repartition_rows_cache_coverage(system)
         coverage_percent = round(100 * cached_slots / total_slots) if total_slots else 0
@@ -489,4 +491,4 @@ def sankey_delete_card(request):
     diagrams = config.get("sankey_diagrams", [])
     config["sankey_diagrams"] = [diagram for diagram in diagrams if diagram["id"] != card_id]
     model_web.persist_to_cache()
-    return HttpResponse("")
+    return append_workspace_storage_status(HttpResponse(""), request.session)

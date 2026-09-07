@@ -1300,6 +1300,10 @@ input:disabled{
         width: 33vw;
     }
 
+    #sidePanel:not(.d-none) ~ #panel-result-btn {
+        width: 67vw !important;
+    }
+
     #helpDrawer {
         width: 33vw;
         height: 100%;
@@ -1644,6 +1648,32 @@ input:disabled{
 .workspace-size-progress {
     height: 0.75rem;
     accent-color: var(--new-primary);
+}
+
+.workspace-storage-status {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+    background: #fff;
+}
+
+.workspace-storage-warning {
+    padding: 0.7rem 1rem;
+    border-top: 1px solid #e0b84f;
+    border-bottom: 1px solid #e0b84f;
+    background: #fff8df;
+    color: #594400;
+    line-height: 1.4;
+}
+
+.workspace-storage-warning-link {
+    color: #473700;
+    font-weight: 600;
+}
+
+.workspace-storage-warning-link:focus-visible {
+    outline: 3px solid rgba(71, 55, 0, 0.35);
+    outline-offset: 3px;
 }
 
 @media (max-width: 767.98px) {

@@ -82,17 +82,47 @@ function csrfTokenFromHtmxHeaders() {
     }
 }
 
+function requestWorkspaceStorageStatus() {
+    const statusRegion = document.getElementById("workspace-storage-status");
+    if (!statusRegion || !window.htmx) return;
+    return window.htmx.ajax("GET", "/model_builder/workspace-storage-status/", {
+        target: "#workspace-storage-status",
+        swap: "none",
+    });
+}
+
+function installSankeyStorageStatusRefresh() {
+    if (!window.fetch || window.fetch.workspaceStorageStatusAware) return;
+    const originalFetch = window.fetch.bind(window);
+    const observedFetch = function(input, options) {
+        const responsePromise = originalFetch(input, options);
+        const url = String(input && input.url ? input.url : input);
+        if (url.includes("/model_builder/sankey-delete-card/")) {
+            Promise.resolve(responsePromise)
+                .then(response => {
+                    if (response.ok) requestWorkspaceStorageStatus();
+                })
+                .catch(() => {});
+        }
+        return responsePromise;
+    };
+    observedFetch.workspaceStorageStatusAware = true;
+    window.fetch = observedFetch;
+}
+
 function saveCardOrder(sortables) {
     const cardOrder = Object.fromEntries(
         sortables.map(({listId, sortable}) => [listId, sortable.toArray()])
     );
-    fetch("/model_builder/save-card-order/", {
+    return fetch("/model_builder/save-card-order/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": csrfTokenFromHtmxHeaders(),
         },
         body: JSON.stringify(cardOrder),
+    }).then(response => {
+        if (response.ok) requestWorkspaceStorageStatus();
     }).catch(() => {});
 }
 
@@ -374,6 +404,10 @@ document.body.addEventListener("htmx:afterSettle", function (event) {
     initTruncatedTextTooltips(event.detail.elt);
 });
 
+if (typeof module === "undefined") {
+    installSankeyStorageStatusRefresh();
+}
+
 // Conditional confirmation for destructive model-replacing actions (toolbar reboot, picker cards).
 // The triggering element carries `data-confirm-when-model-not-empty="<question>"`; we only prompt
 // when the canvas actually holds objects (`.model-builder-card`) — rebooting/replacing an empty
@@ -395,7 +429,9 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         CARD_ORDER_LIST_IDS,
         initSortableObjectCards,
+        installSankeyStorageStatusRefresh,
         rejectInvalidAutosavingRelationshipCount,
+        requestWorkspaceStorageStatus,
         rememberAutosavingRelationshipCount,
     };
 }

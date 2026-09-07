@@ -139,6 +139,8 @@ Dependencies: Task 2.
 
 ## 4. Add the lightweight real-time shared-budget warning
 
+**Status:** Done
+
 Surface storage pressure only when it becomes actionable. Reuse the canonical size integers and update a stable status region across every persistence boundary without introducing model serialization, hydration, polling, or a permanently visible technical meter.
 
 Implementation units:
