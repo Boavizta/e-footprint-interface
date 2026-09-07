@@ -105,3 +105,22 @@ test("a rejected background save keeps the DOM order and is handled", async () =
 
     expect(Array.from(serverList.children, child => child.id)).toEqual(reorderedIds);
 });
+
+test("HTMX button restoration does not overwrite control state changed during a request", () => {
+    document.body.innerHTML = `
+        <button id="persistently-disabled" disabled>Unavailable</button>
+        <input id="builder-payload" disabled>
+    `;
+    loadModule();
+    const xhr = {};
+    const button = document.getElementById("persistently-disabled");
+    const payload = document.getElementById("builder-payload");
+
+    document.body.dispatchEvent(new CustomEvent("htmx:beforeRequest", {detail: {xhr}}));
+    button.disabled = false;
+    payload.disabled = false;
+    document.body.dispatchEvent(new CustomEvent("htmx:afterRequest", {detail: {xhr}}));
+
+    expect(button.disabled).toBe(true);
+    expect(payload.disabled).toBe(false);
+});

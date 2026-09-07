@@ -355,7 +355,7 @@ const disabledBeforeHtmxRequest = new WeakMap();
 
 document.body.addEventListener("htmx:beforeRequest", function (evt) {
     const snapshot = new Set();
-    document.querySelectorAll("[disabled]").forEach(el => snapshot.add(el));
+    document.querySelectorAll("button[disabled]").forEach(el => snapshot.add(el));
     disabledBeforeHtmxRequest.set(evt.detail.xhr, snapshot);
 });
 
