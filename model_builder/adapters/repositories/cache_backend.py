@@ -1,6 +1,7 @@
 """Shared cache backend helper for Redis/Postgres-backed repositories."""
 import os
 from datetime import datetime, timezone
+from enum import Enum
 from time import perf_counter
 from typing import Optional
 
@@ -9,6 +10,12 @@ from django.core.cache import caches
 from django.db import connections, router, transaction
 from django.utils.timezone import now as tz_now
 from efootprint.logger import logger
+
+
+class CacheTouchOutcome(Enum):
+    UPDATED = "updated"
+    MISSING = "missing"
+    ERROR = "error"
 
 
 class CacheBackend:
@@ -130,7 +137,7 @@ class CacheBackend:
             if set_result is False:
                 logger.warning(f"{self.POSTGRES_CACHE_ALIAS} cache set for key {cache_key} was dropped (write lost)")
 
-    def touch_postgres(self, cache_key: str, timeout_seconds: int) -> bool:
+    def touch_postgres(self, cache_key: str, timeout_seconds: int) -> CacheTouchOutcome:
         """Update a live Postgres cache expiry without reading, rewriting, or reviving its value."""
         postgres_cache = self._get_cache(self.POSTGRES_CACHE_ALIAS)
 
@@ -154,15 +161,13 @@ class CacheBackend:
                         connection.ops.adapt_datetimefield_value(now),
                     ],
                 )
-                return cursor.rowcount == 1
+                return CacheTouchOutcome.UPDATED if cursor.rowcount == 1 else CacheTouchOutcome.MISSING
 
-        return bool(
-            self._time_cache_call(
-                "touch",
-                self.POSTGRES_CACHE_ALIAS,
-                touch_live_row,
-                default=False,
-            )
+        return self._time_cache_call(
+            "touch",
+            self.POSTGRES_CACHE_ALIAS,
+            touch_live_row,
+            default=CacheTouchOutcome.ERROR,
         )
 
     def delete_expired_postgres(self, now) -> int:

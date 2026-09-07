@@ -1,7 +1,7 @@
 """Tests for session-scoped recovery retention and expiry-only slot updates."""
 
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.cache import caches
@@ -10,7 +10,7 @@ from django.core.management import call_command
 from django.db import connection
 from django.utils import timezone
 
-from model_builder.adapters.repositories.cache_backend import CacheBackend
+from model_builder.adapters.repositories.cache_backend import CacheBackend, CacheTouchOutcome
 from model_builder.adapters.repositories.recovery_retention import (
     APPROVED_RECOVERY_RETENTION_SECONDS,
     DEFAULT_RECOVERY_RETENTION_SECONDS,
@@ -96,13 +96,18 @@ def test_each_saved_slot_is_touched_once_without_loading_or_rewriting_payloads()
     index.set_slot_size(1, 200)
 
     with (
-        patch.object(CacheBackend, "touch_postgres", autospec=True, side_effect=[True, False]) as touch,
+        patch.object(
+            CacheBackend,
+            "touch_postgres",
+            autospec=True,
+            side_effect=[CacheTouchOutcome.UPDATED, CacheTouchOutcome.MISSING],
+        ) as touch,
         patch.object(CacheBackend, "get", autospec=True, side_effect=AssertionError("must not hydrate")),
         patch.object(CacheBackend, "set", autospec=True, side_effect=AssertionError("must not rewrite")),
     ):
         results = set_recovery_retention(session, 6 * 3600)
 
-    assert results == {0: True, 1: False}
+    assert results == {0: CacheTouchOutcome.UPDATED, 1: CacheTouchOutcome.MISSING}
     assert session[RECOVERY_RETENTION_SESSION_KEY] == 6 * 3600
     assert [args.args[1:] for args in touch.call_args_list] == [
         ("system_data:session-key:0", 6 * 3600),
@@ -116,10 +121,15 @@ def test_partial_disappearance_does_not_rollback_success_or_preference():
     index.set_slot_size(0, 100)
     index.set_slot_size(1, 200)
 
-    with patch.object(CacheBackend, "touch_postgres", autospec=True, side_effect=[True, False]):
+    with patch.object(
+        CacheBackend,
+        "touch_postgres",
+        autospec=True,
+        side_effect=[CacheTouchOutcome.UPDATED, CacheTouchOutcome.MISSING],
+    ):
         results = set_recovery_retention(session, 3 * 3600)
 
-    assert results == {0: True, 1: False}
+    assert results == {0: CacheTouchOutcome.UPDATED, 1: CacheTouchOutcome.MISSING}
     assert get_recovery_retention_seconds(session) == 3 * 3600
 
 
@@ -149,10 +159,19 @@ def test_expired_database_row_is_reported_missing_and_is_not_revived(database_ca
     if timezone.is_naive(updated_expiry):
         updated_expiry = timezone.make_aware(updated_expiry, timezone.get_current_timezone())
 
-    assert results == {0: True, 1: False}
+    assert results == {0: CacheTouchOutcome.UPDATED, 1: CacheTouchOutcome.MISSING}
     assert updated_value == original_value
     assert updated_expiry != original_expiry
     assert (before_touch + timedelta(hours=12)).replace(microsecond=0) <= updated_expiry
     assert updated_expiry <= (after_touch + timedelta(hours=12)).replace(microsecond=0)
     assert cache.get(live_key) == {"payload": "live"}
     assert cache.get("system_data:session-key:1") is None
+
+
+def test_postgres_touch_reports_backend_errors_separately():
+    postgres_cache = Mock()
+    postgres_cache.make_and_validate_key.side_effect = RuntimeError("database unavailable")
+    with patch.object(CacheBackend, "_get_cache", return_value=postgres_cache):
+        outcome = CacheBackend().touch_postgres("system_data:session-key:0", 3600)
+
+    assert outcome is CacheTouchOutcome.ERROR

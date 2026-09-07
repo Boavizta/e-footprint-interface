@@ -92,13 +92,21 @@
                 {% endif %}
             </p>
             <p class="mb-0">
-                Backups are observed to run overnight, but their timing can vary. A short recovery period such as six
-                hours normally expires before that window and reduces the chance of capture; it does not guarantee
-                exclusion. Any modeling still stored when a backup runs can remain in that backup for up to
+                {% if data_status.postgres_backup_window %}
+                Backups are observed to run {{ data_status.postgres_backup_window }}, but their timing can vary. A short
+                recovery period such as six hours normally expires before that window and reduces the chance of capture;
+                it does not guarantee exclusion.
+                {% else %}
+                Backup timing depends on this deployment. A short recovery period can reduce the chance of capture, but
+                it does not guarantee exclusion.
+                {% endif %}
+                Any modeling still stored when a backup runs can remain in that backup for up to
                 {{ data_status.postgres_backup_retention_days }} days.
             </p>
+            {% elif data_status.postgres_backups_enabled == False %}
+            <p class="mb-0">PostgreSQL backups are disabled for this deployment.</p>
             {% else %}
-            <p class="mb-0">No PostgreSQL backup lifecycle is configured for this deployment.</p>
+            <p class="mb-0">No PostgreSQL backup-lifecycle assurance is configured for this deployment.</p>
             {% endif %}
         </article>
         <article class="data-privacy-card">
@@ -171,7 +179,8 @@
         </form>
 
         {% if retention_results %}
-        <div class="alert alert-success mt-3 mb-0" id="retention-update-result" role="status" aria-live="polite"
+        <div class="alert {% if retention_results.has_errors %}alert-warning{% else %}alert-success{% endif %} mt-3 mb-0"
+             id="retention-update-result" role="status" aria-live="polite"
              tabindex="-1">
             <p class="fw-semibold mb-1">{{ retention_results.summary }}</p>
             {% if retention_results.slots %}
@@ -179,8 +188,9 @@
                 {% for result in retention_results.slots %}
                 <li>
                     {{ result.label }}:
-                    {% if result.updated %}existing recovery expiry updated.{% else %}the recovery copy had already
-                    expired or was no longer available.{% endif %}
+                    {% if result.outcome == "updated" %}existing recovery expiry updated.
+                    {% elif result.outcome == "missing" %}the recovery copy had already expired or was no longer available.
+                    {% else %}the existing recovery expiry could not be updated because storage was unavailable.{% endif %}
                 </li>
                 {% endfor %}
             </ul>

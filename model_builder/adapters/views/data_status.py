@@ -46,6 +46,7 @@ class DataStatus:
     postgres_backup_frequency: str
     postgres_backup_retention_days: int
     postgres_backups_encrypted_at_rest: bool | None
+    postgres_backup_window: str
     public_shared_instance: bool
 
 
@@ -113,5 +114,6 @@ def build_data_status(session: SessionBase) -> DataStatus:
         postgres_backup_frequency=settings.DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY,
         postgres_backup_retention_days=settings.DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS,
         postgres_backups_encrypted_at_rest=settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST,
+        postgres_backup_window=settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW,
         public_shared_instance=bool(settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE),
     )
