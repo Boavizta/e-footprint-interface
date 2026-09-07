@@ -72,6 +72,17 @@ def test_help_menu_links_data_privacy_as_a_normal_route_and_side_panel_partial()
     assert "Data &amp; privacy" in content
 
 
+@pytest.mark.django_db
+def test_data_privacy_partial_includes_the_standard_side_panel_close_button(client):
+    response = client.get("/model_builder/data-privacy/", HTTP_HX_REQUEST="true")
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert 'id="btn-close-side-panel"' in content
+    assert 'onclick="closeAndEmptySidePanel()"' in content
+    assert '{% include "model_builder/components/close_cross.html"' not in content
+
+
 @pytest.mark.parametrize("kind", ["bug", "feedback"])
 def test_github_feedback_urls_contain_prompts_only(kind):
     url = build_github_feedback_url(kind)
