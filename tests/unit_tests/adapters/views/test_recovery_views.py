@@ -32,7 +32,7 @@ def test_recovery_offers_safe_github_email_and_manual_attachment_guidance(client
     assert response.status_code == 200
     assert "Report this bug on GitHub" in content
     assert "Report this bug by email" in content
-    assert "GitHub issues and their attachments are normally public" in content
+    assert "GitHub issues and their attachments are public" in content
     assert "attach it manually" in content
 
 
