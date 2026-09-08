@@ -373,17 +373,31 @@ def generate_dynamic_form(
                         {"input_type": "select_str_input", "selected": default_values[attr_name].value, "options": []}
                     )
                     depends_on = conditional_list_values[attr_name]["depends_on"]
+                    dependency_path = depends_on.split(".")
+                    first_segment = dependency_path[0]
                     conditional_values = conditional_list_values[attr_name]["conditional_list_values"]
                     values_by_conditional_value = {
                         str(conditional_value): [str(possible_value) for possible_value in possible_values]
                         for conditional_value, possible_values in conditional_values.items()
                     }
-                    if "." in depends_on:
+                    dependency_is_fixed_on_edit = (
+                        obj_to_edit is not None
+                        and first_segment in corresponding_web_class.attributes_to_skip_in_forms
+                    )
+                    if dependency_is_fixed_on_edit:
+                        resolved = obj_to_edit.modeling_obj
+                        for segment in dependency_path:
+                            resolved = getattr(resolved, segment)
+                        structure_field["options"] = [
+                            {"label": value, "value": value}
+                            for value in values_by_conditional_value.get(str(resolved), [])
+                        ]
+                    elif "." in depends_on:
                         # Cross-object dependency (e.g. "external_api.model_name"): the dotted path is
                         # not a DOM id. Each referenced object has a fixed value for the resolved sub-path,
                         # so we collapse the two-hop semantic into a single hop keyed by the referenced
                         # object's id — reusing the single-hop conditional-select cascade with no extra JS.
-                        first_segment, *remaining_path = depends_on.split(".")
+                        remaining_path = dependency_path[1:]
                         filter_by = corresponding_web_class.conditional_list_filter_overrides.get(
                             first_segment, f"{efootprint_class_str}_{first_segment}"
                         )
@@ -403,13 +417,14 @@ def generate_dynamic_form(
                     else:
                         filter_by = f"{efootprint_class_str}_{depends_on}"
                         list_value = values_by_conditional_value
-                    dynamic_lists.append(
-                        {
-                            "input_id": f"{efootprint_class_str}_{attr_name}",
-                            "filter_by": filter_by,
-                            "list_value": list_value,
-                        }
-                    )
+                    if not dependency_is_fixed_on_edit:
+                        dynamic_lists.append(
+                            {
+                                "input_id": f"{efootprint_class_str}_{attr_name}",
+                                "filter_by": filter_by,
+                                "list_value": list_value,
+                            }
+                        )
                 else:
                     structure_field.update({"input_type": "str"})
 

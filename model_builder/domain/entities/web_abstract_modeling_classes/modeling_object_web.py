@@ -28,7 +28,8 @@ class ModelingObjectWeb:
     # Maps the first segment of a cross-object conditional_list_values `depends_on` path
     # (e.g. "external_api" in "external_api.model_name") to the DOM id of the field that
     # actually carries that referenced object's selection, when it isn't rendered as
-    # `{class}_{segment}` (e.g. because it's skipped in forms and chosen via a helper field).
+    # `{class}_{segment}` (e.g. because it's skipped and chosen via a creation helper field).
+    # On edit, a skipped dependency is fixed and its conditional options are resolved server-side.
     conditional_list_filter_overrides = {}
     gets_deleted_if_unique_mod_obj_container_gets_deleted = True
 

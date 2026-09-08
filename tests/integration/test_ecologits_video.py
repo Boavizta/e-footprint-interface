@@ -196,6 +196,25 @@ def test_job_form_resolution_select_is_keyed_by_real_api_with_correct_resolution
         id_by_model["seedance-1.0"]: ["480p (854 x 480)", "720p (1280 x 720)"]}
 
 
+def test_job_edit_form_resolution_select_has_current_api_resolutions():
+    repository = InMemorySystemRepository(initial_data=_build_video_system_data())
+    model_web = ModelWeb(repository)
+    video_job = next(
+        job for job in model_web.get_web_objects_from_efootprint_type("JobBase")
+        if job.efootprint_class.__name__ == "EcoLogitsVideoGenExternalAPIJob")
+
+    context = FormContextBuilder(model_web).build_edition_context(video_job)
+    resolution_field = next(
+        field for field in context["form_fields"] + context["form_fields_advanced"]
+        if field["web_id"] == "EcoLogitsVideoGenExternalAPIJob_resolution")
+
+    assert resolution_field["selected"] == "720p (1280 x 720)"
+    assert resolution_field["options"] == [
+        {"label": "720p (1280 x 720)", "value": "720p (1280 x 720)"},
+        {"label": "1080p (1920 x 1080)", "value": "1080p (1920 x 1080)"},
+    ]
+
+
 def test_conditional_select_value_metadata_round_trips_through_edit():
     repository = InMemorySystemRepository(initial_data=_build_video_system_data())
     api_web = ModelWeb(repository).external_apis[0]

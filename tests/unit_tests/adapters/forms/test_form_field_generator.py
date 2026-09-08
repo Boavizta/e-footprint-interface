@@ -474,3 +474,32 @@ def test_generate_dynamic_form_rekeys_cross_object_conditional_by_referenced_obj
     assert entry["filter_by"] == "service_or_external_api"
     # and the list is keyed by available API object id, each mapping to that API's model's resolutions.
     assert entry["list_value"] == {"api_1": ["720p", "1080p"], "api_2": ["4k"]}
+
+
+def test_generate_dynamic_form_resolves_skipped_conditional_dependency_from_edited_object(
+    monkeypatch, minimal_model_web
+):
+    monkeypatch.setitem(
+        MODELING_OBJECT_CLASSES_DICT, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobClass
+    )
+    monkeypatch.setitem(
+        ALL_EFOOTPRINT_CLASSES_DICT, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobClass
+    )
+    monkeypatch.setitem(
+        EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobWeb
+    )
+    external_api = _StubReferencedAPI("api_1", "model-a")
+    obj_to_edit = SimpleNamespace(modeling_obj=SimpleNamespace(external_api=external_api))
+    default_values = {"name": "test", "resolution": SourceObject("720p")}
+
+    fields, _, dynamic_lists = generate_dynamic_form(
+        _SyntheticCrossObjectJobClass.__name__, default_values, minimal_model_web, obj_to_edit=obj_to_edit
+    )
+
+    resolution_field = _get_field_by_web_id(fields, f"{_SyntheticCrossObjectJobClass.__name__}_resolution")
+    assert resolution_field["selected"] == "720p"
+    assert resolution_field["options"] == [
+        {"label": "720p", "value": "720p"},
+        {"label": "1080p", "value": "1080p"},
+    ]
+    assert dynamic_lists == []
