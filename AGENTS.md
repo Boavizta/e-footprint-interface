@@ -29,7 +29,8 @@ This file orients agents and contributors. It is intentionally short. Substance 
 ## Dev commands
 
 ```bash
-poetry install --with dev
+git pull                                     # always start from the latest main — agents repeatedly dev against stale checkouts
+poetry install --with dev                    # re-run after every pull so dependencies (incl. the efootprint library) stay in sync
 npm install && npm run build:result-charts:dev
 poetry run python manage.py migrate
 poetry run python manage.py runserver         # http://localhost:8000
