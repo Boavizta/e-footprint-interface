@@ -20,26 +20,7 @@ class DictSession(dict):
     modified = False
 
 
-def _configure_public_deployment(settings):
-    settings.DATA_PRIVACY_OPERATOR_NAME = "Boavizta"
-    settings.DATA_PRIVACY_HOSTING_PROVIDER_NAME = "Clever Cloud"
-    settings.DATA_PRIVACY_HOSTING_REGION = "Paris"
-    settings.DATA_PRIVACY_SECURITY_CONTACT = "security@example.org"
-    settings.DATA_PRIVACY_HTTPS_ENABLED = True
-    settings.DATA_PRIVACY_REDIS_TLS_SETUP_IN_PROGRESS = True
-    settings.DATA_PRIVACY_REDIS_BACKUP_DISABLE_IN_PROGRESS = True
-    settings.DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST = True
-    settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED = True
-    settings.DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY = "daily"
-    settings.DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS = 7
-    settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = False
-    settings.DATA_PRIVACY_POSTGRES_BACKUP_ENCRYPTION_IN_PROGRESS = True
-    settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW = "overnight"
-    settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = True
-
-
-def test_data_status_uses_integer_workspace_metadata_and_configured_facts(settings):
-    _configure_public_deployment(settings)
+def test_data_status_uses_integer_workspace_metadata():
     session = DictSession()
     WorkspaceIndex(session).set_slot_size(0, 1 * 1024 * 1024)
     WorkspaceIndex(session).set_slot_size(1, 512 * 1024)
@@ -58,13 +39,6 @@ def test_data_status_uses_integer_workspace_metadata_and_configured_facts(settin
     assert status.hot_cache_retention_display == "1 hour"
     assert status.recovery_retention_display == "12 hours"
     assert [choice.seconds for choice in status.recovery_retention_choices] == list(APPROVED_RECOVERY_RETENTION_SECONDS)
-    assert status.operator_name == "Boavizta"
-    assert status.hosting_provider_name == "Clever Cloud"
-    assert status.postgres_encrypted_at_rest is True
-    assert status.postgres_backups_encrypted_at_rest is False
-    assert status.redis_tls_setup_in_progress is True
-    assert status.redis_backup_disable_in_progress is True
-    assert status.postgres_backup_encryption_in_progress is True
 
 
 @pytest.mark.parametrize(
@@ -78,9 +52,8 @@ def test_data_status_uses_integer_workspace_metadata_and_configured_facts(settin
     ],
 )
 def test_workspace_storage_warning_uses_the_exact_eighty_percent_boundary(
-    settings, workspace_limit_mb, workspace_size_bytes, expected_warning
+    workspace_limit_mb, workspace_size_bytes, expected_warning
 ):
-    _configure_public_deployment(settings)
     session = DictSession()
     WorkspaceIndex(session).set_slot_size(0, workspace_size_bytes)
 
@@ -91,8 +64,7 @@ def test_workspace_storage_warning_uses_the_exact_eighty_percent_boundary(
 
 
 @pytest.mark.django_db
-def test_workspace_storage_status_is_metadata_only_and_keeps_one_accessible_oob_region(client, settings):
-    _configure_public_deployment(settings)
+def test_workspace_storage_status_is_metadata_only_and_keeps_one_accessible_oob_region(client):
     session = client.session
     WorkspaceIndex(session).set_slot_size(0, 4 * 1024 * 1024)
     session.save()
@@ -116,8 +88,7 @@ def test_workspace_storage_status_is_metadata_only_and_keeps_one_accessible_oob_
 
 
 @pytest.mark.django_db
-def test_workspace_storage_status_is_visually_empty_below_the_warning_threshold(client, settings):
-    _configure_public_deployment(settings)
+def test_workspace_storage_status_is_visually_empty_below_the_warning_threshold(client):
     session = client.session
     WorkspaceIndex(session).set_slot_size(0, 4 * 1024 * 1024 - 1)
     session.save()
@@ -161,8 +132,7 @@ def test_result_materialization_response_refreshes_workspace_storage_status(clie
 
 
 @pytest.mark.django_db
-def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retention_choices(client, settings):
-    _configure_public_deployment(settings)
+def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retention_choices(client):
     session = client.session
     WorkspaceIndex(session).set_slot_size(0, 1_024)
     session.save()
@@ -175,6 +145,7 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
         response = client.get("/model_builder/data-privacy/", HTTP_HX_REQUEST="true")
 
     content = response.content.decode()
+    normalized_content = " ".join(content.split())
     option_values = [int(value) for value in re.findall(r'<option value="(\d+)"', content)]
 
     assert response.status_code == 200
@@ -188,9 +159,9 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert "Redis hot cache" in content
     assert "Live PostgreSQL recovery storage" in content
     assert "Live PostgreSQL storage is encrypted at rest" in content
-    assert "These backups are not encrypted at rest" in content
+    assert "are not encrypted at rest" in content
     assert "Redis backups are being disabled" in content
-    assert "TLS protection for the connection between the application and Redis is being set up" in content
+    assert "TLS protection for the connection between the application and Redis is being set up" in normalized_content
     assert "Backup encryption is being set up" in content
     assert "<h2 class=\"h6 fw-semibold\">Security</h2>" in content
     assert ">Protection</h2>" not in content
@@ -201,51 +172,33 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert "Boavizta" in content
     assert "Clever Cloud" in content
     assert "Paris" in content
-    assert 'href="mailto:security@example.org"' in content
+    assert 'href="mailto:vincent.villet@publicissapient.com"' in content
     assert "50 MB limit is a capacity policy for this shared public deployment" in content
 
 
 @pytest.mark.django_db
-def test_data_privacy_route_is_standalone_and_self_host_facts_are_not_assumed(client, settings):
+def test_data_privacy_route_is_standalone(client, settings):
     settings.STORAGES = {
         **settings.STORAGES,
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
     }
-    settings.DATA_PRIVACY_OPERATOR_NAME = ""
-    settings.DATA_PRIVACY_HOSTING_PROVIDER_NAME = ""
-    settings.DATA_PRIVACY_HOSTING_REGION = ""
-    settings.DATA_PRIVACY_SECURITY_CONTACT = ""
-    settings.DATA_PRIVACY_HTTPS_ENABLED = None
-    settings.DATA_PRIVACY_REDIS_TLS_SETUP_IN_PROGRESS = False
-    settings.DATA_PRIVACY_REDIS_BACKUP_DISABLE_IN_PROGRESS = False
-    settings.DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST = None
-    settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED = None
-    settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = None
-    settings.DATA_PRIVACY_POSTGRES_BACKUP_ENCRYPTION_IN_PROGRESS = False
-    settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW = ""
-    settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = False
-
     with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 8):
         response = client.get("/model_builder/data-privacy/")
 
     content = response.content.decode()
     assert response.status_code == 200
     assert "<!DOCTYPE html>" in content
-    assert "Clever Cloud" not in content
-    assert "Boavizta" not in content
-    assert "Paris" not in content
-    assert "8 MB limit is the capacity policy configured for this deployment" in content
-    assert "No at-rest encryption assurance is configured" in content
-    assert "No backup-lifecycle assurance is configured" in content
-    assert "PostgreSQL backups are disabled" not in content
-    assert "Redis backups are being disabled" not in content
-    assert "TLS protection for the connection between the application and Redis is being set up" not in content
-    assert "Backup encryption is being set up" not in content
+    assert "Operated by Boavizta" in content
+    assert "Clever Cloud" in content
+    assert "hosted in Paris" in content
+    assert "8 MB limit is a capacity policy for this shared public deployment" in content
+    assert "Redis backups are being disabled" in content
+    assert "TLS protection" in content
+    assert "Backup encryption is being set up" in content
 
 
 @pytest.mark.django_db
-def test_retention_update_persists_the_choice_and_reports_each_saved_slot(client, settings):
-    _configure_public_deployment(settings)
+def test_retention_update_persists_the_choice_and_reports_each_saved_slot(client):
     session = client.session
     index = WorkspaceIndex(session)
     index.set_slot_size(0, 100)
@@ -281,8 +234,7 @@ def test_retention_update_persists_the_choice_and_reports_each_saved_slot(client
 
 
 @pytest.mark.django_db
-def test_retention_update_reports_backend_failure_without_claiming_disappearance(client, settings):
-    _configure_public_deployment(settings)
+def test_retention_update_reports_backend_failure_without_claiming_disappearance(client):
     session = client.session
     WorkspaceIndex(session).set_slot_size(0, 100)
     session.save()
@@ -311,7 +263,6 @@ def test_retention_update_rejects_values_outside_the_allowlist(client):
 
 @pytest.mark.django_db
 def test_retention_update_requires_csrf(settings):
-    _configure_public_deployment(settings)
     settings.STORAGES = {
         **settings.STORAGES,
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},

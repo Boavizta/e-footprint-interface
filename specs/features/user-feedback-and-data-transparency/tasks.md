@@ -133,7 +133,7 @@ Acceptance:
 - Its copy clearly separates hot cache, recovery rows, live database storage, and seven-day backups, including which layers are currently known to be encrypted at rest.
 - The selector exposes exactly `1h, 3h, 6h, 12h, 1d…14d`, shows 12 hours by default, survives navigation through the session, and immediately updates occupied recovery expiries without touching Redis.
 - Current workspace size and configured limit render from stored integer metadata only; opening or refreshing the panel performs no model hydration or serialization.
-- Deployment-specific facts remain configurable so a self-hosted installation is not forced to claim Clever Cloud, Paris, 50 MB, or Boavizta operation.
+- The official Boavizta deployment policy is stated directly in the template, with no privacy-specific environment configuration. Self-hosting customization is deferred until an actual downstream need is proposed.
 
 Dependencies: Task 2.
 
@@ -206,7 +206,7 @@ Provider facts to close:
 Implementation units:
 
 - Record the dated written answers and distinguish provider confirmation from direct runtime checks.
-- Reconcile production settings, environment documentation, and Data & privacy copy with the final state. If PostgreSQL backup encryption has not actually been activated, continue to say plainly that the seven-day backups are not encrypted at rest.
+- Reconcile the hardcoded Data & privacy policy with the final state. If PostgreSQL backup encryption has not actually been activated, continue to say plainly that the seven-day backups are not encrypted at rest.
 - Verify the deployed Redis baseline (`maxmemory` 128 MB, `allkeys-lru`), one-hour system TTL, memory headroom, cache hits/misses, evictions, rejected writes, and cleanup-worker logs. Treat eviction as resilience behavior, not as a retention guarantee.
 - Verify that containers, Redis, and PostgreSQL are still hosted in Paris and that the documented operator, processor, and security contact remain accurate.
 - Harmonize the architecture and save/load journey documentation with the verified release behavior and document PostgreSQL backups as required resilience for the forthcoming public-link sharing feature without implementing that feature here.

@@ -58,91 +58,41 @@
         </article>
         <article class="data-privacy-card data-privacy-card-security">
             <h2 class="h6 fw-semibold">Security</h2>
-            {% if data_status.operator_name or data_status.hosting_provider_name or data_status.hosting_region %}
             <p>
                 <strong>Operation and hosting.</strong>
-                {% if data_status.operator_name %}Operated by {{ data_status.operator_name }}.{% endif %}
-                {% if data_status.hosting_provider_name %}
-                {{ data_status.hosting_provider_name }} is the data processor and hosting provider for the application
-                containers, PostgreSQL, and Redis{% if data_status.hosting_region %}, hosted in
-                {{ data_status.hosting_region }}{% endif %}.
-                {% endif %}
+                Operated by Boavizta. Clever Cloud is the data processor and hosting provider for the application
+                containers, PostgreSQL, and Redis, hosted in Paris.
             </p>
-            {% else %}
-            <p>
-                <strong>Operation and hosting.</strong> Deployment-specific operator, processor, hosting, and region
-                details are not configured.
-            </p>
-            {% endif %}
             <p>
                 <strong>Transport.</strong>
-                {% if data_status.https_enabled == True %}
-                HTTPS protects data in transit between your browser and the application for this deployment.
-                {% else %}
-                No transport-protection assurance is configured for this deployment.
-                {% endif %}
-                {% if data_status.redis_tls_setup_in_progress %}
-                TLS protection for the connection between the application and Redis is being set up. Until it is
-                completed and verified, no encrypted-transport assurance is made for that connection.
-                {% endif %}
+                HTTPS protects data in transit between your browser and the application. TLS protection for the
+                connection between the application and Redis is being set up. Until it is completed and verified, no
+                encrypted-transport assurance is made for that connection.
             </p>
             <p>
                 <strong>Storage.</strong>
-                {% if data_status.postgres_encrypted_at_rest == True %}
-                Live PostgreSQL storage is encrypted at rest.
-                {% elif data_status.postgres_encrypted_at_rest == False %}
-                Live PostgreSQL storage is not encrypted at rest.
-                {% else %}
-                No at-rest encryption assurance is configured for live PostgreSQL storage.
-                {% endif %}
-                No at-rest encryption claim is made here for the Redis hot cache.
+                Live PostgreSQL storage is encrypted at rest. No at-rest encryption claim is made here for the Redis hot
+                cache.
             </p>
-            {% if data_status.redis_backup_disable_in_progress %}
             <p>
                 <strong>Redis backups.</strong> Redis backups are being disabled. Until that change is completed and
                 verified, no claim is made that provider backup or persistence is disabled.
             </p>
-            {% endif %}
-            {% if data_status.postgres_backups_enabled == True %}
             <p>
                 <strong>PostgreSQL backups.</strong>
-                {{ data_status.postgres_backup_frequency|capfirst }} PostgreSQL backups are retained for
-                {{ data_status.postgres_backup_retention_days }} days. They are separate from live recovery storage.
-                {% if data_status.postgres_backups_encrypted_at_rest == True %}
-                These backups are encrypted at rest.
-                {% elif data_status.postgres_backups_encrypted_at_rest == False %}
-                These backups are not encrypted at rest.
-                {% else %}
-                No at-rest encryption assurance is configured for these backups.
-                {% endif %}
-                {% if data_status.postgres_backup_encryption_in_progress %}
-                Backup encryption is being set up. Until activation is completed and verified, treat the backups as
-                unencrypted.
-                {% endif %}
+                Daily PostgreSQL backups are retained for seven days. They are separate from live recovery storage and
+                are not encrypted at rest. Backup encryption is being set up. Until activation is completed and verified,
+                treat the backups as unencrypted.
             </p>
-            <p class="mb-0">
-                {% if data_status.postgres_backup_window %}
-                Backups are observed to run {{ data_status.postgres_backup_window }}, but their timing can vary. A short
-                recovery period such as six hours normally expires before that window and reduces the chance of capture;
-                it does not guarantee exclusion.
-                {% else %}
-                Backup timing depends on this deployment. A short recovery period can reduce the chance of capture, but
-                it does not guarantee exclusion.
-                {% endif %}
-                Any modeling still stored when a backup runs can remain in that backup for up to
-                {{ data_status.postgres_backup_retention_days }} days.
+            <p>
+                Backups are observed to run overnight, but their timing can vary. A short recovery period such as six
+                hours normally expires before that window and reduces the chance of capture; it does not guarantee
+                exclusion. Any modeling still stored when a backup runs can remain in that backup for up to seven days.
             </p>
-            {% elif data_status.postgres_backups_enabled == False %}
-            <p><strong>PostgreSQL backups.</strong> Backups are disabled for this deployment.</p>
-            {% else %}
-            <p><strong>PostgreSQL backups.</strong> No backup-lifecycle assurance is configured for this deployment.</p>
-            {% endif %}
-            {% if data_status.security_contact %}
             <p class="mb-0">
                 <strong>Contact.</strong> Security contact:
-                <a href="mailto:{{ data_status.security_contact }}">{{ data_status.security_contact }}</a>.
+                <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a>.
             </p>
-            {% endif %}
         </article>
     </div>
 
@@ -159,13 +109,8 @@
         </p>
         <p class="small text-muted mb-0">
             This is the latest successfully saved size, read from existing storage metadata.
-            {% if data_status.public_shared_instance %}
             The {{ data_status.workspace_limit_display }} limit is a capacity policy for this shared public deployment;
             it is not an e-footprint modeling or file-format limit.
-            {% else %}
-            The {{ data_status.workspace_limit_display }} limit is the capacity policy configured for this deployment;
-            it is not an e-footprint modeling or file-format limit.
-            {% endif %}
             A self-hosted installation can raise the limit to match its infrastructure.
         </p>
     </section>

@@ -41,21 +41,6 @@ class DataStatus:
     workspace_limit_bytes: int
     workspace_limit_display: str
     show_workspace_storage_warning: bool
-    operator_name: str
-    hosting_provider_name: str
-    hosting_region: str
-    security_contact: str
-    https_enabled: bool | None
-    redis_tls_setup_in_progress: bool
-    redis_backup_disable_in_progress: bool
-    postgres_encrypted_at_rest: bool | None
-    postgres_backups_enabled: bool | None
-    postgres_backup_frequency: str
-    postgres_backup_retention_days: int
-    postgres_backups_encrypted_at_rest: bool | None
-    postgres_backup_encryption_in_progress: bool
-    postgres_backup_window: str
-    public_shared_instance: bool
 
 
 def format_duration(seconds: int) -> str:
@@ -119,21 +104,6 @@ def build_data_status(session: SessionBase) -> DataStatus:
         workspace_limit_bytes=workspace_limit_bytes,
         workspace_limit_display=format_byte_size(workspace_limit_bytes),
         show_workspace_storage_warning=show_workspace_storage_warning,
-        operator_name=settings.DATA_PRIVACY_OPERATOR_NAME,
-        hosting_provider_name=settings.DATA_PRIVACY_HOSTING_PROVIDER_NAME,
-        hosting_region=settings.DATA_PRIVACY_HOSTING_REGION,
-        security_contact=settings.DATA_PRIVACY_SECURITY_CONTACT,
-        https_enabled=settings.DATA_PRIVACY_HTTPS_ENABLED,
-        redis_tls_setup_in_progress=settings.DATA_PRIVACY_REDIS_TLS_SETUP_IN_PROGRESS,
-        redis_backup_disable_in_progress=settings.DATA_PRIVACY_REDIS_BACKUP_DISABLE_IN_PROGRESS,
-        postgres_encrypted_at_rest=settings.DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST,
-        postgres_backups_enabled=settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED,
-        postgres_backup_frequency=settings.DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY,
-        postgres_backup_retention_days=settings.DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS,
-        postgres_backups_encrypted_at_rest=settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST,
-        postgres_backup_encryption_in_progress=settings.DATA_PRIVACY_POSTGRES_BACKUP_ENCRYPTION_IN_PROGRESS,
-        postgres_backup_window=settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW,
-        public_shared_instance=bool(settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE),
     )
 
 
