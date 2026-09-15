@@ -1,6 +1,6 @@
 # User feedback and data transparency — tasks
 
-Status: Tasks — proposed · 2026-09-07
+Status: Implementation complete; release close-out in progress · 2026-09-15
 
 Inputs: [approved specification](spec.html) · [approved plan](plan.html)
 
@@ -184,14 +184,24 @@ Dependencies: Tasks 2 and 3.
 
 ## 5. Reconcile the release with Clever Cloud’s final written answers
 
-This is deliberately the final task. Do not close it, finalize production privacy copy, or replace a known negative fact with an optimistic assumption until the outstanding provider answers have been received and checked against the running services.
+**Status:** In progress — release close-out; does not block deployment
+
+**Deployment decision (2026-09-15):** Tasks 1–4 and truthful interim privacy copy are ready to deploy. Keep this task and feature folder open, and do not archive the feature, until the final provider changes and operational checks below are complete. Pending infrastructure work does not block deployment of the feature itself.
+
+Current provider status (2026-09-15):
+
+- Redis TLS setup is in progress. Until it is completed and verified, the application makes no encrypted application-to-Redis transport claim.
+- Redis backups are being disabled. Until completion and verification, the application makes no claim that provider backup or persistence is disabled.
+- PostgreSQL backup encryption is being set up. Until activation is completed and verified, the backups continue to be described as unencrypted at rest.
+
+This is deliberately the final task. Do not close it, replace an interim or known negative fact with an optimistic assumption, or archive the feature until the outstanding provider answers have been received and checked against the running services.
 
 Provider facts to close:
 
 - Redis encryption at rest.
-- Redis transport protection: TLS (`rediss://`) or a documented equivalent encrypted private path.
-- Confirmation that Redis backups are disabled, including any persistence/snapshot behavior that remains.
-- PostgreSQL backup encryption pricing: whether the quoted €100 is one-off or recurring, which backups/regions it covers, and whether encryption has actually been activated.
+- Completion and runtime verification of Redis transport protection: TLS (`rediss://`) or a documented equivalent encrypted private path.
+- Confirmation that Redis backups have been disabled, including any persistence/snapshot behavior that remains.
+- PostgreSQL backup encryption pricing: whether the quoted €100 is one-off or recurring and which backups/regions it covers; plus confirmation that encryption has actually been activated.
 
 Implementation units:
 
@@ -224,4 +234,6 @@ Acceptance:
 - Operational checks confirm the deployed TTL/eviction/cleanup behavior without inspecting user payloads.
 - All focused Python, JavaScript, rendered-fixture, and critical end-to-end tests pass, and the changelog and durable architecture/journey documentation match the shipped behavior.
 
-Dependencies: Tasks 1–4 and all final Clever Cloud answers listed above.
+Deployment dependency: Tasks 1–4 (satisfied).
+
+Close-out and archive dependencies: all final Clever Cloud answers and operational checks listed above.

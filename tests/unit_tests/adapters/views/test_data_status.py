@@ -26,11 +26,14 @@ def _configure_public_deployment(settings):
     settings.DATA_PRIVACY_HOSTING_REGION = "Paris"
     settings.DATA_PRIVACY_SECURITY_CONTACT = "security@example.org"
     settings.DATA_PRIVACY_HTTPS_ENABLED = True
+    settings.DATA_PRIVACY_REDIS_TLS_SETUP_IN_PROGRESS = True
+    settings.DATA_PRIVACY_REDIS_BACKUP_DISABLE_IN_PROGRESS = True
     settings.DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST = True
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED = True
     settings.DATA_PRIVACY_POSTGRES_BACKUP_FREQUENCY = "daily"
     settings.DATA_PRIVACY_POSTGRES_BACKUP_RETENTION_DAYS = 7
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = False
+    settings.DATA_PRIVACY_POSTGRES_BACKUP_ENCRYPTION_IN_PROGRESS = True
     settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW = "overnight"
     settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = True
 
@@ -59,6 +62,9 @@ def test_data_status_uses_integer_workspace_metadata_and_configured_facts(settin
     assert status.hosting_provider_name == "Clever Cloud"
     assert status.postgres_encrypted_at_rest is True
     assert status.postgres_backups_encrypted_at_rest is False
+    assert status.redis_tls_setup_in_progress is True
+    assert status.redis_backup_disable_in_progress is True
+    assert status.postgres_backup_encryption_in_progress is True
 
 
 @pytest.mark.parametrize(
@@ -183,6 +189,9 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert "Live PostgreSQL recovery storage" in content
     assert "Live PostgreSQL storage is encrypted at rest" in content
     assert "These backups are not encrypted at rest" in content
+    assert "Redis backups are being disabled" in content
+    assert "TLS protection for the connection between the application and Redis is being set up" in content
+    assert "Backup encryption is being set up" in content
     assert "all data is encrypted" not in content.lower()
     assert "does not guarantee" in content
     assert "Boavizta" in content
@@ -203,9 +212,12 @@ def test_data_privacy_route_is_standalone_and_self_host_facts_are_not_assumed(cl
     settings.DATA_PRIVACY_HOSTING_REGION = ""
     settings.DATA_PRIVACY_SECURITY_CONTACT = ""
     settings.DATA_PRIVACY_HTTPS_ENABLED = None
+    settings.DATA_PRIVACY_REDIS_TLS_SETUP_IN_PROGRESS = False
+    settings.DATA_PRIVACY_REDIS_BACKUP_DISABLE_IN_PROGRESS = False
     settings.DATA_PRIVACY_POSTGRES_ENCRYPTED_AT_REST = None
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENABLED = None
     settings.DATA_PRIVACY_POSTGRES_BACKUPS_ENCRYPTED_AT_REST = None
+    settings.DATA_PRIVACY_POSTGRES_BACKUP_ENCRYPTION_IN_PROGRESS = False
     settings.DATA_PRIVACY_POSTGRES_BACKUP_WINDOW = ""
     settings.DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = False
 
@@ -222,6 +234,9 @@ def test_data_privacy_route_is_standalone_and_self_host_facts_are_not_assumed(cl
     assert "No at-rest encryption assurance is configured" in content
     assert "No PostgreSQL backup-lifecycle assurance is configured" in content
     assert "PostgreSQL backups are disabled" not in content
+    assert "Redis backups are being disabled" not in content
+    assert "TLS protection for the connection between the application and Redis is being set up" not in content
+    assert "Backup encryption is being set up" not in content
 
 
 @pytest.mark.django_db

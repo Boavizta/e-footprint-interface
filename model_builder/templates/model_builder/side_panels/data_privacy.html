@@ -45,6 +45,12 @@
                 {{ data_status.hot_cache_retention_display }} after the latest save. Reads do not extend that time, and
                 eviction or infrastructure failure can remove this copy sooner.
             </p>
+            {% if data_status.redis_backup_disable_in_progress %}
+            <p class="mb-0 mt-2">
+                Redis backups are being disabled. Until that change is completed and verified, no claim is made that
+                provider backup or persistence is disabled.
+            </p>
+            {% endif %}
         </article>
         <article class="data-privacy-card">
             <h2 class="h6 fw-semibold">Live PostgreSQL recovery storage</h2>
@@ -60,7 +66,7 @@
             <h2 class="h6 fw-semibold">Protection</h2>
             <p>
                 {% if data_status.https_enabled == True %}
-                HTTPS protects data in transit for this deployment.
+                HTTPS protects data in transit between your browser and the application for this deployment.
                 {% else %}
                 No transport-protection assurance is configured for this deployment.
                 {% endif %}
@@ -75,6 +81,12 @@
                 {% endif %}
                 No at-rest encryption claim is made here for the Redis hot cache.
             </p>
+            {% if data_status.redis_tls_setup_in_progress %}
+            <p class="mb-0">
+                TLS protection for the connection between the application and Redis is being set up. Until it is
+                completed and verified, no encrypted-transport assurance is made for that connection.
+            </p>
+            {% endif %}
         </article>
         <article class="data-privacy-card">
             <h2 class="h6 fw-semibold">PostgreSQL backups</h2>
@@ -88,6 +100,10 @@
                 These backups are not encrypted at rest.
                 {% else %}
                 No at-rest encryption assurance is configured for these backups.
+                {% endif %}
+                {% if data_status.postgres_backup_encryption_in_progress %}
+                Backup encryption is being set up. Until activation is completed and verified, treat the backups as
+                unencrypted.
                 {% endif %}
             </p>
             <p class="mb-0">

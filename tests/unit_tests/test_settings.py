@@ -22,6 +22,9 @@ def test_public_privacy_claims_are_not_inferred_from_the_hosting_platform():
     assert settings.DATA_PRIVACY_OPERATOR_NAME == ""
     assert settings.DATA_PRIVACY_HOSTING_PROVIDER_NAME == ""
     assert settings.DATA_PRIVACY_HOSTING_REGION == ""
+    assert settings.DATA_PRIVACY_REDIS_TLS_SETUP_IN_PROGRESS is False
+    assert settings.DATA_PRIVACY_REDIS_BACKUP_DISABLE_IN_PROGRESS is False
+    assert settings.DATA_PRIVACY_POSTGRES_BACKUP_ENCRYPTION_IN_PROGRESS is False
 
 
 def test_optional_privacy_boolean_preserves_unknown_and_rejects_invalid_values(monkeypatch):
