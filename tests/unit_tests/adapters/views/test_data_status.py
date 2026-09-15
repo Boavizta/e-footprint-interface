@@ -158,7 +158,7 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert "opaque session identifier—not your modeling" in content
     assert "Redis hot cache" in content
     assert "Live PostgreSQL recovery storage" in content
-    assert "Live PostgreSQL storage is encrypted at rest" in content
+    assert "Live PostgreSQL storage and the Redis hot cache are encrypted at rest" in content
     assert "are not encrypted at rest" in content
     assert "Redis backups are being disabled" in content
     assert "TLS protection for the connection between the application and Redis is being set up" in normalized_content

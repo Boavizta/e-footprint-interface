@@ -190,6 +190,7 @@ Dependencies: Tasks 2 and 3.
 
 Current provider status (2026-09-15):
 
+- Live Redis storage is encrypted at rest; Redis backups are the unencrypted layer.
 - Redis TLS setup is in progress. Until it is completed and verified, the application makes no encrypted application-to-Redis transport claim.
 - Redis backups are being disabled. Until completion and verification, the application makes no claim that provider backup or persistence is disabled.
 - PostgreSQL backup encryption is being set up. Until activation is completed and verified, the backups continue to be described as unencrypted at rest.
@@ -198,7 +199,6 @@ This is deliberately the final task. Do not close it, replace an interim or know
 
 Provider facts to close:
 
-- Redis encryption at rest.
 - Completion and runtime verification of Redis transport protection: TLS (`rediss://`) or a documented equivalent encrypted private path.
 - Confirmation that Redis backups have been disabled, including any persistence/snapshot behavior that remains.
 - PostgreSQL backup encryption pricing: whether the quoted €100 is one-off or recurring and which backups/regions it covers; plus confirmation that encryption has actually been activated.
