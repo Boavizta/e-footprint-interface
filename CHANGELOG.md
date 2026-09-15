@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [V1.13.0] - 2026-09-15
+
+### Added
+- A Feedback page provides safe GitHub and email handoffs, with an optional modeling download that users review and attach themselves.
+- A Data & privacy page explains how modeling data is stored, shows workspace usage, and documents hosting, encryption, and backup protections.
+- A non-blocking warning appears when a workspace reaches 80% of the shared storage limit.
+
+### Changed
+- Redis keeps the latest saved modeling for one hour. PostgreSQL recovery retention can be set from one hour to 14 days, defaults to 12 hours, and expired data is cleaned up hourly.
+
 ## [V1.12.1] - 2026-09-08
 
 ### Fixed
