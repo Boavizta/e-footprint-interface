@@ -55,20 +55,14 @@ def test_retention_choice_and_shared_budget_warning_work_together(minimal_comple
     builder.open_data_privacy_from_storage_warning()
     expect(page.locator("#retention-seconds")).to_have_value("3600")
 
-    operation_card = page.locator(
+    security_card = page.locator(
         ".data-privacy-card",
-        has=page.get_by_role("heading", name="Operation, hosting & security"),
+        has=page.get_by_role("heading", name="Security", exact=True),
     )
-    operation_text = operation_card.inner_text()
-    if "Deployment-specific operator" in operation_text:
-        expect(operation_card).to_contain_text(
-            "Deployment-specific operator, processor, hosting, and region details are not configured"
-        )
-        expect(operation_card.locator("a[href^='mailto:']")).to_have_count(0)
-    else:
-        expect(operation_card).to_contain_text("Operated by")
-        expect(operation_card).to_contain_text("hosted in")
-        expect(operation_card.locator("a[href^='mailto:']")).to_have_count(1)
+    expect(security_card).to_contain_text("Operated by Boavizta")
+    expect(security_card).to_contain_text("Clever Cloud")
+    expect(security_card).to_contain_text("hosted in Paris")
+    expect(security_card.locator("a[href^='mailto:']")).to_have_count(1)
 
     builder.close_side_panel()
     builder.open_feedback_from_desktop_navbar()
