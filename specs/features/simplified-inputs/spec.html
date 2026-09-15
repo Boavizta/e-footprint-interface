@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simplified inputs — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  button { cursor: pointer; padding: .42rem .75rem; }
+  input, select, textarea { box-sizing: border-box; padding: .35rem .45rem; max-width: 100%; }
+  #file-entry { background: #f5f7fa; border: 1px solid #c9d1dc; border-radius: 7px;
+                padding: .7rem; margin-bottom: .8rem; }
+  #file-entry p { margin: 0 0 .45rem; }
+  #file-entry button { margin: .2rem .25rem .2rem 0; }
+  #open-result { display: block; color: #41546f; margin-top: .35rem; }
+  #mode-flow { display: grid; grid-template-columns: 1fr auto 1fr; gap: .45rem;
+               align-items: center; margin: .8rem 0; font-size: .86rem; }
+  #mode-flow div { border: 1px solid #ccd4df; border-radius: 6px; padding: .45rem .55rem;
+                   background: white; text-align: center; }
+  #mode-flow strong { display: block; }
+  #mode-switch-summary { text-align: center; border: 1px solid #9fb0c5; background: #eef4ff;
+                         border-radius: 6px; padding: .55rem; }
+  #modeling-screen, #construction-screen, #consumption-screen {
+    border: 1px solid #9eabbc; border-radius: 8px; overflow: hidden;
+  }
+  #modeling-screen > header, #construction-screen > header, #consumption-screen > header {
+    background: #243b64; color: white; padding: .65rem .9rem; display: flex;
+    justify-content: space-between; gap: 1rem; align-items: center;
+  }
+  #modeling-screen > header small, #construction-screen > header small, #consumption-screen > header small {
+    color: #dce6f7;
+  }
+  [data-mode-nav] { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem;
+                    padding: .5rem .7rem; background: #edf1f6; border-bottom: 1px solid #c9d1dc; }
+  [data-mode-nav] span { font-size: .8rem; font-weight: 700; color: #4d5d72; margin-right: .2rem; }
+  [data-mode-nav] button { background: white; border: 1px solid #aeb9c7; border-radius: 5px;
+                           padding: .3rem .55rem; }
+  [data-mode-nav] button[aria-pressed="true"] { background: #243b64; color: white; border-color: #243b64; }
+  [data-mode-nav] button:disabled { color: #8a929c; background: #e5e8ec; cursor: not-allowed; }
+  #modeling-body, #construction-body, #consumption-body { padding: .9rem; }
+  fieldset { border: 1px solid #d8d8d8; border-radius: 6px; margin: .7rem 0; padding: .65rem .8rem; }
+  legend { font-weight: 650; padding: 0 .3rem; }
+  label { display: block; margin: .35rem 0; }
+  #template-status { background: #eef4ff; border: 1px solid #aec4ec; border-radius: 6px;
+                     padding: .55rem .7rem; margin-bottom: .75rem; }
+  #template-status button { margin: .35rem .25rem 0 0; }
+  #model-canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; margin: .8rem 0; }
+  #model-canvas section { border: 1px solid #bbb; border-radius: 6px; padding: .55rem; background: #fafafa; }
+  #model-canvas h3 { font-size: .9rem; margin: 0 0 .35rem; }
+  #model-canvas p { font-size: .82rem; margin: .25rem 0; padding: .3rem; background: white;
+                    border: 1px solid #ddd; border-radius: 4px; }
+  #construction-actions, #consumption-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+  #template-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .7rem; }
+  #template-fields fieldset { margin: 0; }
+  #template-fields input { width: 100%; }
+  #consumption-workspace { display: grid; grid-template-columns: minmax(0, 1fr); }
+  #consumption-workspace[data-panel-open="true"] { grid-template-columns: minmax(0, 1fr) minmax(19rem, 44%); }
+  [data-timeseries-card] { border: 1px solid #9fb0c5; border-radius: 7px; margin-top: .8rem;
+                           padding: .7rem; background: #f8faff; }
+  [data-timeseries-card] > header { display: flex; justify-content: space-between; align-items: center;
+                                    gap: .7rem; }
+  [data-timeseries-card] p { margin: .35rem 0 0; }
+  [data-timeseries-card] small { color: #5c6878; }
+  #timeseries-panel { border-left: 1px solid #9eabbc; background: white; min-width: 0; }
+  #timeseries-panel > header { display: flex; justify-content: space-between; align-items: center;
+                               gap: .6rem; background: #eef2f7; border-bottom: 1px solid #c9d1dc;
+                               padding: .65rem .75rem; }
+  #timeseries-panel > div { padding: .75rem; }
+  #timeseries-panel select { width: 100%; }
+  #timeseries-panel fieldset { background: #fafafa; }
+  #timeseries-panel table { font-size: .78rem; margin: .45rem 0; }
+  #timeseries-panel table input { width: 4.5rem; }
+  #timeseries-panel footer { display: flex; justify-content: flex-end; gap: .4rem; margin-top: .8rem; }
+  [data-preview] { border: 1px solid #ccd4df; border-radius: 6px; background: #fbfcfe;
+                   padding: .5rem; margin-top: .65rem; }
+  [data-preview] p { margin: 0 0 .35rem; font-size: .82rem; }
+  [data-preview] svg { width: 100%; height: 5rem; display: block; }
+  #mode-banner { background: #eef4ff; border: 1px solid #aec4ec; border-radius: 6px;
+                 padding: .55rem .7rem; margin-bottom: .8rem; }
+  #results-summary { background: #f4faf4; border: 1px solid #b9d8b9; border-radius: 6px;
+                     padding: .6rem .75rem; margin: .8rem 0; }
+  [data-same-access] { background: #fff5e6; border: 1px solid #d4a75b; border-radius: 6px;
+                       padding: .55rem .7rem; margin: .75rem 0; }
+  @media (max-width: 36rem) {
+    #model-canvas, #mode-flow { grid-template-columns: 1fr; }
+    #consumption-workspace[data-panel-open="true"] { grid-template-columns: 1fr; }
+    #timeseries-panel { border-left: 0; border-top: 1px solid #9eabbc; }
+    #mode-flow > span { transform: rotate(90deg); text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Simplified inputs</h1>
+<p class="status">Status: Spec — under review · 2026-09-14</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <p>An ecodesign expert can build a faithful modeling, but that modeling may contain dozens of
+  interdependent objects and assumptions. A colleague who only needs to adapt a few business
+  variables must currently enter the same full editing experience, understand which inputs are safe
+  to change, and avoid disturbing the expert's underlying structure.</p>
+  <p>This feature lets the expert turn a complete modeling into a <strong>simplified template</strong>:
+  a self-contained JSON file that exposes a deliberately chosen subset of inputs. Opening the file
+  leads with those inputs, so another person can adapt the modeling without first learning its full
+  construction. The same JSON also retains the complete modeling and template definition. Every file
+  holder can move between normal modeling, template construction, and template consumption;
+  simplification guides the user but does not conceal, secure, or create ownership over the
+  underlying data.</p>
+  <table>
+    <tr><th>Persona</th><th>Need</th></tr>
+    <tr><td>Ecodesign expert / consultant</td><td>Encode a robust, explainable modeling once, decide
+    which assumptions another person should adapt, and distribute the result as a file.</td></tr>
+    <tr><td>Product owner, engineer, or client consuming the template</td><td>Answer a small, relevant
+    set of questions and see the resulting footprint without navigating or accidentally restructuring
+    the expert modeling.</td></tr>
+    <tr><td>Any file holder acting in either role</td><td>Move between the guided experience, normal
+    modeling, and template construction without needing a different file or additional permission.</td></tr>
+  </table>
+  <p>“Template maker” and “consumer” describe what someone is doing at a given moment, not different
+  account roles. A consumer may inspect or revise the template; a maker may use the consumption view
+  to test it. The only default is the opening mode.</p>
+  <p><strong>Why now:</strong> e-footprint already supports deep modeling, explainable results, and
+  portable JSON round-trips. A simplified-input layer makes that expert work reusable by the
+  interface's primary non-technical audience and directly serves its principle of “no one left
+  behind, depth available on demand.”</p>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <p>Each criterion is user-observable and testable.</p>
+  <ul>
+    <li><strong>Create from real work:</strong> from normal modeling mode, any user can enter template
+    construction mode and choose a subset of the modeling's editable inputs to expose.</li>
+    <li><strong>Portable handoff:</strong> the expert can export one self-contained JSON file carrying
+    the complete modeling and its simplified-input definition. No account, server-side library, or
+    separate companion file is required to use it.</li>
+    <li><strong>Predictable opening mode:</strong> a normal modeling JSON opens in modeling mode. A
+    JSON containing a simplified-template definition opens in template consumption mode by default,
+    regardless of who created or opened it.</li>
+    <li><strong>Only the intended choices:</strong> in template consumption mode, only the inputs
+    selected in template construction mode are editable. Hidden inputs and structural actions cannot
+    be changed accidentally through that mode.</li>
+    <li><strong>Familiar input context:</strong> Simplified inputs identifies every exposed field
+    using its existing field label together with the owning object's existing type and name; template
+    makers do not need to invent a separate category or labeling system.</li>
+    <li><strong>Adapt and calculate:</strong> a consumer can change the exposed inputs using their
+    normal input types, receives the same validation guarantees as full editing, and can view results
+    recalculated from the adapted values.</li>
+    <li><strong>Focused timeseries editing:</strong> an exposed timeseries appears as a condensed
+    field within the same owning-object container as ordinary inputs. Its Edit action opens a
+    field-only side panel containing the compatible strategy selector, the selected strategy's
+    complete editor, and its preview; only one timeseries is edited at a time.</li>
+    <li><strong>Timeseries strategies remain available:</strong> a consumer can switch among the
+    compatible timeseries strategies available in normal editing. Saving the panel persists the
+    selected strategy and authored inputs, closes the panel, and refreshes the condensed summary.</li>
+    <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
+    legitimate calculated consequences, but does not rewrite unrelated hidden assumptions or the
+    simplified-input definition.</li>
+    <li><strong>Three explicit modes:</strong> a visible, consistently placed control lets any file
+    holder move among template consumption (“Simplified inputs”), normal modeling (“Modeling”), and
+    template construction (“Template setup”) without exporting or reopening the JSON.</li>
+    <li><strong>Depth remains available:</strong> switching to modeling mode makes every assumption
+    and structural action available, with clear copy explaining that the simplified guardrails no
+    longer apply. This is a usability boundary, not an access-control mechanism.</li>
+    <li><strong>Resume template work:</strong> switching to template construction mode lets the same
+    user edit which inputs the template exposes and export an updated templated JSON without needing
+    the original pre-template file.</li>
+    <li><strong>Faithful round-trip:</strong> repeated export and reopen cycles preserve the complete
+    modeling, current adapted values, and simplified-input choices. A file that still contains a
+    template continues to open in template consumption mode by default.</li>
+    <li><strong>Safe failure:</strong> an invalid template definition or unreadable JSON is rejected
+    with an actionable explanation and does not replace the modeling already open in the session.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, classes, schema shape, rendering strategy, and
+  migration mechanics belong in <code>plan.html</code>.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Entering template construction mode from a normal modeling and creating a simplified
+      template from it.</li>
+      <li>Selecting which existing modeling inputs are editable in template consumption mode.</li>
+      <li>A small template identity for orientation: a name and an explanation of what the consumer
+      is adapting.</li>
+      <li>Three visibly distinct modes over the same in-session modeling: normal modeling, template
+      construction, and template consumption.</li>
+      <li>A dedicated template consumption mode that groups exposed inputs into a focused editing
+      surface, labels the current mode, validates changes, and keeps results available.</li>
+      <li>Organizing the focused surface with the existing modeling hierarchy: each input keeps its
+      normal field label and is shown under its owning object's type and name.</li>
+      <li>Timeseries exposed as one composite field inside its normal owning-object group: a
+      condensed summary on the main surface and a dedicated side panel for its strategy selector,
+      full editor, validation, and preview.</li>
+      <li>Full control of the exposed timeseries, including changing to any compatible editable
+      strategy, while keeping the complexity of only one timeseries open at a time.</li>
+      <li>A consistent mode control for moving among all three modes without changing files.</li>
+      <li>A JSON round-trip containing both the complete modeling and the simplified-input definition.</li>
+      <li>Opening normal JSON in modeling mode and templated JSON in template consumption mode by
+      default.</li>
+      <li>Equal access to all three modes for every holder of a templated JSON; no maker/consumer
+      permission distinction.</li>
+      <li>Preserving source, confidence, comment, unit, and explanatory context already associated
+      with an exposed input wherever the normal editor supports them.</li>
+      <li>Non-destructive validation and recovery when an uploaded template cannot be used.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Using hidden inputs as secrets, locking full editing, passwords, roles, digital signatures,
+      or author-only permissions.</li>
+      <li>Publishing templates to a hosted catalogue, stable public URLs, discovery, or server-side
+      persistence. File exchange remains the sharing mechanism.</li>
+      <li>Multi-user collaborative editing of one modeling.</li>
+      <li>Changing or simplifying e-footprint's calculation semantics. The template controls which
+      existing inputs are presented; it does not introduce a second modeling engine.</li>
+      <li>Automatically deciding which inputs are important or generating a template from heuristics.</li>
+      <li>Spreadsheet, YAML, XML, or other template formats.</li>
+      <li>Template version history, merging independently adapted copies, or syncing a consumer copy
+      when the expert later changes the source template.</li>
+      <li>Multiple alternative simplified experiences inside one file.</li>
+      <li>A separate read-only full-model exploration mode. A user who wants to inspect the complete
+      modeling switches to Modeling, where they are trusted to avoid unintended changes.</li>
+      <li>Selecting or locking individual nested parts of a timeseries, such as one profile baseline
+      or one weekly time range. The timeseries is exposed as a whole.</li>
+      <li>Custom template categories, custom field labels, or a second naming hierarchy independent
+      of the modeling's existing object types, object names, and field labels.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>The mockup makes file opening and mode transitions explicit. Try both file types, then use the
+  mode control inside the application frame. “Simplified inputs,” “Modeling,” and “Template setup”
+  are three views over the same loaded JSON—not different files, accounts, or permission levels.</p>
+  <div class="mockup">
+    <div id="file-entry">
+      <p><strong>Start here: open a JSON file</strong></p>
+      <button type="button" id="open-regular-json">Open normal modeling JSON</button>
+      <button type="button" id="open-templated-json">Open templated JSON</button>
+      <small id="open-result">Templated JSON detected → opened in Simplified inputs by default.</small>
+    </div>
+
+    <div id="mode-flow" aria-label="Default opening mode by file contents">
+      <div><strong>Normal modeling JSON</strong>opens in Modeling</div>
+      <span>or</span>
+      <div><strong>Templated JSON</strong>opens in Simplified inputs</div>
+    </div>
+    <p id="mode-switch-summary"><strong>Once loaded: Simplified inputs ⇄ Modeling ⇄ Template setup</strong><br>
+    <small>The same mode control stays in the same place in all three views.</small></p>
+
+    <article id="modeling-screen" hidden>
+      <header>
+        <span><strong>Streaming service</strong><br><small>Modeling mode · all inputs and structure are editable</small></span>
+        <button type="button">Download JSON</button>
+      </header>
+      <nav data-mode-nav aria-label="Choose working mode">
+        <span>Mode</span>
+        <button type="button" data-mode="consumption" aria-pressed="false">Simplified inputs</button>
+        <button type="button" data-mode="modeling" aria-pressed="true">Modeling</button>
+        <button type="button" data-mode="construction" aria-pressed="false">Template setup</button>
+      </nav>
+      <div id="modeling-body">
+        <div id="template-status"></div>
+        <p><strong>Full modeling canvas</strong> — add, edit, delete, and reconnect any object.</p>
+        <div id="model-canvas">
+          <section><h3>Usage patterns</h3><p>Video views · Edit</p><p>Homepage visits · Edit</p></section>
+          <section><h3>Usage journeys</h3><p>Watch a video · Edit</p><p>Browse catalogue · Edit</p></section>
+          <section><h3>Infrastructure</h3><p>Video origin · Edit</p><p>CDN and network · Edit</p><p>User devices · Edit</p></section>
+        </div>
+        <div data-same-access><strong>You have left the simplified guardrails.</strong> Every
+        assumption and structural action is available. Use the mode control above to return to
+        Simplified inputs or to change the Template setup.</div>
+      </div>
+    </article>
+
+    <article id="construction-screen" hidden>
+      <header>
+        <span><strong>Template setup</strong><br><small>Create or revise the simplified experience for this modeling</small></span>
+        <button type="button">Download JSON</button>
+      </header>
+      <nav data-mode-nav aria-label="Choose working mode">
+        <span>Mode</span>
+        <button type="button" data-mode="consumption" aria-pressed="false">Simplified inputs</button>
+        <button type="button" data-mode="modeling" aria-pressed="false">Modeling</button>
+        <button type="button" data-mode="construction" aria-pressed="true">Template setup</button>
+      </nav>
+      <div id="construction-body">
+        <div data-same-access><strong>No maker-only access:</strong> anyone holding this JSON can
+        enter Template setup, just as they can enter Modeling or Simplified inputs.</div>
+        <label>Template name<br><input type="text" value="Adapt this streaming scenario" size="38"></label>
+        <label>Guidance for consumers<br><textarea rows="2" cols="52">Enter your usage context, traffic growth, server electricity mix, and compute schedule. The remaining assumptions were reviewed by the ecodesign team.</textarea></label>
+        <p><strong>Choose the inputs shown in Simplified inputs</strong></p>
+        <fieldset>
+          <legend>Usage pattern · Watch a video</legend>
+          <label><input type="checkbox" checked> Country</label>
+          <label><input type="checkbox" checked> Network</label>
+          <label><input type="checkbox" checked> Hourly pattern occurrences (timeseries)</label>
+          <label><input type="checkbox"> Devices</label>
+        </fieldset>
+        <fieldset>
+          <legend>Web server · Video origin</legend>
+          <label><input type="checkbox" checked> Electricity mix</label>
+          <label><input type="checkbox"> CPU model and utilization</label>
+          <label><input type="checkbox"> Lifetime and embodied footprint inputs</label>
+        </fieldset>
+        <fieldset>
+          <legend>Recurrent server need · Video origin demand</legend>
+          <label><input type="checkbox" checked> Recurrent compute need (timeseries)</label>
+        </fieldset>
+        <p><small>Unchecked inputs stay in the complete modeling but are not editable in Simplified inputs.</small></p>
+        <div id="construction-actions">
+          <button type="button" id="save-template">Save setup and preview Simplified inputs</button>
+          <button type="button" data-mode="modeling">Back to Modeling</button>
+          <button type="button" id="remove-template">Remove template from this JSON</button>
+        </div>
+      </div>
+    </article>
+
+    <article id="consumption-screen">
+      <header>
+        <span><strong>Adapt this streaming scenario</strong><br><small>Simplified inputs · default view for this templated JSON</small></span>
+        <button type="button">Download adapted JSON</button>
+      </header>
+      <nav data-mode-nav aria-label="Choose working mode">
+        <span>Mode</span>
+        <button type="button" data-mode="consumption" aria-pressed="true">Simplified inputs</button>
+        <button type="button" data-mode="modeling" aria-pressed="false">Modeling</button>
+        <button type="button" data-mode="construction" aria-pressed="false">Template setup</button>
+      </nav>
+      <div id="consumption-workspace">
+        <div id="consumption-body">
+          <div id="mode-banner"><strong>This file opened here because it contains a template.</strong>
+          Adapt the 5 exposed inputs, or use the mode control above to enter the full modeling or
+          revise the template itself.</div>
+          <p>Enter your usage context, traffic growth, server electricity mix, and compute schedule. The
+          remaining assumptions were reviewed by the ecodesign team.</p>
+          <div id="template-fields">
+            <fieldset>
+              <legend>Usage pattern · Watch a video</legend>
+              <label>Country<br><select><option>France</option><option>European average</option></select></label>
+              <label>Network<br><select><option>Wi-Fi network</option><option>Mobile network</option></select></label>
+              <article data-timeseries-card>
+                <header>
+                  <span><strong>Hourly pattern occurrences</strong><br><small>Timeseries input</small></span>
+                  <button type="button" data-open-timeseries="hourly">Edit traffic</button>
+                </header>
+                <p><strong id="hourly-timeseries-summary-strategy">Growth projection</strong><br>
+                <span id="hourly-timeseries-summary-details">Starts 2026-01-01 · 1 year · 250,000/month · +10%/year</span></p>
+                <p><small>Source: Audience forecast · Confidence: medium</small></p>
+              </article>
+            </fieldset>
+            <fieldset>
+              <legend>Web server · Video origin</legend>
+              <label>Electricity mix<br><select><option>France</option><option>European average</option></select></label>
+            </fieldset>
+            <fieldset>
+              <legend>Recurrent server need · Video origin demand</legend>
+              <article data-timeseries-card>
+                <header>
+                  <span><strong>Recurrent compute need</strong><br><small>Timeseries input</small></span>
+                  <button type="button" data-open-timeseries="recurrent">Edit schedule</button>
+                </header>
+                <p><strong id="recurrent-timeseries-summary-strategy">Weekly pattern</strong><br>
+                <span id="recurrent-timeseries-summary-details">2 profiles · 1 time range · cpu_core</span></p>
+                <p><small>Source: Operations estimate · Confidence: medium</small></p>
+              </article>
+            </fieldset>
+          </div>
+
+          <div id="results-summary"><strong>Updated result:</strong> 18.4 t CO2-eq/year
+          <br><small>The normal detailed, explainable results remain available.</small></div>
+          <div id="consumption-actions">
+            <button type="button">Apply simple changes</button>
+            <button type="button">Download my adapted JSON</button>
+          </div>
+          <div data-same-access><strong>Same file, same access:</strong> “maker” and “consumer” are not
+          permissions. Selecting Modeling above enables full editing; selecting Template setup lets
+          you change what this screen exposes.</div>
+        </div>
+
+        <aside id="timeseries-panel" hidden>
+          <header>
+            <span><strong id="timeseries-panel-title">Edit recurrent compute need</strong><br>
+            <small id="timeseries-panel-context">Recurrent server need · Video origin demand</small></span>
+            <button type="button" id="close-timeseries-panel" aria-label="Close timeseries editor">×</button>
+          </header>
+          <div>
+            <label>Strategy
+              <select id="timeseries-strategy">
+                <option value="weekly">Weekly pattern</option>
+                <option value="constant">Constant value</option>
+              </select>
+            </label>
+
+            <div id="growth-strategy-editor" hidden>
+              <fieldset>
+                <legend>Growth projection</legend>
+                <label>Start date <input type="date" value="2026-01-01"></label>
+                <label>Modeling duration <input type="number" value="1" step="1">
+                  <select><option>year</option><option>month</option></select></label>
+                <label>Initial volume <input type="number" value="250000" step="1000">
+                  <select><option>per month</option><option>per day</option><option>per year</option></select></label>
+                <label>Net growth rate <input type="number" value="10" step="0.1"> %
+                  <select><option>per year</option><option>per month</option></select></label>
+              </fieldset>
+              <div data-preview>
+                <p><strong>Traffic preview</strong> · monthly view</p>
+                <svg viewBox="0 0 320 80" role="img" aria-label="Growth projection preview">
+                  <path d="M5 68 H315 M5 8 V68" fill="none" stroke="#b8c2cf"/>
+                  <path d="M5 60 C72 58 118 50 168 42 S258 22 315 12" fill="none"
+                        stroke="#395c91" stroke-width="3"/>
+                </svg>
+              </div>
+            </div>
+
+            <div id="weekly-strategy-editor">
+              <fieldset>
+                <legend>Profile 1 · Weekdays</legend>
+                <label>Name <input type="text" value="weekday"></label>
+                <label>Days
+                  <select><option>Mon–Fri</option><option>Every day</option></select>
+                </label>
+                <label>Baseline <input type="number" value="1" step="0.1"> cpu_core</label>
+                <table>
+                  <thead><tr><th>From</th><th>To</th><th>Value</th><th></th></tr></thead>
+                  <tbody><tr><td><input type="number" value="8"></td><td><input type="number" value="18"></td>
+                    <td><input type="number" value="5"></td><td><button type="button">Remove</button></td></tr></tbody>
+                </table>
+                <button type="button">+ Add time range</button>
+              </fieldset>
+              <fieldset>
+                <legend>Profile 2 · Weekend</legend>
+                <label>Name <input type="text" value="weekend"></label>
+                <label>Days <select><option>Sat–Sun</option><option>Every day</option></select></label>
+                <label>Baseline <input type="number" value="0.5" step="0.1"> cpu_core</label>
+              </fieldset>
+              <button type="button">+ Add another profile</button>
+              <div data-preview>
+                <p><strong>Weekly preview</strong> · 168 hours</p>
+                <svg viewBox="0 0 320 80" role="img" aria-label="Weekly pattern preview">
+                  <path d="M5 68 H315 M5 8 V68" fill="none" stroke="#b8c2cf"/>
+                  <path d="M5 58 H22 V20 H55 V58 H68 V20 H101 V58 H114 V20 H147 V58 H160 V20 H193 V58 H206 V20 H239 V58 H315"
+                        fill="none" stroke="#395c91" stroke-width="3"/>
+                </svg>
+              </div>
+            </div>
+
+            <div id="constant-strategy-editor" hidden>
+              <fieldset>
+                <legend>Constant value</legend>
+                <label>Value <input type="number" id="constant-timeseries-value" value="4" step="0.1"> cpu_core</label>
+              </fieldset>
+              <div data-preview>
+                <p><strong>Weekly preview</strong> · 168 hours</p>
+                <svg viewBox="0 0 320 80" role="img" aria-label="Constant timeseries preview">
+                  <path d="M5 68 H315 M5 8 V68" fill="none" stroke="#b8c2cf"/>
+                  <path d="M5 30 H315" fill="none" stroke="#395c91" stroke-width="3"/>
+                </svg>
+              </div>
+            </div>
+
+            <footer>
+              <button type="button" id="cancel-timeseries-panel">Cancel</button>
+              <button type="button" id="save-timeseries-panel">Save timeseries</button>
+            </footer>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <script>
+      (function () {
+        var mockup = document.currentScript.parentElement;
+        var modes = ['modeling', 'construction', 'consumption'];
+        var hasTemplate = true;
+        var activeTimeseries = 'recurrent';
+        var savedTimeseriesStrategies = {hourly: 'growth', recurrent: 'weekly'};
+
+        function refreshTemplateState() {
+          mockup.querySelectorAll('[data-mode="consumption"]').forEach(function (button) {
+            button.disabled = !hasTemplate;
+          });
+          mockup.querySelector('#remove-template').hidden = !hasTemplate;
+          mockup.querySelector('#template-status').innerHTML = hasTemplate
+            ? '<strong>This JSON contains a simplified template.</strong><br>' +
+              '<button type="button" data-jump="consumption">Open Simplified inputs</button> ' +
+              '<button type="button" data-jump="construction">Edit Template setup</button>'
+            : '<strong>This is a normal modeling JSON.</strong> It has no simplified template yet.<br>' +
+              '<button type="button" data-jump="construction">Create simplified template</button>';
+
+          mockup.querySelectorAll('[data-jump]').forEach(function (button) {
+            button.addEventListener('click', function () { show(button.dataset.jump); });
+          });
+        }
+
+        function closeTimeseriesPanel() {
+          mockup.querySelector('#timeseries-panel').hidden = true;
+          mockup.querySelector('#consumption-workspace').removeAttribute('data-panel-open');
+        }
+
+        function show(mode) {
+          if (mode === 'consumption' && !hasTemplate) return;
+          closeTimeseriesPanel();
+          modes.forEach(function (candidate) {
+            mockup.querySelector('#' + candidate + '-screen').hidden = candidate !== mode;
+          });
+          mockup.querySelectorAll('[data-mode]').forEach(function (button) {
+            button.setAttribute('aria-pressed', button.dataset.mode === mode ? 'true' : 'false');
+          });
+        }
+
+        mockup.querySelectorAll('[data-mode]').forEach(function (button) {
+          button.addEventListener('click', function () { show(button.dataset.mode); });
+        });
+
+        function activateTimeseriesEditor(strategy) {
+          mockup.querySelector('#growth-strategy-editor').hidden = strategy !== 'growth';
+          mockup.querySelector('#weekly-strategy-editor').hidden = strategy !== 'weekly';
+          mockup.querySelector('#constant-strategy-editor').hidden = strategy !== 'constant';
+        }
+
+        function openTimeseriesPanel(field) {
+          activeTimeseries = field;
+          var selector = mockup.querySelector('#timeseries-strategy');
+          if (field === 'hourly') {
+            mockup.querySelector('#timeseries-panel-title').textContent = 'Edit hourly pattern occurrences';
+            mockup.querySelector('#timeseries-panel-context').textContent = 'Usage pattern · Watch a video';
+            selector.innerHTML = '<option value="growth">Growth projection</option>';
+          } else {
+            mockup.querySelector('#timeseries-panel-title').textContent = 'Edit recurrent compute need';
+            mockup.querySelector('#timeseries-panel-context').textContent =
+              'Recurrent server need · Video origin demand';
+            selector.innerHTML = '<option value="weekly">Weekly pattern</option>' +
+              '<option value="constant">Constant value</option>';
+          }
+          selector.value = savedTimeseriesStrategies[field];
+          activateTimeseriesEditor(selector.value);
+          mockup.querySelector('#timeseries-panel').hidden = false;
+          mockup.querySelector('#consumption-workspace').setAttribute('data-panel-open', 'true');
+        }
+
+        mockup.querySelectorAll('[data-open-timeseries]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            openTimeseriesPanel(button.dataset.openTimeseries);
+          });
+        });
+
+        mockup.querySelector('#close-timeseries-panel').addEventListener('click', closeTimeseriesPanel);
+        mockup.querySelector('#cancel-timeseries-panel').addEventListener('click', closeTimeseriesPanel);
+
+        mockup.querySelector('#timeseries-strategy').addEventListener('change', function (event) {
+          activateTimeseriesEditor(event.target.value);
+        });
+
+        mockup.querySelector('#save-timeseries-panel').addEventListener('click', function () {
+          var strategy = mockup.querySelector('#timeseries-strategy').value;
+          savedTimeseriesStrategies[activeTimeseries] = strategy;
+          if (activeTimeseries === 'hourly') {
+            mockup.querySelector('#hourly-timeseries-summary-strategy').textContent = 'Growth projection';
+            mockup.querySelector('#hourly-timeseries-summary-details').textContent =
+              'Starts 2026-01-01 · 1 year · 250,000/month · +10%/year';
+          } else if (strategy === 'weekly') {
+            mockup.querySelector('#recurrent-timeseries-summary-strategy').textContent = 'Weekly pattern';
+            mockup.querySelector('#recurrent-timeseries-summary-details').textContent =
+              '2 profiles · 1 time range · cpu_core';
+          } else {
+            var value = mockup.querySelector('#constant-timeseries-value').value;
+            mockup.querySelector('#recurrent-timeseries-summary-strategy').textContent = 'Constant value';
+            mockup.querySelector('#recurrent-timeseries-summary-details').textContent = value + ' cpu_core';
+          }
+          closeTimeseriesPanel();
+        });
+
+        mockup.querySelector('#open-regular-json').addEventListener('click', function () {
+          hasTemplate = false;
+          mockup.querySelector('#open-result').textContent =
+            'No template definition detected → opened in Modeling mode.';
+          refreshTemplateState();
+          show('modeling');
+        });
+
+        mockup.querySelector('#open-templated-json').addEventListener('click', function () {
+          hasTemplate = true;
+          mockup.querySelector('#open-result').textContent =
+            'Templated JSON detected → opened in Simplified inputs by default.';
+          refreshTemplateState();
+          show('consumption');
+        });
+
+        mockup.querySelector('#save-template').addEventListener('click', function () {
+          hasTemplate = true;
+          mockup.querySelector('#open-result').textContent =
+            'Template setup saved → previewing the default Simplified inputs view.';
+          refreshTemplateState();
+          show('consumption');
+        });
+
+        mockup.querySelector('#remove-template').addEventListener('click', function () {
+          hasTemplate = false;
+          mockup.querySelector('#open-result').textContent =
+            'Template definition removed → future opens use Modeling mode.';
+          refreshTemplateState();
+          show('modeling');
+        });
+
+        refreshTemplateState();
+      })();
+    </script>
+  </div>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Mission fit:</strong> the default experience serves a non-technical consumer, while
+    the full depth remains available on demand as required by <code>specs/mission.md</code>.</li>
+    <li><strong>The library remains the modeling truth:</strong> simplified inputs must update the
+    same underlying e-footprint modeling and produce the same validations, calculations, derivations,
+    and JSON-compatible values as full editing. No calculation logic may be reimplemented by the
+    interface (<code>specs/constitution.md</code> §1.3).</li>
+    <li><strong>JSON remains the only portable format:</strong> this feature extends the user-visible
+    JSON round-trip rather than introducing an alternative serialization format, consistent with the
+    e-footprint mission and constitution.</li>
+    <li><strong>Existing file safety still applies:</strong> import must validate before replacing
+    session state, calculated outputs must be verified or recomputed under the established rules, and
+    a failed open must leave the current modeling intact.</li>
+    <li><strong>File contents are transparent:</strong> because the complete modeling is needed for
+    calculation, audit, and resuming full editing, every assumption is present in the JSON. The UI
+    must not imply that unexposed inputs are confidential or tamper-proof.</li>
+    <li><strong>Architecture and interaction:</strong> implementation must preserve Clean Architecture
+    dependency direction and the HTMX-first, minimal-JavaScript principle
+    (<code>specs/constitution.md</code> §1.1 and §1.4).</li>
+    <li><strong>No backward-compatibility burden:</strong> the two repositories are co-developed; the
+    plan should favor one clear format and migration path over parallel legacy behavior.</li>
+    <li><strong>Desktop first and English only:</strong> existing constitutional product constraints
+    continue to apply.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ol>
+    <li><strong>Other selectable input shapes:</strong> beyond scalar inputs, choices, and complete
+    timeseries editors, must v1 also expose relationships and weighted collections?</li>
+    <li><strong>Comparison workspace:</strong> when a simplified-template file is opened or added in a
+    two-model workspace, should its Simplified inputs view apply independently and still allow it to
+    participate in comparison, or is the feature single-model only in v1?</li>
+    <li><strong>Template definition after modeling edits:</strong> if Modeling removes or replaces an
+    input that the simplified definition exposes, should export be blocked until Template setup is
+    repaired, or should stale selections be dropped with a warning?</li>
+  </ol>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end and resolve its open capability questions with the product owner.</li>
+    <li>Read <code>plan.html</code> (when written) for the JSON contract, interaction architecture,
+    ordered implementation steps, and test gates.</li>
+    <li>Re-read <code>specs/architecture.md</code>, especially persistence, workspace files, normal
+    input editing, and modeling templates.</li>
+    <li>Read <code>specs/design/journeys/save-and-load.html</code> and
+    <code>specs/design/journeys/build-a-model.html</code> for the current file and editing experiences.</li>
+    <li>Read the companion library's <code>specs/architecture/index.html</code> and serialization pages
+    before deciding whether the JSON contract belongs wholly to interface metadata or requires a
+    coordinated library change.</li>
+  </ol>
+</section>
+
+</body>
+</html>
