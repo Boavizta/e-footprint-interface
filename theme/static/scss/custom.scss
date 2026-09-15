@@ -1645,6 +1645,10 @@ input:disabled{
     line-height: 1.55;
 }
 
+.data-privacy-card-security {
+    grid-column: 1 / -1;
+}
+
 .workspace-size-progress {
     height: 0.75rem;
     accent-color: var(--new-primary);

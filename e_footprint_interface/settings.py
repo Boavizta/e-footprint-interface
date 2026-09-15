@@ -197,7 +197,14 @@ def optional_env_bool(name: str, default: bool | None = None) -> bool | None:
     raise ValueError(f"{name} must be a boolean value.")
 
 
-DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = optional_env_bool("DATA_PRIVACY_PUBLIC_SHARED_INSTANCE", False) is True
+def clever_cloud_privacy_default() -> bool:
+    """Use the verified public-deployment facts on the Clever Cloud apps."""
+    return os.getenv("DJANGO_CLEVER_CLOUD") == "True"
+
+
+DATA_PRIVACY_PUBLIC_SHARED_INSTANCE = optional_env_bool(
+    "DATA_PRIVACY_PUBLIC_SHARED_INSTANCE", clever_cloud_privacy_default()
+) is True
 DATA_PRIVACY_OPERATOR_NAME = os.getenv(
     "DATA_PRIVACY_OPERATOR_NAME", "Boavizta" if DATA_PRIVACY_PUBLIC_SHARED_INSTANCE else ""
 )

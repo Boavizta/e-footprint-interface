@@ -45,12 +45,6 @@
                 {{ data_status.hot_cache_retention_display }} after the latest save. Reads do not extend that time, and
                 eviction or infrastructure failure can remove this copy sooner.
             </p>
-            {% if data_status.redis_backup_disable_in_progress %}
-            <p class="mb-0 mt-2">
-                Redis backups are being disabled. Until that change is completed and verified, no claim is made that
-                provider backup or persistence is disabled.
-            </p>
-            {% endif %}
         </article>
         <article class="data-privacy-card">
             <h2 class="h6 fw-semibold">Live PostgreSQL recovery storage</h2>
@@ -62,16 +56,38 @@
                 service operation.
             </p>
         </article>
-        <article class="data-privacy-card">
-            <h2 class="h6 fw-semibold">Protection</h2>
+        <article class="data-privacy-card data-privacy-card-security">
+            <h2 class="h6 fw-semibold">Security</h2>
+            {% if data_status.operator_name or data_status.hosting_provider_name or data_status.hosting_region %}
             <p>
+                <strong>Operation and hosting.</strong>
+                {% if data_status.operator_name %}Operated by {{ data_status.operator_name }}.{% endif %}
+                {% if data_status.hosting_provider_name %}
+                {{ data_status.hosting_provider_name }} is the data processor and hosting provider for the application
+                containers, PostgreSQL, and Redis{% if data_status.hosting_region %}, hosted in
+                {{ data_status.hosting_region }}{% endif %}.
+                {% endif %}
+            </p>
+            {% else %}
+            <p>
+                <strong>Operation and hosting.</strong> Deployment-specific operator, processor, hosting, and region
+                details are not configured.
+            </p>
+            {% endif %}
+            <p>
+                <strong>Transport.</strong>
                 {% if data_status.https_enabled == True %}
                 HTTPS protects data in transit between your browser and the application for this deployment.
                 {% else %}
                 No transport-protection assurance is configured for this deployment.
                 {% endif %}
+                {% if data_status.redis_tls_setup_in_progress %}
+                TLS protection for the connection between the application and Redis is being set up. Until it is
+                completed and verified, no encrypted-transport assurance is made for that connection.
+                {% endif %}
             </p>
             <p>
+                <strong>Storage.</strong>
                 {% if data_status.postgres_encrypted_at_rest == True %}
                 Live PostgreSQL storage is encrypted at rest.
                 {% elif data_status.postgres_encrypted_at_rest == False %}
@@ -81,17 +97,15 @@
                 {% endif %}
                 No at-rest encryption claim is made here for the Redis hot cache.
             </p>
-            {% if data_status.redis_tls_setup_in_progress %}
-            <p class="mb-0">
-                TLS protection for the connection between the application and Redis is being set up. Until it is
-                completed and verified, no encrypted-transport assurance is made for that connection.
+            {% if data_status.redis_backup_disable_in_progress %}
+            <p>
+                <strong>Redis backups.</strong> Redis backups are being disabled. Until that change is completed and
+                verified, no claim is made that provider backup or persistence is disabled.
             </p>
             {% endif %}
-        </article>
-        <article class="data-privacy-card">
-            <h2 class="h6 fw-semibold">PostgreSQL backups</h2>
             {% if data_status.postgres_backups_enabled == True %}
             <p>
+                <strong>PostgreSQL backups.</strong>
                 {{ data_status.postgres_backup_frequency|capfirst }} PostgreSQL backups are retained for
                 {{ data_status.postgres_backup_retention_days }} days. They are separate from live recovery storage.
                 {% if data_status.postgres_backups_encrypted_at_rest == True %}
@@ -119,28 +133,13 @@
                 {{ data_status.postgres_backup_retention_days }} days.
             </p>
             {% elif data_status.postgres_backups_enabled == False %}
-            <p class="mb-0">PostgreSQL backups are disabled for this deployment.</p>
+            <p><strong>PostgreSQL backups.</strong> Backups are disabled for this deployment.</p>
             {% else %}
-            <p class="mb-0">No PostgreSQL backup-lifecycle assurance is configured for this deployment.</p>
-            {% endif %}
-        </article>
-        <article class="data-privacy-card">
-            <h2 class="h6 fw-semibold">Operation, hosting &amp; security</h2>
-            {% if data_status.operator_name or data_status.hosting_provider_name or data_status.hosting_region %}
-            <p>
-                {% if data_status.operator_name %}Operated by {{ data_status.operator_name }}.{% endif %}
-                {% if data_status.hosting_provider_name %}
-                {{ data_status.hosting_provider_name }} is the data processor and hosting provider for the application
-                containers, PostgreSQL, and Redis{% if data_status.hosting_region %}, hosted in
-                {{ data_status.hosting_region }}{% endif %}.
-                {% endif %}
-            </p>
-            {% else %}
-            <p>Deployment-specific operator, processor, hosting, and region details are not configured.</p>
+            <p><strong>PostgreSQL backups.</strong> No backup-lifecycle assurance is configured for this deployment.</p>
             {% endif %}
             {% if data_status.security_contact %}
             <p class="mb-0">
-                Security contact:
+                <strong>Contact.</strong> Security contact:
                 <a href="mailto:{{ data_status.security_contact }}">{{ data_status.security_contact }}</a>.
             </p>
             {% endif %}

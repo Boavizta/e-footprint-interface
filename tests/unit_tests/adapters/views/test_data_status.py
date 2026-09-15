@@ -192,6 +192,10 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert "Redis backups are being disabled" in content
     assert "TLS protection for the connection between the application and Redis is being set up" in content
     assert "Backup encryption is being set up" in content
+    assert "<h2 class=\"h6 fw-semibold\">Security</h2>" in content
+    assert ">Protection</h2>" not in content
+    assert ">PostgreSQL backups</h2>" not in content
+    assert ">Operation, hosting &amp; security</h2>" not in content
     assert "all data is encrypted" not in content.lower()
     assert "does not guarantee" in content
     assert "Boavizta" in content
@@ -232,7 +236,7 @@ def test_data_privacy_route_is_standalone_and_self_host_facts_are_not_assumed(cl
     assert "Paris" not in content
     assert "8 MB limit is the capacity policy configured for this deployment" in content
     assert "No at-rest encryption assurance is configured" in content
-    assert "No PostgreSQL backup-lifecycle assurance is configured" in content
+    assert "No backup-lifecycle assurance is configured" in content
     assert "PostgreSQL backups are disabled" not in content
     assert "Redis backups are being disabled" not in content
     assert "TLS protection for the connection between the application and Redis is being set up" not in content
