@@ -465,10 +465,7 @@
         <div class="panel" style="width:68%">
           <div class="phead"><b>Data &amp; privacy</b><span class="x">×</span></div>
           <div class="privacygrid">
-            <div class="privacycard"><b>Browser session</b>Opaque identifier for up to two weeks; small index and preferences stay server-side.</div>
-            <div class="privacycard"><b>Redis hot cache</b>Latest saved modeling stays hot for up to one hour after a save.</div>
-            <div class="privacycard"><b>Live PostgreSQL recovery</b>Inputs-only copy follows the selected recovery period.</div>
-            <div class="privacycard"><b>Backups</b>Daily, seven-day rotation; separate from live expiry and disclosed independently.</div>
+            <div class="privacycard" style="grid-column:1/-1"><b>How your modeling is stored</b>Browser identifier only · complete Redis copy for one hour · inputs-only PostgreSQL recovery copy for the selected period.</div>
           </div>
           <p class="helptxt" style="margin:.55rem 0 .1rem"><b>Workspace storage</b></p>
           <div class="sizetrack"><span></span></div>
@@ -476,10 +473,11 @@
           <div class="field"><label>Keep the recovery copy for</label></div>
           <select class="retentionselect"><option>12 hours (default)</option></select>
           <button class="savebtn" style="margin-top:.45rem">Save retention</button>
+          <p class="helptxt" style="margin:.65rem 0 0"><b>Security</b> Hosting, encryption, backups, and work in progress.</p>
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span><b>Help → Data &amp; privacy</b> opens the reusable side panel; its ordinary URL also works alone. The panel separates the browser identifier, Redis hot cache, live PostgreSQL recovery rows, and backups. It shows the last saved workspace size and lets the user choose 1, 3, 6, or 12 hours, or 1–14 days.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span><b>Help → Data &amp; privacy</b> opens the reusable side panel; its ordinary URL also works alone. The panel first explains how modeling data is stored, then places workspace usage beside its recovery-retention control, followed by the more technical security details.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">4</span><h3>Recovery is explicit, bounded, and session-wide</h3></div>

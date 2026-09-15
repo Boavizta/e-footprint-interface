@@ -1627,12 +1627,6 @@ input:disabled{
     overflow-y: auto;
 }
 
-.data-privacy-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-
 .data-privacy-card,
 .workspace-size-detail {
     padding: 0.85rem;
@@ -1643,10 +1637,6 @@ input:disabled{
 
 .data-privacy-card p {
     line-height: 1.55;
-}
-
-.data-privacy-card-security {
-    grid-column: 1 / -1;
 }
 
 .workspace-size-progress {
@@ -1678,12 +1668,6 @@ input:disabled{
 .workspace-storage-warning-link:focus-visible {
     outline: 3px solid rgba(71, 55, 0, 0.35);
     outline-offset: 3px;
-}
-
-@media (max-width: 767.98px) {
-    .data-privacy-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* ===== Source metadata widgets ===== */

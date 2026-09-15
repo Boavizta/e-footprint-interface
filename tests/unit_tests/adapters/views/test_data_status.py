@@ -156,14 +156,19 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert option_values == list(APPROVED_RECOVERY_RETENTION_SECONDS)
     assert re.search(r'<option value="43200"\s+selected>', content)
     assert "opaque session identifier—not your modeling" in content
-    assert "Redis hot cache" in content
-    assert "Live PostgreSQL recovery storage" in content
+    assert "How your modeling is stored" in content
+    assert "In your browser" in content
+    assert "For fast access" in content
+    assert "For recovery" in content
+    assert ">Browser session</h2>" not in content
+    assert ">Redis hot cache</h2>" not in content
+    assert ">Live PostgreSQL recovery storage</h2>" not in content
     assert "Live PostgreSQL storage and the Redis hot cache are encrypted at rest" in content
-    assert "are not encrypted at rest" in content
+    assert "are not encrypted at rest" in normalized_content
     assert "Redis backups are being disabled" in content
     assert "TLS protection for the connection between the application and Redis is being set up" in normalized_content
     assert "Backup encryption is being set up" in content
-    assert "<h2 class=\"h6 fw-semibold\">Security</h2>" in content
+    assert '<h2 id="security-heading" class="h6 fw-semibold">Security</h2>' in content
     assert ">Protection</h2>" not in content
     assert ">PostgreSQL backups</h2>" not in content
     assert ">Operation, hosting &amp; security</h2>" not in content
@@ -174,6 +179,9 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert "Paris" in content
     assert 'href="mailto:vincent.villet@publicissapient.com"' in content
     assert "50 MB limit is a capacity policy for this shared public deployment" in content
+    assert content.index("How your modeling is stored") < content.index("Workspace storage")
+    assert content.index("Workspace storage") < content.index("Recovery retention")
+    assert content.index("Recovery retention") < content.index("Security")
 
 
 @pytest.mark.django_db

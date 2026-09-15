@@ -24,76 +24,34 @@
     </header>
 
     <p>
-        This page explains how this browser session uses storage. There is no account or server-side library of
-        modelings.
+        This page explains how your modeling is stored and lets you manage its recovery settings. There is no account or
+        server-side library of modelings.
     </p>
 
-    <div class="data-privacy-grid mb-4">
-        <article class="data-privacy-card">
-            <h2 class="h6 fw-semibold">Browser session</h2>
-            <p class="mb-0">
+    <section class="data-privacy-card mb-4" aria-labelledby="modeling-storage-heading">
+        <h2 id="modeling-storage-heading" class="h6 fw-semibold">How your modeling is stored</h2>
+        <p>
+            <strong>In your browser.</strong>
                 An opaque session identifier—not your modeling—is kept in the browser for up to
                 {{ data_status.session_cookie_age_display }}. A small workspace index and preferences are kept in the
                 server-side <code>django_session</code> record for that session. Clearing the cookie makes stored recovery
                 copies unreachable from that browser, even before their server expiry.
-            </p>
-        </article>
-        <article class="data-privacy-card">
-            <h2 class="h6 fw-semibold">Redis hot cache</h2>
-            <p class="mb-0">
+        </p>
+        <p>
+            <strong>For fast access.</strong>
                 The latest saved modeling and available calculations stay in the fast Redis cache for up to
                 {{ data_status.hot_cache_retention_display }} after the latest save. Reads do not extend that time, and
                 eviction or infrastructure failure can remove this copy sooner.
-            </p>
-        </article>
-        <article class="data-privacy-card">
-            <h2 class="h6 fw-semibold">Live PostgreSQL recovery storage</h2>
-            <p class="mb-0">
+        </p>
+        <p class="mb-0">
+            <strong>For recovery.</strong>
                 A smaller, inputs-only recovery copy is kept in live PostgreSQL for
                 {{ data_status.recovery_retention_display }} after the latest save or retention change. If Redis has
                 expired, the first recovery load can be slower while calculations are rebuilt. Expired recovery rows and
                 server-side sessions are physically purged within {{ data_status.live_cleanup_lag_display }} during normal
                 service operation.
-            </p>
-        </article>
-        <article class="data-privacy-card data-privacy-card-security">
-            <h2 class="h6 fw-semibold">Security</h2>
-            <p>
-                <strong>Operation and hosting.</strong>
-                Operated by Boavizta. Clever Cloud is the data processor and hosting provider for the application
-                containers, PostgreSQL, and Redis, hosted in Paris.
-            </p>
-            <p>
-                <strong>Transport.</strong>
-                HTTPS protects data in transit between your browser and the application. TLS protection for the
-                connection between the application and Redis is being set up. Until it is completed and verified, no
-                encrypted-transport assurance is made for that connection.
-            </p>
-            <p>
-                <strong>Storage.</strong>
-                Live PostgreSQL storage and the Redis hot cache are encrypted at rest.
-            </p>
-            <p>
-                <strong>Redis backups.</strong> Redis backups are being disabled. Until that change is completed and
-                verified, no claim is made that provider backup or persistence is disabled.
-            </p>
-            <p>
-                <strong>PostgreSQL backups.</strong>
-                Daily PostgreSQL backups are retained for seven days. They are separate from live recovery storage and
-                are not encrypted at rest. Backup encryption is being set up. Until activation is completed and verified,
-                treat the backups as unencrypted.
-            </p>
-            <p>
-                Backups are observed to run overnight, but their timing can vary. A short recovery period such as six
-                hours normally expires before that window and reduces the chance of capture; it does not guarantee
-                exclusion. Any modeling still stored when a backup runs can remain in that backup for up to seven days.
-            </p>
-            <p class="mb-0">
-                <strong>Contact.</strong> Security contact:
-                <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a>.
-            </p>
-        </article>
-    </div>
+        </p>
+    </section>
 
     <section class="workspace-size-detail mb-4" aria-labelledby="workspace-size-heading">
         <h2 id="workspace-size-heading" class="h6 fw-semibold">Workspace storage</h2>
@@ -114,7 +72,7 @@
         </p>
     </section>
 
-    <section aria-labelledby="recovery-retention-heading">
+    <section class="mb-4" aria-labelledby="recovery-retention-heading">
         <h2 id="recovery-retention-heading" class="h6 fw-semibold">Recovery retention</h2>
         <p>
             This choice applies to every modeling in this browser session. Expiry is measured from the latest save or
@@ -157,6 +115,44 @@
             {% endif %}
         </div>
         {% endif %}
+    </section>
+
+    <section class="data-privacy-card" aria-labelledby="security-heading">
+        <h2 id="security-heading" class="h6 fw-semibold">Security</h2>
+        <p>
+            <strong>Operation and hosting.</strong>
+            Operated by Boavizta. Clever Cloud is the data processor and hosting provider for the application containers,
+            PostgreSQL, and Redis, hosted in Paris.
+        </p>
+        <p>
+            <strong>Transport.</strong>
+            HTTPS protects data in transit between your browser and the application. TLS protection for the connection
+            between the application and Redis is being set up. Until it is completed and verified, no encrypted-transport
+            assurance is made for that connection.
+        </p>
+        <p>
+            <strong>Storage.</strong>
+            Live PostgreSQL storage and the Redis hot cache are encrypted at rest.
+        </p>
+        <p>
+            <strong>Redis backups.</strong> Redis backups are being disabled. Until that change is completed and verified,
+            no claim is made that provider backup or persistence is disabled.
+        </p>
+        <p>
+            <strong>PostgreSQL backups.</strong>
+            Daily PostgreSQL backups are retained for seven days. They are separate from live recovery storage and are not
+            encrypted at rest. Backup encryption is being set up. Until activation is completed and verified, treat the
+            backups as unencrypted.
+        </p>
+        <p>
+            Backups are observed to run overnight, but their timing can vary. A short recovery period such as six hours
+            normally expires before that window and reduces the chance of capture; it does not guarantee exclusion. Any
+            modeling still stored when a backup runs can remain in that backup for up to seven days.
+        </p>
+        <p class="mb-0">
+            <strong>Contact.</strong> Security contact:
+            <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a>.
+        </p>
     </section>
 </section>
 
