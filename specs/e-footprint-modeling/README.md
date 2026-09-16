@@ -186,7 +186,17 @@ when it reduces actual compute or energy, not merely when work moved elsewhere.
 
 ## Mapping the evidence into e-footprint
 
-Build two otherwise identical systems: the reproducible historical baseline and the current optimized application.
+Build two otherwise identical systems as sibling models in one interface workspace per adoption scenario: the current
+optimized application in the Reference slot and the reproducible no-AI, low-optimization counterfactual in the
+Comparison slot. Keeping the scenario pair in one `.e-f.json` file makes the comparison directly loadable and prevents
+traffic assumptions from drifting between separately handled files.
+
+The maintained implementation profiles live in
+[`optimizations/implementation-profiles.json`](optimizations/implementation-profiles.json). Usage scenarios are shared;
+the profile changes only implementation-dependent job duration, transferred bytes and the container tier selected from
+the reconstructed maximum-request memory. This prevents traffic edits from drifting between the current and
+counterfactual systems. The spreadsheet inventory remains a review surface, while the profile JSON is the generator's
+machine-readable source of truth.
 
 - Represent the production application and its backing services explicitly in infrastructure. Keep unobserved provider
   layers as sourced ranges.

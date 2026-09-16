@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "generated_from_evidence_date": "2026-09-16",
+  "runtime_ai_footprint_included": false,
+  "development_ai_footprint_included": false,
+  "plan_catalog": [
+    {"tier": "nano", "vcpu": 1, "nominal_ram_gib": 0.5, "monthly_price_eur": 6},
+    {"tier": "XS", "vcpu": 1, "nominal_ram_gib": 1, "monthly_price_eur": 16},
+    {"tier": "S", "vcpu": 2, "nominal_ram_gib": 2, "monthly_price_eur": 32},
+    {"tier": "M", "vcpu": 4, "nominal_ram_gib": 4, "monthly_price_eur": 76},
+    {"tier": "L", "vcpu": 6, "nominal_ram_gib": 8, "monthly_price_eur": 152},
+    {"tier": "XL", "vcpu": 8, "nominal_ram_gib": 16, "monthly_price_eur": 304},
+    {"tier": "2XL", "vcpu": 12, "nominal_ram_gib": 24, "monthly_price_eur": 480},
+    {"tier": "3XL", "vcpu": 16, "nominal_ram_gib": 32, "monthly_price_eur": 640}
+  ],
+  "capacity_assumptions": {
+    "unavailable_ram_gib": 1.1,
+    "computation_guard_ratio": 0.85,
+    "comment": "The 1.1 GiB unavailable allowance is observed approximately on M and provisionally held constant for tier selection. The selected 3XL tier must be replaced with observed cgroup capacity when available."
+  },
+  "profiles": {
+    "current": {
+      "label": "Current optimized implementation",
+      "file_prefix": "current",
+      "tier_selection": {
+        "mode": "observed",
+        "tier": "M",
+        "process_visible_ram_mib": 2926
+      },
+      "default_duration_factor": 1,
+      "default_transfer_factor": 1,
+      "action_duration_factors": {},
+      "action_transfer_factors": {},
+      "confidence": "measured-current-proxy",
+      "comment": "Current action durations come from the reviewed 2026-09-15 benchmark evidence."
+    },
+    "no-ai-low-optim": {
+      "label": "No AI, low optimization counterfactual",
+      "file_prefix": "no-ai-low-optim",
+      "tier_selection": {
+        "mode": "minimum_safe_capacity",
+        "estimated_max_request_peak_mib": 23020.416210295727,
+        "memory_derivation": {
+          "base_peak_mib": 2674,
+          "base_description": "Five-pattern cold-Sankey worker peak measured on e-footprint 23.0.0b2 after pull computation but before bounded attribution retention.",
+          "factors": [
+            {"optimization_removed": "Pull-engine memory benefit", "factor": 1.3658480074142724, "claim_ids": ["C031"]},
+            {"optimization_removed": "Full NumPy implementation replaced by partial NumPy", "factor": 1.3333333333333333, "claim_ids": ["C003", "C012"]},
+            {"optimization_removed": "Float32 time-series precision", "factor": 1.2727272727272725, "claim_ids": ["C005", "C015"]},
+            {"optimization_removed": "Lazy compression and materialization", "factor": 1.8571428571428574, "claim_ids": ["C006", "C013"]},
+            {"optimization_removed": "Explanation-parent cleanup", "factor": 2, "claim_ids": ["C019"]}
+          ],
+          "excluded_factor": "The 10–30% slots result concerns repeated load/destroy growth rather than the fresh-request peak and is not multiplied into the maximum request."
+        }
+      },
+      "retained_optimizations": [
+        "G01 selective recomputation using the eager/push update graph",
+        "G02 partial NumPy implementation, estimated at 5× versus pandas rather than the current 10× central estimate"
+      ],
+      "excluded_optimizations": [
+        "pull-based computation",
+        "float32 time-series precision",
+        "lazy compression and materialization",
+        "explanation-parent cleanup",
+        "bounded attribution retention",
+        "current serialization and interface request fast paths"
+      ],
+      "default_duration_factor": 1,
+      "default_transfer_factor": 1,
+      "action_duration_factors": {
+        "load_ecommerce_template": 7,
+        "open_results_and_generate_cold_sankey": 5,
+        "refine_warm_sankey": 8,
+        "add_usage_journey_step": 6,
+        "add_direct_server_job": 6,
+        "increase_usage_volume": 8,
+        "increase_server_ram": 6,
+        "open_results_for_richer_model": 5,
+        "update_model_with_results_open": 8,
+        "duplicate_built_model": 5,
+        "rename_alternative": 4,
+        "reduce_alternative_usage_volume": 8,
+        "increase_alternative_step_count": 6,
+        "compare_reference_and_alternative": 5,
+        "export_comparison_workspace": 2.5,
+        "export_model_for_reuse": 2.5,
+        "reset_active_model_before_reuse": 3,
+        "import_previously_built_model": 7,
+        "open_calculated_value_explanation": 4,
+        "open_calculus_graph": 4,
+        "open_reused_model_results": 5,
+        "export_sources": 1.5,
+        "export_reused_model": 2.5
+      },
+      "action_transfer_factors": {
+        "export_comparison_workspace": 15.84,
+        "export_model_for_reuse": 15.84,
+        "import_previously_built_model": 15.84,
+        "export_reused_model": 15.84
+      },
+      "confidence": "counterfactual-central-estimate",
+      "comment": "Single central counterfactual agreed for the article. Factors preserve selective recomputation and partial NumPy while removing the other identified optimization families."
+    }
+  }
+}

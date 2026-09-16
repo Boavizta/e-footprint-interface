@@ -1,0 +1,2402 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-16",
+  "title": "e-footprint optimization evidence inventory",
+  "scope": {
+    "statement": "Complete for commits explicitly tagged [OPTIM] in reachable Git history as of 2026-09-16, supplemented by the January workbook and deck, changelogs, and preserved performance reports.",
+    "tagged_commit_count": 99,
+    "repository_counts": {
+      "e-footprint": 70,
+      "e-footprint-interface": 29
+    },
+    "optimization_group_count": 21,
+    "quantified_claim_count": 34,
+    "limitations": [
+      "Commit subjects and release notes are evidence of intended mechanisms, not causal attribution to AI-assisted development.",
+      "Historical speed and memory factors often describe a component, model topology, or sequential story stage rather than the complete deployed user action.",
+      "Factors from overlapping groups must not be multiplied without a benchmark that isolates the interaction.",
+      "The January workbook's combined speed×memory number is a heuristic, not a carbon-footprint multiplier."
+    ]
+  },
+  "estimation_rules": [
+    "Prefer repeated before/after benchmarks over release notes, commit claims, and retrospective estimates.",
+    "Keep CPU duration, peak/retained RAM, persisted bytes, network bytes, cache state, and completion probability as separate model parameters.",
+    "Apply a factor only to the share of a journey actually affected by that optimization.",
+    "Use low/central/high bounds when the evidence is historical or topology dependent.",
+    "Model cold, warm, recovered-session, and large-model paths separately.",
+    "Treat the no-optimization scenario as action-specific counterfactuals, not one universal multiplier."
+  ],
+  "optimization_groups": [
+    {
+      "id": "G01",
+      "title": "Selective recomputation and update graph",
+      "period": "2023-07–2026-08",
+      "layer": "Core calculation engine",
+      "mechanism": "Track calculated dependencies, cache results and invalidate only affected branches after edits.",
+      "affected_operations": [
+        "model hydration",
+        "object add/edit/delete",
+        "result calculation"
+      ],
+      "best_estimate_summary": "January reconstruction assigns ~10× calculation speed; a later edit-path change reports ~30% less time (1.4×).",
+      "evidence_grade": "C — historical reconstruction plus commit claims",
+      "counterfactual_priority": "Critical",
+      "overlap_and_caveats": "The 10× is a bundle estimate and overlaps later caching/pull work; do not multiply it by every recomputation-related commit.",
+      "source_refs": [
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx#Feuil1!B7:E7",
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx#slides-5-6",
+        "e-footprint-interface/CHANGELOG.md#V0.9.0"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 8
+    },
+    {
+      "id": "G02",
+      "title": "NumPy-native time-series calculation",
+      "period": "2025-06",
+      "layer": "Core time-series representation",
+      "mechanism": "Replace pandas Series/DataFrame arithmetic with contiguous NumPy arrays.",
+      "affected_operations": [
+        "all hourly calculations",
+        "serialization",
+        "model hydration"
+      ],
+      "best_estimate_summary": "~10× speed and ~2× dynamic-memory improvement in January material; changelog reports about 20× performance.",
+      "evidence_grade": "B/C — consistent direction, differing historical estimates",
+      "counterfactual_priority": "Critical",
+      "overlap_and_caveats": "Use 10× as central and 20× as high sensitivity until the pre-change revision is benchmarked on a representative model.",
+      "source_refs": [
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx#Feuil1!B5:E5",
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx#slides-7-8",
+        "e-footprint/CHANGELOG.md#V10.1.11"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 2
+    },
+    {
+      "id": "G03",
+      "title": "Float32 time-series precision",
+      "period": "2025-06",
+      "layer": "Core numeric representation",
+      "mechanism": "Store and compute hourly values as float32 rather than float64.",
+      "affected_operations": [
+        "all hourly calculations",
+        "serialization",
+        "in-memory model"
+      ],
+      "best_estimate_summary": "~1.1–1.2× compute improvement; 30–40% lower time-series memory (January heuristic: 1.7× dynamic memory).",
+      "evidence_grade": "B/C — implementation fact plus historical estimates",
+      "counterfactual_priority": "High",
+      "overlap_and_caveats": "Memory benefit is not a whole-process RSS factor; apply it only to the time-series share of memory.",
+      "source_refs": [
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx#Feuil1!B6:E6",
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx#slides-11-12",
+        "e-footprint/CHANGELOG.md#V10.1.11"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 1
+    },
+    {
+      "id": "G04",
+      "title": "Compressed values and lazy materialization",
+      "period": "2025-06–2026-08",
+      "layer": "Persistence and time-series memory",
+      "mechanism": "Keep repeated values compressed and defer expansion/deserialization until a calculation needs them.",
+      "affected_operations": [
+        "JSON load/save",
+        "model hydration",
+        "time-series calculation"
+      ],
+      "best_estimate_summary": "2–3× faster serialization in a commit claim; up to 90% smaller serialized repeated values and ~4× dynamic-memory benefit in January material.",
+      "evidence_grade": "C — scoped commit claims and historical reconstruction",
+      "counterfactual_priority": "Critical",
+      "overlap_and_caveats": "The 90% and 4× claims apply to compressible/dynamic data, not total files or process RSS; overlap with schema-v23 size gains.",
+      "source_refs": [
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx#Feuil1!B9:E9",
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx#slides-9-10",
+        "e-footprint/CHANGELOG.md#V10.1.11"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 1
+    },
+    {
+      "id": "G05",
+      "title": "JSON hydration and serialization fast paths",
+      "period": "2023-09–2026-08",
+      "layer": "Persistence",
+      "mechanism": "Reduce conversion work with faster parsers, direct serialization, smaller identifiers and deferred links.",
+      "affected_operations": [
+        "JSON import",
+        "JSON save",
+        "workspace persistence"
+      ],
+      "best_estimate_summary": "Scoped claims include ~10× faster datetime/orjson components and ~15% smaller large JSON from compact identifiers; aggregate effect is unmeasured.",
+      "evidence_grade": "C — component-level commit claims",
+      "counterfactual_priority": "High",
+      "overlap_and_caveats": "Component speedups should be weighted by their share of end-to-end import/save time.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md",
+        "e-footprint-interface/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 12
+    },
+    {
+      "id": "G06",
+      "title": "Explainability object and parent-retention memory",
+      "period": "2025-06–2026-08",
+      "layer": "Core object graph",
+      "mechanism": "Release parent/explanation references earlier and use fixed object layouts.",
+      "affected_operations": [
+        "model calculation",
+        "explanations",
+        "repeated load/destroy"
+      ],
+      "best_estimate_summary": "Parent cleanup/related optimizations approximately halve memory in historical releases; slots reduce repeated load/destroy growth by 10–30%.",
+      "evidence_grade": "B/C — changelog and scoped benchmark claims",
+      "counterfactual_priority": "High",
+      "overlap_and_caveats": "Memory-growth results are allocator/workload specific and overlap attribution-source eviction.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md#V10.1.11",
+        "e-footprint/CHANGELOG.md#V17.0.0"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 6
+    },
+    {
+      "id": "G07",
+      "title": "Occurrence convolution and vectorization",
+      "period": "2025-07",
+      "layer": "Core edge/event calculation",
+      "mechanism": "Replace nested occurrence loops with vectorized and FFT-based convolution.",
+      "affected_operations": [
+        "edge occurrence calculation",
+        "long-period recurrent events"
+      ],
+      "best_estimate_summary": "~30× for the typical FFT step, ~500× for a six-year scoped convolution, and order-of-1000× for the original extreme path.",
+      "evidence_grade": "B/C — highly scoped performance claims",
+      "counterfactual_priority": "High for edge-heavy journeys",
+      "overlap_and_caveats": "Do not apply to non-edge models or to the full request; benchmark share varies sharply with topology and horizon.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md#V10.1.13"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 5
+    },
+    {
+      "id": "G08",
+      "title": "Server, storage and network calculation fast paths",
+      "period": "2023-08–2025-09",
+      "layer": "Domain calculations",
+      "mechanism": "Avoid redundant loops/conversions in server, storage, network, data-exchange and autoscaling formulas.",
+      "affected_operations": [
+        "results calculation",
+        "server autoscaling",
+        "data exchange"
+      ],
+      "best_estimate_summary": "Scoped claims: autoscaling 0.85→0.10 s (8.5×), data exchange ~30% faster (1.3×), storage ~10–15% faster.",
+      "evidence_grade": "B/C — scoped commit/changelog claims",
+      "counterfactual_priority": "Medium",
+      "overlap_and_caveats": "Apply only when the modeled system contains the affected object type.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 5
+    },
+    {
+      "id": "G09",
+      "title": "Unit and time-axis overhead reductions",
+      "period": "2023-09–2026-06",
+      "layer": "Core utilities",
+      "mechanism": "Cache unit lookups and remove repeated alignment, formatting and time-axis work.",
+      "affected_operations": [
+        "calculation",
+        "rendering",
+        "serialization"
+      ],
+      "best_estimate_summary": "Custom unit registry reported ~5% overall improvement; other fast paths are unquantified.",
+      "evidence_grade": "C — release claim",
+      "counterfactual_priority": "Medium",
+      "overlap_and_caveats": "Broadly used but small; likely overlaps measurements attributed to larger calculation-engine changes.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 9
+    },
+    {
+      "id": "G10",
+      "title": "Legacy Sankey attribution caching",
+      "period": "2026-03",
+      "layer": "Result visualization",
+      "mechanism": "Cache repeated attributed-footprint properties during warm Sankey generation.",
+      "affected_operations": [
+        "warm Sankey generation"
+      ],
+      "best_estimate_summary": "~100× warm Sankey claim for the affected cached-property path.",
+      "evidence_grade": "C — commit-level scoped claim",
+      "counterfactual_priority": "Medium",
+      "overlap_and_caveats": "Superseded/overlapped by later attribution fold and pull-engine changes; not an end-to-end request factor.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 1
+    },
+    {
+      "id": "G11",
+      "title": "Scalar/vectorized attribution fold",
+      "period": "2026-06",
+      "layer": "Result attribution",
+      "mechanism": "Accumulate period totals as plain floats and remove hourly arrays from the Sankey fold.",
+      "affected_operations": [
+        "cold Sankey",
+        "attributed footprint"
+      ],
+      "best_estimate_summary": "Cold big-system fold 1.26→0.35 s (3.6×); real edge-heavy cold Sankey 436→332 ms (1.31×).",
+      "evidence_grade": "B — changelog benchmark results",
+      "counterfactual_priority": "High",
+      "overlap_and_caveats": "Two fixtures show topology-dependent gains; use both as bounded calibration rather than one universal factor.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md#2026-06-performance"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 7
+    },
+    {
+      "id": "G12",
+      "title": "Bounded attribution memory and streaming",
+      "period": "2026-08",
+      "layer": "Result attribution",
+      "mechanism": "Evict source-scoped intermediates, finalize formulas and avoid retaining entire attribution trees.",
+      "affected_operations": [
+        "cold Sankey",
+        "multi-target attributed footprint"
+      ],
+      "best_estimate_summary": "Implemented five-target benchmark: peak RSS 2,350.7→~642 MB (72.6% lower, 3.66×), latency 1.61→2.25 s (~40% slower).",
+      "evidence_grade": "A — repeated before/after benchmark",
+      "counterfactual_priority": "Critical for large Sankeys",
+      "overlap_and_caveats": "This is a memory-for-latency trade-off. Model both resource dimensions; do not report it as an unconditional speed optimization.",
+      "source_refs": [
+        "e-footprint-interface/performance/memory/results/2026-08-28-attribution-source-eviction.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 4
+    },
+    {
+      "id": "G13",
+      "title": "Pull engine and schema-v23 persistence",
+      "period": "2026-07–2026-08",
+      "layer": "Core engine and persistence",
+      "mechanism": "Compute on demand, invalidate affected descendants, and persist a minimal input/cached-output calculation graph.",
+      "affected_operations": [
+        "JSON load/save",
+        "edit/read cycle",
+        "results",
+        "Sankey"
+      ],
+      "best_estimate_summary": "Cached export 202.8→12.8 MB (15.8× smaller); current gates show 5.4× load-to-ready, 4.4–24.2× edit/read and 589.5→431.6 MB peak RSS.",
+      "evidence_grade": "A/B — measured release gates and current rerun",
+      "counterfactual_priority": "Critical but later chapter",
+      "overlap_and_caveats": "This is a later amplifier, not the origin of most savings. It overlaps recomputation, lazy loading and attribution-memory work.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md#V23.0.0",
+        "e-footprint-interface/CHANGELOG.md#V0.17.0"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 1
+    },
+    {
+      "id": "G14",
+      "title": "Interface request and model-build deduplication",
+      "period": "2025-01–2026-08",
+      "layer": "Web orchestration",
+      "mechanism": "Avoid fetching, hydrating, computing or saving the same model twice in one user action.",
+      "affected_operations": [
+        "JSON import",
+        "model edit",
+        "result request",
+        "comparison open"
+      ],
+      "best_estimate_summary": "Several changes remove duplicated work; 'stop computing system twice on import' implies an affected-compute ceiling near 2×, but no end-to-end aggregate is measured.",
+      "evidence_grade": "C — mechanism and commit subjects",
+      "counterfactual_priority": "High",
+      "overlap_and_caveats": "Treat as request-count/work-elimination evidence, not a blanket 2× duration factor.",
+      "source_refs": [
+        "e-footprint-interface/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 5
+    },
+    {
+      "id": "G15",
+      "title": "Calculated-state cache and compact recovery persistence",
+      "period": "2025-09–2026-08",
+      "layer": "Web persistence",
+      "mechanism": "Keep calculated models in Redis and retain compact recoverable inputs in PostgreSQL.",
+      "affected_operations": [
+        "repeated results",
+        "repeated Sankey",
+        "workspace recovery"
+      ],
+      "best_estimate_summary": "Redis hot-state reuse is described as a great improvement; schema-v23 cached-state benefits are quantified in G13, but this layer has no isolated factor.",
+      "evidence_grade": "C — architectural evidence, no isolated benchmark",
+      "counterfactual_priority": "High",
+      "overlap_and_caveats": "Counterfactual depends on cache-hit rate and session behavior; model cold and warm actions separately.",
+      "source_refs": [
+        "e-footprint-interface/CHANGELOG.md#V0.13.2",
+        "e-footprint-interface/CHANGELOG.md#V0.17.0"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 3
+    },
+    {
+      "id": "G16",
+      "title": "Sources UI lazy loading and local row updates",
+      "period": "2026-05",
+      "layer": "Web UI",
+      "mechanism": "Load the source table only when opened and patch edited rows without rebuilding the full table.",
+      "affected_operations": [
+        "source audit",
+        "source metadata edit"
+      ],
+      "best_estimate_summary": "Eliminates unnecessary initial source-table work and full reloads; no reliable timing factor yet.",
+      "evidence_grade": "C — verified mechanism, unquantified",
+      "counterfactual_priority": "Medium",
+      "overlap_and_caveats": "Best modeled initially as fewer requests/queries/rendered rows, then benchmark S4 directly.",
+      "source_refs": [
+        "e-footprint-interface/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 5
+    },
+    {
+      "id": "G17",
+      "title": "Comparison workspace and resident overlay",
+      "period": "2026-06–2026-09",
+      "layer": "Web UI",
+      "mechanism": "Hydrate each comparison slot once, build the active model once, and keep the workspace resident behind overlays.",
+      "affected_operations": [
+        "open comparison",
+        "switch model",
+        "return from results/Sankey"
+      ],
+      "best_estimate_summary": "Removes duplicated active-model construction (affected build work up to ~2×) and avoids reloads on return; no isolated end-to-end result.",
+      "evidence_grade": "C — mechanism and commit subjects",
+      "counterfactual_priority": "Medium",
+      "overlap_and_caveats": "Savings depend on navigation mix and cache warmth; benchmark as complete user journeys.",
+      "source_refs": [
+        "e-footprint-interface/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 3
+    },
+    {
+      "id": "G18",
+      "title": "Worker lifecycle and memory containment",
+      "period": "2025-09–2026-08",
+      "layer": "Production runtime",
+      "mechanism": "Collect after requests, guard cgroup working set, recycle high-retention workers and avoid OOM failure.",
+      "affected_operations": [
+        "large Sankey",
+        "large results",
+        "worker recovery"
+      ],
+      "best_estimate_summary": "Memory-guard observation overhead is 0–1.8% in calibrated completed runs; primary benefit is reliable completion, not lower per-request compute.",
+      "evidence_grade": "A — deployment-shaped calibration",
+      "counterfactual_priority": "Operational constraint",
+      "overlap_and_caveats": "Model abort/retry/completion probability and replacement-worker cold starts separately from optimization savings.",
+      "source_refs": [
+        "e-footprint-interface/performance/memory/results/2026-08-28-memory-guard.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 4
+    },
+    {
+      "id": "G19",
+      "title": "Front-end payload and dependency reductions",
+      "period": "2025-09–2026-08",
+      "layer": "Browser/static assets",
+      "mechanism": "Use smaller chart bundles, self-hosted fonts and lighter client-side rendering paths.",
+      "affected_operations": [
+        "first page load",
+        "results charts",
+        "Sankey display"
+      ],
+      "best_estimate_summary": "Direction is supported by code changes; no consolidated byte or energy estimate is available.",
+      "evidence_grade": "D — unquantified",
+      "counterfactual_priority": "Low for server model",
+      "overlap_and_caveats": "Include only if browser/network energy enters the functional unit; separate from backend CPU/RAM.",
+      "source_refs": [
+        "e-footprint-interface/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 2
+    },
+    {
+      "id": "G20",
+      "title": "Import, startup and reflection caches",
+      "period": "2023-09–2026-08",
+      "layer": "Runtime utilities",
+      "mechanism": "Cache signatures/defaults/lookups and reduce import-time or repeated reflection work.",
+      "affected_operations": [
+        "worker startup",
+        "model hydration",
+        "object construction"
+      ],
+      "best_estimate_summary": "Mostly unquantified; individual commit messages indicate avoided repeated lookups and conversions.",
+      "evidence_grade": "D — mechanism only",
+      "counterfactual_priority": "Low/Medium",
+      "overlap_and_caveats": "May matter under worker recycling and cold starts; benchmark instead of assigning an arbitrary factor.",
+      "source_refs": [
+        "e-footprint/CHANGELOG.md",
+        "e-footprint-interface/CHANGELOG.md"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 12
+    },
+    {
+      "id": "G21",
+      "title": "Miscellaneous micro-optimizations",
+      "period": "2023-06–2026-08",
+      "layer": "Cross-cutting",
+      "mechanism": "Small loop, lookup, import and rendering improvements not defensibly isolated into a larger family.",
+      "affected_operations": [
+        "mixed"
+      ],
+      "best_estimate_summary": "January residual heuristic: ~1.5× speed and ~1.1× dynamic memory; later individual changes are generally unquantified.",
+      "evidence_grade": "D — residual historical estimate",
+      "counterfactual_priority": "Sensitivity only",
+      "overlap_and_caveats": "Use only as a bounded residual after named families; it is the highest-overlap category.",
+      "source_refs": [
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx#Feuil1!B12:E12",
+        "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx#slides-13-14"
+      ],
+      "ai_assistance_status": "unverified",
+      "tagged_commit_count": 3
+    }
+  ],
+  "commit_evidence": [
+    {
+      "repository": "e-footprint",
+      "date": "2023-07-27",
+      "full_hash": "61da4f4b26e7529f13894bdff8d01df6358d8ee1",
+      "short_hash": "61da4f4b",
+      "subject": "[OPTIM] obvious loop optims",
+      "group_id": "G21",
+      "url": "https://github.com/Boavizta/e-footprint/commit/61da4f4b26e7529f13894bdff8d01df6358d8ee1",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2023-09-26",
+      "full_hash": "030c044d3c35eea70c64fbe9ea63af0e151c0b8a",
+      "short_hash": "030c044d",
+      "subject": "[OPTIM] don’t use frame info to identify higher level function in ModelingObject __setattr__",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/030c044d3c35eea70c64fbe9ea63af0e151c0b8a",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2023-11-08",
+      "full_hash": "0352cc21bc2ff19017d79c36e7651c2ed4ec371f",
+      "short_hash": "0352cc21",
+      "subject": "[OPTIM] launch computations at system level.",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint/commit/0352cc21bc2ff19017d79c36e7651c2ed4ec371f",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2023-11-08",
+      "full_hash": "8c08cc70e9633ca65beb3d3cbaec32aab8b53bb6",
+      "short_hash": "8c08cc70",
+      "subject": "[OPTIM] Use pint Quantity instead of ExplainableQuantities in ExplainableHourlyUsage value list. Up to 50% speed improvement in full system calculations.",
+      "group_id": "G06",
+      "url": "https://github.com/Boavizta/e-footprint/commit/8c08cc70e9633ca65beb3d3cbaec32aab8b53bb6",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2024-07-01",
+      "full_hash": "73cb6022816bc4619be7849f9b6a72b979b4508b",
+      "short_hash": "73cb6022",
+      "subject": "[OPTIM] Use plotly_basic js package to reduce js codebase",
+      "group_id": "G19",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/73cb6022816bc4619be7849f9b6a72b979b4508b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2024-09-03",
+      "full_hash": "d2371b74e94d3e1f4ad198656da5e1898e720ac2",
+      "short_hash": "d2371b74",
+      "subject": "[OPTIM] Autoscaling update_nb_of_instances calculation (reduce time calculation from 0.85s to 0.1s)",
+      "group_id": "G08",
+      "url": "https://github.com/Boavizta/e-footprint/commit/d2371b74e94d3e1f4ad198656da5e1898e720ac2",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2024-09-10",
+      "full_hash": "800be311fcadbc976d22c3134582c519ffdb56c6",
+      "short_hash": "800be311",
+      "subject": "[OPTIM] Optimize str representation of ExplainableHourlyQuantity",
+      "group_id": "G06",
+      "url": "https://github.com/Boavizta/e-footprint/commit/800be311fcadbc976d22c3134582c519ffdb56c6",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2024-09-25",
+      "full_hash": "4aec2b0983e0be1a9ee00320c91ed380ac71e319",
+      "short_hash": "4aec2b09",
+      "subject": "[OPTIM] Optimize source values computation chain",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint/commit/4aec2b0983e0be1a9ee00320c91ed380ac71e319",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2024-10-29",
+      "full_hash": "bfaab922e6fbdd9f3bdb8d38d3a3b3e99c653eed",
+      "short_hash": "bfaab922",
+      "subject": "[OPTIM] create_hourly_usage_from_frequency perf",
+      "group_id": "G07",
+      "url": "https://github.com/Boavizta/e-footprint/commit/bfaab922e6fbdd9f3bdb8d38d3a3b3e99c653eed",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2025-02-04",
+      "full_hash": "e95f8034d8928b6d8e6e14da0dbd0767ad2efbb0",
+      "short_hash": "e95f8034",
+      "subject": "[OPTIM] By default don’t trigger computations and disable automatic modeling updates",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/e95f8034d8928b6d8e6e14da0dbd0767ad2efbb0",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2025-03-04",
+      "full_hash": "b709839b6c477a880bae6b20bc325f16744743ef",
+      "short_hash": "b709839b",
+      "subject": "[OPTIM] Don’t recompute time series when changing display granularity",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/b709839b6c477a880bae6b20bc325f16744743ef",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-03-25",
+      "full_hash": "b4b2b3ac56c575305da04a973a5a8358c00dec4c",
+      "short_hash": "b4b2b3ac",
+      "subject": "[OPTIM] use cache_folder param in Pint UnitRegistry instantiation",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/b4b2b3ac56c575305da04a973a5a8358c00dec4c",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-05-19",
+      "full_hash": "37750784d8f3b9a369fe4aed2bc26f4653a0913b",
+      "short_hash": "37750784",
+      "subject": "[OPTIM] lazy loading of compressed values in ExplainableHourlyQuantities created from json",
+      "group_id": "G04",
+      "url": "https://github.com/Boavizta/e-footprint/commit/37750784d8f3b9a369fe4aed2bc26f4653a0913b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-05-21",
+      "full_hash": "31f3f96bba2449c310affa3881901d22825f430d",
+      "short_hash": "31f3f96b",
+      "subject": "[OPTIM] Optimize dict key lookups + reduce use of getattr in json_to_system.py",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/31f3f96bba2449c310affa3881901d22825f430d",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-05-21",
+      "full_hash": "3d4efe27ddcf0d318ebaca533e3846005d2ce107",
+      "short_hash": "3d4efe27",
+      "subject": "[OPTIM] Don’t call System.__init__ in json_to_system.py",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/3d4efe27ddcf0d318ebaca533e3846005d2ce107",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-05-21",
+      "full_hash": "58e2ee29694e3d18cee668b8d3ba60462dc3dbf5",
+      "short_hash": "58e2ee29",
+      "subject": "[OPTIM] Minor optim: caching self_dict_container in object_linked_to_modeling_obj.py’s key_in_dict",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/58e2ee29694e3d18cee668b8d3ba60462dc3dbf5",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-05-21",
+      "full_hash": "7ef0de1833da4649e8d6659491a90feb3385ea5b",
+      "short_hash": "7ef0de18",
+      "subject": "[OPTIM] Iterate on dict keys using for key in my_dict instead of for key in my_dict.keys()",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/7ef0de1833da4649e8d6659491a90feb3385ea5b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-05-21",
+      "full_hash": "e0e076867b45ae6c48672119d9671abcd9a96ef9",
+      "short_hash": "e0e07686",
+      "subject": "[OPTIM] Cache pint unit parsing in json_to_system.py.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/e0e076867b45ae6c48672119d9671abcd9a96ef9",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-12",
+      "full_hash": "5ee1823c94561042e1fca25f7d463ac3891d658e",
+      "short_hash": "5ee1823c",
+      "subject": "[OPTIM] Cache ObjectLinkedToModelingObj attributes.",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/5ee1823c94561042e1fca25f7d463ac3891d658e",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-12",
+      "full_hash": "9146d286f5e0da7f6fb9d6d904ef174adad85a48",
+      "short_hash": "9146d286",
+      "subject": "[OPTIM] Switch to full numpy logic instead of pandas.",
+      "group_id": "G02",
+      "url": "https://github.com/Boavizta/e-footprint/commit/9146d286f5e0da7f6fb9d6d904ef174adad85a48",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "0e0b342f34e173176b4319cd5668612e1ad1e0f8",
+      "short_hash": "0e0b342f",
+      "subject": "[OPTIM] If ancestors and children haven’t been rehydrated from json use json data directly when dumping json, skipping the rehydration part.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/0e0b342f34e173176b4319cd5668612e1ad1e0f8",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "25e240a147d55d84c712232ee87e1913963ab156",
+      "short_hash": "25e240a1",
+      "subject": "[OPTIM] attribute updates chain computation and ObjectLinkedToModelingObj error handling. Editions take about 30% less time to compute (1.4 x perf gain).",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/25e240a147d55d84c712232ee87e1913963ab156",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "3c345f32f87a3735cb08e5b5fe87bfc81822dc5e",
+      "short_hash": "3c345f32",
+      "subject": "[OPTIM] Use ciso8601 for 10x faster datetime parsing",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/3c345f32f87a3735cb08e5b5fe87bfc81822dc5e",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "3cb6815fb619c385113383ecdd033a79db231d13",
+      "short_hash": "3cb6815f",
+      "subject": "[OPTIM] Optimize all_descendants_with_id method",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/3cb6815fb619c385113383ecdd033a79db231d13",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "4b877c05dab53c49bb69e43cb6df9a540cb5eed0",
+      "short_hash": "4b877c05",
+      "subject": "[OPTIM] Lazy loading of Quantities in ExplainableQuantities loaded from json. About 2-3x perf gain on serialization.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/4b877c05dab53c49bb69e43cb6df9a540cb5eed0",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "84ff909420300a93465f5640dfec9be4c0708575",
+      "short_hash": "84ff9094",
+      "subject": "[OPTIM] ModelingObject’s default_values as attributes and not class properties.",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/84ff909420300a93465f5640dfec9be4c0708575",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "9ce1f22b378e95f1fe14391236079c07ae4330d8",
+      "short_hash": "9ce1f22b",
+      "subject": "[OPTIM] Cache full_str_tuple_id and attribute_id",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/9ce1f22b378e95f1fe14391236079c07ae4330d8",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "dd1e95ae51c748ba494b8ec3caef6c6385aaa16b",
+      "short_hash": "dd1e95ae",
+      "subject": "[OPTIM] Add possibility to not compute previous system footprints in ModelingUpdate.",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint/commit/dd1e95ae51c748ba494b8ec3caef6c6385aaa16b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "ec3724d50ab8eb457f8af159beaf471b13797088",
+      "short_hash": "ec3724d5",
+      "subject": "[OPTIM] Optimize attr_updates_chain computation by using deque instead of lists",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint/commit/ec3724d50ab8eb457f8af159beaf471b13797088",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "ec5c91f900ff8ef22c4af241edff3f1f8fc5df1c",
+      "short_hash": "ec5c91f9",
+      "subject": "[OPTIM] Cache __init__ signature fetching.",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/ec5c91f900ff8ef22c4af241edff3f1f8fc5df1c",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-16",
+      "full_hash": "f033b44a4dd0a2f487976a16a74f3547db3d4e2a",
+      "short_hash": "f033b44a",
+      "subject": "[OPTIM] List_values and conditional_list_values as attributes instead of classmethods, like default_values.",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/f033b44a4dd0a2f487976a16a74f3547db3d4e2a",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-17",
+      "full_hash": "2ffe33184891bc6c1acb2fa0e58709b6c079cfb0",
+      "short_hash": "2ffe3318",
+      "subject": "[OPTIM] Cast data to np.float32 instead of default np.float64. Calculation perf gain about 10% (about 30% when accounting for serialization and deserialization speed gains) and memory usage down about 30-40%.",
+      "group_id": "G03",
+      "url": "https://github.com/Boavizta/e-footprint/commit/2ffe33184891bc6c1acb2fa0e58709b6c079cfb0",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-17",
+      "full_hash": "42ab0188e57ae7d4c6a656ca12f0dff7d9a7bbc1",
+      "short_hash": "42ab0188",
+      "subject": "[OPTIM] Remove useless pandas and matplotlib imports.",
+      "group_id": "G02",
+      "url": "https://github.com/Boavizta/e-footprint/commit/42ab0188e57ae7d4c6a656ca12f0dff7d9a7bbc1",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-19",
+      "full_hash": "2b52908dd5efef042523aa72e8fdce20b57f3793",
+      "short_hash": "2b52908d",
+      "subject": "[OPTIM] At Service init only compute Service and Server calculated attributes, don’t launch full computation chain to save Storage computations.",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint/commit/2b52908dd5efef042523aa72e8fdce20b57f3793",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-19",
+      "full_hash": "6b226155a5835660a5a8b985ebfda0ad87e7d057",
+      "short_hash": "6b226155",
+      "subject": "[OPTIM] Avoid unnecessary unit manipulations in ExplainableHourlyQuantities addition and multiplication",
+      "group_id": "G06",
+      "url": "https://github.com/Boavizta/e-footprint/commit/6b226155a5835660a5a8b985ebfda0ad87e7d057",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-19",
+      "full_hash": "87aaf37835699d2b7902060cfd3a3cf2ac9432ab",
+      "short_hash": "87aaf378",
+      "subject": "[OPTIM] In ExplainableQuantity and ExplainableHourlyQuantities to_json always use cached json data if available",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/87aaf37835699d2b7902060cfd3a3cf2ac9432ab",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-23",
+      "full_hash": "38169a69808aae7666660bf4fc3cb7917c803980",
+      "short_hash": "38169a69",
+      "subject": "[OPTIM] Erase left and right parents after explain_nested_tuples computation. Divides by 2 the memory footprint.",
+      "group_id": "G06",
+      "url": "https://github.com/Boavizta/e-footprint/commit/38169a69808aae7666660bf4fc3cb7917c803980",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-06-23",
+      "full_hash": "4497303b2ecade3862c0f68aa586729ebb938499",
+      "short_hash": "4497303b",
+      "subject": "[OPTIM] By default call Boaviztapi via web to reduce module import latency and size but implement fallback in case web call fails.",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/4497303b2ecade3862c0f68aa586729ebb938499",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2025-06-25",
+      "full_hash": "9c4e7a4e76d6a9ca6894104eca33acc2e01df7e3",
+      "short_hash": "9c4e7a4e",
+      "subject": "[OPTIM] Use get_init_signature_params to fetch __init__ signature of e-footprint classes from cache",
+      "group_id": "G14",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/9c4e7a4e76d6a9ca6894104eca33acc2e01df7e3",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-07-18",
+      "full_hash": "8d584bf21d332c12acdb581721b43e71da50b427",
+      "short_hash": "8d584bf2",
+      "subject": "[OPTIM] automatic_storage_dumps_after_storage_duration logic + cache storage_needed in update_nb_of_active_instances",
+      "group_id": "G08",
+      "url": "https://github.com/Boavizta/e-footprint/commit/8d584bf21d332c12acdb581721b43e71da50b427",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-07-18",
+      "full_hash": "ac869de03a2370ba38d5c87b947d7ee544a1f04f",
+      "short_hash": "ac869de0",
+      "subject": "[OPTIM] Introduce update_storage_needed, update_storage_freed and update_automatic_storage_dumps_after_storage_duration instead of treating them as properties and recomputing them more than needed. About 15% speed increase.",
+      "group_id": "G08",
+      "url": "https://github.com/Boavizta/e-footprint/commit/ac869de03a2370ba38d5c87b947d7ee544a1f04f",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-07-18",
+      "full_hash": "bb18121bd8595b06a67c5b99d2863edf32dd5c4b",
+      "short_hash": "bb18121b",
+      "subject": "[OPTIM] Simplify compute_hourly_data_exchange_for_usage_pattern logic by using hourly_avg_occurrences_per_usage_pattern. About 30% speed increase.",
+      "group_id": "G07",
+      "url": "https://github.com/Boavizta/e-footprint/commit/bb18121bd8595b06a67c5b99d2863edf32dd5c4b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-07-21",
+      "full_hash": "c01642db112dcdfb10872e359934a61473151838",
+      "short_hash": "c01642db",
+      "subject": "[OPTIM] Don’t include CSS escaped name in ModelingObject ids to reduce json size. About 15% json size reduction in big modeling.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/c01642db112dcdfb10872e359934a61473151838",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-08-25",
+      "full_hash": "0faf349d15106513bb7e6e833fb62e72bb5dd237",
+      "short_hash": "0faf349d",
+      "subject": "[OPTIM] compute_nb_avg_hourly_occurrences by replacing its Python loop with a single np.convolve operation. About 500x speedup on runs with event_duration of 6 years (can easily happen in EdgeUsagePattern’s nb_edge_usage_journeys_in_parallel computation).",
+      "group_id": "G07",
+      "url": "https://github.com/Boavizta/e-footprint/commit/0faf349d15106513bb7e6e833fb62e72bb5dd237",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2025-08-27",
+      "full_hash": "f06a66fab67ccad89dc1986e49416e725263edaa",
+      "short_hash": "f06a66fa",
+      "subject": "[OPTIM] compute_nb_avg_hourly_occurrences by using scipy’s fftconvolve instead of np.convolve. About 30x speed gain in typical edge usage pattern case.",
+      "group_id": "G07",
+      "url": "https://github.com/Boavizta/e-footprint/commit/f06a66fab67ccad89dc1986e49416e725263edaa",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-01-21",
+      "full_hash": "433678a8150e5398e4f5898c33ccb0b4852b0068",
+      "short_hash": "433678a8",
+      "subject": "[OPTIM] Add __slots__ to ExplainableObject classes to reduce memory fragmentation.",
+      "group_id": "G06",
+      "url": "https://github.com/Boavizta/e-footprint/commit/433678a8150e5398e4f5898c33ccb0b4852b0068",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-22",
+      "full_hash": "668489d9db07f81c2af438c6bb7208c26111cc87",
+      "short_hash": "668489d9",
+      "subject": "[OPTIM] Rationalize calls to model_web.update_system_data_with_up_to_date_calculated_attributes(), so that it happens only once per view (and not for each object creation, for example).",
+      "group_id": "G14",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/668489d9db07f81c2af438c6bb7208c26111cc87",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-22",
+      "full_hash": "e735e89938df0bd2ab0e95ef7a95857822518bad",
+      "short_hash": "e735e899",
+      "subject": "[OPTIM] Remove unnecessary system data fetchings and savings from upload_json view.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/e735e89938df0bd2ab0e95ef7a95857822518bad",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-22",
+      "full_hash": "f79cda6c1bd901881bd6060215fe7d58339fd025",
+      "short_hash": "f79cda6c",
+      "subject": "[OPTIM] Rationalize system data fetching so that it happens only once per request.",
+      "group_id": "G14",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/f79cda6c1bd901881bd6060215fe7d58339fd025",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-23",
+      "full_hash": "82f18aec6547cc063dd3785da2ff8aa478aa193b",
+      "short_hash": "82f18aec",
+      "subject": "[OPTIM] Other data fetching optims, especially taking source of data into account, to save system with calculated attributes when it’s loaded from postgres.",
+      "group_id": "G15",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/82f18aec6547cc063dd3785da2ff8aa478aa193b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-26",
+      "full_hash": "5821eb0e7f5c9ad1334f07edf5d16ddc0f4329d0",
+      "short_hash": "5821eb0e",
+      "subject": "[OPTIM] Stop computing system twice when importing system from json.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/5821eb0e7f5c9ad1334f07edf5d16ddc0f4329d0",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-27",
+      "full_hash": "69e6abcdc2580dd2f0d309d973864bb72b50dc28",
+      "short_hash": "69e6abcd",
+      "subject": "[OPTIM] Use orjson for 10x faster json size computation.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/69e6abcdc2580dd2f0d309d973864bb72b50dc28",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-27",
+      "full_hash": "b4f81a834d2ab661c298f62576d304a46104fd0b",
+      "short_hash": "b4f81a83",
+      "subject": "[OPTIM] Load model web only once when editing object.",
+      "group_id": "G14",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/b4f81a834d2ab661c298f62576d304a46104fd0b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-01-27",
+      "full_hash": "fef7943843e00ae7f86e73998d460af7255da29a",
+      "short_hash": "fef79438",
+      "subject": "[OPTIM] Load model web only once when deleting object.",
+      "group_id": "G14",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/fef7943843e00ae7f86e73998d460af7255da29a",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-03-12",
+      "full_hash": "95c19a71ff9446fabef9bff3cf38d12c394404ca",
+      "short_hash": "95c19a71",
+      "subject": "[OPTIM] Use cached_property on impact attribution properties to avoid computing same repartitions over and over during Sankey diagram generation. About 100x speed gain on Sankey diagram building.",
+      "group_id": "G10",
+      "url": "https://github.com/Boavizta/e-footprint/commit/95c19a71ff9446fabef9bff3cf38d12c394404ca",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-03-19",
+      "full_hash": "9eb10ca80b64336f5164faac783f79d67b1c14cf",
+      "short_hash": "9eb10ca8",
+      "subject": "[OPTIM] Turn fabrication_footprint_breakdown_by_source into a calculated attribute in EdgeDevice, to cache it.",
+      "group_id": "G21",
+      "url": "https://github.com/Boavizta/e-footprint/commit/9eb10ca80b64336f5164faac783f79d67b1c14cf",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-03-19",
+      "full_hash": "d2ab3e753f9f086a30ca0f6f223d38a623e05550",
+      "short_hash": "d2ab3e75",
+      "subject": "[OPTIM] Introduce total_unitary_hourly_need_per_usage_pattern in EdgeComponent.",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/d2ab3e753f9f086a30ca0f6f223d38a623e05550",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-03-27",
+      "full_hash": "73b9f9a1762bb8bc9abca65b129601ac5559148e",
+      "short_hash": "73b9f9a1",
+      "subject": "[OPTIM] format_quantity_for_display for array Quantities, by introducing _round_array_to_sig_figs vectorized function instead of doing a for loop with _round_to_sig_figs.",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/73b9f9a1762bb8bc9abca65b129601ac5559148e",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-03-27",
+      "full_hash": "7ec3fbd5f86c9d27c0eb49260404aa592ad3dc9b",
+      "short_hash": "7ec3fbd5",
+      "subject": "[OPTIM] test speed.",
+      "group_id": "G21",
+      "url": "https://github.com/Boavizta/e-footprint/commit/7ec3fbd5f86c9d27c0eb49260404aa592ad3dc9b",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-04-17",
+      "full_hash": "341c5e39ca1e3f36e0531e06377483300ee98378",
+      "short_hash": "341c5e39",
+      "subject": "[OPTIM] Self-host Inter font and echarts to drop third-party CDN dependencies.",
+      "group_id": "G19",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/341c5e39ca1e3f36e0531e06377483300ee98378",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-05-04",
+      "full_hash": "41f3acd88bb4dc37a35ed46946876734fb4251c1",
+      "short_hash": "41f3acd8",
+      "subject": "[OPTIM] Lazy-load source table on first Sources tab click",
+      "group_id": "G16",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/41f3acd88bb4dc37a35ed46946876734fb4251c1",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-05-04",
+      "full_hash": "af98edce6aa0c96a5447851c8df9ca8f3f6b773c",
+      "short_hash": "af98edce",
+      "subject": "[OPTIM] lazy load source table controls",
+      "group_id": "G16",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/af98edce6aa0c96a5447851c8df9ca8f3f6b773c",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-05-05",
+      "full_hash": "6c5b653dcff8f04b369d6bfe59cad940d40418f4",
+      "short_hash": "6c5b653d",
+      "subject": "[OPTIM] speed up source table row editor",
+      "group_id": "G16",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/6c5b653dcff8f04b369d6bfe59cad940d40418f4",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-05-05",
+      "full_hash": "95d204725e51759d7153889fa1affa94663ccac0",
+      "short_hash": "95d20472",
+      "subject": "[OPTIM] skip source table reload after confidence edit",
+      "group_id": "G16",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/95d204725e51759d7153889fa1affa94663ccac0",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-05-05",
+      "full_hash": "c3c7a796950fe72d44034896a64eaa1d18c899eb",
+      "short_hash": "c3c7a796",
+      "subject": "[OPTIM] update source row metadata locally",
+      "group_id": "G16",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/c3c7a796950fe72d44034896a64eaa1d18c899eb",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "38f33f5e3967310befccf7ce299195e390014344",
+      "short_hash": "38f33f5e",
+      "subject": "[OPTIM] Keep compute_nb_avg_hourly_occurrences on bare ndarrays.",
+      "group_id": "G07",
+      "url": "https://github.com/Boavizta/e-footprint/commit/38f33f5e3967310befccf7ce299195e390014344",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "463cef80b522ac6c9bf4efb2a2d0685821343f47",
+      "short_hash": "463cef80",
+      "subject": "[OPTIM] Add same-grid fast path in align_temporally_quantity_arrays.",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/463cef80b522ac6c9bf4efb2a2d0685821343f47",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "635b71d456ba7da4889c8aea6a31bf933366daee",
+      "short_hash": "635b71d4",
+      "subject": "[OPTIM] Cache Network.energy_footprint_per_usage_pattern as calculated attribute.",
+      "group_id": "G08",
+      "url": "https://github.com/Boavizta/e-footprint/commit/635b71d456ba7da4889c8aea6a31bf933366daee",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "68303b7cbb65a92ec4dae14b505da80682098ce1",
+      "short_hash": "68303b7c",
+      "subject": "[OPTIM] Filter simulation hourly quantities with O(1) index math instead of O(N) tz-aware datetime loop.",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/68303b7cbb65a92ec4dae14b505da80682098ce1",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "a3e7d13ad0fd6b03fe085b79082bb70fd4db04f5",
+      "short_hash": "a3e7d13a",
+      "subject": "[OPTIM] Snapshot the category breakdown once in System.update_total_footprint.",
+      "group_id": "G01",
+      "url": "https://github.com/Boavizta/e-footprint/commit/a3e7d13ad0fd6b03fe085b79082bb70fd4db04f5",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "ca3d20065bd59efdd47df2d38d1029fa2cfc9742",
+      "short_hash": "ca3d2006",
+      "subject": "[OPTIM] Make validate_timeseries_unit fast in the common no-label path.",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/ca3d20065bd59efdd47df2d38d1029fa2cfc9742",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-19",
+      "full_hash": "f6abc1c82e9f7eed2f80b3e8a25d7672e0da4704",
+      "short_hash": "f6abc1c8",
+      "subject": "[OPTIM] Lift shared_storage_per_job into its own Storage calculated attribute.",
+      "group_id": "G08",
+      "url": "https://github.com/Boavizta/e-footprint/commit/f6abc1c82e9f7eed2f80b3e8a25d7672e0da4704",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-20",
+      "full_hash": "12d6b5a58f9c809ce3da943a38da1cfde00cde07",
+      "short_hash": "12d6b5a5",
+      "subject": "[OPTIM] Vectorize get_time_axis with np.datetime64 for plot time series.",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/12d6b5a58f9c809ce3da943a38da1cfde00cde07",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-05-20",
+      "full_hash": "da73b8361269519197a8b7afc4f354d164cdd2c4",
+      "short_hash": "da73b836",
+      "subject": "[OPTIM] Track deferred linked objects with an id-set in system_to_json.",
+      "group_id": "G05",
+      "url": "https://github.com/Boavizta/e-footprint/commit/da73b8361269519197a8b7afc4f354d164cdd2c4",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-06-11",
+      "full_hash": "3c4414ba961887f8f04cb9824956c51e72fae288",
+      "short_hash": "3c4414ba",
+      "subject": "[OPTIM] attribution-logic: flushed_memo on the four attribution-only JobBase primitives",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint/commit/3c4414ba961887f8f04cb9824956c51e72fae288",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-06-11",
+      "full_hash": "91d8e36d0be50105008498c3314c42eaa456a222",
+      "short_hash": "91d8e36d",
+      "subject": "[OPTIM] cache unit attribute lookups in the registry",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/91d8e36d0be50105008498c3314c42eaa456a222",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-06-11",
+      "full_hash": "d7375c50d18ea1b96a256646ac9213d9852fe1dc",
+      "short_hash": "d7375c50",
+      "subject": "[OPTIM] attribution-logic: node_totals_and_links accumulates period-total scalars instead of hourly series",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint/commit/d7375c50d18ea1b96a256646ac9213d9852fe1dc",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-06-11",
+      "full_hash": "f5179f820b0efd1538c0cb9d7f7b3bfee521b2d7",
+      "short_hash": "f5179f82",
+      "subject": "[OPTIM] attribution-logic: node_totals_and_links accumulates kg floats, returns kg Quantities",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint/commit/f5179f820b0efd1538c0cb9d7f7b3bfee521b2d7",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-06-11",
+      "full_hash": "fdc6e079d3327c146d6c8c442261e49f068ab1e0",
+      "short_hash": "fdc6e079",
+      "subject": "[OPTIM] linear ancestor dedup in ExplainableObject init",
+      "group_id": "G06",
+      "url": "https://github.com/Boavizta/e-footprint/commit/fdc6e079d3327c146d6c8c442261e49f068ab1e0",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-06-16",
+      "full_hash": "9d2a67ddedb78a37bc578a8f8c38c4e4096518a9",
+      "short_hash": "9d2a67dd",
+      "subject": "[OPTIM] model-comparison: hydrate each slot once in download_workspace",
+      "group_id": "G17",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/9d2a67ddedb78a37bc578a8f8c38c4e4096518a9",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-06-17",
+      "full_hash": "27c7c15786c177d0206ddba1a7895b5d6e49afe8",
+      "short_hash": "27c7c157",
+      "subject": "[OPTIM] Reuse vectorized get_time_axis for TimeSeries.hours",
+      "group_id": "G09",
+      "url": "https://github.com/Boavizta/e-footprint/commit/27c7c15786c177d0206ddba1a7895b5d6e49afe8",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-06-22",
+      "full_hash": "de85778670ed920004515bed99ab12637a875e3e",
+      "short_hash": "de857786",
+      "subject": "[OPTIM] model-builder: build the active model once per render, not twice",
+      "group_id": "G17",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/de85778670ed920004515bed99ab12637a875e3e",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-06-25",
+      "full_hash": "55bb8da59a39787f6d6c376569962e6c68b229df",
+      "short_hash": "55bb8da5",
+      "subject": "[OPTIM] compare-overlay-layer: Resident comparison view (the perf win)",
+      "group_id": "G17",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/55bb8da59a39787f6d6c376569962e6c68b229df",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-07-29",
+      "full_hash": "ad53cea68aea68d8d6b7f8e0562086967f315fad",
+      "short_hash": "ad53cea6",
+      "subject": "[OPTIM] Avoid eager parity assertion formatting",
+      "group_id": "G20",
+      "url": "https://github.com/Boavizta/e-footprint/commit/ad53cea68aea68d8d6b7f8e0562086967f315fad",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-07-30",
+      "full_hash": "4cabbe1cd660eb0b31152002b3703d37cf0eef1a",
+      "short_hash": "4cabbe1c",
+      "subject": "[OPTIM] Stream targeted attributed footprints",
+      "group_id": "G12",
+      "url": "https://github.com/Boavizta/e-footprint/commit/4cabbe1cd660eb0b31152002b3703d37cf0eef1a",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-07-30",
+      "full_hash": "6dbbc105e41afd0fcf7911e0bfc27ab61014b950",
+      "short_hash": "6dbbc105",
+      "subject": "[OPTIM] Cache Job attribution coordinates",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint/commit/6dbbc105e41afd0fcf7911e0bfc27ab61014b950",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-08-03",
+      "full_hash": "17df33ed4aa60eb2749a4feb15f02d618c161340",
+      "short_hash": "17df33ed",
+      "subject": "[OPTIM] Keep object deletion footprint-lazy",
+      "group_id": "G13",
+      "url": "https://github.com/Boavizta/e-footprint/commit/17df33ed4aa60eb2749a4feb15f02d618c161340",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-08-05",
+      "full_hash": "a218812014023f534264b7cbe146dbad2765ca1f",
+      "short_hash": "a2188120",
+      "subject": "[OPTIM] Keep Sankey construction float-native",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint/commit/a218812014023f534264b7cbe146dbad2765ca1f",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-08-05",
+      "full_hash": "fa9544cb396aaa9917110d0fd36c67b0451677b8",
+      "short_hash": "fa9544cb",
+      "subject": "[OPTIM] Normalize Sankey matrix fold once",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint/commit/fa9544cb396aaa9917110d0fd36c67b0451677b8",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-05",
+      "full_hash": "229ad857cc651cabba51f370518aa7375cd5c8fd",
+      "short_hash": "229ad857",
+      "subject": "[OPTIM] Keep Postgres recovery payload compact",
+      "group_id": "G15",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/229ad857cc651cabba51f370518aa7375cd5c8fd",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-05",
+      "full_hash": "c8cca6a524c3e9db3f3ac3b2a6c166bb2f073915",
+      "short_hash": "c8cca6a5",
+      "subject": "[OPTIM] Adapt Sankey payload to kg floats",
+      "group_id": "G11",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/c8cca6a524c3e9db3f3ac3b2a6c166bb2f073915",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-27",
+      "full_hash": "528733b8c5996daf6d4140a53cdb315970c578c3",
+      "short_hash": "528733b8",
+      "subject": "[OPTIM] Add GC diagnostics to model timings",
+      "group_id": "G18",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/528733b8c5996daf6d4140a53cdb315970c578c3",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-27",
+      "full_hash": "fd83f882901c75d5dcb588b1590ed29b8162ad38",
+      "short_hash": "fd83f882",
+      "subject": "[OPTIM] Move cyclic GC after responses",
+      "group_id": "G18",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/fd83f882901c75d5dcb588b1590ed29b8162ad38",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-28",
+      "full_hash": "0b66aa13ea8036d49d2c7d120e29dc9749d42e7f",
+      "short_hash": "0b66aa13",
+      "subject": "[OPTIM] Exclude local artifacts from Docker images",
+      "group_id": "G18",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/0b66aa13ea8036d49d2c7d120e29dc9749d42e7f",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-28",
+      "full_hash": "a3dc8ac47ad4cbac69e78320e1657aabc5d6c55a",
+      "short_hash": "a3dc8ac4",
+      "subject": "[OPTIM] Scale worker memory guard to container",
+      "group_id": "G18",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/a3dc8ac47ad4cbac69e78320e1657aabc5d6c55a",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-08-31",
+      "full_hash": "3ff45352f30cdf659607cab5127f2d826d29a75f",
+      "short_hash": "3ff45352",
+      "subject": "[OPTIM] attribution-memory-optimization: Implement bounded direct attributed-footprint retention",
+      "group_id": "G12",
+      "url": "https://github.com/Boavizta/e-footprint/commit/3ff45352f30cdf659607cab5127f2d826d29a75f",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint",
+      "date": "2026-08-31",
+      "full_hash": "c6c463972a97e3ee1a3fbeb45f728fc59916749f",
+      "short_hash": "c6c46397",
+      "subject": "[OPTIM] attribution-memory-optimization: Bound cold Sankey retention by attribution source",
+      "group_id": "G12",
+      "url": "https://github.com/Boavizta/e-footprint/commit/c6c463972a97e3ee1a3fbeb45f728fc59916749f",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-31",
+      "full_hash": "83ce062db5e34fdd3b1c8027eaa1854be8c8192d",
+      "short_hash": "83ce062d",
+      "subject": "[OPTIM] attribution-memory-optimization: Implement bounded direct attributed-footprint retention",
+      "group_id": "G12",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/83ce062db5e34fdd3b1c8027eaa1854be8c8192d",
+      "ai_assistance_status": "unverified"
+    },
+    {
+      "repository": "e-footprint-interface",
+      "date": "2026-08-31",
+      "full_hash": "cf854e77a070b764b6abc1f29bb6b4c45ad898e2",
+      "short_hash": "cf854e77",
+      "subject": "[OPTIM] Persist card order without rebuilding model",
+      "group_id": "G15",
+      "url": "https://github.com/Boavizta/e-footprint-interface/commit/cf854e77a070b764b6abc1f29bb6b4c45ad898e2",
+      "ai_assistance_status": "unverified"
+    }
+  ],
+  "quantified_claims": [
+    {
+      "id": "C001",
+      "group_id": "G01",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B7:E7",
+      "metric": "calculation speed",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 10,
+      "suggested_lower_factor": 3,
+      "suggested_upper_factor": 10,
+      "evidence_type": "historical reconstruction",
+      "confidence": "low-medium",
+      "notes": "Selective recomputation estimate."
+    },
+    {
+      "id": "C002",
+      "group_id": "G02",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B5:E5",
+      "metric": "time-series speed",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 10,
+      "suggested_lower_factor": 10,
+      "suggested_upper_factor": 20,
+      "evidence_type": "historical reconstruction",
+      "confidence": "medium",
+      "notes": "Central value differs from changelog's ~20× claim."
+    },
+    {
+      "id": "C003",
+      "group_id": "G02",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B5:E5",
+      "metric": "dynamic memory",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 2,
+      "suggested_lower_factor": 1.5,
+      "suggested_upper_factor": 2,
+      "evidence_type": "historical reconstruction",
+      "confidence": "medium",
+      "notes": "Applies to affected dynamic structures, not total RSS."
+    },
+    {
+      "id": "C004",
+      "group_id": "G03",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B6:E6",
+      "metric": "calculation speed",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 1.2,
+      "suggested_lower_factor": 1.1,
+      "suggested_upper_factor": 1.2,
+      "evidence_type": "historical reconstruction",
+      "confidence": "medium",
+      "notes": "Float32 speed estimate."
+    },
+    {
+      "id": "C005",
+      "group_id": "G03",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B6:E6",
+      "metric": "dynamic memory",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 1.7,
+      "suggested_lower_factor": 1.3,
+      "suggested_upper_factor": 1.7,
+      "evidence_type": "historical reconstruction",
+      "confidence": "medium",
+      "notes": "Historical heuristic; implementation expectation is 30–40% lower array memory."
+    },
+    {
+      "id": "C006",
+      "group_id": "G04",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B9:E9",
+      "metric": "dynamic memory",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 4,
+      "suggested_lower_factor": 2,
+      "suggested_upper_factor": 4,
+      "evidence_type": "historical reconstruction",
+      "confidence": "low-medium",
+      "notes": "Smart decompression/lazy values."
+    },
+    {
+      "id": "C007",
+      "group_id": "G20",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B11:E11",
+      "metric": "static memory",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 1.2,
+      "suggested_lower_factor": 1,
+      "suggested_upper_factor": 1.2,
+      "evidence_type": "historical reconstruction",
+      "confidence": "low",
+      "notes": "Package-import heuristic."
+    },
+    {
+      "id": "C008",
+      "group_id": "G21",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B12:E12",
+      "metric": "calculation speed",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 1.5,
+      "suggested_lower_factor": 1,
+      "suggested_upper_factor": 1.5,
+      "evidence_type": "historical reconstruction",
+      "confidence": "low",
+      "notes": "Residual miscellaneous bucket."
+    },
+    {
+      "id": "C009",
+      "group_id": "G21",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+      "source_location": "Feuil1 B12:E12",
+      "metric": "dynamic memory",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 1.1,
+      "suggested_lower_factor": 1,
+      "suggested_upper_factor": 1.1,
+      "evidence_type": "historical reconstruction",
+      "confidence": "low",
+      "notes": "Residual miscellaneous bucket."
+    },
+    {
+      "id": "C010",
+      "group_id": "G01",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 4–6",
+      "metric": "representative calculation duration",
+      "before": 7.2,
+      "after": 0.7,
+      "unit": "seconds",
+      "improvement_factor": 10.3,
+      "suggested_lower_factor": 3,
+      "suggested_upper_factor": 10,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "low-medium",
+      "notes": "Sequential story stage after selective recomputation."
+    },
+    {
+      "id": "C011",
+      "group_id": "G02",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 7–8",
+      "metric": "representative calculation duration",
+      "before": 0.7,
+      "after": 0.07,
+      "unit": "seconds",
+      "improvement_factor": 10,
+      "suggested_lower_factor": 10,
+      "suggested_upper_factor": 20,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "medium",
+      "notes": "Sequential story stage after NumPy migration."
+    },
+    {
+      "id": "C012",
+      "group_id": "G02",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 7–8",
+      "metric": "representative peak memory",
+      "before": 2.5,
+      "after": 1.3,
+      "unit": "GB",
+      "improvement_factor": 1.92,
+      "suggested_lower_factor": 1.5,
+      "suggested_upper_factor": 2,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "medium",
+      "notes": "Rounded presentation values."
+    },
+    {
+      "id": "C013",
+      "group_id": "G04",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 9–10",
+      "metric": "representative peak memory",
+      "before": 1.3,
+      "after": 0.7,
+      "unit": "GB",
+      "improvement_factor": 1.86,
+      "suggested_lower_factor": 1.5,
+      "suggested_upper_factor": 4,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "low-medium",
+      "notes": "Stage combines compression/lazy materialization with prior improvements."
+    },
+    {
+      "id": "C014",
+      "group_id": "G03",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 11–12",
+      "metric": "representative calculation duration",
+      "before": 0.07,
+      "after": 0.06,
+      "unit": "seconds",
+      "improvement_factor": 1.17,
+      "suggested_lower_factor": 1.1,
+      "suggested_upper_factor": 1.2,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "medium",
+      "notes": "Rounded presentation values."
+    },
+    {
+      "id": "C015",
+      "group_id": "G03",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 11–12",
+      "metric": "representative peak memory",
+      "before": 0.7,
+      "after": 0.55,
+      "unit": "GB",
+      "improvement_factor": 1.27,
+      "suggested_lower_factor": 1.3,
+      "suggested_upper_factor": 1.7,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "medium",
+      "notes": "Whole-process stage, smaller than the array-only heuristic."
+    },
+    {
+      "id": "C016",
+      "group_id": "G21",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 13–14",
+      "metric": "representative calculation duration",
+      "before": 0.06,
+      "after": 0.04,
+      "unit": "seconds",
+      "improvement_factor": 1.5,
+      "suggested_lower_factor": 1,
+      "suggested_upper_factor": 1.5,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "low",
+      "notes": "Residual miscellaneous improvements."
+    },
+    {
+      "id": "C017",
+      "group_id": "G21",
+      "source": "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+      "source_location": "slides 13–14",
+      "metric": "representative peak memory",
+      "before": 0.55,
+      "after": 0.5,
+      "unit": "GB",
+      "improvement_factor": 1.1,
+      "suggested_lower_factor": 1,
+      "suggested_upper_factor": 1.1,
+      "evidence_type": "presentation reconstruction",
+      "confidence": "low",
+      "notes": "Residual miscellaneous improvements."
+    },
+    {
+      "id": "C018",
+      "group_id": "G02",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "V10.1.11",
+      "metric": "NumPy time-series performance",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 20,
+      "suggested_lower_factor": 10,
+      "suggested_upper_factor": 20,
+      "evidence_type": "release note",
+      "confidence": "medium",
+      "notes": "Broad release claim; pre-change benchmark not retained here."
+    },
+    {
+      "id": "C019",
+      "group_id": "G06",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "V10.1.11",
+      "metric": "memory footprint",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 2,
+      "suggested_lower_factor": 1.5,
+      "suggested_upper_factor": 2,
+      "evidence_type": "release note",
+      "confidence": "medium",
+      "notes": "Various optimizations; attribution across families is uncertain."
+    },
+    {
+      "id": "C020",
+      "group_id": "G07",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "V10.1.13",
+      "metric": "six-year occurrence convolution",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 500,
+      "suggested_lower_factor": 30,
+      "suggested_upper_factor": 500,
+      "evidence_type": "scoped commit/release claim",
+      "confidence": "medium",
+      "notes": "Edge-heavy, long-horizon calculation only."
+    },
+    {
+      "id": "C021",
+      "group_id": "G07",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "V10.1.13",
+      "metric": "typical FFT occurrence step",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 30,
+      "suggested_lower_factor": 10,
+      "suggested_upper_factor": 30,
+      "evidence_type": "scoped commit/release claim",
+      "confidence": "medium",
+      "notes": "Not full request duration."
+    },
+    {
+      "id": "C022",
+      "group_id": "G08",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "autoscaling optimization",
+      "metric": "autoscaling calculation duration",
+      "before": 0.85,
+      "after": 0.1,
+      "unit": "seconds",
+      "improvement_factor": 8.5,
+      "suggested_lower_factor": 5,
+      "suggested_upper_factor": 8.5,
+      "evidence_type": "commit claim",
+      "confidence": "medium",
+      "notes": "Affected autoscaling path only."
+    },
+    {
+      "id": "C023",
+      "group_id": "G11",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "2026-06 performance entry",
+      "metric": "cold big-system attribution fold",
+      "before": 1.26,
+      "after": 0.35,
+      "unit": "seconds",
+      "improvement_factor": 3.6,
+      "suggested_lower_factor": 1.3,
+      "suggested_upper_factor": 3.6,
+      "evidence_type": "benchmark release note",
+      "confidence": "medium-high",
+      "notes": "Fixture dependent."
+    },
+    {
+      "id": "C024",
+      "group_id": "G11",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "2026-06 performance entry",
+      "metric": "real edge-heavy cold Sankey",
+      "before": 436,
+      "after": 332,
+      "unit": "milliseconds",
+      "improvement_factor": 1.31,
+      "suggested_lower_factor": 1.2,
+      "suggested_upper_factor": 1.4,
+      "evidence_type": "benchmark release note",
+      "confidence": "medium-high",
+      "notes": "Real edge-heavy model."
+    },
+    {
+      "id": "C025",
+      "group_id": "G12",
+      "source": "e-footprint-interface/performance/memory/results/2026-08-28-attribution-source-eviction.md",
+      "source_location": "implemented five-target table",
+      "metric": "peak RSS",
+      "before": 2350.7,
+      "after": 642.0,
+      "unit": "MiB",
+      "improvement_factor": 3.66,
+      "suggested_lower_factor": 3.5,
+      "suggested_upper_factor": 3.8,
+      "evidence_type": "repeated before/after benchmark",
+      "confidence": "high",
+      "notes": "Median implemented value approximated from 632.0/645.3/649.2 MiB runs."
+    },
+    {
+      "id": "C026",
+      "group_id": "G12",
+      "source": "e-footprint-interface/performance/memory/results/2026-08-28-attribution-source-eviction.md",
+      "source_location": "implemented five-target table",
+      "metric": "latency",
+      "before": 1.609,
+      "after": 2.253,
+      "unit": "seconds",
+      "improvement_factor": 0.714,
+      "suggested_lower_factor": 0.65,
+      "suggested_upper_factor": 0.8,
+      "evidence_type": "repeated before/after benchmark",
+      "confidence": "high",
+      "notes": "Optimization is ~40% slower while dramatically lowering memory."
+    },
+    {
+      "id": "C027",
+      "group_id": "G13",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "V23.0.0",
+      "metric": "complete cached JSON export",
+      "before": 202.8,
+      "after": 12.8,
+      "unit": "MB",
+      "improvement_factor": 15.84,
+      "suggested_lower_factor": 15,
+      "suggested_upper_factor": 16,
+      "evidence_type": "fixture benchmark",
+      "confidence": "high",
+      "notes": "Standard large-system fixture."
+    },
+    {
+      "id": "C028",
+      "group_id": "G13",
+      "source": "e-footprint/CHANGELOG.md",
+      "source_location": "V23.0.0",
+      "metric": "additional attribution peak memory",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 3,
+      "suggested_lower_factor": 2.6,
+      "suggested_upper_factor": 3.8,
+      "evidence_type": "fixture benchmark",
+      "confidence": "medium-high",
+      "notes": "Additional peak about one-third; production-shaped total peaks 2.6–3.8× lower."
+    },
+    {
+      "id": "C029",
+      "group_id": "G13",
+      "source": "2026-09-16 current performance-gate rerun",
+      "source_location": "load-to-ready gate",
+      "metric": "load-to-ready duration",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": 5.4,
+      "suggested_lower_factor": 5.4,
+      "suggested_upper_factor": 5.4,
+      "evidence_type": "current local benchmark",
+      "confidence": "high",
+      "notes": "Current versus preserved legacy path on local machine."
+    },
+    {
+      "id": "C030",
+      "group_id": "G13",
+      "source": "2026-09-16 current performance-gate rerun",
+      "source_location": "edit/read gates",
+      "metric": "edit/read duration",
+      "before": null,
+      "after": null,
+      "unit": "ratio",
+      "improvement_factor": null,
+      "suggested_lower_factor": 4.4,
+      "suggested_upper_factor": 24.2,
+      "evidence_type": "current local benchmark",
+      "confidence": "high",
+      "notes": "Range across measured edit/read cases."
+    },
+    {
+      "id": "C031",
+      "group_id": "G13",
+      "source": "2026-09-16 current performance-gate rerun",
+      "source_location": "peak RSS gate",
+      "metric": "peak RSS",
+      "before": 589.5,
+      "after": 431.6,
+      "unit": "MB",
+      "improvement_factor": 1.37,
+      "suggested_lower_factor": 1.37,
+      "suggested_upper_factor": 1.37,
+      "evidence_type": "current local benchmark",
+      "confidence": "high",
+      "notes": "About 26.8% lower peak RSS."
+    },
+    {
+      "id": "C032",
+      "group_id": "G18",
+      "source": "e-footprint-interface/performance/memory/results/2026-08-28-memory-guard.md",
+      "source_location": "completed observation comparisons",
+      "metric": "memory-observer overhead",
+      "before": 0,
+      "after": 1.8,
+      "unit": "percent",
+      "improvement_factor": null,
+      "suggested_lower_factor": 0,
+      "suggested_upper_factor": 1.8,
+      "evidence_type": "deployment-shaped calibration",
+      "confidence": "high",
+      "notes": "This is overhead, not an optimization saving."
+    },
+    {
+      "id": "C033",
+      "group_id": "G14",
+      "source": "e-footprint-interface/CHANGELOG.md",
+      "source_location": "import deduplication commits",
+      "metric": "duplicate import computation",
+      "before": 2,
+      "after": 1,
+      "unit": "computations",
+      "improvement_factor": 2,
+      "suggested_lower_factor": 1,
+      "suggested_upper_factor": 2,
+      "evidence_type": "mechanism/commit claim",
+      "confidence": "medium",
+      "notes": "Ceiling for affected compute only; import contains other work."
+    },
+    {
+      "id": "C034",
+      "group_id": "G15",
+      "source": "e-footprint-interface/CHANGELOG.md",
+      "source_location": "V0.13.2",
+      "metric": "warm calculated-state reuse",
+      "before": null,
+      "after": null,
+      "unit": "unquantified",
+      "improvement_factor": null,
+      "suggested_lower_factor": null,
+      "suggested_upper_factor": null,
+      "evidence_type": "release note",
+      "confidence": "low-medium",
+      "notes": "Requires cold/warm benchmark and cache-hit scenario."
+    }
+  ],
+  "model_mapping": [
+    {
+      "group_id": "G01",
+      "benchmark_atoms": [
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "usage_journeys": [
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "server CPU time",
+        "request duration"
+      ],
+      "recommended_treatment": "Benchmark representative mutations; use a bounded duration factor only on recalculated branches."
+    },
+    {
+      "group_id": "G02",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B3",
+        "B5",
+        "B6"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "server CPU time",
+        "dynamic RAM"
+      ],
+      "recommended_treatment": "Use 10× central / 20× high for affected numerical work, weighted by its share of each action."
+    },
+    {
+      "group_id": "G03",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B3",
+        "B5",
+        "B6"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "server CPU time",
+        "time-series RAM",
+        "serialized bytes"
+      ],
+      "recommended_treatment": "Apply 1.1–1.2× to numerical work and 30–40% to time-series memory only."
+    },
+    {
+      "group_id": "G04",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B3",
+        "B5",
+        "B10"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S4"
+      ],
+      "model_parameters": [
+        "hydration time",
+        "dynamic RAM",
+        "persisted/network bytes"
+      ],
+      "recommended_treatment": "Parameterize compressible share; benchmark cold hydration separately from warm calculation."
+    },
+    {
+      "group_id": "G05",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B8",
+        "B10"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S4"
+      ],
+      "model_parameters": [
+        "server CPU time",
+        "payload bytes"
+      ],
+      "recommended_treatment": "Measure complete imports/saves; retain component claims only as diagnostics."
+    },
+    {
+      "group_id": "G06",
+      "benchmark_atoms": [
+        "B5",
+        "B6",
+        "B9"
+      ],
+      "usage_journeys": [
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "peak RAM",
+        "retained RAM"
+      ],
+      "recommended_treatment": "Use process/container memory measurements, not object-size sums."
+    },
+    {
+      "group_id": "G07",
+      "benchmark_atoms": [
+        "B3",
+        "B5"
+      ],
+      "usage_journeys": [
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "edge-calculation CPU time"
+      ],
+      "recommended_treatment": "Apply only to edge-heavy models and weight by profiled occurrence-calculation share."
+    },
+    {
+      "group_id": "G08",
+      "benchmark_atoms": [
+        "B5"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "domain-calculation CPU time"
+      ],
+      "recommended_treatment": "Select factors by object mix; do not apply absent server/storage/network objects."
+    },
+    {
+      "group_id": "G09",
+      "benchmark_atoms": [
+        "B1",
+        "B3",
+        "B5",
+        "B6"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "server CPU time"
+      ],
+      "recommended_treatment": "Treat as a small shared residual or benchmark directly."
+    },
+    {
+      "group_id": "G10",
+      "benchmark_atoms": [
+        "B6",
+        "B7"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S3"
+      ],
+      "model_parameters": [
+        "warm Sankey CPU time"
+      ],
+      "recommended_treatment": "Keep for historical chronology; exclude from current counterfactual if superseded by G11–G13."
+    },
+    {
+      "group_id": "G11",
+      "benchmark_atoms": [
+        "B6",
+        "B7",
+        "B9"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S3"
+      ],
+      "model_parameters": [
+        "Sankey CPU time"
+      ],
+      "recommended_treatment": "Use 1.31× central and 3.6× high according to topology."
+    },
+    {
+      "group_id": "G12",
+      "benchmark_atoms": [
+        "B6",
+        "B7",
+        "B9"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S3"
+      ],
+      "model_parameters": [
+        "peak RAM",
+        "Sankey duration"
+      ],
+      "recommended_treatment": "Model 3.5–3.8× memory benefit together with the measured latency penalty."
+    },
+    {
+      "group_id": "G13",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B3",
+        "B5",
+        "B6",
+        "B10"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "model_parameters": [
+        "CPU time",
+        "peak RAM",
+        "payload bytes",
+        "cache retention"
+      ],
+      "recommended_treatment": "Use preserved legacy/current benchmark pairs by action; never multiply the headline gates together."
+    },
+    {
+      "group_id": "G14",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B8"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "request count",
+        "server CPU time"
+      ],
+      "recommended_treatment": "Reconstruct the eliminated duplicate operations and validate with request traces."
+    },
+    {
+      "group_id": "G15",
+      "benchmark_atoms": [
+        "B1",
+        "B2",
+        "B5",
+        "B6"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "cold/warm mix",
+        "Redis bytes",
+        "PostgreSQL bytes"
+      ],
+      "recommended_treatment": "Model a cache-hit distribution; benchmark cold, warm-same-model and recovered-session cases."
+    },
+    {
+      "group_id": "G16",
+      "benchmark_atoms": [
+        "B8"
+      ],
+      "usage_journeys": [
+        "S4"
+      ],
+      "model_parameters": [
+        "request/query count",
+        "render duration",
+        "payload bytes"
+      ],
+      "recommended_treatment": "Count avoided requests/rows and benchmark the S4 source-audit journey."
+    },
+    {
+      "group_id": "G17",
+      "benchmark_atoms": [
+        "B2",
+        "B3",
+        "B6"
+      ],
+      "usage_journeys": [
+        "S3"
+      ],
+      "model_parameters": [
+        "hydration count",
+        "request duration",
+        "browser navigation"
+      ],
+      "recommended_treatment": "Benchmark the whole compare-and-return journey with resident and cold variants."
+    },
+    {
+      "group_id": "G18",
+      "benchmark_atoms": [
+        "B6",
+        "B7"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S3"
+      ],
+      "model_parameters": [
+        "completion probability",
+        "retry count",
+        "worker cold start"
+      ],
+      "recommended_treatment": "Treat as reliability/overhead, not a direct saving; include avoided failed work only in realistic retry scenarios."
+    },
+    {
+      "group_id": "G19",
+      "benchmark_atoms": [
+        "B1"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S3"
+      ],
+      "model_parameters": [
+        "browser CPU time",
+        "network bytes"
+      ],
+      "recommended_treatment": "Include only in an expanded client/network boundary and measure transfer sizes."
+    },
+    {
+      "group_id": "G20",
+      "benchmark_atoms": [
+        "B1",
+        "B2"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2"
+      ],
+      "model_parameters": [
+        "worker cold-start time",
+        "static RAM"
+      ],
+      "recommended_treatment": "Benchmark fresh-worker imports and hydration; connect to worker-recycle frequency."
+    },
+    {
+      "group_id": "G21",
+      "benchmark_atoms": [
+        "B1",
+        "B3",
+        "B5",
+        "B6"
+      ],
+      "usage_journeys": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "model_parameters": [
+        "CPU time",
+        "dynamic RAM"
+      ],
+      "recommended_treatment": "Use only as 1.0–1.5× / 1.0–1.1× residual sensitivity after explicit families."
+    }
+  ],
+  "source_files": [
+    "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/Optimisations e-footprint.xlsx",
+    "e-footprint/communications/articles/2026-09-ai-assisted-ecodesign-carbon-case/26-01-20 comment j’ai divisé par 1000 l’impact de mon application.pptx",
+    "e-footprint/CHANGELOG.md",
+    "e-footprint-interface/CHANGELOG.md",
+    "e-footprint-interface/performance/memory/results/2026-08-28-attribution-source-eviction.md",
+    "e-footprint-interface/performance/memory/results/2026-08-28-memory-guard.md",
+    "e-footprint-interface/specs/e-footprint-modeling/benchmarks/results/2026-09-15-summary.md"
+  ]
+}

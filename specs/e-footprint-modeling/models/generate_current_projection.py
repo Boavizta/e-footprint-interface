@@ -1,10 +1,11 @@
-"""Generate importable current-version operational models for the five adoption scenarios."""
+"""Generate importable operational models for the implementation and adoption scenarios."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import math
+import runpy
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -35,25 +36,24 @@ from efootprint.core.usage.job import Job
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
-
-
 HERE = Path(__file__).resolve().parent
 MODELING_ROOT = HERE.parent
+INTERFACE_VERSION = runpy.run_path(
+    str(MODELING_ROOT.parents[1] / "e_footprint_interface" / "version.py")
+)["__version__"]
 ACTION_EVIDENCE_PATH = MODELING_ROOT / "benchmarks" / "results" / "2026-09-15-action-evidence.json"
+IMPLEMENTATION_PROFILES_PATH = MODELING_ROOT / "optimizations" / "implementation-profiles.json"
 
 START = datetime(2025, 9, 1)
 END = datetime(2028, 1, 1)
 WORK_HOURS = tuple(range(9, 17))
 WORK_DAYS = tuple(range(5))
 
-SERVER_RAM_MB = 2_926
-SERVER_VCPU = 4
 REFERENCE_HOST_VCPU = 24
 REFERENCE_HOST_MANUFACTURING_KG = 600
 REFERENCE_HOST_MAX_POWER_W = 300
 REFERENCE_HOST_IDLE_POWER_W = 50
 KEEP_ALIVE_RAM_MB = 1
-REQUEST_RAM_MB = SERVER_RAM_MB - KEEP_ALIVE_RAM_MB
 
 
 SCENARIOS = {
@@ -175,6 +175,11 @@ MEMORY_SOURCE = Source(
     "https://github.com/Boavizta/e-footprint-interface/blob/main/performance/memory/results/2026-08-28-production-container.md",
     id="production-container-memory-2026-08-28",
 )
+COUNTERFACTUAL_SOURCE = Source(
+    "No AI, low optimization implementation profile",
+    "https://github.com/Boavizta/e-footprint-interface/blob/main/specs/e-footprint-modeling/optimizations/implementation-profiles.json",
+    id="no-ai-low-optim-profile-2026-09-16",
+)
 OWID_SOURCE = Source(
     "Our World in Data electricity carbon intensity",
     "https://ourworldindata.org/grapher/carbon-intensity-electricity",
@@ -203,6 +208,26 @@ class ActionEvidence:
     production_ms: float
     calibrated_production_ms: float
     calibration_factor: float
+
+
+@dataclass(frozen=True)
+class ImplementationProfile:
+    profile_id: str
+    label: str
+    file_prefix: str
+    tier: str
+    vcpu: int
+    nominal_ram_gib: float
+    process_visible_ram_mib: float
+    safe_ram_mib: float
+    monthly_price_eur: float
+    estimated_max_request_peak_mib: float | None
+    default_duration_factor: float
+    default_transfer_factor: float
+    action_duration_factors: dict[str, float]
+    action_transfer_factors: dict[str, float]
+    confidence: str
+    comment: str
 
 
 def source_value(value, source: Source, confidence: str, comment: str) -> SourceValue:
@@ -239,6 +264,81 @@ def load_benchmark_evidence() -> dict[str, ActionEvidence]:
     return evidence
 
 
+def load_implementation_profiles() -> dict[str, ImplementationProfile]:
+    document = json.loads(IMPLEMENTATION_PROFILES_PATH.read_text(encoding="utf-8"))
+    if document.get("schema_version") != 1:
+        raise ValueError("Unsupported implementation-profile schema")
+
+    plans = {plan["tier"]: plan for plan in document["plan_catalog"]}
+    capacity = document["capacity_assumptions"]
+    unavailable_ram_gib = float(capacity["unavailable_ram_gib"])
+    guard_ratio = float(capacity["computation_guard_ratio"])
+    profiles = {}
+    for profile_id, raw in document["profiles"].items():
+        selection = raw["tier_selection"]
+        peak_mib = selection.get("estimated_max_request_peak_mib")
+        if selection["mode"] == "observed":
+            tier = selection["tier"]
+            process_visible_ram_mib = float(selection["process_visible_ram_mib"])
+        elif selection["mode"] == "minimum_safe_capacity":
+            tier = None
+            process_visible_ram_mib = None
+            for plan in document["plan_catalog"]:
+                visible_mib = max(0, (float(plan["nominal_ram_gib"]) - unavailable_ram_gib) * 1024)
+                if float(peak_mib) <= visible_mib * guard_ratio:
+                    tier = plan["tier"]
+                    process_visible_ram_mib = visible_mib
+                    break
+            if tier is None:
+                ceiling = document["plan_catalog"][-1]
+                ceiling_safe_mib = max(
+                    0, (float(ceiling["nominal_ram_gib"]) - unavailable_ram_gib) * 1024 * guard_ratio
+                )
+                raise ValueError(
+                    f"{profile_id} requires {float(peak_mib):.1f} MiB, above the 3XL safe ceiling "
+                    f"of {ceiling_safe_mib:.1f} MiB"
+                )
+        else:
+            raise ValueError(f"Unsupported tier-selection mode for {profile_id}: {selection['mode']}")
+
+        plan = plans[tier]
+        profiles[profile_id] = ImplementationProfile(
+            profile_id=profile_id,
+            label=raw["label"],
+            file_prefix=raw["file_prefix"],
+            tier=tier,
+            vcpu=int(plan["vcpu"]),
+            nominal_ram_gib=float(plan["nominal_ram_gib"]),
+            process_visible_ram_mib=float(process_visible_ram_mib),
+            safe_ram_mib=float(process_visible_ram_mib) * guard_ratio,
+            monthly_price_eur=float(plan["monthly_price_eur"]),
+            estimated_max_request_peak_mib=float(peak_mib) if peak_mib is not None else None,
+            default_duration_factor=float(raw["default_duration_factor"]),
+            default_transfer_factor=float(raw["default_transfer_factor"]),
+            action_duration_factors={key: float(value) for key, value in raw["action_duration_factors"].items()},
+            action_transfer_factors={key: float(value) for key, value in raw["action_transfer_factors"].items()},
+            confidence=raw["confidence"],
+            comment=raw["comment"],
+        )
+
+        derivation = selection.get("memory_derivation")
+        if derivation:
+            derived_peak_mib = float(derivation["base_peak_mib"])
+            for factor in derivation["factors"]:
+                derived_peak_mib *= float(factor["factor"])
+            if not math.isclose(derived_peak_mib, float(peak_mib), rel_tol=1e-12):
+                raise ValueError(f"{profile_id} maximum-memory derivation is inconsistent")
+
+    required_actions = {action for recipe in JOURNEY_RECIPES.values() for action, _ in recipe}
+    required_actions.update(action for action, _ in SHARED_MODEL_RECIPE)
+    counterfactual = profiles["no-ai-low-optim"]
+    if set(counterfactual.action_duration_factors) != required_actions:
+        raise ValueError("Counterfactual duration factors do not match the modeled action catalogue")
+    if not set(counterfactual.action_transfer_factors).issubset(required_actions):
+        raise ValueError("Counterfactual transfer factors contain an unknown modeled action")
+    return profiles
+
+
 def validate_scenario_config() -> None:
     journey_ids = set(JOURNEY_USER_MINUTES)
     mixes = {"prelaunch": PRELAUNCH_MIX, **{name: scenario["postlaunch_mix"] for name, scenario in SCENARIOS.items()}}
@@ -249,10 +349,12 @@ def validate_scenario_config() -> None:
             raise ValueError(f"{name} journey mix sums to {sum(mix.values())}, not 1")
 
 
-def build_system(scenario_name: str, evidence: dict[str, ActionEvidence]) -> System:
-    server = build_server()
-    benchmark_jobs = build_benchmark_jobs(server, evidence)
-    journeys = build_journeys(server, benchmark_jobs, evidence)
+def build_system(
+    scenario_name: str, evidence: dict[str, ActionEvidence], profile: ImplementationProfile
+) -> System:
+    server = build_server(profile)
+    benchmark_jobs = build_benchmark_jobs(server, evidence, profile)
+    journeys = build_journeys(server, benchmark_jobs, evidence, profile)
     countries = build_countries()
     device = build_device()
     network = build_network()
@@ -280,15 +382,20 @@ def build_system(scenario_name: str, evidence: dict[str, ActionEvidence]) -> Sys
             )
 
     usage_patterns.append(build_keep_alive_pattern(server, network, countries["France"]))
+    system_name = (
+        f"e-footprint-interface current operation – {scenario_name} adoption – Sep 2025 to Dec 2027"
+        if profile.profile_id == "current"
+        else f"e-footprint-interface {profile.label.lower()} – {scenario_name} adoption – Sep 2025 to Dec 2027"
+    )
     return System(
-        f"e-footprint-interface current operation – {scenario_name} adoption – Sep 2025 to Dec 2027",
+        system_name,
         usage_patterns=usage_patterns,
         edge_usage_patterns=[],
     )
 
 
-def build_server() -> Server:
-    vcpu_allocation_share = SERVER_VCPU / REFERENCE_HOST_VCPU
+def build_server(profile: ImplementationProfile) -> Server:
+    vcpu_allocation_share = profile.vcpu / REFERENCE_HOST_VCPU
     storage = Storage(
         "Application backing storage proxy",
         carbon_footprint_manufacturing_per_storage_capacity=source_value(
@@ -312,45 +419,57 @@ def build_server() -> Server:
             1 * u.year, INFRA_SOURCE, "low", "Inert while modeled job storage writes are zero."
         ),
     )
+    profile_source = DEPLOYMENT_SOURCE if profile.profile_id == "current" else COUNTERFACTUAL_SOURCE
     return Server(
+        # Keep the semantic id stable across implementation profiles so the interface comparison
+        # recognizes one changed allocation rather than one removed server plus one added server.
         "Clever Cloud application container allocation",
         server_type=SourceObject(
             "autoscaling",
-            source=INFRA_SOURCE,
+            source=profile_source,
             confidence="medium",
-            comment="Autoscaling is used with a synthetic keep-alive request to approximate minimum_nb_of_instances=1.",
+            comment=(
+                "Autoscaling is used with a synthetic keep-alive request to approximate minimum_nb_of_instances=1. "
+                f"The {profile.tier} tier is the implementation profile's selected per-container unit."
+            ),
         ),
         carbon_footprint_manufacturing=source_value(
             REFERENCE_HOST_MANUFACTURING_KG * vcpu_allocation_share * u.kg,
             INFRA_SOURCE,
             "low",
-            "Four twenty-fourths of a generic 600 kg, 24-core host, allocated in proportion to vCPU; replace with "
-            "provider hardware and allocation data.",
+            f"{profile.vcpu}/24 of a generic 600 kg, 24-core host, allocated in proportion to vCPU for the "
+            f"{profile.tier} tier; replace with provider hardware and allocation data.",
         ),
         power=source_value(
             REFERENCE_HOST_MAX_POWER_W * vcpu_allocation_share * u.W,
             INFRA_SOURCE,
             "low",
-            "Four twenty-fourths of a generic 300 W host maximum power, allocated in proportion to vCPU.",
+            f"{profile.vcpu}/24 of a generic 300 W host maximum power, allocated in proportion to vCPU.",
         ),
         lifespan=source_value(6 * u.year, INFRA_SOURCE, "low", "Generic server lifetime hypothesis."),
         idle_power=source_value(
             REFERENCE_HOST_IDLE_POWER_W * vcpu_allocation_share * u.W,
             INFRA_SOURCE,
             "low",
-            "Four twenty-fourths of a generic 50 W host idle power, allocated in proportion to vCPU.",
+            f"{profile.vcpu}/24 of a generic 50 W host idle power, allocated in proportion to vCPU.",
         ),
         ram=source_value(
-            SERVER_RAM_MB * u.MB_ram,
-            MEMORY_SOURCE,
-            "medium",
-            "Process-visible production constraint retained from the production-container observations.",
+            profile.process_visible_ram_mib * u.MB_ram,
+            MEMORY_SOURCE if profile.profile_id == "current" else COUNTERFACTUAL_SOURCE,
+            "medium" if profile.profile_id == "current" else "low",
+            (
+                "Process-visible production constraint retained from the production-container observations."
+                if profile.profile_id == "current"
+                else f"{profile.tier} nominal RAM minus the provisional 1.1 GiB unavailable allowance; "
+                f"85% safe capacity is {profile.safe_ram_mib:.1f} MiB and the reconstructed maximum request is "
+                f"{profile.estimated_max_request_peak_mib:.1f} MiB."
+            ),
         ),
         compute=source_value(
-            SERVER_VCPU * u.cpu_core,
-            DEPLOYMENT_SOURCE,
-            "high",
-            "The production Docker container is allocated four vCPUs.",
+            profile.vcpu * u.cpu_core,
+            profile_source,
+            "high" if profile.profile_id == "current" else "medium",
+            f"The {profile.tier} Docker tier is allocated {profile.vcpu} vCPUs.",
         ),
         power_usage_effectiveness=source_value(
             1.2 * u.dimensionless, INFRA_SOURCE, "low", "Generic datacenter PUE hypothesis."
@@ -363,9 +482,9 @@ def build_server() -> Server:
         ),
         utilization_rate=source_value(
             1 * u.dimensionless,
-            MEMORY_SOURCE,
-            "medium",
-            "The 2,926 MB value is already the process-visible capacity, so no second headroom factor is applied.",
+            MEMORY_SOURCE if profile.profile_id == "current" else COUNTERFACTUAL_SOURCE,
+            "medium" if profile.profile_id == "current" else "low",
+            "The modeled RAM value is already process-visible capacity, so no second headroom factor is applied.",
         ),
         base_ram_consumption=source_value(
             0 * u.MB_ram,
@@ -383,28 +502,47 @@ def build_server() -> Server:
     )
 
 
-def build_benchmark_jobs(server: Server, evidence: dict[str, ActionEvidence]) -> dict[str, Job]:
+def build_benchmark_jobs(
+    server: Server, evidence: dict[str, ActionEvidence], profile: ImplementationProfile
+) -> dict[str, Job]:
     jobs = {}
+    request_ram_mib = profile.process_visible_ram_mib - KEEP_ALIVE_RAM_MB
     for journey_id, recipe in JOURNEY_RECIPES.items():
         for action, _ in recipe:
             if action in jobs:
                 continue
             measured = evidence[action]
-            request_comment = (
-                f"Proxy for server service time. Ten-run local median={measured.local_median_ms:.3f} ms; "
-                f"single production browser observation={measured.production_ms:.3f} ms; common calibration "
-                f"factor={measured.calibration_factor:.3f}; modeled duration={measured.calibrated_production_ms:.3f} ms. "
-                "The common factor preserves the stable local action shape while matching the production total. "
-                "Replace with correlated server-log service time."
-            )
+            duration_factor = profile.action_duration_factors.get(action, profile.default_duration_factor)
+            transfer_factor = profile.action_transfer_factors.get(action, profile.default_transfer_factor)
+            modeled_duration_ms = measured.calibrated_production_ms * duration_factor
+            if profile.profile_id == "current":
+                request_comment = (
+                    f"Proxy for server service time. Ten-run local median={measured.local_median_ms:.3f} ms; "
+                    f"single production browser observation={measured.production_ms:.3f} ms; common calibration "
+                    f"factor={measured.calibration_factor:.3f}; modeled duration={modeled_duration_ms:.3f} ms. "
+                    "The common factor preserves the stable local action shape while matching the production total. "
+                    "Replace with correlated server-log service time."
+                )
+                duration_source = BENCHMARK_SOURCE
+                duration_confidence = "low"
+            else:
+                request_comment = (
+                    f"Counterfactual central estimate: {duration_factor:g} × the current calibrated action duration "
+                    f"of {measured.calibrated_production_ms:.3f} ms = {modeled_duration_ms:.3f} ms. Selective "
+                    "recomputation and a partial NumPy implementation are retained; other optimization families "
+                    "are removed."
+                )
+                duration_source = COUNTERFACTUAL_SOURCE
+                duration_confidence = "low"
             jobs[action] = Job(
                 f"{journey_id} benchmark action – {action}",
                 server=server,
                 data_transferred=source_value(
-                    250 * u.kB,
-                    INFRA_SOURCE,
+                    250 * transfer_factor * u.kB,
+                    INFRA_SOURCE if profile.profile_id == "current" else COUNTERFACTUAL_SOURCE,
                     "low",
-                    "Request/response byte sizes were not captured; 250 kB per measured action is a v1 placeholder.",
+                    f"Current placeholder is 250 kB; the {profile.profile_id} profile applies a "
+                    f"{transfer_factor:g}× action-specific transfer factor.",
                 ),
                 data_stored=source_value(
                     0 * u.kB_stored,
@@ -413,7 +551,7 @@ def build_benchmark_jobs(server: Server, evidence: dict[str, ActionEvidence]) ->
                     "Session/cache writes are not yet inventoried as persistent storage growth.",
                 ),
                 request_duration=source_value(
-                    measured.calibrated_production_ms * u.ms, BENCHMARK_SOURCE, "low", request_comment
+                    modeled_duration_ms * u.ms, duration_source, duration_confidence, request_comment
                 ),
                 compute_needed=source_value(
                     0.5 * u.cpu_core,
@@ -422,10 +560,13 @@ def build_benchmark_jobs(server: Server, evidence: dict[str, ActionEvidence]) ->
                     "Average CPU occupancy hypothesis; replace with CPU-ms divided by service time from correlated logs.",
                 ),
                 ram_needed=source_value(
-                    REQUEST_RAM_MB * u.MB_ram,
+                    request_ram_mib * u.MB_ram,
                     USER_SCOPE_SOURCE,
                     "medium",
-                    "Reserves the single-worker container for one request. One MB is left for the synthetic keep-alive demand, so one real request plus keep-alive fits exactly and a concurrent request requires another instance.",
+                    f"Reserves the single-worker {profile.tier} container for one request. One MiB is left for the "
+                    "synthetic keep-alive demand, so one real request plus keep-alive fits exactly and a concurrent "
+                    "request requires another instance. Tier selection is driven separately by the profile's "
+                    "maximum-request memory requirement.",
                 ),
             )
     return jobs
@@ -435,6 +576,7 @@ def build_journeys(
     server: Server,
     jobs: dict[str, Job],
     evidence: dict[str, ActionEvidence],
+    profile: ImplementationProfile,
 ) -> dict[str, UsageJourney]:
     journeys = {}
     for journey_id, recipe in JOURNEY_RECIPES.items():
@@ -472,34 +614,38 @@ def build_journeys(
     shared_steps = []
     for action, user_minutes in SHARED_MODEL_RECIPE:
         base = evidence[action]
-        complex_duration_ms = base.calibrated_production_ms * 1.5
+        duration_factor = profile.action_duration_factors.get(action, profile.default_duration_factor)
+        transfer_factor = profile.action_transfer_factors.get(action, profile.default_transfer_factor)
+        complex_duration_ms = base.calibrated_production_ms * duration_factor * 1.5
         complex_job = Job(
             f"S5 complex shared model – {action}",
             server=server,
             data_transferred=source_value(
-                500 * u.kB,
-                INFRA_SOURCE,
+                500 * transfer_factor * u.kB,
+                INFRA_SOURCE if profile.profile_id == "current" else COUNTERFACTUAL_SOURCE,
                 "low",
-                "Twice the ordinary placeholder to represent a larger shared model response.",
+                f"Twice the ordinary placeholder for the larger shared model, with the {profile.profile_id} "
+                f"profile's {transfer_factor:g}× transfer factor.",
             ),
             data_stored=source_value(
                 0 * u.kB_stored, INFRA_SOURCE, "low", "Read-only shared exploration; no persistent growth modeled."
             ),
             request_duration=source_value(
                 complex_duration_ms * u.ms,
-                USER_SCOPE_SOURCE,
+                USER_SCOPE_SOURCE if profile.profile_id == "current" else COUNTERFACTUAL_SOURCE,
                 "low",
-                f"No S5 benchmark exists yet. Uses 1.5 × calibrated F1 duration for {action} "
-                f"({base.calibrated_production_ms:.3f} ms), representing a more complex-than-average shared model.",
+                f"No S5 benchmark exists yet. Uses 1.5 × the {profile.profile_id} duration for {action}: current "
+                f"calibrated duration {base.calibrated_production_ms:.3f} ms × implementation factor "
+                f"{duration_factor:g}. This represents a more complex-than-average shared model.",
             ),
             compute_needed=source_value(
                 0.5 * u.cpu_core, INFRA_SOURCE, "low", "Same provisional average CPU occupancy as benchmarked jobs."
             ),
             ram_needed=source_value(
-                REQUEST_RAM_MB * u.MB_ram,
+                (profile.process_visible_ram_mib - KEEP_ALIVE_RAM_MB) * u.MB_ram,
                 USER_SCOPE_SOURCE,
                 "medium",
-                "Same exclusive single-worker container reservation as benchmarked requests.",
+                f"Same exclusive single-worker {profile.tier} container reservation as benchmarked requests.",
             ),
         )
         shared_steps.append(
@@ -657,7 +803,7 @@ def build_keep_alive_pattern(server: Server, network: Network, country: Country)
             KEEP_ALIVE_RAM_MB * u.MB_ram,
             INFRA_SOURCE,
             "medium",
-            "One MB complements each real job's 2,925 MB reservation without forcing a second instance.",
+            "One MB complements each real job's profile-specific reservation without forcing a second instance.",
         ),
     )
     keep_alive_step = UsageJourneyStep(
@@ -716,10 +862,11 @@ def expected_usage_total(scenario_name: str) -> float:
     return prelaunch + postlaunch
 
 
-def write_and_validate(system: System, output_path: Path, scenario_name: str) -> None:
+def serialize_and_validate(
+    system: System, scenario_name: str, profile: ImplementationProfile
+) -> tuple[dict, float, float]:
     document = system_to_json(system, output_filepath=None, save_computed_state=False)
-    output_path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
-    class_objects, _, _ = json_to_system(json.loads(output_path.read_text(encoding="utf-8")))
+    class_objects, _, _ = json_to_system(json.loads(json.dumps(document)))
     loaded_system = next(iter(class_objects["System"].values()))
     expected_pattern_count = len(GEOGRAPHIES) * len(JOURNEY_USER_MINUTES) + 1
     if len(loaded_system.usage_patterns) != expected_pattern_count:
@@ -729,6 +876,8 @@ def write_and_validate(system: System, output_path: Path, scenario_name: str) ->
         )
     if BENCHMARK_SOURCE.id not in document["Sources"] or USER_SCOPE_SOURCE.id not in document["Sources"]:
         raise ValueError("Expected traceability sources are absent from generated JSON")
+    if profile.profile_id != "current" and COUNTERFACTUAL_SOURCE.id not in document["Sources"]:
+        raise ValueError("Counterfactual profile source is absent from generated JSON")
     traffic_total = sum(
         pattern.hourly_occurrences.sum().to(u.occurrence).magnitude
         for pattern in loaded_system.usage_patterns
@@ -739,9 +888,67 @@ def write_and_validate(system: System, output_path: Path, scenario_name: str) ->
     instances = loaded_system.servers[0].nb_of_instances
     if instances.min().magnitude != 1:
         raise ValueError("Synthetic keep-alive failed to preserve a minimum of one application instance")
+    return document, traffic_total, float(instances.max().magnitude)
+
+
+def write_and_validate(
+    system: System, output_path: Path, scenario_name: str, profile: ImplementationProfile
+) -> None:
+    document, traffic_total, max_instances = serialize_and_validate(system, scenario_name, profile)
+    output_path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
     print(
-        f"{scenario_name}: wrote {output_path} "
-        f"({traffic_total:,.0f} modeled usage occurrences, instances 1–{instances.max().magnitude:g}, "
+        f"{profile.profile_id}/{scenario_name}: wrote {output_path} "
+        f"({traffic_total:,.0f} modeled usage occurrences, instances 1–{max_instances:g}, "
+        f"tier {profile.tier}, {output_path.stat().st_size / 1_000_000:.1f} MB)"
+    )
+
+
+def comparable_object_ids(document: dict) -> set[str]:
+    """Return modeling-object ids that the interface uses to pair comparison rows."""
+    excluded = {"System", "Sources", "calculation_graph", "interface_config"}
+    return {
+        object_id
+        for class_name, objects in document.items()
+        if class_name not in excluded and isinstance(objects, dict)
+        for object_id in objects
+    }
+
+
+def write_comparison_workspace(
+    scenario_name: str,
+    evidence: dict[str, ActionEvidence],
+    profiles: dict[str, ImplementationProfile],
+    output_path: Path,
+) -> None:
+    """Write the current and counterfactual systems as sibling models in one interface workspace."""
+    documents = []
+    diagnostics = []
+    for profile_id in ("current", "no-ai-low-optim"):
+        profile = profiles[profile_id]
+        document, traffic_total, max_instances = serialize_and_validate(
+            build_system(scenario_name, evidence, profile), scenario_name, profile
+        )
+        documents.append(document)
+        diagnostics.append((profile, traffic_total, max_instances))
+
+    system_ids = [next(iter(document["System"])) for document in documents]
+    if len(set(system_ids)) != 2:
+        raise ValueError("Comparison siblings must have distinct System ids")
+    if comparable_object_ids(documents[0]) != comparable_object_ids(documents[1]):
+        raise ValueError("Comparison siblings do not share the same semantic modeling-object ids")
+
+    workspace = {
+        "efootprint_workspace_version": INTERFACE_VERSION,
+        "active_slot": 0,
+        "models": documents,
+    }
+    output_path.write_text(json.dumps(workspace, indent=2) + "\n", encoding="utf-8")
+    current, counterfactual = diagnostics
+    print(
+        f"comparison/{scenario_name}: wrote {output_path} "
+        f"({current[1]:,.0f} modeled usage occurrences per sibling, "
+        f"instances current 1–{current[2]:g} vs no-ai-low-optim 1–{counterfactual[2]:g}, "
+        f"tiers {current[0].tier} vs {counterfactual[0].tier}, "
         f"{output_path.stat().st_size / 1_000_000:.1f} MB)"
     )
 
@@ -755,6 +962,15 @@ def parse_args() -> argparse.Namespace:
         help="Generate all five scenarios or one selected scenario.",
     )
     parser.add_argument("--output-dir", type=Path, default=HERE)
+    parser.add_argument(
+        "--implementation",
+        choices=["all", "current", "no-ai-low-optim", "comparison"],
+        default="current",
+        help=(
+            "Generate a standalone profile, both standalone profiles, or one two-model comparison "
+            "workspace per scenario."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -765,10 +981,29 @@ def main() -> None:
     Source._use_name_as_id = True
     validate_scenario_config()
     evidence = load_benchmark_evidence()
-    selected = SCENARIOS if args.scenario == "all" else [args.scenario]
-    for scenario_name in selected:
-        system = build_system(scenario_name, evidence)
-        write_and_validate(system, args.output_dir / f"current-{scenario_name}.e-f.json", scenario_name)
+    profiles = load_implementation_profiles()
+    selected_scenarios = SCENARIOS if args.scenario == "all" else [args.scenario]
+    if args.implementation == "comparison":
+        for scenario_name in selected_scenarios:
+            write_comparison_workspace(
+                scenario_name,
+                evidence,
+                profiles,
+                args.output_dir / f"current-vs-no-ai-low-optim-{scenario_name}.e-f.json",
+            )
+        return
+
+    selected_profiles = profiles if args.implementation == "all" else [args.implementation]
+    for profile_id in selected_profiles:
+        profile = profiles[profile_id]
+        for scenario_name in selected_scenarios:
+            system = build_system(scenario_name, evidence, profile)
+            write_and_validate(
+                system,
+                args.output_dir / f"{profile.file_prefix}-{scenario_name}.e-f.json",
+                scenario_name,
+                profile,
+            )
 
 
 if __name__ == "__main__":
