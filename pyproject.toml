@@ -75,6 +75,7 @@ base_url = "http://localhost:8000"
 # Markers for test categorization
 markers = [
     "e2e: End-to-end tests requiring browser",
+    "benchmark: Opt-in performance benchmark; not part of the regular E2E suite",
     "slow: Tests that take longer to run",
     "onboarding_first_run: Let the once-ever guided tour auto-run (suppressed by default so it doesn't overlay other suites)",
 ]

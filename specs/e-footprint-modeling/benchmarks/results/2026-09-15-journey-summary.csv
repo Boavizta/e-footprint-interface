@@ -1,0 +1,6 @@
+scope,local_successful_runs,local_q25_ms,local_median_ms,local_q75_ms,production_successful_runs,production_ms,production_over_local_median
+all_measured_actions,10,4234.925,4263.367,4292.969,1,16303.372,3.824
+S1_explore_example,10,370.495,381.028,405.625,1,2610.398,6.851
+S2_build_and_refine,10,779.312,808.407,820.524,1,4148.935,5.132
+S3_compare_alternative,10,583.672,605.386,615.721,1,2343.675,3.871
+S4_audit_and_reuse,10,2446.241,2468.661,2483.450,1,7200.364,2.917

@@ -139,6 +139,8 @@ currently runs Supervisor, nginx, one preloaded Gunicorn worker and the Django a
 services must be inventoried as separate resources when they are actually provisioned.
 
 - Record the exact image digest, git SHAs for both repositories, Python/dependency versions and architecture.
+- Model the production Docker container with its operator-reported allocation of **4 vCPU**. Keep measured job CPU
+  occupancy separate from this capacity ceiling.
 - Record `memory.max` or its cgroup-v1 equivalent on every run.
 - Use **2,926 MiB** as the constrained reference until a lower observed production capacity supersedes it. Recent
   deployments of the nominal 4 GB environment exposed about 2,926–3,176 MiB, including a 2,975 MiB observation.
@@ -197,6 +199,19 @@ Build two otherwise identical systems: the reproducible historical baseline and 
 - Keep components unchanged by the optimization visible but identical in both models. Report both total service impact
   and the avoided operational impact.
 
+### Temporary minimum-instance workaround
+
+Until autoscaling servers support an explicit minimum-instance floor, model the production deployment with one
+continuous logical keep-alive thread, represented as contiguous one-hour job segments with minimal non-zero compute
+and RAM demand. Its positive raw demand makes autoscaling round the provisioned instance count up to one in every
+otherwise idle hour, while real jobs can still drive additional instances. A single multi-year `Job` must not be used:
+the concurrency convolution extends its result beyond the input series and introduces FFT noise at this duration.
+
+Keep the synthetic demand negligible and identical in the historical and current systems. Report it as a modeling
+workaround: it slightly reduces available capacity and contributes a small dynamic-load footprint. The future
+first-class requirement is parked in
+`../e-footprint/specs/features/improved-autoscaling-modeling/README.md`.
+
 Peak RAM is not automatically the `ram_needed` of an average request. Use the isolated incremental working set when it
 is defensible, and use a separate capacity scenario for cold peaks that determine whether the deployment can serve the
 operation at all.
@@ -224,6 +239,18 @@ Until production aggregates establish a real hourly shape, run two timing sensit
 and a Europe-centered office-hours pattern with 70% of sessions Monday–Friday 08:00–18:00 Europe/Paris and 30% spread
 across all other hours. The latter is a provisional audience hypothesis, not a claim about future users.
 
+Two extended adoption cases cover teams and automated agents integrating e-footprint into development workflows:
+
+| Case | Oct. 2026 usage occurrences/month | Dec. 2027 usage occurrences/month | Automated S6 share | Interpretation |
+|---|---:|---:|---:|---|
+| Team-scale integration | 2,000 | 50,000 | 70% | About 250 teams maintaining ten models with twenty automated refreshes per model each month at maturity |
+| Agent-scale ecosystem | 10,000 | 500,000 | 95% | About 10,000 active models receiving fifty automated refreshes each month at maturity |
+
+S6 is an agent-triggered maintenance run: import, update one assumption, compute results, inspect one explanation, and
+export. It carries no human device time. These scenarios measure the resulting e-footprint-interface load only; the AI
+agent's own inference and execution footprint remains outside the model until provider, model, token, region, and host
+evidence is available.
+
 The article's most robust output is a threshold, not a forecast:
 
 `break-even active sessions = additional development impact / avoided impact per weighted active session`
@@ -245,7 +272,7 @@ Keep this README as the stable method and usage story. Add, without overwriting 
 
 - `fixtures/` — frozen publishable inputs or deterministic generators plus topology manifests;
 - `benchmarks/` — the replay runner and a versioned operation manifest;
-- `results/<date>-<environment>.csv` and `.md` — raw compact observations and reviewed interpretation;
+- `benchmarks/results/` — reviewed compact evidence and summaries; per-run request traces stay local and Git-ignored;
 - `models/` — historical/current e-footprint model files for each traffic and lifetime case.
 
 The next stage is to freeze F1–F3, select reproducible historical and current SHAs, and implement B1–B10 as an

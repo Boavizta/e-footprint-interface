@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "campaign_date": "2026-09-15",
+  "method": "Median local action shape calibrated so its total equals the single successful production action total.",
+  "local_successful_runs": 10,
+  "production_successful_runs": 1,
+  "calibration_factor": 3.864707278157,
+  "actions": {
+    "load_ecommerce_template": {
+      "local_median_ms": 95.958,
+      "production_ms": 1100.781,
+      "calibrated_production_ms": 370.849581
+    },
+    "open_results_and_generate_cold_sankey": {
+      "local_median_ms": 243.198,
+      "production_ms": 1353.428,
+      "calibrated_production_ms": 939.889081
+    },
+    "refine_warm_sankey": {
+      "local_median_ms": 49.136,
+      "production_ms": 156.189,
+      "calibrated_production_ms": 189.896257
+    },
+    "add_usage_journey_step": {
+      "local_median_ms": 75.4715,
+      "production_ms": 429.441,
+      "calibrated_production_ms": 291.675255
+    },
+    "add_direct_server_job": {
+      "local_median_ms": 73.844,
+      "production_ms": 407.995,
+      "calibrated_production_ms": 285.385444
+    },
+    "increase_usage_volume": {
+      "local_median_ms": 110.7795,
+      "production_ms": 633.725,
+      "calibrated_production_ms": 428.13034
+    },
+    "increase_server_ram": {
+      "local_median_ms": 71.382,
+      "production_ms": 312.541,
+      "calibrated_production_ms": 275.870535
+    },
+    "open_results_for_richer_model": {
+      "local_median_ms": 257.452,
+      "production_ms": 1210.109,
+      "calibrated_production_ms": 994.976618
+    },
+    "update_model_with_results_open": {
+      "local_median_ms": 194.1975,
+      "production_ms": 1155.124,
+      "calibrated_production_ms": 750.516492
+    },
+    "duplicate_built_model": {
+      "local_median_ms": 150.1535,
+      "production_ms": 581.531,
+      "calibrated_production_ms": 580.299324
+    },
+    "rename_alternative": {
+      "local_median_ms": 77.4665,
+      "production_ms": 183.944,
+      "calibrated_production_ms": 299.385346
+    },
+    "reduce_alternative_usage_volume": {
+      "local_median_ms": 106.263,
+      "production_ms": 514.282,
+      "calibrated_production_ms": 410.675389
+    },
+    "increase_alternative_step_count": {
+      "local_median_ms": 30.423,
+      "production_ms": 206.216,
+      "calibrated_production_ms": 117.57599
+    },
+    "compare_reference_and_alternative": {
+      "local_median_ms": 153.938,
+      "production_ms": 313.652,
+      "calibrated_production_ms": 594.925309
+    },
+    "export_comparison_workspace": {
+      "local_median_ms": 63.3395,
+      "production_ms": 544.05,
+      "calibrated_production_ms": 244.788627
+    },
+    "export_model_for_reuse": {
+      "local_median_ms": 72.0935,
+      "production_ms": 281.446,
+      "calibrated_production_ms": 278.620274
+    },
+    "reset_active_model_before_reuse": {
+      "local_median_ms": 91.457,
+      "production_ms": 334.029,
+      "calibrated_production_ms": 353.454534
+    },
+    "import_previously_built_model": {
+      "local_median_ms": 170.2495,
+      "production_ms": 1406.321,
+      "calibrated_production_ms": 657.964482
+    },
+    "open_calculated_value_explanation": {
+      "local_median_ms": 875.5525,
+      "production_ms": 993.11,
+      "calibrated_production_ms": 3383.754119
+    },
+    "open_calculus_graph": {
+      "local_median_ms": 896.331,
+      "production_ms": 1153.307,
+      "calibrated_production_ms": 3464.056939
+    },
+    "open_reused_model_results": {
+      "local_median_ms": 196.0655,
+      "production_ms": 1594.8,
+      "calibrated_production_ms": 757.735765
+    },
+    "export_sources": {
+      "local_median_ms": 112.283,
+      "production_ms": 958.105,
+      "calibrated_production_ms": 433.940927
+    },
+    "export_reused_model": {
+      "local_median_ms": 51.493,
+      "production_ms": 479.246,
+      "calibrated_production_ms": 199.005372
+    }
+  }
+}

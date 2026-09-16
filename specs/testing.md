@@ -117,6 +117,10 @@ When a feature reaches into a new public efootprint API (a method/property/dict-
 
 ## E2E tests (`tests/e2e/`)
 
+The opt-in sequential usage-journey benchmark lives with its modeling evidence in
+`specs/e-footprint-modeling/benchmarks/`. It reuses the synchronous Playwright fixtures and page objects; its README
+documents local/hosted invocation and the privacy-safe JSON/CSV output contract.
+
 ### Philosophy: minimal, non-redundant
 
 Each test should cover a **distinct user workflow**. Avoid redundant tests that are subsets of each other.

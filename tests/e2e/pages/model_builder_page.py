@@ -146,6 +146,7 @@ class ModelBuilderPage:
         """
         self.page.once("dialog", lambda dialog: dialog.accept())
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-reboot-modeling"))
+        self.template_picker.wait_for(state="visible")
         self.dismiss_template_picker_if_present()
         return self
 
