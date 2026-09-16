@@ -45,7 +45,8 @@ ACTION_EVIDENCE_PATH = MODELING_ROOT / "benchmarks" / "results" / "2026-09-15-ac
 IMPLEMENTATION_PROFILES_PATH = MODELING_ROOT / "optimizations" / "implementation-profiles.json"
 
 START = datetime(2025, 9, 1)
-END = datetime(2028, 1, 1)
+END = datetime(2034, 1, 1)
+PUBLIC_LAUNCH = (2026, 10)
 WORK_HOURS = tuple(range(9, 17))
 WORK_DAYS = tuple(range(5))
 
@@ -56,30 +57,80 @@ REFERENCE_HOST_IDLE_POWER_W = 50
 KEEP_ALIVE_RAM_MB = 1
 
 
-SCENARIOS = {
-    "low": {
-        "postlaunch_monthly_occurrences": (200, 500),
-        "postlaunch_mix": {"S1": 0.30, "S2": 0.35, "S3": 0.10, "S4": 0.10, "S5": 0.15, "S6": 0.0},
+ADOPTION_SHAPES = {
+    "niche": {
+        "active_team_anchors": {2026: 5, 2027: 15, 2028: 30, 2029: 45, 2030: 50, 2031: 50, 2032: 50},
+        "mature_exploratory_sessions_per_month": 250,
     },
-    "medium": {
-        "postlaunch_monthly_occurrences": (300, 1_000),
-        "postlaunch_mix": {"S1": 0.30, "S2": 0.25, "S3": 0.10, "S4": 0.10, "S5": 0.25, "S6": 0.0},
+    "central": {
+        "active_team_anchors": {
+            2026: 10,
+            2027: 30,
+            2028: 90,
+            2029: 180,
+            2030: 260,
+            2031: 295,
+            2032: 300,
+        },
+        "mature_exploratory_sessions_per_month": 2_000,
     },
-    "high": {
-        "postlaunch_monthly_occurrences": (400, 5_000),
-        "postlaunch_mix": {"S1": 0.20, "S2": 0.15, "S3": 0.05, "S4": 0.05, "S5": 0.55, "S6": 0.0},
-    },
-    "team": {
-        "postlaunch_monthly_occurrences": (2_000, 50_000),
-        "postlaunch_mix": {"S1": 0.05, "S2": 0.10, "S3": 0.05, "S4": 0.05, "S5": 0.05, "S6": 0.70},
-    },
-    "agent": {
-        "postlaunch_monthly_occurrences": (10_000, 500_000),
-        "postlaunch_mix": {"S1": 0.01, "S2": 0.01, "S3": 0.01, "S4": 0.01, "S5": 0.01, "S6": 0.95},
+    "breakout": {
+        "active_team_anchors": {
+            2026: 20,
+            2027: 100,
+            2028: 400,
+            2029: 1_000,
+            2030: 1_600,
+            2031: 1_950,
+            2032: 2_000,
+        },
+        "mature_exploratory_sessions_per_month": 15_000,
     },
 }
 
+ACTIVITY_REGIMES = {
+    "human-led": {
+        "models_per_team": 4,
+        "interactive_sessions_per_team_month": 6,
+        "automated_runs_per_model_month": 0.5,
+    },
+    "team-integrated": {
+        "models_per_team": 10,
+        "interactive_sessions_per_team_month": 8,
+        "automated_runs_per_model_month": 4,
+    },
+    "agent-intensive": {
+        "models_per_team": 20,
+        "interactive_sessions_per_team_month": 10,
+        "automated_runs_per_model_month": 30,
+    },
+}
+
+SCENARIOS = {
+    "niche-human": {"label": "Niche, human-led", "adoption_shape": "niche", "activity_regime": "human-led"},
+    "central-human": {"label": "Central, human-led", "adoption_shape": "central", "activity_regime": "human-led"},
+    "central-team": {
+        "label": "Central, team-integrated",
+        "adoption_shape": "central",
+        "activity_regime": "team-integrated",
+    },
+    "breakout-team": {
+        "label": "Breakout, team-integrated",
+        "adoption_shape": "breakout",
+        "activity_regime": "team-integrated",
+    },
+    "breakout-agent": {
+        "label": "Breakout, agent-intensive",
+        "adoption_shape": "breakout",
+        "activity_regime": "agent-intensive",
+    },
+}
+
+PRELAUNCH_MONTHLY_OCCURRENCES = 50
 PRELAUNCH_MIX = {"S1": 0.10, "S2": 0.55, "S3": 0.20, "S4": 0.15, "S5": 0.0, "S6": 0.0}
+PUBLIC_EXPLORER_MIX = {"S1": 0.70, "S2": 0.20, "S3": 0.03, "S4": 0.02, "S5": 0.05, "S6": 0.0}
+TEAM_INTERACTIVE_MIX = {"S1": 0.05, "S2": 0.35, "S3": 0.25, "S4": 0.15, "S5": 0.20, "S6": 0.0}
+AUTOMATION_RAMP_MONTHS = 24
 GEOGRAPHIES = {
     "France": {"share": 0.50, "short_name": "FRA", "carbon_intensity": 44, "timezone": "Europe/Paris"},
     "Europe": {"share": 0.25, "short_name": "EUR", "carbon_intensity": 117, "timezone": "Europe/Brussels"},
@@ -341,17 +392,33 @@ def load_implementation_profiles() -> dict[str, ImplementationProfile]:
 
 def validate_scenario_config() -> None:
     journey_ids = set(JOURNEY_USER_MINUTES)
-    mixes = {"prelaunch": PRELAUNCH_MIX, **{name: scenario["postlaunch_mix"] for name, scenario in SCENARIOS.items()}}
+    mixes = {
+        "prelaunch": PRELAUNCH_MIX,
+        "public explorer": PUBLIC_EXPLORER_MIX,
+        "team interactive": TEAM_INTERACTIVE_MIX,
+    }
     for name, mix in mixes.items():
         if set(mix) != journey_ids:
             raise ValueError(f"{name} journey mix does not match {sorted(journey_ids)}")
         if not math.isclose(sum(mix.values()), 1.0):
             raise ValueError(f"{name} journey mix sums to {sum(mix.values())}, not 1")
+    for name, scenario in SCENARIOS.items():
+        if scenario["adoption_shape"] not in ADOPTION_SHAPES:
+            raise ValueError(f"{name} references an unknown adoption shape")
+        if scenario["activity_regime"] not in ACTIVITY_REGIMES:
+            raise ValueError(f"{name} references an unknown activity regime")
+    for name, shape in ADOPTION_SHAPES.items():
+        anchors = shape["active_team_anchors"]
+        if sorted(anchors) != list(range(2026, 2033)):
+            raise ValueError(f"{name} must define year-end active-team anchors from 2026 through 2032")
+        if any(next_value < value for value, next_value in zip(anchors.values(), list(anchors.values())[1:])):
+            raise ValueError(f"{name} active-team anchors must not decrease")
 
 
 def build_system(
     scenario_name: str, evidence: dict[str, ActionEvidence], profile: ImplementationProfile
 ) -> System:
+    scenario_label = SCENARIOS[scenario_name]["label"]
     server = build_server(profile)
     benchmark_jobs = build_benchmark_jobs(server, evidence, profile)
     journeys = build_journeys(server, benchmark_jobs, evidence, profile)
@@ -365,7 +432,7 @@ def build_system(
             hourly_values = build_hourly_traffic(scenario_name, journey_id, geography_name)
             usage_patterns.append(
                 UsagePattern(
-                    f"{scenario_name.title()} – {geography_name} – {journey_id}",
+                    f"{scenario_label} – {geography_name} – {journey_id}",
                     usage_journeys={
                         journey: source_value(
                             1 * u.dimensionless,
@@ -383,9 +450,9 @@ def build_system(
 
     usage_patterns.append(build_keep_alive_pattern(server, network, countries["France"]))
     system_name = (
-        f"e-footprint-interface current operation – {scenario_name} adoption – Sep 2025 to Dec 2027"
+        f"e-footprint-interface current operation – {scenario_label} – Sep 2025 to Dec 2033"
         if profile.profile_id == "current"
-        else f"e-footprint-interface {profile.label.lower()} – {scenario_name} adoption – Sep 2025 to Dec 2027"
+        else f"e-footprint-interface {profile.label.lower()} – {scenario_label} – Sep 2025 to Dec 2033"
     )
     return System(
         system_name,
@@ -695,15 +762,32 @@ def build_hourly_traffic(scenario_name: str, journey_id: str, geography_name: st
         values[index] = monthly_occurrences * mix[journey_id] * geography_share / eligible_by_month[month_key]
 
     scenario = SCENARIOS[scenario_name]
-    start_volume, end_volume = scenario["postlaunch_monthly_occurrences"]
+    shape = ADOPTION_SHAPES[scenario["adoption_shape"]]
+    regime = ACTIVITY_REGIMES[scenario["activity_regime"]]
+    mature_team_occurrences = (
+        regime["interactive_sessions_per_team_month"]
+        + regime["models_per_team"] * regime["automated_runs_per_model_month"]
+    )
+    mature_monthly_volume = (
+        shape["mature_exploratory_sessions_per_month"]
+        + shape["active_team_anchors"][2032] * mature_team_occurrences
+    )
     comment = (
-        f"User-provided trajectory with linear monthly anchors: 50 usage occurrences in Sep 2025 to 200 in Sep 2026; "
-        f"then {start_volume} in Oct 2026 to {end_volume} in Dec 2027 for {scenario_name}. "
+        f"Ground-up {scenario['label']} trajectory: {PRELAUNCH_MONTHLY_OCCURRENCES} monthly development occurrences "
+        f"before the Oct 2026 public launch, then monthly interpolation between the "
+        f"{scenario['adoption_shape']} year-end active-team anchors {shape['active_team_anchors']}. "
+        f"At maturity, each team maintains {regime['models_per_team']} models, performs "
+        f"{regime['interactive_sessions_per_team_month']} interactive sessions per month and triggers "
+        f"{regime['automated_runs_per_model_month']:g} automated S6 runs per model per month. Public exploration "
+        f"scales with team adoption to {shape['mature_exploratory_sessions_per_month']:,} sessions per month. "
+        f"The resulting mature volume is {mature_monthly_volume:,.0f} occurrences per month and is held constant "
+        "through the full 2033 stationary year. Automated frequency ramps to its regime target during the first "
+        f"{AUTOMATION_RAMP_MONTHS} months after launch. "
         f"Traffic share: {geography_name}={geography_share:.0%}. Usage occurrences are spread evenly over "
-        f"Monday–Friday 09:00–17:00 local time. Pre-launch journey mix={PRELAUNCH_MIX}; "
-        f"post-launch mix={scenario['postlaunch_mix']}. "
+        f"Monday–Friday 09:00–17:00 local time. Pre-launch mix={PRELAUNCH_MIX}; public-explorer mix="
+        f"{PUBLIC_EXPLORER_MIX}; team-interactive mix={TEAM_INTERACTIVE_MIX}. "
         "S6 occurrences are automated model-maintenance runs with no user device time. No holidays, seasonality, "
-        "bursts, or landing-page-only visits are represented."
+        "bursts, churn, or landing-page-only visits are represented."
     )
     return SourceHourlyValues(
         Quantity(values, u.occurrence),
@@ -715,15 +799,59 @@ def build_hourly_traffic(scenario_name: str, journey_id: str, geography_name: st
 
 
 def monthly_volume_and_mix(scenario_name: str, month_key: tuple[int, int]) -> tuple[float, dict[str, float]]:
-    month_index = (month_key[0] - START.year) * 12 + month_key[1] - START.month
-    if month_index <= 12:
-        return 50 + (200 - 50) * month_index / 12, PRELAUNCH_MIX
+    occurrences = monthly_journey_occurrences(scenario_name, month_key)
+    volume = sum(occurrences.values())
+    return volume, {journey_id: count / volume for journey_id, count in occurrences.items()}
 
-    postlaunch_index = month_index - 13
-    postlaunch_month_count = 15
-    start_volume, end_volume = SCENARIOS[scenario_name]["postlaunch_monthly_occurrences"]
-    volume = start_volume + (end_volume - start_volume) * postlaunch_index / (postlaunch_month_count - 1)
-    return volume, SCENARIOS[scenario_name]["postlaunch_mix"]
+
+def monthly_journey_occurrences(scenario_name: str, month_key: tuple[int, int]) -> dict[str, float]:
+    if month_number(month_key) < month_number(PUBLIC_LAUNCH):
+        return {
+            journey_id: PRELAUNCH_MONTHLY_OCCURRENCES * share
+            for journey_id, share in PRELAUNCH_MIX.items()
+        }
+
+    scenario = SCENARIOS[scenario_name]
+    shape = ADOPTION_SHAPES[scenario["adoption_shape"]]
+    regime = ACTIVITY_REGIMES[scenario["activity_regime"]]
+    active_teams = interpolated_active_teams(shape, month_key)
+    mature_teams = float(shape["active_team_anchors"][2032])
+    exploratory_sessions = shape["mature_exploratory_sessions_per_month"] * active_teams / mature_teams
+    interactive_sessions = active_teams * regime["interactive_sessions_per_team_month"]
+    months_after_launch = month_number(month_key) - month_number(PUBLIC_LAUNCH)
+    automation_ramp = min(1.0, (months_after_launch + 1) / AUTOMATION_RAMP_MONTHS)
+    automated_runs = (
+        active_teams
+        * regime["models_per_team"]
+        * regime["automated_runs_per_model_month"]
+        * automation_ramp
+    )
+    return {
+        journey_id: (
+            exploratory_sessions * PUBLIC_EXPLORER_MIX[journey_id]
+            + interactive_sessions * TEAM_INTERACTIVE_MIX[journey_id]
+            + (automated_runs if journey_id == "S6" else 0)
+        )
+        for journey_id in JOURNEY_USER_MINUTES
+    }
+
+
+def interpolated_active_teams(shape: dict, month_key: tuple[int, int]) -> float:
+    points = [((2026, 9), 0.0)] + [
+        ((year, 12), float(value)) for year, value in shape["active_team_anchors"].items()
+    ]
+    target = month_number(month_key)
+    for (left_month, left_value), (right_month, right_value) in zip(points, points[1:]):
+        left = month_number(left_month)
+        right = month_number(right_month)
+        if target <= right:
+            fraction = (target - left) / (right - left)
+            return left_value + (right_value - left_value) * fraction
+    return points[-1][1]
+
+
+def month_number(month_key: tuple[int, int]) -> int:
+    return month_key[0] * 12 + month_key[1] - 1
 
 
 def build_countries() -> dict[str, Country]:
@@ -856,10 +984,15 @@ def journey_name(journey_id: str) -> str:
 
 
 def expected_usage_total(scenario_name: str) -> float:
-    prelaunch = 13 * (50 + 200) / 2
-    start_volume, end_volume = SCENARIOS[scenario_name]["postlaunch_monthly_occurrences"]
-    postlaunch = 15 * (start_volume + end_volume) / 2
-    return prelaunch + postlaunch
+    total = 0.0
+    year, month = START.year, START.month
+    while (year, month) < (END.year, END.month):
+        total += monthly_volume_and_mix(scenario_name, (year, month))[0]
+        if month == 12:
+            year, month = year + 1, 1
+        else:
+            month += 1
+    return total
 
 
 def serialize_and_validate(
@@ -883,7 +1016,7 @@ def serialize_and_validate(
         for pattern in loaded_system.usage_patterns
         if pattern.name != "Minimum one application instance"
     )
-    if not math.isclose(traffic_total, expected_usage_total(scenario_name), abs_tol=0.05):
+    if not math.isclose(traffic_total, expected_usage_total(scenario_name), rel_tol=1e-7, abs_tol=0.05):
         raise ValueError(f"Generated traffic sums to {traffic_total}, not the expected scenario total")
     instances = loaded_system.servers[0].nb_of_instances
     if instances.min().magnitude != 1:

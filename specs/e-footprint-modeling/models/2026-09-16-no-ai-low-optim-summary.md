@@ -24,19 +24,21 @@ The total footprint includes identical user-device time in both implementations.
 shows the operational implementation difference more directly than the total-system ratio.
 
 Each row is maintained as one `current-vs-no-ai-low-optim-<scenario>.e-f.json` workspace. Opening it loads the current
-system as the Reference and the counterfactual as its Comparison sibling, ready for the interface comparison view.
+system as the Reference and the counterfactual as its Comparison sibling, ready for the interface comparison view. The
+Sep 2025–Dec 2033 totals include adoption growth through Dec 2032 and a complete stationary year in 2033.
 
 | Scenario | Usage occurrences | Current total | No-AI total | Total ratio | Current server | No-AI server | Maximum instances current → no-AI |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Low | 6,875 | 100.723 kgCO₂e | 244.820 kgCO₂e | 2.43× | 47.908 kgCO₂e | 191.877 kgCO₂e | 1 → 1 |
-| Medium | 11,375 | 124.448 kgCO₂e | 269.005 kgCO₂e | 2.16× | 47.927 kgCO₂e | 192.215 kgCO₂e | 1 → 1 |
-| High | 42,125 | 285.601 kgCO₂e | 434.309 kgCO₂e | 1.52× | 48.099 kgCO₂e | 195.343 kgCO₂e | 1 → 1 |
-| Team | 391,625 | 922.385 kgCO₂e | 1,119.374 kgCO₂e | 1.21× | 49.220 kgCO₂e | 228.100 kgCO₂e | 1 → 3 |
-| Agent | 3,826,625 | 1,294.684 kgCO₂e | 2,120.339 kgCO₂e | 1.64× | 71.090 kgCO₂e | 692.284 kgCO₂e | 5 → 21 |
+| Niche, human-led | 42,586 | 411.813 kgCO₂e | 928.112 kgCO₂e | 2.25× | 171.216 kgCO₂e | 686.493 kgCO₂e | 1 → 1 |
+| Central, human-led | 233,172 | 1,463.330 kgCO₂e | 1,993.010 kgCO₂e | 1.36× | 171.704 kgCO₂e | 696.258 kgCO₂e | 1 → 1 |
+| Central, team-integrated | 859,863 | 1,717.194 kgCO₂e | 2,319.535 kgCO₂e | 1.35× | 173.872 kgCO₂e | 737.688 kgCO₂e | 1 → 1 |
+| Breakout, team-integrated | 5,396,553 | 10,074.792 kgCO₂e | 11,417.459 kgCO₂e | 1.13× | 188.468 kgCO₂e | 1,292.223 kgCO₂e | 2 → 5 |
+| Breakout, agent-intensive | 59,922,943 | 12,469.467 kgCO₂e | 23,803.365 kgCO₂e | 1.91× | 568.776 kgCO₂e | 8,694.853 kgCO₂e | 13 → 58 |
 
-The quiet scenarios are dominated by the minimum provisioned container: the 3XL allocation makes their server
-footprint about four times the current M allocation even before traffic causes additional instances. In the agent case,
-slower actions increase the hourly peak to 21 instances and the server footprint to about 9.7× current.
+The lower-volume scenarios are dominated by the minimum provisioned container: the 3XL allocation makes their server
+footprint about four times the current M allocation even before traffic causes additional instances. In the breakout
+agent-intensive case, slower actions increase the hourly peak from 13 to 58 instances and the server footprint to about
+15.3× current.
 
 These are scenario results, not measured historical behavior. The most consequential uncertainties are the
 counterfactual memory-factor overlap, the provisional 1.1 GiB reserve on 3XL, action CPU occupancy and the generic

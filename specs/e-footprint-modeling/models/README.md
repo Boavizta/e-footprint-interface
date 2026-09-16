@@ -24,11 +24,11 @@ poetry run python specs/e-footprint-modeling/models/generate_current_projection.
   --implementation all
 ```
 
-The generated `current-vs-no-ai-low-optim-{low,medium,high,team,agent}.e-f.json` files can each be opened from the
-interface's **Open a file** action. The current optimized model is the active Reference slot and the counterfactual is
-the Comparison slot. Both siblings preserve the same semantic object IDs so changed jobs and infrastructure pair
-directly in the comparison instead of appearing as removed and added objects. Re-running the command replaces the
-workspace files deterministically.
+The generated `current-vs-no-ai-low-optim-{niche-human,central-human,central-team,breakout-team,breakout-agent}.e-f.json`
+files can each be opened from the interface's **Open a file** action. The current optimized model is the active
+Reference slot and the counterfactual is the Comparison slot. Both siblings preserve the same semantic object IDs so
+changed jobs and infrastructure pair directly in the comparison instead of appearing as removed and added objects.
+Re-running the command replaces the workspace files deterministically.
 
 Within each workspace, the siblings use the same traffic, geography, journeys, user devices and network assumptions.
 Only the implementation-dependent action durations, transferred bytes and selected Docker tier differ. Their source of
@@ -52,7 +52,13 @@ unavailable allowance and applies the 85% computation ceiling to each catalog ti
 nominal, 30.9 GiB process-visible and about 26.3 GiB safe). If future evidence changes the maximum request, the generator
 reselects the smallest sufficient tier and fails explicitly if the documented 3XL ceiling is exceeded.
 
-The team and agent cases add S6, an automated build/maintenance journey that imports a model, changes an assumption,
-computes results, inspects one explanation, and exports the updated model. S6 has no user-device time. Its totals cover
-the load imposed on e-footprint-interface, not the external compute or inference used by the calling agent; that must
-be added when agent model, token, region, and execution-host evidence exists.
+The usage horizon is Sep 2025–Dec 2033. It includes a 50-occurrence/month development baseline before the Oct 2026
+public launch, monthly interpolation between year-end active-team anchors through Dec 2032, and one complete stationary
+year in 2033. Each post-launch month is derived from active teams, public exploratory sessions, models per team,
+interactive sessions per team, and automated runs per model. The five canonical scenarios cover niche/central/breakout
+adoption crossed with human-led, team-integrated, or agent-intensive activity.
+
+Automated runs use S6: import a model, change an assumption, compute results, inspect one explanation, and export the
+updated model. S6 has no user-device time. Its totals cover the load imposed on e-footprint-interface, not the external
+compute or inference used by the calling agent; that must be added when agent model, token, region, and execution-host
+evidence exists.
