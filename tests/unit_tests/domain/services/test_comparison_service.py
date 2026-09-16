@@ -6,9 +6,9 @@ exposes (totals, per-(category, phase) decomposition, an aligned hourly time-ser
 so the assertions are about the view model — not about recomputing footprints.
 
 The load-bearing invariants checked here: the decomposition bars sum to the headline Δ, the KPI cards'
-usage+manufacturing split each total their model, the paired/cumulative chart payloads carry one shared
-unit and the constant model-identity colour pair (magnitude honesty), and the diff shows only
-differences, id-first.
+usage+manufacturing split each total their model and use readable units, the paired/cumulative chart
+payloads carry one shared unit and the constant model-identity colour pair (magnitude honesty), and the
+diff shows only differences, id-first.
 """
 from datetime import datetime, timezone
 from types import SimpleNamespace
@@ -17,7 +17,8 @@ import numpy as np
 import pytest
 
 from model_builder.domain.services.comparison_service import (
-    ComparisonService, MODEL_A_COLOR, MODEL_A_COLOR_LIGHT, MODEL_B_COLOR, MODEL_B_COLOR_LIGHT)
+    ComparisonService, KpiCard, KpiDelta, MODEL_A_COLOR, MODEL_A_COLOR_LIGHT, MODEL_B_COLOR, MODEL_B_COLOR_LIGHT,
+)
 
 
 def _delta(before, after):
@@ -168,6 +169,17 @@ class TestKpiStrip:
         assert view.delta.relative == pytest.approx(view.delta.absolute_kg / view.card_a.total_kg)
         assert view.delta.usage_kg + view.delta.manufacturing_kg == pytest.approx(view.delta.absolute_kg)
         assert view.delta.relative_display == "-29%"
+
+    def test_each_card_value_uses_its_own_readable_display_unit(self):
+        card_a = KpiCard("Reference", 1990.0, 689.0000000000001, 1301.0, "2025–2033")
+        card_b = KpiCard("Counterfactual", 2500.0, 1200.0, 1300.0, "2025–2033")
+        delta = KpiDelta(510.0, 510 / 1990, 511.0, -1.0)
+
+        ComparisonService._format_displays(card_a, card_b, delta, [])
+
+        assert card_a.total_display == "1.99 t"
+        assert card_a.usage_display == "689 kg"
+        assert card_a.manufacturing_display == "1.3 t"
 
 
 class TestDecomposition:

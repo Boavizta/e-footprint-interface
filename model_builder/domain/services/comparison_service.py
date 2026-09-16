@@ -143,8 +143,8 @@ class ComparisonService:
         paired_chart = self._paired_chart(comparison)
         cumulative_chart = self._cumulative_chart(comparison)
         diff_changed, diff_only_a, diff_only_b = self._diff(comparison.input_diff)
-        # One shared display unit across the whole KPI strip + decomposition, so the magnitudes read
-        # against each other (magnitude honesty) — picked from the larger of the two totals.
+        # Format each KPI and decomposition value in its own readable display unit. Chart axes remain
+        # shared separately, preserving direct magnitude comparison where a common scale matters.
         self._format_displays(card_a, card_b, delta, decomposition)
         decomposition_chart = self._decomposition_chart(decomposition)
         return ComparisonView(
@@ -176,36 +176,17 @@ class ComparisonService:
 
     @staticmethod
     def _format_displays(card_a, card_b, delta, decomposition):
-        from efootprint.constants.units import u
-        from efootprint.utils.display import (
-            best_display_unit, human_readable_unit, format_display_number, format_quantity_for_display)
-
-        # One shared unit for the KPI strip (the two cards + the headline Δ), picked from the larger
-        # total so every figure reads against it (magnitude honesty). Sig-fig rounding goes through the
-        # library's public ``format_quantity_for_display`` — converting its result back to the shared
-        # unit is safe because sig-fig rounding is scale-invariant, so the shared unit is preserved
-        # across the round-trip.
-        unit = best_display_unit(max(card_a.total_kg, card_b.total_kg) * u.kg)
-        unit_str = human_readable_unit(unit)
-
-        def fmt(kg):
-            magnitude = format_quantity_for_display((kg * u.kg).to(unit), 3).to(unit).magnitude
-            return f"{format_display_number(magnitude)} {unit_str}"
-
-        # The decomposition rows AND the headline Δ span very different magnitudes (a few grams of
-        # network impact next to half a tonne of device manufacturing), so each gets its own best unit and
-        # rounding via the library's display helpers rather than the strip's shared unit. This is also
-        # what keeps the Δ figures clean: forcing a small value into the shared unit and converting back
-        # leaves float-representation noise (e.g. "0.5710000000000001 t" instead of "+571 kg").
+        # KPI components, decomposition rows, and the headline Δ can span very different magnitudes,
+        # so each uses its own best display unit. Avoiding conversion back to a shared text unit also
+        # prevents float-representation noise such as "0.6890000000000001 t".
         def fmt_best_signed(kg):
-            quantity = format_quantity_for_display(kg * u.kg, 3)
-            sign = "+" if quantity.magnitude > 0 else ""
-            return f"{sign}{format_display_number(quantity.magnitude)} {human_readable_unit(quantity.units)}"
+            value = _format_kg_value(kg)
+            return f"+{value}" if kg > 0 else value
 
         for card in (card_a, card_b):
-            card.total_display = fmt(card.total_kg)
-            card.usage_display = fmt(card.usage_kg)
-            card.manufacturing_display = fmt(card.manufacturing_kg)
+            card.total_display = _format_kg_value(card.total_kg)
+            card.usage_display = _format_kg_value(card.usage_kg)
+            card.manufacturing_display = _format_kg_value(card.manufacturing_kg)
 
         delta.absolute_display = fmt_best_signed(delta.absolute_kg)
         delta.usage_display = fmt_best_signed(delta.usage_kg)
