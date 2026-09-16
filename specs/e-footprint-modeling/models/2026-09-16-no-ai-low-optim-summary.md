@@ -42,5 +42,6 @@ agent-intensive case, slower actions increase the hourly peak from 13 to 58 inst
 
 These are scenario results, not measured historical behavior. The most consequential uncertainties are the
 counterfactual memory-factor overlap, the provisional 1.1 GiB reserve on 3XL, action CPU occupancy and the generic
-vCPU-proportional physical-host proxy. Price is retained in the profile as a financial co-benefit but is not used as an
-environmental factor.
+vCPU-proportional physical-host proxy. The human pattern uses horizon-average S1–S5 weights, preserving cumulative
+journey totals while smoothing their timing. Price is retained in the profile as a financial co-benefit but is not used
+as an environmental factor.

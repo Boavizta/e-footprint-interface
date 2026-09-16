@@ -202,8 +202,10 @@ machine-readable source of truth.
   layers as sourced ranges.
 - Map each material benchmark operation to a `Job` with measured request duration, CPU need, RAM need and transferred or
   stored data. A multi-request operation may use several jobs when cache/database/network costs are measured separately.
-- Map S1–S4 to `UsageJourney` objects whose steps invoke the benchmark jobs with the counts above.
-- Map each traffic case to a `UsagePattern` with an hourly distribution, modeling duration and growth assumption.
+- Map S1–S6 to `UsageJourney` objects whose steps invoke the benchmark jobs with the counts above.
+- For each geography, use one full-horizon human `UsagePattern` weighted across S1–S5 and one automated pattern linked
+  to S6. Human weights are horizon-wide averages chosen to preserve every journey's cumulative occurrence total; this
+  deliberately smooths the hypothetical pre-/post-launch mix change while retaining the exact human volume curve.
 - Represent idle provisioned capacity and recurring maintenance explicitly; neither should disappear when traffic is
   zero.
 - Keep components unchanged by the optimization visible but identical in both models. Report both total service impact

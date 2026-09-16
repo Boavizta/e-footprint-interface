@@ -58,6 +58,11 @@ year in 2033. Each post-launch month is derived from active teams, public explor
 interactive sessions per team, and automated runs per model. The five canonical scenarios cover niche/central/breakout
 adoption crossed with human-led, team-integrated, or agent-intensive activity.
 
+Each model contains two user-facing patterns per geography: one human activity curve weighted across S1–S5 and one
+automated-maintenance curve linked to S6, plus the global infrastructure keep-alive. The human journey weights are
+full-horizon averages. They preserve the exact cumulative S1–S5 occurrence totals while smoothing the hypothetical
+change in human journey mix at launch. The generator validates every journey total after JSON round-trip.
+
 Automated runs use S6: import a model, change an assumption, compute results, inspect one explanation, and export the
 updated model. S6 has no user-device time. Its totals cover the load imposed on e-footprint-interface, not the external
 compute or inference used by the calling agent; that must be added when agent model, token, region, and execution-host

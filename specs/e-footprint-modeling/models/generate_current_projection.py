@@ -427,26 +427,44 @@ def build_system(
     network = build_network()
 
     usage_patterns = []
+    human_weights = horizon_human_journey_weights(scenario_name)
     for geography_name, geography in GEOGRAPHIES.items():
-        for journey_id, journey in journeys.items():
-            hourly_values = build_hourly_traffic(scenario_name, journey_id, geography_name)
-            usage_patterns.append(
-                UsagePattern(
-                    f"{scenario_label} – {geography_name} – {journey_id}",
-                    usage_journeys={
-                        journey: source_value(
-                            1 * u.dimensionless,
-                            USER_SCOPE_SOURCE,
-                            "high",
-                            "This pattern is already sliced by journey; one occurrence is one session of this journey.",
-                        )
-                    },
-                    devices=[] if journey_id == "S6" else [device],
-                    network=network,
-                    country=countries[geography_name],
-                    hourly_occurrences=hourly_values,
-                )
+        usage_patterns.append(
+            UsagePattern(
+                f"{scenario_label} – {geography_name} – Human activity",
+                usage_journeys={
+                    journeys[journey_id]: source_value(
+                        weight * u.dimensionless,
+                        USER_SCOPE_SOURCE,
+                        "low",
+                        f"Horizon-wide average share of human activity for {journey_id}. It preserves the exact "
+                        "full-horizon journey total while intentionally smoothing the pre-/post-launch mix change.",
+                    )
+                    for journey_id, weight in human_weights.items()
+                },
+                devices=[device],
+                network=network,
+                country=countries[geography_name],
+                hourly_occurrences=build_hourly_traffic(scenario_name, "human", geography_name),
             )
+        )
+        usage_patterns.append(
+            UsagePattern(
+                f"{scenario_label} – {geography_name} – Automated maintenance",
+                usage_journeys={
+                    journeys["S6"]: source_value(
+                        1 * u.dimensionless,
+                        USER_SCOPE_SOURCE,
+                        "high",
+                        "Every occurrence is one complete automated S6 model-maintenance run.",
+                    )
+                },
+                devices=[],
+                network=network,
+                country=countries[geography_name],
+                hourly_occurrences=build_hourly_traffic(scenario_name, "automated", geography_name),
+            )
+        )
 
     usage_patterns.append(build_keep_alive_pattern(server, network, countries["France"]))
     system_name = (
@@ -746,7 +764,7 @@ def build_journeys(
     return journeys
 
 
-def build_hourly_traffic(scenario_name: str, journey_id: str, geography_name: str) -> SourceHourlyValues:
+def build_hourly_traffic(scenario_name: str, stream: str, geography_name: str) -> SourceHourlyValues:
     hours = [START + timedelta(hours=index) for index in range(int((END - START).total_seconds() / 3_600))]
     eligible_by_month = Counter(
         (hour.year, hour.month) for hour in hours if hour.weekday() in WORK_DAYS and hour.hour in WORK_HOURS
@@ -758,8 +776,16 @@ def build_hourly_traffic(scenario_name: str, journey_id: str, geography_name: st
         if hour.weekday() not in WORK_DAYS or hour.hour not in WORK_HOURS:
             continue
         month_key = (hour.year, hour.month)
-        monthly_occurrences, mix = monthly_volume_and_mix(scenario_name, month_key)
-        values[index] = monthly_occurrences * mix[journey_id] * geography_share / eligible_by_month[month_key]
+        journey_occurrences = monthly_journey_occurrences(scenario_name, month_key)
+        if stream == "human":
+            monthly_occurrences = sum(
+                count for journey_id, count in journey_occurrences.items() if journey_id != "S6"
+            )
+        elif stream == "automated":
+            monthly_occurrences = journey_occurrences["S6"]
+        else:
+            raise ValueError(f"Unknown usage stream: {stream}")
+        values[index] = monthly_occurrences * geography_share / eligible_by_month[month_key]
 
     scenario = SCENARIOS[scenario_name]
     shape = ADOPTION_SHAPES[scenario["adoption_shape"]]
@@ -772,9 +798,15 @@ def build_hourly_traffic(scenario_name: str, journey_id: str, geography_name: st
         shape["mature_exploratory_sessions_per_month"]
         + shape["active_team_anchors"][2032] * mature_team_occurrences
     )
+    stream_scope = (
+        f"It includes the {PRELAUNCH_MONTHLY_OCCURRENCES} monthly development occurrences before launch and all "
+        "S1–S5 activity after launch."
+        if stream == "human"
+        else "It is zero before launch and contains only automated S6 maintenance runs after launch."
+    )
     comment = (
-        f"Ground-up {scenario['label']} trajectory: {PRELAUNCH_MONTHLY_OCCURRENCES} monthly development occurrences "
-        f"before the Oct 2026 public launch, then monthly interpolation between the "
+        f"{stream.title()} usage stream for the ground-up {scenario['label']} trajectory. {stream_scope} "
+        f"After the Oct 2026 public launch, usage follows monthly interpolation between the "
         f"{scenario['adoption_shape']} year-end active-team anchors {shape['active_team_anchors']}. "
         f"At maturity, each team maintains {regime['models_per_team']} models, performs "
         f"{regime['interactive_sessions_per_team_month']} interactive sessions per month and triggers "
@@ -802,6 +834,27 @@ def monthly_volume_and_mix(scenario_name: str, month_key: tuple[int, int]) -> tu
     occurrences = monthly_journey_occurrences(scenario_name, month_key)
     volume = sum(occurrences.values())
     return volume, {journey_id: count / volume for journey_id, count in occurrences.items()}
+
+
+def horizon_human_journey_weights(scenario_name: str) -> dict[str, float]:
+    totals = expected_journey_totals(scenario_name)
+    human_totals = {journey_id: count for journey_id, count in totals.items() if journey_id != "S6"}
+    total = sum(human_totals.values())
+    return {journey_id: count / total for journey_id, count in human_totals.items() if count > 0}
+
+
+def expected_journey_totals(scenario_name: str) -> dict[str, float]:
+    totals = {journey_id: 0.0 for journey_id in JOURNEY_USER_MINUTES}
+    year, month = START.year, START.month
+    while (year, month) < (END.year, END.month):
+        occurrences = monthly_journey_occurrences(scenario_name, (year, month))
+        for journey_id in totals:
+            totals[journey_id] += occurrences[journey_id]
+        if month == 12:
+            year, month = year + 1, 1
+        else:
+            month += 1
+    return totals
 
 
 def monthly_journey_occurrences(scenario_name: str, month_key: tuple[int, int]) -> dict[str, float]:
@@ -984,15 +1037,7 @@ def journey_name(journey_id: str) -> str:
 
 
 def expected_usage_total(scenario_name: str) -> float:
-    total = 0.0
-    year, month = START.year, START.month
-    while (year, month) < (END.year, END.month):
-        total += monthly_volume_and_mix(scenario_name, (year, month))[0]
-        if month == 12:
-            year, month = year + 1, 1
-        else:
-            month += 1
-    return total
+    return sum(expected_journey_totals(scenario_name).values())
 
 
 def serialize_and_validate(
@@ -1001,7 +1046,7 @@ def serialize_and_validate(
     document = system_to_json(system, output_filepath=None, save_computed_state=False)
     class_objects, _, _ = json_to_system(json.loads(json.dumps(document)))
     loaded_system = next(iter(class_objects["System"].values()))
-    expected_pattern_count = len(GEOGRAPHIES) * len(JOURNEY_USER_MINUTES) + 1
+    expected_pattern_count = len(GEOGRAPHIES) * 2 + 1
     if len(loaded_system.usage_patterns) != expected_pattern_count:
         raise ValueError(
             f"Round-tripped model contains {len(loaded_system.usage_patterns)} usage patterns, "
@@ -1018,6 +1063,20 @@ def serialize_and_validate(
     )
     if not math.isclose(traffic_total, expected_usage_total(scenario_name), rel_tol=1e-7, abs_tol=0.05):
         raise ValueError(f"Generated traffic sums to {traffic_total}, not the expected scenario total")
+    actual_journey_totals = {journey_id: 0.0 for journey_id in JOURNEY_USER_MINUTES}
+    for pattern in loaded_system.usage_patterns:
+        if pattern.name == "Minimum one application instance":
+            continue
+        pattern_total = pattern.hourly_occurrences.sum().to(u.occurrence).magnitude
+        for journey, weight in pattern.usage_journeys.items():
+            journey_id = journey.name.split(" ", 1)[0]
+            actual_journey_totals[journey_id] += pattern_total * weight.to(u.dimensionless).magnitude
+    for journey_id, expected in expected_journey_totals(scenario_name).items():
+        actual = actual_journey_totals[journey_id]
+        if not math.isclose(actual, expected, rel_tol=1e-7, abs_tol=0.05):
+            raise ValueError(
+                f"Generated {journey_id} total is {actual}, not the expected full-horizon total {expected}"
+            )
     instances = loaded_system.servers[0].nb_of_instances
     if instances.min().magnitude != 1:
         raise ValueError("Synthetic keep-alive failed to preserve a minimum of one application instance")
