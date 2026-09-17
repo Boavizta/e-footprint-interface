@@ -20,6 +20,7 @@
   blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
   button { cursor: pointer; padding: .42rem .75rem; }
   input, select, textarea { box-sizing: border-box; padding: .35rem .45rem; max-width: 100%; }
+  [hidden] { display: none !important; }
   #file-entry { background: #f5f7fa; border: 1px solid #c9d1dc; border-radius: 7px;
                 padding: .7rem; margin-bottom: .8rem; }
   #file-entry p { margin: 0 0 .45rem; }
@@ -35,6 +36,7 @@
   #modeling-screen, #construction-screen, #consumption-screen {
     border: 1px solid #9eabbc; border-radius: 8px; overflow: hidden;
   }
+  #modeling-screen { position: relative; }
   #modeling-screen > header, #construction-screen > header, #consumption-screen > header {
     background: #243b64; color: white; padding: .65rem .9rem; display: flex;
     justify-content: space-between; gap: 1rem; align-items: center;
@@ -56,23 +58,101 @@
   #template-status { background: #eef4ff; border: 1px solid #aec4ec; border-radius: 6px;
                      padding: .55rem .7rem; margin-bottom: .75rem; }
   #template-status button { margin: .35rem .25rem 0 0; }
+  #modeling-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(17rem, 38%);
+                        gap: .7rem; align-items: start; }
   #model-canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; margin: .8rem 0; }
   #model-canvas section { border: 1px solid #bbb; border-radius: 6px; padding: .55rem; background: #fafafa; }
   #model-canvas h3 { font-size: .9rem; margin: 0 0 .35rem; }
   #model-canvas p { font-size: .82rem; margin: .25rem 0; padding: .3rem; background: white;
                     border: 1px solid #ddd; border-radius: 4px; }
+  #modeling-edit-panel { border: 1px solid #9eabbc; border-radius: 7px; background: white; overflow: hidden; }
+  #modeling-edit-panel > header { background: #eef2f7; border-bottom: 1px solid #c9d1dc;
+                                  padding: .6rem .7rem; display: flex; align-items: center;
+                                  justify-content: space-between; gap: .5rem; }
+  #modeling-edit-panel > header button { display: grid; place-items: center; padding: .35rem; }
+  #modeling-edit-panel > header button svg { width: .9rem; height: .9rem; }
+  #modeling-edit-panel > div { padding: .7rem; }
+  #modeling-edit-panel select { width: 100%; }
+  #modeling-edit-panel footer { border-top: 1px solid #e1e5ea; display: flex; flex-wrap: wrap;
+                                justify-content: flex-end; gap: .4rem; padding-top: .65rem;
+                                margin-top: .8rem; }
+  [data-modeling-field-label] { display: flex; align-items: center; gap: .28rem; }
+  [data-template-indicator] { position: relative; display: inline-grid; place-items: center;
+                              width: .85rem; height: .85rem; color: #657a9b; cursor: help;
+                              flex: 0 0 auto; }
+  [data-template-indicator] svg { width: .75rem; height: .75rem; display: block; }
+  [data-template-indicator] small { position: absolute; z-index: 4; left: 50%; bottom: 1.25rem;
+                                    transform: translateX(-50%); background: #243b64; color: white;
+                                    border-radius: 4px; padding: .22rem .38rem; white-space: nowrap;
+                                    font-size: .7rem; font-weight: 500; opacity: 0; pointer-events: none; }
+  [data-template-indicator]:hover small, [data-template-indicator]:focus small { opacity: 1; }
+  #modeling-delete-result { border: 1px solid #b9d8b9; background: #f4faf4; border-radius: 6px;
+                            padding: .5rem .65rem; margin: .7rem 0; }
+  #delete-confirmation-backdrop { position: absolute; z-index: 6; inset: 0; background: rgba(20, 30, 45, .48);
+                                  display: grid; place-items: center; padding: 1rem; }
+  #delete-object-confirmation { width: min(29rem, 100%); background: white; border-radius: 8px;
+                                box-shadow: 0 .6rem 2rem rgba(0, 0, 0, .25); padding: .9rem; }
+  #delete-object-confirmation h3 { margin: 0 0 .35rem; }
+  #delete-object-confirmation p { margin: .35rem 0; }
+  #delete-object-confirmation footer { display: flex; justify-content: flex-end; gap: .4rem; margin-top: .8rem; }
+  [data-template-delete-warning] { background: #fff5e6; border: 1px solid #d4a75b;
+                                   border-radius: 6px; padding: .55rem .65rem; margin-top: .75rem; }
   #construction-actions, #consumption-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
-  #template-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .7rem; }
-  #template-fields fieldset { margin: 0; }
-  #template-fields input { width: 100%; }
+  [data-template-field] { border-top: 1px solid #e1e5ea; padding: .45rem 0; }
+  [data-template-field]:first-of-type { border-top: 0; }
+  [data-template-field] label { margin: .2rem 0; }
+  [data-help-input] { width: 100%; font-size: .85rem; }
+  [data-field-help] { display: block; color: #637083; font-size: .78rem; font-weight: 400;
+                      line-height: 1.35; margin: .08rem 0 .3rem; text-transform: lowercase; }
+  [data-simplified-field] { margin: .4rem 0 .8rem; }
+  [data-simplified-field] > label { margin-bottom: 0; }
+  [data-field-provenance] { margin: .35rem 0 0; padding: .3rem .55rem; background: #fafbfc; }
+  [data-field-provenance] summary { color: #43546b; font-size: .8rem; }
+  [data-field-provenance] label { font-size: .8rem; }
+  [data-field-provenance] input, [data-field-provenance] select,
+  [data-field-provenance] textarea { display: block; width: 100%; }
   #consumption-workspace { display: grid; grid-template-columns: minmax(0, 1fr); }
   #consumption-workspace[data-panel-open="true"] { grid-template-columns: minmax(0, 1fr) minmax(19rem, 44%); }
-  [data-timeseries-card] { border: 1px solid #9fb0c5; border-radius: 7px; margin-top: .8rem;
-                           padding: .7rem; background: #f8faff; }
-  [data-timeseries-card] > header { display: flex; justify-content: space-between; align-items: center;
-                                    gap: .7rem; }
-  [data-timeseries-card] p { margin: .35rem 0 0; }
-  [data-timeseries-card] small { color: #5c6878; }
+  #consumption-layout { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr);
+                        gap: .7rem; align-items: start; }
+  #object-outline { border: 1px solid #ccd4df; border-radius: 6px; background: #fafbfc;
+                    padding: .55rem; position: sticky; top: .4rem; }
+  #object-outline h3 { font-size: .9rem; margin: 0 0 .45rem; }
+  #object-outline nav strong { display: block; color: #526177; font-size: .72rem;
+                               margin: .5rem .25rem .15rem; text-transform: uppercase; }
+  #object-outline nav button { display: block; width: 100%; border: 0; background: transparent;
+                               color: #34445a; padding: .25rem; text-align: left; font-size: .78rem; }
+  #object-outline nav button:hover, #object-outline nav button[aria-current="true"] {
+    background: #e8eef7; border-radius: 4px;
+  }
+  #object-jump-control { display: none; font-size: .8rem; }
+  #object-jump-control select { display: block; width: 100%; }
+  #template-fields { max-height: 34rem; overflow-y: auto; scroll-behavior: smooth;
+                     padding: 0 .25rem .5rem 0; }
+  #template-fields > header { position: sticky; top: 0; z-index: 2; display: flex;
+                              justify-content: flex-end; gap: .35rem; background: white;
+                              border-bottom: 1px solid #e1e5ea; padding: 0 0 .4rem; }
+  #template-fields > header button { padding: .25rem .45rem; font-size: .76rem; }
+  [data-object-type] { margin: .55rem 0; padding: .45rem .55rem; border-color: #aeb9c7;
+                       background: #f7f9fc; }
+  [data-object-type] > summary { color: #243b64; }
+  [data-object-type] > div { padding: .1rem .15rem .15rem; }
+  [data-template-object] { margin: .45rem 0; background: white; }
+  [data-template-object] > summary { font-size: .9rem; }
+  [data-template-object] > summary small { color: #69768a; font-weight: 400; margin-left: .35rem; }
+  [data-object-fields] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+                         gap: .55rem .7rem; padding: .45rem .1rem .15rem; }
+  [data-object-fields] [data-simplified-field] { min-width: 0; margin: 0; }
+  #consumption-footer { position: sticky; bottom: 0; z-index: 3; background: white;
+                        border-top: 1px solid #c9d1dc; padding-top: .55rem; }
+  #consumption-footer #results-summary { margin: 0 0 .5rem; }
+  #consumption-workspace[data-panel-open="true"] #consumption-layout { grid-template-columns: minmax(0, 1fr); }
+  #consumption-workspace[data-panel-open="true"] #object-outline { display: none; }
+  #consumption-workspace[data-panel-open="true"] [data-object-fields] { grid-template-columns: 1fr; }
+  [data-timeseries-value] { display: block; min-height: 2rem; border: 1px solid #9aa6b5;
+                            border-radius: 3px; background: white; padding: .35rem .45rem;
+                            line-height: 1.3; font-size: .85rem; }
+  [data-timeseries-field] > button { margin-top: .35rem; padding: .3rem .55rem; }
   #timeseries-panel { border-left: 1px solid #9eabbc; background: white; min-width: 0; }
   #timeseries-panel > header { display: flex; justify-content: space-between; align-items: center;
                                gap: .6rem; background: #eef2f7; border-bottom: 1px solid #c9d1dc;
@@ -93,9 +173,17 @@
                      padding: .6rem .75rem; margin: .8rem 0; }
   [data-same-access] { background: #fff5e6; border: 1px solid #d4a75b; border-radius: 6px;
                        padding: .55rem .7rem; margin: .75rem 0; }
+  @media (max-width: 44rem) {
+    #consumption-layout { grid-template-columns: 1fr; }
+    #object-outline { position: static; }
+    #object-outline nav { display: none; }
+    #object-jump-control { display: block; }
+    [data-object-fields] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
   @media (max-width: 36rem) {
-    #model-canvas, #mode-flow { grid-template-columns: 1fr; }
+    #model-canvas, #mode-flow, #modeling-workspace { grid-template-columns: 1fr; }
     #consumption-workspace[data-panel-open="true"] { grid-template-columns: 1fr; }
+    [data-object-fields] { grid-template-columns: 1fr; }
     #timeseries-panel { border-left: 0; border-top: 1px solid #9eabbc; }
     #mode-flow > span { transform: rotate(90deg); text-align: center; }
   }
@@ -156,16 +244,31 @@
     <li><strong>Familiar input context:</strong> Simplified inputs identifies every exposed field
     using its existing field label together with the owning object's existing type and name; template
     makers do not need to invent a separate category or labeling system.</li>
+    <li><strong>Scales to many objects:</strong> Simplified inputs provides a left-hand outline grouped
+    by existing object type and a single scrollable main pane with collapsible object-type and object
+    levels. Selecting an object in the outline expands its ancestors and brings it into view. Within
+    each object only, exposed fields use up to three columns when space permits, falling back to two
+    or one without mixing fields from different objects.</li>
+    <li><strong>Efficient navigation:</strong> consumers can expand or collapse all modeled sections,
+    see exposed-input counts on object headers, and retain their expansion state while working.
+    The first object and any object containing a validation error open automatically.</li>
+    <li><strong>Per-field guidance:</strong> in Template setup, the maker can optionally add custom
+    help text to each exposed field. In Simplified inputs, non-empty help is displayed in lowercase
+    immediately below the field name; an empty help value leaves no placeholder or gap.</li>
+    <li><strong>Editable source and comment:</strong> for every exposed input, a consumer can view and
+    edit the source, confidence, and comment through the same compact disclosure below its value,
+    including for timeseries inputs.</li>
     <li><strong>Adapt and calculate:</strong> a consumer can change the exposed inputs using their
     normal input types, receives the same validation guarantees as full editing, and can view results
     recalculated from the adapted values.</li>
-    <li><strong>Focused timeseries editing:</strong> an exposed timeseries appears as a condensed
-    field within the same owning-object container as ordinary inputs. Its Edit action opens a
+    <li><strong>Focused timeseries editing:</strong> an exposed timeseries uses the same field layout
+    as an ordinary input within its owning-object container. In place of a standard value control it
+    shows a read-only string preview and a small Edit timeseries action. That action opens a
     field-only side panel containing the compatible strategy selector, the selected strategy's
-    complete editor, and its preview; only one timeseries is edited at a time.</li>
+    complete editor, and its visual preview; only one timeseries is edited at a time.</li>
     <li><strong>Timeseries strategies remain available:</strong> a consumer can switch among the
     compatible timeseries strategies available in normal editing. Saving the panel persists the
-    selected strategy and authored inputs, closes the panel, and refreshes the condensed summary.</li>
+    selected strategy and authored inputs, closes the panel, and refreshes the string preview.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
     legitimate calculated consequences, but does not rewrite unrelated hidden assumptions or the
     simplified-input definition.</li>
@@ -175,12 +278,22 @@
     <li><strong>Depth remains available:</strong> switching to modeling mode makes every assumption
     and structural action available, with clear copy explaining that the simplified guardrails no
     longer apply. This is a usability boundary, not an access-control mechanism.</li>
+    <li><strong>Template-aware full editing:</strong> in Modeling's object-editing panel, every field
+    currently exposed through Simplified inputs carries a discreet, non-interactive visual marker.
+    Hovering or focusing the marker reveals “Included in Simplified inputs”; fields not exposed by
+    the template do not carry it.</li>
+    <li><strong>Warn before removing exposed fields:</strong> when an object being deleted contains
+    fields exposed through Simplified inputs, its existing deletion confirmation and unchanged
+    actions are extended with a warning that identifies the affected fields and explains that they
+    will be removed from the template. Confirming removes the object and those template references
+    together, leaving no stale selections.</li>
     <li><strong>Resume template work:</strong> switching to template construction mode lets the same
     user edit which inputs the template exposes and export an updated templated JSON without needing
     the original pre-template file.</li>
     <li><strong>Faithful round-trip:</strong> repeated export and reopen cycles preserve the complete
-    modeling, current adapted values, and simplified-input choices. A file that still contains a
-    template continues to open in template consumption mode by default.</li>
+    modeling, current adapted values, simplified-input choices, per-field help text, and consumer
+    edits to source and comment. A file that still contains a template continues to open in template
+    consumption mode by default.</li>
     <li><strong>Safe failure:</strong> an invalid template definition or unreadable JSON is rejected
     with an actionable explanation and does not replace the modeling already open in the session.</li>
   </ul>
@@ -203,9 +316,18 @@
       surface, labels the current mode, validates changes, and keeps results available.</li>
       <li>Organizing the focused surface with the existing modeling hierarchy: each input keeps its
       normal field label and is shown under its owning object's type and name.</li>
-      <li>Timeseries exposed as one composite field inside its normal owning-object group: a
-      condensed summary on the main surface and a dedicated side panel for its strategy selector,
-      full editor, validation, and preview.</li>
+      <li>A scalable consumption workspace with a left object outline, one main scrolling pane, two
+      collapsible hierarchy levels, exposed-input counts, outline-to-object navigation, and global
+      expand/collapse controls. On narrower layouts the outline becomes a compact object selector.</li>
+      <li>A responsive grid of up to three field columns within each object. Width changes, including
+      opening the timeseries side panel, may reflow fields inside that object but never interleave
+      fields from different objects.</li>
+      <li>Optional custom help text for every exposed field, authored in Template setup and shown in
+      lowercase directly below that field's existing label in Simplified inputs.</li>
+      <li>Timeseries exposed as one composite field inside its normal owning-object group, using the
+      same label, help, and Source and comment disclosure as ordinary inputs. A read-only string
+      preview and Edit timeseries action replace the ordinary value control; a dedicated side panel
+      contains the strategy selector, full editor, validation, and visual preview.</li>
       <li>Full control of the exposed timeseries, including changing to any compatible editable
       strategy, while keeping the complexity of only one timeseries open at a time.</li>
       <li>A consistent mode control for moving among all three modes without changing files.</li>
@@ -214,8 +336,14 @@
       default.</li>
       <li>Equal access to all three modes for every holder of a templated JSON; no maker/consumer
       permission distinction.</li>
-      <li>Preserving source, confidence, comment, unit, and explanatory context already associated
-      with an exposed input wherever the normal editor supports them.</li>
+      <li>A discreet, accessible marker beside template-exposed fields in Modeling's edit panel,
+      with its explanatory text available on hover or keyboard focus.</li>
+      <li>An additional warning inside the existing object-deletion confirmation when the object
+      contains exposed fields, followed by atomic removal of the object and its template references.</li>
+      <li>Showing the current source, confidence, and comment for every exposed input and letting the
+      consumer edit them in Simplified inputs without separately exposing those metadata fields in
+      Template setup. Other context such as units remains available wherever the normal editor
+      supports it.</li>
       <li>Non-destructive validation and recovery when an uploaded template cannot be used.</li>
     </ul>
   </details>
@@ -238,7 +366,11 @@
       <li>Selecting or locking individual nested parts of a timeseries, such as one profile baseline
       or one weekly time range. The timeseries is exposed as a whole.</li>
       <li>Custom template categories, custom field labels, or a second naming hierarchy independent
-      of the modeling's existing object types, object names, and field labels.</li>
+      of the modeling's existing object types, object names, and field labels. Per-field help text
+      supplements those labels but does not replace them.</li>
+      <li>Adding or removing fields from the simplified template directly in Modeling's edit panel.
+      The marker there is informational; membership and custom help remain managed together in
+      Template setup.</li>
     </ul>
   </details>
 </section>
@@ -247,7 +379,13 @@
   <h2>4. UX / interface</h2>
   <p>The mockup makes file opening and mode transitions explicit. Try both file types, then use the
   mode control inside the application frame. “Simplified inputs,” “Modeling,” and “Template setup”
-  are three views over the same loaded JSON—not different files, accounts, or permission levels.</p>
+  are three views over the same loaded JSON—not different files, accounts, or permission levels.
+  Help text entered beside an exposed field in Template setup appears in lowercase directly beneath
+  that field's name after saving the setup. Open “Source and comment” below an ordinary input to edit
+  its metadata; a timeseries uses the same disclosure, with only its value editor moving into a side
+  panel. In Simplified inputs, use the left outline and both disclosure levels; the three fields under
+  “Watch a video” share columns only with one another. In Modeling, hover or focus the small bookmark markers in the edit panel,
+  then try its Delete object action to see how the existing confirmation is extended.</p>
   <div class="mockup">
     <div id="file-entry">
       <p><strong>Start here: open a JSON file</strong></p>
@@ -277,15 +415,66 @@
       </nav>
       <div id="modeling-body">
         <div id="template-status"></div>
-        <p><strong>Full modeling canvas</strong> — add, edit, delete, and reconnect any object.</p>
-        <div id="model-canvas">
-          <section><h3>Usage patterns</h3><p>Video views · Edit</p><p>Homepage visits · Edit</p></section>
-          <section><h3>Usage journeys</h3><p>Watch a video · Edit</p><p>Browse catalogue · Edit</p></section>
-          <section><h3>Infrastructure</h3><p>Video origin · Edit</p><p>CDN and network · Edit</p><p>User devices · Edit</p></section>
+        <div id="modeling-delete-result" hidden></div>
+        <div id="modeling-workspace">
+          <div>
+            <p><strong>Full modeling canvas</strong> — add, edit, delete, and reconnect any object.</p>
+            <div id="model-canvas">
+              <section><h3>Usage patterns</h3><p id="watch-video-model-card">Watch a video · Editing</p><p>Homepage visits · Edit</p></section>
+              <section><h3>Usage journeys</h3><p>Stream a film · Edit</p><p>Browse catalogue · Edit</p></section>
+              <section><h3>Infrastructure</h3><p>Video origin · Edit</p><p>CDN and network · Edit</p><p>User devices · Edit</p></section>
+            </div>
+            <div data-same-access><strong>You have left the simplified guardrails.</strong> Every
+            assumption and structural action is available. Use the mode control above to return to
+            Simplified inputs or to change the Template setup.</div>
+          </div>
+          <aside id="modeling-edit-panel">
+            <header><span><strong>Edit Usage pattern</strong><br><small>Watch a video</small></span>
+              <button type="button" id="open-delete-object-confirmation" aria-label="Delete">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor"
+                  d="M5.5 1h5v1.5H15v1H1v-1h4.5zm-2 3.5h9l-.7 10H4.2zm2 1.5.4 7h1L6.5 6zm4 0-.4 7h1l.4-7z"/></svg>
+              </button></header>
+            <div>
+              <label><span data-modeling-field-label><strong>Country</strong>
+                <span data-template-indicator tabindex="0" role="img" aria-label="Included in Simplified inputs">
+                  <svg viewBox="0 0 18 18" aria-hidden="true"><path fill="currentColor" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg>
+                  <small role="tooltip">Included in Simplified inputs</small>
+                </span></span>
+                <select><option>France</option><option>European average</option></select></label>
+              <label><span data-modeling-field-label><strong>Network</strong>
+                <span data-template-indicator tabindex="0" role="img" aria-label="Included in Simplified inputs">
+                  <svg viewBox="0 0 18 18" aria-hidden="true"><path fill="currentColor" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg>
+                  <small role="tooltip">Included in Simplified inputs</small>
+                </span></span>
+                <select><option>Wi-Fi network</option><option>Mobile network</option></select></label>
+              <label><span data-modeling-field-label><strong>Hourly pattern occurrences</strong>
+                <span data-template-indicator tabindex="0" role="img" aria-label="Included in Simplified inputs">
+                  <svg viewBox="0 0 18 18" aria-hidden="true"><path fill="currentColor" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg>
+                  <small role="tooltip">Included in Simplified inputs</small>
+                </span></span>
+                <button type="button">Edit growth projection</button></label>
+              <label><strong>Devices</strong>
+                <select><option>Smart TV</option><option>Laptop</option></select></label>
+              <footer>
+                <button type="button">Save changes</button>
+              </footer>
+            </div>
+          </aside>
         </div>
-        <div data-same-access><strong>You have left the simplified guardrails.</strong> Every
-        assumption and structural action is available. Use the mode control above to return to
-        Simplified inputs or to change the Template setup.</div>
+      </div>
+      <div id="delete-confirmation-backdrop" hidden>
+        <section id="delete-object-confirmation" role="dialog" aria-modal="true"
+          aria-labelledby="delete-object-confirmation-title">
+          <h3 id="delete-object-confirmation-title">Are you sure you want to delete this Usage pattern?</h3>
+          <div data-template-delete-warning>
+            <strong>This object contains 3 fields included in Simplified inputs.</strong>
+            <p>Country, Network, and Hourly pattern occurrences will also be removed from the template.</p>
+          </div>
+          <footer>
+            <button type="button" id="confirm-delete-object">Yes, delete</button>
+            <button type="button" id="cancel-delete-object">No, go back</button>
+          </footer>
+        </section>
       </div>
     </article>
 
@@ -306,22 +495,55 @@
         <label>Template name<br><input type="text" value="Adapt this streaming scenario" size="38"></label>
         <label>Guidance for consumers<br><textarea rows="2" cols="52">Enter your usage context, traffic growth, server electricity mix, and compute schedule. The remaining assumptions were reviewed by the ecodesign team.</textarea></label>
         <p><strong>Choose the inputs shown in Simplified inputs</strong></p>
-        <fieldset>
+        <fieldset id="usage-template-setup">
           <legend>Usage pattern · Watch a video</legend>
-          <label><input type="checkbox" checked> Country</label>
-          <label><input type="checkbox" checked> Network</label>
-          <label><input type="checkbox" checked> Hourly pattern occurrences (timeseries)</label>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Country</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="country"
+              value="where the people watching this service are located"></label>
+          </div>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Network</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="network"
+              value="the access network used for each viewing session"></label>
+          </div>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Hourly pattern occurrences (timeseries)</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="hourly-occurrences"
+              value="how viewing demand changes over the modeling period"></label>
+          </div>
           <label><input type="checkbox"> Devices</label>
         </fieldset>
         <fieldset>
+          <legend>Usage pattern · Browse catalogue</legend>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Sessions per month</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="browse-sessions"
+              value="the expected monthly catalogue browsing sessions"></label>
+          </div>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Country</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="browse-country"
+              value="where catalogue browsing sessions take place"></label>
+          </div>
+        </fieldset>
+        <fieldset>
           <legend>Web server · Video origin</legend>
-          <label><input type="checkbox" checked> Electricity mix</label>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Electricity mix</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="electricity-mix"
+              value="the electricity mix used by the video origin server"></label>
+          </div>
           <label><input type="checkbox"> CPU model and utilization</label>
           <label><input type="checkbox"> Lifetime and embodied footprint inputs</label>
         </fieldset>
         <fieldset>
           <legend>Recurrent server need · Video origin demand</legend>
-          <label><input type="checkbox" checked> Recurrent compute need (timeseries)</label>
+          <div data-template-field>
+            <label><input type="checkbox" checked> Recurrent compute need (timeseries)</label>
+            <label><small>Help text</small><br><input type="text" data-help-input="recurrent-compute"
+              value="the compute schedule required by the recurrent server call"></label>
+          </div>
         </fieldset>
         <p><small>Unchecked inputs stay in the complete modeling but are not editable in Simplified inputs.</small></p>
         <div id="construction-actions">
@@ -346,49 +568,173 @@
       <div id="consumption-workspace">
         <div id="consumption-body">
           <div id="mode-banner"><strong>This file opened here because it contains a template.</strong>
-          Adapt the 5 exposed inputs, or use the mode control above to enter the full modeling or
+          Adapt the <span id="exposed-input-count">7</span> exposed inputs, or use the mode control above to enter the full modeling or
           revise the template itself.</div>
           <p>Enter your usage context, traffic growth, server electricity mix, and compute schedule. The
           remaining assumptions were reviewed by the ecodesign team.</p>
-          <div id="template-fields">
-            <fieldset>
-              <legend>Usage pattern · Watch a video</legend>
-              <label>Country<br><select><option>France</option><option>European average</option></select></label>
-              <label>Network<br><select><option>Wi-Fi network</option><option>Mobile network</option></select></label>
-              <article data-timeseries-card>
-                <header>
-                  <span><strong>Hourly pattern occurrences</strong><br><small>Timeseries input</small></span>
-                  <button type="button" data-open-timeseries="hourly">Edit traffic</button>
-                </header>
-                <p><strong id="hourly-timeseries-summary-strategy">Growth projection</strong><br>
-                <span id="hourly-timeseries-summary-details">Starts 2026-01-01 · 1 year · 250,000/month · +10%/year</span></p>
-                <p><small>Source: Audience forecast · Confidence: medium</small></p>
-              </article>
-            </fieldset>
-            <fieldset>
-              <legend>Web server · Video origin</legend>
-              <label>Electricity mix<br><select><option>France</option><option>European average</option></select></label>
-            </fieldset>
-            <fieldset>
-              <legend>Recurrent server need · Video origin demand</legend>
-              <article data-timeseries-card>
-                <header>
-                  <span><strong>Recurrent compute need</strong><br><small>Timeseries input</small></span>
-                  <button type="button" data-open-timeseries="recurrent">Edit schedule</button>
-                </header>
-                <p><strong id="recurrent-timeseries-summary-strategy">Weekly pattern</strong><br>
-                <span id="recurrent-timeseries-summary-details">2 profiles · 1 time range · cpu_core</span></p>
-                <p><small>Source: Operations estimate · Confidence: medium</small></p>
-              </article>
-            </fieldset>
+          <div id="consumption-layout">
+            <aside id="object-outline">
+              <h3>Object outline</h3>
+              <nav aria-label="Jump to an exposed object">
+                <strong>Usage patterns</strong>
+                <button type="button" id="outline-watch-video" data-object-target="usage-simplified-fields"
+                  aria-current="true">Watch a video</button>
+                <button type="button" data-object-target="browse-catalogue-fields">Browse catalogue</button>
+                <strong>Web servers</strong>
+                <button type="button" data-object-target="video-origin-fields">Video origin</button>
+                <strong>Recurrent server needs</strong>
+                <button type="button" data-object-target="video-origin-demand-fields">Video origin demand</button>
+              </nav>
+              <label id="object-jump-control">Jump to object
+                <select id="object-jump">
+                  <option value="usage-simplified-fields">Watch a video</option>
+                  <option value="browse-catalogue-fields">Browse catalogue</option>
+                  <option value="video-origin-fields">Video origin</option>
+                  <option value="video-origin-demand-fields">Video origin demand</option>
+                </select>
+              </label>
+            </aside>
+
+            <div id="template-fields" tabindex="0" aria-label="Scrollable simplified inputs">
+              <header>
+                <button type="button" id="expand-all-objects">Expand all</button>
+                <button type="button" id="collapse-all-objects">Collapse all</button>
+              </header>
+              <details data-object-type open>
+                <summary>Usage patterns · <span id="usage-type-count">2 objects</span></summary>
+                <div>
+                  <details data-template-object id="usage-simplified-fields" open>
+                    <summary>Watch a video <small>3 inputs</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field>
+                        <label><strong>Country</strong>
+                          <small data-field-help data-help-output="country">where the people watching this service are located</small>
+                          <select><option>France</option><option>European average</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="User research — March 2026"></label>
+                          <label>Source link <input type="url" value="https://example.org/research/markets"></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">France is the launch market for this scenario.</textarea></label>
+                        </details>
+                      </section>
+                      <section data-simplified-field>
+                        <label><strong>Network</strong>
+                          <small data-field-help data-help-output="network">the access network used for each viewing session</small>
+                          <select><option>Wi-Fi network</option><option>Mobile network</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Product analytics"></label>
+                          <label>Source link <input type="url" value="https://example.org/analytics/network"></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Wi-Fi is the expected default access network.</textarea></label>
+                        </details>
+                      </section>
+                      <section data-simplified-field data-timeseries-field>
+                        <label><strong>Hourly pattern occurrences</strong>
+                          <small data-field-help data-help-output="hourly-occurrences">how viewing demand changes over the modeling period</small>
+                          <output data-timeseries-value id="hourly-timeseries-preview">Growth projection — starts 2026-01-01 · 1 year · 250,000/month · +10%/year</output></label>
+                        <button type="button" data-open-timeseries="hourly">Edit timeseries</button>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Audience forecast"></label>
+                          <label>Source link <input type="url" value="https://example.org/forecast/audience"></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Includes expected campaign traffic.</textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+
+                  <details data-template-object id="browse-catalogue-fields">
+                    <summary>Browse catalogue <small>2 inputs</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field>
+                        <label><strong>Sessions per month</strong>
+                          <small data-field-help data-help-output="browse-sessions">the expected monthly catalogue browsing sessions</small>
+                          <input type="number" value="50000" step="1000"></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Product forecast"></label>
+                          <label>Source link <input type="url" value="https://example.org/forecast/catalogue"></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Expected traffic after the first quarter.</textarea></label>
+                        </details>
+                      </section>
+                      <section data-simplified-field>
+                        <label><strong>Country</strong>
+                          <small data-field-help data-help-output="browse-country">where catalogue browsing sessions take place</small>
+                          <select><option>France</option><option>European average</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Market rollout plan"></label>
+                          <label>Source link <input type="url" value="https://example.org/rollout"></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Catalogue launches in France first.</textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+                </div>
+              </details>
+
+              <details data-object-type>
+                <summary>Web servers · 1 object</summary>
+                <div>
+                  <details data-template-object id="video-origin-fields">
+                    <summary>Video origin <small>1 input</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field>
+                        <label><strong>Electricity mix</strong>
+                          <small data-field-help data-help-output="electricity-mix">the electricity mix used by the video origin server</small>
+                          <select><option>France</option><option>European average</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="RTE 2025 residual mix"></label>
+                          <label>Source link <input type="url" value="https://example.org/electricity/france"></label>
+                          <label>Confidence <select><option>low</option><option>medium</option><option selected>high</option></select></label>
+                          <label>Comment <textarea rows="2">Use the location-based mix for the origin server.</textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+                </div>
+              </details>
+
+              <details data-object-type>
+                <summary>Recurrent server needs · 1 object</summary>
+                <div>
+                  <details data-template-object id="video-origin-demand-fields">
+                    <summary>Video origin demand <small>1 input</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field data-timeseries-field>
+                        <label><strong>Recurrent compute need</strong>
+                          <small data-field-help data-help-output="recurrent-compute">the compute schedule required by the recurrent server call</small>
+                          <output data-timeseries-value id="recurrent-timeseries-preview">Weekly pattern — 2 profiles · 1 time range · cpu_core</output></label>
+                        <button type="button" data-open-timeseries="recurrent">Edit timeseries</button>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Operations estimate"></label>
+                          <label>Source link <input type="url" value="https://example.org/operations/transcoding"></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Weekday peaks follow the transcoding schedule.</textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+                </div>
+              </details>
+            </div>
           </div>
 
-          <div id="results-summary"><strong>Updated result:</strong> 18.4 t CO2-eq/year
-          <br><small>The normal detailed, explainable results remain available.</small></div>
-          <div id="consumption-actions">
-            <button type="button">Apply simple changes</button>
-            <button type="button">Download my adapted JSON</button>
-          </div>
+          <footer id="consumption-footer">
+            <div id="results-summary"><strong>Updated result:</strong> 18.4 t CO2-eq/year
+            <br><small>The normal detailed, explainable results remain available.</small></div>
+            <div id="consumption-actions">
+              <button type="button">Apply simple changes</button>
+              <button type="button">Download my adapted JSON</button>
+            </div>
+          </footer>
           <div data-same-access><strong>Same file, same access:</strong> “maker” and “consumer” are not
           permissions. Selecting Modeling above enables full editing; selecting Template setup lets
           you change what this screen exposes.</div>
@@ -497,6 +843,10 @@
             button.disabled = !hasTemplate;
           });
           mockup.querySelector('#remove-template').hidden = !hasTemplate;
+          mockup.querySelectorAll('[data-template-indicator]').forEach(function (indicator) {
+            indicator.hidden = !hasTemplate;
+          });
+          mockup.querySelector('[data-template-delete-warning]').hidden = !hasTemplate;
           mockup.querySelector('#template-status').innerHTML = hasTemplate
             ? '<strong>This JSON contains a simplified template.</strong><br>' +
               '<button type="button" data-jump="consumption">Open Simplified inputs</button> ' +
@@ -514,9 +864,14 @@
           mockup.querySelector('#consumption-workspace').removeAttribute('data-panel-open');
         }
 
+        function closeDeleteObjectConfirmation() {
+          mockup.querySelector('#delete-confirmation-backdrop').hidden = true;
+        }
+
         function show(mode) {
           if (mode === 'consumption' && !hasTemplate) return;
           closeTimeseriesPanel();
+          closeDeleteObjectConfirmation();
           modes.forEach(function (candidate) {
             mockup.querySelector('#' + candidate + '-screen').hidden = candidate !== mode;
           });
@@ -527,6 +882,75 @@
 
         mockup.querySelectorAll('[data-mode]').forEach(function (button) {
           button.addEventListener('click', function () { show(button.dataset.mode); });
+        });
+
+        function focusObject(objectId) {
+          var objectSection = mockup.querySelector('#' + objectId);
+          if (!objectSection || objectSection.hidden) return;
+          var typeSection = objectSection.closest('[data-object-type]');
+          typeSection.open = true;
+          objectSection.open = true;
+          mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
+            if (button.dataset.objectTarget === objectId) {
+              button.setAttribute('aria-current', 'true');
+            } else {
+              button.removeAttribute('aria-current');
+            }
+          });
+          mockup.querySelector('#object-jump').value = objectId;
+          if (objectSection.scrollIntoView) {
+            objectSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+          }
+        }
+
+        mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
+          button.addEventListener('click', function () { focusObject(button.dataset.objectTarget); });
+        });
+
+        mockup.querySelector('#object-jump').addEventListener('change', function (event) {
+          focusObject(event.target.value);
+        });
+
+        mockup.querySelector('#expand-all-objects').addEventListener('click', function () {
+          mockup.querySelectorAll('[data-object-type], [data-template-object]').forEach(function (section) {
+            section.open = true;
+          });
+        });
+
+        mockup.querySelector('#collapse-all-objects').addEventListener('click', function () {
+          mockup.querySelectorAll('[data-object-type], [data-template-object]').forEach(function (section) {
+            section.open = false;
+          });
+        });
+
+        mockup.querySelector('#open-delete-object-confirmation').addEventListener('click', function () {
+          mockup.querySelector('#delete-confirmation-backdrop').hidden = false;
+          mockup.querySelector('#cancel-delete-object').focus();
+        });
+
+        mockup.querySelector('#cancel-delete-object').addEventListener('click', closeDeleteObjectConfirmation);
+
+        mockup.querySelector('#confirm-delete-object').addEventListener('click', function () {
+          mockup.querySelector('#watch-video-model-card').hidden = true;
+          mockup.querySelector('#modeling-edit-panel').hidden = true;
+          var result = mockup.querySelector('#modeling-delete-result');
+          if (hasTemplate) {
+            mockup.querySelector('#usage-template-setup').hidden = true;
+            mockup.querySelector('#usage-simplified-fields').hidden = true;
+            mockup.querySelector('#outline-watch-video').hidden = true;
+            mockup.querySelector('#outline-watch-video').removeAttribute('aria-current');
+            mockup.querySelector('#object-jump option[value="usage-simplified-fields"]').remove();
+            mockup.querySelector('#object-jump').value = 'browse-catalogue-fields';
+            mockup.querySelector('[data-object-target="browse-catalogue-fields"]')
+              .setAttribute('aria-current', 'true');
+            mockup.querySelector('#usage-type-count').textContent = '1 object';
+            mockup.querySelector('#exposed-input-count').textContent = '4';
+            result.textContent = '“Watch a video” deleted. Its 3 fields were also removed from the template.';
+          } else {
+            result.textContent = '“Watch a video” deleted.';
+          }
+          result.hidden = false;
+          closeDeleteObjectConfirmation();
         });
 
         function activateTimeseriesEditor(strategy) {
@@ -572,17 +996,15 @@
           var strategy = mockup.querySelector('#timeseries-strategy').value;
           savedTimeseriesStrategies[activeTimeseries] = strategy;
           if (activeTimeseries === 'hourly') {
-            mockup.querySelector('#hourly-timeseries-summary-strategy').textContent = 'Growth projection';
-            mockup.querySelector('#hourly-timeseries-summary-details').textContent =
-              'Starts 2026-01-01 · 1 year · 250,000/month · +10%/year';
+            mockup.querySelector('#hourly-timeseries-preview').textContent =
+              'Growth projection — starts 2026-01-01 · 1 year · 250,000/month · +10%/year';
           } else if (strategy === 'weekly') {
-            mockup.querySelector('#recurrent-timeseries-summary-strategy').textContent = 'Weekly pattern';
-            mockup.querySelector('#recurrent-timeseries-summary-details').textContent =
-              '2 profiles · 1 time range · cpu_core';
+            mockup.querySelector('#recurrent-timeseries-preview').textContent =
+              'Weekly pattern — 2 profiles · 1 time range · cpu_core';
           } else {
             var value = mockup.querySelector('#constant-timeseries-value').value;
-            mockup.querySelector('#recurrent-timeseries-summary-strategy').textContent = 'Constant value';
-            mockup.querySelector('#recurrent-timeseries-summary-details').textContent = value + ' cpu_core';
+            mockup.querySelector('#recurrent-timeseries-preview').textContent =
+              'Constant value — ' + value + ' cpu_core';
           }
           closeTimeseriesPanel();
         });
@@ -603,8 +1025,18 @@
           show('consumption');
         });
 
+        function syncFieldHelp() {
+          mockup.querySelectorAll('[data-help-input]').forEach(function (input) {
+            var output = mockup.querySelector('[data-help-output="' + input.dataset.helpInput + '"]');
+            var help = input.value.trim().toLowerCase();
+            output.textContent = help;
+            output.hidden = !help;
+          });
+        }
+
         mockup.querySelector('#save-template').addEventListener('click', function () {
           hasTemplate = true;
+          syncFieldHelp();
           mockup.querySelector('#open-result').textContent =
             'Template setup saved → previewing the default Simplified inputs view.';
           refreshTemplateState();
@@ -661,9 +1093,6 @@
     <li><strong>Comparison workspace:</strong> when a simplified-template file is opened or added in a
     two-model workspace, should its Simplified inputs view apply independently and still allow it to
     participate in comparison, or is the feature single-model only in v1?</li>
-    <li><strong>Template definition after modeling edits:</strong> if Modeling removes or replaces an
-    input that the simplified definition exposes, should export be blocked until Template setup is
-    repaired, or should stale selections be dropped with a warning?</li>
   </ol>
 </section>
 
