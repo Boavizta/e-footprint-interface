@@ -63,6 +63,22 @@ automated-maintenance curve linked to S6, plus the global infrastructure keep-al
 full-horizon averages. They preserve the exact cumulative S1–S5 occurrence totals while smoothing the hypothetical
 change in human journey mix at launch. The generator validates every journey total after JSON round-trip.
 
+Journey steps carry explicit repeat counts rather than assuming one interaction of each kind. Allocated user time is
+divided by the repeat count, so richer interaction sequences increase server operations without inflating the agreed
+session duration. The central recipes are:
+
+| Journey | Interactions/session | User duration | Main repeated interactions |
+|---|---:|---:|---|
+| S1 | 5 | 10 min | 3 warm Sankey refinements |
+| S2 | 18 | 45 min | 6 closed-result mutations, 3 cold Sankeys, 2 open-result mutations, 2 value explanations |
+| S3 | 8 | 20 min | 3 alternative mutations, 2 comparisons |
+| S4 | 11 | 15 min | 3 value explanations, 2 calculus graphs |
+| S5 | 8 | 15 min | 3 warm refinements, 2 value explanations |
+| S6 | 8 | 0 min | 3 assumption updates, 2 value explanations |
+
+These counts are low-confidence central usage-story hypotheses. Each benchmark duration still represents one measured
+operation; the step multiplier determines how often that operation occurs within one journey.
+
 Automated runs use S6: import a model, change an assumption, compute results, inspect one explanation, and export the
 updated model. S6 has no user-device time. Its totals cover the load imposed on e-footprint-interface, not the external
 compute or inference used by the calling agent; that must be added when agent model, token, region, and execution-host

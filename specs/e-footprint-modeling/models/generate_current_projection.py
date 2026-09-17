@@ -153,51 +153,58 @@ JOURNEY_USER_MINUTES = {
 
 JOURNEY_RECIPES = {
     "S1": [
-        ("load_ecommerce_template", 2),
-        ("open_results_and_generate_cold_sankey", 6),
-        ("refine_warm_sankey", 2),
+        ("load_ecommerce_template", 1, 2),
+        ("open_results_and_generate_cold_sankey", 1, 5),
+        ("refine_warm_sankey", 3, 3),
     ],
     "S2": [
-        ("add_usage_journey_step", 5),
-        ("add_direct_server_job", 5),
-        ("increase_usage_volume", 5),
-        ("increase_server_ram", 5),
-        ("open_results_for_richer_model", 15),
-        ("update_model_with_results_open", 10),
+        ("import_previously_built_model", 1, 3),
+        ("add_usage_journey_step", 2, 6),
+        ("add_direct_server_job", 2, 8),
+        ("increase_usage_volume", 1, 3),
+        ("increase_server_ram", 1, 3),
+        ("open_results_for_richer_model", 1, 4),
+        ("open_results_and_generate_cold_sankey", 3, 6),
+        ("update_model_with_results_open", 2, 4),
+        ("refine_warm_sankey", 1, 1),
+        ("open_calculated_value_explanation", 2, 3),
+        ("open_calculus_graph", 1, 3),
+        ("export_model_for_reuse", 1, 1),
     ],
     "S3": [
-        ("duplicate_built_model", 3),
-        ("rename_alternative", 2),
-        ("reduce_alternative_usage_volume", 3),
-        ("increase_alternative_step_count", 2),
-        ("compare_reference_and_alternative", 8),
-        ("export_comparison_workspace", 2),
+        ("import_previously_built_model", 1, 2),
+        ("duplicate_built_model", 1, 2),
+        ("rename_alternative", 1, 2),
+        ("reduce_alternative_usage_volume", 1, 2),
+        ("increase_alternative_step_count", 1, 2),
+        ("compare_reference_and_alternative", 2, 8),
+        ("export_comparison_workspace", 1, 2),
     ],
     "S4": [
-        ("export_model_for_reuse", 1),
-        ("reset_active_model_before_reuse", 1),
-        ("import_previously_built_model", 2),
-        ("open_calculated_value_explanation", 3),
-        ("open_calculus_graph", 3),
-        ("open_reused_model_results", 3),
-        ("export_sources", 1),
-        ("export_reused_model", 1),
+        ("export_model_for_reuse", 1, 1),
+        ("reset_active_model_before_reuse", 1, 1),
+        ("import_previously_built_model", 1, 2),
+        ("open_calculated_value_explanation", 3, 3),
+        ("open_calculus_graph", 2, 2),
+        ("open_reused_model_results", 1, 3),
+        ("export_sources", 1, 1),
+        ("export_reused_model", 1, 2),
     ],
     "S6": [
-        ("import_previously_built_model", 0),
-        ("increase_usage_volume", 0),
-        ("open_results_for_richer_model", 0),
-        ("open_calculated_value_explanation", 0),
-        ("export_reused_model", 0),
+        ("import_previously_built_model", 1, 0),
+        ("increase_usage_volume", 3, 0),
+        ("open_results_for_richer_model", 1, 0),
+        ("open_calculated_value_explanation", 2, 0),
+        ("export_reused_model", 1, 0),
     ],
 }
 
 SHARED_MODEL_RECIPE = [
-    ("import_previously_built_model", 2),
-    ("open_reused_model_results", 6),
-    ("refine_warm_sankey", 2),
-    ("open_calculated_value_explanation", 2),
-    ("open_calculus_graph", 3),
+    ("import_previously_built_model", 1, 2),
+    ("open_reused_model_results", 1, 5),
+    ("refine_warm_sankey", 3, 3),
+    ("open_calculated_value_explanation", 2, 3),
+    ("open_calculus_graph", 1, 2),
 ]
 
 
@@ -291,8 +298,8 @@ def load_benchmark_evidence() -> dict[str, ActionEvidence]:
         raise ValueError("Unsupported action-evidence schema")
 
     rows = document.get("actions", {})
-    required_actions = {action for recipe in JOURNEY_RECIPES.values() for action, _ in recipe}
-    required_actions.update(action for action, _ in SHARED_MODEL_RECIPE)
+    required_actions = {action for recipe in JOURNEY_RECIPES.values() for action, _, _ in recipe}
+    required_actions.update(action for action, _, _ in SHARED_MODEL_RECIPE)
     if set(rows) != required_actions:
         raise ValueError("Compact action evidence does not match the modeled journey actions")
 
@@ -380,8 +387,8 @@ def load_implementation_profiles() -> dict[str, ImplementationProfile]:
             if not math.isclose(derived_peak_mib, float(peak_mib), rel_tol=1e-12):
                 raise ValueError(f"{profile_id} maximum-memory derivation is inconsistent")
 
-    required_actions = {action for recipe in JOURNEY_RECIPES.values() for action, _ in recipe}
-    required_actions.update(action for action, _ in SHARED_MODEL_RECIPE)
+    required_actions = {action for recipe in JOURNEY_RECIPES.values() for action, _, _ in recipe}
+    required_actions.update(action for action, _, _ in SHARED_MODEL_RECIPE)
     counterfactual = profiles["no-ai-low-optim"]
     if set(counterfactual.action_duration_factors) != required_actions:
         raise ValueError("Counterfactual duration factors do not match the modeled action catalogue")
@@ -413,6 +420,16 @@ def validate_scenario_config() -> None:
             raise ValueError(f"{name} must define year-end active-team anchors from 2026 through 2032")
         if any(next_value < value for value, next_value in zip(anchors.values(), list(anchors.values())[1:])):
             raise ValueError(f"{name} active-team anchors must not decrease")
+    recipes = {**JOURNEY_RECIPES, "S5": SHARED_MODEL_RECIPE}
+    for journey_id, recipe in recipes.items():
+        if any(times <= 0 or allocated_minutes < 0 for _, times, allocated_minutes in recipe):
+            raise ValueError(f"{journey_id} recipe contains an invalid multiplier or time allocation")
+        allocated_minutes = sum(item[2] for item in recipe)
+        if not math.isclose(allocated_minutes, JOURNEY_USER_MINUTES[journey_id]):
+            raise ValueError(
+                f"{journey_id} allocates {allocated_minutes} user minutes, "
+                f"expected {JOURNEY_USER_MINUTES[journey_id]}"
+            )
 
 
 def build_system(
@@ -593,7 +610,7 @@ def build_benchmark_jobs(
     jobs = {}
     request_ram_mib = profile.process_visible_ram_mib - KEEP_ALIVE_RAM_MB
     for journey_id, recipe in JOURNEY_RECIPES.items():
-        for action, _ in recipe:
+        for action, _, _ in recipe:
             if action in jobs:
                 continue
             measured = evidence[action]
@@ -666,38 +683,43 @@ def build_journeys(
     journeys = {}
     for journey_id, recipe in JOURNEY_RECIPES.items():
         steps = []
-        for action, user_minutes in recipe:
-            steps.append(
-                UsageJourneyStep(
-                    f"{journey_id} step – {action}",
-                    user_time_spent=source_value(
-                        user_minutes * u.min,
-                        USER_SCOPE_SOURCE,
-                        "low",
-                        f"Informed user-time hypothesis. Allocations sum to {JOURNEY_USER_MINUTES[journey_id]} minutes for {journey_id}.",
+        for action, times_per_journey, allocated_user_minutes in recipe:
+            user_minutes_per_occurrence = allocated_user_minutes / times_per_journey
+            step = UsageJourneyStep(
+                f"{journey_id} step – {action}",
+                user_time_spent=source_value(
+                    user_minutes_per_occurrence * u.min,
+                    USER_SCOPE_SOURCE,
+                    "low",
+                    f"Informed user-time hypothesis: {allocated_user_minutes:g} minutes allocated across "
+                    f"{times_per_journey:g} occurrences ({user_minutes_per_occurrence:g} minutes each). "
+                    f"All step allocations sum to {JOURNEY_USER_MINUTES[journey_id]} minutes for {journey_id}.",
+                ),
+                jobs={
+                    jobs[action]: source_value(
+                        1 * u.dimensionless,
+                        BENCHMARK_SOURCE,
+                        "high",
+                        "One occurrence of this step triggers the measured action once.",
                     ),
-                    jobs={
-                        jobs[action]: source_value(
-                            1 * u.dimensionless,
-                            BENCHMARK_SOURCE,
-                            "high",
-                            "The Playwright journey triggers this measured action once at this point in the sequence.",
-                        ),
-                    },
-                )
+                },
             )
+            steps.append((step, times_per_journey))
         journeys[journey_id] = UsageJourney(
             f"{journey_id} – {journey_name(journey_id)}",
             uj_steps={
                 step: source_value(
-                    1 * u.dimensionless, USER_SCOPE_SOURCE, "high", "Each ordered step occurs once per session."
+                    times_per_journey * u.dimensionless,
+                    USER_SCOPE_SOURCE,
+                    "low",
+                    f"Central usage-story hypothesis: this interaction occurs {times_per_journey:g} times per session.",
                 )
-                for step in steps
+                for step, times_per_journey in steps
             },
         )
 
     shared_steps = []
-    for action, user_minutes in SHARED_MODEL_RECIPE:
+    for action, times_per_journey, allocated_user_minutes in SHARED_MODEL_RECIPE:
         base = evidence[action]
         duration_factor = profile.action_duration_factors.get(action, profile.default_duration_factor)
         transfer_factor = profile.action_transfer_factors.get(action, profile.default_transfer_factor)
@@ -734,31 +756,38 @@ def build_journeys(
             ),
         )
         shared_steps.append(
-            UsageJourneyStep(
-                f"S5 step – {action}",
-                user_time_spent=source_value(
-                    user_minutes * u.min,
-                    USER_SCOPE_SOURCE,
-                    "low",
-                    "Informed user-time allocation for read-only exploration of a shared complex model.",
-                ),
-                jobs={
-                    complex_job: source_value(
-                        1 * u.dimensionless,
+            (
+                UsageJourneyStep(
+                    f"S5 step – {action}",
+                    user_time_spent=source_value(
+                        (allocated_user_minutes / times_per_journey) * u.min,
                         USER_SCOPE_SOURCE,
-                        "medium",
-                        "The provisional shared-model journey triggers this operation once.",
+                        "low",
+                        f"Informed allocation of {allocated_user_minutes:g} minutes across "
+                        f"{times_per_journey:g} occurrences while exploring a shared complex model.",
                     ),
-                },
+                    jobs={
+                        complex_job: source_value(
+                            1 * u.dimensionless,
+                            USER_SCOPE_SOURCE,
+                            "medium",
+                            "One occurrence of this step triggers the provisional shared-model operation once.",
+                        ),
+                    },
+                ),
+                times_per_journey,
             )
         )
     journeys["S5"] = UsageJourney(
         "S5 – Explore a shared complex model",
         uj_steps={
             step: source_value(
-                1 * u.dimensionless, USER_SCOPE_SOURCE, "medium", "Each provisional S5 step occurs once."
+                times_per_journey * u.dimensionless,
+                USER_SCOPE_SOURCE,
+                "low",
+                f"Central usage-story hypothesis: this interaction occurs {times_per_journey:g} times per session.",
             )
-            for step in shared_steps
+            for step, times_per_journey in shared_steps
         },
     )
     return journeys
@@ -1052,6 +1081,23 @@ def serialize_and_validate(
             f"Round-tripped model contains {len(loaded_system.usage_patterns)} usage patterns, "
             f"expected {expected_pattern_count}"
         )
+    recipes = {**JOURNEY_RECIPES, "S5": SHARED_MODEL_RECIPE}
+    loaded_journeys = {
+        journey.name.split(" ", 1)[0]: journey
+        for journey in class_objects["UsageJourney"].values()
+        if not journey.name.startswith("Infrastructure")
+    }
+    for journey_id, recipe in recipes.items():
+        journey = loaded_journeys[journey_id]
+        duration_minutes = journey.duration.to(u.min).magnitude
+        if not math.isclose(duration_minutes, JOURNEY_USER_MINUTES[journey_id], abs_tol=1e-9):
+            raise ValueError(f"{journey_id} duration is {duration_minutes}, not {JOURNEY_USER_MINUTES[journey_id]}")
+        actual_interactions = sum(weight.to(u.dimensionless).magnitude for weight in journey.uj_steps.values())
+        expected_interactions = sum(times for _, times, _ in recipe)
+        if not math.isclose(actual_interactions, expected_interactions, abs_tol=1e-9):
+            raise ValueError(
+                f"{journey_id} contains {actual_interactions} interactions, expected {expected_interactions}"
+            )
     if BENCHMARK_SOURCE.id not in document["Sources"] or USER_SCOPE_SOURCE.id not in document["Sources"]:
         raise ValueError("Expected traceability sources are absent from generated JSON")
     if profile.profile_id != "current" and COUNTERFACTUAL_SOURCE.id not in document["Sources"]:

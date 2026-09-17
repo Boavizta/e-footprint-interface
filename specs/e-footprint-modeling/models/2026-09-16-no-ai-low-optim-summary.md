@@ -6,8 +6,8 @@ identified speed and memory optimizations. AI development and inference footprin
 
 ## Implementation profile
 
-- Weighted modeled actions are about 4.8–5.4× slower depending on the adoption mix. Individual journey estimates are
-  5.9× for S1, 6.5× for S2, 5.2× for S3, 4.1× for S4, 4.4× for S5 and 4.8× for S6.
+- Weighted modeled actions are about 4.76–4.79× slower depending on the adoption mix. Individual journey estimates are
+  6.3× for S1, 4.9× for S2, 5.5× for S3, 4.0× for S4, 4.4× for S5 and 4.8× for S6.
 - The maximum-request reconstruction starts from the measured 2,674 MiB five-pattern cold-Sankey peak before bounded
   attribution retention. Removing the pull-engine memory benefit, full NumPy, float32, lazy compression and
   explanation-parent cleanup gives 23,020 MiB (about 22.5 GiB).
@@ -29,16 +29,16 @@ Sep 2025–Dec 2033 totals include adoption growth through Dec 2032 and a comple
 
 | Scenario | Usage occurrences | Current total | No-AI total | Total ratio | Current server | No-AI server | Maximum instances current → no-AI |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Niche, human-led | 42,586 | 411.813 kgCO₂e | 928.112 kgCO₂e | 2.25× | 171.216 kgCO₂e | 686.493 kgCO₂e | 1 → 1 |
-| Central, human-led | 233,172 | 1,463.330 kgCO₂e | 1,993.010 kgCO₂e | 1.36× | 171.704 kgCO₂e | 696.258 kgCO₂e | 1 → 1 |
-| Central, team-integrated | 859,863 | 1,717.194 kgCO₂e | 2,319.535 kgCO₂e | 1.35× | 173.872 kgCO₂e | 737.688 kgCO₂e | 1 → 1 |
-| Breakout, team-integrated | 5,396,553 | 10,074.792 kgCO₂e | 11,417.459 kgCO₂e | 1.13× | 188.468 kgCO₂e | 1,292.223 kgCO₂e | 2 → 5 |
-| Breakout, agent-intensive | 59,922,943 | 12,469.467 kgCO₂e | 23,803.365 kgCO₂e | 1.91× | 568.776 kgCO₂e | 8,694.853 kgCO₂e | 13 → 58 |
+| Niche, human-led | 42,586 | 412.372 kgCO₂e | 932.169 kgCO₂e | 2.26× | 171.375 kgCO₂e | 689.434 kgCO₂e | 1 → 1 |
+| Central, human-led | 233,172 | 1,466.290 kgCO₂e | 2,014.227 kgCO₂e | 1.37× | 172.532 kgCO₂e | 711.608 kgCO₂e | 1 → 1 |
+| Central, team-integrated | 859,863 | 1,725.515 kgCO₂e | 2,397.446 kgCO₂e | 1.39× | 176.404 kgCO₂e | 805.254 kgCO₂e | 1 → 2 |
+| Breakout, team-integrated | 5,396,553 | 10,143.556 kgCO₂e | 12,085.548 kgCO₂e | 1.19× | 220.877 kgCO₂e | 1,895.080 kgCO₂e | 2 → 10 |
+| Breakout, agent-intensive | 59,922,943 | 13,132.649 kgCO₂e | 30,418.219 kgCO₂e | 2.32× | 893.788 kgCO₂e | 14,937.593 kgCO₂e | 22 → 102 |
 
 The lower-volume scenarios are dominated by the minimum provisioned container: the 3XL allocation makes their server
 footprint about four times the current M allocation even before traffic causes additional instances. In the breakout
-agent-intensive case, slower actions increase the hourly peak from 13 to 58 instances and the server footprint to about
-15.3× current.
+agent-intensive case, slower actions increase the hourly peak from 22 to 102 instances and the server footprint to
+about 16.7× current.
 
 These are scenario results, not measured historical behavior. The most consequential uncertainties are the
 counterfactual memory-factor overlap, the provisional 1.1 GiB reserve on 3XL, action CPU occupancy and the generic

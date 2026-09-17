@@ -38,10 +38,10 @@ production aggregates after launch.
 
 | ID | Session | What the person accomplishes | Initial operation mix |
 |---|---|---|---|
-| S1 | **Explore an example** | Starts modeling, selects a maintained template, reads its footprint and inspects where it comes from. | 1 template load; 1 Results opening; 1 cold Sankey; 1 warm Sankey refinement |
+| S1 | **Explore an example** | Starts modeling, selects a maintained template, reads its footprint and inspects where it comes from. | 1 template load; 1 Results opening with cold Sankey; 3 warm Sankey refinements |
 | S2 | **Build and refine a model** | Opens a model, changes assumptions and structure, checks the effect, audits selected values, then keeps a copy. | 1 load; 6 mutations with Results closed; 1 explicit Results opening; 2 mutations with Results open; 3 cold Sankeys; 1 warm Sankey refinement; 2 audit lookups; 1 model export |
 | S3 | **Compare an alternative** | Duplicates or imports a second model, edits the alternative, and checks whether the change helps. | 1 load; 1 duplication/import; 3 saved mutations; 2 comparisons; 1 workspace export |
-| S4 | **Audit and reuse a model** | Opens an existing model, traces evidence and derivations, exports sources, and saves the model or workspace. | 1 import; 1 Results opening; 3 audit lookups; 1 sources export; 1 model/workspace export |
+| S4 | **Audit and reuse a model** | Opens an existing model, traces evidence and derivations, exports sources, and saves the model or workspace. | 1 initial export and reset; 1 import; 1 Results opening; 3 value explanations; 2 calculus graphs; 1 sources export; 1 final model export |
 
 An operation count means an actual server request that completes the named work. Purely client-side actions such as
 changing chart granularity, closing a panel, switching a resident canvas, or dismissing comparison are not separate
