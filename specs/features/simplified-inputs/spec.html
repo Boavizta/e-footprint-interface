@@ -16,7 +16,9 @@
   code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
   details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
   summary { cursor: pointer; font-weight: 600; }
-  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  .mockup { box-sizing: border-box; border: 1px dashed #999; border-radius: 8px;
+            padding: 1rem; margin: 1rem 0; width: min(90rem, calc(100vw - 3rem));
+            position: relative; left: 50%; transform: translateX(-50%); }
   blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
   button { cursor: pointer; padding: .42rem .75rem; }
   input, select, textarea { box-sizing: border-box; padding: .35rem .45rem; max-width: 100%; }
@@ -33,31 +35,73 @@
   #mode-flow strong { display: block; }
   #mode-switch-summary { text-align: center; border: 1px solid #9fb0c5; background: #eef4ff;
                          border-radius: 6px; padding: .55rem; }
-  #modeling-screen, #construction-screen, #consumption-screen {
-    border: 1px solid #9eabbc; border-radius: 8px; overflow: hidden;
-  }
+  #app-shell { position: relative; min-height: 42rem; border: 1px solid #cfd5df; border-radius: 8px;
+    background: white; color: #111928; }
+  #app-navbar { display: flex; align-items: center; gap: .6rem; padding: .35rem 1.3rem;
+    background: #f8f9fa; border-radius: 8px 8px 0 0; }
+  #app-navbar img { width: 120px; height: 40px; object-fit: contain; margin-right: auto; }
+  #app-navbar button { background: #f9fafb; border: 1px solid #d1d5db; border-radius: 6px;
+    font-size: .85rem; font-weight: 600; padding: .3rem .8rem; }
+  #app-navbar [data-demo-action="Documentation"] { color: #1b9891; border-color: #1b9891; }
+  #workspace-tabs { display: flex; gap: .25rem; padding: .65rem 1.2rem 0; border-bottom: 1px solid #d1d5db; }
+  #workspace-tabs > span { display: flex; align-items: center; border: 1px solid transparent;
+    border-radius: 6px 6px 0 0; margin-bottom: -1px; }
+  #workspace-tabs > span:has([aria-pressed="true"]) { border-color: #d1d5db; border-bottom-color: white; }
+  #workspace-tabs button { border: 0; background: transparent; color: #6b7280; padding: .55rem .8rem; font-size: .82rem; }
+  #workspace-tabs [data-workspace-model] { width: 11rem; text-align: left; }
+  #workspace-tabs button[aria-pressed="true"] { color: #111928; font-weight: 650; }
+  #workspace-tabs [data-open-comparison] { color: #2d4675; font-weight: 600; }
+  #workspace-tabs [data-demo-action] { padding: .5rem; }
+  #model-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; padding: .8rem 1.2rem;
+    border-bottom: 1px solid #e5e7eb; position: relative; z-index: 10; background: white; }
+  #model-name-control { min-width: 0; margin-right: auto; border: 0; background: none; padding: 0;
+    color: #111928; text-align: left; }
+  #mock-system-name { display: block; max-width: 18rem; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; font-size: 1.05rem; }
+  #current-view-label { display: block; font-size: .72rem; color: #6b7280; }
+  #edge-modeling-control { display: flex; align-items: center; gap: .3rem; margin: 0; font-size: .8rem; }
+  #edge-modeling-control input { appearance: none; width: 2rem; height: 1.1rem; padding: .1rem;
+    border: 1px solid #b8c1ce; border-radius: 1rem; background: #e5e7eb; cursor: pointer; }
+  #edge-modeling-control input::before { content: ''; display: block; width: .75rem; height: .75rem;
+    border-radius: 50%; background: white; box-shadow: 0 1px 2px #11192833; }
+  #edge-modeling-control input:checked { background: #2d4675; border-color: #2d4675; }
+  #edge-modeling-control input:checked::before { transform: translateX(.85rem); }
+  #mode-destination { border: 1px solid #bdc8d9; background: white; color: #2d4675;
+    border-radius: 5px; font-size: .8rem; white-space: nowrap; }
+  #desktop-toolbar-actions { display: flex; align-items: center; gap: .3rem; }
+  [data-toolbar-action], [data-toolbar-menu] > summary { border: 0; background: none; border-radius: 5px;
+    color: #374151; padding: .3rem .4rem; font-size: .85rem; font-weight: 400; }
+  [data-toolbar-action] img, [data-toolbar-menu] > summary img { width: 24px; height: 24px; vertical-align: middle; }
+  [data-toolbar-action]:hover, [data-toolbar-menu] > summary:hover { background: #f3f4f6; }
+  [data-toolbar-menu] { position: relative; margin: 0; padding: 0; border: 0; }
+  [data-toolbar-menu] > summary { display: flex; align-items: center; gap: .3rem; list-style: none; cursor: pointer; }
+  [data-toolbar-menu] > summary::-webkit-details-marker { display: none; }
+  [data-toolbar-menu] > summary::after { content: '▾'; font-size: .65rem; }
+  [data-menu-items] { position: absolute; z-index: 12; right: 0; top: calc(100% + .35rem); min-width: 12rem;
+    padding: .35rem; border: 1px solid #d1d5db; border-radius: 6px; background: white;
+    box-shadow: 0 .3rem .8rem #11192818; }
+  [data-menu-items] button { display: block; width: 100%; padding: .4rem .6rem; border: 0; background: white;
+    text-align: left; white-space: nowrap; font-size: .82rem; }
+  [data-menu-items] button:hover { background: #f3f4f6; }
+  [data-show-results] { background: linear-gradient(120deg, #1b9891, #2d4675); color: white;
+    border: 0; border-radius: 2rem; padding: .45rem .9rem; font-size: .82rem; white-space: nowrap; }
+  [data-mobile-only], #mobile-model-picker, #mobile-toolbar-menu { display: none; }
+  #mock-results-panel { position: absolute; z-index: 8; inset: auto 0 0; max-height: 75%; overflow: auto;
+    border-top: 1px solid #bdc8d9; background: white; box-shadow: 0 -.3rem 1rem #11192818; padding: .8rem 1rem; }
+  #mock-results-panel > header { display: flex; align-items: center; justify-content: space-between; }
+  #mock-results-panel h3 { margin: 0; }
+  #results-tabs { display: flex; gap: .5rem; border-bottom: 1px solid #e5e7eb; margin: .5rem 0; }
+  #results-tabs button { border: 0; background: none; color: #526177; padding: .4rem .7rem; }
+  #results-tabs button[aria-pressed="true"] { color: #2d4675; border-bottom: 2px solid #2d4675; font-weight: 650; }
+  #comparison-screen { padding: 1.2rem; }
+  #comparison-screen h3 { margin-top: 0; }
+  #comparison-screen table { font-size: .85rem; }
+  #configuration-actions-top { display: flex; gap: .4rem; }
   #modeling-screen { position: relative; }
-  #modeling-screen > header, #construction-screen > header, #consumption-screen > header {
-    background: #243b64; color: white; padding: .65rem .9rem; display: flex;
-    justify-content: space-between; gap: 1rem; align-items: center;
-  }
-  #modeling-screen > header small, #construction-screen > header small, #consumption-screen > header small {
-    color: #dce6f7;
-  }
-  [data-mode-nav] { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem;
-                    padding: .5rem .7rem; background: #edf1f6; border-bottom: 1px solid #c9d1dc; }
-  [data-mode-nav] span { font-size: .8rem; font-weight: 700; color: #4d5d72; margin-right: .2rem; }
-  [data-mode-nav] button { background: white; border: 1px solid #aeb9c7; border-radius: 5px;
-                           padding: .3rem .55rem; }
-  [data-mode-nav] button[aria-pressed="true"] { background: #243b64; color: white; border-color: #243b64; }
-  [data-mode-nav] button:disabled { color: #8a929c; background: #e5e8ec; cursor: not-allowed; }
-  #modeling-body, #construction-body, #consumption-body { padding: .9rem; }
+  #modeling-body, #simplified-body { padding: .9rem; }
   fieldset { border: 1px solid #d8d8d8; border-radius: 6px; margin: .7rem 0; padding: .65rem .8rem; }
   legend { font-weight: 650; padding: 0 .3rem; }
   label { display: block; margin: .35rem 0; }
-  #template-status { background: #eef4ff; border: 1px solid #aec4ec; border-radius: 6px;
-                     padding: .55rem .7rem; margin-bottom: .75rem; }
-  #template-status button { margin: .35rem .25rem 0 0; }
   #modeling-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(17rem, 38%);
                         gap: .7rem; align-items: start; }
   #model-canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; margin: .8rem 0; }
@@ -65,6 +109,9 @@
   #model-canvas h3 { font-size: .9rem; margin: 0 0 .35rem; }
   #model-canvas p { font-size: .82rem; margin: .25rem 0; padding: .3rem; background: white;
                     border: 1px solid #ddd; border-radius: 4px; }
+  #model-canvas p button { border: 0; padding: 0; background: none; color: inherit; font: inherit; }
+  #model-canvas section > button { margin-top: .4rem; padding: .3rem; font-size: .8rem;
+    border: 1px solid #cfd5df; border-radius: 4px; background: white; color: #2d4675; }
   #modeling-edit-panel { border: 1px solid #9eabbc; border-radius: 7px; background: white; overflow: hidden; }
   #modeling-edit-panel > header { background: #eef2f7; border-bottom: 1px solid #c9d1dc;
                                   padding: .6rem .7rem; display: flex; align-items: center;
@@ -76,16 +123,40 @@
   #modeling-edit-panel footer { border-top: 1px solid #e1e5ea; display: flex; flex-wrap: wrap;
                                 justify-content: flex-end; gap: .4rem; padding-top: .65rem;
                                 margin-top: .8rem; }
-  [data-modeling-field-label] { display: flex; align-items: center; gap: .28rem; }
-  [data-template-indicator] { position: relative; display: inline-grid; place-items: center;
-                              width: .85rem; height: .85rem; color: #657a9b; cursor: help;
-                              flex: 0 0 auto; }
-  [data-template-indicator] svg { width: .75rem; height: .75rem; display: block; }
-  [data-template-indicator] small { position: absolute; z-index: 4; left: 50%; bottom: 1.25rem;
-                                    transform: translateX(-50%); background: #243b64; color: white;
-                                    border-radius: 4px; padding: .22rem .38rem; white-space: nowrap;
-                                    font-size: .7rem; font-weight: 500; opacity: 0; pointer-events: none; }
-  [data-template-indicator]:hover small, [data-template-indicator]:focus small { opacity: 1; }
+  #workspace-context, #value-status { display: block; color: #526177; margin: .4rem 0; }
+  [data-inline-field] { position: relative; margin: .75rem 0; }
+  [data-inline-field] > label > strong { display: block; padding-right: 2rem; }
+  [data-simplified-control] { border: 0; margin: 0; padding: 0; }
+  [data-simplified-control] > summary { position: absolute; right: 0; top: 0; display: grid;
+    place-items: center; width: 1.6rem; height: 1.6rem; color: #657a9b; border-radius: 4px;
+    list-style: none; }
+  [data-simplified-control] > summary::-webkit-details-marker { display: none; }
+  [data-simplified-control] > summary:hover { background: #eef2f7; }
+  [data-simplified-control] > summary:hover::after, [data-simplified-control] > summary:focus-visible::after {
+    content: attr(data-tooltip); position: absolute; z-index: 5; right: 0; top: 1.7rem;
+    width: max-content; max-width: 15rem; padding: .2rem .4rem; border-radius: 4px;
+    background: #243b64; color: white; font-size: .72rem; font-weight: 400;
+  }
+  [data-simplified-control] svg { width: .85rem; height: .85rem; fill: none; stroke: currentColor; }
+  [data-simplified-control][data-included="true"] svg { fill: currentColor; }
+  [data-simplified-control] > div { padding: .5rem .6rem; margin-top: .4rem; border-left: 2px solid #9fb0c5;
+    background: #f5f7fa; }
+  [data-simplified-control] label { font-size: .82rem; }
+  [data-inline-help] { display: block; width: 100%; }
+  [data-simplified-control] small { display: block; font-size: .75rem; color: #526177; }
+  [data-simplified-control] button { margin-top: .3rem; padding: .15rem .4rem; font-size: .75rem; }
+  #modeling-create-panel { border: 1px solid #9eabbc; border-radius: 7px; padding: .8rem;
+    box-sizing: border-box; width: 100%; }
+  #modeling-create-panel h3 { margin: 0; }
+  #modeling-create-panel input:not([type="checkbox"]), #modeling-create-panel select { width: 100%; }
+  #modeling-create-panel footer { display: flex; gap: .4rem; margin-top: .8rem; }
+  [data-source-head], [data-source-row] { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr;
+    gap: .7rem; padding: .4rem 2rem .4rem .3rem; font-size: .82rem; }
+  [data-source-head] { font-weight: 600; border-bottom: 1px solid #c9d1dc; }
+  #modeling-sources [data-inline-field] { border-bottom: 1px solid #e1e5ea; padding-bottom: .6rem; }
+  #modeling-sources [data-simplified-control] > summary { top: .35rem; }
+  #modeling-sources [data-simplified-control] > div { max-width: 30rem; }
+  #modeling-sources small { display: block; color: #526177; }
   #modeling-delete-result { border: 1px solid #b9d8b9; background: #f4faf4; border-radius: 6px;
                             padding: .5rem .65rem; margin: .7rem 0; }
   #delete-confirmation-backdrop { position: absolute; z-index: 6; inset: 0; background: rgba(20, 30, 45, .48);
@@ -95,12 +166,23 @@
   #delete-object-confirmation h3 { margin: 0 0 .35rem; }
   #delete-object-confirmation p { margin: .35rem 0; }
   #delete-object-confirmation footer { display: flex; justify-content: flex-end; gap: .4rem; margin-top: .8rem; }
-  [data-template-delete-warning] { background: #fff5e6; border: 1px solid #d4a75b;
+  [data-simplified-delete-warning] { background: #fff5e6; border: 1px solid #d4a75b;
                                    border-radius: 6px; padding: .55rem .65rem; margin-top: .75rem; }
-  #construction-actions, #consumption-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
-  [data-template-field] { border-top: 1px solid #e1e5ea; padding: .45rem 0; }
-  [data-template-field]:first-of-type { border-top: 0; }
-  [data-template-field] label { margin: .2rem 0; }
+  #configuration-actions, #simplified-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+  #simplified-heading { display: flex; justify-content: space-between; align-items: center;
+                         flex-wrap: wrap; gap: .5rem; margin-bottom: .65rem; }
+  #simplified-heading h3 { margin: 0; }
+  #simplified-identity { display: grid; grid-template-columns: minmax(12rem, 1fr) 2fr; gap: .7rem; }
+  #simplified-identity input, #simplified-identity textarea { display: block; width: 100%; }
+  [data-authoring-controls] { margin: .4rem 0; border-top: 1px solid #d8dfe8; padding-top: .3rem; }
+  [data-authoring-controls] label { font-size: .8rem; }
+  [data-authoring-controls] input[type="checkbox"] { width: auto; }
+  #simplified-screen[data-editing="true"] [data-simplified-field] { border: 1px solid #d8dfe8;
+    border-radius: 5px; padding: .55rem; }
+  #simplified-screen[data-editing="true"] [data-simplified-field][data-included="false"] {
+    border-style: dashed; background: #fafbfc;
+  }
+  #simplified-screen[data-editing="true"] [data-field-provenance] { display: none; }
   [data-help-input] { width: 100%; font-size: .85rem; }
   [data-field-help] { display: block; color: #637083; font-size: .78rem; font-weight: 400;
                       line-height: 1.35; margin: .08rem 0 .3rem; text-transform: lowercase; }
@@ -111,9 +193,11 @@
   [data-field-provenance] label { font-size: .8rem; }
   [data-field-provenance] input, [data-field-provenance] select,
   [data-field-provenance] textarea { display: block; width: 100%; }
-  #consumption-workspace { display: grid; grid-template-columns: minmax(0, 1fr); }
-  #consumption-workspace[data-panel-open="true"] { grid-template-columns: minmax(0, 1fr) minmax(19rem, 44%); }
-  #consumption-layout { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr);
+  #simplified-workspace { display: grid; grid-template-columns: minmax(0, 1fr);
+                          container-type: inline-size; }
+  #simplified-workspace[data-panel-open="true"] { grid-template-columns: minmax(0, 1fr) minmax(19rem, 32%); }
+  #simplified-body { container-type: inline-size; container-name: simplified-workspace; min-width: 0; }
+  #simplified-layout { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr);
                         gap: .7rem; align-items: start; }
   #object-outline { border: 1px solid #ccd4df; border-radius: 6px; background: #fafbfc;
                     padding: .55rem; position: sticky; top: .4rem; }
@@ -127,64 +211,102 @@
   }
   #object-jump-control { display: none; font-size: .8rem; }
   #object-jump-control select { display: block; width: 100%; }
-  #template-fields { max-height: 34rem; overflow-y: auto; scroll-behavior: smooth;
+  #simplified-fields { container-type: inline-size; container-name: field-pane;
+                     max-height: 34rem; overflow-y: auto; scroll-behavior: smooth;
                      padding: 0 .25rem .5rem 0; }
-  #template-fields > header { position: sticky; top: 0; z-index: 2; display: flex;
-                              justify-content: flex-end; gap: .35rem; background: white;
+  #simplified-fields > header { position: sticky; top: 0; z-index: 2; display: flex;
+                              justify-content: flex-end; flex-wrap: wrap; align-items: center;
+                              gap: .35rem; background: white;
                               border-bottom: 1px solid #e1e5ea; padding: 0 0 .4rem; }
-  #template-fields > header button { padding: .25rem .45rem; font-size: .76rem; }
+  #simplified-fields > header button { padding: .25rem .45rem; font-size: .76rem; }
+  #selected-object-filter { margin-right: auto; font-size: .78rem; }
+  #selected-object-filter input { vertical-align: middle; }
+  #filtered-objects-empty { padding: .65rem; font-size: .85rem; }
+  #filtered-objects-empty p { margin: 0 0 .5rem; }
   [data-object-type] { margin: .55rem 0; padding: .45rem .55rem; border-color: #aeb9c7;
                        background: #f7f9fc; }
   [data-object-type] > summary { color: #243b64; }
   [data-object-type] > div { padding: .1rem .15rem .15rem; }
-  [data-template-object] { margin: .45rem 0; background: white; }
-  [data-template-object] > summary { font-size: .9rem; }
-  [data-template-object] > summary small { color: #69768a; font-weight: 400; margin-left: .35rem; }
-  [data-object-fields] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  [data-simplified-object] { margin: .45rem 0; background: white; }
+  [data-simplified-object] > summary { font-size: .9rem; }
+  [data-simplified-object] > summary small { color: #69768a; font-weight: 400; margin-left: .35rem; }
+  [data-object-fields] { display: grid; grid-template-columns: minmax(0, 1fr);
                          gap: .55rem .7rem; padding: .45rem .1rem .15rem; }
   [data-object-fields] [data-simplified-field] { min-width: 0; margin: 0; }
-  #consumption-footer { position: sticky; bottom: 0; z-index: 3; background: white;
+  [data-object-fields] input, [data-object-fields] select { max-width: 100%; }
+  [data-object-fields] > section > label > input,
+  [data-object-fields] > section > label > select { width: 100%; }
+  #simplified-footer { position: sticky; bottom: 0; z-index: 3; background: white;
                         border-top: 1px solid #c9d1dc; padding-top: .55rem; }
-  #consumption-footer #results-summary { margin: 0 0 .5rem; }
-  #consumption-workspace[data-panel-open="true"] #consumption-layout { grid-template-columns: minmax(0, 1fr); }
-  #consumption-workspace[data-panel-open="true"] #object-outline { display: none; }
-  #consumption-workspace[data-panel-open="true"] [data-object-fields] { grid-template-columns: 1fr; }
   [data-timeseries-value] { display: block; min-height: 2rem; border: 1px solid #9aa6b5;
                             border-radius: 3px; background: white; padding: .35rem .45rem;
                             line-height: 1.3; font-size: .85rem; }
   [data-timeseries-field] > button { margin-top: .35rem; padding: .3rem .55rem; }
-  #timeseries-panel { border-left: 1px solid #9eabbc; background: white; min-width: 0; }
+  #timeseries-panel { position: relative; border-left: 1px solid #9eabbc; background: white; min-width: 0; }
   #timeseries-panel > header { display: flex; justify-content: space-between; align-items: center;
                                gap: .6rem; background: #eef2f7; border-bottom: 1px solid #c9d1dc;
                                padding: .65rem .75rem; }
   #timeseries-panel > div { padding: .75rem; }
   #timeseries-panel select { width: 100%; }
   #timeseries-panel fieldset { background: #fafafa; }
-  #timeseries-panel table { font-size: .78rem; margin: .45rem 0; }
-  #timeseries-panel table input { width: 4.5rem; }
+  #timeseries-panel table { table-layout: fixed; font-size: .78rem; margin: .45rem 0; }
+  #timeseries-panel table th, #timeseries-panel table td { padding: .2rem; }
+  #timeseries-panel table input { width: 100%; padding: .25rem; }
+  #timeseries-panel table button { padding: .25rem .15rem; font-size: .7rem; }
   #timeseries-panel footer { display: flex; justify-content: flex-end; gap: .4rem; margin-top: .8rem; }
-  [data-preview] { border: 1px solid #ccd4df; border-radius: 6px; background: #fbfcfe;
-                   padding: .5rem; margin-top: .65rem; }
+  [data-preview] { position: absolute; right: calc(100% + .7rem); top: .75rem; z-index: 6;
+                   box-sizing: border-box; width: min(42rem, calc(100cqw - 100% - 1.4rem));
+                   border: 1px solid #ccd4df; border-radius: 6px; background: #fbfcfe;
+                   padding: .85rem; box-shadow: 0 .3rem 1rem #11192826; }
   [data-preview] p { margin: 0 0 .35rem; font-size: .82rem; }
-  [data-preview] svg { width: 100%; height: 5rem; display: block; }
-  #mode-banner { background: #eef4ff; border: 1px solid #aec4ec; border-radius: 6px;
-                 padding: .55rem .7rem; margin-bottom: .8rem; }
+  [data-preview] svg { width: 100%; height: 18rem; display: block; }
   #results-summary { background: #f4faf4; border: 1px solid #b9d8b9; border-radius: 6px;
                      padding: .6rem .75rem; margin: .8rem 0; }
-  [data-same-access] { background: #fff5e6; border: 1px solid #d4a75b; border-radius: 6px;
-                       padding: .55rem .7rem; margin: .75rem 0; }
-  @media (max-width: 44rem) {
-    #consumption-layout { grid-template-columns: 1fr; }
+  @container field-pane (min-width: 29rem) {
+    [data-object-fields] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @container field-pane (min-width: 45rem) {
+    [data-object-fields] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @container simplified-workspace (max-width: 38rem) {
+    #simplified-layout { grid-template-columns: 1fr; }
     #object-outline { position: static; }
     #object-outline nav { display: none; }
     #object-jump-control { display: block; }
-    [data-object-fields] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 61.99rem) {
+    #simplified-workspace[data-panel-open="true"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    #app-navbar, #workspace-tabs, #desktop-toolbar-actions { display: none; }
+    #mobile-model-picker, #mobile-toolbar-menu { display: block; }
+    #model-toolbar { gap: .5rem; padding: .6rem; }
+    #mobile-model-picker > summary { border: 1px solid #d1d5db; border-radius: 2rem; font-size: .72rem; }
+    #mobile-model-picker [data-menu-items] { right: auto; left: 0; }
+    #mobile-toolbar-menu { margin-left: auto; order: 6; }
+    #mobile-toolbar-menu > summary { font-size: 1.2rem; }
+    #mobile-toolbar-menu > summary::after { content: none; }
+    #mobile-toolbar-menu > [data-menu-items] { width: min(17rem, calc(100vw - 5rem)); }
+    #mobile-toolbar-menu [data-mobile-only] { display: block; }
+    #mobile-toolbar-menu [data-toolbar-action], #mobile-toolbar-menu [data-toolbar-menu] > summary {
+      display: flex; width: 100%; align-items: center; gap: .5rem; padding: .45rem; }
+    #mobile-toolbar-menu [data-toolbar-menu] [data-menu-items] { position: static; border: 0; box-shadow: none;
+      min-width: 0; padding-left: 1.2rem; }
+    #mobile-toolbar-menu [data-show-results] { margin: .35rem 0; width: 100%;
+      background: linear-gradient(120deg, #1b9891, #2d4675); color: white; }
+    #mock-system-name { max-width: 11rem; font-size: .85rem; }
+    #edge-modeling-control { order: 4; }
+    #mode-destination { order: 5; }
+    #app-shell[data-comparing="true"] #workspace-tabs { display: flex; padding: .5rem .25rem 0; }
+    #app-shell[data-comparing="true"] #workspace-tabs [data-workspace-model] { width: auto; font-size: .7rem; padding: .5rem; }
+    #app-shell[data-comparing="true"] #workspace-tabs > [data-open-comparison] { display: none; }
   }
   @media (max-width: 36rem) {
+    [data-source-head] { display: none; }
+    [data-source-row] { grid-template-columns: 1fr 1fr; }
     #model-canvas, #mode-flow, #modeling-workspace { grid-template-columns: 1fr; }
-    #consumption-workspace[data-panel-open="true"] { grid-template-columns: 1fr; }
-    [data-object-fields] { grid-template-columns: 1fr; }
+    #simplified-workspace[data-panel-open="true"] { grid-template-columns: 1fr; }
+    #simplified-identity { grid-template-columns: 1fr; }
     #timeseries-panel { border-left: 0; border-top: 1px solid #9eabbc; }
+    [data-preview] { position: static; width: 100%; margin-top: .65rem; box-shadow: none; }
     #mode-flow > span { transform: rotate(90deg); text-align: center; }
   }
 </style>
@@ -192,7 +314,7 @@
 <body>
 
 <h1>Simplified inputs</h1>
-<p class="status">Status: Spec — under review · 2026-09-14</p>
+<p class="status">Status: Spec — under review · 2026-09-21</p>
 
 <section>
   <h2>1. Problem and audience</h2>
@@ -200,26 +322,41 @@
   interdependent objects and assumptions. A colleague who only needs to adapt a few business
   variables must currently enter the same full editing experience, understand which inputs are safe
   to change, and avoid disturbing the expert's underlying structure.</p>
-  <p>This feature lets the expert turn a complete modeling into a <strong>simplified template</strong>:
-  a self-contained JSON file that exposes a deliberately chosen subset of inputs. Opening the file
-  leads with those inputs, so another person can adapt the modeling without first learning its full
-  construction. The same JSON also retains the complete modeling and template definition. Every file
-  holder can move between normal modeling, template construction, and template consumption;
+  <p>This feature adds a <strong>simplified-input definition</strong> to a complete modeling,
+  exposing a deliberately chosen subset of inputs. The definition travels with the modeling in the
+  same self-contained JSON file. Opening a file with selected inputs leads with those inputs, so
+  another person can adapt the modeling without first learning its full construction. Every file
+  holder can move between Modeling, Simplified inputs, and simplified-input configuration;
   simplification guides the user but does not conceal, secure, or create ownership over the
   underlying data.</p>
+  <p>Every modeling in the workspace has one simplified-input definition, initially empty. Experts
+  can populate it while creating or editing objects and while reviewing individual inputs in
+  Results → Sources, without interrupting their modeling workflow. Reference and comparison
+  modelings each own their selection and guidance.</p>
+  <p>The definition stores field membership and presentation metadata only. Current values, source,
+  confidence, and comment belong to the e-footprint modeling part of the JSON. Selecting an input
+  never captures its initial value or creates a default to restore later. To preserve a baseline,
+  save the JSON or use the comparison feature.</p>
   <table>
     <tr><th>Persona</th><th>Need</th></tr>
     <tr><td>Ecodesign expert / consultant</td><td>Encode a robust, explainable modeling once, decide
     which assumptions another person should adapt, and distribute the result as a file.</td></tr>
-    <tr><td>Product owner, engineer, or client consuming the template</td><td>Answer a small, relevant
+    <tr><td>Product owner, engineer, or client using Simplified inputs</td><td>Answer a small, relevant
     set of questions and see the resulting footprint without navigating or accidentally restructuring
     the expert modeling.</td></tr>
     <tr><td>Any file holder acting in either role</td><td>Move between the guided experience, normal
-    modeling, and template construction without needing a different file or additional permission.</td></tr>
+    modeling, and simplified-input configuration without needing a different file or additional permission.</td></tr>
   </table>
-  <p>“Template maker” and “consumer” describe what someone is doing at a given moment, not different
-  account roles. A consumer may inspect or revise the template; a maker may use the consumption view
-  to test it. The only default is the opening mode.</p>
+  <p>“Modeling author” and “user” describe activities, not different account roles. Anyone can configure
+  the simplified inputs or use them to adapt values. JSON-opening defaults depend on whether inputs
+  are selected, not on who opens the file.</p>
+  <p><strong>Terminology:</strong> Simplified inputs is a configurable view of an existing modeling,
+  not a template used to create another one. Configure opens the Configure simplified inputs view,
+  where the author selects fields and writes help; editing values happens in Simplified inputs or
+  Modeling. A JSON file carries a modeling with simplified inputs, not a separate template.</p>
+  <p>Separately, the ready-made modelings currently called “templates” in the interface and library
+  will be renamed <strong>examples</strong> in a dedicated ride-along refactor. An example is a complete
+  modeling to learn from or start from; any modeling, including an example, can have simplified inputs.</p>
   <p><strong>Why now:</strong> e-footprint already supports deep modeling, explainable results, and
   portable JSON round-trips. A simplified-input layer makes that expert work reusable by the
   interface's primary non-technical audience and directly serves its principle of “no one left
@@ -230,72 +367,141 @@
   <h2>2. Success criteria</h2>
   <p>Each criterion is user-observable and testable.</p>
   <ul>
-    <li><strong>Create from real work:</strong> from normal modeling mode, any user can enter template
-    construction mode and choose a subset of the modeling's editable inputs to expose.</li>
+    <li><strong>Build the selection while modeling:</strong> every modeling always has a simplified-input
+    definition, possibly empty. An expert can include inputs and write optional help in creation
+    panels, editing panels, and individual rows in Results → Sources, or review the whole selection
+    through Configure. Including the first input needs no separate creation or naming step.</li>
+    <li><strong>Empty is a valid state:</strong> removing the last selected input or choosing Clear
+    simplified inputs empties the selection; it does not delete a separate entity or change
+    any modeling values. The empty Simplified inputs view offers Choose inputs. Retained guidance
+    alone does not make the selection non-empty.</li>
+    <li><strong>Confirm clearing simplified inputs:</strong> Clear simplified inputs opens a native
+    browser confirmation warning that it removes all selected inputs and all custom per-field help,
+    including help retained on previously deselected inputs. The modeling's values, sources, confidence,
+    and comments remain unchanged. Confirming clears the draft selection and per-field help only;
+    the view's title and general guidance remain. Save and return applies the change; cancelling the
+    confirmation changes nothing, and cancelling configuration restores the saved selection and help.</li>
     <li><strong>Portable handoff:</strong> the expert can export one self-contained JSON file carrying
     the complete modeling and its simplified-input definition. No account, server-side library, or
     separate companion file is required to use it.</li>
-    <li><strong>Predictable opening mode:</strong> a normal modeling JSON opens in modeling mode. A
-    JSON containing a simplified-template definition opens in template consumption mode by default,
-    regardless of who created or opened it.</li>
-    <li><strong>Only the intended choices:</strong> in template consumption mode, only the inputs
-    selected in template construction mode are editable. Hidden inputs and structural actions cannot
+    <li><strong>JSON-only opening defaults:</strong> when a modeling is loaded from JSON, at least one
+    selected input opens Simplified inputs; zero selected inputs opens Modeling. This rule applies
+    independently to each modeling in a workspace file, initially showing the active modeling.
+    Adding or removing selected inputs never automatically navigates away from the current view.</li>
+    <li><strong>Independent workspace context:</strong> reference and comparison modelings each retain
+    their own selection, help text, values, and last view. Switching between them restores that view
+    (including configuration), scroll position, and expanded sections instead of reapplying
+    JSON-opening defaults. Preserved drafts resume intact; navigation that would discard edits follows
+    the existing save/discard safeguards. Duplicating a modeling copies
+    its selection and guidance, after which both copies evolve independently.</li>
+    <li><strong>One source of values:</strong> Simplified inputs reads and edits the modeling's actual
+    values. The simplified-input configuration has no initial-value snapshot, default values, or reset-to-defaults
+    action. Removing and re-including an input preserves its current modeling value; JSON saves and
+    comparison modelings provide baselines when needed.</li>
+    <li><strong>Only the intended choices:</strong> in Simplified inputs, only the inputs
+    included in its definition are editable. Hidden inputs and structural actions cannot
     be changed accidentally through that mode.</li>
     <li><strong>Familiar input context:</strong> Simplified inputs identifies every exposed field
-    using its existing field label together with the owning object's existing type and name; template
-    makers do not need to invent a separate category or labeling system.</li>
-    <li><strong>Scales to many objects:</strong> Simplified inputs provides a left-hand outline grouped
+    using its existing field label together with the owning object's existing type and name; modeling
+    authors do not need to invent a separate category or labeling system.</li>
+    <li><strong>Scales to many objects:</strong> Simplified inputs provides a left-hand Navigation section grouped
     by existing object type and a single scrollable main pane with collapsible object-type and object
-    levels. Selecting an object in the outline expands its ancestors and brings it into view. Within
+    levels. Selecting an object in Navigation expands its ancestors and brings it into view. Within
     each object only, exposed fields use up to three columns when space permits, falling back to two
     or one without mixing fields from different objects.</li>
-    <li><strong>Efficient navigation:</strong> consumers can expand or collapse all modeled sections,
+    <li><strong>Efficient navigation:</strong> users can expand or collapse all modeled sections,
     see exposed-input counts on object headers, and retain their expansion state while working.
     The first object and any object containing a validation error open automatically.</li>
-    <li><strong>Per-field guidance:</strong> in Template setup, the maker can optionally add custom
-    help text to each exposed field. In Simplified inputs, non-empty help is displayed in lowercase
+    <li><strong>Focus configuration on selected objects:</strong> Configure simplified inputs offers
+    Only objects with selected inputs, off by default. Enabling it filters both Navigation and the
+    main pane to objects with at least one selected input in the current draft; empty object types
+    are hidden too. All eligible fields within a matching object remain available. Deselecting its
+    last input removes that object from the filtered view, without deleting its help or other data.
+    An empty result offers Show all objects to turn the filter off. Filtering never changes membership,
+    help, or values. The filter and expansion state are remembered per modeling when navigating;
+    opening a JSON starts with the filter off.</li>
+    <li><strong>Per-field guidance:</strong> in configuration or any inline simplified-input disclosure,
+    the author can optionally add custom help text. In Simplified inputs, non-empty help is displayed in lowercase
     immediately below the field name; an empty help value leaves no placeholder or gap.</li>
-    <li><strong>Editable source and comment:</strong> for every exposed input, a consumer can view and
+    <li><strong>Editable source and comment:</strong> for every exposed input, a user can view and
     edit the source, confidence, and comment through the same compact disclosure below its value,
     including for timeseries inputs.</li>
-    <li><strong>Adapt and calculate:</strong> a consumer can change the exposed inputs using their
+    <li><strong>Adapt and calculate:</strong> a user can change the exposed inputs using their
     normal input types, receives the same validation guarantees as full editing, and can view results
     recalculated from the adapted values.</li>
     <li><strong>Focused timeseries editing:</strong> an exposed timeseries uses the same field layout
     as an ordinary input within its owning-object container. In place of a standard value control it
     shows a read-only string preview and a small Edit timeseries action. That action opens a
-    field-only side panel containing the compatible strategy selector, the selected strategy's
-    complete editor, and its visual preview; only one timeseries is edited at a time.</li>
-    <li><strong>Timeseries strategies remain available:</strong> a consumer can switch among the
+    field-only side panel containing the compatible strategy selector and the selected strategy's
+    complete editor. On tablet and desktop, its visual preview appears immediately to the left of
+    the side panel, over the workspace, as in the existing timeseries editor—not below the form.
+    On phones the preview returns to the panel's form flow. Only one timeseries and its preview are
+    active at a time; switching strategy replaces the preview, and closing the editor closes both.</li>
+    <li><strong>Timeseries strategies remain available:</strong> a user can switch among the
     compatible timeseries strategies available in normal editing. Saving the panel persists the
     selected strategy and authored inputs, closes the panel, and refreshes the string preview.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
     legitimate calculated consequences, but does not rewrite unrelated hidden assumptions or the
     simplified-input definition.</li>
-    <li><strong>Three explicit modes:</strong> a visible, consistently placed control lets any file
-    holder move among template consumption (“Simplified inputs”), normal modeling (“Modeling”), and
-    template construction (“Template setup”) without exporting or reopening the JSON.</li>
-    <li><strong>Depth remains available:</strong> switching to modeling mode makes every assumption
-    and structural action available, with clear copy explaining that the simplified guardrails no
-    longer apply. This is a usability boundary, not an access-control mechanism.</li>
-    <li><strong>Template-aware full editing:</strong> in Modeling's object-editing panel, every field
-    currently exposed through Simplified inputs carries a discreet, non-interactive visual marker.
-    Hovering or focusing the marker reveals “Included in Simplified inputs”; fields not exposed by
-    the template do not carry it.</li>
+    <li><strong>Clear navigation:</strong> in Modeling, a Simplified inputs button sits beside the
+    edge-modeling toggle. Simplified inputs provides a Modeling button to return. The edge-modeling
+    toggle appears only in Modeling, never in Simplified inputs or its configuration view.
+    Within Simplified inputs, Configure opens Configure simplified inputs; Save and return or Cancel
+    returns to Simplified inputs. These transitions use the same loaded JSON.</li>
+    <li><strong>One familiar application shell:</strong> the global navbar, workspace tabs, active
+    modeling's toolbar, and normal file controls remain available in Modeling, Simplified inputs,
+    and configuration. The existing Export affordance exports this modeling or both modelings;
+    there is no separate adapted-JSON download. Show results leads to the normal Results and Sources
+    tabs without leaving the current modeling view. Compact layouts retain the usual model switcher
+    and toolbar menu.</li>
+    <li><strong>Familiar configuration:</strong> configuration and Simplified inputs share Navigation,
+    two disclosure levels, field order, and responsive grid of up to three columns per object.
+    With the filter off, configuration reveals every object with eligible inputs in Navigation and the main pane, including
+    objects with no fields currently exposed. Within each object, all eligible inputs appear with
+    inclusion checkboxes and optional help-text controls. Objects and inputs added in Modeling are
+    available on the next entry into configuration, unchecked unless included during creation.
+    Current values are shown for context; Simplified inputs shows only the saved selection. Saving applies
+    membership and help changes together; Cancel leaves the saved configuration intact.</li>
+    <li><strong>Depth remains available:</strong> switching to Modeling makes every assumption and
+    structural action available. Mode labels and navigation communicate the current view without
+    permanent instructional or permission banners. Autosave explanations remain inside expanded
+    simplified-input controls; contextual warnings appear only when relevant, such as on deletion.
+    This is a usability boundary, not an access-control mechanism.</li>
+    <li><strong>Discreet inline authoring:</strong> every eligible input in creation/editing panels
+    and individual-input Sources rows has a small clickable bookmark: outlined when excluded,
+    filled when included. Hover/focus explains its state. Clicking only opens a compact inline
+    disclosure with Include in Simplified inputs and optional help text; it never toggles membership
+    by itself. At most one disclosure is open per surface, keeping the form or table readable.</li>
+    <li><strong>Immediate changes for existing inputs:</strong> inclusion changes save immediately;
+    help text saves when leaving its field. Both are independent of the object's Save button and
+    do not submit unsaved modeling values. A discreet status distinguishes saving, saved, and failed
+    changes; a failed save remains retryable and must not claim success. Cancelling value edits does
+    not undo saved simplified-input settings. Individually deselecting an input, inline or in the
+    configuration overview, retains its help for re-inclusion, unlike Clear simplified inputs. An Undo
+    action makes an accidental inline membership change recoverable.</li>
+    <li><strong>Creation is provisional:</strong> for an object not yet created, membership and help
+    remain part of the creation draft, visibly labeled Included when this object is created. They
+    are committed only on successful creation; cancellation or failed validation creates no simplified-input
+    references. A failed creation keeps the draft available to correct.</li>
     <li><strong>Warn before removing exposed fields:</strong> when an object being deleted contains
     fields exposed through Simplified inputs, its existing deletion confirmation and unchanged
     actions are extended with a warning that identifies the affected fields and explains that they
-    will be removed from the template. Confirming removes the object and those template references
+    will be removed from Simplified inputs. Confirming removes the object and those simplified-input references
     together, leaving no stale selections.</li>
-    <li><strong>Resume template work:</strong> switching to template construction mode lets the same
-    user edit which inputs the template exposes and export an updated templated JSON without needing
-    the original pre-template file.</li>
+    <li><strong>Resume configuration:</strong> choosing Configure in Simplified inputs lets the same
+    user change the selection and guidance, then export an updated modeling with simplified inputs
+    without needing an earlier file.</li>
     <li><strong>Faithful round-trip:</strong> repeated export and reopen cycles preserve the complete
-    modeling, current adapted values, simplified-input choices, per-field help text, and consumer
-    edits to source and comment. A file that still contains a template continues to open in template
-    consumption mode by default.</li>
-    <li><strong>Safe failure:</strong> an invalid template definition or unreadable JSON is rejected
+    modeling, current adapted values, simplified-input choices, per-field help text, and user
+    edits to source and comment in the modeling itself. Each modeling with a non-empty selection
+    opens in Simplified inputs when loaded from JSON; an empty selection opens in Modeling.</li>
+    <li><strong>Safe failure:</strong> an invalid simplified-input configuration or unreadable JSON is rejected
     with an actionable explanation and does not replace the modeling already open in the session.</li>
+    <li><strong>Consistent examples terminology:</strong> ready-made modelings are called Examples
+    in the catalog, Open examples in navigation, and example modelings in documentation. Onboarding
+    offers Start from an example or Start from scratch. Introductory examples and examples accompanying
+    how-to guides remain loadable and editable with the same contents and guide associations in both
+    the interface and library; the rename does not change their modeling behavior.</li>
   </ul>
 </section>
 
@@ -305,128 +511,220 @@
   migration mechanics belong in <code>plan.html</code>.</blockquote>
   <details open><summary>In scope</summary>
     <ul>
-      <li>Entering template construction mode from a normal modeling and creating a simplified
-      template from it.</li>
-      <li>Selecting which existing modeling inputs are editable in template consumption mode.</li>
-      <li>A small template identity for orientation: a name and an explanation of what the consumer
+      <li>One always-associated, possibly empty simplified-input definition for each workspace modeling.</li>
+      <li>Inline membership and help-text authoring in creation/editing panels and Results → Sources,
+      plus a dedicated overview editor. Sources already lists individual sourced inputs.</li>
+      <li>Selecting which existing modeling inputs are editable in Simplified inputs.</li>
+      <li>A title and general guidance for orientation: an explanation of what the user
       is adapting.</li>
-      <li>Three visibly distinct modes over the same in-session modeling: normal modeling, template
-      construction, and template consumption.</li>
-      <li>A dedicated template consumption mode that groups exposed inputs into a focused editing
+      <li>Two main destinations over the same in-session modeling: Modeling and Simplified inputs,
+      with configuration entered from within Simplified inputs.</li>
+      <li>A dedicated Simplified inputs view that groups exposed inputs into a focused editing
       surface, labels the current mode, validates changes, and keeps results available.</li>
       <li>Organizing the focused surface with the existing modeling hierarchy: each input keeps its
       normal field label and is shown under its owning object's type and name.</li>
-      <li>A scalable consumption workspace with a left object outline, one main scrolling pane, two
-      collapsible hierarchy levels, exposed-input counts, outline-to-object navigation, and global
-      expand/collapse controls. On narrower layouts the outline becomes a compact object selector.</li>
+      <li>A shared configuration and Simplified inputs workspace with a left Navigation section, one main scrolling pane, two
+      collapsible hierarchy levels, exposed-input counts, object navigation, and global
+      expand/collapse controls. On narrower layouts Navigation provides a compact object selector.</li>
+      <li>An optional configuration-only filter, Only objects with selected inputs, driven by the
+      draft selection. Navigation and the main pane stay synchronized; matching objects retain all
+      their eligible fields. An empty filtered view offers Show all objects. Filtering is view state,
+      not a mutation of simplified-input settings or modeling values.</li>
       <li>A responsive grid of up to three field columns within each object. Width changes, including
       opening the timeseries side panel, may reflow fields inside that object but never interleave
       fields from different objects.</li>
-      <li>Optional custom help text for every exposed field, authored in Template setup and shown in
+      <li>Inclusion controls and help-text editing alongside current-value previews in the same
+      compact field layout. With its filter off, configuration shows all objects with eligible inputs and all their eligible
+      fields, including objects and inputs absent from the selection or newly added in Modeling.
+      These remain unselected unless included during creation; Simplified inputs shows only saved exposed fields and hides
+      objects with no exposed fields.</li>
+      <li>Optional custom help text for every exposed field, authored in the overview or inline and shown in
       lowercase directly below that field's existing label in Simplified inputs.</li>
       <li>Timeseries exposed as one composite field inside its normal owning-object group, using the
       same label, help, and Source and comment disclosure as ordinary inputs. A read-only string
       preview and Edit timeseries action replace the ordinary value control; a dedicated side panel
-      contains the strategy selector, full editor, validation, and visual preview.</li>
+      contains the strategy selector, full editor, and validation. The active visual preview sits to
+      the left of the side panel on tablet/desktop, matching the existing editor; on phones it sits
+      in the form flow. This applies to hourly, weekly, and other compatible strategies.</li>
       <li>Full control of the exposed timeseries, including changing to any compatible editable
       strategy, while keeping the complexity of only one timeseries open at a time.</li>
-      <li>A consistent mode control for moving among all three modes without changing files.</li>
+      <li>A Simplified inputs button beside the edge-modeling toggle in Modeling, and a Modeling
+      return button in Simplified inputs. No edge-modeling toggle in Simplified inputs; Configure
+      and Save and return / Cancel manage configuration within that surface.</li>
+      <li>Clear simplified inputs removes the entire selection and all per-field help after browser
+      confirmation, including help on deselected fields. The overview's Save and return / Cancel
+      semantics still apply; modeling data, the title, and general guidance are unchanged.</li>
       <li>A JSON round-trip containing both the complete modeling and the simplified-input definition.</li>
-      <li>Opening normal JSON in modeling mode and templated JSON in template consumption mode by
-      default.</li>
-      <li>Equal access to all three modes for every holder of a templated JSON; no maker/consumer
-      permission distinction.</li>
-      <li>A discreet, accessible marker beside template-exposed fields in Modeling's edit panel,
-      with its explanatory text available on hover or keyboard focus.</li>
+      <li>Reusing the existing navbar, workspace tabs, modeling toolbar, normal Export menu, and
+      Results/Sources navigation in the simplified experience; no special simplified-input download.</li>
+      <li>Choosing the initial view only on JSON load: empty selection → Modeling; non-empty selection
+      → Simplified inputs. Workspace switching restores each modeling's last view and working context.</li>
+      <li>Independent reference/comparison definitions, duplication, and per-model or workspace JSON
+      round-trips. Neither definition contains initial or current input values.</li>
+      <li>Equal access to Modeling, Simplified inputs, and configuration for every holder of a
+      modeling JSON; no author/user permission distinction.</li>
+      <li>Discreet, keyboard-accessible outlined/filled bookmarks that disclose membership and help
+      controls on demand, with immediate persistence for existing inputs and provisional creation settings.</li>
       <li>An additional warning inside the existing object-deletion confirmation when the object
-      contains exposed fields, followed by atomic removal of the object and its template references.</li>
+      contains exposed fields, followed by atomic removal of the object and its simplified-input references.</li>
       <li>Showing the current source, confidence, and comment for every exposed input and letting the
-      consumer edit them in Simplified inputs without separately exposing those metadata fields in
-      Template setup. Other context such as units remains available wherever the normal editor
+      user edit them in Simplified inputs without separately exposing those metadata fields in
+      configuration. Other context such as units remains available wherever the normal editor
       supports it.</li>
-      <li>Non-destructive validation and recovery when an uploaded template cannot be used.</li>
+      <li>Non-destructive validation and recovery when an uploaded modeling with simplified inputs cannot be used.</li>
+      <li>A dedicated ride-along refactor renames the existing ready-made modelings from templates to
+      examples throughout both the interface and library, including developer-facing terminology and
+      documentation. This must be its own task in the implementation run, not just a UI-label change;
+      the draft plan records the coordinated scope and acceptance checks.</li>
     </ul>
   </details>
   <details><summary>Out of scope (this iteration)</summary>
     <ul>
       <li>Using hidden inputs as secrets, locking full editing, passwords, roles, digital signatures,
       or author-only permissions.</li>
-      <li>Publishing templates to a hosted catalogue, stable public URLs, discovery, or server-side
+      <li>Publishing user-authored modelings to a hosted catalogue, stable public URLs, discovery, or server-side
       persistence. File exchange remains the sharing mechanism.</li>
       <li>Multi-user collaborative editing of one modeling.</li>
-      <li>Changing or simplifying e-footprint's calculation semantics. The template controls which
+      <li>Changing or simplifying e-footprint's calculation semantics. The simplified-input configuration controls which
       existing inputs are presented; it does not introduce a second modeling engine.</li>
-      <li>Automatically deciding which inputs are important or generating a template from heuristics.</li>
-      <li>Spreadsheet, YAML, XML, or other template formats.</li>
-      <li>Template version history, merging independently adapted copies, or syncing a consumer copy
-      when the expert later changes the source template.</li>
-      <li>Multiple alternative simplified experiences inside one file.</li>
+      <li>Automatically deciding which inputs are important or generating a selection from heuristics.</li>
+      <li>Spreadsheet, YAML, XML, or other simplified-input exchange formats.</li>
+      <li>Configuration version history, merging independently adapted copies, or syncing a user's copy
+      when the expert later changes the source modeling.</li>
+      <li>Multiple alternative simplified-input definitions for the same modeling. A workspace file
+      may contain two modelings, each with its own definition.</li>
+      <li>Configuration-owned initial values, defaults, snapshots, or a reset-to-defaults action.</li>
       <li>A separate read-only full-model exploration mode. A user who wants to inspect the complete
       modeling switches to Modeling, where they are trusted to avoid unintended changes.</li>
       <li>Selecting or locking individual nested parts of a timeseries, such as one profile baseline
       or one weekly time range. The timeseries is exposed as a whole.</li>
-      <li>Custom template categories, custom field labels, or a second naming hierarchy independent
+      <li>Custom simplified-input categories, custom field labels, or a second naming hierarchy independent
       of the modeling's existing object types, object names, and field labels. Per-field help text
       supplements those labels but does not replace them.</li>
-      <li>Adding or removing fields from the simplified template directly in Modeling's edit panel.
-      The marker there is informational; membership and custom help remain managed together in
-      Template setup.</li>
     </ul>
   </details>
 </section>
 
 <section>
   <h2>4. UX / interface</h2>
-  <p>The mockup makes file opening and mode transitions explicit. Try both file types, then use the
-  mode control inside the application frame. “Simplified inputs,” “Modeling,” and “Template setup”
-  are three views over the same loaded JSON—not different files, accounts, or permission levels.
-  Help text entered beside an exposed field in Template setup appears in lowercase directly beneath
-  that field's name after saving the setup. Open “Source and comment” below an ordinary input to edit
+  <p>The application shell below follows the current navbar, workspace tabs, and modeling toolbar.
+  Try JSON with zero or some selected inputs, then switch between Reference modeling and Comparison
+  modeling: each returns to its last view. In Modeling, edit Watch a video or add a web server;
+  use Show results → Sources for the input inventory. Click a bookmark, change inclusion or help, then visit Simplified
+  inputs to see the result. Existing-input simplified-input settings save independently of value edits;
+  creation settings wait until the object is created. “Edge modeling” is available only in Modeling.
+  Export is always the standard toolbar affordance, including while configuring simplified inputs. Compare
+  opens an illustrative assumptions comparison; selecting a modeling tab returns to its saved view.
+  File and support actions are illustrative; the sample-file controls simulate opening JSON.
+  Help → Open examples previews the ride-along rename of the existing catalog.</p>
+  <p>
+  From Simplified inputs, choose Configure to reveal all eligible objects and inputs, with
+  inclusion and help-text controls within the same Navigation section and field grid. “Catalogue API” appears
+  in Navigation with two unchecked inputs, and “Video origin” gains an unchecked Lifetime input.
+  Enable Only objects with selected inputs to hide “Catalogue API” from both Navigation and the main
+  pane. “Video origin” remains, with its selected and unselected fields available. Deselecting the
+  last input of an object removes it from the filtered view; turn the filter off to find it again.
+  Include a field and save to make it available in Simplified inputs. Save and return previews your
+  changes; Cancel restores the saved selection and guidance. An empty selection offers Choose
+  inputs. Clear simplified inputs asks for confirmation before clearing the draft selection and
+  all custom per-field help, including help on deselected fields; Save and return applies it and
+  Cancel restores the saved settings. Individually deselecting a field retains its help.
+  Help text appears in lowercase directly beneath the field's name after
+  saving. Open “Source and comment” below an ordinary input to edit
   its metadata; a timeseries uses the same disclosure, with only its value editor moving into a side
-  panel. In Simplified inputs, use the left outline and both disclosure levels; the three fields under
-  “Watch a video” share columns only with one another. In Modeling, hover or focus the small bookmark markers in the edit panel,
+  panel and its chart preview appearing to the panel's left on tablet/desktop. On phones the chart
+  stays in the form flow. In Simplified inputs, use Navigation and both disclosure levels; the three fields under
+  “Watch a video” share columns only with one another. In Modeling, open a bookmark in the edit panel,
   then try its Delete object action to see how the existing confirmation is extended.</p>
   <div class="mockup">
     <div id="file-entry">
-      <p><strong>Start here: open a JSON file</strong></p>
-      <button type="button" id="open-regular-json">Open normal modeling JSON</button>
-      <button type="button" id="open-templated-json">Open templated JSON</button>
-      <small id="open-result">Templated JSON detected → opened in Simplified inputs by default.</small>
+      <p><strong>Mockup controls (not application UI): open a JSON file</strong></p>
+      <button type="button" id="open-regular-json">Open JSON · 0 selected inputs</button>
+      <button type="button" id="open-simplified-json">Open JSON · 7 selected inputs</button>
+      <button type="button" id="reopen-current-json">Reopen current modeling as JSON</button>
+      <small id="open-result">JSON with selected inputs → opened in Simplified inputs by default.</small>
     </div>
 
     <div id="mode-flow" aria-label="Default opening mode by file contents">
-      <div><strong>Normal modeling JSON</strong>opens in Modeling</div>
+      <div><strong>JSON · zero selected inputs</strong>opens in Modeling</div>
       <span>or</span>
-      <div><strong>Templated JSON</strong>opens in Simplified inputs</div>
+      <div><strong>JSON · at least one selected input</strong>opens in Simplified inputs</div>
     </div>
-    <p id="mode-switch-summary"><strong>Once loaded: Simplified inputs ⇄ Modeling ⇄ Template setup</strong><br>
-    <small>The same mode control stays in the same place in all three views.</small></p>
+    <p id="mode-switch-summary"><strong>Modeling ⇄ Simplified inputs → Configure</strong><br>
+    <small>Edge modeling appears only in Modeling. Save and return / Cancel leads back to Simplified inputs.</small></p>
+    <small id="workspace-context">Each modeling has its own selection and remembered view.</small>
+
+    <div id="app-shell">
+      <nav id="app-navbar" aria-label="Global navigation">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAABQCAYAAAAnSfh8AAAP2ElEQVR4nOyde3BU1R3Hf3c37xeQF0mASEIIibwfgoDAoiAy1JGqVJ0pndqqdKq1rY6OVTBJseqonVadoeMfbbEPH2WwUAULCCwIvng/GkLAAAkkITySEPLYhOT297u7V+7evffu3c0m2Rt+n5mFfdw9e+7Z+z2/x/mdjQ0YhrEsNmAYxrKwgBnGwrCAGcbCsIAZxsKwgBnGwrCAGcbCsIAZxsKwgBnGwrCAGcbCsIAZxsKwgBnGwrCAGcbCsIAZxsKwgBnGwrCAGcbCsIAZxsKwgBnGwrCAGcbCREBosUFaWhySaM/LS4x1uWLbCgujYNcuu/SqIIgQGi5dKS09CQxzgyNA9xFQtPFJubmZsWPGFCRmZDjsMTG32SMj0wVRTBRsthg8xg6hpLV19dHi4p/jvVBNCAxjSbpngVNTE1OmTClIGD58cdyQId8XIiOH2wSBBOueGIRQzA++4MQQ5fkMFjBzQxOsgCMTZ87MTZ4x40fxgwb90Ga3Z0Ho3XGGYfwQuOjQ6qbec48jLTt7uS06epzgtrgMw/QBgQk4Kyt1yMKFS5Py8p6x22zp0M3YNsJmg5iICLjW1QWua9fYH2aYADEv4IyMtOy7734iYdiwJ2w22yDoZgIsISoKfjBhAszKzYWqhgZ458svofrKFRBFljHDmMWcgLOzB2UvWfJwQkrKLzDeHQhBipfeFIfCHZyQADdnZMCDkyZBRmKidL+6sRFW79kDbWiJ+ysFi5c7RBCK6D5OUw75eRuIc8vWveQEhgkQ/wIeOjR2yPTp81C8TwcrXnpDPAp3zogRsHTKFIiPjoYDVVUQbbdjoloAO7nSkZE9lrUOB0YtXrG9SyFapm+hybQLhO3q58vXrbTURehPwPa4sWMLEkaPXoFucyoEIV5cVoLclGR4ft58yEpKgj2VlfDe/v3Q0NoKzR0dMDMnB2rQdf7o8GFo76fWN3/xi8UiiA7oR9A5qZ+zQZeTPQnzhGIMDQWcMGJEyuAJE5ZFREUVoHUMuOySxDs1OxuK71oANY1X4Nfr18Ppy5e/S1j9cedO+NMXX0AnJrHIde7qt/GvWAT9Ds1zcgJjCrcH0P0xNBJwZOzUqZOik5LuRTc3EgKETDWJ9+VFiySr+8rWrXClrc1LpCRkVz+OeQn3F+ULxb30fxfYHFyPwgSLroDjc3KSEwsLH0DXOQUCBUU6Mi0NXkHx7sVYt2TTJmhBd/lGREugOLkp3SQnML2OZ/wtn3TRc4vt0aNG5cZERS2AAHcs2dFtXjJ+PPxqzhzYWFoKxUGIl0Z12IABUICTQJQ9tGXU4QBmondAEJA1h35Mfz+/nkB7BkpNTRx6330/GZib+zo+MuU+U7wrx7xv33svREVEgAuF+5sNG2DL8eOmMsxyG3ePHg1Pzp4NybGxsKmsDF5G95uSXt91uqXlL0dKSh4FMnAG6C3bkAUkEZWv+20x9BDXExS+cY78+fJjvcSFXv+VbQSS9PDXnvt5/XFxhwM2h955YSslykdGfZP7Iupk5oP5jozOT+6bsj2tCcNoLOXjaQwEEOeoPyeQMaT3a5+79xj6O39NFzouNjYxPjOTYjS/4iWLG4tLQLNzc2F+wSi43NwiLQsR6H5DTnKyJOaOzk7NSI9kTccn4tLSrNwcyE9Lh7GZmTAgJkZ6/wzMUqfGxfnEz0bIX6Teso174ERH/uIVRT2xBmuQoPD6fMVTTvX7jfqvbAOXQopwsijx90XThOK/T9I9By55zdG6CD3hgEFCzuc1J2j0g44znHnh+vnp9UVGOREYtykWCYr+6C0jgYZR8/0+RM1rWTmGeteWe4IRHaJBP1VPFIMBWu6xzZaXN8geGzsW/BCNwhyflQXvLFkCz95xBzYmwNbycig7fx4aUXBV9fUwbOBAKF6wQFpCirB5fxyJfyBa2cemT4fVDz2EbrcD0hMS4FxjI7S0t0vLSrVNTXAV75tN87gvVGG7aHLNlY4NN9ctkP67EYtonVnvVVk0YLY1t3iKQj0ugfbDTF8CH6vACPR6UqIzQYQULQtsj0lNTcVEVIqe20vFF1QKOW/kSHhsxgw4dekSFH3wAVTgEhFZyYMffihVWNW3tEjW9GmHA1ahyN/csQO+OH1aWjKi2DYPP+Y5FH4ainbNwYOwCV3tWlwTJmt8tLYGMpMGwPqjR+Fic3MAJZbaF8h198b3i/C4XU4IAzwXOQQKnRe9V22p/HkDxm2Gz7iEU18CgSbW4+tWzoUeQssC223p6cl4wUfTAxIrVVFlogUdjKJMQtc2E/9fhlaTLCfFt89+8gl8iyKWXVyynhX4uB7j1s8rKuARFPTRmhp49vbbYWFhoWR1b8FYeeXChdJGhifWroW/7d0rWd5ObKMBrfd7+w/A751OOHnxonSMGbQWxt0nKc6lQaQbVdoIqguBLv5QWhtym+gz6SZoXnRCify60s1y90E7ZqbjqO/uSiGhRLtd3/dej1m9UbYnt+nTmmdSkB/T5CD3GTTRPi+j/snndr1d7XNT98UIZXve7YolECK0+m3ufWKJ8fHeY+ivPV8LnJVls9XWJgnZ2VL6Nw7j2/vHjYMfT50K7RjHfnrsmCQ+2kVEGxDIarYaZJlJ0mRBX8VE1KO33gqP4S0fLe+04cOhvK5OKuY4j25y4DZH89M0Eytl61Y6vZ7BQcQZ3eHdT98ZHmfP5V0itIEJTqxf+YbysXzxYhua1k8r7tZbE1bP4LKVxTjL52CaBLzbNjcm1KY73lQnt9zJGnW/8bN9Wg2mEou+C9V7pPtkufz1RQ+dPjghRJB4NayqEycYUI+3+hwUkzW52D7fTfcrsTo6bJCbGweeYJ6s5Z0FBZCKbi65sfNHjYJdaFX/hS7vGYxxzVhHusquulzw7p49Ukz80OTJcOjcOakKi2LcnkQr+UEDpL4ANWMcQRiKF80y8M9VvL0BPYL+zO7O1Hr322NxnXRfr4hELyGkPbH1XHxpRDj1xSwkPi1R9iTahRxRUWR9JQFLiSSMSwsHD5ZKHi9evQo5KSlwR34+/Afj0wv4uNNEfEoJrJsGDYIMdMWpPZoY6DFZ3wB3IIldgkBv8PpQvYtVL7kTGosfWjxLC17QRaF3vHspyrvGWmml9IpI9NrTmtj6inDqi1n6os/aRRqDB3fKd2n9lVzlf2CM+v7+/VJcShZ4AVriF++8EwpQ2OrsshpKWE0eNgyenjtXSmyt+PRT+F9trVTsMTcvT0pamYW8ABfAZVBdmXqxHs3aWjetY/s6Gx2ohTESt/5nBF5EEk5Zei728EbbArsFKQmkA63uiQsX4K3PP5eeICt8HB8fqq6Gx2+bCc/Pmwd//eYb2H3qlFcsTKImy0zFGN+7+WZYPHaslNh6e9cuqGqolzY1PILx8DLMYpN1/+jIEWlXEtVG03tT4+OlLYZk4amSS85CU1KtvanpFPQCnTbxHRDtLwHDhCmmNvSTdJSxLomMssq/2/IZPIzJrSdnzYLbcnJgQ2mpJNLZI0bAFLS4tB5MS0UThw6FjZj8+jeKtA4FSWK8iJZ41e7dUFZ3Hh6YOElKjO2trIQd334LKShe2jc8AMX/X3wfZaibMIb20N7a2HhM3Uf9+MNcdpBQJ3ZOrl15AHoRrZjWCC0XWV3hpR4Ts4kgJeG0RZC3K3oT9C9JknWtxCQWWeZpKL4lEybAC/PnS8tK9EsbVElF7vE/9+2DF9FlLkerrayJJhFTscfG0mNw8Fy1VMl1O64r51P9M2a4yTWnQpH7x4+XJoZmXJqiZSq8XbpaWXnabD95jyrTnwloo4IamvsvoyX97MQJeA7Xgl/YuFHKNlNMK3hKLEl45G7rbWhw4dLUKXSnP8Cs9jMffwyvb98uVXB1eiw+ueXtijLMDpfrSOvRo5fU7eiJVC82Dke04lPRMKtpXKChNSZGa95a66xCHxVPhFNfwpluCViG6pzJNabEFLnKx3F9l0RHcS5tRjCT8SW3nNqggpBVuLxEFVhOnBhoUriEk4Totr6dbQ0NH0J1tUurDb3iBroY1BcEXcR0oyy1URlib6KVlNIrYNDrs3qJSLsoQvApTdQrcwwk6aWcbOTx9fcerQk2FH2xKuox9Hd8yH+MncT2szVrYFxmJvx02jQYlZ4OtZ641wx01Hk8/g87dkg7k0jYcvyN/9ZcPXJkK+jsQtJaO/S0Kg1KvqKoosvrfeExs5PFRGFqxME0Ca0oUpaDao+mb7yvt55Kz9FnyY/1Ftb014x943X3ZLNCpNeo8N9MJZHWuQXaFyuit+SkHkPws2c5JBZYCcWpVEL51ZkzUqEHxcUzhw+XxGgWEju5zuR+K5JnYkdLy7v1J0/Wgc437HYZzSetwhGjcj+jJTBCr2hFb4Ly116wYxnoclhP9iWcMTIcZscw5AKWodj2NYxnpV/kuOsuWDxmDER2Y3M+yvjsxa+++jOcPt1udJz7Irbulx3MJCTX5eq97i77C6xNd620vsXryQJ9X4SS/mR9ZUJRm91jAiZo6eelLVvgY4xnn3I44NVFi6AQXWp54/5IXGJaOnkyzMIlKKqtNqCjsaJieePmzdXgZxM/IRfdm7lo6eIPZZF7KKD+620wUCILl8TkL9NufmIjsawUzGTuAyni1/00Ayt0fRNH/xMvEQqP0devTUtLyCgqWpra3PwWhChGpsKMW3Bd+JezZ8MIFO0RzEpvxQTVgxMnwk3JyZLQX9u2TUqAUUJMhdjW2vr+ydWrH0fr2wBBoPwlCWWiyErLS/I5yP3vbt9D2Z73L3XoL91pbb6Qdy2pv6MbbenP7Biq6RUBy0R7SippvTcSRU0bIxJxvfgainbNoUPw5s6dUtyrQERB7zmzefMDbU5nJZiwvkz4YiRgYIKiV/8kKMXFtKGfbvQLHWSN89GlvoJJr90VFeqfmO3EBFZp3b59j6J4q4DFyzA+9Nnf9K1paoKn1q+X4mCqdz6l2JqIWWhcRu48UHX48LLmtWtL8alOYBjGhz4TMC0VUeEG3RR0Ic3tLtfGqp07X3Bt23YaWLwMo0ufCViFiLa3TXS5qpvOnn317K5dH0FpaT2E57Zdhgkb+lrAXSJa3M729prWlpYN9V9/veqK03kGn78x/4xDP0drrZoTWN2jNwUs7UrEf1zoKLd0tbdf6mhuPtPR0LChYf/+jY17954Deo3pt7BYQ4+vgAcM6LhWV1fWlJj4dyEUhR5tbYKIt67Ozg6oq2tAV7kK49yylvLyE40nTpyHCxeagV1lhgkKweB588XL5hCBhcowISXUImUYphfp0VpohmF6FhYww1gYFjDDWBgWMMNYGBYww1gYFjDDWBgWMMNYGBYww1gYFjDDWBgWMMNYGBYww1gYFjDDWBgWMMNYGBYww1gYFjDDWBgWMMNYGBYww1gYFjDDWJj/AwAA///v/L0zAAAABklEQVQDAC4jorp7Ac8jAAAAAElFTkSuQmCC" alt="e-footprint" width="120" height="40">
+        <button type="button" data-demo-action="Documentation">▤ Documentation</button>
+        <button type="button" data-demo-action="Feedback">♡ Feedback</button>
+      </nav>
+      <nav id="workspace-tabs" aria-label="Workspace modelings">
+        <span><button type="button" data-workspace-model="reference" aria-pressed="true">Reference modeling</button>
+          <button type="button" data-demo-action="Remove reference modeling" aria-label="Remove reference modeling">×</button></span>
+        <span><button type="button" data-workspace-model="comparison" aria-pressed="false">Comparison modeling</button>
+          <button type="button" data-demo-action="Remove comparison modeling" aria-label="Remove comparison modeling">×</button></span>
+        <button type="button" data-open-comparison aria-pressed="false">⇄ Compare</button>
+      </nav>
+      <nav id="model-toolbar" aria-label="Active modeling toolbar">
+        <details id="mobile-model-picker" data-toolbar-menu>
+          <summary aria-label="Switch modeling"><span id="mobile-model-role">Reference</span></summary>
+          <div data-menu-items>
+            <button type="button" data-workspace-model="reference">Reference modeling</button>
+            <button type="button" data-workspace-model="comparison">Comparison modeling</button>
+          </div>
+        </details>
+        <button type="button" id="model-name-control" data-demo-action="Rename modeling">
+          <span id="mock-system-name">Streaming service</span><small id="current-view-label">Simplified inputs</small>
+        </button>
+        <label id="edge-modeling-control" hidden><input type="checkbox" role="switch" data-edge-toggle> Edge modeling</label>
+        <button type="button" id="mode-destination" data-mode="modeling">Modeling →</button>
+        <div id="desktop-toolbar-actions"></div>
+        <details id="mobile-toolbar-menu" data-toolbar-menu>
+          <summary aria-label="Toolbar menu">☰</summary>
+          <div data-menu-items id="mobile-toolbar-actions"></div>
+        </details>
+      </nav>
+      <template id="toolbar-actions-template">
+        <button type="button" data-mobile-only data-open-comparison>⇄ Compare</button>
+        <details data-toolbar-menu>
+          <summary aria-label="Help">ⓘ Help</summary>
+          <div data-menu-items>
+            <button type="button" data-demo-action="Replay tour">↺ Replay tour</button>
+            <button type="button" data-demo-action="Open examples">▦ Open examples</button>
+            <button type="button" data-demo-action="Data and privacy">▣ Data &amp; privacy</button>
+          </div>
+        </details>
+        <button type="button" data-toolbar-action data-open-file title="Open a file" aria-label="Open a file">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIyMiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktZmlsZS1lYXJtYXJrLXBsdXMiIHZpZXdCb3g9IjAgMCAxNiAxNiI+CiAgPHBhdGggZD0iTTggNi41YS41LjUgMCAwIDEgLjUuNXYxLjVIMTBhLjUuNSAwIDAgMSAwIDFIOC41VjExYS41LjUgMCAwIDEtMSAwVjkuNUg2YS41LjUgMCAwIDEgMC0xaDEuNVY3YS41LjUgMCAwIDEgLjUtLjUiLz4KICA8cGF0aCBkPSJNMTQgNC41VjE0YTIgMiAwIDAgMS0yIDJINGEyIDIgMCAwIDEtMi0yVjJhMiAyIDAgMCAxIDItMmg1LjV6bS0zIDBBMS41IDEuNSAwIDAgMSA5LjUgM1YxSDRhMSAxIDAgMCAwLTEgMXYxMmExIDEgMCAwIDAgMSAxaDhhMSAxIDAgMCAwIDEtMVY0LjV6Ii8+Cjwvc3ZnPgo=" alt=""><span data-mobile-only>Open a file</span>
+        </button>
+        <details data-toolbar-menu data-export-menu>
+          <summary title="Export" aria-label="Export"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIyMiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktZmxvcHB5IiB2aWV3Qm94PSIwIDAgMTYgMTYiPgogIDxwYXRoIGQ9Ik0xMSAySDl2M2gyeiIvPgogIDxwYXRoIGQ9Ik0xLjUgMGgxMS41ODZhMS41IDEuNSAwIDAgMSAxLjA2LjQ0bDEuNDE1IDEuNDE0QTEuNSAxLjUgMCAwIDEgMTYgMi45MTRWMTQuNWExLjUgMS41IDAgMCAxLTEuNSAxLjVoLTEzQTEuNSAxLjUgMCAwIDEgMCAxNC41di0xM0ExLjUgMS41IDAgMCAxIDEuNSAwTTEgMS41djEzYS41LjUgMCAwIDAgLjUuNUgydi00LjVBMS41IDEuNSAwIDAgMSAzLjUgOWg5YTEuNSAxLjUgMCAwIDEgMS41IDEuNVYxNWguNWEuNS41IDAgMCAwIC41LS41VjIuOTE0YS41LjUgMCAwIDAtLjE0Ni0uMzUzbC0xLjQxNS0xLjQxNUEuNS41IDAgMCAwIDEzLjA4NiAxSDEzdjQuNUExLjUgMS41IDAgMCAxIDExLjUgN2gtN0ExLjUgMS41IDAgMCAxIDMgNS41VjFIMS41YS41LjUgMCAwIDAtLjUuNW0zIDRhLjUuNSAwIDAgMCAuNS41aDdhLjUuNSAwIDAgMCAuNS0uNVYxSDR6TTMgMTVoMTB2LTQuNWEuNS41IDAgMCAwLS41LS41aC05YS41LjUgMCAwIDAtLjUuNXoiLz4KPC9zdmc+Cg==" alt=""><span data-mobile-only>Export</span></summary>
+          <div data-menu-items>
+            <button type="button" data-demo-action="Export this modeling">⬇ This modeling</button>
+            <button type="button" data-demo-action="Export both modelings">⬇ Both modelings</button>
+          </div>
+        </details>
+        <button type="button" data-toolbar-action data-demo-action="Reset to default modeling" title="Reset to default modeling" aria-label="Reset to default modeling">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMi4wMDE0IDYuNTY0MkMxMy40NDIyIDYuNTY0NzUgMTQuODQ0MSA3LjAyNDc0IDE1Ljk5NzEgNy44NzUyOUMxNy4xNSA4LjcyNTgzIDE3Ljk5MiA5LjkyMTE0IDE4LjM5NjkgMTEuMjgyMkMxOC44MDE3IDEyLjY0MzIgMTguNzQ3NyAxNC4wOTY3IDE4LjI0MjggMTUuNDI1QzE3LjczOCAxNi43NTMzIDE2LjgwOTUgMTcuODg0OCAxNS41OTY1IDE4LjY1MDJDMTQuMzgzNCAxOS40MTU1IDEyLjk1MTEgMTkuNzczNCAxMS41MTQxIDE5LjY3MDNDMTAuMDc3IDE5LjU2NzIgOC43MTI2MSAxOS4wMDg2IDcuNjI1MTYgMTguMDc4MkM2LjUzNzcxIDE3LjE0NzggNS43ODU3OCAxNS44OTU3IDUuNDgxOTkgMTQuNTA5NEM1LjE3ODIgMTMuMTIzMSA1LjMzODkxIDExLjY3NzIgNS45NDAwMyAxMC4zODg0QzYuMDA1NDYgMTAuMjMxNyA2LjAwNjc4IDEwLjA1NjEgNS45NDM3IDkuODk4NTFDNS44ODA2MyA5Ljc0MDg3IDUuNzU4MDYgOS42MTMzNiA1LjYwMTY0IDkuNTQyNjZDNS40NDUyMiA5LjQ3MTk1IDUuMjY3MDcgOS40NjM1MyA1LjEwNDQ5IDkuNTE5MTdDNC45NDE5MSA5LjU3NDggNC44MDc0OSA5LjY5MDE3IDQuNzI5MzcgOS44NDExM0M0LjAwODA1IDExLjM4NzggMy44MTUyOCAxMy4xMjI5IDQuMTc5OTQgMTQuNzg2NUM0LjU0NDYgMTYuNDUwMSA1LjQ0NzA2IDE3Ljk1MjcgNi43NTIxMyAxOS4wNjkxQzguMDU3MjEgMjAuMTg1NSA5LjY5NDY0IDIwLjg1NTYgMTEuNDE5MiAyMC45NzkyQzEzLjE0MzcgMjEuMTAyOCAxNC44NjI1IDIwLjY3MzEgMTYuMzE4MSAxOS43NTQ1QzE3Ljc3MzcgMTguODM1OSAxOC44ODc3IDE3LjQ3NzggMTkuNDkzMyAxNS44ODM3QzIwLjA5ODkgMTQuMjg5NyAyMC4xNjM0IDEyLjU0NTQgMTkuNjc3MyAxMC45MTIxQzE5LjE5MTIgOS4yNzg5MiAxOC4xODA1IDcuODQ0NjggMTYuNzk2NyA2LjgyNDI1QzE1LjQxMjkgNS44MDM4MiAxMy43MzA1IDUuMjUyMTUgMTIuMDAxNCA1LjI1MTg2VjYuNTY0MloiIGZpbGw9IiMzNzQxNTEiLz4KPHBhdGggZD0iTTEyLjAwMTQgOC40ODgxVjMuMzI3OTZDMTIuMDAxMyAzLjI2NTYyIDExLjk4MzMgMy4yMDQ1OCAxMS45NDkzIDMuMTUxOThDMTEuOTE1MyAzLjA5OTM4IDExLjg2NjggMy4wNTc0IDExLjgwOTQgMy4wMzA5N0MxMS43NTIgMy4wMDQ1MyAxMS42ODgyIDIuOTk0NzIgMTEuNjI1NCAzLjAwMjdDMTEuNTYyNiAzLjAxMDY3IDExLjUwMzQgMy4wMzYwOSAxMS40NTQ3IDMuMDc1OTlMOC4zMDgwMyA1LjY1NjA2QzguMjcwNTIgNS42ODY4NSA4LjI0MDM0IDUuNzI1MzggOC4yMTk2MyA1Ljc2ODkyQzguMTk4OTIgNS44MTI0NyA4LjE4ODE4IDUuODU5OTYgOC4xODgxOCA1LjkwODAzQzguMTg4MTggNS45NTYxMSA4LjE5ODkyIDYuMDAzNiA4LjIxOTYzIDYuMDQ3MTRDOC4yNDAzNCA2LjA5MDY4IDguMjcwNTIgNi4xMjkyMSA4LjMwODAzIDYuMTZMMTEuNDU0NyA4Ljc0MDA3QzExLjUwMzQgOC43Nzk5NyAxMS41NjI2IDguODA1NCAxMS42MjU0IDguODEzMzdDMTEuNjg4MiA4LjgyMTM0IDExLjc1MiA4LjgxMTU0IDExLjgwOTQgOC43ODUxQzExLjg2NjggOC43NTg2NiAxMS45MTUzIDguNzE2NjggMTEuOTQ5MyA4LjY2NDA5QzExLjk4MzMgOC42MTE0OSAxMi4wMDEzIDguNTUwNDQgMTIuMDAxNCA4LjQ4ODFaIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTIuMDAxNCA2LjU2NDJDMTMuNDQyMiA2LjU2NDc1IDE0Ljg0NDEgNy4wMjQ3NCAxNS45OTcxIDcuODc1MjlDMTcuMTUgOC43MjU4MyAxNy45OTIgOS45MjExNCAxOC4zOTY5IDExLjI4MjJDMTguODAxNyAxMi42NDMyIDE4Ljc0NzcgMTQuMDk2NyAxOC4yNDI4IDE1LjQyNUMxNy43MzggMTYuNzUzMyAxNi44MDk1IDE3Ljg4NDggMTUuNTk2NSAxOC42NTAyQzE0LjM4MzQgMTkuNDE1NSAxMi45NTExIDE5Ljc3MzQgMTEuNTE0MSAxOS42NzAzQzEwLjA3NyAxOS41NjcyIDguNzEyNjEgMTkuMDA4NiA3LjYyNTE2IDE4LjA3ODJDNi41Mzc3MSAxNy4xNDc4IDUuNzg1NzggMTUuODk1NyA1LjQ4MTk5IDE0LjUwOTRDNS4xNzgyIDEzLjEyMzEgNS4zMzg5MSAxMS42NzcyIDUuOTQwMDMgMTAuMzg4NEM2LjAwNTQ2IDEwLjIzMTcgNi4wMDY3OCAxMC4wNTYxIDUuOTQzNyA5Ljg5ODUxQzUuODgwNjMgOS43NDA4NyA1Ljc1ODA2IDkuNjEzMzYgNS42MDE2NCA5LjU0MjY2QzUuNDQ1MjIgOS40NzE5NSA1LjI2NzA3IDkuNDYzNTMgNS4xMDQ0OSA5LjUxOTE3QzQuOTQxOTEgOS41NzQ4IDQuODA3NDkgOS42OTAxNyA0LjcyOTM3IDkuODQxMTNDNC4wMDgwNSAxMS4zODc4IDMuODE1MjggMTMuMTIyOSA0LjE3OTk0IDE0Ljc4NjVDNC41NDQ2IDE2LjQ1MDEgNS40NDcwNiAxNy45NTI3IDYuNzUyMTMgMTkuMDY5MUM4LjA1NzIxIDIwLjE4NTUgOS42OTQ2NCAyMC44NTU2IDExLjQxOTIgMjAuOTc5MkMxMy4xNDM3IDIxLjEwMjggMTQuODYyNSAyMC42NzMxIDE2LjMxODEgMTkuNzU0NUMxNy43NzM3IDE4LjgzNTkgMTguODg3NyAxNy40Nzc4IDE5LjQ5MzMgMTUuODgzN0MyMC4wOTg5IDE0LjI4OTcgMjAuMTYzNCAxMi41NDU0IDE5LjY3NzMgMTAuOTEyMUMxOS4xOTEyIDkuMjc4OTIgMTguMTgwNSA3Ljg0NDY4IDE2Ljc5NjcgNi44MjQyNUMxNS40MTI5IDUuODAzODIgMTMuNzMwNSA1LjI1MjE1IDEyLjAwMTQgNS4yNTE4NlY2LjU2NDJaIiBzdHJva2U9IiMzNzQxNTEiLz4KPHBhdGggZD0iTTEyLjAwMTQgOC40ODgxVjMuMzI3OTZDMTIuMDAxMyAzLjI2NTYyIDExLjk4MzMgMy4yMDQ1OCAxMS45NDkzIDMuMTUxOThDMTEuOTE1MyAzLjA5OTM4IDExLjg2NjggMy4wNTc0IDExLjgwOTQgMy4wMzA5N0MxMS43NTIgMy4wMDQ1MyAxMS42ODgyIDIuOTk0NzIgMTEuNjI1NCAzLjAwMjdDMTEuNTYyNiAzLjAxMDY3IDExLjUwMzQgMy4wMzYwOSAxMS40NTQ3IDMuMDc1OTlMOC4zMDgwMyA1LjY1NjA2QzguMjcwNTIgNS42ODY4NSA4LjI0MDM0IDUuNzI1MzggOC4yMTk2MyA1Ljc2ODkyQzguMTk4OTIgNS44MTI0NyA4LjE4ODE4IDUuODU5OTYgOC4xODgxOCA1LjkwODAzQzguMTg4MTggNS45NTYxMSA4LjE5ODkyIDYuMDAzNiA4LjIxOTYzIDYuMDQ3MTRDOC4yNDAzNCA2LjA5MDY4IDguMjcwNTIgNi4xMjkyMSA4LjMwODAzIDYuMTZMMTEuNDU0NyA4Ljc0MDA3QzExLjUwMzQgOC43Nzk5NyAxMS41NjI2IDguODA1NCAxMS42MjU0IDguODEzMzdDMTEuNjg4MiA4LjgyMTM0IDExLjc1MiA4LjgxMTU0IDExLjgwOTQgOC43ODUxQzExLjg2NjggOC43NTg2NiAxMS45MTUzIDguNzE2NjggMTEuOTQ5MyA4LjY2NDA5QzExLjk4MzMgOC42MTE0OSAxMi4wMDEzIDguNTUwNDQgMTIuMDAxNCA4LjQ4ODFaIiBzdHJva2U9IiMzNzQxNTEiLz4KPC9zdmc+Cg==" alt=""><span data-mobile-only>Reset to default modeling</span>
+        </button>
+        <button type="button" data-mobile-only data-demo-action="Documentation">▤ Documentation</button>
+        <button type="button" data-mobile-only data-demo-action="Feedback">♡ Feedback</button>
+        <button type="button" data-show-results>Show results</button>
+      </template>
 
     <article id="modeling-screen" hidden>
-      <header>
-        <span><strong>Streaming service</strong><br><small>Modeling mode · all inputs and structure are editable</small></span>
-        <button type="button">Download JSON</button>
-      </header>
-      <nav data-mode-nav aria-label="Choose working mode">
-        <span>Mode</span>
-        <button type="button" data-mode="consumption" aria-pressed="false">Simplified inputs</button>
-        <button type="button" data-mode="modeling" aria-pressed="true">Modeling</button>
-        <button type="button" data-mode="construction" aria-pressed="false">Template setup</button>
-      </nav>
       <div id="modeling-body">
-        <div id="template-status"></div>
         <div id="modeling-delete-result" hidden></div>
         <div id="modeling-workspace">
           <div>
-            <p><strong>Full modeling canvas</strong> — add, edit, delete, and reconnect any object.</p>
             <div id="model-canvas">
-              <section><h3>Usage patterns</h3><p id="watch-video-model-card">Watch a video · Editing</p><p>Homepage visits · Edit</p></section>
+              <section><h3>Usage patterns</h3><p id="watch-video-model-card"><button type="button" data-modeling-surface="edit">Watch a video · Edit</button></p><p>Homepage visits · Edit</p></section>
               <section><h3>Usage journeys</h3><p>Stream a film · Edit</p><p>Browse catalogue · Edit</p></section>
-              <section><h3>Infrastructure</h3><p>Video origin · Edit</p><p>CDN and network · Edit</p><p>User devices · Edit</p></section>
+              <section><h3>Infrastructure</h3><p>Video origin · Edit</p><p>Catalogue API · Edit</p><p id="archive-server-card" hidden>Archive server · Edit</p><p>CDN and network · Edit</p><p>User devices · Edit</p>
+                <button type="button" data-modeling-surface="create">+ Add web server</button></section>
             </div>
-            <div data-same-access><strong>You have left the simplified guardrails.</strong> Every
-            assumption and structural action is available. Use the mode control above to return to
-            Simplified inputs or to change the Template setup.</div>
           </div>
           <aside id="modeling-edit-panel">
             <header><span><strong>Edit Usage pattern</strong><br><small>Watch a video</small></span>
@@ -435,40 +733,63 @@
                   d="M5.5 1h5v1.5H15v1H1v-1h4.5zm-2 3.5h9l-.7 10H4.2zm2 1.5.4 7h1L6.5 6zm4 0-.4 7h1l.4-7z"/></svg>
               </button></header>
             <div>
-              <label><span data-modeling-field-label><strong>Country</strong>
-                <span data-template-indicator tabindex="0" role="img" aria-label="Included in Simplified inputs">
-                  <svg viewBox="0 0 18 18" aria-hidden="true"><path fill="currentColor" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg>
-                  <small role="tooltip">Included in Simplified inputs</small>
-                </span></span>
-                <select><option>France</option><option>European average</option></select></label>
-              <label><span data-modeling-field-label><strong>Network</strong>
-                <span data-template-indicator tabindex="0" role="img" aria-label="Included in Simplified inputs">
-                  <svg viewBox="0 0 18 18" aria-hidden="true"><path fill="currentColor" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg>
-                  <small role="tooltip">Included in Simplified inputs</small>
-                </span></span>
-                <select><option>Wi-Fi network</option><option>Mobile network</option></select></label>
-              <label><span data-modeling-field-label><strong>Hourly pattern occurrences</strong>
-                <span data-template-indicator tabindex="0" role="img" aria-label="Included in Simplified inputs">
-                  <svg viewBox="0 0 18 18" aria-hidden="true"><path fill="currentColor" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg>
-                  <small role="tooltip">Included in Simplified inputs</small>
-                </span></span>
-                <button type="button">Edit growth projection</button></label>
+              <section data-inline-field data-inline-simplified="country">
+                <label><strong>Country</strong>
+                  <select data-modeling-value="country"><option>France</option><option>European average</option></select></label>
+              </section>
+              <section data-inline-field data-inline-simplified="network">
+                <label><strong>Network</strong>
+                  <select data-modeling-value="network"><option>Wi-Fi network</option><option>Mobile network</option></select></label>
+              </section>
+              <section data-inline-field data-inline-simplified="hourly-occurrences">
+                <label><strong>Hourly pattern occurrences</strong>
+                  <output data-source-value="hourly-occurrences">Growth projection · 250,000/month</output></label>
+              </section>
               <label><strong>Devices</strong>
                 <select><option>Smart TV</option><option>Laptop</option></select></label>
               <footer>
-                <button type="button">Save changes</button>
+                <button type="button" id="save-modeling-values">Save changes</button>
+                <button type="button" id="cancel-modeling-values">Cancel</button>
               </footer>
+              <small id="value-status" role="status"></small>
             </div>
           </aside>
         </div>
+        <section id="modeling-create-panel" hidden>
+          <h3>Create web server</h3>
+          <label>Name <input type="text" id="new-server-name" value="Archive server" required></label>
+          <section data-inline-field data-inline-simplified="archive-lifetime" data-provisional>
+            <label><strong>Lifetime</strong>
+              <input type="number" id="new-server-lifetime" value="6" min="1" required> years</label>
+          </section>
+          <p><small>Simplified-input settings remain a draft until this object is created.</small></p>
+          <footer><button type="button" id="create-server">Create</button>
+            <button type="button" id="cancel-create-server">Cancel</button></footer>
+          <p id="creation-status" role="status"></p>
+        </section>
+        <section id="modeling-sources" hidden>
+          <div data-source-head><span>Item name</span><span>Attribute of</span><span>Value</span><span>Source</span></div>
+          <section data-inline-field data-inline-simplified="browse-sessions">
+            <div data-source-row><strong>Sessions per month</strong><span>Browse catalogue<small>Usage pattern</small></span>
+              <output data-source-value="browse-sessions">50,000</output><span>Product forecast<small>Confidence: medium</small></span></div>
+          </section>
+          <section data-inline-field data-inline-simplified="server-lifetime">
+            <div data-source-row><strong>Lifetime</strong><span>Video origin<small>Web server</small></span>
+              <output data-source-value="server-lifetime">5 years</output><span>Hardware renewal policy<small>Confidence: medium</small></span></div>
+          </section>
+          <section data-inline-field data-inline-simplified="recurrent-compute">
+            <div data-source-row><strong>Recurrent compute need</strong><span>Video origin demand<small>Recurrent server need</small></span>
+              <output data-source-value="recurrent-compute">Weekly pattern</output><span>Operations estimate<small>Confidence: medium</small></span></div>
+          </section>
+        </section>
       </div>
       <div id="delete-confirmation-backdrop" hidden>
         <section id="delete-object-confirmation" role="dialog" aria-modal="true"
           aria-labelledby="delete-object-confirmation-title">
           <h3 id="delete-object-confirmation-title">Are you sure you want to delete this Usage pattern?</h3>
-          <div data-template-delete-warning>
+          <div data-simplified-delete-warning>
             <strong>This object contains 3 fields included in Simplified inputs.</strong>
-            <p>Country, Network, and Hourly pattern occurrences will also be removed from the template.</p>
+            <p>Country, Network, and Hourly pattern occurrences will also be removed from Simplified inputs.</p>
           </div>
           <footer>
             <button type="button" id="confirm-delete-object">Yes, delete</button>
@@ -478,103 +799,40 @@
       </div>
     </article>
 
-    <article id="construction-screen" hidden>
-      <header>
-        <span><strong>Template setup</strong><br><small>Create or revise the simplified experience for this modeling</small></span>
-        <button type="button">Download JSON</button>
-      </header>
-      <nav data-mode-nav aria-label="Choose working mode">
-        <span>Mode</span>
-        <button type="button" data-mode="consumption" aria-pressed="false">Simplified inputs</button>
-        <button type="button" data-mode="modeling" aria-pressed="false">Modeling</button>
-        <button type="button" data-mode="construction" aria-pressed="true">Template setup</button>
-      </nav>
-      <div id="construction-body">
-        <div data-same-access><strong>No maker-only access:</strong> anyone holding this JSON can
-        enter Template setup, just as they can enter Modeling or Simplified inputs.</div>
-        <label>Template name<br><input type="text" value="Adapt this streaming scenario" size="38"></label>
-        <label>Guidance for consumers<br><textarea rows="2" cols="52">Enter your usage context, traffic growth, server electricity mix, and compute schedule. The remaining assumptions were reviewed by the ecodesign team.</textarea></label>
-        <p><strong>Choose the inputs shown in Simplified inputs</strong></p>
-        <fieldset id="usage-template-setup">
-          <legend>Usage pattern · Watch a video</legend>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Country</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="country"
-              value="where the people watching this service are located"></label>
-          </div>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Network</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="network"
-              value="the access network used for each viewing session"></label>
-          </div>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Hourly pattern occurrences (timeseries)</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="hourly-occurrences"
-              value="how viewing demand changes over the modeling period"></label>
-          </div>
-          <label><input type="checkbox"> Devices</label>
-        </fieldset>
-        <fieldset>
-          <legend>Usage pattern · Browse catalogue</legend>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Sessions per month</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="browse-sessions"
-              value="the expected monthly catalogue browsing sessions"></label>
-          </div>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Country</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="browse-country"
-              value="where catalogue browsing sessions take place"></label>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Web server · Video origin</legend>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Electricity mix</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="electricity-mix"
-              value="the electricity mix used by the video origin server"></label>
-          </div>
-          <label><input type="checkbox"> CPU model and utilization</label>
-          <label><input type="checkbox"> Lifetime and embodied footprint inputs</label>
-        </fieldset>
-        <fieldset>
-          <legend>Recurrent server need · Video origin demand</legend>
-          <div data-template-field>
-            <label><input type="checkbox" checked> Recurrent compute need (timeseries)</label>
-            <label><small>Help text</small><br><input type="text" data-help-input="recurrent-compute"
-              value="the compute schedule required by the recurrent server call"></label>
-          </div>
-        </fieldset>
-        <p><small>Unchecked inputs stay in the complete modeling but are not editable in Simplified inputs.</small></p>
-        <div id="construction-actions">
-          <button type="button" id="save-template">Save setup and preview Simplified inputs</button>
-          <button type="button" data-mode="modeling">Back to Modeling</button>
-          <button type="button" id="remove-template">Remove template from this JSON</button>
-        </div>
-      </div>
-    </article>
 
-    <article id="consumption-screen">
-      <header>
-        <span><strong>Adapt this streaming scenario</strong><br><small>Simplified inputs · default view for this templated JSON</small></span>
-        <button type="button">Download adapted JSON</button>
-      </header>
-      <nav data-mode-nav aria-label="Choose working mode">
-        <span>Mode</span>
-        <button type="button" data-mode="consumption" aria-pressed="true">Simplified inputs</button>
-        <button type="button" data-mode="modeling" aria-pressed="false">Modeling</button>
-        <button type="button" data-mode="construction" aria-pressed="false">Template setup</button>
-      </nav>
-      <div id="consumption-workspace">
-        <div id="consumption-body">
-          <div id="mode-banner"><strong>This file opened here because it contains a template.</strong>
-          Adapt the <span id="exposed-input-count">7</span> exposed inputs, or use the mode control above to enter the full modeling or
-          revise the template itself.</div>
-          <p>Enter your usage context, traffic growth, server electricity mix, and compute schedule. The
-          remaining assumptions were reviewed by the ecodesign team.</p>
-          <div id="consumption-layout">
+    <article id="simplified-screen">
+      <div id="simplified-workspace">
+        <div id="simplified-body">
+          <div id="simplified-heading">
+            <div>
+              <h3 id="simplified-title">Adapt this streaming scenario</h3>
+              <small data-simplified-only><span id="exposed-input-count">7</span>
+                <span id="exposed-input-noun">inputs</span></small>
+            </div>
+            <button type="button" id="configure-inputs" data-simplified-only>Configure</button>
+            <div id="configuration-actions-top" data-editing-only hidden>
+              <button type="button" data-save-configuration>Save and return</button>
+              <button type="button" data-cancel-configuration>Cancel</button>
+            </div>
+          </div>
+          <p id="simplified-guidance" data-simplified-only>Enter your usage context, traffic growth,
+          server electricity mix, and compute schedule. The remaining assumptions were reviewed by
+          the ecodesign team.</p>
+          <div id="empty-simplified-inputs" hidden><p>No inputs selected for this modeling. Choose inputs here
+            or use bookmarks while modeling.</p><button type="button" id="choose-inputs">Choose inputs</button></div>
+          <div data-editing-only hidden>
+            <p>By default, all objects with eligible inputs are shown, including those not yet selected.
+            Choose inputs to include and add optional help text. Current values are shown for
+            context, not saved as defaults; use Simplified inputs or Modeling to change them.
+            This overview saves as a whole with Save and return, unlike the automatic inline settings.</p>
+            <div id="simplified-identity">
+              <label>Simplified inputs title <input id="simplified-name-input" type="text" value="Adapt this streaming scenario"></label>
+              <label>Guidance <textarea id="simplified-guidance-input" rows="2"></textarea></label>
+            </div>
+          </div>
+          <div id="simplified-layout">
             <aside id="object-outline">
-              <h3>Object outline</h3>
+              <h3>Navigation</h3>
               <nav aria-label="Jump to an exposed object">
                 <strong>Usage patterns</strong>
                 <button type="button" id="outline-watch-video" data-object-target="usage-simplified-fields"
@@ -582,6 +840,8 @@
                 <button type="button" data-object-target="browse-catalogue-fields">Browse catalogue</button>
                 <strong>Web servers</strong>
                 <button type="button" data-object-target="video-origin-fields">Video origin</button>
+                <button type="button" data-object-target="catalogue-api-fields" hidden>Catalogue API</button>
+                <button type="button" data-object-target="archive-server-fields" hidden>Archive server</button>
                 <strong>Recurrent server needs</strong>
                 <button type="button" data-object-target="video-origin-demand-fields">Video origin demand</button>
               </nav>
@@ -590,20 +850,29 @@
                   <option value="usage-simplified-fields">Watch a video</option>
                   <option value="browse-catalogue-fields">Browse catalogue</option>
                   <option value="video-origin-fields">Video origin</option>
+                  <option value="catalogue-api-fields" hidden disabled>Catalogue API</option>
+                  <option value="archive-server-fields" hidden disabled>Archive server</option>
                   <option value="video-origin-demand-fields">Video origin demand</option>
                 </select>
               </label>
             </aside>
 
-            <div id="template-fields" tabindex="0" aria-label="Scrollable simplified inputs">
+            <div id="simplified-fields" tabindex="0" aria-label="Scrollable simplified inputs">
               <header>
+                <label id="selected-object-filter" data-editing-only hidden>
+                  <input type="checkbox" id="only-selected-objects"> Only objects with selected inputs
+                </label>
                 <button type="button" id="expand-all-objects">Expand all</button>
                 <button type="button" id="collapse-all-objects">Collapse all</button>
               </header>
+              <div id="filtered-objects-empty" hidden>
+                <p role="status">No objects with selected inputs.</p>
+                <button type="button" id="show-all-objects">Show all objects</button>
+              </div>
               <details data-object-type open>
-                <summary>Usage patterns · <span id="usage-type-count">2 objects</span></summary>
+                <summary>Usage patterns · 2 objects</summary>
                 <div>
-                  <details data-template-object id="usage-simplified-fields" open>
+                  <details data-simplified-object id="usage-simplified-fields" open>
                     <summary>Watch a video <small>3 inputs</small></summary>
                     <div data-object-fields>
                       <section data-simplified-field>
@@ -646,7 +915,7 @@
                     </div>
                   </details>
 
-                  <details data-template-object id="browse-catalogue-fields">
+                  <details data-simplified-object id="browse-catalogue-fields">
                     <summary>Browse catalogue <small>2 inputs</small></summary>
                     <div data-object-fields>
                       <section data-simplified-field>
@@ -681,7 +950,7 @@
               <details data-object-type>
                 <summary>Web servers · 1 object</summary>
                 <div>
-                  <details data-template-object id="video-origin-fields">
+                  <details data-simplified-object id="video-origin-fields">
                     <summary>Video origin <small>1 input</small></summary>
                     <div data-object-fields>
                       <section data-simplified-field>
@@ -696,6 +965,64 @@
                           <label>Comment <textarea rows="2">Use the location-based mix for the origin server.</textarea></label>
                         </details>
                       </section>
+                      <section data-simplified-field data-included="false" hidden>
+                        <label><strong>Lifetime</strong>
+                          <small data-field-help data-help-output="server-lifetime" hidden></small>
+                          <input type="number" value="5" min="1" aria-label="Lifetime in years"> years</label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Hardware renewal policy"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Expected replacement after five years.</textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+                  <details data-simplified-object id="catalogue-api-fields" hidden>
+                    <summary>Catalogue API <small>0 of 2 selected</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field data-included="false" hidden>
+                        <label><strong>Electricity mix</strong>
+                          <small data-field-help data-help-output="catalogue-api-electricity-mix" hidden></small>
+                          <select><option>France</option><option>European average</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Hosting region"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">The catalogue API is hosted in France.</textarea></label>
+                        </details>
+                      </section>
+                      <section data-simplified-field data-included="false" hidden>
+                        <label><strong>Lifetime</strong>
+                          <small data-field-help data-help-output="catalogue-api-lifetime" hidden></small>
+                          <input type="number" value="4" min="1" aria-label="Lifetime in years"> years</label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Hardware renewal policy"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2">Expected replacement after four years.</textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+                  <details data-simplified-object id="archive-server-fields" data-deleted="true" hidden>
+                    <summary><span id="archive-server-label">Archive server</span> <small>0 inputs</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field data-included="false" hidden>
+                        <label><strong>Lifetime</strong>
+                          <small data-field-help data-help-output="archive-lifetime" hidden></small>
+                          <input type="number" value="6" min="1" aria-label="Lifetime in years"> years</label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Hardware renewal policy"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2"></textarea></label>
+                        </details>
+                      </section>
                     </div>
                   </details>
                 </div>
@@ -704,7 +1031,7 @@
               <details data-object-type>
                 <summary>Recurrent server needs · 1 object</summary>
                 <div>
-                  <details data-template-object id="video-origin-demand-fields">
+                  <details data-simplified-object id="video-origin-demand-fields">
                     <summary>Video origin demand <small>1 input</small></summary>
                     <div data-object-fields>
                       <section data-simplified-field data-timeseries-field>
@@ -727,17 +1054,16 @@
             </div>
           </div>
 
-          <footer id="consumption-footer">
-            <div id="results-summary"><strong>Updated result:</strong> 18.4 t CO2-eq/year
-            <br><small>The normal detailed, explainable results remain available.</small></div>
-            <div id="consumption-actions">
+          <footer id="simplified-footer">
+            <div id="simplified-actions" data-simplified-only>
               <button type="button">Apply simple changes</button>
-              <button type="button">Download my adapted JSON</button>
+            </div>
+            <div id="configuration-actions" data-editing-only hidden>
+              <button type="button" id="save-configuration" data-save-configuration>Save and return</button>
+              <button type="button" data-cancel-configuration>Cancel</button>
+              <button type="button" id="clear-simplified-inputs">Clear simplified inputs</button>
             </div>
           </footer>
-          <div data-same-access><strong>Same file, same access:</strong> “maker” and “consumer” are not
-          permissions. Selecting Modeling above enables full editing; selecting Template setup lets
-          you change what this screen exposes.</div>
         </div>
 
         <aside id="timeseries-panel" hidden>
@@ -830,38 +1156,360 @@
       </div>
     </article>
 
+    <section id="mock-results-panel" hidden aria-label="Results panel">
+      <header><h3>Results</h3><button type="button" id="close-results" aria-label="Close results">×</button></header>
+      <nav id="results-tabs" aria-label="Results tabs">
+        <button type="button" data-result-tab="results" aria-pressed="true">Results</button>
+        <button type="button" data-result-tab="sources" aria-pressed="false">Sources</button>
+      </nav>
+      <div id="results-overview"><div id="results-summary"><strong>Total footprint:</strong> 18.4 t CO2-eq/year</div></div>
+    </section>
+    <section id="comparison-screen" hidden>
+      <h3>Compare modelings</h3>
+      <h4>Input assumptions</h4>
+      <table>
+        <thead><tr><th>Input</th><th>Reference modeling</th><th>Comparison modeling</th></tr></thead>
+        <tbody>
+          <tr><th>Watch a video · Country</th><td data-comparison-value="reference:country">France</td><td data-comparison-value="comparison:country">France</td></tr>
+          <tr><th>Video origin · Lifetime</th><td data-comparison-value="reference:server-lifetime">5 years</td><td data-comparison-value="comparison:server-lifetime">5 years</td></tr>
+        </tbody>
+      </table>
+    </section>
+    </div>
+
     <script>
       (function () {
         var mockup = document.currentScript.parentElement;
-        var modes = ['modeling', 'construction', 'consumption'];
-        var hasTemplate = true;
+        mockup.querySelector('#modeling-workspace').append(mockup.querySelector('#modeling-create-panel'));
+        mockup.querySelector('#mock-results-panel').append(mockup.querySelector('#modeling-sources'));
+        ['desktop-toolbar-actions', 'mobile-toolbar-actions'].forEach(function (id) {
+          mockup.querySelector('#' + id).append(mockup.querySelector('#toolbar-actions-template').content.cloneNode(true));
+        });
+        var currentMode = 'simplified';
+        var activeModel = 'reference';
+        var modelingSurface = 'edit';
+        var comparing = false;
+        var resultsOpen = false;
+        var resultTab = 'results';
+        var workspace = {};
         var activeTimeseries = 'recurrent';
         var savedTimeseriesStrategies = {hourly: 'growth', recurrent: 'weekly'};
+        var fields = Array.from(mockup.querySelectorAll('[data-simplified-field]'));
+        var objects = Array.from(mockup.querySelectorAll('[data-simplified-object]'));
+        var savedConfiguration = {
+          name: mockup.querySelector('#simplified-title').textContent,
+          guidance: mockup.querySelector('#simplified-guidance').textContent.replace(/\s+/g, ' ').trim(),
+          fields: {}
+        };
 
-        function refreshTemplateState() {
-          mockup.querySelectorAll('[data-mode="consumption"]').forEach(function (button) {
-            button.disabled = !hasTemplate;
+        fields.forEach(function (field) {
+          var help = field.querySelector('[data-help-output]');
+          var key = help.dataset.helpOutput;
+          var label = field.querySelector('strong').textContent;
+          field.dataset.field = key;
+          savedConfiguration.fields[key] = {
+            included: field.dataset.included !== 'false',
+            help: help.textContent
+          };
+          var controls = document.createElement('div');
+          controls.dataset.authoringControls = '';
+          var includeLabel = document.createElement('label');
+          var checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.dataset.includeField = key;
+          checkbox.setAttribute('aria-label', 'Include ' + label + ' in Simplified inputs');
+          includeLabel.append(checkbox, ' Include in Simplified inputs');
+          var helpLabel = document.createElement('label');
+          helpLabel.append('Help text (optional)');
+          var helpInput = document.createElement('input');
+          helpInput.type = 'text';
+          helpInput.dataset.helpInput = key;
+          helpInput.setAttribute('aria-label', label + ' help text');
+          helpLabel.append(helpInput);
+          controls.append(includeLabel, helpLabel);
+          field.append(controls);
+          checkbox.addEventListener('change', refreshConfigurationState);
+        });
+        var originalConfiguration = JSON.parse(JSON.stringify(savedConfiguration));
+        // Mockup state only: simplified-input settings and modeling values are deliberately separate.
+        var modelingValues = {};
+        fields.forEach(function (field) {
+          var value = field.querySelector(':scope > label input, :scope > label select, :scope > label output');
+          modelingValues[field.dataset.field] = value.tagName === 'OUTPUT' ? value.textContent : value.value;
+          if (value.tagName !== 'OUTPUT') value.addEventListener('change', function () {
+            if (!value.checkValidity()) { value.reportValidity(); return; }
+            modelingValues[field.dataset.field] = value.value;
+            syncValues();
           });
-          mockup.querySelector('#remove-template').hidden = !hasTemplate;
-          mockup.querySelectorAll('[data-template-indicator]').forEach(function (indicator) {
-            indicator.hidden = !hasTemplate;
-          });
-          mockup.querySelector('[data-template-delete-warning]').hidden = !hasTemplate;
-          mockup.querySelector('#template-status').innerHTML = hasTemplate
-            ? '<strong>This JSON contains a simplified template.</strong><br>' +
-              '<button type="button" data-jump="consumption">Open Simplified inputs</button> ' +
-              '<button type="button" data-jump="construction">Edit Template setup</button>'
-            : '<strong>This is a normal modeling JSON.</strong> It has no simplified template yet.<br>' +
-              '<button type="button" data-jump="construction">Create simplified template</button>';
+        });
+        var originalValues = JSON.parse(JSON.stringify(modelingValues));
 
-          mockup.querySelectorAll('[data-jump]').forEach(function (button) {
-            button.addEventListener('click', function () { show(button.dataset.jump); });
+        function syncValues() {
+          mockup.querySelectorAll('[data-source-value]').forEach(function (output) {
+            var value = modelingValues[output.dataset.sourceValue];
+            if (output.dataset.sourceValue === 'browse-sessions') value = Number(value).toLocaleString('en-US');
+            output.textContent = value +
+              (output.dataset.sourceValue === 'server-lifetime' ? ' years' : '');
+          });
+          mockup.querySelectorAll('[data-modeling-value]').forEach(function (input) {
+            input.value = modelingValues[input.dataset.modelingValue];
           });
         }
 
+        function syncInlineControls() {
+          mockup.querySelectorAll('[data-inline-simplified]').forEach(function (host) {
+            var control = host.querySelector('[data-simplified-control]');
+            var entry = savedConfiguration.fields[host.dataset.inlineSimplified];
+            var included = host.hasAttribute('data-provisional')
+              ? control.querySelector('[data-inline-include]').checked : entry.included;
+            control.dataset.included = String(included);
+            var text = included ? 'Included in Simplified inputs' : 'Add to Simplified inputs';
+            control.querySelector('summary').dataset.tooltip = text;
+            control.querySelector('summary').setAttribute('aria-label',
+              host.querySelector('strong').textContent + ' — ' + text + ' — simplified-input settings');
+            if (!host.hasAttribute('data-provisional')) {
+              control.querySelector('[data-inline-include]').checked = entry.included;
+              control.querySelector('[data-inline-help]').value = entry.help;
+            }
+          });
+        }
+
+        mockup.querySelectorAll('[data-inline-simplified]').forEach(function (host) {
+          var key = host.dataset.inlineSimplified;
+          var provisional = host.hasAttribute('data-provisional');
+          var disclosure = document.createElement('details');
+          disclosure.dataset.simplifiedControl = key;
+          disclosure.name = 'simplified-settings-' + (host.closest('#modeling-sources') ? 'sources' : provisional ? 'create' : 'edit');
+          disclosure.innerHTML = '<summary><svg viewBox="0 0 18 18" aria-hidden="true">' +
+            '<path stroke-width="1.5" d="M5 2.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12l-4-2.5-4 2.5z"/></svg></summary>' +
+            '<div><label><input type="checkbox" data-inline-include> Include in Simplified inputs</label>' +
+            '<label>Help text <input type="text" data-inline-help placeholder="Optional guidance"></label>' +
+            '<small data-inline-status role="status"></small><button type="button" data-inline-undo hidden>Undo membership change</button></div>';
+          host.append(disclosure);
+          var include = disclosure.querySelector('[data-inline-include]');
+          var help = disclosure.querySelector('[data-inline-help]');
+          var status = disclosure.querySelector('[data-inline-status]');
+          var undo = disclosure.querySelector('[data-inline-undo]');
+          status.textContent = provisional ? 'Included when this object is created.' :
+            'Simplified-input settings save automatically, independently of value edits.';
+          include.addEventListener('change', function () {
+            if (!provisional) {
+              undo.dataset.previousIncluded = String(savedConfiguration.fields[key].included);
+              savedConfiguration.fields[key].included = include.checked;
+              if (currentMode === 'configuration') {
+                mockup.querySelector('[data-include-field="' + key + '"]').checked = include.checked;
+              }
+              undo.hidden = false;
+              status.textContent = 'Saved. Modeling values are unchanged.';
+            }
+            refreshConfigurationState();
+          });
+          help.addEventListener('change', function () {
+            if (!provisional) {
+              savedConfiguration.fields[key].help = help.value;
+              if (currentMode === 'configuration') {
+                mockup.querySelector('[data-help-input="' + key + '"]').value = help.value;
+              }
+              status.textContent = 'Help saved. Modeling values are unchanged.';
+            }
+            refreshConfigurationState();
+          });
+          undo.addEventListener('click', function () {
+            savedConfiguration.fields[key].included = undo.dataset.previousIncluded === 'true';
+            if (currentMode === 'configuration') {
+              mockup.querySelector('[data-include-field="' + key + '"]').checked = savedConfiguration.fields[key].included;
+            }
+            undo.hidden = true;
+            status.textContent = 'Membership restored. Modeling values are unchanged.';
+            refreshConfigurationState();
+          });
+        });
+
+        function restoreDraft() {
+          mockup.querySelector('#simplified-name-input').value = savedConfiguration.name;
+          mockup.querySelector('#simplified-guidance-input').value = savedConfiguration.guidance;
+          fields.forEach(function (field) {
+            var entry = savedConfiguration.fields[field.dataset.field];
+            field.querySelector('[data-include-field]').checked = entry.included;
+            field.querySelector('[data-help-input]').value = entry.help;
+          });
+        }
+
+        function isIncluded(field) {
+          return currentMode === 'configuration'
+            ? field.querySelector('[data-include-field]').checked
+            : savedConfiguration.fields[field.dataset.field].included;
+        }
+
+        function refreshConfigurationState() {
+          var editing = currentMode === 'configuration';
+          var selectedOnly = editing && mockup.querySelector('#only-selected-objects').checked;
+          var focusedObject = document.activeElement.closest('[data-simplified-object]');
+          mockup.querySelector('#simplified-screen').dataset.editing = String(editing);
+          mockup.querySelectorAll('[data-editing-only]').forEach(function (element) {
+            element.hidden = !editing;
+          });
+          mockup.querySelectorAll('[data-simplified-only]').forEach(function (element) {
+            element.hidden = editing;
+          });
+          mockup.querySelector('#object-outline nav').setAttribute('aria-label',
+            editing && !selectedOnly ? 'Jump to an object with eligible inputs' : 'Jump to an object with selected inputs');
+          mockup.querySelector('#simplified-title').textContent =
+            editing ? 'Configure simplified inputs' : savedConfiguration.name;
+          mockup.querySelector('#simplified-guidance').textContent = savedConfiguration.guidance;
+          var savedCount = Object.values(savedConfiguration.fields).filter(function (entry) { return entry.included; }).length;
+          mockup.querySelector('#workspace-context').textContent = (activeModel === 'reference' ? 'Reference modeling' : 'Comparison modeling') +
+            ' · ' + savedCount + (savedCount === 1 ? ' selected input' : ' selected inputs') +
+            ' · switching modelings restores the last view.';
+
+          var total = 0;
+          fields.forEach(function (field) {
+            var included = isIncluded(field);
+            var deleted = field.closest('[data-simplified-object]').dataset.deleted === 'true';
+            field.hidden = deleted || (!editing && !included);
+            field.dataset.included = String(included);
+            field.querySelector('[data-authoring-controls]').hidden = !editing;
+            var help = field.querySelector('[data-help-output]');
+            help.textContent = savedConfiguration.fields[field.dataset.field].help.trim().toLowerCase();
+            help.hidden = editing || !help.textContent;
+            field.querySelectorAll(':scope > label input, :scope > label select, :scope > button')
+              .forEach(function (control) { control.disabled = editing; });
+            if (included && !deleted) total++;
+          });
+          objects.forEach(function (object) {
+            var members = Array.from(object.querySelectorAll('[data-simplified-field]'));
+            var count = members.filter(isIncluded).length;
+            object.hidden = object.dataset.deleted === 'true' || ((!editing || selectedOnly) && count === 0);
+            object.querySelector(':scope > summary small').textContent = editing
+              ? count + ' of ' + members.length + ' selected'
+              : count + (count === 1 ? ' input' : ' inputs');
+            mockup.querySelector('[data-object-target="' + object.id + '"]').hidden = object.hidden;
+            var option = mockup.querySelector('#object-jump option[value="' + object.id + '"]');
+            option.hidden = object.hidden;
+            option.disabled = object.hidden;
+          });
+          mockup.querySelectorAll('[data-object-type]').forEach(function (type, index) {
+            var count = Array.from(type.querySelectorAll('[data-simplified-object]'))
+              .filter(function (object) { return !object.hidden; }).length;
+            type.hidden = count === 0;
+            var summary = type.querySelector(':scope > summary');
+            var name = summary.textContent.split(' · ')[0];
+            summary.textContent = name + ' · ' + count + (count === 1 ? ' object' : ' objects');
+            mockup.querySelectorAll('#object-outline nav > strong')[index].hidden = type.hidden;
+          });
+          var current = mockup.querySelector('[data-object-target][aria-current="true"]');
+          if (!current || current.hidden) {
+            var next = mockup.querySelector('[data-object-target]:not([hidden])');
+            mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
+              button.removeAttribute('aria-current');
+            });
+            if (next) {
+              next.setAttribute('aria-current', 'true');
+              mockup.querySelector('#object-jump').value = next.dataset.objectTarget;
+            } else {
+              mockup.querySelector('#object-jump').selectedIndex = -1;
+            }
+          }
+          var anyVisible = objects.some(function (object) { return !object.hidden; });
+          mockup.querySelector('#object-jump').disabled = !anyVisible;
+          mockup.querySelector('#filtered-objects-empty').hidden = !selectedOnly || anyVisible;
+          mockup.querySelector('#expand-all-objects').disabled = !anyVisible;
+          mockup.querySelector('#collapse-all-objects').disabled = !anyVisible;
+          if (focusedObject && focusedObject.hidden && selectedOnly) {
+            mockup.querySelector('#only-selected-objects').focus({preventScroll: true});
+          }
+          mockup.querySelector('#exposed-input-count').textContent = total;
+          mockup.querySelector('#exposed-input-noun').textContent = total === 1 ? 'input' : 'inputs';
+          mockup.querySelector('#simplified-layout').hidden = !editing && total === 0;
+          mockup.querySelector('#empty-simplified-inputs').hidden = editing || total > 0;
+          syncInlineControls();
+          refreshChrome();
+        }
+        mockup.querySelector('#only-selected-objects').addEventListener('change', refreshConfigurationState);
+        mockup.querySelector('#show-all-objects').addEventListener('click', function () {
+          mockup.querySelector('#only-selected-objects').checked = false;
+          refreshConfigurationState();
+          mockup.querySelector('#only-selected-objects').focus({preventScroll: true});
+        });
+
+        function closeToolbarMenus() {
+          mockup.querySelectorAll('[data-toolbar-menu]').forEach(function (menu) { menu.open = false; });
+        }
+
+        function refreshChrome() {
+          mockup.querySelector('#app-shell').dataset.comparing = String(comparing);
+          mockup.querySelector('#model-toolbar').hidden = comparing;
+          mockup.querySelector('#comparison-screen').hidden = !comparing;
+          mockup.querySelector('#modeling-screen').hidden = comparing || currentMode !== 'modeling';
+          mockup.querySelector('#simplified-screen').hidden = comparing || currentMode === 'modeling';
+          mockup.querySelector('#edge-modeling-control').hidden = currentMode !== 'modeling';
+          var destination = mockup.querySelector('#mode-destination');
+          destination.hidden = currentMode === 'configuration';
+          destination.dataset.mode = currentMode === 'modeling' ? 'simplified' : 'modeling';
+          destination.textContent = currentMode === 'modeling' ? 'Simplified inputs →' : 'Modeling →';
+          mockup.querySelector('#current-view-label').textContent = currentMode === 'modeling'
+            ? 'Modeling' : currentMode === 'configuration' ? 'Simplified inputs · Configuration' : 'Simplified inputs';
+          mockup.querySelector('#mock-system-name').textContent = activeModel === 'reference'
+            ? 'Streaming service' : 'Streaming service — alternative';
+          mockup.querySelector('#mobile-model-role').textContent = activeModel === 'reference' ? 'Reference' : 'Comparison';
+          mockup.querySelectorAll('[data-workspace-model]').forEach(function (tab) {
+            tab.setAttribute('aria-pressed', String(!comparing && tab.dataset.workspaceModel === activeModel));
+          });
+          mockup.querySelectorAll('[data-open-comparison]').forEach(function (button) {
+            button.setAttribute('aria-pressed', String(comparing));
+          });
+          mockup.querySelector('#mock-results-panel').hidden = comparing || !resultsOpen;
+          mockup.querySelector('#results-overview').hidden = resultTab !== 'results';
+          mockup.querySelector('#modeling-sources').hidden = resultTab !== 'sources';
+          mockup.querySelectorAll('[data-result-tab]').forEach(function (button) {
+            button.setAttribute('aria-pressed', String(button.dataset.resultTab === resultTab));
+          });
+        }
+        mockup.querySelectorAll('[data-show-results]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            resultsOpen = true;
+            closeToolbarMenus();
+            refreshChrome();
+          });
+        });
+        mockup.querySelector('#close-results').addEventListener('click', function () {
+          resultsOpen = false;
+          refreshChrome();
+        });
+        mockup.querySelectorAll('[data-result-tab]').forEach(function (button) {
+          button.addEventListener('click', function () { resultTab = button.dataset.resultTab; refreshChrome(); });
+        });
+        mockup.querySelectorAll('[data-demo-action]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            mockup.querySelector('#open-result').textContent = 'Mockup only: ' + button.dataset.demoAction +
+              '. This standard app action is illustrative; no file or modeling was changed.';
+            closeToolbarMenus();
+          });
+        });
+        mockup.querySelectorAll('[data-open-file]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            closeToolbarMenus();
+            mockup.querySelector('#open-result').textContent = 'Mockup: choose a sample JSON above to simulate Open a file.';
+            mockup.querySelector('#open-regular-json').focus({preventScroll: true});
+            mockup.querySelector('#file-entry').scrollIntoView({block: 'center', behavior: 'smooth'});
+          });
+        });
+        mockup.querySelectorAll('[data-open-comparison]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            closeToolbarMenus();
+            workspace[activeModel] = snapshot();
+            comparing = true;
+            mockup.querySelectorAll('[data-comparison-value]').forEach(function (cell) {
+              var parts = cell.dataset.comparisonValue.split(':');
+              cell.textContent = workspace[parts[0]].values[parts[1]] + (parts[1] === 'server-lifetime' ? ' years' : '');
+            });
+            refreshChrome();
+          });
+        });
+
         function closeTimeseriesPanel() {
           mockup.querySelector('#timeseries-panel').hidden = true;
-          mockup.querySelector('#consumption-workspace').removeAttribute('data-panel-open');
+          mockup.querySelector('#simplified-workspace').removeAttribute('data-panel-open');
         }
 
         function closeDeleteObjectConfirmation() {
@@ -869,87 +1517,166 @@
         }
 
         function show(mode) {
-          if (mode === 'consumption' && !hasTemplate) return;
           closeTimeseriesPanel();
           closeDeleteObjectConfirmation();
-          modes.forEach(function (candidate) {
-            mockup.querySelector('#' + candidate + '-screen').hidden = candidate !== mode;
-          });
-          mockup.querySelectorAll('[data-mode]').forEach(function (button) {
-            button.setAttribute('aria-pressed', button.dataset.mode === mode ? 'true' : 'false');
+          currentMode = mode;
+          comparing = false;
+          closeToolbarMenus();
+          refreshConfigurationState();
+        }
+
+        function showModelingSurface(surface) {
+          modelingSurface = surface;
+          mockup.querySelector('#modeling-edit-panel').hidden = surface !== 'edit' ||
+            mockup.querySelector('#usage-simplified-fields').dataset.deleted === 'true';
+          mockup.querySelector('#modeling-create-panel').hidden = surface !== 'create';
+          mockup.querySelectorAll('[data-modeling-surface]').forEach(function (button) {
+            button.setAttribute('aria-pressed', String(button.dataset.modelingSurface === surface));
           });
         }
+        mockup.querySelectorAll('[data-modeling-surface]').forEach(function (button) {
+          button.addEventListener('click', function () { showModelingSurface(button.dataset.modelingSurface); });
+        });
+        mockup.querySelector('#save-modeling-values').addEventListener('click', function () {
+          mockup.querySelectorAll('[data-modeling-value]').forEach(function (input) {
+            modelingValues[input.dataset.modelingValue] = input.value;
+            mockup.querySelector('[data-field="' + input.dataset.modelingValue + '"] > label select').value = input.value;
+          });
+          syncValues();
+          mockup.querySelector('#value-status').textContent = 'Modeling values saved.';
+        });
+        mockup.querySelector('#cancel-modeling-values').addEventListener('click', function () {
+          syncValues();
+          mockup.querySelector('#value-status').textContent = 'Value edits discarded. Saved simplified-input settings are unchanged.';
+        });
+        function resetCreationDraft() {
+          mockup.querySelector('#new-server-name').value = 'Archive server';
+          mockup.querySelector('#new-server-lifetime').value = '6';
+          mockup.querySelector('[data-provisional] [data-inline-include]').checked = false;
+          mockup.querySelector('[data-provisional] [data-inline-help]').value = '';
+          mockup.querySelector('[data-provisional] details').open = false;
+          syncInlineControls();
+        }
+        mockup.querySelector('#create-server').addEventListener('click', function () {
+          var name = mockup.querySelector('#new-server-name');
+          var lifetime = mockup.querySelector('#new-server-lifetime');
+          if (!name.value.trim() || !lifetime.checkValidity()) {
+            mockup.querySelector('#creation-status').textContent = 'Enter a name and a lifetime of at least one year. Simplified-input settings remain a draft.';
+            return;
+          }
+          mockup.querySelector('#archive-server-fields').dataset.deleted = 'false';
+          mockup.querySelector('#archive-server-label').textContent = name.value.trim();
+          mockup.querySelector('#archive-server-card').textContent = name.value.trim() + ' · Edit';
+          mockup.querySelector('#archive-server-card').hidden = false;
+          mockup.querySelector('[data-object-target="archive-server-fields"]').textContent = name.value.trim();
+          mockup.querySelector('#object-jump option[value="archive-server-fields"]').textContent = name.value.trim();
+          modelingValues['archive-lifetime'] = lifetime.value;
+          mockup.querySelector('[data-field="archive-lifetime"] > label input').value = lifetime.value;
+          savedConfiguration.fields['archive-lifetime'] = {
+            included: mockup.querySelector('[data-provisional] [data-inline-include]').checked,
+            help: mockup.querySelector('[data-provisional] [data-inline-help]').value
+          };
+          mockup.querySelector('#creation-status').textContent = 'Object created. Its simplified-input settings are now saved; its value belongs to the modeling.';
+          mockup.querySelector('#create-server').disabled = true;
+          mockup.querySelector('#cancel-create-server').textContent = 'Close';
+          refreshConfigurationState();
+        });
+        mockup.querySelector('#cancel-create-server').addEventListener('click', function () {
+          if (mockup.querySelector('#create-server').disabled) { showModelingSurface('edit'); return; }
+          resetCreationDraft();
+          mockup.querySelector('#creation-status').textContent = 'Creation draft discarded. No object or simplified-input references were added.';
+          showModelingSurface('edit');
+        });
 
         mockup.querySelectorAll('[data-mode]').forEach(function (button) {
           button.addEventListener('click', function () { show(button.dataset.mode); });
         });
+        function configureInputs() {
+          restoreDraft();
+          show('configuration');
+        }
+        mockup.querySelector('#configure-inputs').addEventListener('click', configureInputs);
+        mockup.querySelector('#choose-inputs').addEventListener('click', configureInputs);
+        mockup.querySelectorAll('[data-save-configuration]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            savedConfiguration.name = mockup.querySelector('#simplified-name-input').value.trim() || 'Simplified inputs';
+            savedConfiguration.guidance = mockup.querySelector('#simplified-guidance-input').value.trim();
+            fields.forEach(function (field) {
+              savedConfiguration.fields[field.dataset.field] = {
+                included: field.querySelector('[data-include-field]').checked &&
+                  field.closest('[data-simplified-object]').dataset.deleted !== 'true',
+                help: field.querySelector('[data-help-input]').value
+              };
+            });
+            show('simplified');
+          });
+        });
+        mockup.querySelectorAll('[data-cancel-configuration]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            restoreDraft();
+            show('simplified');
+          });
+        });
 
         function focusObject(objectId) {
-          var objectSection = mockup.querySelector('#' + objectId);
-          if (!objectSection || objectSection.hidden) return;
-          var typeSection = objectSection.closest('[data-object-type]');
-          typeSection.open = true;
-          objectSection.open = true;
+          var object = mockup.querySelector('#' + objectId);
+          if (!object || object.hidden) return;
+          object.closest('[data-object-type]').open = true;
+          object.open = true;
           mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
-            if (button.dataset.objectTarget === objectId) {
-              button.setAttribute('aria-current', 'true');
-            } else {
-              button.removeAttribute('aria-current');
-            }
+            if (button.dataset.objectTarget === objectId) button.setAttribute('aria-current', 'true');
+            else button.removeAttribute('aria-current');
           });
           mockup.querySelector('#object-jump').value = objectId;
-          if (objectSection.scrollIntoView) {
-            objectSection.scrollIntoView({behavior: 'smooth', block: 'start'});
-          }
+          var pane = mockup.querySelector('#simplified-fields');
+          pane.scrollTop += object.getBoundingClientRect().top - pane.getBoundingClientRect().top
+            - pane.querySelector('header').offsetHeight - 8;
+          object.querySelector('summary').focus({preventScroll: true});
         }
-
         mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
           button.addEventListener('click', function () { focusObject(button.dataset.objectTarget); });
         });
-
         mockup.querySelector('#object-jump').addEventListener('change', function (event) {
           focusObject(event.target.value);
         });
-
-        mockup.querySelector('#expand-all-objects').addEventListener('click', function () {
-          mockup.querySelectorAll('[data-object-type], [data-template-object]').forEach(function (section) {
-            section.open = true;
+        ['expand', 'collapse'].forEach(function (action) {
+          mockup.querySelector('#' + action + '-all-objects').addEventListener('click', function () {
+            mockup.querySelectorAll('[data-object-type], [data-simplified-object]').forEach(function (section) {
+              if (!section.hidden) section.open = action === 'expand';
+            });
           });
         });
 
-        mockup.querySelector('#collapse-all-objects').addEventListener('click', function () {
-          mockup.querySelectorAll('[data-object-type], [data-template-object]').forEach(function (section) {
-            section.open = false;
+        function exposedWatchFields() {
+          return fields.filter(function (field) {
+            return field.closest('[data-simplified-object]').id === 'usage-simplified-fields' &&
+              savedConfiguration.fields[field.dataset.field].included;
           });
-        });
-
+        }
         mockup.querySelector('#open-delete-object-confirmation').addEventListener('click', function () {
+          var affected = exposedWatchFields();
+          var warning = mockup.querySelector('[data-simplified-delete-warning]');
+          warning.hidden = affected.length === 0;
+          warning.querySelector('strong').textContent = 'This object contains ' + affected.length +
+            (affected.length === 1 ? ' field' : ' fields') + ' included in Simplified inputs.';
+          warning.querySelector('p').textContent = affected.map(function (field) {
+            return field.querySelector('strong').textContent;
+          }).join(', ') + ' will also be removed from Simplified inputs.';
           mockup.querySelector('#delete-confirmation-backdrop').hidden = false;
           mockup.querySelector('#cancel-delete-object').focus();
         });
-
         mockup.querySelector('#cancel-delete-object').addEventListener('click', closeDeleteObjectConfirmation);
-
         mockup.querySelector('#confirm-delete-object').addEventListener('click', function () {
+          var affected = exposedWatchFields();
+          affected.forEach(function (field) { savedConfiguration.fields[field.dataset.field].included = false; });
+          mockup.querySelector('#usage-simplified-fields').dataset.deleted = 'true';
           mockup.querySelector('#watch-video-model-card').hidden = true;
           mockup.querySelector('#modeling-edit-panel').hidden = true;
           var result = mockup.querySelector('#modeling-delete-result');
-          if (hasTemplate) {
-            mockup.querySelector('#usage-template-setup').hidden = true;
-            mockup.querySelector('#usage-simplified-fields').hidden = true;
-            mockup.querySelector('#outline-watch-video').hidden = true;
-            mockup.querySelector('#outline-watch-video').removeAttribute('aria-current');
-            mockup.querySelector('#object-jump option[value="usage-simplified-fields"]').remove();
-            mockup.querySelector('#object-jump').value = 'browse-catalogue-fields';
-            mockup.querySelector('[data-object-target="browse-catalogue-fields"]')
-              .setAttribute('aria-current', 'true');
-            mockup.querySelector('#usage-type-count').textContent = '1 object';
-            mockup.querySelector('#exposed-input-count').textContent = '4';
-            result.textContent = '“Watch a video” deleted. Its 3 fields were also removed from the template.';
-          } else {
-            result.textContent = '“Watch a video” deleted.';
-          }
+          result.textContent = '“Watch a video” deleted.' + (affected.length
+            ? ' Its ' + affected.length + ' exposed inputs were also removed from Simplified inputs.' : '');
           result.hidden = false;
+          refreshConfigurationState();
           closeDeleteObjectConfirmation();
         });
 
@@ -958,7 +1685,6 @@
           mockup.querySelector('#weekly-strategy-editor').hidden = strategy !== 'weekly';
           mockup.querySelector('#constant-strategy-editor').hidden = strategy !== 'constant';
         }
-
         function openTimeseriesPanel(field) {
           activeTimeseries = field;
           var selector = mockup.querySelector('#timeseries-strategy');
@@ -968,90 +1694,228 @@
             selector.innerHTML = '<option value="growth">Growth projection</option>';
           } else {
             mockup.querySelector('#timeseries-panel-title').textContent = 'Edit recurrent compute need';
-            mockup.querySelector('#timeseries-panel-context').textContent =
-              'Recurrent server need · Video origin demand';
-            selector.innerHTML = '<option value="weekly">Weekly pattern</option>' +
-              '<option value="constant">Constant value</option>';
+            mockup.querySelector('#timeseries-panel-context').textContent = 'Recurrent server need · Video origin demand';
+            selector.innerHTML = '<option value="weekly">Weekly pattern</option><option value="constant">Constant value</option>';
           }
           selector.value = savedTimeseriesStrategies[field];
           activateTimeseriesEditor(selector.value);
           mockup.querySelector('#timeseries-panel').hidden = false;
-          mockup.querySelector('#consumption-workspace').setAttribute('data-panel-open', 'true');
+          mockup.querySelector('#simplified-workspace').setAttribute('data-panel-open', 'true');
         }
-
         mockup.querySelectorAll('[data-open-timeseries]').forEach(function (button) {
-          button.addEventListener('click', function () {
-            openTimeseriesPanel(button.dataset.openTimeseries);
-          });
+          button.addEventListener('click', function () { openTimeseriesPanel(button.dataset.openTimeseries); });
         });
-
         mockup.querySelector('#close-timeseries-panel').addEventListener('click', closeTimeseriesPanel);
         mockup.querySelector('#cancel-timeseries-panel').addEventListener('click', closeTimeseriesPanel);
-
         mockup.querySelector('#timeseries-strategy').addEventListener('change', function (event) {
           activateTimeseriesEditor(event.target.value);
         });
-
         mockup.querySelector('#save-timeseries-panel').addEventListener('click', function () {
           var strategy = mockup.querySelector('#timeseries-strategy').value;
           savedTimeseriesStrategies[activeTimeseries] = strategy;
           if (activeTimeseries === 'hourly') {
             mockup.querySelector('#hourly-timeseries-preview').textContent =
               'Growth projection — starts 2026-01-01 · 1 year · 250,000/month · +10%/year';
-          } else if (strategy === 'weekly') {
-            mockup.querySelector('#recurrent-timeseries-preview').textContent =
-              'Weekly pattern — 2 profiles · 1 time range · cpu_core';
           } else {
-            var value = mockup.querySelector('#constant-timeseries-value').value;
-            mockup.querySelector('#recurrent-timeseries-preview').textContent =
-              'Constant value — ' + value + ' cpu_core';
+            mockup.querySelector('#recurrent-timeseries-preview').textContent = strategy === 'weekly'
+              ? 'Weekly pattern — 2 profiles · 1 time range · cpu_core'
+              : 'Constant value — ' + mockup.querySelector('#constant-timeseries-value').value + ' cpu_core';
           }
+          modelingValues[activeTimeseries === 'hourly' ? 'hourly-occurrences' : 'recurrent-compute'] =
+            mockup.querySelector('#' + (activeTimeseries === 'hourly' ? 'hourly' : 'recurrent') + '-timeseries-preview').textContent;
+          syncValues();
           closeTimeseriesPanel();
         });
 
-        mockup.querySelector('#open-regular-json').addEventListener('click', function () {
-          hasTemplate = false;
-          mockup.querySelector('#open-result').textContent =
-            'No template definition detected → opened in Modeling mode.';
-          refreshTemplateState();
-          show('modeling');
-        });
-
-        mockup.querySelector('#open-templated-json').addEventListener('click', function () {
-          hasTemplate = true;
-          mockup.querySelector('#open-result').textContent =
-            'Templated JSON detected → opened in Simplified inputs by default.';
-          refreshTemplateState();
-          show('consumption');
-        });
-
-        function syncFieldHelp() {
-          mockup.querySelectorAll('[data-help-input]').forEach(function (input) {
-            var output = mockup.querySelector('[data-help-output="' + input.dataset.helpInput + '"]');
-            var help = input.value.trim().toLowerCase();
-            output.textContent = help;
-            output.hidden = !help;
+        function openFile(hasSelection) {
+          resultsOpen = false;
+          resultTab = 'results';
+          mockup.querySelector('#only-selected-objects').checked = false;
+          savedConfiguration = JSON.parse(JSON.stringify(originalConfiguration));
+          modelingValues = JSON.parse(JSON.stringify(originalValues));
+          savedTimeseriesStrategies = {hourly: 'growth', recurrent: 'weekly'};
+          if (!hasSelection) {
+            savedConfiguration.name = 'Streaming service inputs';
+            savedConfiguration.guidance = '';
+            Object.keys(savedConfiguration.fields).forEach(function (key) {
+              savedConfiguration.fields[key] = {included: false, help: ''};
+            });
+          }
+          objects.forEach(function (object, index) {
+            object.dataset.deleted = String(object.id === 'archive-server-fields');
+            object.open = index === 0;
           });
+          mockup.querySelectorAll('[data-object-type]').forEach(function (type, index) {
+            type.open = index === 0;
+          });
+          mockup.querySelector('#watch-video-model-card').hidden = false;
+          mockup.querySelector('#modeling-edit-panel').hidden = false;
+          mockup.querySelector('#modeling-delete-result').hidden = true;
+          mockup.querySelector('#create-server').disabled = false;
+          mockup.querySelector('#cancel-create-server').textContent = 'Cancel';
+          mockup.querySelector('#archive-server-card').hidden = true;
+          mockup.querySelector('#creation-status').textContent = '';
+          mockup.querySelectorAll('[data-simplified-control]').forEach(function (control) {
+            control.open = false;
+            control.querySelector('[data-inline-undo]').hidden = true;
+            control.querySelector('[data-inline-status]').textContent = control.closest('[data-provisional]')
+              ? 'Included when this object is created.' : 'Simplified-input settings save automatically, independently of value edits.';
+          });
+          mockup.querySelectorAll('[data-field-provenance] input, [data-field-provenance] textarea').forEach(function (input) {
+            input.value = input.defaultValue;
+          });
+          mockup.querySelectorAll('[data-field-provenance] select').forEach(function (select) {
+            select.value = Array.from(select.options).find(function (option) { return option.defaultSelected; }).value;
+          });
+          mockup.querySelector('#value-status').textContent = '';
+          fields.forEach(function (field) {
+            var value = field.querySelector(':scope > label input, :scope > label select, :scope > label output');
+            if (value.tagName === 'OUTPUT') value.textContent = modelingValues[field.dataset.field];
+            else value.value = modelingValues[field.dataset.field];
+          });
+          resetCreationDraft();
+          syncValues();
+          restoreDraft();
+          mockup.querySelector('#open-result').textContent = hasSelection
+            ? 'JSON with 7 selected inputs → Simplified inputs. Its configuration contains no value snapshots.'
+            : 'JSON with zero selected inputs → Modeling. Add inputs through bookmarks or Choose inputs.';
+          showModelingSurface('edit');
+          show(hasSelection ? 'simplified' : 'modeling');
         }
-
-        mockup.querySelector('#save-template').addEventListener('click', function () {
-          hasTemplate = true;
-          syncFieldHelp();
+        mockup.querySelector('#open-regular-json').addEventListener('click', function () { openFile(false); });
+        mockup.querySelector('#open-simplified-json').addEventListener('click', function () { openFile(true); });
+        mockup.querySelector('#clear-simplified-inputs').addEventListener('click', function () {
+          if (!window.confirm('Remove all selected inputs and custom per-field help text from Simplified inputs?\n\n' +
+            'This also clears help retained on deselected inputs. ' +
+            'Your modeling, including values, sources, confidence, and comments, will remain unchanged.\n\n' +
+            'Choose Save and return afterward to apply this change.')) return;
+          fields.forEach(function (field) {
+            field.querySelector('[data-include-field]').checked = false;
+            field.querySelector('[data-help-input]').value = '';
+          });
           mockup.querySelector('#open-result').textContent =
-            'Template setup saved → previewing the default Simplified inputs view.';
-          refreshTemplateState();
-          show('consumption');
+            'Selection and all per-field help cleared in this draft. Save and return to apply. Modeling data is unchanged.';
+          refreshConfigurationState();
+        });
+        mockup.querySelector('#reopen-current-json').addEventListener('click', function () {
+          resultsOpen = false;
+          resultTab = 'results';
+          mockup.querySelector('#only-selected-objects').checked = false;
+          // Simulate an export/reopen boundary using saved metadata and actual modeling values only.
+          fields.forEach(function (field) {
+            var control = field.querySelector(':scope > label input, :scope > label select, :scope > label output');
+            if (control.tagName === 'OUTPUT') control.textContent = modelingValues[field.dataset.field];
+            else control.value = modelingValues[field.dataset.field];
+          });
+          resetCreationDraft();
+          mockup.querySelectorAll('[data-simplified-control]').forEach(function (control) {
+            control.open = false;
+            control.querySelector('[data-inline-undo]').hidden = true;
+          });
+          syncValues();
+          restoreDraft();
+          var count = Object.values(savedConfiguration.fields).filter(function (entry) { return entry.included; }).length;
+          mockup.querySelector('#open-result').textContent = 'Reopened JSON · ' + count +
+            ' selected inputs → ' + (count ? 'Simplified inputs' : 'Modeling') + '. Current modeling values are preserved.';
+          showModelingSurface('edit');
+          show(count ? 'simplified' : 'modeling');
         });
 
-        mockup.querySelector('#remove-template').addEventListener('click', function () {
-          hasTemplate = false;
-          mockup.querySelector('#open-result').textContent =
-            'Template definition removed → future opens use Modeling mode.';
-          refreshTemplateState();
-          show('modeling');
+        // Preserve separate per-model views and drafts in this single-DOM demonstration.
+        var stateControls = Array.from(mockup.querySelectorAll('input, select, textarea, details, output'));
+        var stateMessages = Array.from(mockup.querySelectorAll('[data-inline-status], #value-status, #creation-status, #modeling-delete-result'));
+        function snapshot() {
+          return JSON.parse(JSON.stringify({
+            configuration: savedConfiguration, values: modelingValues, mode: currentMode, surface: modelingSurface,
+            resultsOpen: resultsOpen, resultTab: resultTab,
+            strategies: savedTimeseriesStrategies, timeseries: activeTimeseries,
+            panelOpen: !mockup.querySelector('#timeseries-panel').hidden,
+            controls: stateControls.map(function (control) {
+              return {value: control.value, checked: control.checked, open: control.open,
+                options: control.tagName === 'SELECT' ? control.innerHTML : null,
+                output: control.tagName === 'OUTPUT' ? control.textContent : null};
+            }),
+            messages: stateMessages.map(function (element) { return element.textContent; }),
+            undo: Array.from(mockup.querySelectorAll('[data-inline-undo]')).map(function (button) {
+              return {hidden: button.hidden, previous: button.dataset.previousIncluded};
+            }),
+            deleted: objects.map(function (object) { return object.dataset.deleted === 'true'; }),
+            archiveName: mockup.querySelector('#archive-server-label').textContent,
+            scroll: mockup.querySelector('#simplified-fields').scrollTop,
+            outline: mockup.querySelector('#object-jump').value
+          }));
+        }
+        function restoreModel(state) {
+          savedConfiguration = JSON.parse(JSON.stringify(state.configuration));
+          modelingValues = JSON.parse(JSON.stringify(state.values));
+          savedTimeseriesStrategies = JSON.parse(JSON.stringify(state.strategies));
+          activeTimeseries = state.timeseries;
+          resultsOpen = state.resultsOpen;
+          resultTab = state.resultTab;
+          objects.forEach(function (object, index) { object.dataset.deleted = String(state.deleted[index]); });
+          mockup.querySelector('#watch-video-model-card').hidden = state.deleted[0];
+          mockup.querySelector('#modeling-edit-panel').hidden = state.deleted[0];
+          mockup.querySelector('#modeling-delete-result').hidden = !state.deleted[0];
+          mockup.querySelector('#create-server').disabled = mockup.querySelector('#archive-server-fields').dataset.deleted !== 'true';
+          mockup.querySelector('#cancel-create-server').textContent = mockup.querySelector('#create-server').disabled ? 'Close' : 'Cancel';
+          mockup.querySelector('#archive-server-label').textContent = state.archiveName;
+          mockup.querySelector('#archive-server-card').textContent = state.archiveName + ' · Edit';
+          mockup.querySelector('#archive-server-card').hidden = !mockup.querySelector('#create-server').disabled;
+          mockup.querySelector('[data-object-target="archive-server-fields"]').textContent = state.archiveName;
+          mockup.querySelector('#object-jump option[value="archive-server-fields"]').textContent = state.archiveName;
+          // Restore configuration checkboxes before rendering their draft selection.
+          stateControls.forEach(function (control, index) {
+            var saved = state.controls[index];
+            if (saved.options !== null) control.innerHTML = saved.options;
+            if (saved.value !== undefined) control.value = saved.value;
+            if (saved.checked !== undefined) control.checked = saved.checked;
+            if (saved.open !== undefined) control.open = saved.open;
+            if (saved.output !== null) control.textContent = saved.output;
+          });
+          showModelingSurface(state.surface);
+          show(state.mode);
+          if (state.panelOpen) {
+            mockup.querySelector('#timeseries-panel').hidden = false;
+            mockup.querySelector('#simplified-workspace').setAttribute('data-panel-open', 'true');
+            activateTimeseriesEditor(mockup.querySelector('#timeseries-strategy').value);
+            mockup.querySelector('#timeseries-panel-title').textContent = state.timeseries === 'hourly'
+              ? 'Edit hourly pattern occurrences' : 'Edit recurrent compute need';
+            mockup.querySelector('#timeseries-panel-context').textContent = state.timeseries === 'hourly'
+              ? 'Usage pattern · Watch a video' : 'Recurrent server need · Video origin demand';
+          }
+          stateMessages.forEach(function (element, index) { element.textContent = state.messages[index]; });
+          mockup.querySelectorAll('[data-inline-undo]').forEach(function (button, index) {
+            button.hidden = state.undo[index].hidden;
+            button.dataset.previousIncluded = state.undo[index].previous;
+          });
+          mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
+            if (button.dataset.objectTarget === state.outline) button.setAttribute('aria-current', 'true');
+            else button.removeAttribute('aria-current');
+          });
+          mockup.querySelector('#simplified-fields').scrollTop = state.scroll;
+        }
+        mockup.querySelectorAll('[data-workspace-model]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            closeToolbarMenus();
+            if (activeModel === button.dataset.workspaceModel) {
+              comparing = false;
+              refreshChrome();
+              return;
+            }
+            workspace[activeModel] = snapshot();
+            activeModel = button.dataset.workspaceModel;
+            restoreModel(workspace[activeModel]);
+          });
         });
-
-        refreshTemplateState();
+        restoreDraft();
+        refreshConfigurationState();
+        syncValues();
+        workspace.reference = snapshot();
+        openFile(false);
+        workspace.comparison = snapshot();
+        restoreModel(workspace.reference);
+        mockup.querySelector('#open-result').textContent =
+          'Reference JSON has 7 selected inputs; comparison JSON has none. Switch tabs to explore independent views.';
       })();
     </script>
   </div>
@@ -1060,7 +1924,7 @@
 <section>
   <h2>5. Constraints</h2>
   <ul>
-    <li><strong>Mission fit:</strong> the default experience serves a non-technical consumer, while
+    <li><strong>Mission fit:</strong> the default experience serves a non-technical user, while
     the full depth remains available on demand as required by <code>specs/mission.md</code>.</li>
     <li><strong>The library remains the modeling truth:</strong> simplified inputs must update the
     same underlying e-footprint modeling and produce the same validations, calculations, derivations,
@@ -1090,9 +1954,6 @@
   <ol>
     <li><strong>Other selectable input shapes:</strong> beyond scalar inputs, choices, and complete
     timeseries editors, must v1 also expose relationships and weighted collections?</li>
-    <li><strong>Comparison workspace:</strong> when a simplified-template file is opened or added in a
-    two-model workspace, should its Simplified inputs view apply independently and still allow it to
-    participate in comparison, or is the feature single-model only in v1?</li>
   </ol>
 </section>
 
@@ -1100,10 +1961,11 @@
   <h2>7. Resuming from cold context</h2>
   <ol>
     <li>Read this file end to end and resolve its open capability questions with the product owner.</li>
-    <li>Read <code>plan.html</code> (when written) for the JSON contract, interaction architecture,
-    ordered implementation steps, and test gates.</li>
+    <li>Read the <a href="plan.html">draft plan</a> for the dedicated cross-repo examples rename.
+    Preserve it as its own task in the eventual implementation run. The main feature's JSON contract,
+    interaction architecture, and ordered implementation steps still need the planning stage.</li>
     <li>Re-read <code>specs/architecture.md</code>, especially persistence, workspace files, normal
-    input editing, and modeling templates.</li>
+    input editing, and the existing ready-made modeling catalog (being renamed from templates to examples).</li>
     <li>Read <code>specs/design/journeys/save-and-load.html</code> and
     <code>specs/design/journeys/build-a-model.html</code> for the current file and editing experiences.</li>
     <li>Read the companion library's <code>specs/architecture/index.html</code> and serialization pages

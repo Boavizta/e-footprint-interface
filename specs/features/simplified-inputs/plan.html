@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simplified inputs — Draft implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+    max-width: 56rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; table-layout: fixed; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  th:nth-child(1), td:nth-child(1) { width: 27%; overflow-wrap: anywhere; }
+  th:nth-child(2), td:nth-child(2) { width: 13%; }
+  th:nth-child(3), td:nth-child(3) { width: 60%; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; overflow-wrap: anywhere; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+<h1>Simplified inputs — Draft implementation plan</h1>
+<p>Status: Draft — captured during specification · 2026-09-21 · <a href="spec.html">Feature spec</a></p>
+<blockquote>This is not the complete or approved feature plan. It preserves the explicitly requested
+cross-repo ride-along refactor. The simplified-input persistence and interaction design still need
+the planning stage; no application or library implementation is authorized by this draft.</blockquote>
+
+<section>
+  <h2>1. Approach</h2>
+  <p>The feature is called Simplified inputs. Its settings select existing fields and attach guidance;
+  they do not instantiate a modeling or own copies of its values. Use simplified-input configuration
+  terminology throughout the eventual feature implementation, matching the spec and mockup.</p>
+  <p>Separately, rename the existing ready-made modeling catalog from templates to examples in depth
+  across both repositories. These are complete editable modelings used as starting points and to
+  accompany documentation, not simplified-input configurations. Keep their contents and behavior unchanged.</p>
+  <p><strong>Required standalone task in this feature's implementation run:</strong>
+  Rename ready-made modeling templates to examples across the library and interface.
+  When tasks are generated, reserve one dedicated task in the driving interface repository's
+  <code>tasks.md</code>, with explicit library and interface portions and its own review and verification.
+  Do not bury this work inside a simplified-input UI task or create a separate feature run.
+  Final ordering is settled during planning; complete the coordinated rename before wiring new code
+  to catalog APIs so the feature does not introduce fresh references to the old terminology.</p>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+  <p>Paths below identify the current entry points; inventory their callers and packaging references
+  when executing the dedicated task. This is a semantic rename, not a global replacement of every
+  occurrence of “template.”</p>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change type</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Library: <code>efootprint/modeling_templates/</code></td><td>Rename</td><td>Move to
+      <code>modeling_examples/</code>. Rename registries, dataclasses, constants, helper functions,
+      parameters, exports, and imports: for example <code>HowToTemplate</code> → <code>HowToExample</code>,
+      <code>template_id</code> → <code>example_id</code>, <code>get_template</code> → <code>get_example</code>,
+      and <code>load_template_system</code> → <code>load_example_system</code>. Apply the same vocabulary
+      to introductory helpers. Preserve the distinction between a loadable example and its how-to guides;
+      multiple guides may still reference the same example.</td></tr>
+      <tr><td>Interface: <code>domain/reference_data/modeling_templates/</code></td><td>Rename</td><td>Under
+      <code>model_builder/</code>, rename the example-data package, registry types, constants, imports,
+      and resource paths. Preserve library ownership of shared examples and interface ownership of
+      its additional examples; do not duplicate or relocate modeling logic into the interface.</td></tr>
+      <tr><td>Interface catalog and onboarding</td><td>Rename</td><td>Update
+      <code>template_catalog_service.py</code>, <code>template_picker_presenter.py</code>, the picker
+      partial, onboarding views, route names and example-specific URL paths, context keys, DOM IDs,
+      data attributes, JS handlers, Help actions, tour copy, and linked documentation together.
+      Catalog: Examples; menu: Open examples; onboarding: Start from an example / Start from scratch.
+      Preserve existing replacement confirmations and scratch/open-file behavior.</td></tr>
+      <tr><td>Authoring and packaged resources</td><td>Rename</td><td>Update library
+      <code>_authoring</code> imports, interface <code>scripts/build_intro_templates.py</code> and
+      <code>scripts/intro_template_scenarios/</code>, package-data declarations, regeneration commands,
+      and resource references. Scenario IDs, modeling contents, and how-to associations are preserved;
+      renaming paths is not a reason to change assumptions or computed results.</td></tr>
+      <tr><td>Tests in both repositories</td><td>Update</td><td>Rename affected test files, fixtures,
+      imports, patch targets, selectors, and assertions. Cover registry completeness, package loading,
+      example computation and JSON round-trip, picker presentation, deep links, and onboarding flows.
+      Existing entry points include library <code>tests/test_modeling_templates.py</code> and interface
+      catalog, registry, picker, deep-link, and load-and-compute tests.</td></tr>
+      <tr><td>Documentation and project guidance</td><td>Update</td><td>Update current READMEs,
+      mkdocs pages/navigation/download links, design journeys, developer instructions, and owning
+      architecture sections. In particular update interface <code>specs/architecture.md</code>, library
+      <code>specs/architecture/layers-and-modeling.html</code>, and related guidance in
+      <code>AGENTS.md</code> / <code>CLAUDE.md</code> where applicable. Leave unrelated rendering-template
+      terminology and historical records alone.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Cross-cutting concerns and task acceptance</h2>
+  <ul>
+    <li><strong>Coordinated API cutover:</strong> both repositories and every in-repo caller use the
+    new names. No legacy alias package, dual API, or deprecated compatibility layer is added.</li>
+    <li><strong>Behavior preservation:</strong> every catalog entry still opens the same modeling,
+    with editable input values and the same guide links. Scratch, file opening, replace confirmation,
+    replaying the tour, and Help navigation still work.</li>
+    <li><strong>Verification:</strong> run library and interface catalog/registry/authoring tests,
+    import and JSON round-trip checks, and critical picker/deep-link browser tests. Check package resource
+    inclusion and run strict documentation builds to catch stale links and imports. Complete the normal
+    constitutional test gates in both repositories before declaring the task done.</li>
+    <li><strong>Terminology audit:</strong> search source, file paths, routes, fixtures, scripts, and
+    live documentation in both repositories for the retired ready-made-modeling terminology. Resolve
+    each remaining occurrence deliberately. Django/Jinja templates, native HTML templates, generic
+    document/code templates, and historical mentions explaining this rename are not rename targets.</li>
+    <li><strong>Migrations:</strong> this catalog rename is not a modeling-schema change. Preserve
+    example identifiers and serialized modeling contents. Audit any persisted catalog-specific keys;
+    if a necessary rename changes a serialized contract, specify its migration before implementing it
+    rather than silently breaking JSON imports.</li>
+    <li><strong>Independent review:</strong> keep the rename identifiable as its own task, with its
+    cross-repo changes and test evidence reviewed independently of simplified-input functionality.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Risks</h2>
+  <ul>
+    <li>Renaming only the UI leaves two competing vocabularies. Audit developer-facing names and
+    documentation as well as displayed labels.</li>
+    <li>Moving packages can break resource loading or authoring commands despite successful imports.
+    Verify packaged JSON resources, regeneration, and the interface's shared-library examples.</li>
+    <li>Route and selector changes can break navigation, guide deep links, or the tour. Update producers
+    and consumers together and exercise the complete flows.</li>
+    <li>A blind text replacement would damage unrelated rendering templates. Limit the rename to the
+    ready-made modeling concept and review every remaining match in context.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. Alternatives considered</h2>
+  <ul>
+    <li>UI-only relabeling: rejected; the user requested an in-depth rename across both repositories.</li>
+    <li>Archetypes or scenarios: examples is clearer for editable learning material and avoids implying
+    authoritative reference architectures or conflating examples with comparison alternatives.</li>
+    <li>Calling the new feature a template: rejected; simplified inputs are a view and configuration
+    attached to any modeling, including an example.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Constitutional notes</h2>
+  <p>Preserve Clean Architecture, library ownership of modeling logic, and the interface's HTMX-first
+  rendering. Both repositories are co-developed without a backward-compatibility burden. No
+  constitutional amendment or calculation change is required by this rename. The normal dependency,
+  test, documentation, and release gates still apply when implementation runs.</p>
+</section>
+
+<section>
+  <h2>7. Open planning work</h2>
+  <p>The main feature still needs its JSON/configuration contract, validation and eligibility rules,
+  per-model persistence, view restoration, inline versus overview save boundaries, UI integration,
+  and test strategy. Resolve the spec's input-shape question before emitting the full task list.
+  Preserve the dedicated examples-rename task while completing that plan.</p>
+</section>
+</body>
+</html>
